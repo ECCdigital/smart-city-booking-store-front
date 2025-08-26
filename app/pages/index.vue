@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="color: var(--color-primary)">
     {{ $t("welcome") }}
   </div>
 </template>

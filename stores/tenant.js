@@ -1,4 +1,4 @@
-import { useTenants } from "../app/composables/api/useTenants.js";
+import { useTenants } from "~/composables/api/useTenants.js";
 
 export const useTenantStore = defineStore("tenant", {
   state: () => ({

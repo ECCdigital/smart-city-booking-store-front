@@ -9,7 +9,6 @@
 <script setup>
 import * as locales from "@nuxt/ui-pro/locale";
 import { useInstanceStore } from "~~/stores/instance.js";
-import {useTenantStore} from "~~/stores/tenant.js";
 
 const { locale } = useI18n();
 
@@ -24,11 +23,6 @@ useHead({
 });
 
 const instanceStore = useInstanceStore();
-const tenantStore = useTenantStore();
-
 
 instanceStore.fetchInstance();
-tenantStore.fetchTenants();
-
-
 </script>

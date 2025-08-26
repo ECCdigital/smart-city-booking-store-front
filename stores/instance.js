@@ -1,4 +1,4 @@
-import { useInstance } from "~/composables/instance/useInstance.js";
+import { useInstance } from "~/composables/api/useInstance.js";
 
 export const useInstanceStore = defineStore("instance", {
   state: () => ({

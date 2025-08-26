@@ -1,11 +1,8 @@
 export default defineEventHandler(async (event) => {
-  const { biletadoBaseUrl } = useRuntimeConfig();
+  const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
 
   try {
-    const response = await $fetch(`${biletadoBaseUrl}/api/instances`, {
-      params: {
-        publicInstance: true,
-      },
+    const response = await $fetch(`${API_BASE_URL}/api/instances/public`, {
       method: "GET",
       server: true,
     });

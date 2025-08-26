@@ -1,25 +1,45 @@
 export default defineEventHandler(async (event) => {
-  const { username, password } = await readBody(event);
+  const { id, password } = await readBody(event);
+  const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
 
-  const apiRes = await fetch("https://deine-api.com/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
+  try {
 
-  if (!apiRes.ok) {
-    return { success: false, message: "Ungültige Login-Daten" };
-  }
 
-  const setCookieHeader = apiRes.headers.get("set-cookie");
-  if (setCookieHeader) {
-    setCookie(event, "session", setCookieHeader.split(";")[0].split("=")[1], {
+    const response = await $fetch(`${API_BASE_URL}/auth/signin`, {
+      method: "POST",
+      body: { id, password },
+    });
+
+    const { accessToken, refreshToken, user, permissions } = response;
+
+    console.log("Login successful:", { accessToken, refreshToken });
+
+    setCookie(event, "access-token", accessToken, {
       httpOnly: true,
-      path: "/",
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      secure: true,
+      maxAge: 60 * 60 * 24,
+    });
+
+    setCookie(event, "refresh-token", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return {
+      success: true,
+      data: {
+        user,
+        permissions,
+      },
+    };
+  } catch (error) {
+    throw createError({
+      success: false,
+      statusCode: error.response?.status || 500,
+      statusMessage: error.response?.data?.message || "Login failed",
     });
   }
-
-  return { success: true };
 });

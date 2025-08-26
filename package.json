@@ -14,15 +14,23 @@
     "@nuxt/fonts": "^0.11.4",
     "@nuxt/icon": "^2.0.0",
     "@nuxt/image": "^1.11.0",
+    "@nuxt/kit": "^4.0.3",
     "@nuxt/ui": "^3.3.0",
     "@nuxt/ui-pro": "^3.3.0",
     "@nuxtjs/i18n": "^10.0.4",
     "@pinia/nuxt": "^0.11.2",
     "eslint": "^9.33.0",
+    "h3": "^1.15.4",
     "nuxi": "^3.28.0",
     "nuxt": "^4.0.3",
+    "nuxt-csurf": "^1.6.5",
+    "nuxt-security": "^2.3.0",
     "pinia": "^3.0.3",
+    "pino": "^9.9.0",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "pino-pretty": "^13.1.1"
   }
 }

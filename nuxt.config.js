@@ -4,8 +4,10 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: true,
 
+  pages: true,
+
   runtimeConfig: {
-    biletadoBaseUrl: "",
+    apiBaseUrl: "",
   },
 
   modules: [
@@ -16,6 +18,7 @@ export default defineNuxtConfig({
     "@nuxt/ui-pro",
     "@nuxtjs/i18n",
     "@pinia/nuxt",
+    "nuxt-security",
   ],
   css: ["~/assets/css/main.css"],
   i18n: {
