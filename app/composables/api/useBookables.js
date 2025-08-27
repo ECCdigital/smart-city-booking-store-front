@@ -1,14 +1,18 @@
 export function useBookables() {
   const fetchBookables = async (tenantID) => {
+    const { apiFetch } = useApi();
+
     try {
-      const response = await $fetch(`/api/bookables/${tenantID}`, {
+      const response = await apiFetch(`/api/bookables/${tenantID}`, {
         method: "GET",
-        credentials: "include",
       });
+
+      console.log(response);
+
       return response;
     } catch (error) {
       console.error("Error fetching bookables:", error);
-      throw new Error("Failed to fetch bookables");
+      throw error;
     }
   };
   return {

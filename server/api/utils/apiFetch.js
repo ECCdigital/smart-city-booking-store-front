@@ -1,10 +1,8 @@
-export async function apiFetch(
-  event,
-  path,
-  options
-) {
+export async function apiFetch(event, path, options) {
   const token = getCookie(event, "access-token");
-    const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
+  const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
+
+  console.log("token", token);
 
   return await $fetch(`${API_BASE_URL}${path}`, {
     ...options,

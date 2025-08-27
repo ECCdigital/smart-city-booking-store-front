@@ -9,6 +9,14 @@ export const useBookableStore = defineStore("bookable", {
     getBookables: (state) => state.bookables,
     getBookableById: (state) => (id) =>
       state.bookables.find((t) => t.id === id),
+    getBookablesByType: (state) => (type) =>
+        state.bookables.filter((b) => b.type === type),
+    getRooms: (state) => state.bookables.filter((b) => b.type === "room"),
+    getResources: (state) =>
+        state.bookables.filter((b) => b.type === "resource"),
+    getLocations: (state) =>
+        state.bookables.filter((b) => b.type === "event-location"),
+    getTickets: (state) => state.bookables.filter((b) => b.type === "ticket"),
   },
   actions: {
     async fetchBookables(tenantID) {
