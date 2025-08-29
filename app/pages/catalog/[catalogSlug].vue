@@ -2,6 +2,7 @@
 import { useCatalogStore } from "~~/stores/catalog.js";
 import { useBookableStore } from "~~/stores/bookable.js";
 import { useEventStore } from "~~/stores/event.js";
+import { useCatalog } from "~/composables/api/useCatalog.js";
 
 definePageMeta({
   layout: "catalog",
@@ -11,6 +12,8 @@ definePageMeta({
 
 const route = useRoute();
 const router = useRouter();
+
+const { fetchCatalogBundle } = useCatalog();
 
 const t = useI18n().t;
 
@@ -37,21 +40,38 @@ const tenantID = computed(() => {
 const bookableStore = useBookableStore();
 const eventStore = useEventStore();
 
+const { data, error } = await useAsyncData(
+  `catalog:${catalogSlug.value}`,
+  () => fetchCatalogBundle({ slug: catalogSlug.value }),
+  { server: true }
+);
+
+if (error.value) {
+  handleError({ statusCode: 404 }, t("errors.noCatalog"));
+}
+
+if (data.value?.catalog) {
+  catalogStore.$patch({ catalog: data.value.catalog });
+}
+if (data.value?.bookables) {
+  bookableStore.$patch({ bookables: data.value.bookables });
+}
+
 const tabs = computed(() => [
   {
     label: "Events",
     icon: "i-heroicons-calendar",
-    value: "events",
+    value: `/catalog/${catalogSlug.value}/events`,
   },
   {
     label: "Test",
     icon: "i-heroicons-beaker",
-    value: "test",
+    value: `/catalog/${catalogSlug.value}/test`,
   },
   {
     label: "Bookables",
     icon: "i-heroicons-ticket",
-    value: "bookables",
+    value: `/catalog/${catalogSlug.value}/bookables`,
   },
 ]);
 
@@ -63,45 +83,7 @@ const defaultTabIndex = computed(() => {
   return 0;
 });
 
-watch(
-  catalogSlug,
-  async (newCatalogSlug) => {
-    if (newCatalogSlug && isValidCatalogSlug(newCatalogSlug)) {
-      try {
-        await catalogStore.fetchCatalog(newCatalogSlug);
-      } catch (error) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: t("errors.noCatalog"),
-        });
-      }
-    }
-  },
-  { immediate: true }
-);
-
 let isFetching = false;
-
-watch(
-  tenantID,
-  async (newTenantID) => {
-    if (newTenantID && !isFetching) {
-      isFetching = true;
-      try {
-        await eventStore.fetchEvents(newTenantID);
-        await bookableStore.fetchBookables(newTenantID);
-      } catch (error) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: t("errors.noCatalog"),
-        });
-      } finally {
-        isFetching = false;
-      }
-    }
-  },
-  { immediate: true }
-);
 
 const active = computed({
   get: () => {

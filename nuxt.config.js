@@ -10,6 +10,10 @@ export default defineNuxtConfig({
     apiBaseUrl: "",
   },
 
+  routeRules: {
+    "/catalog/**": { ssr: true, isr: 300 },
+  },
+
   modules: [
     "@nuxt/eslint",
     "@nuxt/fonts",

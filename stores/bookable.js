@@ -29,5 +29,13 @@ export const useBookableStore = defineStore("bookable", {
         this.bookables = [];
       }
     },
+    addOrUpdate(bookable) {
+      const index = this.bookables.findIndex((b) => b.id === bookable.id);
+      if (index !== -1) {
+        this.bookables[index] = bookable;
+      } else {
+        this.bookables.push(bookable);
+      }
+    },
   },
 });
