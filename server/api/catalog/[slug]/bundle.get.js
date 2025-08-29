@@ -11,59 +11,67 @@ export default cachedEventHandler(
         method: "GET",
       });
 
-      const tenantId = catalog?.tenantId;
-      if (!tenantId) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: "Catalog or tenant not found",
-        });
-      }
-
       const result = { catalog };
 
-      if (bookableId) {
-        result.bookable = await apiFetch(
-          event,
-          `/json/${tenantId}/bookables/${bookableId}`,
-          { method: "GET" }
-        );
-        if (!result.bookable) {
+      if (catalog.type === "single") {
+        const tenantId = catalog?.tenantId;
+        if (!tenantId) {
           throw createError({
             statusCode: 404,
-            statusMessage: "Bookable not found",
+            statusMessage: "Catalog or tenant not found",
           });
         }
-        return result;
-      }
 
-      if (eventId) {
-        result.event = await apiFetch(
-          event,
-          `/json/${tenantId}/events/${eventId}`,
-          { method: "GET" }
-        );
-        if (!result.event) {
-          throw createError({
-            statusCode: 404,
-            statusMessage: "Event not found",
+
+
+        if (bookableId) {
+          result.bookable = await apiFetch(
+              event,
+              `/json/${tenantId}/bookables/${bookableId}`,
+              { method: "GET" }
+          );
+          if (!result.bookable) {
+            throw createError({
+              statusCode: 404,
+              statusMessage: "Bookable not found",
+            });
+          }
+          return result;
+        }
+
+        if (eventId) {
+          result.event = await apiFetch(
+              event,
+              `/json/${tenantId}/events/${eventId}`,
+              { method: "GET" }
+          );
+          if (!result.event) {
+            throw createError({
+              statusCode: 404,
+              statusMessage: "Event not found",
+            });
+          }
+          return result;
+        }
+
+        if (include?.includes("bookables")) {
+          result.bookables = await apiFetch(
+              event,
+              `/json/${tenantId}/bookables/`,
+              { method: "GET" }
+          );
+        }
+
+        if (include?.includes("events")) {
+          result.events = await apiFetch(event, `/json/${tenantId}/events/`, {
+            method: "GET",
           });
         }
-        return result;
       }
 
-      if (include?.includes("bookables")) {
-        result.bookables = await apiFetch(
-          event,
-          `/json/${tenantId}/bookables/`,
-          { method: "GET" }
-        );
-      }
+      //TODO: Handle catalog.type === "aggregated"
 
-      if (include?.includes("events")) {
-        result.events = await apiFetch(event, `/json/${tenantId}/events/`, {
-          method: "GET",
-        });
-      }
+
 
       return result;
     } catch (error) {
