@@ -7,7 +7,7 @@
 </template>
 
 <script setup>
-import * as locales from "@nuxt/ui-pro/locale";
+import * as locales from "@nuxt/ui/locale";
 import { useInstanceStore } from "~~/stores/instance.js";
 
 const { locale } = useI18n();

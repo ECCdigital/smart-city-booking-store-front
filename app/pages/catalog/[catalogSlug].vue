@@ -116,7 +116,6 @@ useHead({
       >
       </UTabs>
     </div>
-
     <NuxtPage />
   </div>
 </template>
