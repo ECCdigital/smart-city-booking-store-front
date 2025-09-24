@@ -1,8 +1,65 @@
 {
   "welcome": "Willkommen",
+  "common": {
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "repeatPassword": "Passwort wiederholen",
+    "newPassword": "Neues Passwort",
+    "username": "Benutzername",
+    "email": "E-Mail",
+    "name": "Name",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "company": "Firma",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "register": "Registrieren",
+    "submit": "Absenden",
+    "cancel": "Abbrechen",
+    "search": "Suchen",
+    "home": "Startseite",
+    "settings": "Einstellungen",
+    "profile": "Profil"
+  },
+  "login": {
+    "title": "Melden Sie sich in Ihrem Konto an",
+    "forgotPassword": "Passwort vergessen?",
+    "noAccount": "Noch kein Konto?",
+    "registerHere": "Hier registrieren"
+  },
 
+  "register": {
+    "title": "Erstellen Sie ein neues Konto",
+    "haveAccount": "Haben Sie bereits ein Konto?",
+    "loginHere": "Hier anmelden",
+    "passwordStrengthCheck": {
+      "description": "Muss enthalten",
+      "nonePassword": "Gib ein Passwort ein",
+      "weakPassword": "Schwaches Passwort",
+      "mediumPassword": "Mittleres Passwort",
+      "strongPassword": "Starkes Passwort",
+      "minLength": "Mindestens 8 Zeichen",
+      "uppercase": "Mindestens ein Großbuchstabe (A-Z)",
+      "lowercase": "Mindestens ein Kleinbuchstabe (a-z)",
+      "number": "Mindestens eine Zahl (0-9)"
+    }
+  },
+
+  "forgotPassword": {
+    "title": "Passwort zurücksetzen",
+    "description": "Geben Sie Ihre E-Mail-Adresse ein, um einen Link zum Zurücksetzen Ihres Passworts zu erhalten.",
+    "submit": "Link senden",
+    "remembered": "Passwort erinnert?"
+  },
+
+  "resetPassword": {
+    "title": "Setzen Sie Ihr Passwort zurück",
+    "description": "Geben Sie Ihr neues Passwort ein.",
+    "submit": "Passwort zurücksetzen",
+    "backToLogin": "Zurück zur"
+  },
 
   "errors": {
-    "noCatalog":"Es wurde kein Katalog gefunden"
+    "noCatalog": "Es wurde kein Katalog gefunden"
   }
 }

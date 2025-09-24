@@ -184,8 +184,6 @@ const activeTabLabel = ref("")
       .... {{activeTabLabel}}
     </div>
     </div>
-
-
     <NuxtPage />
   </div>
 </template>
