@@ -1,6 +1,6 @@
 export default defineEventHandler(async (event) => {
-    const primary = '#0099DB'
-    const secondary = '#FFCC00'
+    const primary = '#ff8b00'
+    const secondary = '#1d9ecc'
 
     console.log('Fetching default theme CSS...')
 
