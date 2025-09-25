@@ -17,7 +17,7 @@ const { bookables } = storeToRefs(bookableStore);
 
 <template>
   <div>
-    <h1>Bookables</h1>
+    <h1 class="text-lg font-bold">Bookables...</h1>
     <ul v-if="bookables?.length">
       <li v-for="b in bookables" :key="b.id">
         <NuxtLink :to="`/catalog/${catalogSlug}/bookables/${b.id}`">
