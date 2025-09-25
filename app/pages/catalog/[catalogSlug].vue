@@ -78,15 +78,15 @@ useHead({
     >
       <template #headline>
         <div class="flex justify-center ">
+          <img
+              src="../../assets/logo-kielregion.png"
+              alt="Logo Kiel Region"
+              class="text-center"
+              style="height: 15vw"
           />
-
-        </template>
-        </UTabs>
-
-      <div class="bg-white text-black">
-      .... {{activeTabLabel}}
-    </div>
-    </div>
+        </div>
+      </template>
+    </UPageHero>
     <NuxtPage />
   </div>
 </template>
