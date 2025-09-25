@@ -17,12 +17,69 @@ const allLocations = computed(() => {
   return locations.concat(bookableStore.getRooms);
 });
 const { bookables } = storeToRefs(bookableStore);
+
+const searchTerm = ref("");
+const searchLocation = ref("");
+const searchDate = ref("");
+
+function testFunction() {
+  console.log("coming soon...");
+}
 </script>
 
 <template>
   <div>
+    <!-- toDo - in eigene Komponente & responsive machen! -->
+    <UCard class="mx-5 p-0 shadow-lg" :ui="{ root: 'p-0', body: 'p-0' }">
+      <UInput
+        v-model="searchTerm"
+        icon="i-lucide-search"
+        size="lg"
+        variant="ghost"
+        placeholder="Search..."
+        class="w-full bg-white dark:bg-white/10"
+      />
+      <USeparator
+        color="neutral"
+        class="w-full"
+        :ui="{ border: 'border-gray-200' }"
+      />
+      <UInput
+        v-model="searchLocation"
+        icon="i-lucide-map-pin"
+        size="lg"
+        variant="ghost"
+        placeholder="Search..."
+        class="w-full bg-white dark:bg-white/10"
+      />
+      <USeparator
+        color="neutral"
+        class="w-full"
+        :ui="{ border: 'border-gray-200' }"
+      />
+      <UInput
+        v-model="searchDate"
+        icon="i-lucide-calendar-clock"
+        size="lg"
+        variant="ghost"
+        placeholder="Search..."
+        class="w-full bg-white dark:bg-white/10"
+      />
+      <UButton
+        label="Suchen"
+        class="w-full justify-center text-white"
+        @click="console.log('suche Sinne des Lebens... ')"
+      />
+    </UCard>
+
+
+    <!-- --------------------toDo - delete this testspace ------------------------------ -->
     <h1 class="text-lg font-bold">Orte</h1>
     <USeparator />
+
+    <div class="text-xs">
+      Begriff: {{ searchTerm }} || Ort: {{ searchLocation }} || Datum:
+      {{ searchDate }}
       <USeparator />
       {{ bookables[5] }}
     </div>
