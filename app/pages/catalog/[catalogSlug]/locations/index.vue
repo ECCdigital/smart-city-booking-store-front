@@ -71,6 +71,84 @@ function testFunction() {
       />
     </UCard>
 
+    <div class="flex items-center m-5">
+      <span>{{ allLocations.length }} passende Ergebnisse</span>
+      <div style="flex: 1"></div>
+      <UButton
+        label="Filtern"
+        color="neutral"
+        variant="soft"
+        class="rounded-full py-2 px-3"
+        @click="testFunction"
+      />
+      <UButton
+        label="Sortieren"
+        color="neutral"
+        variant="soft"
+        class="rounded-full py-2 px-3"
+        @click="testFunction"
+      />
+    </div>
+    <div class="m-5">
+      <UBlogPosts v-if="allLocations?.length">
+        <UBlogPost
+          v-for="(bookable, index) in allLocations"
+          :key="index"
+          class="shadow-lg"
+          :to="`/catalog/${catalogSlug}/locations/${bookable.id}`"
+        >
+          <template #header>
+            <div>
+              <img
+                src="../../../../assets/example_office2.jpg"
+                alt="Ein beispielhaftes Büro."
+              />
+            </div>
+          </template>
+          <template #body>
+            <div>
+              <p class="text-lg font-bold">{{ bookable.title }}</p>
+              <p>{{ bookable.tenantId }}</p>
+            </div>
+            <!-- Adresse und Entfernung -->
+            <div class="my-5">
+              <p>
+                <UIcon name="i-lucide-map-pin" class="size-5" />
+                <span v-if="bookable.location" class="p-3">{{
+                  bookable.location
+                }}</span>
+                <span v-else class="italic p-3">Keine Adresse bekannt.</span>
+              </p>
+              <p v-if="bookable.location">
+                <UIcon name="i-lucide-navigation" class="size-5" />
+                <span class="p-3">Distance coming soon </span>
+              </p>
+            </div>
+            <!-- Eigenschaften -->
+            <USeparator
+              color="neutral"
+              class="w-full"
+              :ui="{ border: 'border-gray-200' }"
+            />
+            <div>
+              <UBadge
+                v-for="(flag, i) in bookable.flags"
+                :key="i"
+                icon="i-lucide-check"
+                size="md"
+                color="neutral"
+                variant="ghost"
+                style="padding-left: 0; padding-right: 15px"
+                >{{ flag }}</UBadge
+              >
+            </div>
+            <!-- Preis -->
+            <div></div>
+          </template>
+        </UBlogPost>
+      </UBlogPosts>
+      <p v-else>Keine Locations gefunden.</p>
+    </div>
 
     <!-- --------------------toDo - delete this testspace ------------------------------ -->
     <h1 class="text-lg font-bold">Orte</h1>
