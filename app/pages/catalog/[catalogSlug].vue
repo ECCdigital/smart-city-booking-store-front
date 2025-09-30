@@ -37,7 +37,7 @@ const eventStore = useEventStore();
 const { data, error } = await useAsyncData(
   `catalog:${catalogSlug.value}`,
   () => fetchCatalogBundle({ slug: catalogSlug.value }),
-  { server: true }
+  { server: true },
 );
 
 if (error.value) {
@@ -51,9 +51,7 @@ if (data.value?.bookables) {
   bookableStore.$patch({ bookables: data.value.bookables });
 }
 
-
 let isFetching = false;
-
 
 useHead({
   link: [
@@ -66,23 +64,25 @@ useHead({
 </script>
 
 <template>
-  <div >
-    <NavigationBar/>
+  <div class="bg-gray-200">
+    <NavigationBar />
 
     <UPageHero
-        title="Unsere Angebote und Veranstaltungen"
-        :ui="{
-          container: 'bg-[url(/assets/kiel_bootshafen.jpg)] contrast-70 p-10 pb-25 shadow-lg',
-          title: 'text-2xl text-black',
-        }"
+      title="Unsere Angebote und Veranstaltungen"
+      :ui="{
+        container:
+          'bg-[url(/assets/kiel_bootshafen.jpg)] contrast-70 p-10 pb-25 shadow-lg',
+        title: 'text-2xl text-black',
+      }"
+      class="z-0"
     >
       <template #headline>
-        <div class="flex justify-center ">
+        <div class="flex justify-center">
           <img
-              src="../../assets/logo-kielregion.png"
-              alt="Logo Kiel Region"
-              class="text-center"
-              style="height: 15vw"
+            src="../../assets/logo-kielregion.png"
+            alt="Logo Kiel Region"
+            class="text-center"
+            style="height: 15vw"
           />
         </div>
       </template>
@@ -91,5 +91,4 @@ useHead({
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

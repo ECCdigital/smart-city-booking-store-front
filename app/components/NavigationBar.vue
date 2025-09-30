@@ -1,20 +1,18 @@
 <template>
-<div :class="barClass">
-  <div
-      v-for="(tab,k) in tabs"
-      :key="k"
-  >
-    <NavigationLink :tab="tab" />
-  </div>
-  <div style="flex:1"></div>
-  <UButton
+  <div :class="barClass">
+    <div v-for="(tab, k) in tabs" :key="k">
+      <NavigationLink :tab="tab" />
+    </div>
+    <div style="flex: 1"></div>
+    <UButton
       label="Login"
       variant="ghost"
       class="px-4 text-white"
       to="/login"
       @click="console.log('want login')"
-  />
-</div>
+    />
+    <!-- toDo - https://ui.nuxt.com/docs/components/field-group (with dropdown) -->
+  </div>
 </template>
 <script setup>
 import NavigationLink from "./NavigationLink.vue";
@@ -29,7 +27,7 @@ const tabs = computed(() => [
   {
     label: "Orte",
     icon: "i-heroicons-map-pin",
-    value: `/catalog/${catalogSlug.value}/locations`
+    value: `/catalog/${catalogSlug.value}/locations`,
   },
   {
     label: "Events",
@@ -39,20 +37,17 @@ const tabs = computed(() => [
   {
     label: "Geräte",
     icon: "i-heroicons-wrench-screwdriver",
-    value: `/catalog/${catalogSlug.value}/bookables`
+    value: `/catalog/${catalogSlug.value}/bookables`,
   },
   {
     label: "Test",
     icon: "i-heroicons-beaker",
     value: `/catalog/${catalogSlug.value}/test`,
   },
-
 ]);
 
 const barClass = computed(() => [
-    "flex items-center bg-[var(--color-secondary)]"
-])
+  "flex items-center bg-[var(--color-secondary)]",
+]);
 </script>
-<style scoped>
-
-</style>
+<style scoped></style>

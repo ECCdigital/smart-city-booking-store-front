@@ -30,7 +30,12 @@ function testFunction() {
 <template>
   <div>
     <!-- toDo - in eigene Komponente & responsive machen! -->
-    <UCard class="mx-5 p-0 shadow-lg" :ui="{ root: 'p-0', body: 'p-0' }">
+    <UCard
+      variant=""
+      class="bg-white mx-5 -mt-15 p-0 shadow-lg"
+      :ui="{ root: 'p-0', body: 'p-0' }"
+      style="position: relative"
+    >
       <UInput
         v-model="searchTerm"
         icon="i-lucide-search"
@@ -39,11 +44,7 @@ function testFunction() {
         placeholder="Search..."
         class="w-full bg-white dark:bg-white/10"
       />
-      <USeparator
-        color="neutral"
-        class="w-full"
-        :ui="{ border: 'border-gray-200' }"
-      />
+      <USeparator class="w-full" :ui="{ border: 'border-gray-400' }" />
       <UInput
         v-model="searchLocation"
         icon="i-lucide-map-pin"
@@ -52,11 +53,7 @@ function testFunction() {
         placeholder="Search..."
         class="w-full bg-white dark:bg-white/10"
       />
-      <USeparator
-        color="neutral"
-        class="w-full"
-        :ui="{ border: 'border-gray-200' }"
-      />
+      <USeparator class="w-full" :ui="{ border: 'border-gray-400' }" />
       <UInput
         v-model="searchDate"
         icon="i-lucide-calendar-clock"
@@ -65,6 +62,8 @@ function testFunction() {
         placeholder="Search..."
         class="w-full bg-white dark:bg-white/10"
       />
+      <!-- toDo - https://ui.nuxt.com/docs/components/calendar -->
+      <!--  <UCalendar range v-model="searchDate" /> -->
       <UButton
         label="Suchen"
         class="w-full justify-center text-white"
@@ -75,8 +74,6 @@ function testFunction() {
 
     <!-- --------------------toDo - delete this testspace ------------------------------ -->
     <h1 class="text-lg font-bold">Orte</h1>
-    <USeparator />
-
     <div class="text-xs">
       Begriff: {{ searchTerm }} || Ort: {{ searchLocation }} || Datum:
       {{ searchDate }}
