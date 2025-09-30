@@ -130,7 +130,7 @@ function testFunction() {
               class="w-full"
               :ui="{ border: 'border-gray-200' }"
             />
-            <div>
+            <div class="my-5">
               <UBadge
                 v-for="(flag, i) in bookable.flags"
                 :key="i"
@@ -143,7 +143,18 @@ function testFunction() {
               >
             </div>
             <!-- Preis -->
-            <div></div>
+            <div class="flex justify-end">
+              <p
+                v-if="!bookable.priceCategories[0].priceEur"
+                class="text-md font-bold"
+              >
+                Kostenlos
+              </p>
+              <p v-else class="text-md font-bold">
+                € {{ bookable.priceCategories[0].priceEur }}
+              </p>
+              <!-- toDo - Funktion ergänzen, um komplexe Preise (und Angebote) anzuzeigen -->
+            </div>
           </template>
         </UBlogPost>
       </UBlogPosts>
