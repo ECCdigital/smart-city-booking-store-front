@@ -1,6 +1,7 @@
 <script setup>
 import { useCatalogBundle } from "~/composables/useCatalogBundle";
 import { useBookableStore } from "~~/stores/bookable";
+import Fuse from "fuse.js";
 
 definePageMeta({ name: "catalog-locations" });
 
@@ -18,9 +19,42 @@ const allLocations = computed(() => {
 });
 const { bookables } = storeToRefs(bookableStore);
 
+//Search
 const searchTerm = ref("");
 const searchLocation = ref("");
 const searchDate = ref("");
+
+const searchTermOptions = {
+  keys: [
+    "title",
+    "description",
+    "flags",
+    "tags", //toDo - was noch???
+  ],
+  includeScore: true,
+  shouldSort: true,
+};
+const searchLocationOptions = {
+  keys: ["description", "location"], //toDo - was noch???
+  includeScore: true,
+  shouldSort: true,
+};
+
+const filteredLocations = ref(allLocations.value);
+function onSearch() {
+  let locations = allLocations.value;
+  if (searchTerm.value) {
+    locations = new Fuse(locations, searchTermOptions)
+      .search(searchTerm.value)
+      .map((result) => result.item);
+  }
+  if (searchLocation.value) {
+    locations = new Fuse(locations, searchLocationOptions)
+      .search(searchLocation.value)
+      .map((result) => result.item);
+  }
+  filteredLocations.value = locations;
+}
 
 function testFunction() {
   console.log("coming soon...");
@@ -41,7 +75,7 @@ function testFunction() {
         icon="i-lucide-search"
         size="lg"
         variant="ghost"
-        placeholder="Search..."
+        placeholder="Wonach suchen Sie?"
         class="w-full bg-white dark:bg-white/10"
       />
       <USeparator class="w-full" :ui="{ border: 'border-gray-400' }" />
@@ -50,7 +84,7 @@ function testFunction() {
         icon="i-lucide-map-pin"
         size="lg"
         variant="ghost"
-        placeholder="Search..."
+        placeholder="Ort"
         class="w-full bg-white dark:bg-white/10"
       />
       <USeparator class="w-full" :ui="{ border: 'border-gray-400' }" />
@@ -59,7 +93,7 @@ function testFunction() {
         icon="i-lucide-calendar-clock"
         size="lg"
         variant="ghost"
-        placeholder="Search..."
+        placeholder="Zeitraum"
         class="w-full bg-white dark:bg-white/10"
       />
       <!-- toDo - https://ui.nuxt.com/docs/components/calendar -->
@@ -67,12 +101,19 @@ function testFunction() {
       <UButton
         label="Suchen"
         class="w-full justify-center text-white"
-        @click="console.log('suche Sinne des Lebens... ')"
+        @click="onSearch"
       />
     </UCard>
 
+    <!-- --------------------toDo - delete this testspace ------------------------------ -->
+    <div class="text-xs m-5 bg-pink-300 h-15">
+      Begriff: {{ searchTerm }} || Ort: {{ searchLocation }} || Datum:
+      {{ searchDate }}
+    </div>
+    <!-- --------------------toDo ----------------------------------------------------- -->
+
     <div class="flex items-center m-5">
-      <span>{{ allLocations.length }} passende Ergebnisse</span>
+      <span>{{ filteredLocations.length }} passende Ergebnisse</span>
       <div style="flex: 1"></div>
       <UButton
         label="Filtern"
@@ -89,10 +130,11 @@ function testFunction() {
         @click="testFunction"
       />
     </div>
+
     <div class="m-5">
-      <UBlogPosts v-if="allLocations?.length">
+      <UBlogPosts v-if="filteredLocations?.length">
         <UBlogPost
-          v-for="(bookable, index) in allLocations"
+          v-for="(bookable, index) in filteredLocations"
           :key="index"
           class="shadow-lg"
           :to="`/catalog/${catalogSlug}/locations/${bookable.id}`"
@@ -107,7 +149,9 @@ function testFunction() {
           </template>
           <template #body>
             <div>
-              <p class="text-lg font-bold">{{ bookable.title }}</p>
+              <p class="text-lg font-bold">
+                {{ bookable.title }}
+              </p>
               <p>{{ bookable.tenantId }}</p>
             </div>
             <!-- Adresse und Entfernung -->
@@ -145,7 +189,15 @@ function testFunction() {
             <!-- Preis -->
             <div class="flex justify-end">
               <p
-                v-if="!bookable.priceCategories[0].priceEur"
+                v-if="
+                  !bookable.priceCategories ||
+                  bookable.priceCategories.length === 0
+                "
+              >
+                Kein Preis festgelegt.
+              </p>
+              <p
+                v-else-if="!bookable.priceCategories[0].priceEur"
                 class="text-md font-bold"
               >
                 Kostenlos
@@ -160,25 +212,6 @@ function testFunction() {
       </UBlogPosts>
       <p v-else>Keine Locations gefunden.</p>
     </div>
-
-    <!-- --------------------toDo - delete this testspace ------------------------------ -->
-    <h1 class="text-lg font-bold">Orte</h1>
-    <div class="text-xs">
-      Begriff: {{ searchTerm }} || Ort: {{ searchLocation }} || Datum:
-      {{ searchDate }}
-      <USeparator />
-      {{ bookables[5] }}
-    </div>
-    <USeparator />
-    <ul v-if="allLocations?.length" class="bg-red-200 text-black">
-      <li v-for="b in allLocations" :key="b.id">
-        <NuxtLink :to="`/catalog/${catalogSlug}/locations/${b.id}`">
-          {{ b.name || b.title || b.id }}
-        </NuxtLink>
-      </li>
-    </ul>
-    <p v-else>Keine Locations gefunden.</p>
-    <USeparator />
   </div>
 </template>
 
