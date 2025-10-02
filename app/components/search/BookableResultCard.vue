@@ -1,7 +1,7 @@
 <template>
   <div>
     <UBlogPost
-      class="shadow-lg"
+      class="shadow-lg h-full"
       :to="`/catalog/${catalogSlug}/locations/${bookable.id}`"
     >
       <template #header>
@@ -13,64 +13,70 @@
         </div>
       </template>
       <template #body>
-        <div>
-          <p class="text-lg font-bold">
-            {{ bookable.title }}
-          </p>
-          <p>{{ bookable.tenantId }}</p>
-        </div>
-        <!-- Adresse und Entfernung -->
-        <div class="my-5">
-          <p>
-            <UIcon name="i-lucide-map-pin" class="size-5" />
-            <span v-if="bookable.location" class="p-3">{{
-              bookable.location
-            }}</span>
-            <span v-else class="italic p-3">Keine Adresse bekannt.</span>
-          </p>
-          <p v-if="bookable.location">
-            <UIcon name="i-lucide-navigation" class="size-5" />
-            <span class="p-3">Distance coming soon </span>
-          </p>
-        </div>
-        <!-- Eigenschaften -->
-        <USeparator
-          color="neutral"
-          class="w-full"
-          :ui="{ border: 'border-gray-200' }"
-        />
-        <div class="my-5">
-          <UBadge
-            v-for="(flag, i) in bookable.flags"
-            :key="i"
-            icon="i-lucide-check"
-            size="md"
-            color="neutral"
-            variant="ghost"
-            style="padding-left: 0; padding-right: 15px"
-            >{{ flag }}</UBadge
-          >
-        </div>
-        <!-- Preis -->
-        <div class="flex justify-end">
-          <p
-            v-if="
-              !bookable.priceCategories || bookable.priceCategories.length === 0
-            "
-          >
-            Kein Preis festgelegt.
-          </p>
-          <p
-            v-else-if="!bookable.priceCategories[0].priceEur"
-            class="text-md font-bold"
-          >
-            Kostenlos
-          </p>
-          <p v-else class="text-md font-bold">
-            € {{ bookable.priceCategories[0].priceEur }}
-          </p>
-          <!-- toDo - Funktion ergänzen, um komplexe Preise (und Angebote) anzuzeigen -->
-          <!-- toDo - Preis immer unter anzeigen -->
+        <div class="flex flex-wrap content-between h-full">
+          <div class="w-full">
+            <!-- Title -->
+            <p class="text-lg font-bold">
+              {{ bookable.title }}
+            </p>
+            <p>{{ bookable.tenantId }}</p>
+
+            <!-- Adresse und Entfernung -->
+            <div class="w-full my-5">
+              <p>
+                <UIcon name="i-lucide-map-pin" class="size-5" />
+                <span v-if="bookable.location" class="p-3">{{
+                  bookable.location
+                }}</span>
+                <span v-else class="italic p-3">Keine Adresse bekannt.</span>
+              </p>
+              <p v-if="bookable.location">
+                <UIcon name="i-lucide-navigation" class="size-5" />
+                <span class="p-3">Distance coming soon </span>
+              </p>
+            </div>
+            <USeparator
+              color="neutral"
+              class="w-full"
+              :ui="{ border: 'border-gray-200' }"
+            />
+
+            <!-- Eigenschaften -->
+            <div class="w-full my-5">
+              <UBadge
+                v-for="(flag, i) in bookable.flags"
+                :key="i"
+                icon="i-lucide-check"
+                size="md"
+                color="neutral"
+                variant="ghost"
+                style="padding-left: 0; padding-right: 15px"
+                >{{ flag }}</UBadge
+              >
+            </div>
+          </div>
+
+          <!-- Preis -->
+          <div class="w-full flex justify-end bg-pink-500/30">
+            <p
+              v-if="
+                !bookable.priceCategories ||
+                bookable.priceCategories.length === 0
+              "
+            >
+              Kein Preis festgelegt.
+            </p>
+            <p
+              v-else-if="!bookable.priceCategories[0].priceEur"
+              class="text-md font-bold"
+            >
+              Kostenlos
+            </p>
+            <p v-else class="text-md font-bold">
+              € {{ bookable.priceCategories[0].priceEur }}
+            </p>
+            <!-- toDo - Funktion ergänzen, um komplexe Preise (und Angebote) anzuzeigen -->
+          </div>
         </div>
       </template>
     </UBlogPost>
