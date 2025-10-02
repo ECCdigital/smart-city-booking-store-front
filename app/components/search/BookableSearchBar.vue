@@ -20,7 +20,6 @@
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputTimePeriod v-model="searchTimePeriod" />
-    <!-- toDo - add timepicker....  -->
     <UButton
       label="Suchen"
       class="w-full justify-center text-white"
@@ -41,6 +40,7 @@ function onSearch() {
   emit("search", {
     term: searchTerm.value,
     location: searchLocation.value,
+    timePeriod: searchTimePeriod.value,
   });
 }
 </script>

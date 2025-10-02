@@ -36,7 +36,7 @@ const searchLocationOptions = {
   shouldSort: true,
 };
 
-function onSearch({ term, location }) {
+function onSearch({ term, location, timePeriod }) {
   let locations = allLocations.value;
   if (term) {
     locations = new Fuse(locations, searchTermOptions)
@@ -47,6 +47,9 @@ function onSearch({ term, location }) {
     locations = new Fuse(locations, searchLocationOptions)
       .search(location)
       .map((result) => result.item);
+  }
+  if (timePeriod) {
+    console.log("want so search for time, too... ");
   }
   filteredLocations.value = locations;
 }

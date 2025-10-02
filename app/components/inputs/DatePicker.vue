@@ -14,7 +14,7 @@
 import VueDatePicker from "@vuepic/vue-datepicker";
 
 const model = defineModel();
-const now = ref(Date.now());
+const now = ref(new Date());
 </script>
 
 <style>
