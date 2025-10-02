@@ -57,7 +57,7 @@
           </div>
 
           <!-- Preis -->
-          <div class="w-full flex justify-end bg-pink-500/30">
+          <div class="w-full flex justify-end">
             <p
               v-if="
                 !bookable.priceCategories ||
