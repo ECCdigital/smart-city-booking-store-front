@@ -2,15 +2,12 @@
   <UTooltip text="Wählen Sie erst ein Startdatum." :disabled="!disabled">
     <VueDatePicker
       v-model="model"
-      format="dd.MM.yyyy"
-      :min-date="minDate"
-      locale="de"
-      month-name-format="long"
+      time-picker
+      format="HH:mm"
       cancelText="Abbrechen"
       selectText="OK"
       teleport-center
       :disabled="disabled"
-      :enable-time-picker="false"
     />
   </UTooltip>
 </template>
@@ -23,11 +20,8 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  minDate: {
-    type: Date,
-    default: new Date(),
-  },
 });
+const now = ref(new Date());
 </script>
 
 <style>

@@ -34,14 +34,33 @@ import InputTimePeriod from "../inputs/InputTimePeriod.vue";
 const emit = defineEmits(["search"]);
 const searchTerm = ref("");
 const searchLocation = ref("");
-const searchTimePeriod = ref({ start: null, end: null });
+const searchTimePeriod = ref({
+  startDate: null,
+  startTime: null,
+  endDate: null,
+  endTime: null,
+});
 
 function onSearch() {
+  const formattedSearchTimePeriod = {
+    ...searchTimePeriod.value,
+    startTime: formatTime(searchTimePeriod.value.startTime),
+    endTime: formatTime(searchTimePeriod.value.endTime),
+  };
+
   emit("search", {
     term: searchTerm.value,
     location: searchLocation.value,
-    timePeriod: searchTimePeriod.value,
+    timePeriod: formattedSearchTimePeriod,
   });
+}
+function formatTime(timeObj) {
+  if (!timeObj) {
+    return null;
+  }
+  const hours = timeObj.hours.toString().padStart(2, "0");
+  const minutes = timeObj.minutes.toString().padStart(2, "0");
+  return `${hours}:${minutes}`;
 }
 </script>
 <style scoped></style>
