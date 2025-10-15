@@ -10,21 +10,21 @@ class AuthService {
 
       const { accessToken, refreshToken: newRefreshToken } = response;
 
-      setCookie(event, "access-token", newRefreshToken, {
+      setCookie(event, "access-token", accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
+        path: "/",
         maxAge: 60 * 60 * 24,
       });
 
-      setCookie(event, "refresh-token", refreshToken, {
+      setCookie(event, "refresh-token", newRefreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
+        path: "/",
         maxAge: 60 * 60 * 24 * 7,
       });
-
-
 
       return {
         success: true,
@@ -32,12 +32,9 @@ class AuthService {
         refreshToken: newRefreshToken,
       };
     } catch {
-      deleteCookie(event, "access-token");
-      deleteCookie(event, "refresh-token");
-      return {
-        success: false,
-        error: "Token refresh failed",
-      };
+      deleteCookie(event, "access-token", { path: "/" });
+      deleteCookie(event, "refresh-token", { path: "/" });
+      return { success: false, error: "Token refresh failed" };
     }
   }
 }
