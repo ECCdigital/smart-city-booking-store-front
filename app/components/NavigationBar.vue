@@ -5,17 +5,25 @@
     </div>
     <div style="flex: 1"></div>
     <UButton
-      label="Login"
+      label="Anmelden"
       variant="ghost"
       class="px-4 text-white"
       to="/login"
       @click="console.log('want login')"
+    />
+    <UButton
+      v-if="isGreaterThanSm"
+      label="Registrieren"
+      class="px-4 text-black bg-white"
+      to="/register"
+      @click="console.log('want register')"
     />
     <!-- toDo - https://ui.nuxt.com/docs/components/field-group (with dropdown) -->
   </div>
 </template>
 <script setup>
 import NavigationLink from "./NavigationLink.vue";
+import { useWindowSize } from "@vueuse/core";
 
 const route = useRoute();
 const router = useRouter();
@@ -45,6 +53,9 @@ const tabs = computed(() => [
     value: `/catalog/${catalogSlug.value}/test`,
   },
 ]);
+
+const { width } = useWindowSize();
+const isGreaterThanSm = computed(() => width.value >= 640);
 
 const barClass = computed(() => [
   "flex items-center bg-[var(--color-secondary)]",
