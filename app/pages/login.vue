@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { ref } from "vue";
 import { useAuth } from "~/composables/auth/useAuth";
 import LoginCard from "~/components/auth/LoginCard.vue";
