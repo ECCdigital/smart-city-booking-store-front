@@ -9,6 +9,7 @@
       :ui="{
         leadingIcon: 'text-[16px] mr-1',
       }"
+      @click="setDefaultStartDate()"
     >
       <template v-if="model.endDate">
         {{ displayDate(model.startDate) }}, {{ displayTime(model.startTime) }} -
@@ -34,11 +35,17 @@
         <div class="flex flex-col md:flex-row gap-2">
           <div class="py-3 w-full">
             <p class="px-1">Startdatum</p>
-            <DatePicker v-model="model.startDate" />
+            <DatePicker
+              v-model="model.startDate"
+              @update:model-value="setDefaultEndDate"
+            />
           </div>
           <div class="py-3 w-full">
             <p class="px-1">Startuhrzeit</p>
-            <TimePicker v-model="model.startTime" />
+            <TimePicker
+              v-model="model.startTime"
+              @update:model-value="setDefaultEndTime"
+            />
           </div>
         </div>
         <div class="flex flex-col md:flex-row gap-2 mt-3">
@@ -84,6 +91,25 @@ function displayTime(time) {
     );
   }
   return "";
+}
+
+function setDefaultStartDate() {
+  if (!model.value.startDate) {
+    model.value.startDate = new Date();
+  }
+}
+function setDefaultEndDate() {
+  if (!model.value.endDate && model.value.startDate) {
+    model.value.endDate = model.value.startDate;
+  }
+}
+
+function setDefaultEndTime() {
+  if (!model.value.endTime && model.value.startTime) {
+    let initialTime = JSON.parse(JSON.stringify(model.value.startTime));
+    initialTime.hours = initialTime.hours + 1;
+    model.value.endTime = initialTime;
+  }
 }
 </script>
 <style scoped></style>

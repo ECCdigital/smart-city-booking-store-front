@@ -3,10 +3,8 @@
     variant=""
     class="bg-white mx-5 -mt-15 p-0 shadow-lg"
     :ui="{ root: 'p-0', body: 'p-0' }"
-    style="position: relative"
+    style="position: relative; width: 80vw"
   >
-    <!-- toDo - responsive machen! -->
-
     <InputText
       v-model="searchTerm"
       icon="i-lucide-search"
@@ -43,9 +41,10 @@ const searchTimePeriod = ref({
 
 function onSearch() {
   const formattedSearchTimePeriod = {
-    ...searchTimePeriod.value,
-    startTime: formatTime(searchTimePeriod.value.startTime),
-    endTime: formatTime(searchTimePeriod.value.endTime),
+    startDate: formateDateToString(searchTimePeriod.value.startDate) || "",
+    endDate: formateDateToString(searchTimePeriod.value.endDate) || "",
+    startTime: formatTimeToString(searchTimePeriod.value.startTime) || "",
+    endTime: formatTimeToString(searchTimePeriod.value.endTime) || "",
   };
 
   emit("search", {
@@ -54,7 +53,19 @@ function onSearch() {
     timePeriod: formattedSearchTimePeriod,
   });
 }
-function formatTime(timeObj) {
+function formateDateToString(dateObj) {
+  if (!dateObj) {
+    return null;
+  }
+  return (
+    dateObj.getUTCFullYear().toString() +
+    "-" +
+    (dateObj.getMonth() + 1).toString().padStart(2, "0") +
+    "-" +
+    dateObj.getDate().toString().padStart(2, "0")
+  );
+}
+function formatTimeToString(timeObj) {
   if (!timeObj) {
     return null;
   }

@@ -5,6 +5,7 @@ import Fuse from "fuse.js";
 import "@vuepic/vue-datepicker/dist/main.css";
 import BookableSearchBar from "../../../../components/search/BookableSearchBar.vue";
 import BookableResultsList from "../../../../components/search/BookableResultsList.vue";
+import { useBookables } from "../../../../composables/api/useBookables.js";
 
 definePageMeta({ name: "catalog-locations" });
 
@@ -26,17 +27,16 @@ const { bookables } = storeToRefs(bookableStore);
 //Search
 const searchTermOptions = {
   keys: ["title", "description", "flags", "tags"],
-  //toDo - was noch???
   includeScore: true,
   shouldSort: true,
 };
 const searchLocationOptions = {
-  keys: ["description", "location"], //toDo - was noch???
+  keys: ["description", "location"],
   includeScore: true,
   shouldSort: true,
 };
 
-function onSearch({ term, location, timePeriod }) {
+async function onSearch({ term, location, timePeriod }) {
   let locations = allLocations.value;
   //nach Suchbegriff suchen
   if (term) {
@@ -52,84 +52,47 @@ function onSearch({ term, location, timePeriod }) {
   }
 
   //nach Zeit suchen
-  if (timePeriod) {
-    console.log("want so search for time ->", timePeriod);
-    //toDo - später auslagern...
-    locations = locations.filter((location) => {
-      //toDo - check specialOpeningHours
+  if (timePeriod.startDate) {
+    const formatedTimePeriod = formateTimePeriod(timePeriod);
 
-      if (!location.isOpeningHoursRelated) {
-        return true;
-      } else {
-        //check hours
-        console.log("found openingHours for ", location.title);
-        let isOpenedDay = false;
-        let isOpenedTime = false;
+    const availabilityChecks = await Promise.all(
+      locations.map(async (location) => {
+        const availability = await useBookables().getBookableAvailability(
+          location.tenantId,
+          location.id,
+          formatedTimePeriod.start.getTime(),
+          formatedTimePeriod.end.getTime(),
+        );
 
-        if (timePeriod.startDate && !timePeriod.endDate) {
-          //wenn nur startDatum, Wochentag ermitteln und abgleichen
-          const weekday = timePeriod.startDate.getDay();
-          console.log("only got startDate an Day...", weekday);
-          isOpenedDay = location.openingHours.some((timeSlot) =>
-            timeSlot.weekdays.includes(weekday),
-          );
+        return { location, isAvailable: availability.isAvailable };
+      }),
+    );
 
-          if (isOpenedDay && timePeriod.startTime) {
-            //wenn am startDatum geöffnet,alle Zeitslots suchen, die den Wochentag beinhalten (können mehrere sein)
-            const suitableDays = location.openingHours.filter((t) =>
-              t.weekdays.includes(weekday),
-            );
-
-            //Uhrzeiten der entsprechenden Tage abgleichen
-            isOpenedTime = suitableDays.some((openingTime) =>
-              isTimeInInterval(
-                timePeriod.startTime,
-                timePeriod.endTime,
-                openingTime.startTime,
-                openingTime.endTime,
-              ),
-            );
-            return isOpenedTime;
-          }
-
-          return isOpenedDay;
-        } else {
-          //wenn auch endDatum
-          console.log("also got endDate...");
-        }
-      }
-    });
+    locations = availabilityChecks
+      .filter((result) => result.isAvailable)
+      .map((result) => result.location);
   }
   filteredLocations.value = locations;
 }
 
-function timeStringToMinutes(timeString) {
-  const [hours, minutes] = timeString.split(":").map(Number);
-  return hours * 60 + minutes;
-}
+function formateTimePeriod(timePeriod) {
+  let newTimePeriod = {};
 
-function isTimeInInterval(
-  startTime,
-  endTime,
-  startOpeningHours,
-  endOpeningHours,
-) {
-  const startOpeningHoursInMinutes = timeStringToMinutes(startOpeningHours);
-  const endOpeningHoursInMinutes = timeStringToMinutes(endOpeningHours);
+  newTimePeriod.start = new Date(
+    timePeriod.startDate + " " + timePeriod.startTime,
+  );
 
-  const startTimeInMinutes = timeStringToMinutes(startTime);
-  let isDuringOpeningHours =
-    startTimeInMinutes >= startOpeningHoursInMinutes &&
-    startTimeInMinutes <= endOpeningHoursInMinutes;
-
-  if (isDuringOpeningHours && endTime) {
-    const endTimeInMinutes = timeStringToMinutes(endTime);
-    isDuringOpeningHours =
-      endTimeInMinutes >= startOpeningHoursInMinutes &&
-      endTimeInMinutes <= endOpeningHoursInMinutes;
+  newTimePeriod.end = "";
+  if (!timePeriod.endDate && timePeriod.endTime) {
+    newTimePeriod.end = new Date(
+      timePeriod.startDate + " " + timePeriod.endTime,
+    );
+  } else {
+    newTimePeriod.end = new Date(timePeriod.endDate + " " + timePeriod.endTime);
   }
-  return isDuringOpeningHours;
+  return newTimePeriod;
 }
+
 function testFunction() {
   console.log("coming soon...");
 }
@@ -137,7 +100,9 @@ function testFunction() {
 
 <template>
   <div>
-    <BookableSearchBar @search="onSearch" />
+    <div class="bg-green-300 flex justify-center">
+      <BookableSearchBar @search="onSearch" />
+    </div>
 
     <BookableResultsList
       :bookables="filteredLocations"
