@@ -64,6 +64,7 @@ async function onSearch({ term, location, timePeriod }) {
           formatedTimePeriod.end.getTime(),
         );
 
+        //toDo - wenn "remaining" gefixt, dann ebenfalls berücksichtigen
         return { location, isAvailable: availability.isAvailable };
       }),
     );
