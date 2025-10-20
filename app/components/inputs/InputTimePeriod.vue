@@ -12,8 +12,9 @@
       @click="setDefaultStartDate()"
     >
       <template v-if="model.endDate">
-        {{ displayDate(model.startDate) }}, {{ displayTime(model.startTime) }} -
-        {{ displayDate(model.endDate) }},
+        {{ displayDate(model.startDate) }}, {{ displayTime(model.startTime) }}
+        <br />
+        - {{ displayDate(model.endDate) }},
         {{ displayTime(model.endTime) || "24:00" }}
       </template>
       <template v-else-if="!model.endDate && model.endTime">

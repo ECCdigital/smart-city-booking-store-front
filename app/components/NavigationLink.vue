@@ -8,7 +8,6 @@
   </NuxtLink>
 </template>
 <script setup>
-import { useWindowSize } from "@vueuse/core";
 import { useBreakpointCheck } from "../composables/utils/useBreakpointCheck.js";
 const props = defineProps({
   tab: {
@@ -22,7 +21,7 @@ const isActive = computed(() => {
   return route.path === props.tab.value;
 });
 
-const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm);
+const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
 
 const linkClass = computed(() => [
   "flex items-center px-4 relative h-12",

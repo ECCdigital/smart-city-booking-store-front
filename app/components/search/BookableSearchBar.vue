@@ -1,6 +1,32 @@
 <template>
+  <div
+    v-if="!!isGreaterThanMd"
+    class="flex justify-between bg-white -mt-5 p-2 z-100 rounded"
+    style="position: relative; width: 60vw"
+  >
+    <InputText
+      v-model="searchTerm"
+      icon="i-lucide-search"
+      placeholder="Wonach suchen Sie?"
+      class=""
+    />
+    <USeparator orientation="vertical" class="" />
+    <InputText
+      v-model="searchLocation"
+      icon="i-lucide-map-pin"
+      placeholder="Ort"
+      class=""
+    />
+    <USeparator orientation="vertical" class="" />
+    <InputTimePeriod v-model="searchTimePeriod" class="bg-blue-100" />
+    <UButton
+      label="Suchen"
+      class="w-full justify-center text-white"
+      @click="onSearch"
+    />
+  </div>
   <UCard
-    variant=""
+    v-else
     class="bg-white mx-5 -mt-15 p-0 shadow-lg"
     :ui="{ root: 'p-0', body: 'p-0' }"
     style="position: relative; width: 80vw"
@@ -28,6 +54,7 @@
 <script setup>
 import InputText from "../inputs/InputText.vue";
 import InputTimePeriod from "../inputs/InputTimePeriod.vue";
+import { useBreakpointCheck } from "../../composables/utils/useBreakpointCheck.js";
 
 const emit = defineEmits(["search"]);
 const searchTerm = ref("");
@@ -38,6 +65,8 @@ const searchTimePeriod = ref({
   endDate: null,
   endTime: null,
 });
+
+const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 
 function onSearch() {
   const formattedSearchTimePeriod = {

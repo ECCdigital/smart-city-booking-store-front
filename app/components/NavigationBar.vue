@@ -55,7 +55,7 @@ const tabs = computed(() => [
   },
 ]);
 
-const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm);
+const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
 
 const barClass = computed(() => [
   "flex items-center bg-[var(--color-secondary)]",
