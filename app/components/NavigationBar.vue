@@ -24,6 +24,7 @@
 <script setup>
 import NavigationLink from "./NavigationLink.vue";
 import { useWindowSize } from "@vueuse/core";
+import { useBreakpointCheck } from "../composables/utils/useBreakpointCheck.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -54,8 +55,7 @@ const tabs = computed(() => [
   },
 ]);
 
-const { width } = useWindowSize();
-const isGreaterThanSm = computed(() => width.value >= 640);
+const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm);
 
 const barClass = computed(() => [
   "flex items-center bg-[var(--color-secondary)]",

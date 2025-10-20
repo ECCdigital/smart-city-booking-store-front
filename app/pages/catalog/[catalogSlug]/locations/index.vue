@@ -101,7 +101,7 @@ function testFunction() {
 
 <template>
   <div>
-    <div class="bg-green-300 flex justify-center">
+    <div class="flex justify-center">
       <BookableSearchBar @search="onSearch" />
     </div>
 
