@@ -8,6 +8,8 @@ import BookableResultsList from "../../../../components/search/BookableResultsLi
 import { useBookables } from "../../../../composables/api/useBookables.js";
 import { useBreakpointCheck } from "../../../../composables/utils/useBreakpointCheck.js";
 import BookableResultsGrid from "../../../../components/search/BookableResultsGrid.vue";
+import FilterArea from "../../../../components/search/FilterArea.vue";
+import SortButton from "../../../../components/search/SortButton.vue";
 
 definePageMeta({ name: "catalog-locations" });
 
@@ -101,6 +103,9 @@ function formateTimePeriod(timePeriod) {
   return newTimePeriod;
 }
 
+function sortBookables(mode) {
+  console.log("Art der Sortierung: ", mode);
+}
 function testFunction() {
   console.log("coming soon...");
 }
@@ -112,18 +117,49 @@ function testFunction() {
       <BookableSearchBar @search="onSearch" />
     </div>
 
-    <BookableResultsList
-      v-if="isGreaterThanMd"
-      :bookables="filteredLocations"
-      @filter="testFunction"
-      @sort="testFunction"
-    />
-    <BookableResultsGrid
-      v-else
-      :bookables="filteredLocations"
-      @filter="testFunction"
-      @sort="testFunction"
-    />
+    <div v-if="!isGreaterThanMd" class="flex items-center m-10">
+      <span>{{ bookables.length }} passende Ergebnisse</span>
+      <div style="flex: 1"></div>
+      <SortButton @sort="sortBookables" />
+      <UPopover>
+        <UButton
+          label="Filtern"
+          icon="i-lucide-funnel"
+          color="neutral"
+          variant="soft"
+          class="rounded-full py-2 px-3"
+          @click="testFunction"
+        />
+        <template #content>
+          <UCard><FilterArea @filter="testFunction" /></UCard>
+        </template>
+      </UPopover>
+    </div>
+    <div class="flex flex-row my-5 m-5">
+      <!-- Filterbereich -->
+      <div v-if="isGreaterThanMd" class="basis-1/4">
+        <p class="text-black font-bold">
+          {{ filteredLocations.length }} passende Ergebnisse
+        </p>
+        <SortButton @sort="sortBookables" />
+        <FilterArea @filter="testFunction" />
+      </div>
+
+      <div :class="isGreaterThanMd ? 'basis-3/4' : ''">
+        <BookableResultsList
+          v-if="isGreaterThanMd"
+          :bookables="filteredLocations"
+          @filter="testFunction"
+          @sort="testFunction"
+        />
+        <BookableResultsGrid
+          v-else
+          :bookables="filteredLocations"
+          @filter="testFunction"
+          @sort="testFunction"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
