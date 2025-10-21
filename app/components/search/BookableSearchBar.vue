@@ -10,15 +10,15 @@
       placeholder="Wonach suchen Sie?"
       class=""
     />
-    <USeparator orientation="vertical" class="" />
+    <USeparator orientation="vertical" />
     <InputText
       v-model="searchLocation"
       icon="i-lucide-map-pin"
       placeholder="Ort"
       class=""
     />
-    <USeparator orientation="vertical" class="" />
-    <InputTimePeriod v-model="searchTimePeriod" />
+    <USeparator orientation="vertical" />
+    <InputTimePeriod @select-date="setSearchTimePeriod" />
     <UButton
       label="Suchen"
       class="w-full justify-center text-white"
@@ -43,7 +43,7 @@
       placeholder="Ort"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
-    <InputTimePeriod v-model="searchTimePeriod" />
+    <InputTimePeriod @select-date="setSearchTimePeriod" />
     <UButton
       label="Suchen"
       class="w-full justify-center text-white"
@@ -59,48 +59,19 @@ import { useBreakpointCheck } from "../../composables/utils/useBreakpointCheck.j
 const emit = defineEmits(["search"]);
 const searchTerm = ref("");
 const searchLocation = ref("");
-const searchTimePeriod = ref({
-  startDate: null,
-  startTime: null,
-  endDate: null,
-  endTime: null,
-});
+const searchTimePeriod = ref();
 
 const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 
+function setSearchTimePeriod(timePeriod) {
+  searchTimePeriod.value = timePeriod;
+}
 function onSearch() {
-  const formattedSearchTimePeriod = {
-    startDate: formateDateToString(searchTimePeriod.value.startDate) || "",
-    endDate: formateDateToString(searchTimePeriod.value.endDate) || "",
-    startTime: formatTimeToString(searchTimePeriod.value.startTime) || "",
-    endTime: formatTimeToString(searchTimePeriod.value.endTime) || "",
-  };
-
   emit("search", {
     term: searchTerm.value,
     location: searchLocation.value,
-    timePeriod: formattedSearchTimePeriod,
+    timePeriod: searchTimePeriod.value,
   });
-}
-function formateDateToString(dateObj) {
-  if (!dateObj) {
-    return null;
-  }
-  return (
-    dateObj.getUTCFullYear().toString() +
-    "-" +
-    (dateObj.getMonth() + 1).toString().padStart(2, "0") +
-    "-" +
-    dateObj.getDate().toString().padStart(2, "0")
-  );
-}
-function formatTimeToString(timeObj) {
-  if (!timeObj) {
-    return null;
-  }
-  const hours = timeObj.hours.toString().padStart(2, "0");
-  const minutes = timeObj.minutes.toString().padStart(2, "0");
-  return `${hours}:${minutes}`;
 }
 </script>
 <style scoped></style>

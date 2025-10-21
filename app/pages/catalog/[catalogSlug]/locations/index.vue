@@ -105,6 +105,7 @@ function formateTimePeriod(timePeriod) {
 
 function sortBookables(mode) {
   console.log("Art der Sortierung: ", mode);
+  //toDo - momentan "relevanz" nach Fuze-Suche...
 }
 function testFunction() {
   console.log("coming soon...");
