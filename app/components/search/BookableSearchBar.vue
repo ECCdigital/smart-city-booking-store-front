@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="!!isGreaterThanMd"
-    class="flex justify-between bg-white -mt-5 p-2 z-100 rounded"
+    class="flex justify-between bg-white -mt-5 p-2 z-100 rounded shadow-lg"
     style="position: relative; width: 60vw"
   >
     <InputText
@@ -18,7 +18,7 @@
       class=""
     />
     <USeparator orientation="vertical" class="" />
-    <InputTimePeriod v-model="searchTimePeriod" class="bg-blue-100" />
+    <InputTimePeriod v-model="searchTimePeriod" />
     <UButton
       label="Suchen"
       class="w-full justify-center text-white"

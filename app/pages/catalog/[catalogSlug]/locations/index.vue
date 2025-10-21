@@ -6,6 +6,8 @@ import "@vuepic/vue-datepicker/dist/main.css";
 import BookableSearchBar from "../../../../components/search/BookableSearchBar.vue";
 import BookableResultsList from "../../../../components/search/BookableResultsList.vue";
 import { useBookables } from "../../../../composables/api/useBookables.js";
+import { useBreakpointCheck } from "../../../../composables/utils/useBreakpointCheck.js";
+import BookableResultsGrid from "../../../../components/search/BookableResultsGrid.vue";
 
 definePageMeta({ name: "catalog-locations" });
 
@@ -16,6 +18,7 @@ const { loadBundle } = useCatalogBundle();
 const bookableStore = useBookableStore();
 
 await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
+const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 
 const allLocations = computed(() => {
   let locations = bookableStore.getLocations;
@@ -37,6 +40,10 @@ const searchLocationOptions = {
 };
 
 async function onSearch({ term, location, timePeriod }) {
+  //toDo - Suchergebnisse in 1 Array speichern und Status ranheften
+
+  //toDo - vorfiltern und prüfen, was überhaupt buchbar ist
+
   let locations = allLocations.value;
   //nach Suchbegriff suchen
   if (term) {
@@ -106,6 +113,13 @@ function testFunction() {
     </div>
 
     <BookableResultsList
+      v-if="isGreaterThanMd"
+      :bookables="filteredLocations"
+      @filter="testFunction"
+      @sort="testFunction"
+    />
+    <BookableResultsGrid
+      v-else
       :bookables="filteredLocations"
       @filter="testFunction"
       @sort="testFunction"
