@@ -75,16 +75,18 @@
 
         <!--Aktionen-->
         <div class="w-full mt-5 flex justify-end">
-          <UButton
+          <!-- toDo - für MVP ausgeblendet! Danach wieder aktivieren!  -->
+          <!--<UButton
             label="Details ansehen"
             variant="ghost"
             class="justify-center px-10"
             :to="`/catalog/${catalogSlug}/locations/${bookable.id}`"
           />
+          -->
           <UButton
             label="Buchen"
             class="justify-center text-white px-10"
-            @click="onStartBooking"
+            @click="goToCheckout"
           />
         </div>
       </div>
@@ -132,8 +134,9 @@ const catalogSlug = computed(() => route.params.catalogSlug);
 function onOpenDetails() {
   console.log("want to open details..");
 }
-function onStartBooking() {
-  console.log("want to start booking..");
+function goToCheckout() {
+  let url = `http://localhost:8080/checkout?id=${props.bookable.id}&tenant=${props.bookable.tenantId}&amount=1`;
+  window.open(url);
 }
 </script>
 
