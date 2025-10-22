@@ -135,6 +135,7 @@ function onOpenDetails() {
   console.log("want to open details..");
 }
 function goToCheckout() {
+  //toDo - fetch base url dynamicallys
   let url = `http://localhost:8080/checkout?id=${props.bookable.id}&tenant=${props.bookable.tenantId}&amount=1`;
   window.open(url);
 }

@@ -120,6 +120,7 @@ const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
 
 function goToCheckout() {
+  //toDo - fetch base url dynamically
   let url = `http://localhost:8080/checkout?id=${props.bookable.id}&tenant=${props.bookable.tenantId}&amount=1`;
   window.open(url);
 }

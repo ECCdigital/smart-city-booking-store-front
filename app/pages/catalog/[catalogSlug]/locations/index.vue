@@ -16,11 +16,11 @@ definePageMeta({ name: "catalog-locations" });
 const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
 
-const { loadBundle } = useCatalogBundle();
-const bookableStore = useBookableStore();
-
-await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
 const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
+const { loadBundle } = useCatalogBundle();
+
+const bookableStore = useBookableStore();
+await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
 
 const allLocations = computed(() => {
   let locations = bookableStore.getLocations;
@@ -61,7 +61,7 @@ async function onSearch({ term, location, timePeriod }) {
   }
 
   //nach Zeit suchen
-  if (timePeriod.startDate) {
+  if (timePeriod && timePeriod.startDate) {
     const formatedTimePeriod = formateTimePeriod(timePeriod);
 
     const availabilityChecks = await Promise.all(
@@ -119,10 +119,10 @@ function testFunction() {
     </div>
 
     <div v-if="!isGreaterThanMd" class="flex items-center m-10">
-      <span>{{ bookables.length }} passende Ergebnisse</span>
+      <span>{{ filteredLocations.length }} passende Ergebnisse</span>
       <div style="flex: 1"></div>
       <SortButton @sort="sortBookables" />
-      <UPopover>
+      <UPopover :content="{ align: 'end', side: 'bottom', sideOffset: '-20' }">
         <UButton
           label="Filtern"
           icon="i-lucide-funnel"
@@ -132,7 +132,9 @@ function testFunction() {
           @click="testFunction"
         />
         <template #content>
-          <UCard><FilterArea @filter="testFunction" /></UCard>
+          <UCard style="width: 80vw"
+            ><FilterArea @filter="testFunction"
+          /></UCard>
         </template>
       </UPopover>
     </div>
@@ -146,7 +148,7 @@ function testFunction() {
         <FilterArea @filter="testFunction" />
       </div>
 
-      <div :class="isGreaterThanMd ? 'basis-3/4' : ''">
+      <div :class="isGreaterThanMd ? 'basis-3/4' : 'w-full'">
         <BookableResultsList
           v-if="isGreaterThanMd"
           :bookables="filteredLocations"
