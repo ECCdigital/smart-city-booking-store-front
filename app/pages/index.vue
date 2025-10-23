@@ -1,10 +1,13 @@
 <template>
-  <div style="color: var(--color-primary)">
-    {{ $t("welcome") }}
+  <div class="bg-gray-200">
   </div>
 </template>
 
 <script setup>
+definePageMeta({
+  layout: "catalog",
+  middleware: ["catalog-auth"],
+});
 
 </script>
 

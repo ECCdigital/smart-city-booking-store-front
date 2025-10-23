@@ -2,7 +2,7 @@
   <div>
     <UBlogPost
       class="shadow-lg h-full"
-      :to="`/catalog/${catalogSlug}/locations/${bookable.id}`"
+      :to="`/locations/${bookable.id}`"
     >
       <template #header>
         <div>
@@ -115,9 +115,6 @@ const props = defineProps({
     required: true,
   },
 });
-
-const route = useRoute();
-const catalogSlug = computed(() => route.params.catalogSlug);
 </script>
 
 <style scoped></style>

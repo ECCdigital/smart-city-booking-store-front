@@ -1,12 +1,12 @@
 <script setup>
-import { useCatalogBundle } from "~/composables/useCatalogBundle";
-import { useBookableStore } from "~~/stores/bookable";
+import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
+import { useBookableStore } from "~~/stores/bookable.js";
 import Fuse from "fuse.js";
 import "@vuepic/vue-datepicker/dist/main.css";
-import BookableSearchBar from "../../../../components/search/BookableSearchBar.vue";
-import BookableResultsList from "../../../../components/search/BookableResultsList.vue";
+import BookableSearchBar from "../../components/search/BookableSearchBar.vue";
+import BookableResultsList from "../../components/search/BookableResultsList.vue";
 
-definePageMeta({ name: "catalog-locations" });
+definePageMeta({ name: "catalog-locations", layout: "catalog" });
 
 const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
@@ -71,13 +71,13 @@ function onSearch({ term, location, timePeriod }) {
           const weekday = timePeriod.startDate.getDay();
           console.log("only got startDate an Day...", weekday);
           isOpenedDay = location.openingHours.some((timeSlot) =>
-            timeSlot.weekdays.includes(weekday),
+            timeSlot.weekdays.includes(weekday)
           );
 
           if (isOpenedDay && timePeriod.startTime) {
             //wenn am startDatum geöffnet,alle Zeitslots suchen, die den Wochentag beinhalten (können mehrere sein)
             const suitableDays = location.openingHours.filter((t) =>
-              t.weekdays.includes(weekday),
+              t.weekdays.includes(weekday)
             );
 
             //Uhrzeiten der entsprechenden Tage abgleichen
@@ -86,8 +86,8 @@ function onSearch({ term, location, timePeriod }) {
                 timePeriod.startTime,
                 timePeriod.endTime,
                 openingTime.startTime,
-                openingTime.endTime,
-              ),
+                openingTime.endTime
+              )
             );
             return isOpenedTime;
           }
@@ -112,7 +112,7 @@ function isTimeInInterval(
   startTime,
   endTime,
   startOpeningHours,
-  endOpeningHours,
+  endOpeningHours
 ) {
   const startOpeningHoursInMinutes = timeStringToMinutes(startOpeningHours);
   const endOpeningHoursInMinutes = timeStringToMinutes(endOpeningHours);
