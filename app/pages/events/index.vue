@@ -1,8 +1,8 @@
 <script setup>
-import { useCatalogBundle } from "~/composables/useCatalogBundle";
-import { useEventStore } from "~~/stores/event";
+import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
+import { useEventStore } from "~~/stores/event.js";
 
-definePageMeta({ name: "catalog-events" });
+definePageMeta({ name: "catalog-events",layout: "catalog", });
 
 const route = useRoute();
 const slug = route.params.catalogSlug;
@@ -20,7 +20,7 @@ const { events } = storeToRefs(eventStore);
     <h1>Events</h1>
     <ul v-if="events?.length">
       <li v-for="e in events" :key="e.id">
-        <NuxtLink :to="`/catalog/${slug}/events/${e.id}`">
+        <NuxtLink :to="`/events/${e.id}`">
           {{ e.information.name || e.information.title || e.id }}
         </NuxtLink>
       </li>

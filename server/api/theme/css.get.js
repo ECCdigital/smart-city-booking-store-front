@@ -1,17 +1,33 @@
+import { logger } from "~~/server/api/utils/logger.js";
+import { apiFetch } from "~~/server/api/utils/apiFetch.js";
+
 export default defineEventHandler(async (event) => {
-    const primary = '#ff8b00'
-    const secondary = '#1d9ecc'
+  const log = logger.child({ caller: "server/api/theme/[..slug].get" });
 
-    console.log('Fetching default theme CSS...')
+  let theme = defaultTheme;
 
-    // Asynchronität simulieren (z. B. API-Call)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    setHeader(event, 'Content-Type', 'text/css')
-    return `
-    :root {
-      --ui-primary: ${primary};
-      --ui-secondary: ${secondary};
+  try {
+    const fetchedThemeBundle = await apiFetch(event, `/api/catalog/themes`, {
+      method: "GET",
+    });
+
+    if (fetchedThemeBundle.theme?.colors?.primary && fetchedThemeBundle.theme?.colors?.secondary) {
+      theme = fetchedThemeBundle.theme.colors;
+    } else {
+      log.warn(
+        `Theme does not have primary or secondary colors, using default theme.`
+      );
     }
-  `
-})
+  } catch (error) {
+    log.error(`Error fetching theme: ${error}`);
+  }
+
+  setHeader(event, "Content-Type", "text/css");
+  return `
+    :root {
+      --ui-primary: ${theme.primary};
+      --ui-secondary: ${theme.secondary};
+    }
+  `;
+});

@@ -1,8 +1,11 @@
 <script setup>
-import { useCatalogBundle } from "~/composables/useCatalogBundle";
-import { useBookableStore } from "~~/stores/bookable";
+import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
+import { useBookableStore } from "~~/stores/bookable.js";
 
-definePageMeta({ name: "catalog-bookables" });
+definePageMeta({
+  name: "catalog-bookables",
+  layout: "catalog",
+});
 
 const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
@@ -20,7 +23,7 @@ const { bookables } = storeToRefs(bookableStore);
     <h1 class="text-lg font-bold">Bookables...</h1>
     <ul v-if="bookables?.length">
       <li v-for="b in bookables" :key="b.id">
-        <NuxtLink :to="`/catalog/${catalogSlug}/bookables/${b.id}`">
+        <NuxtLink :to="`/bookables/${b.id}`">
           {{ b.name || b.title || b.id }}
         </NuxtLink>
       </li>

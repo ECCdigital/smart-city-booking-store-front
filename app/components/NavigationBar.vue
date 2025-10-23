@@ -17,32 +17,21 @@
 <script setup>
 import NavigationLink from "./NavigationLink.vue";
 
-const route = useRoute();
-const router = useRouter();
-
-const catalogSlug = computed(() => {
-  return route?.params?.catalogSlug;
-});
 const tabs = computed(() => [
   {
     label: "Orte",
     icon: "i-heroicons-map-pin",
-    value: `/catalog/${catalogSlug.value}/locations`,
+    value: `/locations`,
   },
   {
     label: "Events",
     icon: "i-heroicons-calendar",
-    value: `/catalog/${catalogSlug.value}/events`,
+    value: `/events`,
   },
   {
     label: "Geräte",
     icon: "i-heroicons-wrench-screwdriver",
-    value: `/catalog/${catalogSlug.value}/bookables`,
-  },
-  {
-    label: "Test",
-    icon: "i-heroicons-beaker",
-    value: `/catalog/${catalogSlug.value}/test`,
+    value: `/bookables`,
   },
 ]);
 

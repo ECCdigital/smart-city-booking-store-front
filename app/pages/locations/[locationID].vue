@@ -3,16 +3,16 @@ import { useBookableStore } from "~~/stores/bookable.js";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 
 definePageMeta({
-  layout: "catalog",
+  layout: "bookable",
   middleware: ["catalog-auth"],
-  name: "bookable-id",
+  name: "location-id",
 });
 
 const route = useRoute();
 const bookableStore = useBookableStore();
 
 const catalogSlug = computed(() => route.params.catalogSlug);
-const bookableID = computed(() => route.params.bookableID);
+const bookableID = computed(() => route.params.locationID);
 
 const { loadBundle } = useCatalogBundle();
 
@@ -30,7 +30,7 @@ if (!bookable.value) {
     <h1>{{ bookable.name || bookable.title }}</h1>
     <p v-if="bookable.description">{{ bookable.description }}</p>
   </article>
-  <p v-else>Bookable nicht gefunden.</p>
+  <p v-else>Ort nicht gefunden.</p>
 </template>
 
 <style scoped></style>
