@@ -1,7 +1,7 @@
 <template>
   <div>
     <UBlogPost class="shadow-lg h-full" @click="goToCheckout">
-      <!-- :to="`/catalog/${catalogSlug}/locations/${bookable.id}`" -->
+      <!-- :to="`/locations/${bookable.id}`" -->
       <template #header>
         <div>
           <img
@@ -115,9 +115,6 @@ const props = defineProps({
     required: true,
   },
 });
-
-const route = useRoute();
-const catalogSlug = computed(() => route.params.catalogSlug);
 
 function goToCheckout() {
   let url = `http://localhost:8080/checkout?id=${props.bookable.id}&tenant=${props.bookable.tenantId}&amount=1`;
