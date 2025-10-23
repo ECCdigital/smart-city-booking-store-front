@@ -1,9 +1,7 @@
 <template>
   <div>
-    <UBlogPost
-      class="shadow-lg h-full"
-      :to="`/locations/${bookable.id}`"
-    >
+    <UBlogPost class="shadow-lg h-full" @click="goToCheckout">
+      <!-- :to="`/locations/${bookable.id}`" -->
       <template #header>
         <div>
           <img
@@ -79,6 +77,7 @@
           </div>
 
           <!-- toDo - TESTING***************************************-->
+          <!--
           <div class="bg-yellow-400 flex-wrap text-xs p-2">
             isOpeningHoursRelated: {{ bookable.isOpeningHoursRelated }}
             <hr />
@@ -102,6 +101,7 @@
             <hr />
             timePeriods: {{ bookable.timePeriods }}
           </div>
+          -->
           <!-- toDo - TESTING***************************************-->
         </div>
       </template>
@@ -115,6 +115,11 @@ const props = defineProps({
     required: true,
   },
 });
+
+function goToCheckout() {
+  let url = `http://localhost:8080/checkout?id=${props.bookable.id}&tenant=${props.bookable.tenantId}&amount=1`;
+  window.open(url);
+}
 </script>
 
 <style scoped></style>

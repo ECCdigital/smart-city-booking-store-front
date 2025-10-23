@@ -8,6 +8,7 @@
       selectText="OK"
       teleport-center
       :disabled="disabled"
+      :action-row="{ showPreview: false }"
     />
   </UTooltip>
 </template>

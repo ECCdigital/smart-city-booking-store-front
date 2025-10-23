@@ -15,7 +15,30 @@ export function useBookables() {
       throw error;
     }
   };
+  const getBookableAvailability = async (tenantID, bookableId, start, end) => {
+    const { apiFetch } = useApi();
+    try {
+      const response = await apiFetch(
+        `/api/bookables/${tenantID}/availability/${bookableId}`,
+        {
+          method: "POST",
+          body: {
+            start: start,
+            end: end,
+          },
+        },
+      );
+
+      console.log(response);
+
+      return response;
+    } catch (error) {
+      console.error("Error checking bookable availability:", error);
+      throw error;
+    }
+  };
   return {
     fetchBookables,
+    getBookableAvailability,
   };
 }

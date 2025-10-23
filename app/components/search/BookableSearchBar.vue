@@ -1,12 +1,36 @@
 <template>
+  <div
+    v-if="!!isGreaterThanMd"
+    class="flex justify-between bg-white -mt-5 p-2 z-100 rounded shadow-lg"
+    style="position: relative; width: 60vw"
+  >
+    <InputText
+      v-model="searchTerm"
+      icon="i-lucide-search"
+      placeholder="Wonach suchen Sie?"
+      class=""
+    />
+    <USeparator orientation="vertical" />
+    <InputText
+      v-model="searchLocation"
+      icon="i-lucide-map-pin"
+      placeholder="Ort"
+      class=""
+    />
+    <USeparator orientation="vertical" />
+    <InputTimePeriod @select-date="setSearchTimePeriod" />
+    <UButton
+      label="Suchen"
+      class="w-full justify-center text-white"
+      @click="onSearch"
+    />
+  </div>
   <UCard
-    variant=""
+    v-else
     class="bg-white mx-5 -mt-15 p-0 shadow-lg"
     :ui="{ root: 'p-0', body: 'p-0' }"
-    style="position: relative"
+    style="position: relative; width: 80vw"
   >
-    <!-- toDo - responsive machen! -->
-
     <InputText
       v-model="searchTerm"
       icon="i-lucide-search"
@@ -19,7 +43,7 @@
       placeholder="Ort"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
-    <InputTimePeriod v-model="searchTimePeriod" />
+    <InputTimePeriod @select-date="setSearchTimePeriod" />
     <UButton
       label="Suchen"
       class="w-full justify-center text-white"
@@ -30,37 +54,24 @@
 <script setup>
 import InputText from "../inputs/InputText.vue";
 import InputTimePeriod from "../inputs/InputTimePeriod.vue";
+import { useBreakpointCheck } from "../../composables/utils/useBreakpointCheck.js";
 
 const emit = defineEmits(["search"]);
 const searchTerm = ref("");
 const searchLocation = ref("");
-const searchTimePeriod = ref({
-  startDate: null,
-  startTime: null,
-  endDate: null,
-  endTime: null,
-});
+const searchTimePeriod = ref();
 
+const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
+
+function setSearchTimePeriod(timePeriod) {
+  searchTimePeriod.value = timePeriod;
+}
 function onSearch() {
-  const formattedSearchTimePeriod = {
-    ...searchTimePeriod.value,
-    startTime: formatTime(searchTimePeriod.value.startTime),
-    endTime: formatTime(searchTimePeriod.value.endTime),
-  };
-
   emit("search", {
     term: searchTerm.value,
     location: searchLocation.value,
-    timePeriod: formattedSearchTimePeriod,
+    timePeriod: searchTimePeriod.value,
   });
-}
-function formatTime(timeObj) {
-  if (!timeObj) {
-    return null;
-  }
-  const hours = timeObj.hours.toString().padStart(2, "0");
-  const minutes = timeObj.minutes.toString().padStart(2, "0");
-  return `${hours}:${minutes}`;
 }
 </script>
 <style scoped></style>
