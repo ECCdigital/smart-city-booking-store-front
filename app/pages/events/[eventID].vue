@@ -2,6 +2,13 @@
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useEventStore } from "~~/stores/event.js";
 
+definePageMeta({
+  layout: "bookable",
+  middleware: ["catalog-auth"],
+  name: "event-id",
+});
+
+
 const route = useRoute();
 const eventStore = useEventStore();
 const catalogSlug = computed(() => route.params.catalogSlug);

@@ -10,6 +10,13 @@ export function useCatalogBundle() {
   const eventStore = useEventStore();
 
   async function loadBundle({ slug, bookableID, eventID, include = [] }) {
+    console.log("Loading catalog bundle:", {
+      slug,
+      bookableID,
+      eventID,
+      include,
+    });
+
     const { data, error } = await useAsyncData(
       `catalog:${slug}:${bookableID || eventID || include.sort().join(",")}`,
       () =>
@@ -21,6 +28,8 @@ export function useCatalogBundle() {
         }),
       { server: true }
     );
+
+    console.log("Fetched catalog bundle data:", data.value, "error:", error.value);
 
     if (error.value) {
       handleError(error.value);

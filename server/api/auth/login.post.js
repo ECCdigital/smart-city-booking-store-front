@@ -12,12 +12,11 @@ export default defineEventHandler(async (event) => {
 
     const { accessToken, refreshToken, user, permissions } = response;
 
-    console.log("Login successful:", { accessToken, refreshToken });
-
     setCookie(event, "access-token", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      path: "/",
       maxAge: 60 * 60 * 24,
     });
 
@@ -25,6 +24,7 @@ export default defineEventHandler(async (event) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      path: "/",
       maxAge: 60 * 60 * 24 * 7,
     });
 

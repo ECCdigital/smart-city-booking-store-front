@@ -1,18 +1,18 @@
 <script setup>
-import { useCatalogBundle } from "~/composables/useCatalogBundle";
-import { useBookableStore } from "~~/stores/bookable";
+import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
+import { useBookableStore } from "~~/stores/bookable.js";
 import Fuse from "fuse.js";
 import "@vuepic/vue-datepicker/dist/main.css";
-import BookableSearchBar from "../../../../components/search/BookableSearchBar.vue";
-import BookableResultsList from "../../../../components/search/BookableResultsList.vue";
-import { useBookables } from "../../../../composables/api/useBookables.js";
-import { useBreakpointCheck } from "../../../../composables/utils/useBreakpointCheck.js";
-import BookableResultsGrid from "../../../../components/search/BookableResultsGrid.vue";
-import FilterArea from "../../../../components/search/FilterArea.vue";
-import SortButton from "../../../../components/search/SortButton.vue";
-import FilterButton from "../../../../components/search/FilterButton.vue";
+import BookableSearchBar from "../../components/search/BookableSearchBar.vue";
+import BookableResultsList from "../../components/search/BookableResultsList.vue";
+import { useBookables } from "~/composables/api/useBookables.js";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
+import BookableResultsGrid from "../../components/search/BookableResultsGrid.vue";
+import FilterArea from "../../components/search/FilterArea.vue";
+import SortButton from "../../components/search/SortButton.vue";
+import FilterButton from "../../components/search/FilterButton.vue";
 
-definePageMeta({ name: "catalog-locations" });
+definePageMeta({ name: "catalog-locations", layout: "catalog" });
 
 const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
