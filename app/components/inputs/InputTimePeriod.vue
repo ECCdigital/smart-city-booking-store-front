@@ -2,7 +2,7 @@
   <UPopover
     v-model:open="open"
     :dismissible="false"
-    :content="{ side: 'bottom' }"
+    :content="{ side: 'bottom', sideOffset: '-20' }"
   >
     <UButton
       size="lg"

@@ -1,13 +1,13 @@
 <template>
   <div>
-    <UBlogPost class="shadow-lg h-full" @click="goToCheckout">
-      <!-- :to="`/locations/${bookable.id}`" -->
+    <UBlogPost class="shadow-lg h-full" :class="isNotBookable? 'opacity-70':''" @click="goToCheckout">
+      <!-- :to="`/catalog/${catalogSlug}/locations/${bookable.id}`" -->
       <template #header>
         <div>
           <img
             src="../../assets/example_office2.jpg"
             alt="Ein beispielhaftes Büro."
-          />
+          >
         </div>
       </template>
       <template #body>
@@ -55,25 +55,14 @@
           </div>
 
           <!-- Preis -->
-          <div class="w-full flex justify-end">
-            <p
-              v-if="
-                !bookable.priceCategories ||
-                bookable.priceCategories.length === 0
-              "
-            >
-              Kein Preis festgelegt.
-            </p>
-            <p
-              v-else-if="!bookable.priceCategories[0].priceEur"
-              class="text-md font-bold"
-            >
+          <div v-if="!isNotBookable" class="w-full flex justify-end">
+            <p v-if="price && price===0" class="text-md font-bold">
               Kostenlos
             </p>
-            <p v-else class="text-md font-bold">
-              € {{ bookable.priceCategories[0].priceEur }}
+            <p v-if="price" class="text-md font-bold">
+              € {{ price.regularPriceEur }}
             </p>
-            <!-- toDo - Funktion ergänzen, um komplexe Preise (und Angebote) anzuzeigen -->
+            <!-- toDo - Funktion ergänzen, um Preis für bestimmte User anzuzeigen -->
           </div>
 
           <!-- toDo - TESTING***************************************-->
@@ -114,11 +103,26 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  price: {
+    type: Number,
+    default: null
+  },
+  isNotBookable: {
+    type: Boolean,
+    default: false,
+  },
 });
 
+/*
+const route = useRoute();
+const catalogSlug = computed(() => route.params.catalogSlug);
+*/
 function goToCheckout() {
-  let url = `http://localhost:8080/checkout?id=${props.bookable.id}&tenant=${props.bookable.tenantId}&amount=1`;
-  window.open(url);
+  if (!props.isNotBookable) {
+    //toDo - fetch base url dynamically
+    const url = `http://localhost:8080/checkout?id=${props.bookable.id}&tenant=${props.bookable.tenantId}&amount=1`;
+    window.open(url);
+  }
 }
 </script>
 
