@@ -4,13 +4,14 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: true,
   nitro: {
-    preset: 'node-server',
+    preset: "node-server",
   },
 
   pages: true,
 
   runtimeConfig: {
     apiBaseUrl: "",
+    frontendBaseUrl: "",
   },
 
   routeRules: {

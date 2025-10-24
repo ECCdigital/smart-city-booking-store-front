@@ -1,12 +1,15 @@
 <template>
   <div>
-    <div class="bg-gray-100 flex flex-row rounded-xl">
+    <div
+      class="bg-gray-100 flex flex-row rounded-xl"
+      :class="isNotBookable ? 'opacity-70' : ''"
+    >
       <div class="basis-1/4">
         <img
           src="../../assets/example_office2.jpg"
           alt="Ein beispielhaftes Büro."
           class="rounded-xl h-full object-cover"
-        />
+        >
       </div>
       <div class="basis-3/4 p-4">
         <!-- Title -->
@@ -51,25 +54,14 @@
           </div>
 
           <!-- Preis -->
-          <div class="basis-1/4 w-full flex justify-end grid content-center">
-            <p
-              v-if="
-                !bookable.priceCategories ||
-                bookable.priceCategories.length === 0
-              "
-            >
-              Kein Preis festgelegt.
-            </p>
-            <p
-              v-else-if="!bookable.priceCategories[0].priceEur"
-              class="text-md font-bold"
-            >
+          <div class="basis-1/4 w-full flex justify-end content-center">
+            <p v-if="price && price === 0" class="text-md font-bold">
               Kostenlos
             </p>
-            <p v-else class="text-md font-bold">
-              € {{ bookable.priceCategories[0].priceEur }}
+            <p v-if="price" class="text-md font-bold">
+              € {{ price.regularPriceEur }}
             </p>
-            <!-- toDo - Funktion ergänzen, um komplexe Preise (und Angebote) anzuzeigen -->
+            <!-- toDo - Funktion ergänzen, um Preis für bestimmte User anzuzeigen -->
           </div>
         </div>
 
@@ -77,6 +69,7 @@
         <div class="w-full mt-5 flex justify-end">
           <!-- toDo - für MVP ausgeblendet! Danach wieder aktivieren!  -->
           <!--<UButton
+            v-if="!isNotBookable"
             label="Details ansehen"
             variant="ghost"
             class="justify-center px-10"
@@ -84,6 +77,7 @@
           />
           -->
           <UButton
+            v-if="!isNotBookable"
             label="Buchen"
             class="justify-center text-white px-10"
             @click="goToCheckout"
@@ -93,26 +87,28 @@
       <!-- toDo - TESTING***************************************-->
       <!--
       <div class="bg-yellow-400 flex-wrap text-xs p-2">
+
         isOpeningHoursRelated: {{ bookable.isOpeningHoursRelated }}
-        <hr />
+        <hr >
         isScheduleRelated: {{ bookable.isScheduleRelated }}
-        <hr />
+        <hr >
         isSpecialOpeningHoursRelated:
         {{ bookable.isSpecialOpeningHoursRelated }}
-        <hr />
+        <hr >
         isTimePeriodRelated: {{ bookable.isTimePeriodRelated }}
-        <hr />
-        <hr />
+        <hr >
+        <hr >
         maxBooingDuration: {{ bookable.maxBookingDuration }}
-        <hr />
+        <hr >
         minBooingDuration: {{ bookable.minBookingDuration }}
-        <hr />
-        <hr />
+        <hr >
+        <hr >
+
         openingHours. {{ bookable.openingHours }}
-        <hr />
+        <hr >
         specialOpeningHours: {{ bookable.specialOpeningHours }}
-        <hr />
-        <hr />
+        <hr >
+        <hr >
         timePeriods: {{ bookable.timePeriods }}
       </div>
       -->
@@ -126,17 +122,30 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  price: {
+    type: Number,
+    default: null,
+  },
+  isNotBookable: {
+    type: Boolean,
+    default: false,
+  },
 });
 
+//const {frontendBaseUrl: FRONTEND_BASE_URL} = useRuntimeConfig();
+
+/*
 const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
 
 function onOpenDetails() {
   console.log("want to open details..");
 }
+*/
 function goToCheckout() {
   //toDo - fetch base url dynamicallys
-  let url = `http://localhost:8080/checkout?id=${props.bookable.id}&tenant=${props.bookable.tenantId}&amount=1`;
+  //  const url = `${FRONTEND_BASE_URL}/checkout?id=${props.bookable.id}&tenant=${props.bookable.tenantId}&amount=1`;
+  const url = `http://localhost:8080/checkout?id=${props.bookable.id}&tenant=${props.bookable.tenantId}&amount=1`;
   window.open(url);
 }
 </script>
