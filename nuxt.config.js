@@ -1,3 +1,4 @@
+import "dotenv/config";
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
@@ -11,9 +12,13 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     apiBaseUrl: "",
-    frontendBaseUrl: "",
+    adminBaseUrl: "",
+    // make values available on the client via `useRuntimeConfig().public`
+    public: {
+      adminBaseUrl: process.env.ADMIN_BASE_URL || "",
+      apiBaseUrl: process.env.API_BASE_URL || "",
+    },
   },
-
   routeRules: {
     "/catalog/**": { ssr: true, isr: 300 },
   },
