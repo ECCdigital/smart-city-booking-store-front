@@ -118,10 +118,36 @@ const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
 */
 function goToCheckout() {
-  if (!props.isNotBookable) {
-    //toDo - fetch base url dynamically
-    const url = `http://localhost:8080/checkout?id=${props.bookable.id}&tenant=${props.bookable.tenantId}&amount=1`;
-    window.open(url);
+  const config = useRuntimeConfig();
+  const baseFromConfig = (config && config.public && config.public.adminBaseUrl) || config.adminBaseUrl || "";
+
+  if (!baseFromConfig) {
+    console.warn("adminBaseUrl not set in runtime config; falling back to relative /checkout path");
+  }
+
+  const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
+
+  const params = new URLSearchParams({
+    id: props.bookable.id,
+    tenant: props.bookable.tenantId,
+    amount: "1",
+  });
+
+  const url = base ? `${base}/checkout?${params.toString()}` : `/checkout?${params.toString()}`;
+
+  if (typeof window !== "undefined") {
+    const newWindow = window.open(url, "_blank");
+    if (newWindow) {
+      try {
+        newWindow.opener = null; // enforce noopener
+      } catch (e) {
+        // ignore in case browser forbids
+      }
+    } else {
+      window.location.href = url;
+    }
+  } else {
+    console.warn("Attempted to open checkout URL on server-side: ", url);
   }
 }
 </script>
