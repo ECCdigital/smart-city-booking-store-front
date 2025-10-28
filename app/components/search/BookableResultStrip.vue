@@ -3,6 +3,7 @@
     <div
       class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl"
       :class="isNotBookable ? 'opacity-70' : ''"
+      style="max-height: 400px; min-height: 150px"
     >
       <div class="basis-1/4">
         <img
