@@ -5,18 +5,18 @@
     </div>
     <div style="flex: 1"/>
     <UButton
-      label="Anmelden"
+      :label="isGreaterThanSm ? 'Anmelden' : ''"
+      :icon="isGreaterThanSm ? '' : 'i-lucide-user'"
       variant="ghost"
-      class="px-4 text-white"
+      class="text-white"
+      :class="isGreaterThanSm ? 'px-4' : ''"
       to="/login"
-      @click="console.log('want login')"
     />
     <UButton
       v-if="isGreaterThanSm"
       label="Registrieren"
       class="px-4 text-black bg-white"
       to="/register"
-      @click="console.log('want register')"
     />
     <UColorModeButton class="" size="xl" @click="toggleColorMode"/> <!-- toDo - delete after Testing!!!  -->
     <!-- toDo - https://ui.nuxt.com/docs/components/field-group (with dropdown) -->
