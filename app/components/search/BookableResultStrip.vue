@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      class="bg-gray-100 flex flex-row rounded-xl"
+      class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl"
       :class="isNotBookable ? 'opacity-70' : ''"
     >
       <div class="basis-1/4">
@@ -79,7 +79,7 @@
           <UButton
             v-if="!isNotBookable"
             label="Buchen"
-            class="justify-center text-white px-10"
+            class="justify-center text-white dark:text-black px-10"
             @click="goToCheckout"
           />
         </div>

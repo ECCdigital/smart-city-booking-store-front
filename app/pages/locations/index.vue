@@ -174,7 +174,7 @@ function testFunction() {
     </div>
 
     <div class="m-10 lg:m-5 flex items-center">
-      <span class="lg:text-black lg:font-bold"
+      <span class="text-black dark:text-white lg:font-bold"
         >{{ numberOfSuitableBookables() }} passende Ergebnisse</span
       >
       <div class="" style="flex: 1" />

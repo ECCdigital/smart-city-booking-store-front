@@ -5,7 +5,7 @@
     size="lg"
     variant="ghost"
     :placeholder="placeholder"
-    class="w-full bg-white dark:bg-white/10"
+    class="w-full bg-white dark:bg-gray-700"
   />
 </template>
 <script setup>

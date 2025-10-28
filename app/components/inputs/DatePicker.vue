@@ -11,17 +11,23 @@
     auto-apply
     :enable-time-picker="false"
     :action-row="{ showPreview: true, showSelect: false }"
-    :ui="{
+    :ui="mode==='dark' ? {
+      calendar: 'calendarWidth noBorder darkBackground',
+      menu: 'noBorder darkBackground',
+    } : {
       calendar: 'calendarWidth',
       menu: 'noBorder',
     }"
+    :dark=" mode==='dark' "
     @range-start="onStartRange"
   />
 </template>
 <script setup>
 import VueDatePicker from "@vuepic/vue-datepicker";
+import { useColorMode } from '@vueuse/core'
 
 const model = defineModel();
+const mode = useColorMode()
 
 function onStartRange(startDate) {
   model.value = [startDate, null];
@@ -40,5 +46,9 @@ function onStartRange(startDate) {
 }
 .noBorder {
   border: none;
+}
+
+.darkBackground {
+  background-color: rgb(17, 24, 39);
 }
 </style>

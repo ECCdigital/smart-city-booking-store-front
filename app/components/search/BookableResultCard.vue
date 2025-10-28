@@ -1,6 +1,6 @@
 <template>
   <div>
-    <UBlogPost class="shadow-lg h-full" :class="isNotBookable? 'opacity-70':''" @click="goToCheckout">
+    <UBlogPost class="shadow-lg h-full bg-white dark:bg-gray-700" :class="isNotBookable? 'opacity-70 dark:opacity-50':''" @click="goToCheckout">
       <!-- :to="`/catalog/${catalogSlug}/locations/${bookable.id}`" -->
       <template #header>
         <div>
@@ -118,36 +118,41 @@ const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
 */
 function goToCheckout() {
-  const config = useRuntimeConfig();
-  const baseFromConfig = (config && config.public && config.public.adminBaseUrl) || config.adminBaseUrl || "";
+  if(!props.isNotBookable) {
+    const config = useRuntimeConfig();
 
-  if (!baseFromConfig) {
-    console.warn("adminBaseUrl not set in runtime config; falling back to relative /checkout path");
-  }
+    const baseFromConfig = (config && config.public && config.public.adminBaseUrl) || config.adminBaseUrl || "";
 
-  const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
+    if (!baseFromConfig) {
+      console.warn("adminBaseUrl not set in runtime config; falling back to relative /checkout path");
+    }
 
-  const params = new URLSearchParams({
-    id: props.bookable.id,
-    tenant: props.bookable.tenantId,
-    amount: "1",
-  });
+    const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
 
-  const url = base ? `${base}/checkout?${params.toString()}` : `/checkout?${params.toString()}`;
+    const params = new URLSearchParams({
+      id: props.bookable.id,
+      tenant: props.bookable.tenantId,
+      amount: "1",
+    });
 
-  if (typeof window !== "undefined") {
-    const newWindow = window.open(url, "_blank");
-    if (newWindow) {
-      try {
-        newWindow.opener = null; // enforce noopener
-      } catch (e) {
-        // ignore in case browser forbids
+    console.log("base", base)
+
+    const url = base ? `${base}/checkout?${params.toString()}` : `/checkout?${params.toString()}`;
+
+    if (typeof window !== "undefined") {
+      const newWindow = window.open(url, "_blank");
+      if (newWindow) {
+        try {
+          newWindow.opener = null; // enforce noopener
+        } catch (e) {
+          // ignore in case browser forbids
+        }
+      } else {
+        window.location.href = url;
       }
     } else {
-      window.location.href = url;
+      console.warn("Attempted to open checkout URL on server-side: ", url);
     }
-  } else {
-    console.warn("Attempted to open checkout URL on server-side: ", url);
   }
 }
 </script>

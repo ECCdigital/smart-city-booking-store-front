@@ -3,7 +3,7 @@
     <div v-for="(tab, k) in tabs" :key="k">
       <NavigationLink :tab="tab" />
     </div>
-    <div style="flex: 1"></div>
+    <div style="flex: 1"/>
     <UButton
       label="Anmelden"
       variant="ghost"
@@ -18,13 +18,15 @@
       to="/register"
       @click="console.log('want register')"
     />
+    <UColorModeButton class="" size="xl" @click="toggleColorMode"/> <!-- toDo - delete after Testing!!!  -->
     <!-- toDo - https://ui.nuxt.com/docs/components/field-group (with dropdown) -->
   </div>
 </template>
 <script setup>
 import NavigationLink from "./NavigationLink.vue";
-import { useWindowSize } from "@vueuse/core";
 import { useBreakpointCheck } from "../composables/utils/useBreakpointCheck.js";
+import { useColorMode } from '@vueuse/core'
+
 
 const tabs = computed(() => [
   {
@@ -49,5 +51,14 @@ const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
 const barClass = computed(() => [
   "flex items-center bg-[var(--color-secondary)]",
 ]);
+
+const colorMode = useColorMode()
+function toggleColorMode() {
+  if (colorMode.value === 'dark') {
+    colorMode.value = 'light'
+  } else {
+    colorMode.value = 'dark'
+  }
+}
 </script>
 <style scoped></style>

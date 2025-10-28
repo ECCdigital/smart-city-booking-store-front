@@ -9,14 +9,14 @@
       color="neutral"
       variant="ghost"
       icon="i-lucide-calendar-clock"
-      class="w-full text-gray-400 font-normal bg-white dark:bg-white/10 py-2 px-3"
+      class="w-full text-gray-500 font-normal bg-white dark:bg-gray-700 py-2 px-3"
       :ui="{
         leadingIcon: 'text-[16px] mr-1',
       }"
       @click="setDefaultStartDate()"
     >
       <template v-if="dateRange[0]">
-        <div>
+        <div class="text-black dark:text-white">
           <span>{{ displayDate(dateRange[0]) }}</span>
           <span v-if="dateRange[1] && !timeRange.start"> - </span>
           <span v-if="timeRange.start"
@@ -36,7 +36,7 @@
             color="neutral"
             variant="ghost"
             icon="i-lucide-x"
-            class="rounded-xl"
+            class="rounded-xl "
             @click="open = false"
           />
         </div>
@@ -124,7 +124,7 @@ function setDefaultEndTime() {
   removeValidation();
 
   if (!timeRange.value.end && timeRange.value.start) {
-    let initialTime = JSON.parse(JSON.stringify(timeRange.value.start));
+    const initialTime = JSON.parse(JSON.stringify(timeRange.value.start));
     initialTime.hours = initialTime.hours + 1;
     timeRange.value.end = initialTime;
   }
@@ -168,7 +168,7 @@ function onSelectDate() {
       missingValues.value.push("endTime");
     }
   } else {
-    let selectedDate = {
+    const selectedDate = {
       startDate: formateDateToString(dateRange.value[0]) || "",
       endDate: formateDateToString(dateRange.value[1]) || "",
       startTime: formatTimeToString(timeRange.value.start) || "",
