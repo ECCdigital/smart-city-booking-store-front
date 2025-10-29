@@ -1,7 +1,10 @@
 <template>
   <div>
-    <UBlogPost class="shadow-lg h-full bg-white dark:bg-gray-700" :class="isNotBookable? 'opacity-70 dark:opacity-50':''" @click="goToCheckout">
-      <!-- :to="`/catalog/${catalogSlug}/locations/${bookable.id}`" -->
+    <UBlogPost
+      class="shadow-lg h-full bg-white dark:bg-gray-700"
+      :class="isNotBookable ? 'opacity-70 dark:opacity-50' : ''"
+      @click="goToCheckout"
+    >
       <template #header>
         <div>
           <img
@@ -55,14 +58,21 @@
           </div>
 
           <!-- Preis -->
-          <div v-if="!isNotBookable" class="w-full flex justify-end">
-            <p v-if="price && price===0" class="text-md font-bold">
-              Kostenlos
+          <div
+            v-if="!isNotBookable"
+            class="w-full flex justify-end text-md font-bold"
+          >
+            <p v-if="price && price.regularGrossPriceEur > price.userGrossPriceEur">
+              <span class="text-gray-500 line-through mr-2">
+                {{ displayPrice(price.regularGrossPriceEur) }}
+              </span>
+              <span>
+                {{ displayPrice(price.userGrossPriceEur) }}
+              </span>
             </p>
-            <p v-if="price" class="text-md font-bold">
-              € {{ price.regularPriceEur }}
+            <p v-else class="text-md font-bold bg-ed-500">
+              {{ displayPrice(price.regularGrossPriceEur || null) }}
             </p>
-            <!-- toDo - Funktion ergänzen, um Preis für bestimmte User anzuzeigen -->
           </div>
 
           <!-- toDo - TESTING***************************************-->
@@ -105,7 +115,7 @@ const props = defineProps({
   },
   price: {
     type: Number,
-    default: null
+    default: null,
   },
   isNotBookable: {
     type: Boolean,
@@ -113,18 +123,27 @@ const props = defineProps({
   },
 });
 
-/*
-const route = useRoute();
-const catalogSlug = computed(() => route.params.catalogSlug);
-*/
+function displayPrice(price) {
+  if (!price) {
+    return "Kein Preis bekannt.";
+  } else {
+    return "€ " + price.toString().replace(/\./g, ",");
+  }
+}
+
 function goToCheckout() {
-  if(!props.isNotBookable) {
+  if (!props.isNotBookable) {
     const config = useRuntimeConfig();
 
-    const baseFromConfig = (config && config.public && config.public.adminBaseUrl) || config.adminBaseUrl || "";
+    const baseFromConfig =
+      (config && config.public && config.public.adminBaseUrl) ||
+      config.adminBaseUrl ||
+      "";
 
     if (!baseFromConfig) {
-      console.warn("adminBaseUrl not set in runtime config; falling back to relative /checkout path");
+      console.warn(
+        "adminBaseUrl not set in runtime config; falling back to relative /checkout path",
+      );
     }
 
     const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
@@ -135,9 +154,9 @@ function goToCheckout() {
       amount: "1",
     });
 
-    console.log("base", base)
-
-    const url = base ? `${base}/checkout?${params.toString()}` : `/checkout?${params.toString()}`;
+    const url = base
+      ? `${base}/checkout?${params.toString()}`
+      : `/checkout?${params.toString()}`;
 
     if (typeof window !== "undefined") {
       const newWindow = window.open(url, "_blank");
