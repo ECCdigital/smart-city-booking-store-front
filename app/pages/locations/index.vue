@@ -27,8 +27,9 @@ const allLocations = computed(() => {
   const locations = bookableStore.getLocations;
   return locations.concat(bookableStore.getRooms);
 });
-const filteredLocations = ref(allLocations.value); //ref([]); //toDo --**********************************
-const { bookables } = storeToRefs(bookableStore);
+const filteredLocations = ref(allLocations.value);
+
+const sortMode = ref("relevance");
 
 //Search
 const searchTermOptions = {
@@ -58,7 +59,6 @@ async function onSearch({ term, location, timePeriod }) {
   //toDo - wenn "notBookable" auch noch related bookables prüfen!?
   console.log(locationsWithStatus);
 
-  //toDo - vorfiltern und prüfen, was überhaupt buchbar ist
   //alle die status === isBookable haben in Suche einbeziehen
   let bookableLocations = locationsWithStatus.filter(
     (l) => l.status === "isBookable",
@@ -84,8 +84,8 @@ async function onSearch({ term, location, timePeriod }) {
     formatedTimePeriod = formateTimePeriod(timePeriod);
 
     const availabilityChecks = await Promise.all(
-        bookableLocations.map(async (location) => {
-          const availability = await useBookables().getBookableAvailability(
+      bookableLocations.map(async (location) => {
+        const availability = await useBookables().getBookableAvailability(
           location.bookable.tenantId,
           location.bookable.id,
           formatedTimePeriod.start.getTime(),
@@ -97,48 +97,49 @@ async function onSearch({ term, location, timePeriod }) {
       }),
     );
 
-    console.log("avivi: ", availabilityChecks)
+    console.log("avivi: ", availabilityChecks);
     bookableLocations = availabilityChecks
       .filter((result) => result.isAvailable)
       .map((result) => result.location);
   }
 
   //Status updaten
-  const temp = await Promise.all(locationsWithStatus.map(async (item) => {
-    if (item.status === "isBookable") {
-      const isSuitable = bookableLocations.includes(item);
+  const updatedLocations = await Promise.all(
+    locationsWithStatus.map(async (item) => {
+      if (item.status === "isBookable") {
+        const isSuitable = bookableLocations.includes(item);
 
-      let price = null;
-      if (timePeriod ) {
-        //toDo - Preis raussuchen und mit ins Objekt schreiben
-        price = await useBookables().getBookablePrice(
+        let price = null;
+        if (timePeriod) {
+          //Preis raussuchen und mit ins Objekt schreiben
+          price = await useBookables().getBookablePrice(
             item.bookable.tenantId,
             item.bookable.id,
             formatedTimePeriod.start.getTime(),
             formatedTimePeriod.end.getTime(),
-        )
-      }
+          );
+        }
 
-      return {
-        ...item,
-        status: isSuitable ? "suitable" : "nonSuitable",
-        calculatedPrice: isSuitable ? price : null, //toDo - Hardcore Preis ersetzen
-      };
-    } else {
-      return {
-        ...item,
-        status: "nonBookable",
-        calculatedPrice: null,
-      };
-    }
-  }));
-  console.log(temp);
-  filteredLocations.value = temp; //toDo - temp umbenennen!!
+        return {
+          ...item,
+          status: isSuitable ? "suitable" : "nonSuitable",
+          calculatedPrice: isSuitable ? price : null,
+        };
+      } else {
+        return {
+          ...item,
+          status: "nonBookable",
+          calculatedPrice: null,
+        };
+      }
+    }),
+  );
+  console.log(updatedLocations);
+  filteredLocations.value = updatedLocations;
 }
-function  numberOfSuitableBookables() {
+function numberOfSuitableBookables() {
   return filteredLocations.value.filter((l) => l.status === "suitable").length;
 }
-
 
 function formateTimePeriod(timePeriod) {
   const newTimePeriod = {};
@@ -159,8 +160,40 @@ function formateTimePeriod(timePeriod) {
 }
 
 function sortBookables(mode) {
-  console.log("Art der Sortierung: ", mode);
-  //toDo - momentan "relevanz" nach Fuze-Suche...
+  sortMode.value = mode
+  //Default: momentan "Relevanz" nach Fuze-Suche...
+  filteredLocations.value = filteredLocations.value.sort((a, b) => {
+    //Sortieren nach Preis
+    if (mode === "priceAscending" || mode === "priceDescending") {
+      // Null-Preise sollen immer am Ende sein
+      if (a.calculatedPrice === null) return 1;
+      if (b.calculatedPrice === null) return -1;
+
+      //toDo - Option für User-Preis berücksichtigen...
+      if (mode === "priceAscending") {
+        return a.calculatedPrice.regularPriceEur - b.calculatedPrice.regularPriceEur;
+      } else if (mode === "priceDescending") {
+        return b.calculatedPrice.regularPriceEur - a.calculatedPrice.regularPriceEur;
+      } else {
+        return 0;
+      }
+    }
+
+    //Sortieren nach Distanz - toDo - Entfernung berechnen
+    if (mode === "distanceAscending" || mode === "distanceDescending") {
+      // Momentan keine Entfernung vorhanden, also keine Sortierung
+      /*
+      if (mode === "distanceAscending") {
+        return a.calculatedDistance - b.calculatedDistance;
+      } else if (mode === "distanceDescending") {
+        return b.calculatedDistance - a.calculatedDistance;
+      } else {
+        return 0;
+      }
+      */
+      return 0;
+    }
+  });
 }
 function testFunction() {
   console.log("coming soon...");
@@ -173,18 +206,21 @@ function testFunction() {
       <BookableSearchBar @search="onSearch" />
     </div>
 
-    <div class="m-10 lg:m-5 flex items-center">
+    <div class="m-10 lg:m-5 sm:flex items-center">
       <span class="text-black dark:text-white lg:font-bold"
         >{{ numberOfSuitableBookables() }} passende Ergebnisse</span
       >
       <div class="" style="flex: 1" />
-      <SortButton v-if="filteredLocations.length > 0" @sort="sortBookables" />
-      <FilterButton
-        v-if="filteredLocations.length > 0"
-        class="lg:hidden"
-        @filter="testFunction"
-      />
+      <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0" >
+        <SortButton v-if="filteredLocations.length > 0" :sort-mode="sortMode" @sort="sortBookables" />
+        <FilterButton
+            v-if="filteredLocations.length > 0"
+            class="lg:hidden"
+            @filter="testFunction"
+        />
+      </div>
     </div>
+
 
     <div class="flex flex-row lg:my-5 m-5">
       <!-- Filterbereich -->
@@ -210,6 +246,16 @@ function testFunction() {
         />
       </div>
     </div>
+    <ul class="bg-amber-800">
+      <li v-for="(l, i) in filteredLocations" :key="i">
+        <span v-if="l"
+          >{{ l.bookable?.title }} - {{ l.status }} - Preis:
+          {{
+            l.calculatedPrice || "n.a."
+          }}</span
+        >
+      </li>
+    </ul>
   </div>
 </template>
 
