@@ -62,7 +62,7 @@
             v-if="!isNotBookable"
             class="w-full flex justify-end text-md font-bold"
           >
-            <BookablePriceDisplay :price="price" />
+            <BookablePriceDisplay v-if="!isNotBookable" :price="price" />
           </div>
 
           <!-- toDo - TESTING***************************************-->

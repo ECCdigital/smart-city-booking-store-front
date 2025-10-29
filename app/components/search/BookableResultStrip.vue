@@ -65,7 +65,7 @@
           <div
             class="basis-1/4 w-full flex justify-end content-center text-md font-bold"
           >
-            <BookablePriceDisplay :price="price" />
+            <BookablePriceDisplay v-if="!isNotBookable" :price="price" />
           </div>
         </div>
 
