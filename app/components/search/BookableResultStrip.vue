@@ -55,14 +55,18 @@
           </div>
 
           <!-- Preis -->
-          <div class="basis-1/4 w-full flex justify-end content-center">
-            <p v-if="price && price === 0" class="text-md font-bold">
-              Kostenlos
+          <div class="basis-1/4 w-full flex justify-end content-center text-md font-bold">
+            <p v-if="price && price.regularGrossPriceEur > price.userGrossPriceEur">
+              <span class="text-gray-500 line-through mr-2">
+                {{ displayPrice(price.regularGrossPriceEur) }}
+              </span>
+              <span>
+                {{ displayPrice(price.userGrossPriceEur) }}
+              </span>
             </p>
-            <p v-if="price" class="text-md font-bold">
-              € {{ price.regularPriceEur }}
+            <p v-else>
+              {{ displayPrice(price?.regularGrossPriceEur || null) }}
             </p>
-            <!-- toDo - Funktion ergänzen, um Preis für bestimmte User anzuzeigen -->
           </div>
         </div>
 
@@ -133,17 +137,14 @@ const props = defineProps({
   },
 });
 
-
-//const {frontendBaseUrl: FRONTEND_BASE_URL} = useRuntimeConfig();
-
-/*
-const route = useRoute();
-const catalogSlug = computed(() => route.params.catalogSlug);
-
-function onOpenDetails() {
-  console.log("want to open details..");
+function displayPrice(price) {
+  if (!price) {
+    return "Kein Preis bekannt.";
+  } else {
+    return "€ " + price.toString().replace(/\./g, ",");
+  }
 }
-*/
+
 function goToCheckout() {
   const config = useRuntimeConfig();
   const baseFromConfig = (config && config.public && config.public.adminBaseUrl) || config.adminBaseUrl || "";

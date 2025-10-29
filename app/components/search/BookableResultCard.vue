@@ -70,8 +70,8 @@
                 {{ displayPrice(price.userGrossPriceEur) }}
               </span>
             </p>
-            <p v-else class="text-md font-bold bg-ed-500">
-              {{ displayPrice(price.regularGrossPriceEur || null) }}
+            <p v-else>
+              {{ displayPrice(price?.regularGrossPriceEur || null) }}
             </p>
           </div>
 
