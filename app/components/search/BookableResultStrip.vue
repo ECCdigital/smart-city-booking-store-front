@@ -56,17 +56,7 @@
 
           <!-- Preis -->
           <div class="basis-1/4 w-full flex justify-end content-center text-md font-bold">
-            <p v-if="price && price.regularGrossPriceEur > price.userGrossPriceEur">
-              <span class="text-gray-500 line-through mr-2">
-                {{ displayPrice(price.regularGrossPriceEur) }}
-              </span>
-              <span>
-                {{ displayPrice(price.userGrossPriceEur) }}
-              </span>
-            </p>
-            <p v-else>
-              {{ displayPrice(price?.regularGrossPriceEur || null) }}
-            </p>
+            <BookablePriceDisplay :price="price" />
           </div>
         </div>
 
@@ -122,6 +112,8 @@
   </div>
 </template>
 <script setup>
+import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
+
 const props = defineProps({
   bookable: {
     type: Object,
@@ -136,14 +128,6 @@ const props = defineProps({
     default: false,
   },
 });
-
-function displayPrice(price) {
-  if (!price) {
-    return "Kein Preis bekannt.";
-  } else {
-    return "€ " + price.toString().replace(/\./g, ",");
-  }
-}
 
 function goToCheckout() {
   const config = useRuntimeConfig();
@@ -169,6 +153,7 @@ function goToCheckout() {
       try {
         newWindow.opener = null; // enforce noopener
       } catch (e) {
+        console.error(e)
         // ignore in case browser forbids
       }
     } else {

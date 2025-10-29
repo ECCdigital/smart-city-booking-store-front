@@ -62,17 +62,7 @@
             v-if="!isNotBookable"
             class="w-full flex justify-end text-md font-bold"
           >
-            <p v-if="price && price.regularGrossPriceEur > price.userGrossPriceEur">
-              <span class="text-gray-500 line-through mr-2">
-                {{ displayPrice(price.regularGrossPriceEur) }}
-              </span>
-              <span>
-                {{ displayPrice(price.userGrossPriceEur) }}
-              </span>
-            </p>
-            <p v-else>
-              {{ displayPrice(price?.regularGrossPriceEur || null) }}
-            </p>
+            <BookablePriceDisplay :price="price" />
           </div>
 
           <!-- toDo - TESTING***************************************-->
@@ -108,6 +98,8 @@
   </div>
 </template>
 <script setup>
+import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
+
 const props = defineProps({
   bookable: {
     type: Object,
