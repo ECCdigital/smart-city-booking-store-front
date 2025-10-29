@@ -92,12 +92,10 @@ async function onSearch({ term, location, timePeriod }) {
           formatedTimePeriod.end.getTime(),
         );
 
-        //toDo - wenn "remaining" gefixt, dann ebenfalls berücksichtigen
-        return { location, isAvailable: availability.isAvailable };
+        return { location, isAvailable: availability.isAvailable && availability.remaining > 0 };
       }),
     );
 
-    console.log("avivi: ", availabilityChecks);
     bookableLocations = availabilityChecks
       .filter((result) => result.isAvailable)
       .map((result) => result.location);
