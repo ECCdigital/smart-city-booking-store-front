@@ -28,6 +28,22 @@ const allLocations = computed(() => {
   return locations.concat(bookableStore.getRooms);
 });
 const filteredLocations = ref(allLocations.value);
+const filteredResultLocations = computed(() => {
+  let locations = filteredLocations.value;
+  if(hideNonSuitable.value){
+    console.log("only want suitable locations");
+    locations = locations.filter((l) => l.status !== "nonSuitable");
+  }
+  if(hideNonBookable.value){
+    console.log("only want bookable locations");
+    locations = locations.filter((l) => l.status !== "nonBookable");
+  }
+  return locations;
+});
+
+const hideNonBookable = ref(false);
+const hideNonSuitable = ref(false);
+
 
 const sortMode = ref("relevance");
 
@@ -53,10 +69,10 @@ async function onSearch({ term, location, timePeriod }) {
     if (location.isBookable) {
       return { bookable: location, status: "isBookable" };
     } else {
-      return { bookable: location, status: "notBookable" };
+      return { bookable: location, status: "nonBookable" };
     }
   });
-  //toDo - wenn "notBookable" auch noch related bookables prüfen!?
+  //toDo - wenn "nonBookable" auch noch related bookables prüfen!?
   console.log(locationsWithStatus);
 
   //alle die status === isBookable haben in Suche einbeziehen
@@ -193,6 +209,16 @@ function sortBookables(mode) {
     }
   });
 }
+
+function filterBookableLocations(isIncluded) {
+  console.log("want to filter for bookable locations: ", isIncluded)
+  hideNonBookable.value = !isIncluded;
+}
+function filterSuitableLocations(isIncluded) {
+  console.log("want to filter for suitable locations: ", isIncluded)
+  hideNonSuitable.value = !isIncluded;
+}
+
 function testFunction() {
   console.log("coming soon...");
 }
@@ -216,6 +242,7 @@ function testFunction() {
             class="lg:hidden"
             @filter="testFunction"
         />
+        <!-- toDo - add filter function!!!!!!!! -->
       </div>
     </div>
 
@@ -225,6 +252,9 @@ function testFunction() {
       <div v-if="isGreaterThanMd" class="md:basis-1/4">
         <FilterArea
           v-if="filteredLocations.length > 0"
+          :bookables="filteredResultLocations"
+          @change-bookable-visability="filterBookableLocations"
+          @change-suiable-visability="filterSuitableLocations"
           @filter="testFunction"
         />
       </div>
@@ -232,13 +262,13 @@ function testFunction() {
       <div class="md:basis-3/4">
         <BookableResultsList
           v-if="isGreaterThanMd"
-          :bookables="filteredLocations"
+          :bookables="filteredResultLocations"
           include-non-bookable
           include-non-suitable
         />
         <BookableResultsGrid
           v-else
-          :bookables="filteredLocations"
+          :bookables="filteredResultLocations"
           include-non-bookable
           include-non-suitable
         />
