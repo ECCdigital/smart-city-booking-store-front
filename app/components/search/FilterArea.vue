@@ -33,11 +33,22 @@
         <p class="mb-3">
           € {{ choosenPriceRange[0] }} - € {{ choosenPriceRange[1] }}
         </p>
+        <div
+          v-if="priceBins.some((p) => p > 0)"
+          class="flex space-x-1 h-15 items-end justify-between"
+        >
+          <div
+            v-for="(count, index) in priceBins"
+            :key="index"
+            :style="{ height: count * 10 + 'px' }"
+            class="bg-primary/40 w-6"
+          />
+        </div>
         <USlider
           v-model="choosenPriceRange"
           :min="priceRange[0]"
           :max="priceRange[1]"
-          :step="10"
+          :step="5"
           @change="instantFilter"
         />
       </div>
@@ -79,11 +90,11 @@ const props = defineProps({
     default: false,
   },
 });
-const emit = defineEmits(["filter"])
+const emit = defineEmits(["filter"]);
 
 //Passende und buchbare Objekte
-const includeNonSuitable = ref(true)
-const includeNonBookable = ref(true)
+const includeNonSuitable = ref(true);
+const includeNonBookable = ref(true);
 
 //Kategorien - toDo - anpassen!!!!!!!!!!!!!!!!!!!!
 const choosenCategories = ref([]);
@@ -96,52 +107,82 @@ const categories = [
 //Preis
 const priceRange = computed(() => {
   const validPrices = props.bookables
-      .map((b) => b.calculatedPrice?.userGrossPriceEur)
-      .filter((price) => price !== undefined && price !== null);
+    .map((b) => b.calculatedPrice?.userGrossPriceEur)
+    .filter((price) => price !== undefined && price !== null);
 
   const minPrice =
-      validPrices.length > 0 ? Math.floor(Math.min(...validPrices)) : 0;
+    validPrices.length > 0 ? Math.floor(Math.min(...validPrices)) : 0;
   const maxPrice =
-      validPrices.length > 0 ? Math.ceil(Math.max(...validPrices)) : 0;
+    validPrices.length > 0 ? Math.ceil(Math.max(...validPrices)) : 100;
   return [minPrice, maxPrice];
 });
 const choosenPriceRange = ref([priceRange.value[0], priceRange.value[1]]);
+const priceBins = computed(() => {
+  const binsCount =
+    Math.ceil((priceRange.value[1] - priceRange.value[0]) / 5) || 1;
+  console.log("binsCount: ", binsCount);
+  const bins = new Array(binsCount).fill(0);
+  console.log("bins before: ", bins);
+  const range = priceRange.value[1] - priceRange.value[0];
+  console.log("range: ", range);
+  props.bookables.forEach((b) => {
+    if (b.calculatedPrice) {
+      const index = Math.min(
+        Math.floor(
+          ((b.calculatedPrice.userGrossPriceEur - priceRange.value[0]) /
+            range) *
+            binsCount,
+        ),
+        binsCount - 1,
+      );
+      bins[index]++;
+    }
+  });
+  return bins;
+});
 
 //Distanz
 const distanceRange = ref([0, 100]); //in km //toDo - implementieren!!!!!!!!!
-const choosenDistanceRange = ref([distanceRange.value[0], distanceRange.value[1]]);
+const choosenDistanceRange = ref([
+  distanceRange.value[0],
+  distanceRange.value[1],
+]);
 
-function instantFilter(){
-  if(!props.useAsDialog){
+function instantFilter() {
+  if (!props.useAsDialog) {
     onFilter();
   }
 }
 
-function onFilter(){
-  if(props.bookables.length > 0){
-    let filteredBookables = props.bookables
+function onFilter() {
+  if (props.bookables.length > 0) {
+    let filteredBookables = props.bookables;
 
     //Passende und buchbare Objekte
-    if(!includeNonSuitable.value){
+    if (!includeNonSuitable.value) {
       console.log("only want suitable locations");
-      filteredBookables = filteredBookables.filter((b) => b.status !== "nonSuitable");
+      filteredBookables = filteredBookables.filter(
+        (b) => b.status !== "nonSuitable",
+      );
     }
-    if(!includeNonBookable.value){
+    if (!includeNonBookable.value) {
       console.log("only want bookable locations");
-      filteredBookables = filteredBookables.filter((b) => b.status !== "nonBookable");
+      filteredBookables = filteredBookables.filter(
+        (b) => b.status !== "nonBookable",
+      );
     }
 
     filteredBookables = filteredBookables.filter((b) => {
-      if(b.calculatedPrice) {
+      if (b.calculatedPrice) {
         const price = b.calculatedPrice?.userGrossPriceEur || 0;
 
         return (
-            price >= choosenPriceRange.value[0] &&
-            price <= choosenPriceRange.value[1]
+          price >= choosenPriceRange.value[0] &&
+          price <= choosenPriceRange.value[1]
         );
       }
-      return true
-    })
+      return true;
+    });
 
     //toDo - Filterlogik für Kategorie ergänzen!!!!!!!!!!!!!!!!!
     //toDo - Filterlogik für Distanz ergänzen!!!!!!!!!!!!!!!!!
