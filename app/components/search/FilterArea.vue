@@ -1,6 +1,19 @@
 <template>
   <div :class="useAsDialog ? '' : 'my-2 p-2 border border-gray-200 rounded'">
+    <div class="flex justify-between items-center">
+
     <p class="my-4 font-bold">Ergebnisse filtern</p>
+      <UTooltip v-if="!useAsDialog" text="Filter zurücksetzen">
+      <UButton
+          v-if="!useAsDialog"
+          icon="i-lucide-trash"
+          color="neutral"
+          variant="soft"
+          class="rounded-full py-2 px-3"
+          @click="removeFilter"
+      />
+      </UTooltip>
+    </div>
     <USeparator v-if="!useAsDialog" class="border-gray-200" />
     <div class="my-4 space-y-3">
       <div class="flex space-x-2">
@@ -67,7 +80,15 @@
         />
       </div>
     </div>
-    <div v-if="useAsDialog" class="flex justify-end">
+    <div v-if="useAsDialog" class="flex justify-between">
+      <UButton
+          label="Filter entfernen"
+          icon="i-lucide-trash"
+          color="neutral"
+          variant="soft"
+          class="rounded-full py-2 px-3"
+          @click="removeFilter"
+      />
       <UButton
         label="Filtern"
         icon="i-lucide-funnel"
@@ -189,6 +210,15 @@ function onFilter() {
 
     emit("filter", filteredBookables);
   }
+}
+function removeFilter(){
+  includeNonSuitable.value = true
+  includeNonBookable.value = true
+  choosenCategories.value = []
+  choosenPriceRange.value = [priceRange.value[0], priceRange.value[1]]
+  choosenDistanceRange.value = [distanceRange.value[0], distanceRange.value[1]]
+
+  emit("filter", props.bookables);
 }
 </script>
 <style scoped></style>
