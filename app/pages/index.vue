@@ -1,6 +1,5 @@
 <template>
-  <div class="bg-gray-200">
-  </div>
+  <div class="bg-white dark:bg-gray-900"/>
 </template>
 
 <script setup>

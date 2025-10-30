@@ -1,13 +1,21 @@
 <template>
   <div>
     <div
-      class="bg-gray-100 flex flex-row rounded-xl"
+      class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl"
       :class="isNotBookable ? 'opacity-70' : ''"
+      style="max-height: 400px; min-height: 150px"
     >
       <div class="basis-1/4">
         <img
-          src="../../assets/example_office2.jpg"
-          alt="Ein beispielhaftes Büro."
+          v-if="bookable.imgUrl"
+          :src="bookable.imgUrl"
+          alt="Bild des Buchungsobjekts"
+          class="rounded-xl h-full object-cover"
+        >
+        <img
+          v-else
+          src="../../assets/bookable-default.jpg"
+          alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
           class="rounded-xl h-full object-cover"
         >
       </div>
@@ -54,14 +62,10 @@
           </div>
 
           <!-- Preis -->
-          <div class="basis-1/4 w-full flex justify-end content-center">
-            <p v-if="price && price === 0" class="text-md font-bold">
-              Kostenlos
-            </p>
-            <p v-if="price" class="text-md font-bold">
-              € {{ price.regularPriceEur }}
-            </p>
-            <!-- toDo - Funktion ergänzen, um Preis für bestimmte User anzuzeigen -->
+          <div
+            class="basis-1/4 w-full flex justify-end content-center text-md font-bold"
+          >
+            <BookablePriceDisplay v-if="!isNotBookable" :price="price" />
           </div>
         </div>
 
@@ -79,7 +83,7 @@
           <UButton
             v-if="!isNotBookable"
             label="Buchen"
-            class="justify-center text-white px-10"
+            class="justify-center text-white dark:text-black px-10"
             @click="goToCheckout"
           />
         </div>
@@ -117,6 +121,8 @@
   </div>
 </template>
 <script setup>
+import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
+
 const props = defineProps({
   bookable: {
     type: Object,
@@ -132,23 +138,17 @@ const props = defineProps({
   },
 });
 
-
-//const {frontendBaseUrl: FRONTEND_BASE_URL} = useRuntimeConfig();
-
-/*
-const route = useRoute();
-const catalogSlug = computed(() => route.params.catalogSlug);
-
-function onOpenDetails() {
-  console.log("want to open details..");
-}
-*/
 function goToCheckout() {
   const config = useRuntimeConfig();
-  const baseFromConfig = (config && config.public && config.public.adminBaseUrl) || config.adminBaseUrl || "";
+  const baseFromConfig =
+    (config && config.public && config.public.adminBaseUrl) ||
+    config.adminBaseUrl ||
+    "";
 
   if (!baseFromConfig) {
-    console.warn("adminBaseUrl not set in runtime config; falling back to relative /checkout path");
+    console.warn(
+      "adminBaseUrl not set in runtime config; falling back to relative /checkout path",
+    );
   }
 
   const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
@@ -159,7 +159,9 @@ function goToCheckout() {
     amount: "1",
   });
 
-  const url = base ? `${base}/checkout?${params.toString()}` : `/checkout?${params.toString()}`;
+  const url = base
+    ? `${base}/checkout?${params.toString()}`
+    : `/checkout?${params.toString()}`;
 
   if (typeof window !== "undefined") {
     const newWindow = window.open(url, "_blank");
@@ -167,6 +169,7 @@ function goToCheckout() {
       try {
         newWindow.opener = null; // enforce noopener
       } catch (e) {
+        console.error(e);
         // ignore in case browser forbids
       }
     } else {

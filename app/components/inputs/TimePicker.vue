@@ -4,16 +4,27 @@
       v-model="model"
       time-picker
       format="HH:mm"
-      cancelText="Abbrechen"
-      selectText="OK"
+      cancel-text="Abbrechen"
+      select-text="OK"
       teleport-center
       :disabled="disabled"
       :action-row="{ showPreview: false }"
+      :ui="
+        mode === 'dark'
+          ? {
+              input: 'darkBackground',
+            }
+          : {}
+      "
+      :dark="mode === 'dark'"
     />
   </UTooltip>
 </template>
 <script setup>
 import VueDatePicker from "@vuepic/vue-datepicker";
+import { useColorMode } from "@vueuse/core";
+
+const mode = useColorMode();
 
 const model = defineModel();
 const props = defineProps({
@@ -22,12 +33,15 @@ const props = defineProps({
     default: false,
   },
 });
-const now = ref(new Date());
 </script>
 
 <style>
 .dp__action_buttons .dp__action_select {
   background-color: var(--color-primary) !important;
   color: #fff !important;
+}
+
+.darkBackground {
+  background-color: rgb(17, 24, 39);
 }
 </style>

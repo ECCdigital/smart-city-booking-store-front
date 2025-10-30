@@ -1,7 +1,10 @@
 <template>
   <div>
-    <UBlogPost class="shadow-lg h-full" :class="isNotBookable? 'opacity-70':''" @click="goToCheckout">
-      <!-- :to="`/catalog/${catalogSlug}/locations/${bookable.id}`" -->
+    <UBlogPost
+      class="shadow-lg h-full bg-white dark:bg-gray-700"
+      :class="isNotBookable ? 'opacity-70 dark:opacity-50' : ''"
+      @click="goToCheckout"
+    >
       <template #header>
         <div>
           <img
@@ -55,14 +58,11 @@
           </div>
 
           <!-- Preis -->
-          <div v-if="!isNotBookable" class="w-full flex justify-end">
-            <p v-if="price && price===0" class="text-md font-bold">
-              Kostenlos
-            </p>
-            <p v-if="price" class="text-md font-bold">
-              € {{ price.regularPriceEur }}
-            </p>
-            <!-- toDo - Funktion ergänzen, um Preis für bestimmte User anzuzeigen -->
+          <div
+            v-if="!isNotBookable"
+            class="w-full flex justify-end text-md font-bold"
+          >
+            <BookablePriceDisplay v-if="!isNotBookable" :price="price" />
           </div>
 
           <!-- toDo - TESTING***************************************-->
@@ -98,6 +98,8 @@
   </div>
 </template>
 <script setup>
+import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
+
 const props = defineProps({
   bookable: {
     type: Object,
@@ -105,7 +107,7 @@ const props = defineProps({
   },
   price: {
     type: Number,
-    default: null
+    default: null,
   },
   isNotBookable: {
     type: Boolean,
@@ -113,41 +115,55 @@ const props = defineProps({
   },
 });
 
-/*
-const route = useRoute();
-const catalogSlug = computed(() => route.params.catalogSlug);
-*/
-function goToCheckout() {
-  const config = useRuntimeConfig();
-  const baseFromConfig = (config && config.public && config.public.adminBaseUrl) || config.adminBaseUrl || "";
-
-  if (!baseFromConfig) {
-    console.warn("adminBaseUrl not set in runtime config; falling back to relative /checkout path");
+function displayPrice(price) {
+  if (!price) {
+    return "Kein Preis bekannt.";
+  } else {
+    return "€ " + price.toString().replace(/\./g, ",");
   }
+}
 
-  const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
+function goToCheckout() {
+  if (!props.isNotBookable) {
+    const config = useRuntimeConfig();
 
-  const params = new URLSearchParams({
-    id: props.bookable.id,
-    tenant: props.bookable.tenantId,
-    amount: "1",
-  });
+    const baseFromConfig =
+      (config && config.public && config.public.adminBaseUrl) ||
+      config.adminBaseUrl ||
+      "";
 
-  const url = base ? `${base}/checkout?${params.toString()}` : `/checkout?${params.toString()}`;
+    if (!baseFromConfig) {
+      console.warn(
+        "adminBaseUrl not set in runtime config; falling back to relative /checkout path",
+      );
+    }
 
-  if (typeof window !== "undefined") {
-    const newWindow = window.open(url, "_blank");
-    if (newWindow) {
-      try {
-        newWindow.opener = null; // enforce noopener
-      } catch (e) {
-        // ignore in case browser forbids
+    const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
+
+    const params = new URLSearchParams({
+      id: props.bookable.id,
+      tenant: props.bookable.tenantId,
+      amount: "1",
+    });
+
+    const url = base
+      ? `${base}/checkout?${params.toString()}`
+      : `/checkout?${params.toString()}`;
+
+    if (typeof window !== "undefined") {
+      const newWindow = window.open(url, "_blank");
+      if (newWindow) {
+        try {
+          newWindow.opener = null; // enforce noopener
+        } catch (e) {
+          // ignore in case browser forbids
+        }
+      } else {
+        window.location.href = url;
       }
     } else {
-      window.location.href = url;
+      console.warn("Attempted to open checkout URL on server-side: ", url);
     }
-  } else {
-    console.warn("Attempted to open checkout URL on server-side: ", url);
   }
 }
 </script>

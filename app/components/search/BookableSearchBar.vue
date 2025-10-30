@@ -1,14 +1,14 @@
 <template>
+  <!-- Strip for md and larger screens -->
   <div
     v-if="!!isGreaterThanMd"
-    class="flex justify-between bg-white -mt-5 p-2 z-100 rounded shadow-lg"
+    class="flex justify-between bg-white dark:bg-gray-700 -mt-5 p-2 z-100 rounded shadow-lg "
     style="position: relative; width: 60vw"
   >
     <InputText
       v-model="searchTerm"
       icon="i-lucide-search"
       placeholder="Wonach suchen Sie?"
-      class=""
     />
     <USeparator orientation="vertical" />
     <InputText
@@ -21,13 +21,14 @@
     <InputTimePeriod @select-date="setSearchTimePeriod" />
     <UButton
       label="Suchen"
-      class="w-full justify-center text-white"
+      class="w-full justify-center  text-white dark:text-black"
       @click="onSearch"
     />
   </div>
+  <!--Card for smaller screens -->
   <UCard
     v-else
-    class="bg-white mx-5 -mt-15 p-0 shadow-lg"
+    class="bg-white dark:bg-gray-700 mx-5 -mt-15 p-0 shadow-lg"
     :ui="{ root: 'p-0', body: 'p-0' }"
     style="position: relative; width: 80vw"
   >
@@ -46,7 +47,7 @@
     <InputTimePeriod @select-date="setSearchTimePeriod" />
     <UButton
       label="Suchen"
-      class="w-full justify-center text-white"
+      class="w-full justify-center text-white dark:text-black"
       @click="onSearch"
     />
   </UCard>

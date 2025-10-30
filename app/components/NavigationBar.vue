@@ -3,28 +3,30 @@
     <div v-for="(tab, k) in tabs" :key="k">
       <NavigationLink :tab="tab" />
     </div>
-    <div style="flex: 1"></div>
+    <div style="flex: 1"/>
     <UButton
-      label="Anmelden"
+      :label="isGreaterThanSm ? 'Anmelden' : ''"
+      :icon="isGreaterThanSm ? '' : 'i-lucide-user'"
       variant="ghost"
-      class="px-4 text-white"
+      class="text-white"
+      :class="isGreaterThanSm ? 'px-4' : ''"
       to="/login"
-      @click="console.log('want login')"
     />
     <UButton
       v-if="isGreaterThanSm"
       label="Registrieren"
       class="px-4 text-black bg-white"
       to="/register"
-      @click="console.log('want register')"
     />
+    <UColorModeButton class="" size="xl" @click="toggleColorMode"/> <!-- toDo - delete after Testing!!!  -->
     <!-- toDo - https://ui.nuxt.com/docs/components/field-group (with dropdown) -->
   </div>
 </template>
 <script setup>
 import NavigationLink from "./NavigationLink.vue";
-import { useWindowSize } from "@vueuse/core";
 import { useBreakpointCheck } from "../composables/utils/useBreakpointCheck.js";
+import { useColorMode } from '@vueuse/core'
+
 
 const tabs = computed(() => [
   {
@@ -49,5 +51,14 @@ const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
 const barClass = computed(() => [
   "flex items-center bg-[var(--color-secondary)]",
 ]);
+
+const colorMode = useColorMode()
+function toggleColorMode() {
+  if (colorMode.value === 'dark') {
+    colorMode.value = 'light'
+  } else {
+    colorMode.value = 'dark'
+  }
+}
 </script>
 <style scoped></style>
