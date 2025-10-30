@@ -1,7 +1,6 @@
 <template>
-  <UPopover
-    v-model:open="isOpen"
-    :content="{ align: 'end', side: 'bottom', sideOffset: '-20' }"
+  <UModal
+      v-model:open="isOpen"
   >
     <UButton
       label="Filtern"
@@ -12,7 +11,7 @@
       @click="() => (isOpen = true)"
     />
     <template #content>
-      <UCard style="width: 80vw">
+      <UCard >
         <div class="flex justify-end items-center">
           <UButton
             color="neutral"
@@ -22,20 +21,31 @@
             @click="() => (isOpen = false)"
           />
         </div>
-        <FilterArea useAsDialog @filter="onFilter" />
+        <FilterArea
+            :bookables="props.bookables"
+            use-as-dialog
+            @filter="onFilter"
+        />
       </UCard>
     </template>
-  </UPopover>
+    </UModal>
 </template>
 <script setup>
 import FilterArea from "./FilterArea.vue";
 
+const props = defineProps({
+  bookables: {
+    type: Array,
+    required: true,
+  },
+});
+
 const emit = defineEmits(["filter"]);
 const isOpen = ref(false);
 
-function onFilter() {
+function onFilter(filteredBookables) {
   isOpen.value = false;
-  emit("filter");
+  emit("filter", filteredBookables);
 }
 </script>
 

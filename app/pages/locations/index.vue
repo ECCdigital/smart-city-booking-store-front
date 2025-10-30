@@ -28,21 +28,9 @@ const allLocations = computed(() => {
   return locations.concat(bookableStore.getRooms);
 });
 const filteredLocations = ref(allLocations.value);
-const filteredResultLocations = computed(() => {
-  let locations = filteredLocations.value;
-  if(hideNonSuitable.value){
-    console.log("only want suitable locations");
-    locations = locations.filter((l) => l.status !== "nonSuitable");
-  }
-  if(hideNonBookable.value){
-    console.log("only want bookable locations");
-    locations = locations.filter((l) => l.status !== "nonBookable");
-  }
-  return locations;
-});
+const filteredResultLocations = ref(filteredLocations.value);
+const filterResetKey = ref(0)
 
-const hideNonBookable = ref(false);
-const hideNonSuitable = ref(false);
 
 
 const sortMode = ref("relevance");
@@ -72,8 +60,6 @@ async function onSearch({ term, location, timePeriod }) {
       return { bookable: location, status: "nonBookable" };
     }
   });
-  //toDo - wenn "nonBookable" auch noch related bookables prüfen!?
-  console.log(locationsWithStatus);
 
   //alle die status === isBookable haben in Suche einbeziehen
   let bookableLocations = locationsWithStatus.filter(
@@ -150,6 +136,10 @@ async function onSearch({ term, location, timePeriod }) {
   );
   console.log(updatedLocations);
   filteredLocations.value = updatedLocations;
+  filteredResultLocations.value = filteredLocations.value;
+
+  //Filter zurücksetzen -- toDo - ************** TEST***************
+  filterResetKey.value++
 }
 function numberOfSuitableBookables() {
   return filteredLocations.value.filter((l) => l.status === "suitable").length;
@@ -210,18 +200,16 @@ function sortBookables(mode) {
   });
 }
 
-function filterBookableLocations(isIncluded) {
-  console.log("want to filter for bookable locations: ", isIncluded)
-  hideNonBookable.value = !isIncluded;
-}
-function filterSuitableLocations(isIncluded) {
-  console.log("want to filter for suitable locations: ", isIncluded)
-  hideNonSuitable.value = !isIncluded;
+function setFilteredLocations(locations){
+  console.log("set filtered locations in index.vue: ", locations);
+  filteredResultLocations.value = locations
 }
 
+/*
 function testFunction() {
   console.log("coming soon...");
 }
+*/
 </script>
 
 <template>
@@ -239,8 +227,9 @@ function testFunction() {
         <SortButton v-if="filteredLocations.length > 0" :sort-mode="sortMode" @sort="sortBookables" />
         <FilterButton
             v-if="filteredLocations.length > 0"
+            :bookables="filteredLocations"
             class="lg:hidden"
-            @filter="testFunction"
+            @filter="setFilteredLocations"
         />
         <!-- toDo - add filter function!!!!!!!! -->
       </div>
@@ -252,10 +241,9 @@ function testFunction() {
       <div v-if="isGreaterThanMd" class="md:basis-1/4">
         <FilterArea
           v-if="filteredLocations.length > 0"
-          :bookables="filteredResultLocations"
-          @change-bookable-visability="filterBookableLocations"
-          @change-suiable-visability="filterSuitableLocations"
-          @filter="testFunction"
+          :key="filterResetKey"
+          :bookables="filteredLocations"
+          @filter="setFilteredLocations"
         />
       </div>
 
@@ -274,16 +262,6 @@ function testFunction() {
         />
       </div>
     </div>
-    <ul class="bg-amber-800">
-      <li v-for="(l, i) in filteredLocations" :key="i">
-        <span v-if="l"
-          >{{ l.bookable?.title }} - {{ l.status }} - Preis:
-          {{
-            l.calculatedPrice || "n.a."
-          }}</span
-        >
-      </li>
-    </ul>
   </div>
 </template>
 
