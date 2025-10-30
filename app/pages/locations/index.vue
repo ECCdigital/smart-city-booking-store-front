@@ -28,6 +28,10 @@ const allLocations = computed(() => {
   return locations.concat(bookableStore.getRooms);
 });
 const filteredLocations = ref(allLocations.value);
+const filteredResultLocations = ref(filteredLocations.value);
+const filterResetKey = ref(0)
+
+
 
 const sortMode = ref("relevance");
 
@@ -53,11 +57,9 @@ async function onSearch({ term, location, timePeriod }) {
     if (location.isBookable) {
       return { bookable: location, status: "isBookable" };
     } else {
-      return { bookable: location, status: "notBookable" };
+      return { bookable: location, status: "nonBookable" };
     }
   });
-  //toDo - wenn "notBookable" auch noch related bookables prüfen!?
-  console.log(locationsWithStatus);
 
   //alle die status === isBookable haben in Suche einbeziehen
   let bookableLocations = locationsWithStatus.filter(
@@ -134,6 +136,10 @@ async function onSearch({ term, location, timePeriod }) {
   );
   console.log(updatedLocations);
   filteredLocations.value = updatedLocations;
+  filteredResultLocations.value = filteredLocations.value;
+
+  //Filter zurücksetzen -- toDo - ************** TEST***************
+  filterResetKey.value++
 }
 function numberOfSuitableBookables() {
   return filteredLocations.value.filter((l) => l.status === "suitable").length;
@@ -193,9 +199,17 @@ function sortBookables(mode) {
     }
   });
 }
+
+function setFilteredLocations(locations){
+  console.log("set filtered locations in index.vue: ", locations);
+  filteredResultLocations.value = locations
+}
+
+/*
 function testFunction() {
   console.log("coming soon...");
 }
+*/
 </script>
 
 <template>
@@ -213,9 +227,11 @@ function testFunction() {
         <SortButton v-if="filteredLocations.length > 0" :sort-mode="sortMode" @sort="sortBookables" />
         <FilterButton
             v-if="filteredLocations.length > 0"
+            :bookables="filteredLocations"
             class="lg:hidden"
-            @filter="testFunction"
+            @filter="setFilteredLocations"
         />
+        <!-- toDo - add filter function!!!!!!!! -->
       </div>
     </div>
 
@@ -225,35 +241,27 @@ function testFunction() {
       <div v-if="isGreaterThanMd" class="md:basis-1/4">
         <FilterArea
           v-if="filteredLocations.length > 0"
-          @filter="testFunction"
+          :key="filterResetKey"
+          :bookables="filteredLocations"
+          @filter="setFilteredLocations"
         />
       </div>
 
       <div class="md:basis-3/4">
         <BookableResultsList
           v-if="isGreaterThanMd"
-          :bookables="filteredLocations"
+          :bookables="filteredResultLocations"
           include-non-bookable
           include-non-suitable
         />
         <BookableResultsGrid
           v-else
-          :bookables="filteredLocations"
+          :bookables="filteredResultLocations"
           include-non-bookable
           include-non-suitable
         />
       </div>
     </div>
-    <ul class="bg-amber-800">
-      <li v-for="(l, i) in filteredLocations" :key="i">
-        <span v-if="l"
-          >{{ l.bookable?.title }} - {{ l.status }} - Preis:
-          {{
-            l.calculatedPrice || "n.a."
-          }}</span
-        >
-      </li>
-    </ul>
   </div>
 </template>
 
