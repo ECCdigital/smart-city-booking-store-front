@@ -27,11 +27,40 @@ const allLocations = computed(() => {
   const locations = bookableStore.getLocations;
   return locations.concat(bookableStore.getRooms);
 });
-const filteredLocations = ref(allLocations.value);
-const filteredResultLocations = ref(filteredLocations.value);
-const filterResetKey = ref(0)
+const filteredLocations = ref([]);
+const filteredResultLocations = ref([]);
+const filterResetKey = ref(0);
 
+// Initialisierung: Vor der ersten Suche alles anzeigen
+function initializeResults() {
+  // Status setzen: Buchbare -> "suitable", andere -> "nonBookable"
+  const withStatus = allLocations.value.map((location) => {
+    if (location.isBookable) {
+      return { bookable: location, status: "suitable", calculatedPrice: null };
+    }
+    return { bookable: location, status: "nonBookable", calculatedPrice: null };
+  });
+  filteredLocations.value = withStatus;
+  filteredResultLocations.value = withStatus;
+}
 
+// Reaktiv bleiben, falls der Store später Daten nachlädt
+watch(
+  () => allLocations.value,
+  (val) => {
+    if (!val || val.length === 0) {
+      filteredLocations.value = [];
+      filteredResultLocations.value = [];
+      return;
+    }
+    // Nur initialisieren, wenn noch kein Status existiert (d.h. noch keine Suche)
+    const hasStatus = filteredLocations.value.some((b) => b?.status);
+    if (!hasStatus) {
+      initializeResults();
+    }
+  },
+  { immediate: true, deep: true }
+);
 
 const sortMode = ref("relevance");
 
@@ -53,6 +82,11 @@ const searchLocationOptions = {
 };
 
 async function onSearch({ term, location, timePeriod }) {
+  const hasCriteria = !!(
+    term ||
+    location ||
+    (timePeriod && (timePeriod.startDate || timePeriod.endDate))
+  );
   const locationsWithStatus = allLocations.value.map((location) => {
     if (location.isBookable) {
       return { bookable: location, status: "isBookable" };
@@ -61,9 +95,15 @@ async function onSearch({ term, location, timePeriod }) {
     }
   });
 
+  if (!hasCriteria) {
+    initializeResults();
+    filterResetKey.value++;
+    return;
+  }
+
   //alle die status === isBookable haben in Suche einbeziehen
   let bookableLocations = locationsWithStatus.filter(
-    (l) => l.status === "isBookable",
+    (l) => l.status === "isBookable"
   );
 
   //nach Suchbegriff suchen
@@ -91,11 +131,14 @@ async function onSearch({ term, location, timePeriod }) {
           location.bookable.tenantId,
           location.bookable.id,
           formatedTimePeriod.start.getTime(),
-          formatedTimePeriod.end.getTime(),
+          formatedTimePeriod.end.getTime()
         );
 
-        return { location, isAvailable: availability.isAvailable && availability.remaining > 0 };
-      }),
+        return {
+          location,
+          isAvailable: availability.isAvailable && availability.remaining > 0,
+        };
+      })
     );
 
     bookableLocations = availabilityChecks
@@ -116,7 +159,7 @@ async function onSearch({ term, location, timePeriod }) {
             item.bookable.tenantId,
             item.bookable.id,
             formatedTimePeriod.start.getTime(),
-            formatedTimePeriod.end.getTime(),
+            formatedTimePeriod.end.getTime()
           );
         }
 
@@ -132,14 +175,14 @@ async function onSearch({ term, location, timePeriod }) {
           calculatedPrice: null,
         };
       }
-    }),
+    })
   );
   console.log(updatedLocations);
   filteredLocations.value = updatedLocations;
   filteredResultLocations.value = filteredLocations.value;
 
   //Filter zurücksetzen -- toDo - ************** TEST***************
-  filterResetKey.value++
+  filterResetKey.value++;
 }
 function numberOfSuitableBookables() {
   return filteredLocations.value.filter((l) => l.status === "suitable").length;
@@ -149,13 +192,13 @@ function formateTimePeriod(timePeriod) {
   const newTimePeriod = {};
 
   newTimePeriod.start = new Date(
-    timePeriod.startDate + " " + timePeriod.startTime,
+    timePeriod.startDate + " " + timePeriod.startTime
   );
 
   newTimePeriod.end = "";
   if (!timePeriod.endDate && timePeriod.endTime) {
     newTimePeriod.end = new Date(
-      timePeriod.startDate + " " + timePeriod.endTime,
+      timePeriod.startDate + " " + timePeriod.endTime
     );
   } else {
     newTimePeriod.end = new Date(timePeriod.endDate + " " + timePeriod.endTime);
@@ -164,7 +207,7 @@ function formateTimePeriod(timePeriod) {
 }
 
 function sortBookables(mode) {
-  sortMode.value = mode
+  sortMode.value = mode;
   //Default: momentan "Relevanz" nach Fuze-Suche...
   filteredLocations.value = filteredLocations.value.sort((a, b) => {
     //Sortieren nach Preis
@@ -175,9 +218,13 @@ function sortBookables(mode) {
 
       //toDo - Option für User-Preis berücksichtigen...
       if (mode === "priceAscending") {
-        return a.calculatedPrice.regularPriceEur - b.calculatedPrice.regularPriceEur;
+        return (
+          a.calculatedPrice.regularPriceEur - b.calculatedPrice.regularPriceEur
+        );
       } else if (mode === "priceDescending") {
-        return b.calculatedPrice.regularPriceEur - a.calculatedPrice.regularPriceEur;
+        return (
+          b.calculatedPrice.regularPriceEur - a.calculatedPrice.regularPriceEur
+        );
       } else {
         return 0;
       }
@@ -200,9 +247,9 @@ function sortBookables(mode) {
   });
 }
 
-function setFilteredLocations(locations){
+function setFilteredLocations(locations) {
   console.log("set filtered locations in index.vue: ", locations);
-  filteredResultLocations.value = locations
+  filteredResultLocations.value = locations;
 }
 
 /*
@@ -223,18 +270,21 @@ function testFunction() {
         >{{ numberOfSuitableBookables() }} passende Ergebnisse</span
       >
       <div class="" style="flex: 1" />
-      <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0" >
-        <SortButton v-if="filteredLocations.length > 0" :sort-mode="sortMode" @sort="sortBookables" />
+      <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
+        <SortButton
+          v-if="filteredLocations.length > 0"
+          :sort-mode="sortMode"
+          @sort="sortBookables"
+        />
         <FilterButton
-            v-if="filteredLocations.length > 0"
-            :bookables="filteredLocations"
-            class="lg:hidden"
-            @filter="setFilteredLocations"
+          v-if="filteredLocations.length > 0"
+          :bookables="filteredLocations"
+          class="lg:hidden"
+          @filter="setFilteredLocations"
         />
         <!-- toDo - add filter function!!!!!!!! -->
       </div>
     </div>
-
 
     <div class="flex flex-row lg:my-5 m-5">
       <!-- Filterbereich -->

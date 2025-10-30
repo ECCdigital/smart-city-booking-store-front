@@ -7,11 +7,11 @@
     >
       <div class="basis-1/4">
         <img
-          v-if="bookable.imgUrl"
-          :src="bookable.imgUrl"
-          alt="Bild des Buchungsobjekts"
-          class="rounded-xl h-full object-cover"
-        >
+            v-if="bookable.imgUrl"
+            :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
+            alt="Bild des Buchungsobjekts"
+            class="rounded-xl h-full object-cover"
+        />
         <img
           v-else
           src="../../assets/bookable-default.jpg"

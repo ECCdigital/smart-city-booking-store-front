@@ -1,0 +1,99 @@
+// server/api/img.get.ts
+import { eventHandler, getQuery, setHeader, sendError, H3Error } from 'h3'
+import { parse } from 'node:url'
+import dns from 'node:dns/promises'
+import net from 'node:net'
+
+// Optional: wenn du Bilder transformieren willst, installiere sharp
+// import sharp from 'sharp'
+
+const MAX_BYTES = 5 * 1024 * 1024 // 5MB Limit
+const TIMEOUT_MS = 8000
+
+function isPrivateIp(ip: string) {
+    if (!net.isIP(ip)) return false
+    // IPv4 private ranges
+    const parts = ip.split('.').map(Number)
+    const [a, b] = parts
+    return (
+        a === 10 ||
+        (a === 172 && b >= 16 && b <= 31) ||
+        (a === 192 && b === 168) ||
+        ip === '127.0.0.1'
+    )
+}
+
+async function assertSafeHost(hostname: string) {
+    // Verhindere file:, data:, etc.
+    if (!hostname) throw new H3Error('Invalid hostname')
+    const addrs = await dns.lookup(hostname, { all: true })
+    for (const a of addrs) {
+        if (isPrivateIp(a.address)) {
+            throw new H3Error('Blocked private IP')
+        }
+    }
+}
+
+export default eventHandler(async (event) => {
+    try {
+        const { url: rawUrl } = getQuery(event)
+        if (typeof rawUrl !== 'string') {
+            throw new H3Error('Missing url parameter')
+        }
+
+        const u = new URL(rawUrl)
+        if (u.protocol !== 'http:' && u.protocol !== 'https:') {
+            throw new H3Error('Only http/https allowed')
+        }
+
+        await assertSafeHost(u.hostname)
+
+        const controller = new AbortController()
+        const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
+
+        const res = await fetch(u.toString(), {
+            redirect: 'follow',
+            signal: controller.signal,
+        }).catch((e) => {
+            throw new H3Error('Fetch failed: ' + String(e))
+        })
+        clearTimeout(timer)
+
+        if (!res.ok) {
+            throw new H3Error(`Upstream ${res.status}`)
+        }
+
+        const ct = res.headers.get('content-type') || ''
+        if (!ct.startsWith('image/')) {
+            throw new H3Error('Content is not an image')
+        }
+
+        // Begrenze Größe
+        const reader = res.body!.getReader()
+        const chunks: Uint8Array[] = []
+        let received = 0
+        while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            if (value) {
+                received += value.byteLength
+                if (received > MAX_BYTES) {
+                    throw new H3Error('Image too large')
+                }
+                chunks.push(value)
+            }
+        }
+        const buf = Buffer.concat(chunks)
+
+        // Optional: Transform mit sharp (strip metadata, resize etc.)
+        // const processed = await sharp(buf).rotate().withMetadata({}).toBuffer()
+
+        setHeader(event, 'Content-Type', ct)
+        setHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=86400')
+        // Du kannst zusätzlich ETag/Last-Modified setzen
+
+        return buf
+    } catch (err: any) {
+        return sendError(event, err)
+    }
+})
