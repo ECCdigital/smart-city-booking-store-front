@@ -78,35 +78,6 @@
           />
         </div>
       </div>
-      <!-- toDo - TESTING***************************************-->
-      <!--
-      <div class="bg-yellow-400 flex-wrap text-xs p-2">
-
-        isOpeningHoursRelated: {{ bookable.isOpeningHoursRelated }}
-        <hr >
-        isScheduleRelated: {{ bookable.isScheduleRelated }}
-        <hr >
-        isSpecialOpeningHoursRelated:
-        {{ bookable.isSpecialOpeningHoursRelated }}
-        <hr >
-        isTimePeriodRelated: {{ bookable.isTimePeriodRelated }}
-        <hr >
-        <hr >
-        maxBooingDuration: {{ bookable.maxBookingDuration }}
-        <hr >
-        minBooingDuration: {{ bookable.minBookingDuration }}
-        <hr >
-        <hr >
-
-        openingHours. {{ bookable.openingHours }}
-        <hr >
-        specialOpeningHours: {{ bookable.specialOpeningHours }}
-        <hr >
-        <hr >
-        timePeriods: {{ bookable.timePeriods }}
-      </div>
-      -->
-      <!-- toDo - TESTING*************************************** -->
     </div>
   </div>
 </template>

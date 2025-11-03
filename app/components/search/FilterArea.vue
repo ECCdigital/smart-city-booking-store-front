@@ -141,11 +141,8 @@ const choosenPriceRange = ref([priceRange.value[0], priceRange.value[1]]);
 const priceBins = computed(() => {
   const binsCount =
     Math.ceil((priceRange.value[1] - priceRange.value[0]) / 5) || 1;
-  console.log("binsCount: ", binsCount);
   const bins = new Array(binsCount).fill(0);
-  console.log("bins before: ", bins);
   const range = priceRange.value[1] - priceRange.value[0];
-  console.log("range: ", range);
   props.bookables.forEach((b) => {
     if (b.calculatedPrice) {
       const index = Math.min(
@@ -181,13 +178,11 @@ function onFilter() {
 
     //Passende und buchbare Objekte
     if (!includeNonSuitable.value) {
-      console.log("only want suitable locations");
       filteredBookables = filteredBookables.filter(
         (b) => b.status !== "nonSuitable",
       );
     }
     if (!includeNonBookable.value) {
-      console.log("only want bookable locations");
       filteredBookables = filteredBookables.filter(
         (b) => b.status !== "nonBookable",
       );

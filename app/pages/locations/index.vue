@@ -177,11 +177,10 @@ async function onSearch({ term, location, timePeriod }) {
       }
     })
   );
-  console.log(updatedLocations);
   filteredLocations.value = updatedLocations;
   filteredResultLocations.value = filteredLocations.value;
 
-  //Filter zurücksetzen -- toDo - ************** TEST***************
+  //Filter zurücksetzen
   filterResetKey.value++;
 }
 function numberOfSuitableBookables() {
@@ -248,15 +247,8 @@ function sortBookables(mode) {
 }
 
 function setFilteredLocations(locations) {
-  console.log("set filtered locations in index.vue: ", locations);
   filteredResultLocations.value = locations;
 }
-
-/*
-function testFunction() {
-  console.log("coming soon...");
-}
-*/
 </script>
 
 <template>
