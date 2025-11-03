@@ -8,8 +8,14 @@
       <template #header>
         <div>
           <img
-            src="../../assets/example_office2.jpg"
-            alt="Ein beispielhaftes Büro."
+              v-if="bookable.imgUrl"
+              :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
+              alt="Bild des Buchungsobjekts"
+          >
+          <img
+              v-else
+              src="../../assets/bookable-default.jpg"
+              alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
           >
         </div>
       </template>
