@@ -106,13 +106,7 @@
         icon="i-lucide-circle-x"
         aria-label="Clear input"
         class="mx-3"
-        @click="
-                () => {
-                  dateRange = [];
-                  timeRange = { start: null, end: null };
-                  missingValues = [];
-                }
-              "
+        @click="onDeleteTimePeriod"
     />
   </div>
 </template>
@@ -120,7 +114,7 @@
 import DatePicker from "./DatePicker.vue";
 import TimePicker from "./TimePicker.vue";
 
-const emit = defineEmits(["selectDate"]);
+const emit = defineEmits(["selectDate", "removeDate"]);
 
 const dateRange = ref([]);
 const timeRange = ref({ start: null, end: null });
@@ -187,6 +181,7 @@ function formatTimeToString(timeObj) {
   const minutes = timeObj.minutes.toString().padStart(2, "0");
   return `${hours}:${minutes}`;
 }
+
 function onSelectDate() {
   if (!timeRange.value.start || !timeRange.value.end) {
     if (!timeRange.value.start) {
@@ -206,6 +201,12 @@ function onSelectDate() {
     open.value = false;
     emit("selectDate", selectedDate);
   }
+}
+function onDeleteTimePeriod() {
+  dateRange.value = [];
+  timeRange.value = { start: null, end: null };
+  missingValues.value = [];
+  emit("removeDate");
 }
 </script>
 <style scoped></style>
