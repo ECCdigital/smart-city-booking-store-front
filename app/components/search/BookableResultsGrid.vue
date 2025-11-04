@@ -5,7 +5,7 @@
         v-for="(b, i) in suitableBookables"
         :key="i"
         :bookable="b.bookable"
-        :price="b.calculatedPrice"
+        :calculated-price="b.calculatedPrice"
       />
     </UBlogPosts>
     <h2 v-if="includeNonSuitable && nonSuitableBookables.length > 0" class="text-2xl font-bold m-4 mt-7">

@@ -3,7 +3,7 @@
     <div
       class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl"
       :class="isNotBookable ? 'opacity-70' : ''"
-      style="height: 250px"
+      style="height: 300px"
     >
       <div class="basis-1/5">
         <img
@@ -36,9 +36,9 @@
             :ui="{ border: 'border-gray-300' }"
           />
         </div>
-        <div class=" flex justify-between h-full">
+        <div class="flex justify-between h-full">
           <!-- Eigenschaften -->
-          <div class=" basis-3/4 w-full my-2">
+          <div class="basis-3/4 w-full my-2">
             <UBadge
               v-for="(flag, i) in bookable.flags"
               :key="i"
@@ -51,11 +51,12 @@
               {{ flag }}
             </UBadge>
           </div>
-          <div class=" basis-1/4 w-full grid content-end">
+          <div class="basis-1/4 w-full grid content-end">
             <!-- Preis -->
             <BookablePriceDisplay
               v-if="!isNotBookable"
-              :price="price"
+              :bookable="bookable"
+              :calculated-price="calculatedPrice"
               class="grid place-content-end text-md font-bold"
             />
 
@@ -115,14 +116,14 @@
 <script setup>
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
-import {useTenantStore} from "~~/stores/tenant.js";
+import { useTenantStore } from "~~/stores/tenant.js";
 
 const props = defineProps({
   bookable: {
     type: Object,
     required: true,
   },
-  price: {
+  calculatedPrice: {
     type: Number,
     default: null,
   },
@@ -133,8 +134,8 @@ const props = defineProps({
 });
 
 const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.bookable.tenantId).name
-})
+  return useTenantStore().getTenantById(props.bookable.tenantId).name;
+});
 
 function goToCheckout() {
   const config = useRuntimeConfig();

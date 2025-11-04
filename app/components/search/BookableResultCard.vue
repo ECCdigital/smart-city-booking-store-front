@@ -11,12 +11,12 @@
             v-if="bookable.imgUrl"
             :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
             alt="Bild des Buchungsobjekts"
-          />
+          >
           <img
             v-else
             src="../../assets/bookable-default.jpg"
             alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
-          />
+          >
         </div>
       </template>
       <template #body>
@@ -58,7 +58,11 @@
             v-if="!isNotBookable"
             class="w-full flex justify-end text-md font-bold"
           >
-            <BookablePriceDisplay v-if="!isNotBookable" :price="price" />
+            <BookablePriceDisplay
+              v-if="!isNotBookable"
+              :bookable="bookable"
+              :calculated-price="price"
+            />
           </div>
 
           <!-- toDo - TESTING***************************************-->
@@ -103,7 +107,7 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  price: {
+  calculatedPrice: {
     type: Number,
     default: null,
   },
