@@ -61,7 +61,7 @@
             <BookablePriceDisplay
               v-if="!isNotBookable"
               :bookable="bookable"
-              :calculated-price="price"
+              :calculated-price="calculatedPrice"
             />
           </div>
 

@@ -45,17 +45,18 @@
         <p class="mb-3">
           € {{ choosenPriceRange[0] }} - € {{ choosenPriceRange[1] }}
         </p>
-        <div
-          v-if="priceBars.some((p) => p > 0)"
-          class="flex space-x-1 h-15 items-end justify-between"
-          style="max-width: 25vw"
-        >
+        <div class="w-full flex">
           <div
-            v-for="(count, index) in priceBars"
-            :key="index"
-            :style="{ height: count * 10 + 'px' }"
-            class="bg-primary/40 w-6"
-          />
+            v-if="priceBars.some((bar) => bar > 0)"
+            class="flex w-full space-x-1 h-15 items-end justify-between"
+          >
+            <div
+              v-for="(count, index) in priceBars"
+              :key="index"
+              :style="{ height: count * 10 + 'px' }"
+              class="bg-primary/40 w-6"
+            />
+          </div>
         </div>
         <USlider
           v-model="choosenPriceRange"
@@ -143,19 +144,37 @@ const priceBars = computed(() => {
     Math.ceil((priceRange.value[1] - priceRange.value[0]) / 5) || 1;
   const bars = new Array(barsCount).fill(0);
   const range = priceRange.value[1] - priceRange.value[0];
-  props.bookables.forEach((b) => {
+
+  const getBookablePrice = (b) => {
     if (b.calculatedPrice) {
+      return b.calculatedPrice.userGrossPriceEur;
+    }
+    if (
+      b.status === "suitable" &&
+      b.calculatedPrice === null &&
+      b.bookable?.priceCategories?.length > 0
+    ) {
+      const minPrice = Math.min(
+        ...b.bookable.priceCategories.map((cat) => cat.priceEur),
+      );
+      return b.bookable.priceValueAddedTax
+        ? minPrice + (minPrice * b.bookable.priceValueAddedTax) / 100
+        : minPrice;
+    }
+    return null;
+  };
+
+  props.bookables.forEach((b) => {
+    const price = getBookablePrice(b);
+    if (price !== null) {
       const index = Math.min(
-        Math.floor(
-          ((b.calculatedPrice.userGrossPriceEur - priceRange.value[0]) /
-            range) *
-            barsCount,
-        ),
+        Math.floor(((price - priceRange.value[0]) / range) * barsCount),
         barsCount - 1,
       );
       bars[index]++;
     }
   });
+
   return bars;
 });
 
@@ -178,13 +197,11 @@ function onFilter() {
 
     //Passende und buchbare Objekte
     if (!includeNonSuitable.value) {
-      console.log("only want suitable locations");
       filteredBookables = filteredBookables.filter(
         (b) => b.status !== "nonSuitable",
       );
     }
     if (!includeNonBookable.value) {
-      console.log("only want bookable locations");
       filteredBookables = filteredBookables.filter(
         (b) => b.status !== "nonBookable",
       );
@@ -197,6 +214,22 @@ function onFilter() {
         return (
           price >= choosenPriceRange.value[0] &&
           price <= choosenPriceRange.value[1]
+        );
+      } else if (
+        b.status === "suitable" &&
+        b.calculatedPrice === null &&
+        b.bookable?.priceCategories?.length > 0
+      ) {
+        const minPrice = Math.min(
+          ...b.bookable.priceCategories.map((cat) => cat.priceEur),
+        );
+        const includeTax = b.bookable.priceValueAddedTax
+          ? minPrice + (minPrice * b.bookable.priceValueAddedTax) / 100
+          : minPrice;
+
+        return (
+          includeTax >= choosenPriceRange.value[0] &&
+          includeTax <= choosenPriceRange.value[1]
         );
       }
       return true;
