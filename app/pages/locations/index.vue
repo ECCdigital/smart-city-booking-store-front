@@ -210,6 +210,10 @@ function formateTimePeriod(timePeriod) {
 
 function getPrice(item) {
   if (searchIsInitialized.value) {
+    return item.calculatedPrice?.userGrossPriceEur;
+  }
+  if (
+    item.bookable.priceCategories &&
     item.bookable.priceCategories.length > 0
   ) {
     return Math.min(
@@ -226,7 +230,6 @@ function sortBookables(mode) {
   //Default: momentan "Relevanz" nach Fuze-Suche...
   filteredLocations.value = filteredLocations.value.sort((a, b) => {
     //Sortieren nach Preis
-        );
     if (mode === "priceAscending") {
       return getPrice(a) - getPrice(b);
     }
