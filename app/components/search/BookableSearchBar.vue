@@ -19,7 +19,7 @@
       clearable
     />
     <USeparator orientation="vertical" />
-    <InputTimePeriod @select-date="setSearchTimePeriod" />
+    <InputTimePeriod @select-date="setSearchTimePeriod" @remove-date="removeSearchTimePeriod"/>
     <UButton
       label="Suchen"
       class="w-full justify-center text-white dark:text-black"
@@ -47,7 +47,7 @@
       clearable
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
-    <InputTimePeriod @select-date="setSearchTimePeriod" />
+    <InputTimePeriod @select-date="setSearchTimePeriod" @remove-date="removeSearchTimePeriod"/>
     <UButton
       label="Suchen"
       class="w-full justify-center text-white dark:text-black"
@@ -69,6 +69,9 @@ const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 
 function setSearchTimePeriod(timePeriod) {
   searchTimePeriod.value = timePeriod;
+}
+function removeSearchTimePeriod() {
+  searchTimePeriod.value = null;
 }
 function onSearch() {
   emit("search", {
