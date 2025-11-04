@@ -59,7 +59,7 @@ watch(
       initializeResults();
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 const sortMode = ref("relevance");
@@ -80,6 +80,7 @@ const searchLocationOptions = {
   includeScore: true,
   shouldSort: true,
 };
+const searchIsInitialized = ref(false);
 
 async function onSearch({ term, location, timePeriod }) {
   const hasCriteria = !!(
@@ -97,13 +98,15 @@ async function onSearch({ term, location, timePeriod }) {
 
   if (!hasCriteria) {
     initializeResults();
+    searchIsInitialized.value = false;
     filterResetKey.value++;
     return;
   }
+  searchIsInitialized.value = true;
 
   //alle die status === isBookable haben in Suche einbeziehen
   let bookableLocations = locationsWithStatus.filter(
-    (l) => l.status === "isBookable"
+    (l) => l.status === "isBookable",
   );
 
   //nach Suchbegriff suchen
@@ -131,14 +134,14 @@ async function onSearch({ term, location, timePeriod }) {
           location.bookable.tenantId,
           location.bookable.id,
           formatedTimePeriod.start.getTime(),
-          formatedTimePeriod.end.getTime()
+          formatedTimePeriod.end.getTime(),
         );
 
         return {
           location,
           isAvailable: availability.isAvailable && availability.remaining > 0,
         };
-      })
+      }),
     );
 
     bookableLocations = availabilityChecks
@@ -147,7 +150,7 @@ async function onSearch({ term, location, timePeriod }) {
   }
 
   //Status updaten
-  const updatedLocations = await Promise.all(
+  filteredLocations.value = await Promise.all(
     locationsWithStatus.map(async (item) => {
       if (item.status === "isBookable") {
         const isSuitable = bookableLocations.includes(item);
@@ -159,7 +162,7 @@ async function onSearch({ term, location, timePeriod }) {
             item.bookable.tenantId,
             item.bookable.id,
             formatedTimePeriod.start.getTime(),
-            formatedTimePeriod.end.getTime()
+            formatedTimePeriod.end.getTime(),
           );
         }
 
@@ -175,30 +178,29 @@ async function onSearch({ term, location, timePeriod }) {
           calculatedPrice: null,
         };
       }
-    })
+    }),
   );
-  console.log(updatedLocations);
-  filteredLocations.value = updatedLocations;
   filteredResultLocations.value = filteredLocations.value;
 
-  //Filter zurücksetzen -- toDo - ************** TEST***************
+  //Filter zurücksetzen
   filterResetKey.value++;
 }
 function numberOfSuitableBookables() {
-  return filteredLocations.value.filter((l) => l.status === "suitable").length;
+  return filteredResultLocations.value.filter((l) => l.status === "suitable")
+    .length;
 }
 
 function formateTimePeriod(timePeriod) {
   const newTimePeriod = {};
 
   newTimePeriod.start = new Date(
-    timePeriod.startDate + " " + timePeriod.startTime
+    timePeriod.startDate + " " + timePeriod.startTime,
   );
 
   newTimePeriod.end = "";
   if (!timePeriod.endDate && timePeriod.endTime) {
     newTimePeriod.end = new Date(
-      timePeriod.startDate + " " + timePeriod.endTime
+      timePeriod.startDate + " " + timePeriod.endTime,
     );
   } else {
     newTimePeriod.end = new Date(timePeriod.endDate + " " + timePeriod.endTime);
@@ -251,12 +253,6 @@ function setFilteredLocations(locations) {
   console.log("set filtered locations in index.vue: ", locations);
   filteredResultLocations.value = locations;
 }
-
-/*
-function testFunction() {
-  console.log("coming soon...");
-}
-*/
 </script>
 
 <template>
@@ -266,7 +262,9 @@ function testFunction() {
     </div>
 
     <div class="m-10 lg:m-5 sm:flex items-center">
-      <span class="text-black dark:text-white lg:font-bold"
+      <span
+        v-if="searchIsInitialized"
+        class="text-black dark:text-white lg:font-bold"
         >{{ numberOfSuitableBookables() }} passende Ergebnisse</span
       >
       <div class="" style="flex: 1" />
