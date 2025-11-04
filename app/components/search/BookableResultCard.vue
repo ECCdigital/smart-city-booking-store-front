@@ -8,15 +8,15 @@
       <template #header>
         <div>
           <img
-              v-if="bookable.imgUrl"
-              :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
-              alt="Bild des Buchungsobjekts"
-          >
+            v-if="bookable.imgUrl"
+            :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
+            alt="Bild des Buchungsobjekts"
+          />
           <img
-              v-else
-              src="../../assets/bookable-default.jpg"
-              alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
-          >
+            v-else
+            src="../../assets/bookable-default.jpg"
+            alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
+          />
         </div>
       </template>
       <template #body>
@@ -96,7 +96,7 @@
 <script setup>
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
-import {useTenantStore} from "~~/stores/tenant.js";
+import { useTenantStore } from "~~/stores/tenant.js";
 
 const props = defineProps({
   bookable: {
@@ -114,8 +114,8 @@ const props = defineProps({
 });
 
 const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.bookable.tenantId).name
-})
+  return useTenantStore().getTenantById(props.bookable.tenantId).name;
+});
 
 function goToCheckout() {
   if (!props.isNotBookable) {

@@ -2,7 +2,7 @@
   <!-- Strip for md and larger screens -->
   <div
     v-if="!!isGreaterThanMd"
-    class="flex justify-between bg-white dark:bg-gray-700 -mt-5 p-2 z-100 rounded shadow-lg "
+    class="flex justify-between bg-white dark:bg-gray-700 -mt-5 p-2 z-100 rounded shadow-lg"
     style="position: relative; width: 60vw"
   >
     <InputText
@@ -22,7 +22,7 @@
     <InputTimePeriod @select-date="setSearchTimePeriod" />
     <UButton
       label="Suchen"
-      class="w-full justify-center  text-white dark:text-black"
+      class="w-full justify-center text-white dark:text-black"
       @click="onSearch"
     />
   </div>
