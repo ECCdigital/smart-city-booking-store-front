@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between ">
+  <div class="flex justify-between w-full">
     <UPopover
       v-model:open="open"
       :dismissible="false"
