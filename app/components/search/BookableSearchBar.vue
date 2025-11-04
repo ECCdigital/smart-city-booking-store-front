@@ -9,13 +9,14 @@
       v-model="searchTerm"
       icon="i-lucide-search"
       placeholder="Wonach suchen Sie?"
+      clearable
     />
     <USeparator orientation="vertical" />
     <InputText
       v-model="searchLocation"
       icon="i-lucide-map-pin"
       placeholder="Ort"
-      class=""
+      clearable
     />
     <USeparator orientation="vertical" />
     <InputTimePeriod @select-date="setSearchTimePeriod" />
@@ -36,12 +37,14 @@
       v-model="searchTerm"
       icon="i-lucide-search"
       placeholder="Wonach suchen Sie?"
+      clearable
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputText
       v-model="searchLocation"
       icon="i-lucide-map-pin"
       placeholder="Ort"
+      clearable
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputTimePeriod @select-date="setSearchTimePeriod" />
