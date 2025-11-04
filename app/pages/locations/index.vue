@@ -208,31 +208,34 @@ function formateTimePeriod(timePeriod) {
   return newTimePeriod;
 }
 
+function getPrice(item) {
+  if (searchIsInitialized.value) {
+    item.bookable.priceCategories.length > 0
+  ) {
+    return Math.min(
+      ...item.bookable.priceCategories.map((cat) => cat.priceEur),
+    );
+  }
+  return Infinity;
+}
+
 function sortBookables(mode) {
   sortMode.value = mode;
+  //toDo - Sortierung nach Beliebtheit ergänzen?!
+
   //Default: momentan "Relevanz" nach Fuze-Suche...
   filteredLocations.value = filteredLocations.value.sort((a, b) => {
     //Sortieren nach Preis
-    if (mode === "priceAscending" || mode === "priceDescending") {
-      // Null-Preise sollen immer am Ende sein
-      if (a.calculatedPrice === null) return 1;
-      if (b.calculatedPrice === null) return -1;
-
-      //toDo - Option für User-Preis berücksichtigen...
-      if (mode === "priceAscending") {
-        return (
-          a.calculatedPrice.regularPriceEur - b.calculatedPrice.regularPriceEur
         );
-      } else if (mode === "priceDescending") {
-        return (
-          b.calculatedPrice.regularPriceEur - a.calculatedPrice.regularPriceEur
-        );
-      } else {
-        return 0;
-      }
+    if (mode === "priceAscending") {
+      return getPrice(a) - getPrice(b);
+    }
+    if (mode === "priceDescending") {
+      return getPrice(b) - getPrice(a);
     }
 
-    //Sortieren nach Distanz - toDo - Entfernung berechnen
+    //toDo - Sortierung nach Distanz ergänzen!!
+    //Sortieren nach Distanz
     if (mode === "distanceAscending" || mode === "distanceDescending") {
       // Momentan keine Entfernung vorhanden, also keine Sortierung
       /*
@@ -250,7 +253,6 @@ function sortBookables(mode) {
 }
 
 function setFilteredLocations(locations) {
-  console.log("set filtered locations in index.vue: ", locations);
   filteredResultLocations.value = locations;
 }
 </script>
