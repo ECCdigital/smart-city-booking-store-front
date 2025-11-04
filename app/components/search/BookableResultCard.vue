@@ -26,7 +26,7 @@
             <p class="text-lg font-bold">
               {{ bookable.title }}
             </p>
-            <p>{{ bookable.tenantId }}</p>
+            <p>{{ tenantName }}</p>
 
             <!-- Adresse und Entfernung -->
             <div class="w-full my-5">
@@ -96,6 +96,7 @@
 <script setup>
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
+import {useTenantStore} from "~~/stores/tenant.js";
 
 const props = defineProps({
   bookable: {
@@ -111,6 +112,10 @@ const props = defineProps({
     default: false,
   },
 });
+
+const tenantName = computed(() => {
+  return useTenantStore().getTenantById(props.bookable.tenantId).name
+})
 
 function goToCheckout() {
   if (!props.isNotBookable) {

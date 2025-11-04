@@ -3,15 +3,15 @@
     <div
       class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl"
       :class="isNotBookable ? 'opacity-70' : ''"
-      style="max-height: 400px; min-height: 150px"
+      style="height: 250px"
     >
-      <div class="basis-1/4">
+      <div class="basis-1/5">
         <img
-            v-if="bookable.imgUrl"
-            :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
-            alt="Bild des Buchungsobjekts"
-            class="rounded-xl h-full object-cover"
-        />
+          v-if="bookable.imgUrl"
+          :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
+          alt="Bild des Buchungsobjekts"
+          class="rounded-xl h-full object-cover"
+        >
         <img
           v-else
           src="../../assets/bookable-default.jpg"
@@ -19,26 +19,26 @@
           class="rounded-xl h-full object-cover"
         >
       </div>
-      <div class="basis-3/4 p-4">
-        <!-- Title -->
-        <p class="text-lg font-bold">
-          {{ bookable.title }}
-        </p>
-        <p>{{ bookable.tenantId }}</p>
+      <div class="basis-4/5 p-4 flex flex-col justify-between">
+        <div class="">
+          <!-- Title -->
+          <p class="text-lg font-bold">
+            {{ bookable.title }}
+          </p>
+          <p>{{ tenantName }}</p>
+          <!-- toDo - change to name!!! -->
 
-        <!-- Adresse und Entfernung -->
-        <div class="w-full my-5">
-          <BookableAdressInformation :bookable="bookable" />
+          <!-- Adresse und Entfernung -->
+          <BookableAdressInformation :bookable="bookable" class="w-full my-5" />
+          <USeparator
+            color="neutral"
+            class="w-full"
+            :ui="{ border: 'border-gray-300' }"
+          />
         </div>
-        <USeparator
-          color="neutral"
-          class="w-full"
-          :ui="{ border: 'border-gray-200' }"
-        />
-
-        <div class="flex flex-row">
+        <div class=" flex justify-between h-full">
           <!-- Eigenschaften -->
-          <div class="basis-3/4 w-full my-5">
+          <div class=" basis-3/4 w-full my-2">
             <UBadge
               v-for="(flag, i) in bookable.flags"
               :key="i"
@@ -47,22 +47,22 @@
               color="neutral"
               variant="ghost"
               style="padding-left: 0; padding-right: 15px"
-              >{{ flag }}</UBadge
             >
+              {{ flag }}
+            </UBadge>
           </div>
+          <div class=" basis-1/4 w-full grid content-end">
+            <!-- Preis -->
+            <BookablePriceDisplay
+              v-if="!isNotBookable"
+              :price="price"
+              class="grid place-content-end text-md font-bold"
+            />
 
-          <!-- Preis -->
-          <div
-            class="basis-1/4 w-full flex justify-end content-center text-md font-bold"
-          >
-            <BookablePriceDisplay v-if="!isNotBookable" :price="price" />
-          </div>
-        </div>
-
-        <!--Aktionen-->
-        <div class="w-full mt-5 flex justify-end">
-          <!-- toDo - für MVP ausgeblendet! Danach wieder aktivieren!  -->
-          <!--<UButton
+            <!--Aktionen-->
+            <div class="w-full mt-2 flex justify-end content-end">
+              <!-- toDo - für MVP ausgeblendet! Danach wieder aktivieren!  -->
+              <!--<UButton
             v-if="!isNotBookable"
             label="Details ansehen"
             variant="ghost"
@@ -70,12 +70,14 @@
             :to="`/catalog/${catalogSlug}/locations/${bookable.id}`"
           />
           -->
-          <UButton
-            v-if="!isNotBookable"
-            label="Buchen"
-            class="justify-center text-white dark:text-black px-10"
-            @click="goToCheckout"
-          />
+              <UButton
+                v-if="!isNotBookable"
+                label="Buchen"
+                class="justify-center text-white dark:text-black px-10"
+                @click="goToCheckout"
+              />
+            </div>
+          </div>
         </div>
       </div>
       <!-- toDo - TESTING***************************************-->
@@ -113,6 +115,7 @@
 <script setup>
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
+import {useTenantStore} from "~~/stores/tenant.js";
 
 const props = defineProps({
   bookable: {
@@ -128,6 +131,10 @@ const props = defineProps({
     default: false,
   },
 });
+
+const tenantName = computed(() => {
+  return useTenantStore().getTenantById(props.bookable.tenantId).name
+})
 
 function goToCheckout() {
   const config = useRuntimeConfig();
