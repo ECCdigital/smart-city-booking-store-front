@@ -5,7 +5,7 @@
       :class="isNotBookable ? 'opacity-70' : ''"
       style="height: 300px"
     >
-      <div class="basis-1/5">
+      <div class="basis-1/4">
         <img
           v-if="bookable.imgUrl"
           :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
@@ -19,14 +19,13 @@
           class="rounded-xl h-full object-cover"
         >
       </div>
-      <div class="basis-4/5 p-4 flex flex-col justify-between">
+      <div class="basis-3/4 p-4 flex flex-col justify-between">
         <div class="">
           <!-- Title -->
           <p class="text-lg font-bold">
             {{ bookable.title }}
           </p>
           <p>{{ tenantName }}</p>
-          <!-- toDo - change to name!!! -->
 
           <!-- Adresse und Entfernung -->
           <BookableAdressInformation :bookable="bookable" class="w-full my-5" />
@@ -38,7 +37,7 @@
         </div>
         <div class="flex justify-between h-full">
           <!-- Eigenschaften -->
-          <div class="basis-3/4 w-full my-2">
+          <div class="basis-3/5 w-full my-2">
             <UBadge
               v-for="(flag, i) in bookable.flags"
               :key="i"
@@ -51,7 +50,7 @@
               {{ flag }}
             </UBadge>
           </div>
-          <div class="basis-1/4 w-full grid content-end">
+          <div class="basis-2/5 w-full grid content-end">
             <!-- Preis -->
             <BookablePriceDisplay
               v-if="!isNotBookable"
@@ -83,32 +82,19 @@
       </div>
       <!-- toDo - TESTING***************************************-->
       <!--
-      <div class="bg-yellow-400 flex-wrap text-xs p-2">
-
-        isOpeningHoursRelated: {{ bookable.isOpeningHoursRelated }}
-        <hr >
-        isScheduleRelated: {{ bookable.isScheduleRelated }}
-        <hr >
-        isSpecialOpeningHoursRelated:
-        {{ bookable.isSpecialOpeningHoursRelated }}
-        <hr >
-        isTimePeriodRelated: {{ bookable.isTimePeriodRelated }}
-        <hr >
-        <hr >
-        maxBooingDuration: {{ bookable.maxBookingDuration }}
-        <hr >
-        minBooingDuration: {{ bookable.minBookingDuration }}
-        <hr >
-        <hr >
-
-        openingHours. {{ bookable.openingHours }}
-        <hr >
-        specialOpeningHours: {{ bookable.specialOpeningHours }}
-        <hr >
-        <hr >
-        timePeriods: {{ bookable.timePeriods }}
-      </div>
-      -->
+            <div class="bg-yellow-300 flex-wrap text-xs p-2">
+              priceCategories:
+              <br >
+              <p v-for="(cat, i) in bookable.priceCategories">-{{ i+1 }}.) {{ cat }}</p>
+              <hr >
+              priceType: {{ bookable.priceType }}
+              <hr >
+              priceValueAddedTaxEur: {{ bookable.priceValueAddedTax }}
+              <hr><hr>
+              calculatice: {{calculatedPrice}}
+              <hr><hr>
+            </div>
+            -->
       <!-- toDo - TESTING*************************************** -->
     </div>
   </div>
