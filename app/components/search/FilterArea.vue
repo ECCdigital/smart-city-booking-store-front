@@ -5,11 +5,11 @@
     <p class="my-4 font-bold">Ergebnisse filtern</p>
       <UTooltip v-if="!useAsDialog" text="Filter zurücksetzen">
       <UButton
-          v-if="!useAsDialog"
+          v-if="!useAsDialog && filterIsActive"
           icon="i-lucide-trash"
-          color="neutral"
-          variant="soft"
+          variant="ghost"
           class="rounded-full py-2 px-3"
+          :class="filterIsActive? '':''"
           @click="removeFilter"
       />
       </UTooltip>
@@ -82,6 +82,7 @@
     </div>
     <div v-if="useAsDialog" class="flex justify-between">
       <UButton
+          v-if="filterIsActive"
           label="Filter entfernen"
           icon="i-lucide-trash"
           color="neutral"
@@ -89,6 +90,7 @@
           class="rounded-full py-2 px-3"
           @click="removeFilter"
       />
+      <div v-else class="flex-1"/>
       <UButton
         label="Filtern"
         icon="i-lucide-funnel"
@@ -112,6 +114,8 @@ const props = defineProps({
   },
 });
 const emit = defineEmits(["filter"]);
+
+const filterIsActive = ref(false);
 
 //Passende und buchbare Objekte
 const includeNonSuitable = ref(true);
@@ -167,6 +171,7 @@ const choosenDistanceRange = ref([
 ]);
 
 function instantFilter() {
+  filterIsActive.value = true
   if (!props.useAsDialog) {
     onFilter();
   }
@@ -213,6 +218,7 @@ function removeFilter(){
   choosenPriceRange.value = [priceRange.value[0], priceRange.value[1]]
   choosenDistanceRange.value = [distanceRange.value[0], distanceRange.value[1]]
 
+  filterIsActive.value = false
   emit("filter", props.bookables);
 }
 </script>
