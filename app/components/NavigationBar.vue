@@ -35,12 +35,12 @@ const tabs = computed(() => [
     value: `/locations`,
   },
   {
-    label: "Events",
+    label: "Veranstaltungen",
     icon: "i-heroicons-calendar",
     value: `/events`,
   },
   {
-    label: "Geräte",
+    label: "Geräte & Ressourcen",
     icon: "i-heroicons-wrench-screwdriver",
     value: `/bookables`,
   },
