@@ -84,7 +84,6 @@ const searchLocationOptions = {
 };
 
 async function onSearch({ term, location, timePeriod }) {
-  console.log("searching for:", { term, location, timePeriod });
   const hasCriteria = !!(
     term ||
     location ||
@@ -97,7 +96,6 @@ async function onSearch({ term, location, timePeriod }) {
       return { bookable: resource, status: "nonBookable" };
     }
   });
-  console.log("resourcesWithStatus:", resourcesWithStatus);
 
   if (!hasCriteria) {
     initializeResults();
@@ -123,7 +121,6 @@ async function onSearch({ term, location, timePeriod }) {
       .search(location)
       .map((result) => result.item);
   }
-  console.log("bookableResources after term and location search:", bookableResources);
   //nach Zeit suchen
   let formatedTimePeriod = null;
   if (timePeriod && timePeriod.startDate) {
@@ -145,12 +142,10 @@ async function onSearch({ term, location, timePeriod }) {
       }),
     );
 
-    console.log("-> -> availabilityChecks:", availabilityChecks);
     bookableResources = availabilityChecks
       .filter((result) => result.isAvailable)
-      .map((result) => result.resource); //toDo - ******************************
+      .map((result) => result.resource);
   }
-  console.log("bookableResources after availability check:", bookableResources);
 
   //Status updaten
   const updatedResource = await Promise.all(
@@ -309,20 +304,6 @@ function setFilteredResources(resources) {
             include-non-suitable
         />
       </div>
-    </div>
-    <div class="bg-blue-300">
-      <ul>
-        <li v-for="(b, i) in allResources" :key="i">
-          {{i}}.) {{ b.title }}
-        </li>
-      </ul>
-    </div>
-    <div class="bg-blue-200">
-      <ul>
-        <li v-for="(b, i) in filteredResources" :key="i">
-          {{i}}.) {{ b.bookable.title }}
-        </li>
-      </ul>
     </div>
   </div>
 </template>
