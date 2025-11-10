@@ -49,8 +49,6 @@
             </div>
           </div>
           <DatePicker v-model="dateRange" />
-          <!-- toDo - text input hinzufügen? -->
-          <!-- https://vue3datepicker.com/props/modes-configuration/#text-input-configuration -->
           <div class="py-3 w-full">
             <p
               class="px-1"
