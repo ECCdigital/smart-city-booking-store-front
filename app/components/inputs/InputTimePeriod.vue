@@ -60,6 +60,7 @@
             </p>
             <TimePicker
               v-model="timeRange.start"
+              :text-input="{ format: 'HH:mm' }"
               @update:model-value="setDefaultEndTime"
             />
             <p
@@ -78,6 +79,7 @@
             </p>
             <TimePicker
               v-model="timeRange.end"
+              :text-input="{ format: 'HH:mm' }"
               :disabled="!timeRange.start"
               @update:model-value="removeValidation"
             />
