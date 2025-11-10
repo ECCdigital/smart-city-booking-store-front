@@ -1,9 +1,7 @@
 <template>
   <div class="flex justify-between w-full">
-    <UPopover
-      v-model:open="open"
-      :dismissible="false"
-      :content="{ side: 'bottom', sideOffset: '-20' }"
+    <UModal
+        v-model:open="isOpen"
     >
       <UButton
         size="lg"
@@ -45,7 +43,7 @@
                   variant="ghost"
                   icon="i-lucide-x"
                   class="rounded-xl"
-                  @click="open = false"
+                  @click="isOpen = false"
                 />
               </UTooltip>
             </div>
@@ -97,7 +95,7 @@
           </div>
         </UCard>
       </template>
-    </UPopover>
+    </UModal>
     <UButton
         v-if="dateRange.length > 0 || timeRange.start || timeRange.end"
         color="neutral"
@@ -118,7 +116,7 @@ const emit = defineEmits(["selectDate", "removeDate"]);
 
 const dateRange = ref([]);
 const timeRange = ref({ start: null, end: null });
-const open = ref(false);
+const isOpen = ref(false);
 const missingValues = ref([]);
 
 //Functions to display date and time values
@@ -198,7 +196,7 @@ function onSelectDate() {
       endTime: formatTimeToString(timeRange.value.end) || "",
     };
 
-    open.value = false;
+    isOpen.value = false;
     emit("selectDate", selectedDate);
   }
 }
