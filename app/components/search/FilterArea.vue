@@ -47,23 +47,26 @@
         </p>
         <div class="w-full flex">
           <div
-            v-if="priceBars.some((bar) => bar > 0)"
-            class="flex w-full space-x-1 h-15 items-end justify-between"
+              v-if="priceBars.some((bar) => bar > 0)"
+              class="flex w-full space-x-1 h-15 items-end justify-between"
           >
             <div
-              v-for="(count, index) in priceBars"
-              :key="index"
-              :style="{ height: count * 10 + 'px' }"
-              class="bg-primary/40 w-6"
+                v-for="(count, index) in priceBars"
+                :key="index"
+                :style="{
+                  height: count * 10 + 'px',
+                  width: (100 / priceBars.length) + '%'
+                }"
+                class="bg-primary/40"
             />
           </div>
         </div>
         <USlider
-          v-model="choosenPriceRange"
-          :min="priceRange[0]"
-          :max="priceRange[1]"
-          :step="5"
-          @change="instantFilter"
+            v-model="choosenPriceRange"
+            :min="priceRange[0]"
+            :max="priceRange[1]"
+            :step="5"
+            @change="instantFilter"
         />
       </div>
       <!-- Distanz -->
