@@ -274,7 +274,6 @@ function setFilteredLocations(locations) {
           class="lg:hidden"
           @filter="setFilteredLocations"
         />
-        <!-- toDo - add filter function!!!!!!!! -->
       </div>
     </div>
 
