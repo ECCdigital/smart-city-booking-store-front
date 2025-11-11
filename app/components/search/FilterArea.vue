@@ -1,17 +1,16 @@
 <template>
   <div :class="useAsDialog ? '' : 'my-2 p-2 border border-gray-200 rounded'">
     <div class="flex justify-between items-center">
-
-    <p class="my-4 font-bold">Ergebnisse filtern</p>
+      <p class="my-4 font-bold">Ergebnisse filtern</p>
       <UTooltip v-if="!useAsDialog" text="Filter zurücksetzen">
-      <UButton
+        <UButton
           v-if="!useAsDialog"
           icon="i-lucide-trash"
           color="neutral"
           variant="soft"
           class="rounded-full py-2 px-3"
           @click="removeFilter"
-      />
+        />
       </UTooltip>
     </div>
     <USeparator v-if="!useAsDialog" class="border-gray-200" />
@@ -46,16 +45,21 @@
         <p class="mb-3">
           € {{ choosenPriceRange[0] }} - € {{ choosenPriceRange[1] }}
         </p>
-        <div
-          v-if="priceBins.some((p) => p > 0)"
-          class="flex space-x-1 h-15 items-end justify-between"
-        >
+        <div class="w-full flex">
           <div
-            v-for="(count, index) in priceBins"
-            :key="index"
-            :style="{ height: count * 10 + 'px' }"
-            class="bg-primary/40 w-6"
-          />
+            v-if="priceBars.some((bar) => bar > 0)"
+            class="flex w-full space-x-1 h-15 items-end justify-between"
+          >
+            <div
+              v-for="(count, index) in priceBars"
+              :key="index"
+              :style="{
+                height: count * 10 + 'px',
+                width: 100 / priceBars.length + '%',
+              }"
+              class="bg-primary/40"
+            />
+          </div>
         </div>
         <USlider
           v-model="choosenPriceRange"
@@ -82,12 +86,12 @@
     </div>
     <div v-if="useAsDialog" class="flex justify-between">
       <UButton
-          label="Filter entfernen"
-          icon="i-lucide-trash"
-          color="neutral"
-          variant="soft"
-          class="rounded-full py-2 px-3"
-          @click="removeFilter"
+        label="Filter entfernen"
+        icon="i-lucide-trash"
+        color="neutral"
+        variant="soft"
+        class="rounded-full py-2 px-3"
+        @click="removeFilter"
       />
       <UButton
         label="Filtern"
@@ -138,28 +142,43 @@ const priceRange = computed(() => {
   return [minPrice, maxPrice];
 });
 const choosenPriceRange = ref([priceRange.value[0], priceRange.value[1]]);
-const priceBins = computed(() => {
-  const binsCount =
+const priceBars = computed(() => {
+  const barsCount =
     Math.ceil((priceRange.value[1] - priceRange.value[0]) / 5) || 1;
-  console.log("binsCount: ", binsCount);
-  const bins = new Array(binsCount).fill(0);
-  console.log("bins before: ", bins);
+  const bars = new Array(barsCount).fill(0);
   const range = priceRange.value[1] - priceRange.value[0];
-  console.log("range: ", range);
-  props.bookables.forEach((b) => {
+
+  const getBookablePrice = (b) => {
     if (b.calculatedPrice) {
-      const index = Math.min(
-        Math.floor(
-          ((b.calculatedPrice.userGrossPriceEur - priceRange.value[0]) /
-            range) *
-            binsCount,
-        ),
-        binsCount - 1,
+      return b.calculatedPrice.userGrossPriceEur;
+    }
+    if (
+      b.status === "suitable" &&
+      b.calculatedPrice === null &&
+      b.bookable?.priceCategories?.length > 0
+    ) {
+      const minPrice = Math.min(
+        ...b.bookable.priceCategories.map((cat) => cat.priceEur),
       );
-      bins[index]++;
+      return b.bookable.priceValueAddedTax
+        ? minPrice + (minPrice * b.bookable.priceValueAddedTax) / 100
+        : minPrice;
+    }
+    return null;
+  };
+
+  props.bookables.forEach((b) => {
+    const price = getBookablePrice(b);
+    if (price !== null) {
+      const index = Math.min(
+        Math.floor(((price - priceRange.value[0]) / range) * barsCount),
+        barsCount - 1,
+      );
+      bars[index]++;
     }
   });
-  return bins;
+
+  return bars;
 });
 
 //Distanz
@@ -181,13 +200,11 @@ function onFilter() {
 
     //Passende und buchbare Objekte
     if (!includeNonSuitable.value) {
-      console.log("only want suitable locations");
       filteredBookables = filteredBookables.filter(
         (b) => b.status !== "nonSuitable",
       );
     }
     if (!includeNonBookable.value) {
-      console.log("only want bookable locations");
       filteredBookables = filteredBookables.filter(
         (b) => b.status !== "nonBookable",
       );
@@ -201,6 +218,22 @@ function onFilter() {
           price >= choosenPriceRange.value[0] &&
           price <= choosenPriceRange.value[1]
         );
+      } else if (
+        b.status === "suitable" &&
+        b.calculatedPrice === null &&
+        b.bookable?.priceCategories?.length > 0
+      ) {
+        const minPrice = Math.min(
+          ...b.bookable.priceCategories.map((cat) => cat.priceEur),
+        );
+        const includeTax = b.bookable.priceValueAddedTax
+          ? minPrice + (minPrice * b.bookable.priceValueAddedTax) / 100
+          : minPrice;
+
+        return (
+          includeTax >= choosenPriceRange.value[0] &&
+          includeTax <= choosenPriceRange.value[1]
+        );
       }
       return true;
     });
@@ -211,12 +244,12 @@ function onFilter() {
     emit("filter", filteredBookables);
   }
 }
-function removeFilter(){
-  includeNonSuitable.value = true
-  includeNonBookable.value = true
-  choosenCategories.value = []
-  choosenPriceRange.value = [priceRange.value[0], priceRange.value[1]]
-  choosenDistanceRange.value = [distanceRange.value[0], distanceRange.value[1]]
+function removeFilter() {
+  includeNonSuitable.value = true;
+  includeNonBookable.value = true;
+  choosenCategories.value = [];
+  choosenPriceRange.value = [priceRange.value[0], priceRange.value[1]];
+  choosenDistanceRange.value = [distanceRange.value[0], distanceRange.value[1]];
 
   emit("filter", props.bookables);
 }

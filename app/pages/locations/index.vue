@@ -59,7 +59,7 @@ watch(
       initializeResults();
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 const sortMode = ref("relevance");
@@ -80,6 +80,7 @@ const searchLocationOptions = {
   includeScore: true,
   shouldSort: true,
 };
+const searchIsInitialized = ref(false);
 
 async function onSearch({ term, location, timePeriod }) {
   const hasCriteria = !!(
@@ -97,13 +98,15 @@ async function onSearch({ term, location, timePeriod }) {
 
   if (!hasCriteria) {
     initializeResults();
+    searchIsInitialized.value = false;
     filterResetKey.value++;
     return;
   }
+  searchIsInitialized.value = true;
 
   //alle die status === isBookable haben in Suche einbeziehen
   let bookableLocations = locationsWithStatus.filter(
-    (l) => l.status === "isBookable"
+    (l) => l.status === "isBookable",
   );
 
   //nach Suchbegriff suchen
@@ -131,14 +134,14 @@ async function onSearch({ term, location, timePeriod }) {
           location.bookable.tenantId,
           location.bookable.id,
           formatedTimePeriod.start.getTime(),
-          formatedTimePeriod.end.getTime()
+          formatedTimePeriod.end.getTime(),
         );
 
         return {
           location,
           isAvailable: availability.isAvailable && availability.remaining > 0,
         };
-      })
+      }),
     );
 
     bookableLocations = availabilityChecks
@@ -147,7 +150,7 @@ async function onSearch({ term, location, timePeriod }) {
   }
 
   //Status updaten
-  const updatedLocations = await Promise.all(
+  filteredLocations.value = await Promise.all(
     locationsWithStatus.map(async (item) => {
       if (item.status === "isBookable") {
         const isSuitable = bookableLocations.includes(item);
@@ -159,7 +162,7 @@ async function onSearch({ term, location, timePeriod }) {
             item.bookable.tenantId,
             item.bookable.id,
             formatedTimePeriod.start.getTime(),
-            formatedTimePeriod.end.getTime()
+            formatedTimePeriod.end.getTime(),
           );
         }
 
@@ -175,30 +178,29 @@ async function onSearch({ term, location, timePeriod }) {
           calculatedPrice: null,
         };
       }
-    })
+    }),
   );
-  console.log(updatedLocations);
-  filteredLocations.value = updatedLocations;
   filteredResultLocations.value = filteredLocations.value;
 
-  //Filter zurücksetzen -- toDo - ************** TEST***************
+  //Filter zurücksetzen
   filterResetKey.value++;
 }
 function numberOfSuitableBookables() {
-  return filteredLocations.value.filter((l) => l.status === "suitable").length;
+  return filteredResultLocations.value.filter((l) => l.status === "suitable")
+    .length;
 }
 
 function formateTimePeriod(timePeriod) {
   const newTimePeriod = {};
 
   newTimePeriod.start = new Date(
-    timePeriod.startDate + " " + timePeriod.startTime
+    timePeriod.startDate + " " + timePeriod.startTime,
   );
 
   newTimePeriod.end = "";
   if (!timePeriod.endDate && timePeriod.endTime) {
     newTimePeriod.end = new Date(
-      timePeriod.startDate + " " + timePeriod.endTime
+      timePeriod.startDate + " " + timePeriod.endTime,
     );
   } else {
     newTimePeriod.end = new Date(timePeriod.endDate + " " + timePeriod.endTime);
@@ -206,31 +208,37 @@ function formateTimePeriod(timePeriod) {
   return newTimePeriod;
 }
 
+function getPrice(item) {
+  if (searchIsInitialized.value) {
+    return item.calculatedPrice?.userGrossPriceEur;
+  }
+  if (
+    item.bookable.priceCategories &&
+    item.bookable.priceCategories.length > 0
+  ) {
+    return Math.min(
+      ...item.bookable.priceCategories.map((cat) => cat.priceEur),
+    );
+  }
+  return Infinity;
+}
+
 function sortBookables(mode) {
   sortMode.value = mode;
+  //toDo - Sortierung nach Beliebtheit ergänzen?!
+
   //Default: momentan "Relevanz" nach Fuze-Suche...
   filteredLocations.value = filteredLocations.value.sort((a, b) => {
     //Sortieren nach Preis
-    if (mode === "priceAscending" || mode === "priceDescending") {
-      // Null-Preise sollen immer am Ende sein
-      if (a.calculatedPrice === null) return 1;
-      if (b.calculatedPrice === null) return -1;
-
-      //toDo - Option für User-Preis berücksichtigen...
-      if (mode === "priceAscending") {
-        return (
-          a.calculatedPrice.regularPriceEur - b.calculatedPrice.regularPriceEur
-        );
-      } else if (mode === "priceDescending") {
-        return (
-          b.calculatedPrice.regularPriceEur - a.calculatedPrice.regularPriceEur
-        );
-      } else {
-        return 0;
-      }
+    if (mode === "priceAscending") {
+      return getPrice(a) - getPrice(b);
+    }
+    if (mode === "priceDescending") {
+      return getPrice(b) - getPrice(a);
     }
 
-    //Sortieren nach Distanz - toDo - Entfernung berechnen
+    //toDo - Sortierung nach Distanz ergänzen!!
+    //Sortieren nach Distanz
     if (mode === "distanceAscending" || mode === "distanceDescending") {
       // Momentan keine Entfernung vorhanden, also keine Sortierung
       /*
@@ -248,15 +256,8 @@ function sortBookables(mode) {
 }
 
 function setFilteredLocations(locations) {
-  console.log("set filtered locations in index.vue: ", locations);
   filteredResultLocations.value = locations;
 }
-
-/*
-function testFunction() {
-  console.log("coming soon...");
-}
-*/
 </script>
 
 <template>
@@ -266,7 +267,9 @@ function testFunction() {
     </div>
 
     <div class="m-10 lg:m-5 sm:flex items-center">
-      <span class="text-black dark:text-white lg:font-bold"
+      <span
+        v-if="searchIsInitialized"
+        class="text-black dark:text-white lg:font-bold"
         >{{ numberOfSuitableBookables() }} passende Ergebnisse</span
       >
       <div class="" style="flex: 1" />
@@ -282,7 +285,6 @@ function testFunction() {
           class="lg:hidden"
           @filter="setFilteredLocations"
         />
-        <!-- toDo - add filter function!!!!!!!! -->
       </div>
     </div>
 

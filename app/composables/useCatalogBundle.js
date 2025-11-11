@@ -1,6 +1,7 @@
 import { useCatalogStore } from "~~/stores/catalog.js";
 import { useBookableStore } from "~~/stores/bookable.js";
 import { useEventStore } from "~~/stores/event.js";
+import { useTenantStore } from "~~/stores/tenant.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
 
 export function useCatalogBundle() {
@@ -8,6 +9,7 @@ export function useCatalogBundle() {
   const catalogStore = useCatalogStore();
   const bookableStore = useBookableStore();
   const eventStore = useEventStore();
+  const tenantStore = useTenantStore();
 
   async function loadBundle({ slug, bookableID, eventID, include = [] }) {
     console.log("Loading catalog bundle:", {
@@ -49,6 +51,9 @@ export function useCatalogBundle() {
     }
     if (data.value?.event) {
       eventStore.addOrUpdate(data.value.event);
+    }
+    if (data.value?.tenants) {
+        tenantStore.$patch({ tenants: data.value.tenants });
     }
 
     return data.value;

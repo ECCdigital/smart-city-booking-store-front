@@ -2,26 +2,27 @@
   <!-- Strip for md and larger screens -->
   <div
     v-if="!!isGreaterThanMd"
-    class="flex justify-between bg-white dark:bg-gray-700 -mt-5 p-2 z-100 rounded shadow-lg "
+    class="flex justify-between bg-white dark:bg-gray-700 -mt-5 p-2 z-100 rounded shadow-lg"
     style="position: relative; width: 60vw"
   >
     <InputText
       v-model="searchTerm"
       icon="i-lucide-search"
       placeholder="Wonach suchen Sie?"
+      clearable
     />
     <USeparator orientation="vertical" />
     <InputText
       v-model="searchLocation"
       icon="i-lucide-map-pin"
       placeholder="Ort"
-      class=""
+      clearable
     />
     <USeparator orientation="vertical" />
-    <InputTimePeriod @select-date="setSearchTimePeriod" />
+    <InputTimePeriod @select-date="setSearchTimePeriod" @remove-date="removeSearchTimePeriod"/>
     <UButton
       label="Suchen"
-      class="w-full justify-center  text-white dark:text-black"
+      class="w-full justify-center text-white dark:text-black"
       @click="onSearch"
     />
   </div>
@@ -36,15 +37,17 @@
       v-model="searchTerm"
       icon="i-lucide-search"
       placeholder="Wonach suchen Sie?"
+      clearable
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputText
       v-model="searchLocation"
       icon="i-lucide-map-pin"
       placeholder="Ort"
+      clearable
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
-    <InputTimePeriod @select-date="setSearchTimePeriod" />
+    <InputTimePeriod @select-date="setSearchTimePeriod" @remove-date="removeSearchTimePeriod"/>
     <UButton
       label="Suchen"
       class="w-full justify-center text-white dark:text-black"
@@ -66,6 +69,9 @@ const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 
 function setSearchTimePeriod(timePeriod) {
   searchTimePeriod.value = timePeriod;
+}
+function removeSearchTimePeriod() {
+  searchTimePeriod.value = null;
 }
 function onSearch() {
   emit("search", {
