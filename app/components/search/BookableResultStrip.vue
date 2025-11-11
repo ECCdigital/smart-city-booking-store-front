@@ -11,7 +11,7 @@
             :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
             alt="Bild des Buchungsobjekts"
             class="rounded-xl h-full object-cover"
-        />
+        >
         <img
           v-else
           src="../../assets/bookable-default.jpg"
@@ -73,7 +73,10 @@
           <UButton
             v-if="!isNotBookable"
             label="Buchen"
-            class="justify-center text-white dark:text-black px-10"
+            class="justify-center  px-10"
+            :style="
+        { color: contrastToPrimary }
+      "
             @click="goToCheckout"
           />
         </div>
@@ -84,6 +87,7 @@
 <script setup>
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
+import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 
 const props = defineProps({
   bookable: {
@@ -99,6 +103,10 @@ const props = defineProps({
     default: false,
   },
 });
+
+const contrastToPrimary = computed(() =>
+    useContrastColor().contrastToPrimary(),
+);
 
 function goToCheckout() {
   const config = useRuntimeConfig();

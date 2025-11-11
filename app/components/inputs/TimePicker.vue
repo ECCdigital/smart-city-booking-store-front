@@ -7,7 +7,7 @@
       cancel-text="Abbrechen"
       select-text="OK"
       teleport-center
-      :disabled="disabled"
+      :disabled="props.disabled"
       :action-row="{ showPreview: false }"
       :ui="
         mode === 'dark'
@@ -23,8 +23,12 @@
 <script setup>
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { useColorMode } from "@vueuse/core";
+import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 
 const mode = useColorMode();
+const contrastToPrimary = computed(() =>
+    useContrastColor().contrastToPrimary(),
+);
 
 const model = defineModel();
 const props = defineProps({
@@ -38,7 +42,7 @@ const props = defineProps({
 <style>
 .dp__action_buttons .dp__action_select {
   background-color: var(--color-primary) !important;
-  color: #fff !important;
+  color: v-bind(contrastToPrimary) !important;
 }
 
 .darkBackground {

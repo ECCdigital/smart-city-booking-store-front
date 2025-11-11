@@ -2,7 +2,7 @@
   <!-- Strip for md and larger screens -->
   <div
     v-if="!!isGreaterThanMd"
-    class="flex justify-between bg-white dark:bg-gray-700 -mt-5 p-2 z-100 rounded shadow-lg "
+    class="flex justify-between bg-white dark:bg-gray-700 -mt-5 p-2 z-100 rounded shadow-lg"
     style="position: relative; width: 60vw"
   >
     <InputText
@@ -21,7 +21,10 @@
     <InputTimePeriod @select-date="setSearchTimePeriod" />
     <UButton
       label="Suchen"
-      class="w-full justify-center  text-white dark:text-black"
+      class="w-full justify-center"
+      :style="
+        { color: contrastToPrimary }
+      "
       @click="onSearch"
     />
   </div>
@@ -47,7 +50,10 @@
     <InputTimePeriod @select-date="setSearchTimePeriod" />
     <UButton
       label="Suchen"
-      class="w-full justify-center text-white dark:text-black"
+      class="w-full justify-center"
+      :style="
+        { color: contrastToPrimary }
+      "
       @click="onSearch"
     />
   </UCard>
@@ -55,7 +61,8 @@
 <script setup>
 import InputText from "../inputs/InputText.vue";
 import InputTimePeriod from "../inputs/InputTimePeriod.vue";
-import { useBreakpointCheck } from "../../composables/utils/useBreakpointCheck.js";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const emit = defineEmits(["search"]);
 const searchTerm = ref("");
@@ -63,6 +70,9 @@ const searchLocation = ref("");
 const searchTimePeriod = ref();
 
 const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
+const contrastToPrimary = computed(() =>
+  useContrastColor().contrastToPrimary(),
+);
 
 function setSearchTimePeriod(timePeriod) {
   searchTimePeriod.value = timePeriod;

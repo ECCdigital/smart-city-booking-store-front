@@ -1,17 +1,21 @@
 <template>
   <div :class="useAsDialog ? '' : 'my-2 p-2 border border-gray-200 rounded'">
     <div class="flex justify-between items-center">
-
-    <p class="my-4 font-bold">Ergebnisse filtern</p>
+      <p class="my-4 font-bold">Ergebnisse filtern</p>
       <UTooltip v-if="!useAsDialog" text="Filter zurücksetzen">
-      <UButton
+        <UButton
           v-if="!useAsDialog && filterIsActive"
           icon="i-lucide-trash"
           variant="ghost"
           class="rounded-full py-2 px-3"
-          :class="filterIsActive? '':''"
+          :class="filterIsActive ? '' : ''"
+          :style="
+            colorMode === 'dark'
+              ? { color: lighterColor }
+              : { color: darkerColor }
+          "
           @click="removeFilter"
-      />
+        />
       </UTooltip>
     </div>
     <USeparator v-if="!useAsDialog" class="border-gray-200" />
@@ -20,6 +24,11 @@
         <USwitch
           v-model="includeNonSuitable"
           label="Nicht passende Objekte anzeigen."
+          :style="
+            colorMode === 'dark'
+              ? '--ui-primary: ' + lighterColor
+              : '--ui-primary: ' + darkerColor
+          "
           @change="instantFilter"
         />
       </div>
@@ -27,6 +36,11 @@
         <USwitch
           v-model="includeNonBookable"
           label="Nicht buchbare Objekte anzeigen."
+          :style="
+            colorMode === 'dark'
+              ? '--ui-primary: ' + lighterColor
+              : '--ui-primary: ' + darkerColor
+          "
           @change="instantFilter"
         />
       </div>
@@ -37,6 +51,11 @@
           v-model="choosenCategories"
           :items="categories"
           :ui="{ label: 'text-base' }"
+          :style="
+            colorMode === 'dark'
+              ? '--ui-primary: ' + lighterColor
+              : '--ui-primary: ' + darkerColor
+          "
           @change="instantFilter"
         />
       </div>
@@ -53,8 +72,12 @@
           <div
             v-for="(count, index) in priceBins"
             :key="index"
-            :style="{ height: count * 10 + 'px' }"
-            class="bg-primary/40 w-6"
+            class="w-6"
+            :style="{
+              height: count * 10 + 'px',
+              backgroundColor: colorMode === 'dark' ? lighterColor : darkerColor,
+              opacity: 0.4,
+            }"
           />
         </div>
         <USlider
@@ -62,6 +85,11 @@
           :min="priceRange[0]"
           :max="priceRange[1]"
           :step="5"
+          :style="
+            colorMode === 'dark'
+              ? '--ui-primary: ' + lighterColor
+              : '--ui-primary: ' + darkerColor
+          "
           @change="instantFilter"
         />
       </div>
@@ -76,21 +104,26 @@
           :min="distanceRange[0]"
           :max="distanceRange[1]"
           :step="10"
+          :style="
+            colorMode === 'dark'
+              ? '--ui-primary: ' + lighterColor
+              : '--ui-primary: ' + darkerColor
+          "
           @change="instantFilter"
         />
       </div>
     </div>
     <div v-if="useAsDialog" class="flex justify-between">
       <UButton
-          v-if="filterIsActive"
-          label="Filter entfernen"
-          icon="i-lucide-trash"
-          color="neutral"
-          variant="soft"
-          class="rounded-full py-2 px-3"
-          @click="removeFilter"
+        v-if="filterIsActive"
+        label="Filter entfernen"
+        icon="i-lucide-trash"
+        color="neutral"
+        variant="soft"
+        class="rounded-full py-2 px-3"
+        @click="removeFilter"
       />
-      <div v-else class="flex-1"/>
+      <div v-else class="flex-1" />
       <UButton
         label="Filtern"
         icon="i-lucide-funnel"
@@ -103,6 +136,9 @@
   </div>
 </template>
 <script setup>
+import { useColorMode } from "@vueuse/core";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+
 const props = defineProps({
   bookables: {
     type: Array,
@@ -116,6 +152,11 @@ const props = defineProps({
 const emit = defineEmits(["filter"]);
 
 const filterIsActive = ref(false);
+
+//Colors
+const colorMode = useColorMode();
+const darkerColor = computed(() => useContrastColor().darkerColor());
+const lighterColor = computed(() => useContrastColor().lighterColor());
 
 //Passende und buchbare Objekte
 const includeNonSuitable = ref(true);
@@ -171,7 +212,7 @@ const choosenDistanceRange = ref([
 ]);
 
 function instantFilter() {
-  filterIsActive.value = true
+  filterIsActive.value = true;
   if (!props.useAsDialog) {
     onFilter();
   }
@@ -211,14 +252,14 @@ function onFilter() {
     emit("filter", filteredBookables);
   }
 }
-function removeFilter(){
-  includeNonSuitable.value = true
-  includeNonBookable.value = true
-  choosenCategories.value = []
-  choosenPriceRange.value = [priceRange.value[0], priceRange.value[1]]
-  choosenDistanceRange.value = [distanceRange.value[0], distanceRange.value[1]]
+function removeFilter() {
+  includeNonSuitable.value = true;
+  includeNonBookable.value = true;
+  choosenCategories.value = [];
+  choosenPriceRange.value = [priceRange.value[0], priceRange.value[1]];
+  choosenDistanceRange.value = [distanceRange.value[0], distanceRange.value[1]];
 
-  filterIsActive.value = false
+  filterIsActive.value = false;
   emit("filter", props.bookables);
 }
 </script>

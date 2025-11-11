@@ -36,7 +36,7 @@
             color="neutral"
             variant="ghost"
             icon="i-lucide-x"
-            class="rounded-xl "
+            class="rounded-xl"
             @click="open = false"
           />
         </div>
@@ -82,7 +82,16 @@
         </div>
 
         <div class="flex justify-end">
-          <UButton label="OK" variant="ghost" @click="onSelectDate" />
+          <UButton
+            label="OK"
+            variant="ghost"
+            :style="
+              colorMode === 'dark'
+                ? { color: lighterColor }
+                : { color: darkerColor }
+            "
+            @click="onSelectDate"
+          />
         </div>
       </UCard>
     </template>
@@ -91,6 +100,8 @@
 <script setup>
 import DatePicker from "./DatePicker.vue";
 import TimePicker from "./TimePicker.vue";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import { useColorMode } from "@vueuse/core";
 
 const emit = defineEmits(["selectDate"]);
 
@@ -98,6 +109,10 @@ const dateRange = ref([]);
 const timeRange = ref({ start: null, end: null });
 const open = ref(false);
 const missingValues = ref([]);
+
+const colorMode = useColorMode();
+const darkerColor = computed(() => useContrastColor().darkerColor());
+const lighterColor = computed(() => useContrastColor().lighterColor());
 
 //Functions to display date and time values
 function displayDate(date) {
