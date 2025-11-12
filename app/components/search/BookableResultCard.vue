@@ -8,8 +8,14 @@
       <template #header>
         <div>
           <img
-            src="../../assets/example_office2.jpg"
-            alt="Ein beispielhaftes Büro."
+            v-if="bookable.imgUrl"
+            :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
+            alt="Bild des Buchungsobjekts"
+          >
+          <img
+            v-else
+            src="../../assets/bookable-default.jpg"
+            alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
           >
         </div>
       </template>
@@ -20,7 +26,7 @@
             <p class="text-lg font-bold">
               {{ bookable.title }}
             </p>
-            <p>{{ bookable.tenantId }}</p>
+            <p>{{ tenantName }}</p>
 
             <!-- Adresse und Entfernung -->
             <div class="w-full my-5">
@@ -52,7 +58,11 @@
             v-if="!isNotBookable"
             class="w-full flex justify-end text-md font-bold"
           >
-            <BookablePriceDisplay v-if="!isNotBookable" :price="price" />
+            <BookablePriceDisplay
+              v-if="!isNotBookable"
+              :bookable="bookable"
+              :calculated-price="calculatedPrice"
+            />
           </div>
         </div>
       </template>
@@ -62,13 +72,14 @@
 <script setup>
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
+import { useTenantStore } from "~~/stores/tenant.js";
 
 const props = defineProps({
   bookable: {
     type: Object,
     required: true,
   },
-  price: {
+  calculatedPrice: {
     type: Number,
     default: null,
   },
@@ -76,6 +87,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+});
+
+const tenantName = computed(() => {
+  return useTenantStore().getTenantById(props.bookable.tenantId).name;
 });
 
 function goToCheckout() {

@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     throw createError({
       statusCode: error.status || 500,
-      statusMessage: "Failed to check bookable price",
+      statusMessage: "Failed to check bookable calculatedPrice",
       data: error.message,
     });
   }

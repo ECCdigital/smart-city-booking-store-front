@@ -5,7 +5,7 @@
         v-for="(b, i) in suitableBookables"
         :key="i"
         :bookable="b.bookable"
-        :price="b.calculatedPrice"
+        :calculated-price="b.calculatedPrice"
         class="m-2"
       />
     </UPageList>

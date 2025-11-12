@@ -15,7 +15,7 @@
               : { color: darkerColor }
           "
           @click="removeFilter"
-        />
+      />
       </UTooltip>
     </div>
     <USeparator v-if="!useAsDialog" class="border-gray-200" />
@@ -66,11 +66,11 @@
           € {{ choosenPriceRange[0] }} - € {{ choosenPriceRange[1] }}
         </p>
         <div
-          v-if="priceBins.some((p) => p > 0)"
+          v-if="priceBars.some((p) => p > 0)"
           class="flex space-x-1 h-15 items-end justify-between"
         >
           <div
-            v-for="(count, index) in priceBins"
+            v-for="(count, index) in priceBars"
             :key="index"
             class="w-6"
             :style="{
@@ -183,25 +183,43 @@ const priceRange = computed(() => {
   return [minPrice, maxPrice];
 });
 const choosenPriceRange = ref([priceRange.value[0], priceRange.value[1]]);
-const priceBins = computed(() => {
-  const binsCount =
+const priceBars = computed(() => {
+  const barsCount =
     Math.ceil((priceRange.value[1] - priceRange.value[0]) / 5) || 1;
-  const bins = new Array(binsCount).fill(0);
+  const bars = new Array(barsCount).fill(0);
   const range = priceRange.value[1] - priceRange.value[0];
-  props.bookables.forEach((b) => {
+
+  const getBookablePrice = (b) => {
     if (b.calculatedPrice) {
-      const index = Math.min(
-        Math.floor(
-          ((b.calculatedPrice.userGrossPriceEur - priceRange.value[0]) /
-            range) *
-            binsCount,
-        ),
-        binsCount - 1,
+      return b.calculatedPrice.userGrossPriceEur;
+    }
+    if (
+      b.status === "suitable" &&
+      b.calculatedPrice === null &&
+      b.bookable?.priceCategories?.length > 0
+    ) {
+      const minPrice = Math.min(
+        ...b.bookable.priceCategories.map((cat) => cat.priceEur),
       );
-      bins[index]++;
+      return b.bookable.priceValueAddedTax
+        ? minPrice + (minPrice * b.bookable.priceValueAddedTax) / 100
+        : minPrice;
+    }
+    return null;
+  };
+
+  props.bookables.forEach((b) => {
+    const price = getBookablePrice(b);
+    if (price !== null) {
+      const index = Math.min(
+        Math.floor(((b.calculatedPrice.userGrossPriceEur - priceRange.value[0]) / range) * barsCount),
+        barsCount - 1,
+      );
+      bars[index]++;
     }
   });
-  return bins;
+
+  return bars;
 });
 
 //Distanz
@@ -241,6 +259,22 @@ function onFilter() {
         return (
           price >= choosenPriceRange.value[0] &&
           price <= choosenPriceRange.value[1]
+        );
+      } else if (
+        b.status === "suitable" &&
+        b.calculatedPrice === null &&
+        b.bookable?.priceCategories?.length > 0
+      ) {
+        const minPrice = Math.min(
+          ...b.bookable.priceCategories.map((cat) => cat.priceEur),
+        );
+        const includeTax = b.bookable.priceValueAddedTax
+          ? minPrice + (minPrice * b.bookable.priceValueAddedTax) / 100
+          : minPrice;
+
+        return (
+          includeTax >= choosenPriceRange.value[0] &&
+          includeTax <= choosenPriceRange.value[1]
         );
       }
       return true;

@@ -19,13 +19,19 @@ function isPrivateIp(ip: string) {
         a === 10 ||
         (a === 172 && b >= 16 && b <= 31) ||
         (a === 192 && b === 168) ||
-        ip === '127.0.0.1'
+        ip === '127.0.0.1' ||
+        ip === '::1'
     )
 }
 
 async function assertSafeHost(hostname: string) {
-    // Verhindere file:, data:, etc.
     if (!hostname) throw new H3Error('Invalid hostname')
+
+    const isDev = process.env.NODE_ENV === 'development'
+    if (isDev && (hostname === 'localhost' || hostname === '127.0.0.1')) {
+        return
+    }
+
     const addrs = await dns.lookup(hostname, { all: true })
     for (const a of addrs) {
         if (isPrivateIp(a.address)) {
@@ -90,8 +96,6 @@ export default eventHandler(async (event) => {
 
         setHeader(event, 'Content-Type', ct)
         setHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=86400')
-        // Du kannst zusätzlich ETag/Last-Modified setzen
-
         return buf
     } catch (err: any) {
         return sendError(event, err)
