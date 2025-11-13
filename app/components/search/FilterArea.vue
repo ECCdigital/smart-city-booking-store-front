@@ -212,7 +212,7 @@ const priceBars = computed(() => {
     const price = getBookablePrice(b);
     if (price !== null) {
       const index = Math.min(
-        Math.floor(((b.calculatedPrice.userGrossPriceEur - priceRange.value[0]) / range) * barsCount),
+        Math.floor(((b.calculatedPrice?.userGrossPriceEur - priceRange.value[0]) / range) * barsCount),
         barsCount - 1,
       );
       bars[index]++;
