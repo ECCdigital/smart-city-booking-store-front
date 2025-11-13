@@ -31,7 +31,9 @@
         <div class="w-full my-5">
           <EventTimeInformation :event="event" class="w-full text-sm" />
           <EventAdressInformation :event="event" class="w-full text-sm" />
-          <div class="my-5" v-html="htmlTeaserText"/>
+          <div
+              class="my-5 line-clamp-3"
+              v-html="htmlTeaserText"/>
         </div>
         <USeparator
           color="neutral"
