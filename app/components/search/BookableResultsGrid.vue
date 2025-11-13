@@ -1,6 +1,6 @@
 <template>
   <div>
-    <UBlogPosts v-if="suitableBookables?.length >0" class="m-5">
+    <UBlogPosts v-if="suitableBookables?.length >0 && !isEventGrid" class="m-5">
       <BookableResultCard
         v-for="(b, i) in suitableBookables"
         :key="i"
@@ -12,7 +12,7 @@
     <h2 v-if="includeNonSuitable && nonSuitableBookables.length > 0" class="text-2xl font-bold m-4 mt-7">
       Nicht passende Objekte
     </h2>
-    <UPageList>
+    <UPageList v-if="!isEventGrid">
       <BookableResultCard
           v-for="(b, i) in nonSuitableBookables"
           :key="i"
@@ -25,7 +25,7 @@
     <h2 v-if="includeNonBookable && nonBookableBookables.length > 0" class="text-2xl font-bold m-4 mt-7">
       Nicht buchbare Objekte
     </h2>
-    <UPageList>
+    <UPageList v-if="!isEventGrid">
       <BookableResultCard
           v-for="(b, i) in nonBookableBookables"
           :key="i"
@@ -50,6 +50,10 @@ const props = defineProps({
     default: false,
   },
   includeNonBookable: {
+    type: Boolean,
+    default: false,
+  },
+  isEventGrid: {
     type: Boolean,
     default: false,
   },

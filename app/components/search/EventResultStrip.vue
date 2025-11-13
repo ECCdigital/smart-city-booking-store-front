@@ -1,14 +1,14 @@
 <template>
   <div
     class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl"
-    :class="isNotBookable ? 'opacity-70' : ''"
+    :class="props.isNotBookable ? 'opacity-70' : ''"
     style="height: 300px"
   >
     <div class="basis-1/4">
       <img
-        v-if="bookable.imgUrl"
-        :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
-        alt="Bild des Buchungsobjekts"
+        v-if="event.information?.teaserImage"
+        :src="`/api/img?url=${encodeURIComponent(event.information.teaserImage)}`"
+        alt=""
         class="rounded-xl h-full w-full object-cover"
       >
       <img
@@ -18,27 +18,40 @@
         class="rounded-xl h-full w-full object-cover"
       >
     </div>
+
     <div class="basis-3/4 p-4 flex flex-col justify-between">
       <div class="">
         <!-- Title -->
         <p class="text-lg font-bold">
-          {{ bookable.title }}
+          {{ event.information.name }}
         </p>
         <p>{{ tenantName }}</p>
 
-        <!-- Adresse und Entfernung -->
-        <BookableAdressInformation :bookable="bookable" class="w-full my-5" />
+        <!-- Zeitpunkt, Adresse und Entfernung -->
+        <div class="w-full my-5">
+          <EventTimeInformation :event="event" class="w-full text-sm" />
+          <EventAdressInformation :event="event" class="w-full text-sm" />
+            <p class="my-2">{{ event.information.teaserText }}</p>
+        </div>
         <USeparator
           color="neutral"
           class="w-full"
           :ui="{ border: 'border-gray-300' }"
         />
+        <div class="w-full my-2">
+          <p>Veranstalter: {{event.eventOrganizer.name}}</p>
+        </div>
       </div>
+
       <div class="flex justify-between h-full">
+        <!-- toDo - Veranstalter?  -->
+        <!-- toDo - Preis?  -->
+        <!-- toDo - Eigenschaften?  -->
+
         <!-- Eigenschaften -->
         <div class="basis-3/5 w-full my-2">
           <UBadge
-            v-for="(flag, i) in bookable.flags"
+            v-for="(flag, i) in event.information.flags"
             :key="i"
             icon="i-lucide-check"
             size="md"
@@ -49,14 +62,17 @@
             {{ flag }}
           </UBadge>
         </div>
+
         <div class="basis-2/5 w-full grid content-end">
           <!-- Preis -->
-          <BookablePriceDisplay
-            v-if="!isNotBookable"
-            :bookable="bookable"
-            :calculated-price="calculatedPrice"
-            class="grid place-content-end text-md font-bold"
-          />
+          <!--
+            <BookablePriceDisplay
+              v-if="!isNotBookable"
+              :bookable="bookable"
+              :calculated-price="calculatedPrice"
+              class="grid place-content-end text-md font-bold"
+            />
+            -->
 
           <!--Aktionen-->
           <div class="w-full mt-2 flex justify-end content-end">
@@ -83,17 +99,17 @@
   </div>
 </template>
 <script setup>
-import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
-import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import EventAdressInformation from "~/components/events/EventAdressInformation.vue";
 import { useTenantStore } from "~~/stores/tenant.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 
 const props = defineProps({
-  bookable: {
+  event: {
     type: Object,
     required: true,
   },
-  calculatedPrice: {
+  price: {
     type: Number,
     default: null,
   },
@@ -102,8 +118,9 @@ const props = defineProps({
     default: false,
   },
 });
+
 const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.bookable.tenantId).name;
+  return useTenantStore().getTenantById(props.event.tenantId).name;
 });
 
 const contrastToPrimary = computed(() =>
@@ -126,8 +143,8 @@ function goToCheckout() {
   const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
 
   const params = new URLSearchParams({
-    id: props.bookable.id,
-    tenant: props.bookable.tenantId,
+    id: props.event.id,
+    tenant: props.event.tenantId,
     amount: "1",
   });
 
