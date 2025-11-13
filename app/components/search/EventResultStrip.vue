@@ -42,11 +42,7 @@
       </div>
 
       <div class="flex justify-between h-full">
-        <!-- toDo - Veranstalter?  -->
-        <!-- toDo - Preis?  -->
-        <!-- toDo - Eigenschaften?  -->
-
-        <!-- Eigenschaften -->
+       <!-- Veranstalter & Eigenschaften -->
         <div class="basis-3/5 w-full my-2">
           <div class="w-full my-2">
             <p>Veranstalter: {{event.eventOrganizer.name}}</p>
@@ -66,15 +62,11 @@
         </div>
 
         <div class="basis-2/5 w-full grid content-end">
-          <!-- Preis -->
-          <!--
-            <BookablePriceDisplay
+          <EventPriceDisplay
               v-if="!isNotBookable"
-              :bookable="bookable"
-              :calculated-price="calculatedPrice"
-              class="grid place-content-end text-md font-bold"
-            />
-            -->
+              :event-tickets="event.tickets"
+              class="grid place-content-end text-md font-bold mt-2"
+          />
 
           <!--Aktionen-->
           <div class="w-full mt-2 flex justify-end content-end">
