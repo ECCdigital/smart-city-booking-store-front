@@ -2,7 +2,7 @@
   <div
     class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl"
     :class="props.isNotBookable ? 'opacity-70' : ''"
-    style="height: 300px"
+    style=""
   >
     <div class="basis-1/4">
       <img
@@ -31,16 +31,14 @@
         <div class="w-full my-5">
           <EventTimeInformation :event="event" class="w-full text-sm" />
           <EventAdressInformation :event="event" class="w-full text-sm" />
-            <p class="my-2">{{ event.information.teaserText }}</p>
+          <div class="my-5" v-html="htmlTeaserText"/>
         </div>
         <USeparator
           color="neutral"
           class="w-full"
           :ui="{ border: 'border-gray-300' }"
         />
-        <div class="w-full my-2">
-          <p>Veranstalter: {{event.eventOrganizer.name}}</p>
-        </div>
+
       </div>
 
       <div class="flex justify-between h-full">
@@ -50,6 +48,10 @@
 
         <!-- Eigenschaften -->
         <div class="basis-3/5 w-full my-2">
+          <div class="w-full my-2">
+            <p>Veranstalter: {{event.eventOrganizer.name}}</p>
+          </div>
+
           <UBadge
             v-for="(flag, i) in event.information.flags"
             :key="i"
@@ -100,9 +102,11 @@
 </template>
 <script setup>
 import EventAdressInformation from "~/components/events/EventAdressInformation.vue";
-import { useTenantStore } from "~~/stores/tenant.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import {useTenantStore} from "~~/stores/tenant.js";
+import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
+import {useSanitizeHtml} from "~/composables/utils/useSanitizeHtml.js";
+import EventPriceDisplay from "~/components/events/EventPriceDisplay.vue";
 
 const props = defineProps({
   event: {
@@ -119,6 +123,11 @@ const props = defineProps({
   },
 });
 
+const { sanitizeHtml } = useSanitizeHtml()
+const htmlTeaserText = computed(() => {
+  return sanitizeHtml(props.event.information.teaserText || "")
+})
+
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.event.tenantId).name;
 });
@@ -128,6 +137,8 @@ const contrastToPrimary = computed(() =>
 );
 
 function goToCheckout() {
+  console.log("goToCheckout clicked for event id:", props.event.id);
+  /*
   const config = useRuntimeConfig();
   const baseFromConfig =
     (config && config.public && config.public.adminBaseUrl) ||
@@ -167,6 +178,8 @@ function goToCheckout() {
   } else {
     console.warn("Attempted to open checkout URL on server-side: ", url);
   }
+
+   */
 }
 </script>
 
