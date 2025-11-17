@@ -6,9 +6,8 @@ import SearchBar from "~/components/search/SearchBar.vue";
 import FilterButton from "~/components/search/FilterButton.vue";
 import SortButton from "~/components/search/SortButton.vue";
 import BookableResultsList from "~/components/search/BookableResultsList.vue";
-//import BookableResultsGrid from "~/components/search/BookableResultsGrid.vue";
+import BookableResultsGrid from "~/components/search/BookableResultsGrid.vue";
 import FilterArea from "~/components/search/FilterArea.vue";
-import Fuse from "fuse.js";
 
 definePageMeta({ name: "catalog-events", layout: "catalog" });
 
@@ -133,7 +132,6 @@ function numberOfSuitableBookables() {
           include-non-suitable
           is-event-list
         />
-        <!--
         <BookableResultsGrid
             v-else
             :bookables="filteredResultEvents"
@@ -141,7 +139,6 @@ function numberOfSuitableBookables() {
             include-non-suitable
             is-event-grid
         />
-        -->
       </div>
     </div>
   </div>

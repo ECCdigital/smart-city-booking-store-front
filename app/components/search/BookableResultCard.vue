@@ -8,9 +8,10 @@
       <template #header>
         <div>
           <img
-            v-if="bookable.imgUrl"
-            :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
+            v-if="bookable?.imgUrl"
+            :src="`/api/img?url=${encodeURIComponent(bookable?.imgUrl)}`"
             alt="Bild des Buchungsobjekts"
+            class="h-full w-full object-cover"
           >
           <img
             v-else

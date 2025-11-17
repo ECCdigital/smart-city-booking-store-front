@@ -16,7 +16,7 @@
         :key="i"
         :event="event.item"
         class="m-2"
-      />
+      /><!-- toDo - Preis ergänzen?!  -->
     </UPageList>
 
     <!-- Nicht passende Ergebnisse -->

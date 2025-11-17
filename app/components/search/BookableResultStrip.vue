@@ -9,7 +9,7 @@
       <img
         v-if="bookable?.imgUrl"
         :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
-        alt="Bild des Buchungsobjekts"
+        alt=""
         class="rounded-xl h-full w-full object-cover"
       >
       <img

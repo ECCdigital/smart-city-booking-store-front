@@ -1,44 +1,75 @@
 <template>
   <div>
-    <UBlogPosts v-if="suitableBookables?.length >0 && !isEventGrid" class="m-5">
+    <!-- Passende Ergebnisse & Default Anzeige -->
+    <UBlogPosts v-if="suitableBookables.length > 0 && !isEventGrid" class="m-5">
       <BookableResultCard
         v-for="(b, i) in suitableBookables"
         :key="i"
-        :bookable="b.bookable"
+        :bookable="b.item"
         :calculated-price="b.calculatedPrice"
       />
     </UBlogPosts>
+    <UBlogPosts v-if="suitableBookables.length > 0 && isEventGrid" class="m-5">
+      <EventResultCard
+        v-for="(event, i) in suitableBookables"
+        :key="i"
+        :event="event.item"
+      /><!-- toDo - Preis ergänzen?!  -->
+    </UBlogPosts>
 
-    <h2 v-if="includeNonSuitable && nonSuitableBookables.length > 0" class="text-2xl font-bold m-4 mt-7">
-      Nicht passende Objekte
-    </h2>
-    <UPageList v-if="!isEventGrid">
-      <BookableResultCard
+    <!-- Nicht passende Ergebnisse -->
+    <div v-if="nonSuitableBookables.length > 0">
+      <h2 v-if="includeNonSuitable" class="text-2xl font-bold m-4 mt-7">
+        Nicht passende Objekte
+      </h2>
+      <UPageList v-if="!isEventGrid">
+        <BookableResultCard
           v-for="(b, i) in nonSuitableBookables"
           :key="i"
-          :bookable="b.bookable"
+          :bookable="b.item"
           is-not-bookable
           class="m-2"
-      />
-    </UPageList>
+        />
+      </UPageList>
+      <UPageList v-if="isEventGrid">
+        <EventResultCard
+          v-for="(event, i) in nonSuitableBookables"
+          :key="i"
+          :event="event.item"
+        /><!-- toDo - Preis ergänzen?!  -->
+      </UPageList>
+    </div>
 
-    <h2 v-if="includeNonBookable && nonBookableBookables.length > 0" class="text-2xl font-bold m-4 mt-7">
-      Nicht buchbare Objekte
-    </h2>
-    <UPageList v-if="!isEventGrid">
-      <BookableResultCard
+
+    <!-- Nicht buchbare Ergebnisse -->
+    <div v-if="nonBookableBookables.length > 0">
+      <h2 v-if="includeNonBookable" class="text-2xl font-bold m-4 mt-7">
+        Nicht buchbare Objekte
+      </h2>
+      <UPageList v-if="!isEventGrid">
+        <BookableResultCard
           v-for="(b, i) in nonBookableBookables"
           :key="i"
-          :bookable="b.bookable"
+          :bookable="b.item"
           is-not-bookable
           class="m-2"
-      />
-    </UPageList>
-    <p v-if="bookables.length <1">Keine Locations gefunden.</p>
+        />
+      </UPageList>
+      <UPageList v-if="isEventGrid">
+        <EventResultCard
+          v-for="(event, i) in nonBookableBookables"
+          :key="i"
+          :event="event.item"
+        /><!-- toDo - Preis ergänzen?!  -->
+      </UPageList>
+    </div>
+
+    <p v-if="bookables.length < 1">Keine Locations gefunden.</p>
   </div>
 </template>
 <script setup>
 import BookableResultCard from "./BookableResultCard.vue";
+import EventResultCard from "~/components/search/EventResultCard.vue";
 
 const props = defineProps({
   bookables: {
@@ -73,4 +104,3 @@ const nonBookableBookables = computed(() =>
 </script>
 
 <style scoped></style>
-
