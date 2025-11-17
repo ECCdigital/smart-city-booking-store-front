@@ -1,12 +1,13 @@
 <template>
   <div
+      v-if="props.bookable"
     class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl"
     :class="isNotBookable ? 'opacity-70' : ''"
     style="height: 300px"
   >
     <div class="basis-1/4">
       <img
-        v-if="bookable.imgUrl"
+        v-if="bookable?.imgUrl"
         :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
         alt="Bild des Buchungsobjekts"
         class="rounded-xl h-full w-full object-cover"
@@ -22,7 +23,7 @@
       <div class="">
         <!-- Title -->
         <p class="text-lg font-bold">
-          {{ bookable.title }}
+          {{ bookable?.title }}
         </p>
         <p>{{ tenantName }}</p>
 
@@ -38,7 +39,7 @@
         <!-- Eigenschaften -->
         <div class="basis-3/5 w-full my-2">
           <UBadge
-            v-for="(flag, i) in bookable.flags"
+            v-for="(flag, i) in bookable?.flags"
             :key="i"
             icon="i-lucide-check"
             size="md"
@@ -80,6 +81,7 @@
         </div>
       </div>
     </div>
+
   </div>
 </template>
 <script setup>
@@ -103,7 +105,7 @@ const props = defineProps({
   },
 });
 const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.bookable.tenantId).name;
+  return useTenantStore().getTenantById(props.bookable?.tenantId)?.name||"";
 });
 
 const contrastToPrimary = computed(() =>
@@ -126,8 +128,8 @@ function goToCheckout() {
   const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
 
   const params = new URLSearchParams({
-    id: props.bookable.id,
-    tenant: props.bookable.tenantId,
+    id: props.bookabl?.id,
+    tenant: props.bookable?.tenantId,
     amount: "1",
   });
 

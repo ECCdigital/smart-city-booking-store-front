@@ -78,7 +78,7 @@
             label="Details ansehen"
             variant="ghost"
             class="justify-center px-10"
-            :to="`/catalog/${catalogSlug}/locations/${bookable.id}`"
+            :to="`/catalog/${catalogSlug}/events/${event.id}`"
           />
           -->
             <UButton
@@ -172,7 +172,6 @@ function goToCheckout() {
   } else {
     console.warn("Attempted to open checkout URL on server-side: ", url);
   }
-
    */
 }
 </script>

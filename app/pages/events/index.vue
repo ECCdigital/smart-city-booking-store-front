@@ -2,12 +2,13 @@
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useEventStore } from "~~/stores/event.js";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
-import BookableSearchBar from "~/components/search/BookableSearchBar.vue";
+import SearchBar from "~/components/search/SearchBar.vue";
 import FilterButton from "~/components/search/FilterButton.vue";
 import SortButton from "~/components/search/SortButton.vue";
 import BookableResultsList from "~/components/search/BookableResultsList.vue";
-import BookableResultsGrid from "~/components/search/BookableResultsGrid.vue";
+//import BookableResultsGrid from "~/components/search/BookableResultsGrid.vue";
 import FilterArea from "~/components/search/FilterArea.vue";
+import Fuse from "fuse.js";
 
 definePageMeta({ name: "catalog-events", layout: "catalog" });
 
@@ -20,20 +21,51 @@ const { loadBundle } = useCatalogBundle();
 const eventStore = useEventStore();
 await loadBundle({ catalogSlug, include: ["events"] });
 
-//const { events } = storeToRefs(eventStore);
-
 const allEvents = computed(() => {
   return eventStore.getEvents;
 });
-const filteredEvents = ref(allEvents.value); //ref([]);
-const filteredResultEvents = ref(filteredEvents.value); //ref([]);
-//const filterResetKey = ref(0);
+const filteredEvents = ref([]);
+const filteredResultEvents = ref([]);
+const filterResetKey = ref(0);
+
+// Initialisierung: Vor der ersten Suche alles anzeigen
+function initializeResults() {
+  // Status setzen: Buchbare -> "suitable", andere -> "nonBookable"
+  const withStatus = allEvents.value.map((event) => {
+    if (event.attendees.publicEvent === true) {
+      return { item: event, status: "suitable", calculatedPrice: null };
+    }
+    return { item: event, status: "nonBookable", calculatedPrice: null };
+  });
+
+  filteredEvents.value = withStatus;
+  filteredResultEvents.value = withStatus;
+}
+// Reaktiv bleiben, falls der Store später Daten nachlädt
+watch(
+  () => allEvents.value,
+  (val) => {
+    if (!val || val.length === 0) {
+      filteredEvents.value = [];
+      filteredResultEvents.value = [];
+      return;
+    }
+    // Nur initialisieren, wenn noch kein Status existiert (d.h. noch keine Suche)
+    const hasStatus = filteredEvents.value.some((b) => b?.status);
+    if (!hasStatus) {
+      initializeResults();
+    }
+  },
+  { immediate: true, deep: true },
+);
 
 const sortMode = ref("relevance");
 
-function onSearch() {
-  console.log("Search triggered");
-  // toDo - Implement search logic here
+//Search
+const searchIsInitialized = ref(false);
+function onSearch(eventArray) {
+  filteredEvents.value = eventArray;
+  filteredResultEvents.value = eventArray;
 }
 function setFilteredEvents(events) {
   filteredResultEvents.value = events;
@@ -43,19 +75,27 @@ function sortBookables(mode) {
   // toDo - Implement sorting logic here
 }
 function numberOfSuitableBookables() {
-  return filteredEvents.value.length; //toDo - ANPASSEN!!!
-  //return filteredEvents.value.filter((l) => l.status === "suitable").length;
+  return filteredResultEvents.value.filter((e) => e.status === "suitable").length;
 }
 </script>
 
 <template>
   <div>
     <div class="flex justify-center">
-      <BookableSearchBar @search="onSearch" />
+      <SearchBar
+        v-model:is-initailized="searchIsInitialized"
+        v-model:filter-reset-key="filterResetKey"
+        :items-to-search="allEvents"
+        is-event
+        @initialize="initializeResults"
+        @search="onSearch"
+      />
     </div>
 
     <div class="m-10 lg:m-5 sm:flex items-center">
-      <span class="text-black dark:text-white lg:font-bold"
+      <span
+        v-if="searchIsInitialized"
+        class="text-black dark:text-white lg:font-bold"
         >{{ numberOfSuitableBookables() }} passende Ergebnisse</span
       >
       <div class="" style="flex: 1" />
@@ -87,12 +127,13 @@ function numberOfSuitableBookables() {
 
       <div class="md:basis-3/4">
         <BookableResultsList
-            v-if="isGreaterThanMd"
-            :bookables="filteredResultEvents"
-            include-non-bookable
-            include-non-suitable
-            is-event-list
+          v-if="isGreaterThanMd"
+          :bookables="filteredResultEvents"
+          include-non-bookable
+          include-non-suitable
+          is-event-list
         />
+        <!--
         <BookableResultsGrid
             v-else
             :bookables="filteredResultEvents"
@@ -100,17 +141,8 @@ function numberOfSuitableBookables() {
             include-non-suitable
             is-event-grid
         />
+        -->
       </div>
-
-      <!--
-      <div class=bg-yellow-300>
-       <ol>
-         <li v-for="(event, index) in filteredResultEvents" :key="index">
-           - {{index}}.){{ event }}
-         </li>
-       </ol>
-      </div>
-      -->
     </div>
   </div>
 </template>

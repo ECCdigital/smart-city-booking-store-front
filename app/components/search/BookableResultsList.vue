@@ -1,45 +1,71 @@
 <template>
   <div>
+    <!-- Passende Ergebnisse & Default Anzeige -->
     <UPageList v-if="!isEventList">
       <BookableResultStrip
         v-for="(b, i) in suitableBookables"
         :key="i"
-        :bookable="b.bookable"
+        :bookable="b.item"
         :calculated-price="b.calculatedPrice"
         class="m-2"
       />
     </UPageList>
     <UPageList v-else>
       <EventResultStrip
-        v-for="(event, i) in props.bookables"
+        v-for="(event, i) in suitableBookables"
         :key="i"
-        :event="event"
+        :event="event.item"
         class="m-2"
       />
     </UPageList>
 
-    <h2 v-if="includeNonSuitable && nonSuitableBookables.length > 0" class="text-2xl font-bold m-4 mt-7">
+    <!-- Nicht passende Ergebnisse -->
+    <h2
+      v-if="includeNonSuitable && nonSuitableBookables.length > 0"
+      class="text-2xl font-bold m-4 mt-7"
+    >
       Nicht passende Objekte
     </h2>
     <UPageList v-if="!isEventList">
       <BookableResultStrip
-          v-for="(b, i) in nonSuitableBookables"
-          :key="i"
-          :bookable="b.bookable"
-          is-not-bookable
-          class="m-2"
+        v-for="(b, i) in nonSuitableBookables"
+        :key="i"
+        :bookable="b.item"
+        is-not-bookable
+        class="m-2"
       />
     </UPageList>
-    <h2 v-if="includeNonBookable && nonBookableBookables.length > 0" class="text-2xl font-bold m-4 mt-7">
+    <UPageList v-else>
+      <EventResultStrip
+        v-for="(event, i) in nonSuitableBookables"
+        :key="i"
+        :event="event.item"
+        class="m-2"
+      />
+    </UPageList>
+
+    <!-- Nicht buchbare Ergebnisse -->
+    <h2
+      v-if="includeNonBookable && nonBookableBookables.length > 0"
+      class="text-2xl font-bold m-4 mt-7"
+    >
       Nicht buchbare Objekte
     </h2>
     <UPageList v-if="!isEventList">
       <BookableResultStrip
-          v-for="(b, i) in nonBookableBookables"
-          :key="i"
-          :bookable="b.bookable"
-          is-not-bookable
-          class="m-2"
+        v-for="(b, i) in nonBookableBookables"
+        :key="i"
+        :bookable="b.item"
+        is-not-bookable
+        class="m-2"
+      />
+    </UPageList>
+    <UPageList v-else>
+      <EventResultStrip
+        v-for="(event, i) in nonBookableBookables"
+        :key="i"
+        :event="event.item"
+        class="m-2"
       />
     </UPageList>
 
@@ -69,7 +95,6 @@ const props = defineProps({
   },
 });
 
-
 const suitableBookables = computed(() =>
   props.bookables.filter((b) => b.status === "suitable"),
 );
@@ -81,7 +106,6 @@ const nonSuitableBookables = computed(() =>
 const nonBookableBookables = computed(() =>
   props.bookables.filter((b) => b.status === "nonBookable"),
 );
-
 </script>
 
 <style scoped></style>

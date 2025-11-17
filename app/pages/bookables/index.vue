@@ -1,12 +1,10 @@
 <script setup>
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useBookableStore } from "~~/stores/bookable.js";
-import { useBreakpointCheck } from "../../composables/utils/useBreakpointCheck.js";
-import BookableSearchBar from "../../components/search/BookableSearchBar.vue";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
+import SearchBar from "../../components/search/SearchBar.vue";
 import SortButton from "../../components/search/SortButton.vue";
 import FilterButton from "../../components/search/FilterButton.vue";
-import Fuse from "fuse.js";
-import { useBookables } from "../../composables/api/useBookables.js";
 import FilterArea from "~/components/search/FilterArea.vue";
 import BookableResultsList from "~/components/search/BookableResultsList.vue";
 import BookableResultsGrid from "~/components/search/BookableResultsGrid.vue";
@@ -38,9 +36,9 @@ function initializeResults() {
   // Status setzen: Buchbare -> "suitable", andere -> "nonBookable"
   const withStatus = allResources.value.map((resource) => {
     if (resource.isBookable) {
-      return { bookable: resource, status: "suitable", calculatedPrice: null };
+      return { item: resource, status: "suitable", calculatedPrice: null };
     }
-    return { bookable: resource, status: "nonBookable", calculatedPrice: null };
+    return { item: resource, status: "nonBookable", calculatedPrice: null };
   });
   filteredResources.value = withStatus;
   filteredResultResources.value = withStatus;
@@ -67,144 +65,15 @@ watch(
 const sortMode = ref("relevance");
 
 //Search
-const searchTermOptions = {
-  keys: [
-    "bookable.title",
-    "bookable.description",
-    "bookable.flags",
-    "bookable.tags",
-  ],
-  includeScore: true,
-  shouldSort: true,
-};
-const searchLocationOptions = {
-  keys: ["bookable.description", "bookable.location"],
-  includeScore: true,
-  shouldSort: true,
-};
+const searchIsInitialized = ref(false);
 
-async function onSearch({ term, location, timePeriod }) {
-  const hasCriteria = !!(
-    term ||
-    location ||
-    (timePeriod && (timePeriod.startDate || timePeriod.endDate))
-  );
-  const resourcesWithStatus = allResources.value.map((resource) => {
-    if (resource.isBookable) {
-      return { bookable: resource, status: "isBookable" };
-    } else {
-      return { bookable: resource, status: "nonBookable" };
-    }
-  });
-
-  if (!hasCriteria) {
-    initializeResults();
-    filterResetKey.value++;
-    return;
-  }
-
-  //alle die status === isBookable haben in Suche einbeziehen
-  let bookableResources = resourcesWithStatus.filter(
-    (r) => r.status === "isBookable",
-  );
-
-  //nach Suchbegriff suchen
-  if (term) {
-    bookableResources = new Fuse(bookableResources, searchTermOptions)
-      .search(term)
-      .map((result) => result.item);
-  }
-
-  //nach Ort suchen
-  if (location) {
-    bookableResources = new Fuse(bookableResources, searchLocationOptions)
-      .search(location)
-      .map((result) => result.item);
-  }
-  //nach Zeit suchen
-  let formatedTimePeriod = null;
-  if (timePeriod && timePeriod.startDate) {
-    formatedTimePeriod = formateTimePeriod(timePeriod);
-
-    const availabilityChecks = await Promise.all(
-      bookableResources.map(async (resource) => {
-        const availability = await useBookables().getBookableAvailability(
-          resource.bookable.tenantId,
-          resource.bookable.id,
-          formatedTimePeriod.start.getTime(),
-          formatedTimePeriod.end.getTime(),
-        );
-
-        return {
-          resource,
-          isAvailable: availability.isAvailable && availability.remaining > 0,
-        };
-      }),
-    );
-
-    bookableResources = availabilityChecks
-      .filter((result) => result.isAvailable)
-      .map((result) => result.resource);
-  }
-
-  //Status updaten
-  const updatedResource = await Promise.all(
-    resourcesWithStatus.map(async (item) => {
-      if (item.status === "isBookable") {
-        const isSuitable = bookableResources.includes(item);
-
-        let price = null;
-        if (timePeriod) {
-          //Preis raussuchen und mit ins Objekt schreiben
-          price = await useBookables().getBookablePrice(
-            item.bookable.tenantId,
-            item.bookable.id,
-            formatedTimePeriod.start.getTime(),
-            formatedTimePeriod.end.getTime(),
-          );
-        }
-
-        return {
-          ...item,
-          status: isSuitable ? "suitable" : "nonSuitable",
-          calculatedPrice: isSuitable ? price : null,
-        };
-      } else {
-        return {
-          ...item,
-          status: "nonBookable",
-          calculatedPrice: null,
-        };
-      }
-    }),
-  );
-  filteredResources.value = updatedResource;
-  filteredResultResources.value = filteredResources.value;
-
-  //Filter zurücksetzen
-  filterResetKey.value++;
+async function onSearch(resourcesArray) {
+  filteredResources.value = resourcesArray;
+  filteredResultResources.value = resourcesArray;
 }
 
 function numberOfSuitableBookables() {
   return filteredResources.value.filter((l) => l.status === "suitable").length;
-}
-
-function formateTimePeriod(timePeriod) {
-  const newTimePeriod = {};
-
-  newTimePeriod.start = new Date(
-    timePeriod.startDate + " " + timePeriod.startTime,
-  );
-
-  newTimePeriod.end = "";
-  if (!timePeriod.endDate && timePeriod.endTime) {
-    newTimePeriod.end = new Date(
-      timePeriod.startDate + " " + timePeriod.endTime,
-    );
-  } else {
-    newTimePeriod.end = new Date(timePeriod.endDate + " " + timePeriod.endTime);
-  }
-  return newTimePeriod;
 }
 
 function sortBookables(mode) {
@@ -256,11 +125,19 @@ function setFilteredResources(resources) {
 <template>
   <div>
     <div class="flex justify-center">
-      <BookableSearchBar @search="onSearch" />
+      <SearchBar
+        v-model:is-initailized="searchIsInitialized"
+        v-model:filter-reset-key="filterResetKey"
+        :items-to-search="allResources"
+        @initialize="initializeResults"
+        @search="onSearch"
+      />
     </div>
 
     <div class="m-10 lg:m-5 sm:flex items-center">
-      <span class="text-black dark:text-white lg:font-bold"
+      <span
+        v-if="searchIsInitialized"
+        class="text-black dark:text-white lg:font-bold"
         >{{ numberOfSuitableBookables() }} passende Ergebnisse</span
       >
       <div class="" style="flex: 1" />
@@ -292,16 +169,16 @@ function setFilteredResources(resources) {
 
       <div class="md:basis-3/4">
         <BookableResultsList
-            v-if="isGreaterThanMd"
-            :bookables="filteredResultResources"
-            include-non-bookable
-            include-non-suitable
+          v-if="isGreaterThanMd"
+          :bookables="filteredResultResources"
+          include-non-bookable
+          include-non-suitable
         />
         <BookableResultsGrid
-            v-else
-            :bookables="filteredResultResources"
-            include-non-bookable
-            include-non-suitable
+          v-else
+          :bookables="filteredResultResources"
+          include-non-bookable
+          include-non-suitable
         />
       </div>
     </div>
