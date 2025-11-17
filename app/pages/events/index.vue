@@ -5,8 +5,8 @@ import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import SearchBar from "~/components/search/SearchBar.vue";
 import FilterButton from "~/components/search/FilterButton.vue";
 import SortButton from "~/components/search/SortButton.vue";
-import BookableResultsList from "~/components/search/BookableResultsList.vue";
-import BookableResultsGrid from "~/components/search/BookableResultsGrid.vue";
+import ResultsList from "~/components/search/ResultsList.vue";
+import ResultsGrid from "~/components/search/ResultsGrid.vue";
 import FilterArea from "~/components/search/FilterArea.vue";
 
 definePageMeta({ name: "catalog-events", layout: "catalog" });
@@ -125,14 +125,14 @@ function numberOfSuitableBookables() {
       </div>
 
       <div class="md:basis-3/4">
-        <BookableResultsList
+        <ResultsList
           v-if="isGreaterThanMd"
           :bookables="filteredResultEvents"
           include-non-bookable
           include-non-suitable
           is-event-list
         />
-        <BookableResultsGrid
+        <ResultsGrid
             v-else
             :bookables="filteredResultEvents"
             include-non-bookable

@@ -6,8 +6,8 @@ import SearchBar from "../../components/search/SearchBar.vue";
 import SortButton from "../../components/search/SortButton.vue";
 import FilterButton from "../../components/search/FilterButton.vue";
 import FilterArea from "~/components/search/FilterArea.vue";
-import BookableResultsList from "~/components/search/BookableResultsList.vue";
-import BookableResultsGrid from "~/components/search/BookableResultsGrid.vue";
+import ResultsList from "~/components/search/ResultsList.vue";
+import ResultsGrid from "~/components/search/ResultsGrid.vue";
 
 definePageMeta({
   name: "catalog-bookables",
@@ -168,13 +168,13 @@ function setFilteredResources(resources) {
       </div>
 
       <div class="md:basis-3/4">
-        <BookableResultsList
+        <ResultsList
           v-if="isGreaterThanMd"
           :bookables="filteredResultResources"
           include-non-bookable
           include-non-suitable
         />
-        <BookableResultsGrid
+        <ResultsGrid
           v-else
           :bookables="filteredResultResources"
           include-non-bookable

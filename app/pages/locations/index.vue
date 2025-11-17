@@ -4,10 +4,10 @@ import { useBookableStore } from "~~/stores/bookable.js";
 import Fuse from "fuse.js";
 import "@vuepic/vue-datepicker/dist/main.css";
 import SearchBar from "../../components/search/SearchBar.vue";
-import BookableResultsList from "../../components/search/BookableResultsList.vue";
+import ResultsList from "../../components/search/ResultsList.vue";
 import { useBookables } from "~/composables/api/useBookables.js";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
-import BookableResultsGrid from "../../components/search/BookableResultsGrid.vue";
+import ResultsGrid from "../../components/search/ResultsGrid.vue";
 import FilterArea from "../../components/search/FilterArea.vue";
 import SortButton from "../../components/search/SortButton.vue";
 import FilterButton from "../../components/search/FilterButton.vue";
@@ -173,13 +173,13 @@ function setFilteredLocations(locations) {
       </div>
 
       <div class="md:basis-3/4">
-        <BookableResultsList
+        <ResultsList
           v-if="isGreaterThanMd"
           :bookables="filteredResultLocations"
           include-non-bookable
           include-non-suitable
         />
-        <BookableResultsGrid
+        <ResultsGrid
           v-else
           :bookables="filteredResultLocations"
           include-non-bookable
