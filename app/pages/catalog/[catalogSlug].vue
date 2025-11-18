@@ -54,7 +54,7 @@ if (data.value?.bookables) {
   bookableStore.$patch({ bookables: data.value.bookables });
 }
 
-let isFetching = false;
+const isFetching = false;
 
 useHead({
   link: [
@@ -81,14 +81,14 @@ useHead({
           Unsere Angebote und Veranstaltungen
         </p>
       </div>
-      <div style="flex: 1; min-width: 15vw"></div>
+      <div style="flex: 1; min-width: 15vw"/>
       <div>
         <img
           src="../../assets/logo-kielregion.png"
           alt="Logo Kiel Region"
           class="text-center"
           style="height: 7vw"
-        />
+        >
       </div>
     </div>
     <UPageHero
@@ -108,7 +108,7 @@ useHead({
             alt="Logo Kiel Region"
             class="text-center"
             style="height: 15vw"
-          />
+          >
         </div>
       </template>
     </UPageHero>

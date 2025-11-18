@@ -106,7 +106,9 @@ function numberOfSuitableBookables() {
         />
         <FilterButton
           v-if="filteredEvents.length > 0"
+          v-model:is-initailized="searchIsInitialized"
           :bookables="filteredEvents"
+          is-event
           class="lg:hidden"
           @filter="setFilteredEvents"
         />
@@ -119,7 +121,9 @@ function numberOfSuitableBookables() {
         <FilterArea
           v-if="filteredEvents.length > 0"
           :key="filterResetKey"
+          v-model:is-initailized="searchIsInitialized"
           :bookables="filteredEvents"
+          is-event
           @filter="setFilteredEvents"
         />
       </div>

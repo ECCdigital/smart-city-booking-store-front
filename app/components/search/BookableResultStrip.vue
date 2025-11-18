@@ -128,7 +128,7 @@ function goToCheckout() {
   const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
 
   const params = new URLSearchParams({
-    id: props.bookabl?.id,
+    id: props.bookable?.id,
     tenant: props.bookable?.tenantId,
     amount: "1",
   });

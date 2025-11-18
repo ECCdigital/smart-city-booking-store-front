@@ -15,7 +15,7 @@
               : { color: darkerColor }
           "
           @click="removeFilter"
-      />
+        />
       </UTooltip>
     </div>
     <USeparator v-if="!useAsDialog" class="border-gray-200" />
@@ -67,15 +67,17 @@
         </p>
         <div
           v-if="priceBars.some((p) => p > 0)"
-          class="flex space-x-1 h-15 items-end justify-between"
+          class="flex space-x-1 items-end justify-between max-w-sm"
         >
           <div
             v-for="(count, index) in priceBars"
             :key="index"
-            class="w-6"
+            class="w-full"
+            style="max-height: 50px"
             :style="{
-              height: count * 10 + 'px',
-              backgroundColor: colorMode === 'dark' ? lighterColor : darkerColor,
+              height: (count / Math.max(...priceBars)) * 50 + 'px',
+              backgroundColor:
+                colorMode === 'dark' ? lighterColor : darkerColor,
               opacity: 0.4,
             }"
           />
@@ -84,7 +86,7 @@
           v-model="choosenPriceRange"
           :min="priceRange[0]"
           :max="priceRange[1]"
-          :step="5"
+          :step="dynamicPriceStep"
           :style="
             colorMode === 'dark'
               ? '--ui-primary: ' + lighterColor
@@ -92,9 +94,10 @@
           "
           @change="instantFilter"
         />
+
       </div>
       <!-- Distanz -->
-      <div class="my-7">
+      <div v-if="searchIsInitialized" class="my-7">
         <p class="mb-3">Distanz</p>
         <p class="mb-3">
           {{ choosenDistanceRange[0] }} km - {{ choosenDistanceRange[1] }} km
@@ -139,12 +142,17 @@
 import { useColorMode } from "@vueuse/core";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
+const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
   bookables: {
     type: Array,
     required: true,
   },
   useAsDialog: {
+    type: Boolean,
+    default: false,
+  },
+  isEvent: {
     type: Boolean,
     default: false,
   },
@@ -172,55 +180,94 @@ const categories = [
 
 //Preis
 const priceRange = computed(() => {
-  const validPrices = props.bookables
-    .map((b) => b.calculatedPrice?.userGrossPriceEur)
-    .filter((price) => price !== undefined && price !== null);
-
+  let validPrices = [];
+  if (!props.isEvent) {
+    validPrices = props.bookables.map((b) => getBookableMinPrice(b));
+  } else {
+    validPrices = props.bookables.map((e) => getEventMinPrice(e));
+  }
+  validPrices = validPrices.filter(
+    (price) => price !== undefined && price !== null && !isNaN(price),
+  );
+  console.log("validPrices:", validPrices);
+  //set endpoints rounded to 5
   const minPrice =
-    validPrices.length > 0 ? Math.floor(Math.min(...validPrices)) : 0;
+    validPrices.length > 0 ? Math.floor(Math.min(...validPrices) / 5) * 5 : 0;
   const maxPrice =
-    validPrices.length > 0 ? Math.ceil(Math.max(...validPrices)) : 100;
+    validPrices.length > 0 ? Math.ceil(Math.max(...validPrices) / 5) * 5 : 100;
   return [minPrice, maxPrice];
 });
+
 const choosenPriceRange = ref([priceRange.value[0], priceRange.value[1]]);
+const dynamicPriceStep = computed(() => {
+  const range = priceRange.value[1] - priceRange.value[0];
+
+  let step = Math.ceil(range / 20);// 20 steps max
+  step = Math.max(5, Math.ceil(step / 5) * 5);
+  return step;
+});
 const priceBars = computed(() => {
+  //set number of bars depending on price range
   const barsCount =
-    Math.ceil((priceRange.value[1] - priceRange.value[0]) / 5) || 1;
+    Math.ceil((priceRange.value[1] - priceRange.value[0]) / dynamicPriceStep.value) || 1;
   const bars = new Array(barsCount).fill(0);
   const range = priceRange.value[1] - priceRange.value[0];
 
-  const getBookablePrice = (b) => {
-    if (b.calculatedPrice) {
-      return b.calculatedPrice.userGrossPriceEur;
-    }
-    if (
-      b.status === "suitable" &&
-      b.calculatedPrice === null &&
-      b.bookable?.priceCategories?.length > 0
-    ) {
-      const minPrice = Math.min(
-        ...b.bookable.priceCategories.map((cat) => cat.priceEur),
-      );
-      return b.bookable.priceValueAddedTax
-        ? minPrice + (minPrice * b.bookable.priceValueAddedTax) / 100
-        : minPrice;
-    }
-    return null;
-  };
-
   props.bookables.forEach((b) => {
-    const price = getBookablePrice(b);
-    if (price !== null) {
+    let minPrice = null;
+    if (!props.isEvent) {
+      minPrice = getBookableMinPrice(b);
+    } else {
+      minPrice = getEventMinPrice(b);
+    }
+    //sort price into bars
+    if (minPrice !== null) {
       const index = Math.min(
-        Math.floor(((b.calculatedPrice?.userGrossPriceEur - priceRange.value[0]) / range) * barsCount),
+        Math.floor(((minPrice - priceRange.value[0]) / range) * barsCount),
         barsCount - 1,
       );
       bars[index]++;
     }
   });
-
   return bars;
 });
+
+function getBookableMinPrice(bookable) {
+  if(bookable.status !== "suitable"){
+    return null;
+  }
+  //if search is initialized, return calculated price
+  if (searchIsInitialized.value && bookable.calculatedPrice) {
+    return bookable.calculatedPrice.userGrossPriceEur;
+  }
+  //else return min price from price categories
+  const minPrice = Math.min(
+    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || []),
+  );
+  return bookable.item.priceValueAddedTax
+    ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
+    : minPrice;
+}
+function getTicketMinPrice(ticket) {
+  const minPrice = Math.min(
+    ...ticket.priceCategories.map((cat) => cat.priceEur),
+  );
+  return ticket.priceValueAddedTax
+    ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
+    : minPrice;
+}
+function getEventMinPrice(event) {
+  if(event.status !== "suitable"){
+    return null;
+  }
+  if (event.item.tickets && event.item.tickets.length > 0) {
+    return Math.min(
+      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket)),
+    );
+  } else {
+    return 0;
+  }
+}
 
 //Distanz
 const distanceRange = ref([0, 100]); //in km //toDo - implementieren!!!!!!!!!
@@ -263,13 +310,13 @@ function onFilter() {
       } else if (
         b.status === "suitable" &&
         b.calculatedPrice === null &&
-        b.bookable?.priceCategories?.length > 0
+        b.item?.priceCategories?.length > 0
       ) {
         const minPrice = Math.min(
-          ...b.bookable.priceCategories.map((cat) => cat.priceEur),
+          ...b.item.priceCategories.map((cat) => cat.priceEur),
         );
-        const includeTax = b.bookable.priceValueAddedTax
-          ? minPrice + (minPrice * b.bookable.priceValueAddedTax) / 100
+        const includeTax = b.item.priceValueAddedTax
+          ? minPrice + (minPrice * b.item.priceValueAddedTax) / 100
           : minPrice;
 
         return (

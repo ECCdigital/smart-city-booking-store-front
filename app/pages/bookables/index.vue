@@ -149,6 +149,7 @@ function setFilteredResources(resources) {
         />
         <FilterButton
           v-if="filteredResources.length > 0"
+          v-model:is-initailized="searchIsInitialized"
           :bookables="filteredResources"
           class="lg:hidden"
           @filter="setFilteredResources"
@@ -162,6 +163,7 @@ function setFilteredResources(resources) {
         <FilterArea
           v-if="filteredResources.length > 0"
           :key="filterResetKey"
+          v-model:is-initailized="searchIsInitialized"
           :bookables="filteredResources"
           @filter="setFilteredResources"
         />

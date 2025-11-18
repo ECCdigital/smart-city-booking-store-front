@@ -154,6 +154,7 @@ function setFilteredLocations(locations) {
         />
         <FilterButton
           v-if="filteredLocations.length > 0"
+          v-model:is-initailized="searchIsInitialized"
           :bookables="filteredLocations"
           class="lg:hidden"
           @filter="setFilteredLocations"
@@ -167,6 +168,7 @@ function setFilteredLocations(locations) {
         <FilterArea
           v-if="filteredLocations.length > 0"
           :key="filterResetKey"
+          v-model:is-initailized="searchIsInitialized"
           :bookables="filteredLocations"
           @filter="setFilteredLocations"
         />
