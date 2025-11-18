@@ -70,6 +70,7 @@
           }"
         />
       </div>
+
       <USlider
         v-model="choosenPriceRange"
         :min="priceRange[0]"
@@ -156,12 +157,42 @@ const lighterColor = computed(() => useContrastColor().lighterColor());
 //Passende Objekte
 const includeNonSuitable = ref(true);
 
-//Kategorien - toDo - anpassen!!!!!!!!!!!!!!!!!!!!
+//Kategorien - toDo - anpassen und dynamisch auslesen!!!!!!!!!!!!!!!!!!!!
 const choosenCategories = ref([]);
-const categories = [
+const categories = computed(() => {
+  console.log("Bookables:", props.bookables);
+  let type = "";
+  if(props.isEvent){
+    type ="event";
+  } else if (props.bookables.length > 0) {
+    type = props.bookables[0].item.type;
+  }
+switch (type){
+    case "event":
+      return eventCategories;
+    case "resource":
+      return resourceCategories;
+    case "event-location":
+      return locationCategories;
+      case "room":
+        return locationCategories;
+  }
+  return null;
+});
+const locationCategories = [
   { label: "Seminarräume", value: "kategorie1" },
   { label: "Konferenzräume", value: "kategorie2" },
   { label: "Werkstätten", value: "kategorie3" },
+];
+const resourceCategories = [
+  { label: "Mobilität", value: "kategorie4" },
+  { label: "Elektorgeräte", value: "kategorie5" },
+  { label: "Gerätestationen", value: "kategorie6" },
+];
+const eventCategories = [
+  { label: "Konzerte", value: "kategorie7" },
+  { label: "Workshops", value: "kategorie8" },
+  { label: "Vorträge", value: "kategorie9" },
 ];
 
 //Preis
@@ -175,7 +206,7 @@ const priceRange = computed(() => {
   validPrices = validPrices.filter(
     (price) => price !== undefined && price !== null && !isNaN(price),
   );
-  console.log("validPrices:", validPrices);
+
   //set endpoints rounded to 5
   const minPrice =
     validPrices.length > 0 ? Math.floor(Math.min(...validPrices) / 5) * 5 : 0;
@@ -275,39 +306,25 @@ function onFilter() {
   if (props.bookables.length > 0) {
     let filteredBookables = props.bookables;
 
-    //Passende und buchbare Objekte
     if (!includeNonSuitable.value) {
       filteredBookables = filteredBookables.filter(
         (b) => b.status !== "nonSuitable",
       );
     }
 
+    //filter by price
     filteredBookables = filteredBookables.filter((b) => {
-      if (b.calculatedPrice) {
-        const price = b.calculatedPrice?.userGrossPriceEur || 0;
-
-        return (
-          price >= choosenPriceRange.value[0] &&
-          price <= choosenPriceRange.value[1]
-        );
-      } else if (
-        b.status === "suitable" &&
-        b.calculatedPrice === null &&
-        b.item?.priceCategories?.length > 0
-      ) {
-        const minPrice = Math.min(
-          ...b.item.priceCategories.map((cat) => cat.priceEur),
-        );
-        const includeTax = b.item.priceValueAddedTax
-          ? minPrice + (minPrice * b.item.priceValueAddedTax) / 100
-          : minPrice;
-
-        return (
-          includeTax >= choosenPriceRange.value[0] &&
-          includeTax <= choosenPriceRange.value[1]
-        );
+      let price = 0;
+      if (!props.isEvent) {
+        price = getBookableMinPrice(b) || 0;
+      } else {
+        price = getEventMinPrice(b) || 0;
       }
-      return true;
+
+      return (
+        price >= choosenPriceRange.value[0] &&
+        price <= choosenPriceRange.value[1]
+      );
     });
 
     //toDo - Filterlogik für Kategorie ergänzen!!!!!!!!!!!!!!!!!
