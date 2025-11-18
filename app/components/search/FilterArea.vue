@@ -32,90 +32,77 @@
           @change="instantFilter"
         />
       </div>
-      <div class="flex space-x-2">
-        <USwitch
-          v-model="includeNonBookable"
-          label="Nicht buchbare Objekte anzeigen."
-          :style="
-            colorMode === 'dark'
-              ? '--ui-primary: ' + lighterColor
-              : '--ui-primary: ' + darkerColor
-          "
-          @change="instantFilter"
-        />
-      </div>
-      <!-- Kategorie -->
-      <div class="my-7">
-        <p class="mb-3">Kategorie</p>
-        <UCheckboxGroup
-          v-model="choosenCategories"
-          :items="categories"
-          :ui="{ label: 'text-base' }"
-          :style="
-            colorMode === 'dark'
-              ? '--ui-primary: ' + lighterColor
-              : '--ui-primary: ' + darkerColor
-          "
-          @change="instantFilter"
-        />
-      </div>
-      <!-- Preis -->
-      <div class="my-7">
-        <p class="mb-3">Preis</p>
-        <p class="mb-3">
-          € {{ choosenPriceRange[0] }} - € {{ choosenPriceRange[1] }}
-        </p>
-        <div
-          v-if="priceBars.some((p) => p > 0)"
-          class="flex space-x-1 items-end justify-between max-w-sm"
-        >
-          <div
-            v-for="(count, index) in priceBars"
-            :key="index"
-            class="w-full"
-            style="max-height: 50px"
-            :style="{
-              height: (count / Math.max(...priceBars)) * 50 + 'px',
-              backgroundColor:
-                colorMode === 'dark' ? lighterColor : darkerColor,
-              opacity: 0.4,
-            }"
-          />
-        </div>
-        <USlider
-          v-model="choosenPriceRange"
-          :min="priceRange[0]"
-          :max="priceRange[1]"
-          :step="dynamicPriceStep"
-          :style="
-            colorMode === 'dark'
-              ? '--ui-primary: ' + lighterColor
-              : '--ui-primary: ' + darkerColor
-          "
-          @change="instantFilter"
-        />
-
-      </div>
-      <!-- Distanz -->
-      <div v-if="searchIsInitialized" class="my-7">
-        <p class="mb-3">Distanz</p>
-        <p class="mb-3">
-          {{ choosenDistanceRange[0] }} km - {{ choosenDistanceRange[1] }} km
-        </p>
-        <USlider
-          v-model="choosenDistanceRange"
-          :min="distanceRange[0]"
-          :max="distanceRange[1]"
-          :step="10"
-          :style="
-            colorMode === 'dark'
-              ? '--ui-primary: ' + lighterColor
-              : '--ui-primary: ' + darkerColor
-          "
-          @change="instantFilter"
-        />
-      </div>
     </div>
+    <!-- Kategorie -->
+    <div class="my-7">
+      <p class="mb-3">Kategorie</p>
+      <UCheckboxGroup
+        v-model="choosenCategories"
+        :items="categories"
+        :ui="{ label: 'text-base' }"
+        :style="
+          colorMode === 'dark'
+            ? '--ui-primary: ' + lighterColor
+            : '--ui-primary: ' + darkerColor
+        "
+        @change="instantFilter"
+      />
+    </div>
+    <!-- Preis -->
+    <div class="my-7">
+      <p class="mb-3">Preis</p>
+      <p class="mb-3">
+        € {{ choosenPriceRange[0] }} - € {{ choosenPriceRange[1] }}
+      </p>
+      <div
+        v-if="priceBars.some((p) => p > 0)"
+        class="flex space-x-1 items-end justify-between max-w-sm"
+      >
+        <div
+          v-for="(count, index) in priceBars"
+          :key="index"
+          class="w-full"
+          style="max-height: 50px"
+          :style="{
+            height: (count / Math.max(...priceBars)) * 50 + 'px',
+            backgroundColor: colorMode === 'dark' ? lighterColor : darkerColor,
+            opacity: 0.4,
+          }"
+        />
+      </div>
+      <USlider
+        v-model="choosenPriceRange"
+        :min="priceRange[0]"
+        :max="priceRange[1]"
+        :step="dynamicPriceStep"
+        :style="
+          colorMode === 'dark'
+            ? '--ui-primary: ' + lighterColor
+            : '--ui-primary: ' + darkerColor
+        "
+        @change="instantFilter"
+      />
+    </div>
+    <!-- Distanz -->
+    <div v-if="searchIsInitialized" class="my-7">
+      <p class="mb-3">Distanz</p>
+      <p class="mb-3">
+        {{ choosenDistanceRange[0] }} km - {{ choosenDistanceRange[1] }} km
+      </p>
+      <USlider
+        v-model="choosenDistanceRange"
+        :min="distanceRange[0]"
+        :max="distanceRange[1]"
+        :step="10"
+        :style="
+          colorMode === 'dark'
+            ? '--ui-primary: ' + lighterColor
+            : '--ui-primary: ' + darkerColor
+        "
+        @change="instantFilter"
+      />
+    </div>
+
     <div v-if="useAsDialog" class="flex justify-between">
       <UButton
         v-if="filterIsActive"
@@ -166,9 +153,8 @@ const colorMode = useColorMode();
 const darkerColor = computed(() => useContrastColor().darkerColor());
 const lighterColor = computed(() => useContrastColor().lighterColor());
 
-//Passende und buchbare Objekte
+//Passende Objekte
 const includeNonSuitable = ref(true);
-const includeNonBookable = ref(true);
 
 //Kategorien - toDo - anpassen!!!!!!!!!!!!!!!!!!!!
 const choosenCategories = ref([]);
@@ -202,14 +188,16 @@ const choosenPriceRange = ref([priceRange.value[0], priceRange.value[1]]);
 const dynamicPriceStep = computed(() => {
   const range = priceRange.value[1] - priceRange.value[0];
 
-  let step = Math.ceil(range / 20);// 20 steps max
+  let step = Math.ceil(range / 20); // 20 steps max
   step = Math.max(5, Math.ceil(step / 5) * 5);
   return step;
 });
 const priceBars = computed(() => {
   //set number of bars depending on price range
   const barsCount =
-    Math.ceil((priceRange.value[1] - priceRange.value[0]) / dynamicPriceStep.value) || 1;
+    Math.ceil(
+      (priceRange.value[1] - priceRange.value[0]) / dynamicPriceStep.value,
+    ) || 1;
   const bars = new Array(barsCount).fill(0);
   const range = priceRange.value[1] - priceRange.value[0];
 
@@ -233,7 +221,7 @@ const priceBars = computed(() => {
 });
 
 function getBookableMinPrice(bookable) {
-  if(bookable.status !== "suitable"){
+  if (bookable.status !== "suitable") {
     return null;
   }
   //if search is initialized, return calculated price
@@ -257,7 +245,7 @@ function getTicketMinPrice(ticket) {
     : minPrice;
 }
 function getEventMinPrice(event) {
-  if(event.status !== "suitable"){
+  if (event.status !== "suitable") {
     return null;
   }
   if (event.item.tickets && event.item.tickets.length > 0) {
@@ -291,11 +279,6 @@ function onFilter() {
     if (!includeNonSuitable.value) {
       filteredBookables = filteredBookables.filter(
         (b) => b.status !== "nonSuitable",
-      );
-    }
-    if (!includeNonBookable.value) {
-      filteredBookables = filteredBookables.filter(
-        (b) => b.status !== "nonBookable",
       );
     }
 
@@ -335,7 +318,6 @@ function onFilter() {
 }
 function removeFilter() {
   includeNonSuitable.value = true;
-  includeNonBookable.value = true;
   choosenCategories.value = [];
   choosenPriceRange.value = [priceRange.value[0], priceRange.value[1]];
   choosenDistanceRange.value = [distanceRange.value[0], distanceRange.value[1]];

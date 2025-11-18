@@ -44,31 +44,6 @@
       />
     </UPageList>
 
-    <!-- Nicht buchbare Ergebnisse -->
-    <h2
-      v-if="includeNonBookable && nonBookableBookables.length > 0"
-      class="text-2xl font-bold m-4 mt-7"
-    >
-      Nicht buchbare Objekte
-    </h2>
-    <UPageList v-if="!isEventList">
-      <BookableResultStrip
-        v-for="(b, i) in nonBookableBookables"
-        :key="i"
-        :bookable="b.item"
-        is-not-bookable
-        class="m-2"
-      />
-    </UPageList>
-    <UPageList v-else>
-      <EventResultStrip
-        v-for="(event, i) in nonBookableBookables"
-        :key="i"
-        :event="event.item"
-        class="m-2"
-      />
-    </UPageList>
-
     <p v-if="bookables.length < 1">Keine Objekte gefunden.</p>
   </div>
 </template>
@@ -101,10 +76,6 @@ const suitableBookables = computed(() =>
 
 const nonSuitableBookables = computed(() =>
   props.bookables.filter((b) => b.status === "nonSuitable"),
-);
-
-const nonBookableBookables = computed(() =>
-  props.bookables.filter((b) => b.status === "nonBookable"),
 );
 </script>
 

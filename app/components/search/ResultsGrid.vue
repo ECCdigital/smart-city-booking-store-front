@@ -14,7 +14,7 @@
         v-for="(event, i) in suitableBookables"
         :key="i"
         :event="event.item"
-      /><!-- toDo - Preis ergänzen?!  -->
+      />
     </UBlogPosts>
 
     <!-- Nicht passende Ergebnisse -->
@@ -36,31 +36,7 @@
           v-for="(event, i) in nonSuitableBookables"
           :key="i"
           :event="event.item"
-        /><!-- toDo - Preis ergänzen?!  -->
-      </UPageList>
-    </div>
-
-
-    <!-- Nicht buchbare Ergebnisse -->
-    <div v-if="nonBookableBookables.length > 0">
-      <h2 v-if="includeNonBookable" class="text-2xl font-bold m-4 mt-7">
-        Nicht buchbare Objekte
-      </h2>
-      <UPageList v-if="!isEventGrid">
-        <BookableResultCard
-          v-for="(b, i) in nonBookableBookables"
-          :key="i"
-          :bookable="b.item"
-          is-not-bookable
-          class="m-2"
         />
-      </UPageList>
-      <UPageList v-if="isEventGrid">
-        <EventResultCard
-          v-for="(event, i) in nonBookableBookables"
-          :key="i"
-          :event="event.item"
-        /><!-- toDo - Preis ergänzen?!  -->
       </UPageList>
     </div>
 
@@ -96,10 +72,6 @@ const suitableBookables = computed(() =>
 
 const nonSuitableBookables = computed(() =>
   props.bookables.filter((b) => b.status === "nonSuitable"),
-);
-
-const nonBookableBookables = computed(() =>
-  props.bookables.filter((b) => b.status === "nonBookable"),
 );
 </script>
 
