@@ -1,5 +1,5 @@
 <template>
-  <div class="text-right ">
+  <div class="text-right">
     <p v-if="props.eventTickets.length === 0">Kostenlos</p>
     <p v-else>
       {{ displayMinDefaultPrice() }}
@@ -22,7 +22,13 @@ const props = defineProps({
 });
 
 function getMinPrice(ticket) {
-  return Math.min(...ticket.priceCategories.map((cat) => cat.priceEur));
+  return Math.min(
+    ...ticket.priceCategories.map((cat) => {
+      return ticket.priceValueAddedTax
+        ? cat.priceEur + (cat.priceEur * ticket.priceValueAddedTax) / 100
+        : cat.priceEur;
+    }),
+  );
 }
 function displayMinDefaultPrice() {
   if (props.eventTickets.length === 0) {
@@ -30,8 +36,8 @@ function displayMinDefaultPrice() {
   }
 
   const allTicketMin = props.eventTickets.map((ticket) => {
-    return getMinPrice(ticket)
-  })
+    return getMinPrice(ticket);
+  });
 
   const min = Math.min(...allTicketMin);
   if (min === 0) {
@@ -40,6 +46,4 @@ function displayMinDefaultPrice() {
   return "ab " + min.toFixed(2).toString().replace(/\./g, ",") + " €";
 }
 </script>
-<style scoped>
-
-</style>
+<style scoped></style>
