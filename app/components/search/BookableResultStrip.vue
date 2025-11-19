@@ -39,17 +39,6 @@
         <!-- Eigenschaften -->
         <div class="basis-3/5 w-full my-2">
           <BookableFlagDisplay :flags="bookable?.flags" />
-          <UBadge
-            v-for="(flag, i) in bookable?.flags"
-            :key="i"
-            icon="i-lucide-check"
-            size="md"
-            color="neutral"
-            variant="ghost"
-            style="padding-left: 0; padding-right: 15px"
-          >
-            {{ flag }}
-          </UBadge>
         </div>
         <div class="basis-2/5 w-full grid content-end">
           <!-- Preis -->
