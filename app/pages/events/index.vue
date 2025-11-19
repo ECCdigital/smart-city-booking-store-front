@@ -27,9 +27,9 @@ const filteredEvents = ref([]);
 const filteredResultEvents = ref([]);
 const filterResetKey = ref(0);
 
-// Initialisierung: Vor der ersten Suche alles anzeigen
+// Initialization: Show all items before the first search
 function initializeResults() {
-  // Status setzen: Buchbare -> "suitable", andere -> "nonBookable"
+  // Set status: Bookable -> "suitable", others -> "nonBookable"
   const withStatus = allEvents.value.map((event) => {
     if (event.attendees.publicEvent === true) {
       return { item: event, status: "suitable", calculatedPrice: null };
@@ -40,7 +40,7 @@ function initializeResults() {
   filteredEvents.value = withStatus;
   filteredResultEvents.value = withStatus;
 }
-// Reaktiv bleiben, falls der Store später Daten nachlädt
+//Stay reactive in case the store loads data later.
 watch(
   () => allEvents.value,
   (val) => {
@@ -49,7 +49,7 @@ watch(
       filteredResultEvents.value = [];
       return;
     }
-    // Nur initialisieren, wenn noch kein Status existiert (d.h. noch keine Suche)
+    // Only initialize if no status exists yet (i.e., no search has been performed yet)
     const hasStatus = filteredEvents.value.some((b) => b?.status);
     if (!hasStatus) {
       initializeResults();
@@ -58,23 +58,23 @@ watch(
   { immediate: true, deep: true },
 );
 
-const sortMode = ref("relevance");
-
 //Search
 const searchIsInitialized = ref(false);
 function onSearch(eventArray) {
   filteredEvents.value = eventArray;
   filteredResultEvents.value = eventArray;
 }
-function setFilteredEvents(events) {
+function numberOfSuitableBookables() {
+  return filteredResultEvents.value.filter((e) => e.status === "suitable")
+    .length;
+}
+
+//Sort & Filter
+function setSortedEvents(events) {
   filteredResultEvents.value = events;
 }
-function sortBookables(mode) {
-  console.log("Sort mode:", mode);
-  // toDo - Implement sorting logic here
-}
-function numberOfSuitableBookables() {
-  return filteredResultEvents.value.filter((e) => e.status === "suitable").length;
+function setFilteredEvents(events) {
+  filteredResultEvents.value = events;
 }
 </script>
 
@@ -101,8 +101,9 @@ function numberOfSuitableBookables() {
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
         <SortButton
           v-if="filteredEvents.length > 0"
-          :sort-mode="sortMode"
-          @sort="sortBookables"
+          :items-to-sort="filteredResultEvents"
+          is-event
+          @sort="setSortedEvents"
         />
         <FilterButton
           v-if="filteredEvents.length > 0"
@@ -116,7 +117,6 @@ function numberOfSuitableBookables() {
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
-      <!-- Filterbereich -->
       <div v-if="isGreaterThanMd" class="md:basis-1/4">
         <FilterArea
           v-if="filteredEvents.length > 0"
@@ -137,11 +137,11 @@ function numberOfSuitableBookables() {
           is-event-list
         />
         <ResultsGrid
-            v-else
-            :bookables="filteredResultEvents"
-            include-non-bookable
-            include-non-suitable
-            is-event-grid
+          v-else
+          :bookables="filteredResultEvents"
+          include-non-bookable
+          include-non-suitable
+          is-event-grid
         />
       </div>
     </div>

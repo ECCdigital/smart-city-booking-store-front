@@ -24,16 +24,15 @@ const bookableStore = useBookableStore();
 await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
 
 const allResources = computed(() => {
-  //return bookableStore.getBookables;
   return bookableStore.getResources;
 });
 const filteredResources = ref([]);
 const filteredResultResources = ref([]);
 const filterResetKey = ref(0);
 
-// Initialisierung: Vor der ersten Suche alles anzeigen
+// Initialization: Show all items before the first search
 function initializeResults() {
-  // Status setzen: Buchbare -> "suitable", andere -> "nonBookable"
+  // Set status: Bookable -> "suitable", others -> "nonBookable"
   const withStatus = allResources.value.map((resource) => {
     if (resource.isBookable) {
       return { item: resource, status: "suitable", calculatedPrice: null };
@@ -44,7 +43,7 @@ function initializeResults() {
   filteredResultResources.value = withStatus;
 }
 
-// Reaktiv bleiben, falls der Store später Daten nachlädt
+//Stay reactive in case the store loads data later.
 watch(
   () => allResources.value,
   (val) => {
@@ -53,7 +52,7 @@ watch(
       filteredResultResources.value = [];
       return;
     }
-    // Nur initialisieren, wenn noch kein Status existiert (d.h. noch keine Suche)
+    // Only initialize if no status exists yet (i.e., no search has been performed yet)
     const hasStatus = filteredResources.value.some((b) => b?.status);
     if (!hasStatus) {
       initializeResults();
@@ -62,61 +61,20 @@ watch(
   { immediate: true, deep: true },
 );
 
-const sortMode = ref("relevance");
-
 //Search
 const searchIsInitialized = ref(false);
-
 async function onSearch(resourcesArray) {
   filteredResources.value = resourcesArray;
   filteredResultResources.value = resourcesArray;
 }
-
 function numberOfSuitableBookables() {
   return filteredResources.value.filter((l) => l.status === "suitable").length;
 }
 
-function sortBookables(mode) {
-  sortMode.value = mode;
-  //Default: momentan "Relevanz" nach Fuze-Suche...
-  filteredResources.value = filteredResources.value.sort((a, b) => {
-    //Sortieren nach Preis
-    if (mode === "priceAscending" || mode === "priceDescending") {
-      // Null-Preise sollen immer am Ende sein
-      if (a.calculatedPrice === null) return 1;
-      if (b.calculatedPrice === null) return -1;
-
-      //toDo - Option für User-Preis berücksichtigen...
-      if (mode === "priceAscending") {
-        return (
-          a.calculatedPrice.regularPriceEur - b.calculatedPrice.regularPriceEur
-        );
-      } else if (mode === "priceDescending") {
-        return (
-          b.calculatedPrice.regularPriceEur - a.calculatedPrice.regularPriceEur
-        );
-      } else {
-        return 0;
-      }
-    }
-
-    //Sortieren nach Distanz - toDo - Entfernung berechnen
-    if (mode === "distanceAscending" || mode === "distanceDescending") {
-      // Momentan keine Entfernung vorhanden, also keine Sortierung
-      /*
-      if (mode === "distanceAscending") {
-        return a.calculatedDistance - b.calculatedDistance;
-      } else if (mode === "distanceDescending") {
-        return b.calculatedDistance - a.calculatedDistance;
-      } else {
-        return 0;
-      }
-      */
-      return 0;
-    }
-  });
+//Sort & Filter
+function setSortedResources(resources) {
+  filteredResultResources.value = resources;
 }
-
 function setFilteredResources(resources) {
   filteredResultResources.value = resources;
 }
@@ -144,8 +102,8 @@ function setFilteredResources(resources) {
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
         <SortButton
           v-if="filteredResources.length > 0"
-          :sort-mode="sortMode"
-          @sort="sortBookables"
+          :items-to-sort="filteredResultResources"
+          @sort="setSortedResources"
         />
         <FilterButton
           v-if="filteredResources.length > 0"
@@ -158,7 +116,6 @@ function setFilteredResources(resources) {
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
-      <!-- Filterbereich -->
       <div v-if="isGreaterThanMd" class="md:basis-1/4">
         <FilterArea
           v-if="filteredResources.length > 0"
