@@ -229,7 +229,7 @@ const priceBars = computed(() => {
     Math.ceil(
       (priceRange.value[1] - priceRange.value[0]) / dynamicPriceStep.value,
     ) || 1;
-  const bars = new Array(barsCount).fill(0);
+  const  bars = new Array(barsCount).fill(0);
   const range = priceRange.value[1] - priceRange.value[0];
 
   props.bookables.forEach((b) => {

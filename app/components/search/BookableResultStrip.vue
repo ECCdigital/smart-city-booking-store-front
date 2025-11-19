@@ -38,6 +38,7 @@
       <div class="flex justify-between h-full">
         <!-- Eigenschaften -->
         <div class="basis-3/5 w-full my-2">
+          <BookableFlagDisplay :flags="bookable?.flags" />
           <UBadge
             v-for="(flag, i) in bookable?.flags"
             :key="i"
@@ -89,6 +90,7 @@ import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vu
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useTenantStore } from "~~/stores/tenant.js";
+import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 
 const props = defineProps({
   bookable: {

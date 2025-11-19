@@ -49,18 +49,7 @@
           <div class="w-full my-2">
             <p>Veranstalter: {{event.eventOrganizer.name}}</p>
           </div>
-
-          <UBadge
-            v-for="(flag, i) in event.information.flags"
-            :key="i"
-            icon="i-lucide-check"
-            size="md"
-            color="neutral"
-            variant="ghost"
-            style="padding-left: 0; padding-right: 15px"
-          >
-            {{ flag }}
-          </UBadge>
+          <BookableFlagDisplay :flags="event.information.flags" />
         </div>
 
         <div class="basis-2/5 w-full grid content-end">
@@ -101,6 +90,7 @@ import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import {useSanitizeHtml} from "~/composables/utils/useSanitizeHtml.js";
 import EventPriceDisplay from "~/components/events/EventPriceDisplay.vue";
+import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 
 const props = defineProps({
   event: {

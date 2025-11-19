@@ -41,16 +41,7 @@
 
             <!-- Eigenschaften -->
             <div class="w-full my-5">
-              <UBadge
-                v-for="(flag, i) in bookable.flags"
-                :key="i"
-                icon="i-lucide-check"
-                size="md"
-                color="neutral"
-                variant="ghost"
-                style="padding-left: 0; padding-right: 15px"
-                >{{ flag }}</UBadge
-              >
+              <BookableFlagDisplay :flags="bookable?.flags" />
             </div>
           </div>
 
@@ -74,6 +65,7 @@
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
 import { useTenantStore } from "~~/stores/tenant.js";
+import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 
 const props = defineProps({
   bookable: {
