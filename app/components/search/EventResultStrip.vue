@@ -1,15 +1,15 @@
 <template>
   <div
-    class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl"
+    class="bg-gray-200 dark:bg-gray-700 flex rounded-xl"
     :class="props.isNotBookable ? 'opacity-70' : ''"
-    style=""
   >
-    <div class="basis-1/4">
+    <div class="basis-1/4 flex items-center">
       <img
         v-if="event.information?.teaserImage"
         :src="`/api/img?url=${encodeURIComponent(event.information.teaserImage)}`"
         alt=""
-        class="rounded-xl h-full w-full object-cover"
+        class="rounded-xl w-full h-full object-cover"
+        style="max-height: 375px"
       >
       <img
         v-else
@@ -19,8 +19,10 @@
       >
     </div>
 
-    <div class="basis-3/4 p-4 flex flex-col justify-between">
-      <div class="">
+    <div
+      class="basis-3/4 p-4 flex flex-col "
+    >
+      <div>
         <!-- Title -->
         <p class="text-lg font-bold">
           {{ event.information.name }}
@@ -31,32 +33,31 @@
         <div class="w-full my-5">
           <EventTimeInformation :event="event" class="w-full text-sm" />
           <EventAdressInformation :event="event" class="w-full text-sm" />
-          <div
-              class="my-5 line-clamp-3"
-              v-html="htmlTeaserText"/>
+          <div class="my-5 line-clamp-3" v-html="htmlTeaserText" />
         </div>
         <USeparator
           color="neutral"
           class="w-full"
           :ui="{ border: 'border-gray-300' }"
         />
-
       </div>
 
-      <div class="flex justify-between h-full">
-       <!-- Veranstalter & Eigenschaften -->
+      <div id="contentInformation" class="flex h-full justify-between ">
+        <!-- Veranstalter & Eigenschaften -->
         <div class="basis-3/5 w-full my-2">
           <div class="w-full my-2">
-            <p>Veranstalter: {{event.eventOrganizer.name}}</p>
+            <p>Veranstalter: {{ event.eventOrganizer.name }}</p>
           </div>
-          <BookableFlagDisplay :flags="event.information.flags" />
+          <div>
+            <BookableFlagDisplay :flags="event.information.flags" />
+          </div>
         </div>
 
         <div class="basis-2/5 w-full grid content-end">
           <EventPriceDisplay
-              v-if="!isNotBookable"
-              :event-tickets="event.tickets"
-              class="grid place-content-end text-md font-bold mt-2"
+            v-if="!isNotBookable"
+            :event-tickets="event.tickets"
+            class="grid place-content-end text-md font-bold mt-2"
           />
 
           <!--Aktionen-->
@@ -82,13 +83,14 @@
       </div>
     </div>
   </div>
+
 </template>
 <script setup>
 import EventAdressInformation from "~/components/events/EventAdressInformation.vue";
-import {useTenantStore} from "~~/stores/tenant.js";
-import {useContrastColor} from "~/composables/utils/useContrastColor.js";
+import { useTenantStore } from "~~/stores/tenant.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
-import {useSanitizeHtml} from "~/composables/utils/useSanitizeHtml.js";
+import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import EventPriceDisplay from "~/components/events/EventPriceDisplay.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 
@@ -107,10 +109,10 @@ const props = defineProps({
   },
 });
 
-const { sanitizeHtml } = useSanitizeHtml()
+const { sanitizeHtml } = useSanitizeHtml();
 const htmlTeaserText = computed(() => {
-  return sanitizeHtml(props.event.information.teaserText || "")
-})
+  return sanitizeHtml(props.event.information.teaserText || "");
+});
 
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.event.tenantId).name;
