@@ -80,6 +80,7 @@ import BookableAdressInformation from "~/components/bookables/BookableAdressInfo
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useTenantStore } from "~~/stores/tenant.js";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
+import {useCheckoutRedirect} from "~/composables/utils/useCheckoutRedirect.js";
 
 const props = defineProps({
   bookable: {
@@ -104,45 +105,10 @@ const contrastToPrimary = computed(() =>
 );
 
 function goToCheckout() {
-  const config = useRuntimeConfig();
-  const baseFromConfig =
-    (config && config.public && config.public.adminBaseUrl) ||
-    config.adminBaseUrl ||
-    "";
-
-  if (!baseFromConfig) {
-    console.warn(
-      "adminBaseUrl not set in runtime config; falling back to relative /checkout path",
-    );
-  }
-
-  const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
-
-  const params = new URLSearchParams({
-    id: props.bookable?.id,
-    tenant: props.bookable?.tenantId,
-    amount: "1",
-  });
-
-  const url = base
-    ? `${base}/checkout?${params.toString()}`
-    : `/checkout?${params.toString()}`;
-
-  if (typeof window !== "undefined") {
-    const newWindow = window.open(url, "_blank");
-    if (newWindow) {
-      try {
-        newWindow.opener = null; // enforce noopener
-      } catch (e) {
-        console.error(e);
-        // ignore in case browser forbids
-      }
-    } else {
-      window.location.href = url;
-    }
-  } else {
-    console.warn("Attempted to open checkout URL on server-side: ", url);
-  }
+  useCheckoutRedirect().redirectToCheckout(
+      props.bookable.id,
+      props.bookable.tenantId
+  )
 }
 </script>
 

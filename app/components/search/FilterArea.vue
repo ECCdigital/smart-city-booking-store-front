@@ -160,7 +160,6 @@ const includeNonSuitable = ref(true);
 //Kategorien - toDo - anpassen und dynamisch auslesen!!!!!!!!!!!!!!!!!!!!
 const choosenCategories = ref([]);
 const categories = computed(() => {
-  console.log("Bookables:", props.bookables);
   let type = "";
   if(props.isEvent){
     type ="event";
