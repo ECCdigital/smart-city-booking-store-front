@@ -19,9 +19,7 @@
       >
     </div>
 
-    <div
-      class="basis-3/4 p-4 flex flex-col "
-    >
+    <div class="basis-3/4 p-4 flex flex-col">
       <div>
         <!-- Title -->
         <p class="text-lg font-bold">
@@ -42,7 +40,7 @@
         />
       </div>
 
-      <div id="contentInformation" class="flex h-full justify-between ">
+      <div class="flex h-full justify-between">
         <!-- Veranstalter & Eigenschaften -->
         <div class="basis-3/5 w-full my-2">
           <div class="w-full my-2">
@@ -57,6 +55,7 @@
           <EventPriceDisplay
             v-if="!isNotBookable"
             :event-tickets="event.tickets"
+            :is-free="event.attendees.free"
             class="grid place-content-end text-md font-bold mt-2"
           />
 
@@ -71,19 +70,28 @@
             :to="`/catalog/${catalogSlug}/events/${event.id}`"
           />
           -->
-            <UButton
-              v-if="!isNotBookable"
-              label="Buchen"
-              class="justify-center px-10"
-              :style="{ color: contrastToPrimary }"
-              @click="goToCheckout"
-            />
+            <UTooltip :disabled="disableTooltip" :text="tooltipText">
+              <UButton
+                v-if="!isNotBookable"
+                label="Buchen"
+                :disabled="bookingDisabled"
+                class="justify-center px-10 "
+                :class="bookingDisabled ? 'opacity-50' : ''"
+                :style="{ color: contrastToPrimary }"
+                @click="goToTicketOptions"
+              />
+            </UTooltip>
           </div>
         </div>
       </div>
     </div>
+    <EventTicketOptionsDialog
+      v-model:open="openTicketOptions"
+      :tickets="event.tickets"
+      :is-private-event="isPrivateEvent"
+      :registration-needed="event.attendees.needsRegistration"
+    />
   </div>
-
 </template>
 <script setup>
 import EventAdressInformation from "~/components/events/EventAdressInformation.vue";
@@ -93,6 +101,8 @@ import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import EventPriceDisplay from "~/components/events/EventPriceDisplay.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
+import EventTicketOptionsDialog from "~/components/events/EventTicketOptionsDialog.vue";
+import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 
 const props = defineProps({
   event: {
@@ -117,54 +127,57 @@ const htmlTeaserText = computed(() => {
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.event.tenantId).name;
 });
+const hasEventTickets = computed(() => {
+  return props.event.externalBookingUrl || props.event.tickets.length > 0;
+});
+const isPrivateEvent = computed(() => {
+  return !props.event.attendees.publicEvent || false;
+});
+
+const disableTooltip = computed(() => {
+  if (!props.event.attendees.needsRegistration) {
+    return true;
+  }
+  return isPrivateEvent.value && !hasEventTickets.value;
+});
+const tooltipText = computed(() => {
+  if (isPrivateEvent.value) {
+    return "Das Event ist nicht öffentlich und kann nicht gebucht werden.";
+  } else if (!hasEventTickets.value) {
+    return "Für dieses Event sind keine Tickets verfügbar.";
+  } else {
+    return "";
+  }
+});
 
 const contrastToPrimary = computed(() =>
   useContrastColor().contrastToPrimary(),
 );
 
-function goToCheckout() {
-  console.log("goToCheckout clicked for event id:", props.event.id);
-  /*
-  const config = useRuntimeConfig();
-  const baseFromConfig =
-    (config && config.public && config.public.adminBaseUrl) ||
-    config.adminBaseUrl ||
-    "";
+const bookingDisabled = computed(
+  () =>
+    props.event.attendees.needsRegistration &&
+    (isPrivateEvent.value || !hasEventTickets.value),
+);
+const openTicketOptions = ref(false);
+function goToTicketOptions() {
+  console.log("Opening ticket options dialog for", props.event);
 
-  if (!baseFromConfig) {
-    console.warn(
-      "adminBaseUrl not set in runtime config; falling back to relative /checkout path",
+  //external booking url
+  if (props.event.externalBookingUrl) {
+    window.open(props.event.externalBookingUrl, "_blank");
+    return;
+  }
+
+  //direct to checkout if only one ticket type
+  if (props.event.tickets.length === 1) {
+    useCheckoutRedirect().redirectToCheckout(
+      props.event.tickets[0].id,
+      props.event.tickets[0].tenantId,
     );
-  }
-
-  const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
-
-  const params = new URLSearchParams({
-    id: props.event.id,
-    tenant: props.event.tenantId,
-    amount: "1",
-  });
-
-  const url = base
-    ? `${base}/checkout?${params.toString()}`
-    : `/checkout?${params.toString()}`;
-
-  if (typeof window !== "undefined") {
-    const newWindow = window.open(url, "_blank");
-    if (newWindow) {
-      try {
-        newWindow.opener = null; // enforce noopener
-      } catch (e) {
-        console.error(e);
-        // ignore in case browser forbids
-      }
-    } else {
-      window.location.href = url;
-    }
   } else {
-    console.warn("Attempted to open checkout URL on server-side: ", url);
+    openTicketOptions.value = true;
   }
-   */
 }
 </script>
 

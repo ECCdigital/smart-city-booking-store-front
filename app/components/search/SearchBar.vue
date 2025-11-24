@@ -157,7 +157,10 @@ async function onSearch() {
   }
   isInitialized.value = true;
 
-  const itemsWithStatus = setItemStatus();
+  let itemsWithStatus = setItemStatus();
+  if (props.isEvent) {
+    itemsWithStatus = await checkTickets(itemsWithStatus);
+  }
 
   //alle Items mit Stauts "isBookable" einbeziehen
   let bookableItems = itemsWithStatus.filter((i) => i.status === "isBookable");
@@ -184,7 +187,7 @@ function setItemStatus() {
   return props.itemsToSearch.map((item) => {
     if (!props.isEvent && item.isBookable) {
       return { item: item, status: "isBookable" };
-    } else if (props.isEvent && item.attendees.publicEvent === true) {
+    } else if (props.isEvent) {
       return { item: item, status: "isBookable" };
     } else {
       return { item: item, status: "nonBookable" };
@@ -211,7 +214,8 @@ async function updateItemStatus(
             formatedTimePeriod.end.getTime(),
           );
         } else if (formatedTimePeriod && props.isEvent) {
-          //toDo - Preis setzen für Events!!!!
+          //Preis und Verfügbarkeit für Events prüfen!!!!
+          //toDo - notwendig???
         }
         return {
           ...item,
@@ -227,6 +231,7 @@ async function updateItemStatus(
       }
     }),
   );
+  console.log("updatedItems: ", updatedItems);
   return updatedItems;
 }
 
@@ -284,10 +289,10 @@ async function searchForTimePeriod(items, formatedTimePeriod) {
         });
 
         const isWithinPeriod =
-            formatedEventTimePeriod &&
-            formatedTimePeriod &&
-            formatedEventTimePeriod.start >= formatedTimePeriod.start &&
-            formatedEventTimePeriod.end <= formatedTimePeriod.end;
+          formatedEventTimePeriod &&
+          formatedTimePeriod &&
+          formatedEventTimePeriod.start >= formatedTimePeriod.start &&
+          formatedEventTimePeriod.end <= formatedTimePeriod.end;
 
         return {
           item,
@@ -323,6 +328,41 @@ function formateTimePeriod(timePeriod) {
     return newTimePeriod;
   }
   return null;
+}
+async function checkTickets(events) {
+  console.log("checkTickets called", events);
+  const updatedEvents = await Promise.all(
+    events.map(async (event) => {
+      const updatedTickets = await Promise.all(
+        event.item.tickets.map(async (ticket) => {
+          const ticketPrice = await useBookables().getBookablePrice(
+            event.item.tenantId,
+            ticket.id,
+          );
+          const ticketAvailability =
+            await useBookables().getBookableAvailability(
+              event.item.tenantId,
+              ticket.id,
+            );
+          return {
+            ...ticket,
+            calculatedPrice: ticketPrice,
+            availability: ticketAvailability,
+          };
+        }),
+      );
+    console.log("updatedTicket", updatedTickets);
+      return {
+        ...event,
+        item: {
+          ...event.item,
+          tickets: updatedTickets,
+        },
+      };
+    }),
+  );
+  console.log("updatedEvents", updatedEvents);
+  return updatedEvents;
 }
 </script>
 <style scoped></style>

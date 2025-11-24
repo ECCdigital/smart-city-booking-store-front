@@ -5,10 +5,11 @@
     </div>
     <div style="flex: 1" />
     <UButton
-      :label="isGreaterThanSm ? 'Anmelden' : ''"
+      :label="isGreaterThanSm ? 'Anmelden' : ' '"
       :icon="isGreaterThanSm ? '' : 'i-lucide-user'"
+      :size="isGreaterThanSm ? 'xl' : ' '"
       variant="ghost"
-      :class="isGreaterThanSm ? 'px-4' : ''"
+      :class="isGreaterThanSm ? 'px-4' : 'px-2'"
       :style="{ color: contrastToSecondary }"
       to="/login"
     />

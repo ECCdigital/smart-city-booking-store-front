@@ -1,6 +1,6 @@
 <template>
   <div class="text-right">
-    <p v-if="props.eventTickets.length === 0">Kostenlos</p>
+    <p v-if="isFree || props.eventTickets.length === 0">Kostenlos</p>
     <p v-else>
       {{ displayMinDefaultPrice() }}
     </p>
@@ -18,6 +18,10 @@ const props = defineProps({
   eventTickets: {
     type: Array,
     required: true,
+  },
+  isFree: {
+    type: Boolean,
+    default: false,
   },
 });
 

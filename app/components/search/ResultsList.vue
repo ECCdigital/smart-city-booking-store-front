@@ -15,6 +15,7 @@
         v-for="(event, i) in suitableBookables"
         :key="i"
         :event="event.item"
+        :ticket-information="event.ticketInformation"
         class="m-2"
       /><!-- toDo - Preis ergänzen?!  -->
     </UPageList>
