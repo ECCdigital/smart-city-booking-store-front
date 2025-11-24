@@ -5,19 +5,26 @@
     :class="isNotBookable ? 'opacity-70' : ''"
     style="height: 300px"
   >
-    <div class="basis-1/4">
+    <div class="basis-1/4 flex items-center">
       <img
         v-if="bookable?.imgUrl"
         :src="`/api/img?url=${encodeURIComponent(bookable.imgUrl)}`"
         alt=""
-        class="rounded-xl h-full w-full object-cover"
+        class="w-full h-full object-contain"
       >
       <img
         v-else
         src="../../assets/bookable-default.jpg"
         alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
-        class="rounded-xl h-full w-full object-cover"
+        class="h-full w-full object-cover"
       >
+      <USeparator
+          orientation="vertical"
+          color="primary"
+          type="solid"
+          size="xl"
+          class="w-full"
+      />
     </div>
     <div class="basis-3/4 p-4 flex flex-col justify-between">
       <div class="">

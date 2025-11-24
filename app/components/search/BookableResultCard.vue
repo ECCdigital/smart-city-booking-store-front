@@ -6,20 +6,24 @@
       @click="goToCheckout"
     >
       <template #header>
-        <div>
-          <img
-            v-if="bookable?.imgUrl"
-            :src="`/api/img?url=${encodeURIComponent(bookable?.imgUrl)}`"
-            alt="Bild des Buchungsobjekts"
-            class="h-full w-full object-cover"
-          >
-          <img
-            v-else
-            src="../../assets/bookable-default.jpg"
-            alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
-          >
+        <div class="flex flex-col h-full">
+          <div class="basis-full flex items-center h-9/10">
+            <img
+              v-if="bookable?.imgUrl"
+              :src="`/api/img?url=${encodeURIComponent(bookable?.imgUrl)}`"
+              alt="Bild des Buchungsobjekts"
+              class="h-full w-full object-contain"
+            >
+            <img
+              v-else
+              src="../../assets/bookable-default.jpg"
+              alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
+            >
+          </div>
+          <USeparator color="primary" type="solid" size="xl" class="w-full" />
         </div>
       </template>
+      
       <template #body>
         <div class="flex flex-wrap content-between h-full">
           <div class="w-full">
@@ -66,7 +70,7 @@ import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vu
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
 import { useTenantStore } from "~~/stores/tenant.js";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
-import {useCheckoutRedirect} from "~/composables/utils/useCheckoutRedirect.js";
+import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 
 const props = defineProps({
   bookable: {
@@ -90,9 +94,9 @@ const tenantName = computed(() => {
 function goToCheckout() {
   if (!props.isNotBookable) {
     useCheckoutRedirect().redirectToCheckout(
-        props.bookable.id,
-        props.bookable.tenantId
-    )
+      props.bookable.id,
+      props.bookable.tenantId,
+    );
   }
 }
 </script>

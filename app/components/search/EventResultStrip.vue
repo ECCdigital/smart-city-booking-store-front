@@ -2,21 +2,28 @@
   <div
     class="bg-gray-200 dark:bg-gray-700 flex rounded-xl"
     :class="props.isNotBookable ? 'opacity-70' : ''"
+    style="min-height: 350px"
   >
     <div class="basis-1/4 flex items-center">
       <img
         v-if="event.information?.teaserImage"
         :src="`/api/img?url=${encodeURIComponent(event.information.teaserImage)}`"
         alt=""
-        class="rounded-xl w-full h-full object-cover"
-        style="max-height: 375px"
+        class="w-full h-full object-contain"
       >
       <img
         v-else
         src="../../assets/bookable-default.jpg"
         alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
-        class="rounded-xl h-full w-full object-cover"
+        class="h-full w-full object-cover"
       >
+      <USeparator
+          orientation="vertical"
+          color="primary"
+          type="solid"
+          size="xl"
+          class="w-full"
+      />
     </div>
 
     <div class="basis-3/4 p-4 flex flex-col">

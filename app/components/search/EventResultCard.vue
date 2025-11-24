@@ -6,17 +6,21 @@
       @click="goToTicketOptions"
     >
       <template #header>
-        <div>
-          <img
-            v-if="event.information?.teaserImage"
-            :src="`/api/img?url=${encodeURIComponent(event.information.teaserImage)}`"
-            alt=""
-          >
-          <img
-            v-else
-            src="../../assets/bookable-default.jpg"
-            alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
-          >
+        <div class="flex flex-col h-full">
+          <div class="basis-full flex items-center h-9/10">
+            <img
+              v-if="event.information?.teaserImage"
+              :src="`/api/img?url=${encodeURIComponent(event.information.teaserImage)}`"
+              alt=""
+              class="h-full w-full object-contain"
+            >
+            <img
+              v-else
+              src="../../assets/bookable-default.jpg"
+              alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
+            >
+          </div>
+          <USeparator color="primary" type="solid" size="xl" class="w-full" />
         </div>
       </template>
 
