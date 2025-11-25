@@ -20,7 +20,7 @@
     </div>
     <USeparator v-if="!useAsDialog" class="border-gray-200" />
     <div class="my-4 space-y-3">
-      <div class="flex space-x-2">
+      <div class=" space-y-3">
         <USwitch
           v-model="includeNonSuitable"
           label="Nicht passende Objekte anzeigen."
@@ -30,6 +30,28 @@
               : '--ui-primary: ' + darkerColor
           "
           @change="instantFilter"
+        />
+        <USwitch
+            v-if="isEvent"
+            v-model="onlyPublicEvents"
+            label="Nur öffentliche Events anzeigen."
+            :style="
+            colorMode === 'dark'
+              ? '--ui-primary: ' + lighterColor
+              : '--ui-primary: ' + darkerColor
+          "
+            @change="instantFilter"
+        />
+        <USwitch
+            v-if="isEvent"
+            v-model="onlyRegistrationNeededEvents"
+            label="Nur anmeldepflichte Events anzeigen."
+            :style="
+            colorMode === 'dark'
+              ? '--ui-primary: ' + lighterColor
+              : '--ui-primary: ' + darkerColor
+          "
+            @change="instantFilter"
         />
       </div>
     </div>
@@ -156,6 +178,8 @@ const lighterColor = computed(() => useContrastColor().lighterColor());
 
 //Passende Objekte
 const includeNonSuitable = ref(true);
+const onlyPublicEvents = ref(false);
+const onlyRegistrationNeededEvents = ref(false);
 
 //Kategorien - toDo - anpassen und dynamisch auslesen!!!!!!!!!!!!!!!!!!!!
 const choosenCategories = ref([]);
@@ -308,6 +332,17 @@ function onFilter() {
     if (!includeNonSuitable.value) {
       filteredBookables = filteredBookables.filter(
         (b) => b.status !== "nonSuitable",
+      );
+    }
+    //filter by event properties
+    if(props.isEvent && onlyPublicEvents.value){
+      filteredBookables = filteredBookables.filter(
+          (e) => e.item.attendees.publicEvent === true,
+      );
+    }
+    if(props.isEvent && onlyRegistrationNeededEvents.value){
+      filteredBookables = filteredBookables.filter(
+          (e) => e.item.attendees.needsRegistration === true,
       );
     }
 
