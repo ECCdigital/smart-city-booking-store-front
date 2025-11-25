@@ -35,6 +35,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  searchParams: {
+    type: Object,
+    default: null,
+  },
 });
 const ticketsAvailable = computed(
   () => props.ticket.availability?.remaining > 0 || true,
@@ -48,6 +52,8 @@ function goToCheckout() {
   useCheckoutRedirect().redirectToCheckout(
     props.ticket.id,
     props.ticket.tenantId,
+      props.searchParams?.searchTimePeriod?.start || null,
+      props.searchParams?.searchTimePeriod?.end || null,
   );
 }
 </script>

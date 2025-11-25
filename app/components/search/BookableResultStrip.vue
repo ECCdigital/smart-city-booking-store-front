@@ -1,6 +1,6 @@
 <template>
   <div
-      v-if="props.bookable"
+    v-if="props.bookable"
     class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl"
     :class="isNotBookable ? 'opacity-70' : ''"
     style="height: 300px"
@@ -19,11 +19,11 @@
         class="h-full w-full object-cover"
       >
       <USeparator
-          orientation="vertical"
-          color="primary"
-          type="solid"
-          size="xl"
-          class="w-full"
+        orientation="vertical"
+        color="primary"
+        type="solid"
+        size="xl"
+        class="w-full"
       />
     </div>
     <div class="basis-3/4 p-4 flex flex-col justify-between">
@@ -87,7 +87,7 @@ import BookableAdressInformation from "~/components/bookables/BookableAdressInfo
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useTenantStore } from "~~/stores/tenant.js";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
-import {useCheckoutRedirect} from "~/composables/utils/useCheckoutRedirect.js";
+import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 
 const props = defineProps({
   bookable: {
@@ -98,13 +98,17 @@ const props = defineProps({
     type: Number,
     default: null,
   },
+  searchParams: {
+    type: Object,
+    default: null,
+  },
   isNotBookable: {
     type: Boolean,
     default: false,
   },
 });
 const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.bookable?.tenantId)?.name||"";
+  return useTenantStore().getTenantById(props.bookable?.tenantId)?.name || "";
 });
 
 const contrastToPrimary = computed(() =>
@@ -113,9 +117,11 @@ const contrastToPrimary = computed(() =>
 
 function goToCheckout() {
   useCheckoutRedirect().redirectToCheckout(
-      props.bookable.id,
-      props.bookable.tenantId
-  )
+    props.bookable.id,
+    props.bookable.tenantId,
+      props.searchParams?.searchTimePeriod?.start || null,
+      props.searchParams?.searchTimePeriod?.end || null,
+  );
 }
 </script>
 

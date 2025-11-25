@@ -62,9 +62,11 @@ watch(
 
 //Search
 const searchIsInitialized = ref(false);
-function onSearch(locationsArray) {
-  filteredLocations.value = locationsArray;
-  filteredResultLocations.value = locationsArray;
+const currentSearchParams = ref({});
+function onSearch({items, searchParams}) {
+  filteredLocations.value = items;
+  filteredResultLocations.value = items;
+  currentSearchParams.value = searchParams;
 }
 function numberOfSuitableBookables() {
   return filteredResultLocations.value.filter((l) => l.status === "suitable")
@@ -131,12 +133,14 @@ function setSortedLocations(locations) {
         <ResultsList
           v-if="isGreaterThanMd"
           :bookables="filteredResultLocations"
+          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
         />
         <ResultsGrid
           v-else
           :bookables="filteredResultLocations"
+          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
         />

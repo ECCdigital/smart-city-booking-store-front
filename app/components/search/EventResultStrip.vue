@@ -18,11 +18,11 @@
         class="h-full w-full object-cover"
       >
       <USeparator
-          orientation="vertical"
-          color="primary"
-          type="solid"
-          size="xl"
-          class="w-full"
+        orientation="vertical"
+        color="primary"
+        type="solid"
+        size="xl"
+        class="w-full"
       />
     </div>
 
@@ -80,13 +80,13 @@
             <UTooltip :disabled="disableTooltip" :text="tooltipText">
               <div>
                 <UButton
-                    v-if="!isNotBookable"
-                    label="Buchen"
-                    :disabled="bookingDisabled"
-                    class="justify-center px-10 "
-                    :class="bookingDisabled ? 'opacity-50' : ''"
-                    :style="{ color: contrastToPrimary }"
-                    @click="goToTicketOptions"
+                  v-if="!isNotBookable"
+                  label="Buchen"
+                  :disabled="bookingDisabled"
+                  class="justify-center px-10"
+                  :class="bookingDisabled ? 'opacity-50' : ''"
+                  :style="{ color: contrastToPrimary }"
+                  @click="goToTicketOptions"
                 />
               </div>
             </UTooltip>
@@ -97,6 +97,7 @@
     <EventTicketOptionsDialog
       v-model:open="openTicketOptions"
       :tickets="event.tickets"
+      :search-params="searchParams"
       :is-private-event="isPrivateEvent"
       :registration-needed="event.attendees.needsRegistration"
     />
@@ -120,6 +121,10 @@ const props = defineProps({
   },
   price: {
     type: Number,
+    default: null,
+  },
+  searchParams: {
+    type: Object,
     default: null,
   },
   isNotBookable: {
@@ -170,8 +175,6 @@ const bookingDisabled = computed(
 );
 const openTicketOptions = ref(false);
 function goToTicketOptions() {
-  console.log("Opening ticket options dialog for", props.event);
-
   //external booking url
   if (props.event.externalBookingUrl) {
     window.open(props.event.externalBookingUrl, "_blank");
@@ -183,6 +186,8 @@ function goToTicketOptions() {
     useCheckoutRedirect().redirectToCheckout(
       props.event.tickets[0].id,
       props.event.tickets[0].tenantId,
+        props.searchParams?.searchTimePeriod?.start || null,
+        props.searchParams?.searchTimePeriod?.end || null,
     );
   } else {
     openTicketOptions.value = true;

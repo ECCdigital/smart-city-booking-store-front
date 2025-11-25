@@ -4,7 +4,7 @@ export function useCheckoutRedirect() {
    * @param {string} bookableId - The unique identifier of the bookable item.
    * @param {string} tenantId - The identifier of the tenant.
    */
-  function redirectToCheckout(bookableId, tenantId) {
+  function redirectToCheckout(bookableId, tenantId, startDate = null, endDate = null) {
     const config = useRuntimeConfig();
     const baseFromConfig =
       (config && config.public && config.public.adminBaseUrl) ||
@@ -23,6 +23,8 @@ export function useCheckoutRedirect() {
       id: bookableId,
       tenant: tenantId,
       amount: "1",
+        startDate: startDate,
+        endDate: endDate
     });
 
     const url = base

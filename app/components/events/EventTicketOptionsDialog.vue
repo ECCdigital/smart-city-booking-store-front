@@ -3,10 +3,8 @@
     <template #body>
       <div v-if="!registrationNeeded" class="flex justify-center p-2 my-5 mb-2">
         <p class="text-lg text-center md:text-left">
-          Für das Event ist <b>keine Anmeldung nötig</b>.
-          <br><br>
-          Sie können ohne
-          Buchung teilnehmen.
+          Für das Event ist <b>keine Anmeldung nötig</b>. <br ><br >
+          Sie können ohne Buchung teilnehmen.
         </p>
       </div>
       <div v-else-if="isPrivateEvent" class="flex justify-center p-2 my-5 mb-2">
@@ -27,6 +25,7 @@
           v-for="(ticket, i) in props.tickets"
           :key="i"
           :ticket="ticket"
+          :search-params="searchParams"
         />
       </div>
     </template>
@@ -41,6 +40,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  searchParams: {
+    type: Object,
+    default: null,
+  },
   isPrivateEvent: {
     type: Boolean,
     default: false,
@@ -50,7 +53,6 @@ const props = defineProps({
     default: false,
   },
 });
-
 </script>
 
 <style scoped></style>

@@ -60,9 +60,12 @@ watch(
 
 //Search
 const searchIsInitialized = ref(false);
-function onSearch(eventArray) {
-  filteredEvents.value = eventArray;
-  filteredResultEvents.value = eventArray;
+const currentSearchParams = ref({});
+function onSearch({ items, searchParams }) {
+  filteredEvents.value = items;
+  filteredResultEvents.value = items;
+  console.log(searchParams)
+  currentSearchParams.value = searchParams;
 }
 function numberOfSuitableBookables() {
   return filteredResultEvents.value.filter((e) => e.status === "suitable")
@@ -132,6 +135,7 @@ function setFilteredEvents(events) {
         <ResultsList
           v-if="isGreaterThanMd"
           :bookables="filteredResultEvents"
+          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
           is-event-list
@@ -139,6 +143,7 @@ function setFilteredEvents(events) {
         <ResultsGrid
           v-else
           :bookables="filteredResultEvents"
+          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
           is-event-grid

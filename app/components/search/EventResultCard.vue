@@ -96,6 +96,10 @@ const props = defineProps({
     type: Number,
     default: null,
   },
+  searchParams: {
+    type: Object,
+    default: null,
+  },
   isNotBookable: {
     type: Boolean,
     default: false,
@@ -113,8 +117,6 @@ const tenantName = computed(() => {
 
 const openTicketOptions = ref(false);
 function goToTicketOptions() {
-  console.log("Opening ticket options dialog for", props.event);
-
   //external booking url
   if (props.event.externalBookingUrl) {
     window.open(props.event.externalBookingUrl, "_blank");
@@ -126,6 +128,8 @@ function goToTicketOptions() {
     useCheckoutRedirect().redirectToCheckout(
       props.event.tickets[0].id,
       props.event.tickets[0].tenantId,
+      props.searchParams?.searchTimePeriod?.start || null,
+      props.searchParams?.searchTimePeriod?.end || null,
     );
   } else {
     openTicketOptions.value = true;

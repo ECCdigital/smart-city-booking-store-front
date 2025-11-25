@@ -7,6 +7,7 @@
         :key="i"
         :bookable="b.item"
         :calculated-price="b.calculatedPrice"
+        :search-params="searchParams"
         class="m-2"
       />
     </UPageList>
@@ -16,8 +17,9 @@
         :key="i"
         :event="event.item"
         :ticket-information="event.ticketInformation"
+        :search-params="searchParams"
         class="m-2"
-      /><!-- toDo - Preis ergänzen?!  -->
+      />
     </UPageList>
 
     <!-- Nicht passende Ergebnisse -->
@@ -56,6 +58,10 @@ const props = defineProps({
   bookables: {
     type: Array,
     required: true,
+  },
+  searchParams: {
+    type: Object,
+    default: null,
   },
   includeNonSuitable: {
     type: Boolean,

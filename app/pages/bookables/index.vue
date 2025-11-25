@@ -63,9 +63,11 @@ watch(
 
 //Search
 const searchIsInitialized = ref(false);
-async function onSearch(resourcesArray) {
-  filteredResources.value = resourcesArray;
-  filteredResultResources.value = resourcesArray;
+const currentSearchParams = ref({});
+async function onSearch({ items, searchParams }) {
+  filteredResources.value = items;
+  filteredResultResources.value = items;
+  currentSearchParams.value = searchParams;
 }
 function numberOfSuitableBookables() {
   return filteredResources.value.filter((l) => l.status === "suitable").length;
@@ -130,12 +132,14 @@ function setFilteredResources(resources) {
         <ResultsList
           v-if="isGreaterThanMd"
           :bookables="filteredResultResources"
+          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
         />
         <ResultsGrid
           v-else
           :bookables="filteredResultResources"
+          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
         />

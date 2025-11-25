@@ -2,14 +2,10 @@ export function useBookables() {
   const fetchBookables = async (tenantID) => {
     const { apiFetch } = useApi();
 
-    console.log("#################### TEST 1 #################################")
     try {
       const response = await apiFetch(`/api/bookables/${tenantID}`, {
         method: "GET",
       });
-
-        console.log("#################### TEST 2 #################################")
-        console.log(response);
 
       return response;
     } catch (error) {
@@ -31,8 +27,7 @@ export function useBookables() {
         },
       );
 
-      console.log(response);
-
+      //console.log(response);
       return response;
     } catch (error) {
       console.error("Error checking bookable availability:", error);
@@ -53,8 +48,7 @@ export function useBookables() {
         },
       );
 
-      console.log(response);
-
+      //console.log(response);
       return response;
     } catch (error) {
       console.error("Error checking bookable availability:", error);

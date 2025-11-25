@@ -23,7 +23,7 @@
           <USeparator color="primary" type="solid" size="xl" class="w-full" />
         </div>
       </template>
-      
+
       <template #body>
         <div class="flex flex-wrap content-between h-full">
           <div class="w-full">
@@ -81,6 +81,10 @@ const props = defineProps({
     type: Number,
     default: null,
   },
+  searchParams: {
+    type: Object,
+    default: null,
+  },
   isNotBookable: {
     type: Boolean,
     default: false,
@@ -96,6 +100,8 @@ function goToCheckout() {
     useCheckoutRedirect().redirectToCheckout(
       props.bookable.id,
       props.bookable.tenantId,
+        props.searchParams?.searchTimePeriod?.start || null,
+        props.searchParams?.searchTimePeriod?.end || null,
     );
   }
 }

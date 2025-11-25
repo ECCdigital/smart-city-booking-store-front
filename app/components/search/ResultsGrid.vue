@@ -7,6 +7,7 @@
         :key="i"
         :bookable="b.item"
         :calculated-price="b.calculatedPrice"
+        :search-params="searchParams"
       />
     </UBlogPosts>
     <UBlogPosts v-if="suitableBookables.length > 0 && isEventGrid" class="m-5">
@@ -14,6 +15,7 @@
         v-for="(event, i) in suitableBookables"
         :key="i"
         :event="event.item"
+        :search-params="searchParams"
       />
     </UBlogPosts>
 
@@ -51,6 +53,10 @@ const props = defineProps({
   bookables: {
     type: Array,
     required: true,
+  },
+  searchParams: {
+    type: Object,
+    default: null,
   },
   includeNonSuitable: {
     type: Boolean,

@@ -162,14 +162,14 @@ async function onSearch() {
     itemsWithStatus = await checkTickets(itemsWithStatus);
   }
 
-  //alle Items mit Stauts "isBookable" einbeziehen
+  //include only items with status "isBookable"
   let bookableItems = itemsWithStatus.filter((i) => i.status === "isBookable");
 
-  //nach Suchbegriff und Ort suchen
+  //search by search term and location
   bookableItems = searchForSearchTerm(bookableItems);
   bookableItems = searchForLocation(bookableItems);
 
-  //nach Zeit suchen
+  //search by time period
   const formatedTimePeriod = formateTimePeriod(searchTimePeriod.value);
   bookableItems = await searchForTimePeriod(bookableItems, formatedTimePeriod);
 
@@ -180,7 +180,14 @@ async function onSearch() {
   );
 
   filterResetKey.value++;
-  emit("search", updatedBookableItems);
+  emit("search", {
+    items: updatedBookableItems,
+    searchParams: {
+      searchTerm: searchTerm.value,
+      searchLocation: searchLocation.value,
+      searchTimePeriod: formatedTimePeriod,
+    },
+  });
 }
 
 function setItemStatus() {
@@ -206,16 +213,16 @@ async function updateItemStatus(
 
         let price = null;
         if (formatedTimePeriod && !props.isEvent) {
-          //Preis raussuchen und mit ins Objekt schreiben
+          //get price for bookables
           price = await useBookables().getBookablePrice(
             item.item.tenantId,
             item.item.id,
-            formatedTimePeriod.start.getTime(),
-            formatedTimePeriod.end.getTime(),
+            formatedTimePeriod.start,
+            formatedTimePeriod.end,
           );
         } else if (formatedTimePeriod && props.isEvent) {
-          //Preis und Verfügbarkeit für Events prüfen!!!!
-          //toDo - notwendig???
+          //chec k price and availability for events
+          //toDo - needed??
         }
         return {
           ...item,
@@ -231,7 +238,6 @@ async function updateItemStatus(
       }
     }),
   );
-  console.log("updatedItems: ", updatedItems);
   return updatedItems;
 }
 
@@ -269,10 +275,9 @@ async function searchForTimePeriod(items, formatedTimePeriod) {
           const availability = await useBookables().getBookableAvailability(
             item.item.tenantId,
             item.item.id,
-            formatedTimePeriod.start.getTime(),
-            formatedTimePeriod.end.getTime(),
+            formatedTimePeriod.start,
+            formatedTimePeriod.end,
           );
-
           return {
             item,
             isAvailable: availability.isAvailable && availability.remaining > 0,
@@ -307,30 +312,30 @@ async function searchForTimePeriod(items, formatedTimePeriod) {
   return items;
 }
 
+//build time period object (with timestamp) from selected time period
 function formateTimePeriod(timePeriod) {
   if (timePeriod && timePeriod.startDate) {
     const newTimePeriod = {};
 
     newTimePeriod.start = new Date(
       timePeriod.startDate + " " + timePeriod.startTime,
-    );
+    ).getTime();
 
     newTimePeriod.end = "";
     if (!timePeriod.endDate && timePeriod.endTime) {
       newTimePeriod.end = new Date(
         timePeriod.startDate + " " + timePeriod.endTime,
-      );
+      ).getTime();
     } else {
       newTimePeriod.end = new Date(
         timePeriod.endDate + " " + timePeriod.endTime,
-      );
+      ).getTime();
     }
     return newTimePeriod;
   }
   return null;
 }
 async function checkTickets(events) {
-  console.log("checkTickets called", events);
   const updatedEvents = await Promise.all(
     events.map(async (event) => {
       const updatedTickets = await Promise.all(
@@ -351,7 +356,6 @@ async function checkTickets(events) {
           };
         }),
       );
-    console.log("updatedTicket", updatedTickets);
       return {
         ...event,
         item: {
@@ -361,7 +365,6 @@ async function checkTickets(events) {
       };
     }),
   );
-  console.log("updatedEvents", updatedEvents);
   return updatedEvents;
 }
 </script>
