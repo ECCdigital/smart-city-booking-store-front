@@ -78,15 +78,17 @@
           />
           -->
             <UTooltip :disabled="disableTooltip" :text="tooltipText">
-              <UButton
-                v-if="!isNotBookable"
-                label="Buchen"
-                :disabled="bookingDisabled"
-                class="justify-center px-10 "
-                :class="bookingDisabled ? 'opacity-50' : ''"
-                :style="{ color: contrastToPrimary }"
-                @click="goToTicketOptions"
-              />
+              <div>
+                <UButton
+                    v-if="!isNotBookable"
+                    label="Buchen"
+                    :disabled="bookingDisabled"
+                    class="justify-center px-10 "
+                    :class="bookingDisabled ? 'opacity-50' : ''"
+                    :style="{ color: contrastToPrimary }"
+                    @click="goToTicketOptions"
+                />
+              </div>
             </UTooltip>
           </div>
         </div>

@@ -1,23 +1,25 @@
 <template>
   <UTooltip text="Wählen Sie erst ein Startdatum." :disabled="!disabled">
-    <VueDatePicker
-      v-model="model"
-      time-picker
-      format="HH:mm"
-      cancel-text="Abbrechen"
-      select-text="OK"
-      teleport-center
-      :disabled="props.disabled"
-      :action-row="{ showPreview: false }"
-      :ui="
+    <div>
+      <VueDatePicker
+          v-model="model"
+          time-picker
+          format="HH:mm"
+          cancel-text="Abbrechen"
+          select-text="OK"
+          teleport-center
+          :disabled="props.disabled"
+          :action-row="{ showPreview: false }"
+          :ui="
         mode === 'dark'
           ? {
               input: 'darkBackground',
             }
           : {}
       "
-      :dark="mode === 'dark'"
-    />
+          :dark="mode === 'dark'"
+      />
+    </div>
   </UTooltip>
 </template>
 <script setup>
