@@ -57,7 +57,7 @@
           <!-- Preis -->
           <div
             v-if="!isNotBookable"
-            class="w-full flex justify-end text-md font-bold"
+            class="w-full flex flex-col justify-end text-md font-bold"
           >
             <EventPriceDisplay
               v-if="!isNotBookable"
@@ -65,6 +65,15 @@
               :is-free="event.attendees.free"
               class="grid place-content-end text-md font-bold mt-2"
             />
+            <div class="flex justify-end mt-2">
+              <UButton
+                v-if="!isNotBookable && !event.attendees.needsRegistration"
+                label="Keine Anmeldung nötig"
+                variant="soft"
+                disabled
+                class="justify-center px-3"
+              />
+            </div>
           </div>
         </div>
       </template>

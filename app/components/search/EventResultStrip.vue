@@ -80,13 +80,19 @@
             <UTooltip :disabled="disableTooltip" :text="tooltipText">
               <div>
                 <UButton
-                  v-if="!isNotBookable"
+                  v-if="!isNotBookable && event.attendees.needsRegistration"
                   label="Buchen"
                   :disabled="bookingDisabled"
-                  class="justify-center px-10"
-                  :class="bookingDisabled ? 'opacity-50' : ''"
+                  class="bookingButton justify-center px-10 "
                   :style="{ color: contrastToPrimary }"
                   @click="goToTicketOptions"
+                />
+                <UButton
+                    v-if="!isNotBookable && !event.attendees.needsRegistration"
+                    label="Keine Anmeldung nötig"
+                    variant="soft"
+                    disabled
+                    class="bookingButton justify-center px-3"
                 />
               </div>
             </UTooltip>
@@ -195,4 +201,8 @@ function goToTicketOptions() {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.bookingButton:disabled{
+  background-color: #cccccc;
+}
+</style>
