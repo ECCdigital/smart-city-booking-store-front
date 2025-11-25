@@ -43,7 +43,7 @@
                   variant="ghost"
                   icon="i-lucide-x"
                   class="rounded-xl"
-                  @click="isOpen = false"
+                  @click="closeTimePeriodInput"
                 />
               </UTooltip>
             </div>
@@ -150,6 +150,12 @@ function displayTime(time) {
 }
 
 //Functions to set default values
+function closeTimePeriodInput(){
+  isOpen.value = false;
+  dateRange.value = [];
+  timeRange.value = { start: null, end: null };
+
+}
 function setDefaultStartDate() {
   if (!dateRange.value[0]) {
     dateRange.value[0] = new Date();
