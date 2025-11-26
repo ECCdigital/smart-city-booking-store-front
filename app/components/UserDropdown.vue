@@ -1,6 +1,10 @@
 <script setup>
 import { useAuthStore } from "~~/stores/auth.js";
 
+const t = useI18n().t;
+
+const config = useRuntimeConfig();
+
 const authStore = useAuthStore();
 
 const user = computed(() => authStore.getUser);
@@ -11,16 +15,24 @@ const userName = computed(() => {
 
 const items = [
   [
+    /**
     {
-      label: "Profil",
-      icon: "i-heroicons-user",
-      to: "/profile",
+      label: t("navigation.users"),
+      icon: "i-lucide-user",
+      to: "/users",
+    },
+        **/
+    {
+      label: t("navigation.admin"),
+      icon: "i-lucide-user-star",
+      to: config.public.adminBaseUrl,
+      target: "_blank",
     },
   ],
   [
     {
-      label: "Logout",
-      icon: "i-heroicons-arrow-right-on-rectangle",
+      label: t("common.logout"),
+      icon: "i-lucide-log-out",
       onSelect: () => logout(),
     },
   ],

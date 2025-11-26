@@ -21,6 +21,16 @@
     "settings": "Einstellungen",
     "profile": "Profil"
   },
+  "navigation": {
+    "home": "Startseite",
+    "dashboard": "Dashboard",
+    "bookings": "Buchungen",
+    "resources": "Ressourcen",
+    "users": "Benutzer",
+    "reports": "Berichte",
+    "admin": "Admin",
+    "settings": "Einstellungen"
+  },
   "login": {
     "title": "Melden Sie sich in Ihrem Konto an",
     "forgotPassword": "Passwort vergessen?",
@@ -61,5 +71,11 @@
 
   "errors": {
     "noCatalog": "Es wurde kein Katalog gefunden"
+  },
+  "tenants": {
+    "selectTenant": "Mandant auswählen",
+    "tenant": "Mandant",
+    "tenants": "Mandanten",
+    "clearSelection": "Auswahl aufheben"
   }
 }

@@ -2,6 +2,8 @@
 import { computed } from "vue";
 import { useTenantStore } from "~~/stores/tenant.js";
 
+const t = useI18n().t;
+
 const tenantStore = useTenantStore();
 
 const tenants = computed(() => tenantStore.getTenants);
@@ -11,20 +13,46 @@ const selectedTenant = computed(() => {
 });
 
 const selectedTenantLabel = computed(() => {
-  return selectedTenant.value?.name ?? "Mandant auswählen";
+  return selectedTenant.value?.name ?? t("tenants.selectTenant");
 });
 
-const dropdownItems = computed(() =>
-  tenants.value.map((tenant) => ({
-    label: tenant.name,
-    id: tenant.id,
-    onSelect: () => onSelect(tenant),
-    slot: "prefix",
-  }))
-);
+const dropdownItems = computed(() => {
+  const items = [];
+
+  if (selectedTenant.value) {
+    items.push({
+      label: t("tenants.clearSelection"),
+      id: null,
+      onSelect: onClear,
+    });
+
+    items.push({
+      type: "separator",
+    });
+  }
+
+  items.push(
+    ...tenants.value.map((tenant) => ({
+      label: tenant.name,
+      id: tenant.id,
+      onSelect: () => onSelect(tenant),
+      slot: "prefix",
+    }))
+  );
+
+  return items;
+});
 
 function onSelect(tenant) {
-  tenantStore.setCurrentTenantID(tenant.id);
+  if (tenant.id === selectedTenant.value?.id) {
+    tenantStore.setCurrentTenantID(null);
+  } else {
+    tenantStore.setCurrentTenantID(tenant.id);
+  }
+}
+
+function onClear() {
+  tenantStore.setCurrentTenantID(null);
 }
 </script>
 
@@ -44,7 +72,9 @@ function onSelect(tenant) {
       <div class="flex items-center gap-2">
         <UIcon name="i-lucide-building" size="24" />
         <div class="flex flex-col items-start leading-tight">
-          <span class="text-[10px] uppercase tracking-wide"> Mandant </span>
+          <span class="text-[10px] uppercase tracking-wide">
+            {{ t("tenants.tenant") }}
+          </span>
 
           <span class="text-xs font-semibold leading-tight">
             {{ selectedTenantLabel }}

@@ -11,11 +11,15 @@ import BookableResultsGrid from "../../components/search/BookableResultsGrid.vue
 import FilterArea from "../../components/search/FilterArea.vue";
 import SortButton from "../../components/search/SortButton.vue";
 import FilterButton from "../../components/search/FilterButton.vue";
+import { useTenantStore } from "~~/stores/tenant.js";
 
 definePageMeta({ name: "catalog-locations", layout: "catalog" });
 
 const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
+
+const tenantStore = useTenantStore();
+const tenantID = computed(() => tenantStore.getCurrentTenantID || null);
 
 const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 const { loadBundle } = useCatalogBundle();
@@ -24,12 +28,19 @@ const bookableStore = useBookableStore();
 await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
 
 const allLocations = computed(() => {
-  const locations = bookableStore.getLocations;
-  return locations.concat(bookableStore.getRooms);
+  const tenantFilter = tenantID.value
+    ? (loc) => loc.tenantId === tenantID.value
+    : () => true;
+
+  const locations = bookableStore.getLocations.filter(tenantFilter);
+  const rooms = bookableStore.getRooms.filter(tenantFilter);
+  return locations.concat(rooms);
 });
+
 const filteredLocations = ref([]);
 const filteredResultLocations = ref([]);
 const filterResetKey = ref(0);
+const searchIsInitialized = ref(false);
 
 // Initialisierung: Vor der ersten Suche alles anzeigen
 function initializeResults() {
@@ -54,12 +65,17 @@ watch(
       return;
     }
     // Nur initialisieren, wenn noch kein Status existiert (d.h. noch keine Suche)
+    /**
     const hasStatus = filteredLocations.value.some((b) => b?.status);
     if (!hasStatus) {
       initializeResults();
     }
+        **/
+
+      initializeResults();
+
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 );
 
 const sortMode = ref("relevance");
@@ -80,7 +96,6 @@ const searchLocationOptions = {
   includeScore: true,
   shouldSort: true,
 };
-const searchIsInitialized = ref(false);
 
 async function onSearch({ term, location, timePeriod }) {
   const hasCriteria = !!(
@@ -106,7 +121,7 @@ async function onSearch({ term, location, timePeriod }) {
 
   //alle die status === isBookable haben in Suche einbeziehen
   let bookableLocations = locationsWithStatus.filter(
-    (l) => l.status === "isBookable",
+    (l) => l.status === "isBookable"
   );
 
   //nach Suchbegriff suchen
@@ -134,14 +149,14 @@ async function onSearch({ term, location, timePeriod }) {
           location.bookable.tenantId,
           location.bookable.id,
           formatedTimePeriod.start.getTime(),
-          formatedTimePeriod.end.getTime(),
+          formatedTimePeriod.end.getTime()
         );
 
         return {
           location,
           isAvailable: availability.isAvailable && availability.remaining > 0,
         };
-      }),
+      })
     );
 
     bookableLocations = availabilityChecks
@@ -162,7 +177,7 @@ async function onSearch({ term, location, timePeriod }) {
             item.bookable.tenantId,
             item.bookable.id,
             formatedTimePeriod.start.getTime(),
-            formatedTimePeriod.end.getTime(),
+            formatedTimePeriod.end.getTime()
           );
         }
 
@@ -178,7 +193,7 @@ async function onSearch({ term, location, timePeriod }) {
           calculatedPrice: null,
         };
       }
-    }),
+    })
   );
   filteredResultLocations.value = filteredLocations.value;
 
@@ -194,13 +209,13 @@ function formateTimePeriod(timePeriod) {
   const newTimePeriod = {};
 
   newTimePeriod.start = new Date(
-    timePeriod.startDate + " " + timePeriod.startTime,
+    timePeriod.startDate + " " + timePeriod.startTime
   );
 
   newTimePeriod.end = "";
   if (!timePeriod.endDate && timePeriod.endTime) {
     newTimePeriod.end = new Date(
-      timePeriod.startDate + " " + timePeriod.endTime,
+      timePeriod.startDate + " " + timePeriod.endTime
     );
   } else {
     newTimePeriod.end = new Date(timePeriod.endDate + " " + timePeriod.endTime);
@@ -217,7 +232,7 @@ function getPrice(item) {
     item.bookable.priceCategories.length > 0
   ) {
     return Math.min(
-      ...item.bookable.priceCategories.map((cat) => cat.priceEur),
+      ...item.bookable.priceCategories.map((cat) => cat.priceEur)
     );
   }
   return Infinity;
