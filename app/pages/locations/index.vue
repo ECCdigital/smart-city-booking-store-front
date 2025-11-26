@@ -4,7 +4,6 @@ import { useBookableStore } from "~~/stores/bookable.js";
 import "@vuepic/vue-datepicker/dist/main.css";
 import SearchBar from "../../components/search/SearchBar.vue";
 import ResultsList from "../../components/search/ResultsList.vue";
-import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import ResultsGrid from "../../components/search/ResultsGrid.vue";
 import FilterArea from "../../components/search/FilterArea.vue";
 import SortButton from "../../components/search/SortButton.vue";
@@ -15,7 +14,6 @@ definePageMeta({ name: "catalog-locations", layout: "catalog" });
 const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
 
-const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 const { loadBundle } = useCatalogBundle();
 
 const bookableStore = useBookableStore();
@@ -119,7 +117,7 @@ function setSortedLocations(locations) {
 
     <div class="flex flex-row lg:my-5 m-5">
       <!-- Filterbereich -->
-      <div v-if="isGreaterThanMd" class="md:basis-1/4">
+      <div class="md:basis-1/4 hidden md:block">
         <FilterArea
           v-if="filteredLocations.length > 0"
           :key="filterResetKey"

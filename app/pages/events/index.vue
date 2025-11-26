@@ -120,7 +120,7 @@ function setFilteredEvents(events) {
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
-      <div v-if="isGreaterThanMd" class="md:basis-1/4">
+      <div class="md:basis-1/4 hidden md:block">
         <FilterArea
           v-if="filteredEvents.length > 0"
           :key="filterResetKey"

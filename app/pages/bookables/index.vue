@@ -1,7 +1,6 @@
 <script setup>
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useBookableStore } from "~~/stores/bookable.js";
-import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import SearchBar from "../../components/search/SearchBar.vue";
 import SortButton from "../../components/search/SortButton.vue";
 import FilterButton from "../../components/search/FilterButton.vue";
@@ -17,7 +16,6 @@ definePageMeta({
 const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
 
-const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 const { loadBundle } = useCatalogBundle();
 
 const bookableStore = useBookableStore();
@@ -118,7 +116,7 @@ function setFilteredResources(resources) {
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
-      <div v-if="isGreaterThanMd" class="md:basis-1/4">
+      <div class="md:basis-1/4 hidden md:block">
         <FilterArea
           v-if="filteredResources.length > 0"
           :key="filterResetKey"
