@@ -378,7 +378,7 @@ const cities = computed(() => {
     .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
 });
 
-const numberOfVisibleCities = ref(3); //toDo - später auf 10 setzen!!!!!!!!! ***
+const numberOfVisibleCities = ref(5); //toDo - später auf 10 setzen!!!!!!!!! ***
 function extractCity(location) {
   if (!location || typeof location !== "string") return "";
 
