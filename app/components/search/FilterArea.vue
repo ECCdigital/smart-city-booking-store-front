@@ -20,7 +20,7 @@
     </div>
     <USeparator v-if="!useAsDialog" class="border-gray-200" />
     <div class="my-4 space-y-3">
-      <div class=" space-y-3">
+      <div class="space-y-3">
         <USwitch
           v-model="includeNonSuitable"
           label="Nicht passende Objekte anzeigen."
@@ -32,29 +32,76 @@
           @change="instantFilter"
         />
         <USwitch
-            v-if="isEvent"
-            v-model="onlyPublicEvents"
-            label="Nur öffentliche Events anzeigen."
-            :style="
+          v-if="isEvent"
+          v-model="onlyPublicEvents"
+          label="Nur öffentliche Events anzeigen."
+          :style="
             colorMode === 'dark'
               ? '--ui-primary: ' + lighterColor
               : '--ui-primary: ' + darkerColor
           "
-            @change="instantFilter"
+          @change="instantFilter"
         />
         <USwitch
-            v-if="isEvent"
-            v-model="onlyRegistrationNeededEvents"
-            label="Nur anmeldepflichte Events anzeigen."
-            :style="
+          v-if="isEvent"
+          v-model="onlyRegistrationNeededEvents"
+          label="Nur anmeldepflichte Events anzeigen."
+          :style="
             colorMode === 'dark'
               ? '--ui-primary: ' + lighterColor
               : '--ui-primary: ' + darkerColor
           "
-            @change="instantFilter"
+          @change="instantFilter"
         />
       </div>
     </div>
+    <!-- Orte -->
+    <div class="my-7">
+      <p class="mb-3">Orte</p>
+      <UCheckboxGroup
+        v-model="choosenCities"
+        :items="cities.slice(0, numberOfVisibleCities)"
+        :ui="{ label: 'text-base' }"
+        :style="
+          colorMode === 'dark'
+            ? '--ui-primary: ' + lighterColor
+            : '--ui-primary: ' + darkerColor
+        "
+        @change="instantFilter"
+      >
+        <template #label="{ item }">
+          <div class="flex">
+            {{ item.value }}
+            <span class="text-gray-500 ml-2 text-sm content-center"
+              >({{ item.count }})</span
+            >
+          </div>
+        </template>
+      </UCheckboxGroup>
+      <div class="flex justify-center w-full mt-2">
+        <UButton
+          v-if="numberOfVisibleCities < cities.length"
+          label="Alle Städe anzeigen"
+          variant="ghost"
+          @click="
+            () => {
+              numberOfVisibleCities = cities.length;
+            }
+          "
+        />
+        <UButton
+          v-if="numberOfVisibleCities === cities.length"
+          label="Weniger Städe anzeigen"
+          variant="ghost"
+          @click="
+            () => {
+              numberOfVisibleCities = 3;
+            }
+          "
+        />
+      </div>
+    </div>
+
     <!-- Kategorie -->
     <div class="my-7">
       <p class="mb-3">Kategorie</p>
@@ -185,20 +232,20 @@ const onlyRegistrationNeededEvents = ref(false);
 const choosenCategories = ref([]);
 const categories = computed(() => {
   let type = "";
-  if(props.isEvent){
-    type ="event";
+  if (props.isEvent) {
+    type = "event";
   } else if (props.bookables.length > 0) {
     type = props.bookables[0].item.type;
   }
-switch (type){
+  switch (type) {
     case "event":
       return eventCategories;
     case "resource":
       return resourceCategories;
     case "event-location":
       return locationCategories;
-      case "room":
-        return locationCategories;
+    case "room":
+      return locationCategories;
   }
   return null;
 });
@@ -252,7 +299,7 @@ const priceBars = computed(() => {
     Math.ceil(
       (priceRange.value[1] - priceRange.value[0]) / dynamicPriceStep.value,
     ) || 1;
-  const  bars = new Array(barsCount).fill(0);
+  const bars = new Array(barsCount).fill(0);
   const range = priceRange.value[1] - priceRange.value[0];
 
   props.bookables.forEach((b) => {
@@ -311,6 +358,57 @@ function getEventMinPrice(event) {
   }
 }
 
+//Orte
+const choosenCities = ref([]);
+const cities = computed(() => {
+  const cityCount = {};
+    props.bookables.forEach((b) => {
+      let city = "";
+      if(props.isEvent){
+        city = extractCity(b.item.eventAddress.city);
+      } else {
+        city = extractCity(b.item.location);
+      }
+      if (city) {
+        cityCount[city] = (cityCount[city] || 0) + 1;
+      }
+    });
+  return Object.entries(cityCount)
+    .map(([value, count]) => ({ value, count }))
+    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+});
+
+const numberOfVisibleCities = ref(3); //toDo - später auf 10 setzen!!!!!!!!! ***
+function extractCity(location) {
+  if (!location || typeof location !== "string") return "";
+
+  const trimmed = location.trim();
+
+  //1.) if no digits are present -> probably just the city (split and take last part)
+  if (!/\d/.test(trimmed)) {
+    const parts = trimmed.split(/\s+/);
+    return parts[parts.length - 1];
+  }
+
+  //2.) Split by commas anc check for "PLZ Ort" pattern
+  const commaParts = trimmed
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  for (const part of commaParts) {
+    const match = part.match(/(\d{4,5})\s+(.+)/);
+    if (match) {
+      return match[2].trim();
+    }
+  }
+
+  //3.) if nothing found, use last part and keep only words with letters
+  const last = commaParts[commaParts.length - 1] || trimmed;
+  const words = last.split(/\s+/).filter((w) => /[A-Za-zÄÖÜäöüß]/.test(w));
+  return words.join(" ");
+}
+
 //Distanz
 const distanceRange = ref([0, 100]); //in km //toDo - implementieren!!!!!!!!!
 const choosenDistanceRange = ref([
@@ -335,15 +433,38 @@ function onFilter() {
       );
     }
     //filter by event properties
-    if(props.isEvent && onlyPublicEvents.value){
+    if (props.isEvent && onlyPublicEvents.value) {
       filteredBookables = filteredBookables.filter(
-          (e) => e.item.attendees.publicEvent === true,
+        (e) => e.item.attendees.publicEvent === true,
       );
     }
-    if(props.isEvent && onlyRegistrationNeededEvents.value){
+    if (props.isEvent && onlyRegistrationNeededEvents.value) {
       filteredBookables = filteredBookables.filter(
-          (e) => e.item.attendees.needsRegistration === true,
+        (e) => e.item.attendees.needsRegistration === true,
       );
+    }
+
+    //filter by cities
+    if (choosenCities.value.length > 0) {
+      if (!props.isEvent) {
+        filteredBookables = filteredBookables.filter((b) => {
+          if (!b.item.location) {
+            return false;
+          }
+          return choosenCities.value.some((city) => {
+            return b.item.location.toLowerCase().includes(city.toLowerCase());
+          });
+        });
+      } else {
+        filteredBookables = filteredBookables.filter((b) => {
+          if (!b.item.eventAddress.city) {
+            return false;
+          }
+          return choosenCities.value.some((city) => {
+            return b.item.eventAddress.city.toLowerCase().includes(city.toLowerCase());
+          });
+        });
+      }
     }
 
     //filter by price
@@ -367,6 +488,7 @@ function onFilter() {
     emit("filter", filteredBookables);
   }
 }
+
 function removeFilter() {
   includeNonSuitable.value = true;
   onlyPublicEvents.value = false;
