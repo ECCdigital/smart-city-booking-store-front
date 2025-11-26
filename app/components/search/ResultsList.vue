@@ -1,24 +1,14 @@
 <template>
   <div>
     <!-- Passende Ergebnisse & Default Anzeige -->
-    <UPageList v-if="!isEventList">
-      <BookableResultStrip
-        v-for="(b, i) in suitableBookables"
-        :key="i"
-        :bookable="b.item"
-        :calculated-price="b.calculatedPrice"
-        :search-params="searchParams"
-        class="m-2"
-      />
-    </UPageList>
-    <UPageList v-else>
-      <EventResultStrip
-        v-for="(event, i) in suitableBookables"
-        :key="i"
-        :event="event.item"
-        :ticket-information="event.ticketInformation"
-        :search-params="searchParams"
-        class="m-2"
+    <UPageList>
+      <ResultStrip
+          v-for="(b, i) in suitableBookables"
+          :key="i"
+          :item="b.item"
+          :calculated-price="b.calculatedPrice"
+          :search-params="searchParams"
+          class="m-2"
       />
     </UPageList>
 
@@ -29,21 +19,14 @@
     >
       Nicht passende Objekte
     </h2>
-    <UPageList v-if="!isEventList">
-      <BookableResultStrip
-        v-for="(b, i) in nonSuitableBookables"
-        :key="i"
-        :bookable="b.item"
-        is-not-bookable
-        class="m-2"
-      />
-    </UPageList>
-    <UPageList v-else>
-      <EventResultStrip
-        v-for="(event, i) in nonSuitableBookables"
-        :key="i"
-        :event="event.item"
-        class="m-2"
+    <UPageList>
+      <ResultStrip
+          v-for="(b, i) in nonSuitableBookables"
+          :key="i"
+          :item="b.item"
+          :search-params="searchParams"
+          is-not-bookable
+          class="m-2"
       />
     </UPageList>
 
@@ -51,8 +34,7 @@
   </div>
 </template>
 <script setup>
-import BookableResultStrip from "./BookableResultStrip.vue";
-import EventResultStrip from "~/components/search/EventResultStrip.vue";
+import ResultStrip from "~/components/search/ResultStrip.vue";
 
 const props = defineProps({
   bookables: {
