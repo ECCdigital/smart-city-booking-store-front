@@ -1,5 +1,4 @@
 <template>
-  <div>
     <div id="body" class="flex flex-wrap content-between h-full p-2">
       <div class="w-full">
         <!-- Title -->
@@ -36,7 +35,6 @@
         />
       </div>
     </div>
-  </div>
 </template>
 <script setup>
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";

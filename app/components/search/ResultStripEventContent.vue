@@ -24,10 +24,10 @@
       <!-- Veranstalter & Eigenschaften -->
       <div class="basis-3/5 w-full my-2">
         <p class="w-full my-2">Veranstalter: {{ event.eventOrganizer.name }}</p>
-        <BookableFlagDisplay :flags="event.information.flags" />
+        <BookableFlagDisplay :flags="event.information.flags" class="line-clamp-3"/>
       </div>
 
-      <div class="basis-2/5 w-full grid content-end mt-4 ">
+      <div class="basis-2/5 w-full grid content-end mt-4">
         <EventPriceDisplay
           v-if="!isNotBookable"
           :event-tickets="event.tickets"

@@ -128,7 +128,7 @@ function setFilteredResources(resources) {
         />
       </div>
 
-      <div class="md:basis-3/4">
+      <div class="basis-full md:basis-3/4">
         <ResultsList
           :bookables="filteredResultResources"
           :search-params="currentSearchParams"

@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Passende Ergebnisse & Default Anzeige -->
-    <UBlogPosts v-if="suitableBookables.length > 0" class="m-5">
+    <UPageList v-if="suitableBookables.length > 0" class="m-5 space-y-5">
       <ResultCard
           v-for="(b, i) in suitableBookables"
           :key="i"
@@ -9,7 +9,7 @@
           :calculated-price="b.calculatedPrice"
           :search-params="searchParams"
       />
-    </UBlogPosts>
+    </UPageList>
 
     <!-- Nicht passende Ergebnisse -->
     <div v-if="nonSuitableBookables.length > 0" >

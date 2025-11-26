@@ -16,10 +16,10 @@
       />
     </div>
 
-    <div class="flex justify-between h-full">
+    <div class="flex justify-between h-full overflow-hidden">
       <!-- Eigenschaften -->
       <div class="basis-3/5 w-full my-2">
-        <BookableFlagDisplay :flags="bookable?.flags" />
+        <BookableFlagDisplay :flags="bookable?.flags" class="line-clamp-3"/>
       </div>
       <div class="basis-2/5 w-full grid content-end">
         <!-- Preis -->
