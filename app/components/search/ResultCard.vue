@@ -96,8 +96,8 @@ function goToCheckout() {
 
   if (!isEvent.value && !props.isNotBookable) {
     useCheckoutRedirect().redirectToCheckout(
-      props.bookable.id,
-      props.bookable.tenantId,
+      props.item.id,
+      props.item.tenantId,
       props.searchParams?.searchTimePeriod?.start || null,
       props.searchParams?.searchTimePeriod?.end || null,
     );
