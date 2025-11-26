@@ -493,6 +493,7 @@ function removeFilter() {
   includeNonSuitable.value = true;
   onlyPublicEvents.value = false;
   onlyRegistrationNeededEvents.value = false;
+  choosenCities.value = [];
   choosenCategories.value = [];
   choosenPriceRange.value = [priceRange.value[0], priceRange.value[1]];
   choosenDistanceRange.value = [distanceRange.value[0], distanceRange.value[1]];
