@@ -64,13 +64,12 @@ export const useAuthStore = defineStore("auth", {
         const fetchError = error?.value;
 
         if (fetchError || data.value?.success === false) {
-          createError({
+          throw createError({
             success: false,
             statusCode: fetchError?.response?.status || 500,
             statusMessage:
               fetchError?.response?.data?.message || "Login failed",
           });
-          return false;
         }
 
         this.user = data.value?.data?.user || null;

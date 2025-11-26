@@ -3,6 +3,15 @@ import { useAuthStore } from "~~/stores/auth.js";
 export const useAuth = () => {
   const authStore = useAuthStore();
 
+
+  const register = async (userData) => {
+    const response = await $fetch("/api/auth/signup", {
+      method: "POST",
+      body: userData,
+    });
+    return response;
+  };
+
   return {
     user: readonly(computed(() => authStore.user)),
     permission: readonly(computed(() => authStore.permission)),
@@ -12,5 +21,6 @@ export const useAuth = () => {
     invalidateAuth: authStore.invalidateAuth,
     login: authStore.login,
     logout: authStore.logout,
+    register,
   };
 };

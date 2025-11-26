@@ -39,6 +39,7 @@
   },
 
   "register": {
+    "welcome": "Erstellen Sie ein Konto, um auf alle Funktionen zuzugreifen.",
     "title": "Erstellen Sie ein neues Konto",
     "haveAccount": "Haben Sie bereits ein Konto?",
     "loginHere": "Hier anmelden",
