@@ -8,6 +8,7 @@
     <TenantSwitcher class="mr-2" />
 
     <UButton
+      v-if="!isAuthenticated"
       :label="isGreaterThanSm ? 'Anmelden' : ''"
       :icon="isGreaterThanSm ? '' : 'i-lucide-user'"
       variant="ghost"
@@ -16,11 +17,14 @@
       to="/login"
     />
     <UButton
-      v-if="isGreaterThanSm"
+      v-if="!isAuthenticated && isGreaterThanSm"
       label="Registrieren"
       class="px-4 text-black bg-white"
       to="/register"
     />
+
+    <UserDropdown v-if="isAuthenticated" />
+
     <UColorModeButton class="" size="xl" @click="toggleColorMode" />
     <!-- toDo - delete after Testing!!!  -->
     <!-- toDo - https://ui.nuxt.com/docs/components/field-group (with dropdown) -->
@@ -30,6 +34,7 @@
 import NavigationLink from "./NavigationLink.vue";
 import { useBreakpointCheck } from "../composables/utils/useBreakpointCheck.js";
 import { useColorMode } from "@vueuse/core";
+import { useAuthStore } from "~~/stores/auth.js";
 
 const tabs = computed(() => [
   {
@@ -63,5 +68,8 @@ function toggleColorMode() {
     colorMode.value = "dark";
   }
 }
+
+const authStore = useAuthStore();
+const isAuthenticated = computed(() => authStore.isLoggedIn);
 </script>
 <style scoped></style>
