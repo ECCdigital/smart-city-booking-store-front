@@ -10,17 +10,25 @@
       "
     />
     <span
-      v-if="isActive || isGreaterThanSm"
+      v-if="isActive"
       :class="labelClass"
       :style="
         isActive ? { color: contrastToPrimary } : { color: contrastToSecondary }
       "
       >{{ tab.label }}</span
     >
+    <span
+        v-if="!isActive"
+        class="hidden sm:inline"
+        :class="labelClass"
+        :style="
+        isActive ? { color: contrastToPrimary } : { color: contrastToSecondary }
+      "
+    >{{ tab.label }}</span
+    >
   </NuxtLink>
 </template>
 <script setup>
-import { useBreakpointCheck } from "../composables/utils/useBreakpointCheck.js";
 import { useContrastColor } from "../composables/utils/useContrastColor.js";
 
 const props = defineProps({
@@ -35,7 +43,6 @@ const isActive = computed(() => {
   return route.path === props.tab.value;
 });
 
-const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
 const contrastToPrimary = computed(() =>
   useContrastColor().contrastToPrimary(),
 );

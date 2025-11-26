@@ -1,7 +1,6 @@
 <script setup>
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useEventStore } from "~~/stores/event.js";
-import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import SearchBar from "~/components/search/SearchBar.vue";
 import FilterButton from "~/components/search/FilterButton.vue";
 import SortButton from "~/components/search/SortButton.vue";
@@ -14,7 +13,6 @@ definePageMeta({ name: "catalog-events", layout: "catalog" });
 const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
 
-const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 const { loadBundle } = useCatalogBundle();
 
 const eventStore = useEventStore();

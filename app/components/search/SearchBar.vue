@@ -1,39 +1,39 @@
 <template>
   <!-- Strip for md and larger screens -->
-  <div
-    v-if="!!isGreaterThanMd"
-    class="flex justify-between bg-white dark:bg-gray-700 -mt-5 p-2 z-100 rounded shadow-lg"
-    style="position: relative; width: 60vw"
-  >
-    <InputText
-      v-model="searchTerm"
-      icon="i-lucide-search"
-      placeholder="Wonach suchen Sie?"
-      clearable
-    />
-    <USeparator orientation="vertical" />
-    <InputText
-      v-model="searchLocation"
-      icon="i-lucide-map-pin"
-      placeholder="Ort"
-      clearable
-    />
-    <USeparator orientation="vertical" />
-    <InputTimePeriod
-      @select-date="setSearchTimePeriod"
-      @remove-date="removeSearchTimePeriod"
-    />
-    <UButton
-      label="Suchen"
-      class="w-full justify-center"
-      :style="{ color: contrastToPrimary }"
-      @click="onSearch"
-    />
+  <div class="hidden md:block">
+    <div
+      class="flex justify-between bg-white dark:bg-gray-700 -mt-5 p-2 z-100 rounded shadow-lg"
+      style="position: relative; width: 60vw"
+    >
+      <InputText
+        v-model="searchTerm"
+        icon="i-lucide-search"
+        placeholder="Wonach suchen Sie?"
+        clearable
+      />
+      <USeparator orientation="vertical" />
+      <InputText
+        v-model="searchLocation"
+        icon="i-lucide-map-pin"
+        placeholder="Ort"
+        clearable
+      />
+      <USeparator orientation="vertical" />
+      <InputTimePeriod
+        @select-date="setSearchTimePeriod"
+        @remove-date="removeSearchTimePeriod"
+      />
+      <UButton
+        label="Suchen"
+        class="w-full justify-center"
+        :style="{ color: contrastToPrimary }"
+        @click="onSearch"
+      />
+    </div>
   </div>
   <!--Card for smaller screens -->
   <UCard
-    v-else
-    class="bg-white dark:bg-gray-700 mx-5 -mt-15 p-0 shadow-lg"
+    class="bg-white dark:bg-gray-700 mx-5 -mt-15 p-0 shadow-lg md:hidden"
     :ui="{ root: 'p-0', body: 'p-0' }"
     style="position: relative; width: 80vw"
   >
@@ -66,7 +66,6 @@
 <script setup>
 import InputText from "../inputs/InputText.vue";
 import InputTimePeriod from "../inputs/InputTimePeriod.vue";
-import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import Fuse from "fuse.js";
 import { useBookables } from "~/composables/api/useBookables.js";
@@ -130,7 +129,6 @@ const eventSearchLocationOptions = {
   threshold: 0.3,
 };
 
-const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 const contrastToPrimary = computed(() =>
   useContrastColor().contrastToPrimary(),
 );

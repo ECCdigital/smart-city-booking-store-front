@@ -5,18 +5,23 @@
     </div>
     <div style="flex: 1" />
     <UButton
-      :label="isGreaterThanSm ? 'Anmelden' : ' '"
-      :icon="isGreaterThanSm ? '' : 'i-lucide-user'"
-      :size="isGreaterThanSm ? 'xl' : ' '"
+      label="Anmelden"
+      size=""
       variant="ghost"
-      :class="isGreaterThanSm ? 'px-4' : 'px-2'"
+      class="hidden md:block px-4"
       :style="{ color: contrastToSecondary }"
       to="/login"
     />
     <UButton
-      v-if="isGreaterThanSm"
+        icon="i-lucide-user"
+        variant="ghost"
+        class="md:hidden px-2"
+        :style="{ color: contrastToSecondary }"
+        to="/login"
+    />
+    <UButton
       label="Registrieren"
-      class="px-4 text-black dark:text-white bg-white dark:bg-black"
+      class="hidden sm:block px-4 text-black dark:text-white bg-white dark:bg-black"
       to="/register"
     />
     <UColorModeButton
@@ -30,7 +35,6 @@
 </template>
 <script setup>
 import NavigationLink from "./NavigationLink.vue";
-import { useBreakpointCheck } from "../composables/utils/useBreakpointCheck.js";
 import { useColorMode } from "@vueuse/core";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
@@ -52,7 +56,6 @@ const tabs = computed(() => [
   },
 ]);
 
-const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
 const contrastToSecondary = computed(() => {
       const temp = useContrastColor().contrastToSecondary();
           console.log(temp)

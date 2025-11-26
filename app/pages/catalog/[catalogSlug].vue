@@ -1,10 +1,8 @@
 <script setup>
 import { useCatalogStore } from "~~/stores/catalog.js";
 import { useBookableStore } from "~~/stores/bookable.js";
-import { useEventStore } from "~~/stores/event.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
 import NavigationBar from "../../components/NavigationBar.vue";
-import { useBreakpointCheck } from "../../composables/utils/useBreakpointCheck.js";
 
 definePageMeta({
   layout: "catalog",
@@ -13,7 +11,6 @@ definePageMeta({
 });
 
 const route = useRoute();
-const router = useRouter();
 
 const { fetchCatalogBundle } = useCatalog();
 
@@ -24,18 +21,8 @@ const catalogSlug = computed(() => {
 });
 
 const catalogStore = useCatalogStore();
-const catalog = computed(() => {
-  return catalogStore.getCatalog;
-});
-
-const tenantID = computed(() => {
-  return catalog.value?.tenantId;
-});
 
 const bookableStore = useBookableStore();
-const eventStore = useEventStore();
-
-const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 
 const { data, error } = await useAsyncData(
   `catalog:${catalogSlug.value}`,
@@ -54,8 +41,6 @@ if (data.value?.bookables) {
   bookableStore.$patch({ bookables: data.value.bookables });
 }
 
-const isFetching = false;
-
 useHead({
   link: [
     {
@@ -67,13 +52,12 @@ useHead({
 </script>
 
 <template>
-  <div :class="isGreaterThanMd ? 'bg-white' : 'bg-gray-200'">
+  <div class="bg-gray-200 md:bg-white">
     <NavigationBar />
 
     <!-- Hero -->
     <div
-      v-if="isGreaterThanMd"
-      class="bg-gray-200 px-10 py-15 flex justify-between shadow-sm"
+      class="bg-gray-200 px-10 py-15 flex justify-between shadow-sm hidden md:block"
     >
       <div class="grid content-center max-w-220px">
         <p class="text-primary font-bold">Marktplatz</p>
@@ -81,7 +65,7 @@ useHead({
           Unsere Angebote und Veranstaltungen
         </p>
       </div>
-      <div style="flex: 1; min-width: 15vw"/>
+      <div style="flex: 1; min-width: 15vw" />
       <div>
         <img
           src="../../assets/logo-kielregion.png"
@@ -92,14 +76,13 @@ useHead({
       </div>
     </div>
     <UPageHero
-      v-else
       title="Unsere Angebote und Veranstaltungen"
       :ui="{
         container:
           'bg-[url(/assets/kiel_bootshafen.jpg)] contrast-70 p-10 pb-25 shadow-lg',
         title: 'text-2xl text-black',
       }"
-      class="z-0"
+      class="z-0 md:hidden"
     >
       <template #headline>
         <div class="flex justify-center">
