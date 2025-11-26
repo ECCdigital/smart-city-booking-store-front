@@ -49,6 +49,9 @@ export const useAuth = () => {
         body: credentials,
       });
 
+      console.log("Login response data:", data.value);
+      console.log("Login response error:", error.value);
+
       if (error.value || data.value?.success === false) {
         createError({
           success: false,
@@ -64,6 +67,7 @@ export const useAuth = () => {
 
       return false;
     } catch (error) {
+      console.error("Login error:", error);
       throw error;
     }
   };

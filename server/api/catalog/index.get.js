@@ -10,7 +10,6 @@ export default defineEventHandler(async (event) => {
             method: "GET",
         });
 
-        console.log("Fetched catalog:", fetchedCatalog);
 
         return fetchedCatalog;
     } catch (error) {
