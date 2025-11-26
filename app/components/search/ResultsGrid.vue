@@ -1,53 +1,39 @@
 <template>
   <div>
     <!-- Passende Ergebnisse & Default Anzeige -->
-    <UBlogPosts v-if="suitableBookables.length > 0 && !isEventGrid" class="m-5">
-      <BookableResultCard
-        v-for="(b, i) in suitableBookables"
-        :key="i"
-        :bookable="b.item"
-        :calculated-price="b.calculatedPrice"
-        :search-params="searchParams"
-      />
-    </UBlogPosts>
-    <UBlogPosts v-if="suitableBookables.length > 0 && isEventGrid" class="m-5">
-      <EventResultCard
-        v-for="(event, i) in suitableBookables"
-        :key="i"
-        :event="event.item"
-        :search-params="searchParams"
+    <UBlogPosts v-if="suitableBookables.length > 0" class="m-5">
+      <ResultCard
+          v-for="(b, i) in suitableBookables"
+          :key="i"
+          :item="b.item"
+          :calculated-price="b.calculatedPrice"
+          :search-params="searchParams"
       />
     </UBlogPosts>
 
     <!-- Nicht passende Ergebnisse -->
-    <div v-if="nonSuitableBookables.length > 0">
-      <h2 v-if="includeNonSuitable" class="text-2xl font-bold m-4 mt-7">
+    <div v-if="nonSuitableBookables.length > 0" >
+      <h2 v-if="includeNonSuitable" class="text-2xl font-bold m-5 mt-7">
         Nicht passende Objekte
       </h2>
-      <UPageList v-if="!isEventGrid">
-        <BookableResultCard
-          v-for="(b, i) in nonSuitableBookables"
-          :key="i"
-          :bookable="b.item"
-          is-not-bookable
-          class="m-2"
-        />
-      </UPageList>
-      <UPageList v-if="isEventGrid">
-        <EventResultCard
-          v-for="(event, i) in nonSuitableBookables"
-          :key="i"
-          :event="event.item"
+      <UPageList class="m-5">
+        <ResultCard
+            v-for="(b, i) in nonSuitableBookables"
+            :key="i"
+            :item="b.item"
+            :calculated-price="b.calculatedPrice"
+            :search-params="searchParams"
+            is-not-bookable
+            class="mb-5"
         />
       </UPageList>
     </div>
 
-    <p v-if="bookables.length < 1">Keine Locations gefunden.</p>
+    <p v-if="bookables.length < 1">Keine Objekte gefunden.</p>
   </div>
 </template>
 <script setup>
-import BookableResultCard from "./BookableResultCard.vue";
-import EventResultCard from "~/components/search/EventResultCard.vue";
+import ResultCard from "~/components/search/ResultCard.vue";
 
 const props = defineProps({
   bookables: {

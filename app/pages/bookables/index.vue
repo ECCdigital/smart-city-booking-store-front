@@ -130,18 +130,18 @@ function setFilteredResources(resources) {
 
       <div class="md:basis-3/4">
         <ResultsList
-          v-if="isGreaterThanMd"
           :bookables="filteredResultResources"
           :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
+          class="hidden md:block"
         />
         <ResultsGrid
-          v-else
           :bookables="filteredResultResources"
           :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
+          class="md:hidden"
         />
       </div>
     </div>

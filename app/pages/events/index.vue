@@ -133,20 +133,20 @@ function setFilteredEvents(events) {
 
       <div class="md:basis-3/4">
         <ResultsList
-          v-if="isGreaterThanMd"
           :bookables="filteredResultEvents"
           :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
           is-event-list
+          class="hidden md:block"
         />
         <ResultsGrid
-          v-else
           :bookables="filteredResultEvents"
           :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
           is-event-grid
+          class="md:hidden"
         />
       </div>
     </div>
