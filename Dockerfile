@@ -1,3 +1,4 @@
+# dockerfile
 # 1) Dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
@@ -22,9 +23,12 @@ ENV PORT=3000
 
 RUN addgroup -g 1001 -S nodejs && adduser -S nuxt -u 1001
 
+# Nur package-Dateien und Nitro-Output kopieren
 COPY --from=builder /app/package*.json ./
-COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/.output ./.output
+
+# Optional: prod-deps (falls Nitro noch welche braucht, z.B. für Adapters)
+RUN npm ci --omit=dev || npm install --only=production || true
 
 USER 1001
 EXPOSE 3000
