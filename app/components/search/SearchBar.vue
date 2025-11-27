@@ -20,6 +20,7 @@
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <InputTimePeriod
+        :time-period="searchTimePeriod"
         @select-date="setSearchTimePeriod"
         @remove-date="removeSearchTimePeriod"
       />
@@ -52,6 +53,7 @@
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputTimePeriod
+      :time-period="searchTimePeriod"
       @select-date="setSearchTimePeriod"
       @remove-date="removeSearchTimePeriod"
     />
@@ -205,11 +207,27 @@ function updateUrl() {
   });
 }
 function readUrl() {
-  const currentUrl = new URL(window.location.href);
-  const params = new URLSearchParams(currentUrl.search);
+  const route = useRoute();
+  searchTerm.value = decodeURIComponent(route.query.searchTerm || "");
+  searchLocation.value = decodeURIComponent(route.query.searchLocation || "");
+  const startDateRaw = route.query.startDate
+    ? new Date(parseInt(route.query.startDate))
+    : null;
+  const startDate = startDateRaw ? startDateRaw.toISOString().slice(0, 10) : "";
+  const startTime = startDateRaw ? startDateRaw.toTimeString().slice(0, 5) : "";
 
-  searchTerm.value = decodeURIComponent(params.get("searchTerm")) || "";
-  searchLocation.value = decodeURIComponent(params.get("searchLocation")) || "";
+  const endDateRaw = route.query.endDate
+    ? new Date(parseInt(route.query.endDate))
+    : null;
+  const endDate = endDateRaw ? endDateRaw.toISOString().slice(0, 10) : "";
+  const endTime = endDateRaw ? endDateRaw.toTimeString().slice(0, 5) : "";
+
+  searchTimePeriod.value = {
+    startDate: startDate,
+    startTime: startTime,
+    endDate: endDate,
+    endTime: endTime,
+  };
 }
 onMounted(() => {
   readUrl();

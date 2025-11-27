@@ -1,8 +1,6 @@
 <template>
   <div class="flex justify-between w-full">
-    <UModal
-        v-model:open="isOpen"
-    >
+    <UModal v-model:open="isOpen">
       <UButton
         size="lg"
         color="neutral"
@@ -15,7 +13,10 @@
         @click="setDefaultStartDate()"
       >
         <template v-if="dateRange[0]">
-          <div class="flex justify-between w-full ">
+          <p class="text-red-800">{{dateRange}}</p>
+          <p class="text-red-800">{{timeRange}}</p>
+
+          <div class="flex justify-between w-full">
             <div class="text-black dark:text-white">
               <span>{{ displayDate(dateRange[0]) }}</span>
               <span v-if="dateRange[1] && !timeRange.start"> - </span>
@@ -90,30 +91,29 @@
           </div>
 
           <div class="flex justify-end">
-
             <UButton
-                label="OK"
-                variant="ghost"
-                :style="
-              colorMode === 'dark'
-                ? { color: lighterColor }
-                : { color: darkerColor }
-            "
-                @click="onSelectDate"
+              label="OK"
+              variant="ghost"
+              :style="
+                colorMode === 'dark'
+                  ? { color: lighterColor }
+                  : { color: darkerColor }
+              "
+              @click="onSelectDate"
             />
           </div>
         </UCard>
       </template>
     </UModal>
     <UButton
-        v-if="dateRange.length > 0 || timeRange.start || timeRange.end"
-        color="neutral"
-        variant="link"
-        size="sm"
-        icon="i-lucide-circle-x"
-        aria-label="Clear input"
-        class="mx-3"
-        @click="onDeleteTimePeriod"
+      v-if="dateRange.length > 0 || timeRange.start || timeRange.end"
+      color="neutral"
+      variant="link"
+      size="sm"
+      icon="i-lucide-circle-x"
+      aria-label="Clear input"
+      class="mx-3"
+      @click="onDeleteTimePeriod"
     />
   </div>
 </template>
@@ -123,10 +123,17 @@ import TimePicker from "./TimePicker.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useColorMode } from "@vueuse/core";
 
+const props = defineProps({
+  timePeriod: {
+    type: Object,
+    default: null,
+  },
+});
 const emit = defineEmits(["selectDate", "removeDate"]);
 
 const dateRange = ref([]);
 const timeRange = ref({ start: null, end: null });
+
 const isOpen = ref(false);
 const missingValues = ref([]);
 
@@ -134,8 +141,59 @@ const colorMode = useColorMode();
 const darkerColor = computed(() => useContrastColor().darkerColor());
 const lighterColor = computed(() => useContrastColor().lighterColor());
 
+//set default values if props are passed
+function setDefaultDateRange() {
+  if (props.timePeriod) {
+    const newDateRange = [];
+    if(props.timePeriod.startDate){
+      newDateRange.push(new Date(props.timePeriod.startDate));
+    }else{
+      return [];
+    }
+    if(props.timePeriod.endDate){
+      newDateRange.push(new Date(props.timePeriod.endDate));
+    }
+    return newDateRange;
+  } else {
+    return []
+  }
+}
+function setDefaultTimeRange() {
+  if (props.timePeriod) {
+    const newTimeRange = { start: null, end: null };
+    if(props.timePeriod.startTime){
+      newTimeRange.start = {
+        hours: parseInt(props.timePeriod.startTime.split(":")[0]),
+        minutes: parseInt(props.timePeriod.startTime.split(":")[1]),
+      }
+    }
+    if(props.timePeriod.endTime){
+      newTimeRange.end = {
+        hours: parseInt(props.timePeriod.endTime.split(":")[0]),
+        minutes: parseInt(props.timePeriod.endTime.split(":")[1]),
+      }
+    }
+    return newTimeRange;
+  } else {
+    return { start: null, end: null };
+  }
+}
+watch(
+  () => props.timePeriod,
+  (newValue) => {
+    if (newValue ) {
+      dateRange.value = setDefaultDateRange();
+      timeRange.value = setDefaultTimeRange();
+    }
+  },
+  { immediate: true, deep: true },
+);
+
 //Functions to display date and time values
 function displayDate(date) {
+  if (!date) return "";
+  date = new Date(date);
+  if (isNaN(date.getTime())) return "";
   return date.toLocaleDateString("de-DE");
 }
 function displayTime(time) {
@@ -150,11 +208,10 @@ function displayTime(time) {
 }
 
 //Functions to set default values
-function closeTimePeriodInput(){
+function closeTimePeriodInput() {
   isOpen.value = false;
   dateRange.value = [];
   timeRange.value = { start: null, end: null };
-
 }
 function setDefaultStartDate() {
   if (!dateRange.value[0]) {
@@ -221,6 +278,7 @@ function onSelectDate() {
     emit("selectDate", selectedDate);
   }
 }
+
 function onDeleteTimePeriod() {
   dateRange.value = [];
   timeRange.value = { start: null, end: null };

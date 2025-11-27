@@ -61,7 +61,7 @@ const props = defineProps({
     required: true,
   },
   calculatedPrice: {
-    type: Number,
+    type: Object,
     default: null,
   },
   searchParams: {
