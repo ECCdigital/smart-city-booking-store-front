@@ -2,11 +2,14 @@
 import { ref } from "vue";
 import { useAuth } from "~/composables/auth/useAuth";
 import LoginCard from "~/components/auth/LoginCard.vue";
+import { useAuthStore } from "~~/stores/auth.js";
 
 definePageMeta({
   layout: "default",
   name: "login",
 });
+
+const t = useI18n().t;
 
 const form = ref({
   id: "",
@@ -17,12 +20,25 @@ const loading = ref(false);
 
 const { login } = useAuth();
 
-const notification = useNotification()
+const notification = useNotification();
+
+const authStore = useAuthStore();
+
+const user = computed(() => authStore.getUser);
+
+const userName = computed(() => {
+  return user.value?.firstName || "";
+});
+
 
 const handleLogin = async () => {
   loading.value = true;
   try {
     await login(form.value);
+    notification.success(
+      t("notifications.loginSuccess.message") + ", " + userName.value + "!",
+      t("notifications.loginSuccess.title")
+    );
     const redirect = useRoute().query.redirect;
     if (redirect && typeof redirect === "string") {
       await navigateTo(redirect);
@@ -30,7 +46,10 @@ const handleLogin = async () => {
       await navigateTo("/");
     }
   } catch (err) {
-    notification.error("Login fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.");
+    notification.error(
+      t("notifications.loginError.message"),
+      t("notifications.loginError.title")
+    );
     console.error("Login failed:", err);
   } finally {
     loading.value = false;

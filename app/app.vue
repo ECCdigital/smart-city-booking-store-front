@@ -15,7 +15,7 @@ const { locale } = useI18n();
 const lang = computed(() => locales[locale.value].code);
 const dir = computed(() => locales[locale.value].dir);
 const toaster = {
-  position: "top-right",
+  position: "bottom-right",
 };
 
 useHead({

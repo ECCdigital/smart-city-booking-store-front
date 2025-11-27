@@ -32,7 +32,10 @@ export function useNotification() {
       title,
       description: message,
       color: typeToColor[type],
-      icon: payload.icon || "info",
+      variant: type,
+      ui: {
+        root: 'bg-white/40 dark:bg-gray-900/40 backdrop-blur-lg'
+      }
     });
   }
 

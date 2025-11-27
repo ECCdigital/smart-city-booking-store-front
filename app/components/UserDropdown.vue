@@ -1,11 +1,15 @@
 <script setup>
 import { useAuthStore } from "~~/stores/auth.js";
+import {useBreakpointCheck} from "~/composables/utils/useBreakpointCheck.js";
 
 const t = useI18n().t;
 
 const config = useRuntimeConfig();
-
 const authStore = useAuthStore();
+const notification = useNotification();
+
+const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
+
 
 const user = computed(() => authStore.getUser);
 
@@ -39,7 +43,18 @@ const items = [
 ];
 
 async function logout() {
-  await authStore.logout();
+  try {
+    await authStore.logout();
+    notification.success(
+      t("notifications.logoutSuccess.message"),
+      t("notifications.logoutSuccess.title")
+    );
+  } catch (error) {
+    notification.error(
+      t("login.logoutErrorMessage.message"),
+      t("login.logoutErrorMessage.title")
+    );
+  }
 }
 </script>
 
@@ -56,7 +71,7 @@ async function logout() {
       class="flex items-center gap-2 outline-none cursor-pointer"
     >
       <UUser
-        :name="userName"
+        :name="isGreaterThanSm ? userName : ''"
         :avatar="{
           icon: 'i-lucide-user',
         }"

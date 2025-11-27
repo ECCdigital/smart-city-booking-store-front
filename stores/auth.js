@@ -86,7 +86,7 @@ export const useAuthStore = defineStore("auth", {
       try {
         await $fetch("/api/auth/logout", { method: "POST" });
       } catch (error) {
-        console.error("Logout error:", error);
+        throw error
       } finally {
         this.invalidateAuth();
       }

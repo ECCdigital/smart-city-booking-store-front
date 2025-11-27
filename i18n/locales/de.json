@@ -35,7 +35,15 @@
     "title": "Melden Sie sich in Ihrem Konto an",
     "forgotPassword": "Passwort vergessen?",
     "noAccount": "Noch kein Konto?",
-    "registerHere": "Hier registrieren"
+    "registerHere": "Hier registrieren",
+    "logoutMessage": "Sie wurden erfolgreich abgemeldet.",
+    "errors": {
+      "invalidCredentials": "Ungültige Anmeldeinformationen. Bitte versuchen Sie es erneut.",
+      "accountLocked": "Ihr Konto ist gesperrt. Bitte kontaktieren Sie den Support.",
+      "accountInactive": "Ihr Konto ist inaktiv. Bitte überprüfen Sie Ihre E-Mails für Aktivierungsanweisungen.",
+      "tooManyAttempts": "Zu viele fehlgeschlagene Anmeldeversuche. Bitte versuchen Sie es später erneut.",
+      "unknownError": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+    }
   },
 
   "register": {
@@ -78,5 +86,20 @@
     "tenant": "Mandant",
     "tenants": "Mandanten",
     "clearSelection": "Auswahl aufheben"
+  },
+
+  "notifications": {
+    "loginSuccess": {
+      "title": "Anmeldung erfolgreich",
+      "message": "Willkommen zurück"
+    },
+    "loginError": {
+      "title": "Anmeldefehler",
+      "message": "Bitte überprüfen Sie Ihre Anmeldeinformationen und versuchen Sie es erneut."
+    },
+    "logoutSuccess": {
+      "title": "Abmeldung erfolgreich",
+      "message": "Sie wurden erfolgreich abgemeldet."
+    }
   }
 }
