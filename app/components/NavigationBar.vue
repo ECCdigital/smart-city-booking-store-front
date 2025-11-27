@@ -6,17 +6,14 @@
     <div style="flex: 1" />
 
     <TenantSwitcher class="mr-2" />
-
     <UButton
-      label="Anmelden"
-      size=""
-      v-if="!isAuthenticated"
-      :label="isGreaterThanSm ? 'Anmelden' : ''"
-      :icon="isGreaterThanSm ? '' : 'i-lucide-user'"
-      variant="ghost"
-      class="hidden md:block px-2"
-      :style="{ color: contrastToSecondary }"
-      to="/login"
+        v-if="!isAuthenticated"
+        :label="isGreaterThanSm ? 'Anmelden' : ''"
+        :icon="isGreaterThanSm ? '' : 'i-lucide-log-in'"
+        variant="ghost"
+        class="block px-2"
+        :style="{ color: contrastToSecondary }"
+        to="/login"
     />
     <UButton
       v-if="!isAuthenticated && isGreaterThanSm"
@@ -28,10 +25,11 @@
     <UserDropdown v-if="isAuthenticated" />
 
     <UColorModeButton
-        size="xl"
-        :style="{ color: contrastToSecondary }"
-        @click="toggleColorMode"
-    />    <!-- toDo - delete after Testing!!!  -->
+      size="xl"
+      :style="{ color: contrastToSecondary }"
+      @click="toggleColorMode"
+    />
+    <!-- toDo - delete after Testing!!!  -->
     <!-- toDo - https://ui.nuxt.com/docs/components/field-group (with dropdown) -->
   </div>
 </template>
@@ -63,11 +61,9 @@ const tabs = computed(() => [
 ]);
 
 const contrastToSecondary = computed(() => {
-      const temp = useContrastColor().contrastToSecondary();
-          console.log(temp)
-      return temp
-    }
-);
+  const temp = useContrastColor().contrastToSecondary();
+  return temp;
+});
 
 const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
 
@@ -87,4 +83,6 @@ function toggleColorMode() {
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isLoggedIn);
 </script>
-<style scoped></style>
+<style scoped>
+
+</style>
