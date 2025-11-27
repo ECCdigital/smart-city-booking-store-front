@@ -11,14 +11,14 @@
         placeholder="Wonach suchen Sie?"
         clearable
       />
-      <USeparator orientation="vertical" />
+      <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <InputText
         v-model="searchLocation"
         icon="i-lucide-map-pin"
         placeholder="Ort"
         clearable
       />
-      <USeparator orientation="vertical" />
+      <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <InputTimePeriod
         @select-date="setSearchTimePeriod"
         @remove-date="removeSearchTimePeriod"
@@ -151,6 +151,7 @@ async function onSearch() {
     emit("initialize");
     isInitialized.value = false;
     filterResetKey.value++;
+    updateUrl();
     return;
   }
   isInitialized.value = true;
@@ -177,6 +178,8 @@ async function onSearch() {
     formatedTimePeriod,
   );
 
+  updateUrl();
+
   filterResetKey.value++;
   emit("search", {
     items: updatedBookableItems,
@@ -187,6 +190,31 @@ async function onSearch() {
     },
   });
 }
+
+function updateUrl() {
+  const router = useRouter();
+  const formattedTimePeriod = formateTimePeriod(searchTimePeriod.value);
+
+  router.push({
+    query: {
+      searchTerm: encodeURIComponent(searchTerm.value) || "",
+      searchLocation: encodeURIComponent(searchLocation.value) || "",
+      startDate: formattedTimePeriod?.start || "",
+      endDate: formattedTimePeriod?.end || "",
+    },
+  });
+}
+function readUrl() {
+  const currentUrl = new URL(window.location.href);
+  const params = new URLSearchParams(currentUrl.search);
+
+  searchTerm.value = decodeURIComponent(params.get("searchTerm")) || "";
+  searchLocation.value = decodeURIComponent(params.get("searchLocation")) || "";
+}
+onMounted(() => {
+  readUrl();
+  onSearch();
+});
 
 function setItemStatus() {
   return props.itemsToSearch.map((item) => {
