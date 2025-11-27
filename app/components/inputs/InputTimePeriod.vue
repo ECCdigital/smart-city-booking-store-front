@@ -43,7 +43,7 @@
                   variant="ghost"
                   icon="i-lucide-x"
                   class="rounded-xl"
-                  @click="isOpen = false"
+                  @click="closeTimePeriodInput"
                 />
               </UTooltip>
             </div>
@@ -91,7 +91,16 @@
 
           <div class="flex justify-end">
 
-            <UButton label="OK" variant="ghost" @click="onSelectDate" />
+            <UButton
+                label="OK"
+                variant="ghost"
+                :style="
+              colorMode === 'dark'
+                ? { color: lighterColor }
+                : { color: darkerColor }
+            "
+                @click="onSelectDate"
+            />
           </div>
         </UCard>
       </template>
@@ -111,6 +120,8 @@
 <script setup>
 import DatePicker from "./DatePicker.vue";
 import TimePicker from "./TimePicker.vue";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import { useColorMode } from "@vueuse/core";
 
 const emit = defineEmits(["selectDate", "removeDate"]);
 
@@ -118,6 +129,10 @@ const dateRange = ref([]);
 const timeRange = ref({ start: null, end: null });
 const isOpen = ref(false);
 const missingValues = ref([]);
+
+const colorMode = useColorMode();
+const darkerColor = computed(() => useContrastColor().darkerColor());
+const lighterColor = computed(() => useContrastColor().lighterColor());
 
 //Functions to display date and time values
 function displayDate(date) {
@@ -135,6 +150,12 @@ function displayTime(time) {
 }
 
 //Functions to set default values
+function closeTimePeriodInput(){
+  isOpen.value = false;
+  dateRange.value = [];
+  timeRange.value = { start: null, end: null };
+
+}
 function setDefaultStartDate() {
   if (!dateRange.value[0]) {
     dateRange.value[0] = new Date();

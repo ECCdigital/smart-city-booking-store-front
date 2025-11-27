@@ -22,7 +22,9 @@
           />
         </div>
         <FilterArea
+            v-model:is-initailized="isInitialized"
             :bookables="props.bookables"
+            is-event
             use-as-dialog
             @filter="onFilter"
         />
@@ -33,10 +35,15 @@
 <script setup>
 import FilterArea from "./FilterArea.vue";
 
+const isInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
   bookables: {
     type: Array,
     required: true,
+  },
+  isEvent: {
+    type: Boolean,
+    default: false,
   },
 });
 

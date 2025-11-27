@@ -1,6 +1,5 @@
 <script setup>
 import NavigationBar from "~/components/NavigationBar.vue";
-import {useBreakpointCheck} from "~/composables/utils/useBreakpointCheck.js";
 
 useHead({
   link: [
@@ -11,7 +10,6 @@ useHead({
   ],
 });
 
-const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 </script>
 
 <template>
@@ -21,8 +19,7 @@ const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
     <!-- toDo - Hero-Design für lg anpassen!  -->
     <!-- toDo - Hero anpassen für Dark-Mode  -->
     <div
-        v-if="isGreaterThanMd"
-        class="bg-gray-200  px-10 py-15 flex justify-between shadow-sm"
+        class="bg-gray-200  px-10 py-15 flex justify-between shadow-sm hidden md:block"
     >
       <div class="grid content-center max-w-220px">
         <p class="text-primary font-bold">Marktplatz</p>
@@ -41,14 +38,13 @@ const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
       </div>
     </div>
     <UPageHero
-        v-else
         title="Unsere Angebote und Veranstaltungen"
         :ui="{
         container:
           'bg-[url(/assets/kiel_bootshafen.jpg)] contrast-70 p-10 pb-25 shadow-lg',
         title: 'text-2xl text-black',
       }"
-        class="z-0"
+        class="md:hidden z-0"
     >
       <template #headline>
         <div class="flex justify-center">

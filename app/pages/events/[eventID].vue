@@ -11,6 +11,7 @@ definePageMeta({
 
 const route = useRoute();
 const eventStore = useEventStore();
+
 const catalogSlug = computed(() => route.params.catalogSlug);
 const eventID = computed(() => route.params.eventID);
 

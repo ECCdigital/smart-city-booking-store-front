@@ -1,21 +1,16 @@
-import { apiFetch } from "~~/server/api/utils/apiFetch.js";
+import {apiFetch} from "~~/server/api/utils/apiFetch.js";
 
 export default defineEventHandler(async (event) => {
   const tenantID = getRouterParam(event, "tenantID");
 
   try {
-    console.log("*** TEST 1 ***");
-
-    const fetchedBookables = await apiFetch(
-      event,
-      `/json/${tenantID}/bookables/`,
-      {
-        method: "GET",
-      },
+      return await apiFetch(
+        event,
+        `/json/${tenantID}/bookables/`,
+        {
+            method: "GET",
+        },
     );
-    console.log("*** TEST 2 ***");
-
-    return fetchedBookables;
   } catch (error) {
     throw createError({
       statusCode: error.status || 500,

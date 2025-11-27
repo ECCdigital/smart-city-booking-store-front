@@ -10,29 +10,31 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxt/eslint": "^1.8.0",
-    "@nuxt/fonts": "^0.11.4",
-    "@nuxt/icon": "^2.0.0",
-    "@nuxt/image": "^1.11.0",
+    "@nuxt/eslint": "1.8.0",
+    "@nuxt/fonts": "0.11.4",
+    "@nuxt/icon": "2.0.0",
+    "@nuxt/image": "1.11.0",
     "@nuxt/kit": "4.0.3",
-    "@nuxt/ui": "^4.0.0",
-    "@nuxtjs/i18n": "^10.0.4",
-    "@pinia/nuxt": "^0.11.2",
-    "@vuepic/vue-datepicker": "^11.0.2",
-    "eslint": "^9.33.0",
-    "fuse.js": "^7.1.0",
-    "h3": "^1.15.4",
-    "nuxi": "^3.28.0",
+    "@nuxt/ui": "4.0.0",
+    "@nuxtjs/i18n": "10.0.4",
+    "@pinia/nuxt": "0.11.2",
+    "@tailwindcss/line-clamp": "^0.4.4",
+    "@vuepic/vue-datepicker": "11.0.2",
+    "eslint": "9.33.0",
+    "fuse.js": "7.1.0",
+    "h3": "1.15.4",
+    "jsdom": "^27.0.1",
+    "nuxi": "3.28.0",
     "nuxt": "4.1.0",
-    "nuxt-csurf": "^1.6.5",
-    "nuxt-security": "^2.3.0",
-    "pinia": "^3.0.3",
-    "pinia-plugin-persistedstate": "^4.7.1",
-    "pino": "^9.9.0",
-    "vue": "^3.5.18",
-    "vue-router": "^4.5.1"
+    "nuxt-csurf": "1.6.5",
+    "nuxt-security": "2.3.0",
+    "pinia": "3.0.3",
+    "pinia-plugin-persistedstate": "4.7.1",
+    "pino": "9.9.0",
+    "vue": "3.5.18",
+    "vue-router": "4.5.1"
   },
   "devDependencies": {
-    "pino-pretty": "^13.1.1"
+    "pino-pretty": "13.1.1"
   }
 }

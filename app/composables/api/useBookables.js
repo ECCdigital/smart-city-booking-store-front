@@ -7,8 +7,6 @@ export function useBookables() {
         method: "GET",
       });
 
-      console.log(response);
-
       return response;
     } catch (error) {
       console.error("Error fetching bookables:", error);
@@ -29,8 +27,7 @@ export function useBookables() {
         },
       );
 
-      console.log(response);
-
+      //console.log(response);
       return response;
     } catch (error) {
       console.error("Error checking bookable availability:", error);
@@ -51,8 +48,7 @@ export function useBookables() {
         },
       );
 
-      console.log(response);
-
+      //console.log(response);
       return response;
     } catch (error) {
       console.error("Error checking bookable availability:", error);

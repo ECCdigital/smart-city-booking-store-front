@@ -1,13 +1,10 @@
 <script setup>
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useBookableStore } from "~~/stores/bookable.js";
-import Fuse from "fuse.js";
 import "@vuepic/vue-datepicker/dist/main.css";
-import BookableSearchBar from "../../components/search/BookableSearchBar.vue";
-import BookableResultsList from "../../components/search/BookableResultsList.vue";
-import { useBookables } from "~/composables/api/useBookables.js";
-import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
-import BookableResultsGrid from "../../components/search/BookableResultsGrid.vue";
+import SearchBar from "../../components/search/SearchBar.vue";
+import ResultsList from "../../components/search/ResultsList.vue";
+import ResultsGrid from "../../components/search/ResultsGrid.vue";
 import FilterArea from "../../components/search/FilterArea.vue";
 import SortButton from "../../components/search/SortButton.vue";
 import FilterButton from "../../components/search/FilterButton.vue";
@@ -42,20 +39,20 @@ const filteredResultLocations = ref([]);
 const filterResetKey = ref(0);
 const searchIsInitialized = ref(false);
 
-// Initialisierung: Vor der ersten Suche alles anzeigen
+// Initialization: Show all items before the first search
 function initializeResults() {
-  // Status setzen: Buchbare -> "suitable", andere -> "nonBookable"
+  // Set status: Bookable -> "suitable", others -> "nonBookable"
   const withStatus = allLocations.value.map((location) => {
     if (location.isBookable) {
-      return { bookable: location, status: "suitable", calculatedPrice: null };
+      return { item: location, status: "suitable", calculatedPrice: null };
     }
-    return { bookable: location, status: "nonBookable", calculatedPrice: null };
+    return { item: location, status: "nonBookable", calculatedPrice: null };
   });
   filteredLocations.value = withStatus;
   filteredResultLocations.value = withStatus;
 }
 
-// Reaktiv bleiben, falls der Store später Daten nachlädt
+//Stay reactive in case the store loads data later.
 watch(
   () => allLocations.value,
   (val) => {
@@ -64,6 +61,7 @@ watch(
       filteredResultLocations.value = [];
       return;
     }
+    // Only initialize if no status exists yet (i.e., no search has been performed yet)
     // Nur initialisieren, wenn noch kein Status existiert (d.h. noch keine Suche)
     /**
     const hasStatus = filteredLocations.value.some((b) => b?.status);
@@ -78,199 +76,23 @@ watch(
   { immediate: true, deep: true }
 );
 
-const sortMode = ref("relevance");
-
 //Search
-const searchTermOptions = {
-  keys: [
-    "bookable.title",
-    "bookable.description",
-    "bookable.flags",
-    "bookable.tags",
-  ],
-  includeScore: true,
-  shouldSort: true,
-};
-const searchLocationOptions = {
-  keys: ["bookable.description", "bookable.location"],
-  includeScore: true,
-  shouldSort: true,
-};
-
-async function onSearch({ term, location, timePeriod }) {
-  const hasCriteria = !!(
-    term ||
-    location ||
-    (timePeriod && (timePeriod.startDate || timePeriod.endDate))
-  );
-  const locationsWithStatus = allLocations.value.map((location) => {
-    if (location.isBookable) {
-      return { bookable: location, status: "isBookable" };
-    } else {
-      return { bookable: location, status: "nonBookable" };
-    }
-  });
-
-  if (!hasCriteria) {
-    initializeResults();
-    searchIsInitialized.value = false;
-    filterResetKey.value++;
-    return;
-  }
-  searchIsInitialized.value = true;
-
-  //alle die status === isBookable haben in Suche einbeziehen
-  let bookableLocations = locationsWithStatus.filter(
-    (l) => l.status === "isBookable"
-  );
-
-  //nach Suchbegriff suchen
-  if (term) {
-    bookableLocations = new Fuse(bookableLocations, searchTermOptions)
-      .search(term)
-      .map((result) => result.item);
-  }
-
-  //nach Ort suchen
-  if (location) {
-    bookableLocations = new Fuse(bookableLocations, searchLocationOptions)
-      .search(location)
-      .map((result) => result.item);
-  }
-
-  //nach Zeit suchen
-  let formatedTimePeriod = null;
-  if (timePeriod && timePeriod.startDate) {
-    formatedTimePeriod = formateTimePeriod(timePeriod);
-
-    const availabilityChecks = await Promise.all(
-      bookableLocations.map(async (location) => {
-        const availability = await useBookables().getBookableAvailability(
-          location.bookable.tenantId,
-          location.bookable.id,
-          formatedTimePeriod.start.getTime(),
-          formatedTimePeriod.end.getTime()
-        );
-
-        return {
-          location,
-          isAvailable: availability.isAvailable && availability.remaining > 0,
-        };
-      })
-    );
-
-    bookableLocations = availabilityChecks
-      .filter((result) => result.isAvailable)
-      .map((result) => result.location);
-  }
-
-  //Status updaten
-  filteredLocations.value = await Promise.all(
-    locationsWithStatus.map(async (item) => {
-      if (item.status === "isBookable") {
-        const isSuitable = bookableLocations.includes(item);
-
-        let price = null;
-        if (timePeriod) {
-          //Preis raussuchen und mit ins Objekt schreiben
-          price = await useBookables().getBookablePrice(
-            item.bookable.tenantId,
-            item.bookable.id,
-            formatedTimePeriod.start.getTime(),
-            formatedTimePeriod.end.getTime()
-          );
-        }
-
-        return {
-          ...item,
-          status: isSuitable ? "suitable" : "nonSuitable",
-          calculatedPrice: isSuitable ? price : null,
-        };
-      } else {
-        return {
-          ...item,
-          status: "nonBookable",
-          calculatedPrice: null,
-        };
-      }
-    })
-  );
-  filteredResultLocations.value = filteredLocations.value;
-
-  //Filter zurücksetzen
-  filterResetKey.value++;
+const currentSearchParams = ref({});
+function onSearch({items, searchParams}) {
+  filteredLocations.value = items;
+  filteredResultLocations.value = items;
+  currentSearchParams.value = searchParams;
 }
 function numberOfSuitableBookables() {
   return filteredResultLocations.value.filter((l) => l.status === "suitable")
     .length;
 }
 
-function formateTimePeriod(timePeriod) {
-  const newTimePeriod = {};
-
-  newTimePeriod.start = new Date(
-    timePeriod.startDate + " " + timePeriod.startTime
-  );
-
-  newTimePeriod.end = "";
-  if (!timePeriod.endDate && timePeriod.endTime) {
-    newTimePeriod.end = new Date(
-      timePeriod.startDate + " " + timePeriod.endTime
-    );
-  } else {
-    newTimePeriod.end = new Date(timePeriod.endDate + " " + timePeriod.endTime);
-  }
-  return newTimePeriod;
-}
-
-function getPrice(item) {
-  if (searchIsInitialized.value) {
-    return item.calculatedPrice?.userGrossPriceEur;
-  }
-  if (
-    item.bookable.priceCategories &&
-    item.bookable.priceCategories.length > 0
-  ) {
-    return Math.min(
-      ...item.bookable.priceCategories.map((cat) => cat.priceEur)
-    );
-  }
-  return Infinity;
-}
-
-function sortBookables(mode) {
-  sortMode.value = mode;
-  //toDo - Sortierung nach Beliebtheit ergänzen?!
-
-  //Default: momentan "Relevanz" nach Fuze-Suche...
-  filteredLocations.value = filteredLocations.value.sort((a, b) => {
-    //Sortieren nach Preis
-    if (mode === "priceAscending") {
-      return getPrice(a) - getPrice(b);
-    }
-    if (mode === "priceDescending") {
-      return getPrice(b) - getPrice(a);
-    }
-
-    //toDo - Sortierung nach Distanz ergänzen!!
-    //Sortieren nach Distanz
-    if (mode === "distanceAscending" || mode === "distanceDescending") {
-      // Momentan keine Entfernung vorhanden, also keine Sortierung
-      /*
-      if (mode === "distanceAscending") {
-        return a.calculatedDistance - b.calculatedDistance;
-      } else if (mode === "distanceDescending") {
-        return b.calculatedDistance - a.calculatedDistance;
-      } else {
-        return 0;
-      }
-      */
-      return 0;
-    }
-  });
-}
-
+//Sort & Filter
 function setFilteredLocations(locations) {
+  filteredResultLocations.value = locations;
+}
+function setSortedLocations(locations) {
   filteredResultLocations.value = locations;
 }
 </script>
@@ -278,7 +100,13 @@ function setFilteredLocations(locations) {
 <template>
   <div>
     <div class="flex justify-center">
-      <BookableSearchBar @search="onSearch" />
+      <SearchBar
+        v-model:is-initailized="searchIsInitialized"
+        v-model:filter-reset-key="filterResetKey"
+        :items-to-search="allLocations"
+        @initialize="initializeResults"
+        @search="onSearch"
+      />
     </div>
 
     <div class="m-10 lg:m-5 sm:flex items-center">
@@ -291,11 +119,12 @@ function setFilteredLocations(locations) {
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
         <SortButton
           v-if="filteredLocations.length > 0"
-          :sort-mode="sortMode"
-          @sort="sortBookables"
+          :items-to-sort="filteredResultLocations"
+          @sort="setSortedLocations"
         />
         <FilterButton
           v-if="filteredLocations.length > 0"
+          v-model:is-initailized="searchIsInitialized"
           :bookables="filteredLocations"
           class="lg:hidden"
           @filter="setFilteredLocations"
@@ -305,27 +134,30 @@ function setFilteredLocations(locations) {
 
     <div class="flex flex-row lg:my-5 m-5">
       <!-- Filterbereich -->
-      <div v-if="isGreaterThanMd" class="md:basis-1/4">
+      <div class="md:basis-1/4 hidden md:block">
         <FilterArea
           v-if="filteredLocations.length > 0"
           :key="filterResetKey"
+          v-model:is-initailized="searchIsInitialized"
           :bookables="filteredLocations"
           @filter="setFilteredLocations"
         />
       </div>
 
       <div class="md:basis-3/4">
-        <BookableResultsList
-          v-if="isGreaterThanMd"
+        <ResultsList
           :bookables="filteredResultLocations"
+          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
+          class="hidden md:block"
         />
-        <BookableResultsGrid
-          v-else
+        <ResultsGrid
           :bookables="filteredResultLocations"
+          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
+          class="md:hidden"
         />
       </div>
     </div>
