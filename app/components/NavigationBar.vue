@@ -4,39 +4,45 @@
       <NavigationLink :tab="tab" />
     </div>
     <div style="flex: 1" />
+
+    <TenantSwitcher class="mr-2" />
+
     <UButton
       label="Anmelden"
       size=""
+      v-if="!isAuthenticated"
+      :label="isGreaterThanSm ? 'Anmelden' : ''"
+      :icon="isGreaterThanSm ? '' : 'i-lucide-user'"
       variant="ghost"
-      class="hidden md:block px-4"
+      class="hidden md:block px-2"
       :style="{ color: contrastToSecondary }"
       to="/login"
     />
     <UButton
-        icon="i-lucide-user"
-        variant="ghost"
-        class="md:hidden px-2"
-        :style="{ color: contrastToSecondary }"
-        to="/login"
-    />
-    <UButton
+      v-if="!isAuthenticated && isGreaterThanSm"
       label="Registrieren"
       class="hidden sm:block px-4 text-black dark:text-white bg-white dark:bg-black"
       to="/register"
     />
+
+    <UserDropdown v-if="isAuthenticated" />
+
     <UColorModeButton
-      size="xl"
-      :style="{ color: contrastToSecondary }"
-      @click="toggleColorMode"
-    />
-    <!-- toDo - delete after Testing!!!  -->
+        size="xl"
+        :style="{ color: contrastToSecondary }"
+        @click="toggleColorMode"
+    />    <!-- toDo - delete after Testing!!!  -->
     <!-- toDo - https://ui.nuxt.com/docs/components/field-group (with dropdown) -->
   </div>
 </template>
 <script setup>
 import NavigationLink from "./NavigationLink.vue";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck";
 import { useColorMode } from "@vueuse/core";
+import { useAuthStore } from "~~/stores/auth.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import TenantSwitcher from "~/components/TenantSwitcher.vue";
+import UserDropdown from "~/components/UserDropdown.vue";
 
 const tabs = computed(() => [
   {
@@ -63,6 +69,8 @@ const contrastToSecondary = computed(() => {
     }
 );
 
+const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
+
 const barClass = computed(() => [
   "flex items-center bg-[var(--color-secondary)]",
 ]);
@@ -75,5 +83,8 @@ function toggleColorMode() {
     colorMode.value = "dark";
   }
 }
+
+const authStore = useAuthStore();
+const isAuthenticated = computed(() => authStore.isLoggedIn);
 </script>
 <style scoped></style>

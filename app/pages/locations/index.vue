@@ -8,24 +8,36 @@ import ResultsGrid from "../../components/search/ResultsGrid.vue";
 import FilterArea from "../../components/search/FilterArea.vue";
 import SortButton from "../../components/search/SortButton.vue";
 import FilterButton from "../../components/search/FilterButton.vue";
+import { useTenantStore } from "~~/stores/tenant.js";
 
 definePageMeta({ name: "catalog-locations", layout: "catalog" });
 
 const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
 
+const tenantStore = useTenantStore();
+const tenantID = computed(() => tenantStore.getCurrentTenantID || null);
+
+const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 const { loadBundle } = useCatalogBundle();
 
 const bookableStore = useBookableStore();
 await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
 
 const allLocations = computed(() => {
-  const locations = bookableStore.getLocations;
-  return locations.concat(bookableStore.getRooms);
+  const tenantFilter = tenantID.value
+    ? (loc) => loc.tenantId === tenantID.value
+    : () => true;
+
+  const locations = bookableStore.getLocations.filter(tenantFilter);
+  const rooms = bookableStore.getRooms.filter(tenantFilter);
+  return locations.concat(rooms);
 });
+
 const filteredLocations = ref([]);
 const filteredResultLocations = ref([]);
 const filterResetKey = ref(0);
+const searchIsInitialized = ref(false);
 
 // Initialization: Show all items before the first search
 function initializeResults() {
@@ -50,16 +62,21 @@ watch(
       return;
     }
     // Only initialize if no status exists yet (i.e., no search has been performed yet)
+    // Nur initialisieren, wenn noch kein Status existiert (d.h. noch keine Suche)
+    /**
     const hasStatus = filteredLocations.value.some((b) => b?.status);
     if (!hasStatus) {
       initializeResults();
     }
+        **/
+
+      initializeResults();
+
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 );
 
 //Search
-const searchIsInitialized = ref(false);
 const currentSearchParams = ref({});
 function onSearch({items, searchParams}) {
   filteredLocations.value = items;

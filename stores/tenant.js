@@ -4,10 +4,15 @@ export const useTenantStore = defineStore("tenant", {
   state: () => ({
     initialized: false,
     tenants: [],
+    currentTenantID: null,
   }),
   getters: {
     getTenants: (state) => state.tenants,
     getTenantById: (state) => (id) => state.tenants.find((t) => t.id === id),
+    getCurrentTenantID: (state) => state.currentTenantID,
+    getCurrentTenant: (state) => {
+      return state.tenants.find((t) => t.id === state.currentTenantID) || null;
+    },
   },
   actions: {
     async fetchTenants() {
@@ -15,9 +20,18 @@ export const useTenantStore = defineStore("tenant", {
       try {
         this.tenants = await fetchTenants();
       } catch (error) {
-        console.error("Error fetching tenants:", error);
         this.tenants = [];
+      } finally {
+        this.initialized = true;
       }
     },
+    setCurrentTenantID(tenantID) {
+      this.currentTenantID = tenantID;
+    },
+  },
+  persist: {
+    key: "tenant-store",
+    storage: process.client ? localStorage : undefined,
+    paths: ["currentTenantID"],
   },
 });
