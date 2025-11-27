@@ -7,6 +7,7 @@ import FilterButton from "../../components/search/FilterButton.vue";
 import FilterArea from "~/components/search/FilterArea.vue";
 import ResultsList from "~/components/search/ResultsList.vue";
 import ResultsGrid from "~/components/search/ResultsGrid.vue";
+import { useTenantStore } from "~~/stores/tenant.js";
 
 definePageMeta({
   name: "catalog-bookables",
@@ -16,13 +17,20 @@ definePageMeta({
 const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
 
+const tenantStore = useTenantStore();
+const tenantID = computed(() => tenantStore.getCurrentTenantID || null);
+
 const { loadBundle } = useCatalogBundle();
 
 const bookableStore = useBookableStore();
 await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
 
 const allResources = computed(() => {
-  return bookableStore.getResources;
+  const tenantFilter = tenantID.value
+    ? (loc) => loc.tenantId === tenantID.value
+    : () => true;
+
+  return bookableStore.getResources.filter(tenantFilter);
 });
 const filteredResources = ref([]);
 const filteredResultResources = ref([]);
@@ -56,7 +64,7 @@ watch(
       initializeResults();
     }
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 );
 
 //Search

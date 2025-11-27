@@ -7,6 +7,7 @@ import SortButton from "~/components/search/SortButton.vue";
 import ResultsList from "~/components/search/ResultsList.vue";
 import ResultsGrid from "~/components/search/ResultsGrid.vue";
 import FilterArea from "~/components/search/FilterArea.vue";
+import { useTenantStore } from "~~/stores/tenant.js";
 
 definePageMeta({ name: "catalog-events", layout: "catalog" });
 
@@ -18,8 +19,14 @@ const { loadBundle } = useCatalogBundle();
 const eventStore = useEventStore();
 await loadBundle({ catalogSlug, include: ["events"] });
 
+const tenantStore = useTenantStore();
+const tenantID = computed(() => tenantStore.getCurrentTenantID || null);
+
 const allEvents = computed(() => {
-  return eventStore.getEvents;
+  const tenantFilter = tenantID.value
+    ? (loc) => loc.tenantId === tenantID.value
+    : () => true;
+  return eventStore.getEvents.filter(tenantFilter);
 });
 const filteredEvents = ref([]);
 const filteredResultEvents = ref([]);
@@ -53,7 +60,7 @@ watch(
       initializeResults();
     }
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 );
 
 //Search
@@ -62,7 +69,7 @@ const currentSearchParams = ref({});
 function onSearch({ items, searchParams }) {
   filteredEvents.value = items;
   filteredResultEvents.value = items;
-  console.log(searchParams)
+  console.log(searchParams);
   currentSearchParams.value = searchParams;
 }
 function numberOfSuitableBookables() {
