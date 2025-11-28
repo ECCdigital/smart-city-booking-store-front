@@ -2,9 +2,12 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
-RUN npm install -g npm@11.6.4
 COPY package*.json ./
-RUN npm ci
+RUN npm ci \
+  && npm install --no-save \
+    @oxc-parser/binding-linux-x64-musl@0.94.0 \
+    @oxc-minify/binding-linux-x64-musl@0.94.0 \
+    @oxc-transform/binding-linux-x64-musl@0.94.0
 
 # 2) Build
 FROM node:20-alpine AS builder
