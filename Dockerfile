@@ -2,18 +2,13 @@
 FROM node:20-slim AS deps
 WORKDIR /app
 
-# Optional: make install a bit quieter and deterministic
+# Make install deterministic
 ENV NODE_ENV=development
 
-# libc already glibc-based here, no musl issues
 COPY package*.json ./
 
-# Avoid postinstall (nuxt prepare) here
-RUN npm ci --ignore-scripts \
-  && npm install --no-save \
-    @oxc-parser/binding-linux-x64-musl@0.94.0 \
-    @oxc-minify/binding-linux-x64-musl@0.94.0 \
-    @oxc-transform/binding-linux-x64-musl@0.94.0
+# Avoid running postinstall (nuxt prepare) here
+RUN npm ci --ignore-scripts
 
 # 2) Build
 FROM node:20-slim AS builder
@@ -23,8 +18,7 @@ ENV NITRO_PRESET=node-server
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# If you want to be explicit:
-# RUN npx nuxt prepare && npm run build
+# Nuxt build will run prepare as needed
 RUN npm run build
 
 # 3) Runtime
