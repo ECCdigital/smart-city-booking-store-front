@@ -23,11 +23,13 @@
     />
 
     <UserDropdown v-if="isAuthenticated" />
-
-    <UColorModeButton
+    <UButton
+      class="ml-2"
       size="xl"
-      :style="{ color: contrastToSecondary }"
+      :icon="colorMode === 'light' ? 'i-lucide-sun' : 'i-lucide-moon'"
+      variant="ghost"
       @click="toggleColorMode"
+      :style="{ color: contrastToSecondary }"
     />
     <!-- toDo - delete after Testing!!!  -->
     <!-- toDo - https://ui.nuxt.com/docs/components/field-group (with dropdown) -->

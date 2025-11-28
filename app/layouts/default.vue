@@ -13,7 +13,6 @@ useHead({
 
 <template>
   <div>
-    <UColorModeButton class="absolute right-1" size="xl" />
     <slot />
   </div>
 </template>
