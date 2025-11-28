@@ -45,17 +45,17 @@ import UserDropdown from "~/components/UserDropdown.vue";
 const tabs = computed(() => [
   {
     label: "Orte",
-    icon: "i-heroicons-map-pin",
+    icon: "i-lucide-map-pin",
     value: `/locations`,
   },
   {
     label: "Veranstaltungen",
-    icon: "i-heroicons-calendar",
+    icon: "i-lucide-calendar",
     value: `/events`,
   },
   {
     label: "Geräte & Ressourcen",
-    icon: "i-heroicons-wrench-screwdriver",
+    icon: "i-lucide-monitor",
     value: `/bookables`,
   },
 ]);

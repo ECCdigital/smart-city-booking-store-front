@@ -70,15 +70,14 @@ watch(
     }
         **/
 
-      initializeResults();
-
+    initializeResults();
   },
   { immediate: true, deep: true }
 );
 
 //Search
 const currentSearchParams = ref({});
-function onSearch({items, searchParams}) {
+function onSearch({ items, searchParams }) {
   filteredLocations.value = items;
   filteredResultLocations.value = items;
   currentSearchParams.value = searchParams;
@@ -132,6 +131,11 @@ function setSortedLocations(locations) {
       </div>
     </div>
 
+    <div v-if="!filteredResultLocations.length" class="text-center mt-10">
+      <UIcon size="48" name="i-lucide-map-pin-off" class="text-gray-400 mb-4" />
+      <p class="text-gray-500">{{ $t("locations.noLocations") }}</p>
+    </div>
+
     <div class="flex flex-row lg:my-5 m-5">
       <!-- Filterbereich -->
       <div class="md:basis-1/4 hidden md:block">
@@ -146,6 +150,7 @@ function setSortedLocations(locations) {
 
       <div class="md:basis-3/4">
         <ResultsList
+          v-if="filteredResultLocations.length"
           :bookables="filteredResultLocations"
           :search-params="currentSearchParams"
           include-non-bookable
@@ -153,6 +158,7 @@ function setSortedLocations(locations) {
           class="hidden md:block"
         />
         <ResultsGrid
+          v-if="filteredResultLocations.length"
           :bookables="filteredResultLocations"
           :search-params="currentSearchParams"
           include-non-bookable

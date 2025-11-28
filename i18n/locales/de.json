@@ -149,5 +149,38 @@
       "title": "Registrierungsfehler",
       "message": "Die E-Mail-Adresse ist bereits registriert."
     }
+  },
+  "locations": {
+    "locations": "Standorte",
+    "location": "Standort",
+    "addLocation": "Standort hinzufügen",
+    "editLocation": "Standort bearbeiten",
+    "deleteLocation": "Standort löschen",
+    "locationName": "Name des Standorts",
+    "locationAddress": "Adresse des Standorts",
+    "locationDescription": "Beschreibung des Standorts",
+    "noLocations": "Keine Standorte gefunden"
+  },
+  "events": {
+    "events": "Veranstaltungen",
+    "event": "Veranstaltung",
+    "addEvent": "Veranstaltung hinzufügen",
+    "editEvent": "Veranstaltung bearbeiten",
+    "deleteEvent": "Veranstaltung löschen",
+    "eventName": "Name der Veranstaltung",
+    "eventDate": "Datum der Veranstaltung",
+    "eventDescription": "Beschreibung der Veranstaltung",
+    "noEvents": "Keine Veranstaltungen gefunden"
+  },
+  "resources": {
+    "resources": "Ressourcen",
+    "resource": "Ressource",
+    "addResource": "Ressource hinzufügen",
+    "editResource": "Ressource bearbeiten",
+    "deleteResource": "Ressource löschen",
+    "resourceName": "Name der Ressource",
+    "resourceType": "Typ der Ressource",
+    "resourceDescription": "Beschreibung der Ressource",
+    "noResources": "Keine Ressourcen gefunden"
   }
 }

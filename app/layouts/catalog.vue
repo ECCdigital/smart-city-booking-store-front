@@ -13,7 +13,7 @@ useHead({
 </script>
 
 <template>
-  <div class="bg-white dark:bg-gray-900">
+  <div class="">
     <NavigationBar />
     <!-- Hero -->
     <!-- toDo - Hero-Design für lg anpassen!  -->

@@ -123,6 +123,15 @@ function setFilteredResources(resources) {
       </div>
     </div>
 
+    <div v-if="!filteredResources.length" class="text-center mt-10">
+      <UIcon
+          size="48"
+          name="i-lucide-monitor-off"
+          class="text-gray-400 mb-4"
+      />
+      <p class="text-gray-500">{{ $t("resources.noResources") }}</p>
+    </div>
+
     <div class="flex flex-row lg:my-5 m-5">
       <div class="md:basis-1/4 hidden md:block">
         <FilterArea
@@ -136,6 +145,7 @@ function setFilteredResources(resources) {
 
       <div class="basis-full md:basis-3/4">
         <ResultsList
+          v-if="filteredResultResources.length > 0"
           :bookables="filteredResultResources"
           :search-params="currentSearchParams"
           include-non-bookable
@@ -143,6 +153,7 @@ function setFilteredResources(resources) {
           class="hidden md:block"
         />
         <ResultsGrid
+          v-if="filteredResultResources.length > 0"
           :bookables="filteredResultResources"
           :search-params="currentSearchParams"
           include-non-bookable

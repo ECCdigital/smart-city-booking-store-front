@@ -124,6 +124,15 @@ function setFilteredEvents(events) {
       </div>
     </div>
 
+    <div v-if="!filteredResultEvents.length" class="text-center mt-10">
+      <UIcon
+        size="48"
+        name="i-lucide-calendar-off"
+        class="text-gray-400 mb-4"
+      />
+      <p class="text-gray-500">{{ $t("events.noEvents") }}</p>
+    </div>
+
     <div class="flex flex-row lg:my-5 m-5">
       <div class="md:basis-1/4 hidden md:block">
         <FilterArea
@@ -138,6 +147,7 @@ function setFilteredEvents(events) {
 
       <div class="md:basis-3/4">
         <ResultsList
+          v-if="filteredResultEvents.length > 0"
           :bookables="filteredResultEvents"
           :search-params="currentSearchParams"
           include-non-bookable
@@ -146,6 +156,7 @@ function setFilteredEvents(events) {
           class="hidden md:block"
         />
         <ResultsGrid
+          v-if="filteredResultEvents.length > 0"
           :bookables="filteredResultEvents"
           :search-params="currentSearchParams"
           include-non-bookable
