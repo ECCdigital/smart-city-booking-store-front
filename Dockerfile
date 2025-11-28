@@ -2,16 +2,26 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
+
+# vorbereitende Dateien kopieren
 COPY package*.json ./
-RUN npm ci
+
+# prepare-Hook während npm ci deaktivieren
+RUN npm set script-prepend-node-path auto \
+ && npm set ignore-scripts true \
+ && npm ci \
+ && npm set ignore-scripts false
 
 # 2) Build
 FROM node:20-alpine AS builder
 WORKDIR /app
 ENV NITRO_PRESET=node-server
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+
+# jetzt nuxt prepare explizit ausführen
+RUN npx nuxt prepare && npm run build
 
 # 3) Runtime
 FROM node:20-alpine AS runner
