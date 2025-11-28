@@ -13,9 +13,6 @@
         @click="setDefaultStartDate()"
       >
         <template v-if="dateRange[0]">
-          <p class="text-red-800">{{dateRange}}</p>
-          <p class="text-red-800">{{timeRange}}</p>
-
           <div class="flex justify-between w-full">
             <div class="text-black dark:text-white">
               <span>{{ displayDate(dateRange[0]) }}</span>
