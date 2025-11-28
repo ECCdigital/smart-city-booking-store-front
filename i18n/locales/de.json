@@ -61,6 +61,42 @@
       "uppercase": "Mindestens ein Großbuchstabe (A-Z)",
       "lowercase": "Mindestens ein Kleinbuchstabe (a-z)",
       "number": "Mindestens eine Zahl (0-9)"
+    },
+    "success": {
+      "heading": "Registrierung erfolgreich!",
+      "description": "Wir haben dir eine E-Mail mit einem Bestätigungslink gesendet. Bitte öffne dein Postfach und bestätige deine E-Mail-Adresse, um dein Konto zu aktivieren.",
+      "spamHint": "Wenn du die E-Mail nicht findest, überprüfe bitte auch deinen Spam- oder Werbeordner.",
+      "toHome": "Zur Startseite",
+      "toLogin": "Zur Anmeldung"
+    }
+  },
+
+  "emailVerification": {
+    "title": "E-Mail-Adresse bestätigen",
+    "description": "Bitte überprüfen Sie Ihre E-Mails und klicken Sie auf den Bestätigungslink, um Ihre E-Mail-Adresse zu verifizieren.",
+    "resendLink": "Bestätigungslink erneut senden",
+    "progress": {
+      "heading": "E-Mail-Bestätigung läuft...",
+      "description": "Bitte warten Sie einen Moment, während wir Ihre E-Mail-Adresse bestätigen."
+    },
+    "action": {
+      "heading": "E-Mail bestätigen",
+      "description": "Klicken Sie auf die Schaltfläche unten, um Ihre E-Mail-Adresse zu bestätigen.",
+      "startVerification": "E-Mail bestätigen",
+      "emailHint": "Diese E-Mail-Adresse wird bestätigt"
+    },
+    "success": {
+      "heading": "E-Mail erfolgreich bestätigt!",
+      "description": "Ihre E-Mail-Adresse wurde erfolgreich verifiziert. Sie können sich jetzt anmelden.",
+      "toLogin": "Zur Anmeldung"
+    },
+    "error": {
+      "heading": "E-Mail-Bestätigung fehlgeschlagen",
+      "alreadyVerifiedHeading": "E-Mail bereits bestätigt",
+      "default": "Es gab ein Problem bei der Bestätigung Ihrer E-Mail-Adresse.",
+      "invalidToken": "Ungültiger oder abgelaufener Bestätigungstoken. Bitte fordern Sie einen neuen Bestätigungslink an.",
+      "alreadyVerified": "Ihre E-Mail-Adresse wurde bereits verifiziert. Sie können sich anmelden.",
+      "userNotFound": "Der Benutzer wurde nicht gefunden. Bitte registrieren Sie sich erneut."
     }
   },
 
@@ -100,6 +136,18 @@
     "logoutSuccess": {
       "title": "Abmeldung erfolgreich",
       "message": "Sie wurden erfolgreich abgemeldet."
+    },
+    "registerSuccess": {
+      "title": "Registrierung erfolgreich",
+      "message": "Bitte überprüfen Sie Ihre E-Mails, um Ihr Konto zu aktivieren."
+    },
+    "registerError": {
+      "title": "Registrierungsfehler",
+      "message": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+    },
+    "registerErrorEmailExists": {
+      "title": "Registrierungsfehler",
+      "message": "Die E-Mail-Adresse ist bereits registriert."
     }
   }
 }

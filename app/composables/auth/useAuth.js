@@ -12,6 +12,14 @@ export const useAuth = () => {
     return response;
   };
 
+  const verifyEmail = async (token, id) => {
+    const response = await $fetch("/api/auth/verify-email", {
+      method: "POST",
+      body: { token, id },
+    });
+    return response;
+  };
+
   return {
     user: readonly(computed(() => authStore.user)),
     permission: readonly(computed(() => authStore.permission)),
@@ -22,5 +30,6 @@ export const useAuth = () => {
     login: authStore.login,
     logout: authStore.logout,
     register,
+    verifyEmail,
   };
 };
