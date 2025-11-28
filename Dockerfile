@@ -14,9 +14,12 @@ RUN npm ci --ignore-scripts \
 FROM node:20-alpine AS builder
 WORKDIR /app
 ENV NITRO_PRESET=node-server
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+
+RUN npm rebuild lightningcss --unsafe-perm \
+  && npm run build
 
 # 3) Runtime
 FROM node:20-alpine AS runner
