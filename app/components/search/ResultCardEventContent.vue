@@ -52,7 +52,6 @@
     <EventTicketOptionsDialog
       v-model:open="openTicketOptions"
       :tickets="event.tickets"
-      :is-private-event="isPrivateEvent"
       :registration-needed="event.attendees.needsRegistration"
     />
   </div>

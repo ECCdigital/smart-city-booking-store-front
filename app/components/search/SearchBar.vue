@@ -195,29 +195,44 @@ async function onSearch() {
 
 function updateUrl() {
   const router = useRouter();
-  const formattedTimePeriod = formateTimePeriod(searchTimePeriod.value);
+  const newQuery = {};
+
+  if(searchTerm.value){
+    newQuery.term = encodeURIComponent(searchTerm.value);
+  } else {
+    delete newQuery.term;
+  }
+  if(searchLocation.value){
+    newQuery.location = encodeURIComponent(searchLocation.value);
+  } else {
+    delete newQuery.location;
+  }
+
+  if(searchTimePeriod.value && searchTimePeriod.value.startDate){
+    const formattedTimePeriod = formateTimePeriod(searchTimePeriod.value);
+    newQuery.start = formattedTimePeriod.start || "";
+    newQuery.end = formattedTimePeriod.end || "";
+  } else {
+    delete newQuery.start;
+    delete newQuery.end;
+  }
 
   router.push({
-    query: {
-      searchTerm: encodeURIComponent(searchTerm.value) || "",
-      searchLocation: encodeURIComponent(searchLocation.value) || "",
-      startDate: formattedTimePeriod?.start || "",
-      endDate: formattedTimePeriod?.end || "",
-    },
+    query: newQuery,
   });
 }
 function readUrl() {
   const route = useRoute();
-  searchTerm.value = decodeURIComponent(route.query.searchTerm || "");
-  searchLocation.value = decodeURIComponent(route.query.searchLocation || "");
-  const startDateRaw = route.query.startDate
-    ? new Date(parseInt(route.query.startDate))
+  searchTerm.value = decodeURIComponent(route.query.term || "");
+  searchLocation.value = decodeURIComponent(route.query.location || "");
+  const startDateRaw = route.query.start
+    ? new Date(parseInt(route.query.start))
     : null;
   const startDate = startDateRaw ? startDateRaw.toISOString().slice(0, 10) : "";
   const startTime = startDateRaw ? startDateRaw.toTimeString().slice(0, 5) : "";
 
-  const endDateRaw = route.query.endDate
-    ? new Date(parseInt(route.query.endDate))
+  const endDateRaw = route.query.end
+    ? new Date(parseInt(route.query.end))
     : null;
   const endDate = endDateRaw ? endDateRaw.toISOString().slice(0, 10) : "";
   const endTime = endDateRaw ? endDateRaw.toTimeString().slice(0, 5) : "";
