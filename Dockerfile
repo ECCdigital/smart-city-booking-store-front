@@ -2,6 +2,7 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
+RUN npm install -g npm@11.6.4
 COPY package*.json ./
 RUN npm ci
 
