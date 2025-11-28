@@ -3,7 +3,8 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
 COPY package*.json ./
-RUN npm ci \
+
+RUN npm ci --ignore-scripts \
   && npm install --no-save \
     @oxc-parser/binding-linux-x64-musl@0.94.0 \
     @oxc-minify/binding-linux-x64-musl@0.94.0 \
