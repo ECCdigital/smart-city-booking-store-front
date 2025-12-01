@@ -1,17 +1,15 @@
 export function useCatalog() {
-  const fetchCatalog = async (slug = null) => {
+  const fetchCatalog = async (tenantID = null) => {
     const { apiFetch } = useApi();
-
-    console.log("Fetching catalog with slug:", slug);
 
     try {
       let response;
-      if (!slug) {
+      if (!tenantID) {
         response = await apiFetch(`/api/catalog/`, {
           method: "GET",
         });
       } else {
-        response = await apiFetch(`/api/catalog/${slug}`, {
+        response = await apiFetch(`/api/catalog/${tenantID}`, {
           method: "GET",
         });
       }
@@ -24,7 +22,7 @@ export function useCatalog() {
   };
 
   const fetchCatalogBundle = async ({
-    slug = null,
+    tenantID = null,
     bookableID = null,
     eventID = null,
     include = null,
@@ -33,7 +31,7 @@ export function useCatalog() {
 
     try {
       let response;
-      if (!slug) {
+      if (!tenantID) {
         response = await apiFetch(`/api/catalog/bundle`, {
           params: {
             bookableId: bookableID,
@@ -43,7 +41,7 @@ export function useCatalog() {
           method: "GET",
         });
       } else {
-        response = await apiFetch(`/api/catalog/${slug}/bundle`, {
+        response = await apiFetch(`/api/catalog/${tenantID}/bundle`, {
           params: {
             bookableId: bookableID,
             eventId: eventID,

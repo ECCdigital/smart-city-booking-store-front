@@ -11,22 +11,24 @@ export function useCatalogBundle() {
   const eventStore = useEventStore();
   const tenantStore = useTenantStore();
 
-  async function loadBundle({ slug, bookableID, eventID, include = [] }) {
+  async function loadBundle({ tenantID, slug, bookableID, eventID, include = [] }) {
 
-    const { data, error } = await useAsyncData(
-      `catalog:${slug}:${bookableID || eventID || include.sort().join(",")}`,
-      () =>
-        fetchCatalogBundle({
-          slug,
-          bookableID,
-          eventID,
-          include: include.join(","),
-        }),
-      { server: true }
-    );
+    console.log("Loading catalog bundle with params:", { tenantID, slug, bookableID, eventID, include });
+      const { data, error } = await useAsyncData(
+          `catalog:${tenantID}:${bookableID || eventID || include.sort().join(",")}`,
+          () =>
+              fetchCatalogBundle({
+                tenantID,
+                bookableID,
+                eventID,
+                include: include.join(","),
+              }),
+          { server: true }
+      );
 
     if (error.value) {
-      handleError(error.value);
+      console.log("EEEEEE!",error.value.data);
+      handleError(error.value.data);
     }
 
     if (data.value?.catalog) {

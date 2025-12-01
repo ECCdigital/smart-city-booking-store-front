@@ -12,13 +12,13 @@ export const useCatalogStore = defineStore("catalog", {
     getError: (state) => state.error,
   },
   actions: {
-    async fetchCatalog(slug) {
+    async fetchCatalog(tenantID) {
       const { fetchCatalog } = useCatalog();
       this.loading = true;
       this.error = null;
 
       try {
-        this.catalog = await fetchCatalog(slug);
+        this.catalog = await fetchCatalog(tenantID);
       } catch (error) {
         this.catalog = null;
         this.error = error;

@@ -23,8 +23,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
       return;
     }
   } catch (error) {
-    console.error("Error during catalog auth check:", error);
-    console.error(error);
     if (error.statusCode === 401) {
       return navigateTo(`/login?redirect=${to.fullPath}`);
     }

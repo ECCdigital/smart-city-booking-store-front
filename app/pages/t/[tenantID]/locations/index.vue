@@ -2,26 +2,27 @@
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useBookableStore } from "~~/stores/bookable.js";
 import "@vuepic/vue-datepicker/dist/main.css";
-import SearchBar from "../../components/search/SearchBar.vue";
-import ResultsList from "../../components/search/ResultsList.vue";
-import ResultsGrid from "../../components/search/ResultsGrid.vue";
-import FilterArea from "../../components/search/FilterArea.vue";
-import SortButton from "../../components/search/SortButton.vue";
-import FilterButton from "../../components/search/FilterButton.vue";
-import { useTenantStore } from "~~/stores/tenant.js";
+import SearchBar from "~/components/search/SearchBar.vue";
+import ResultsList from "~/components/search/ResultsList.vue";
+import ResultsGrid from "~/components/search/ResultsGrid.vue";
+import FilterArea from "~/components/search/FilterArea.vue";
+import SortButton from "~/components/search/SortButton.vue";
+import FilterButton from "~/components/search/FilterButton.vue";
 
-definePageMeta({ name: "catalog-locations", layout: "catalog" });
+definePageMeta({ name: "tenant-catalog-locations", layout: "catalog" });
 
 const route = useRoute();
 const catalogSlug = computed(() => route.params.catalogSlug);
-
-const tenantStore = useTenantStore();
-const tenantID = computed(() => tenantStore.getCurrentTenantID || null);
+const tenantID = computed(() => route.params.tenantID);
 
 const { loadBundle } = useCatalogBundle();
 
 const bookableStore = useBookableStore();
-await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
+await loadBundle({
+  tenantID: tenantID.value,
+  slug: catalogSlug.value,
+  include: ["bookables"],
+});
 
 const allLocations = computed(() => {
   const tenantFilter = tenantID.value
@@ -63,11 +64,11 @@ watch(
     // Only initialize if no status exists yet (i.e., no search has been performed yet)
     // Nur initialisieren, wenn noch kein Status existiert (d.h. noch keine Suche)
     /**
-    const hasStatus = filteredLocations.value.some((b) => b?.status);
-    if (!hasStatus) {
-      initializeResults();
-    }
-        **/
+   const hasStatus = filteredLocations.value.some((b) => b?.status);
+   if (!hasStatus) {
+   initializeResults();
+   }
+   **/
 
     initializeResults();
   },
@@ -82,10 +83,9 @@ function onSearch({ items, searchParams }) {
   currentSearchParams.value = searchParams;
 }
 
-const suitableCount = computed(() =>
-    filteredResultLocations.value.filter(
-        (l) => l.status === "suitable"
-    ).length
+const suitableCount = computed(
+  () =>
+    filteredResultLocations.value.filter((l) => l.status === "suitable").length
 );
 
 //Sort & Filter
