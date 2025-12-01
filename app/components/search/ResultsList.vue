@@ -3,12 +3,11 @@
     <!-- Passende Ergebnisse & Default Anzeige -->
     <UPageList>
       <ResultStrip
-          v-for="(b, i) in suitableBookables"
-          :key="i"
-          :item="b.item"
-          :calculated-price="b.calculatedPrice"
-          :search-params="searchParams"
-          class="m-2"
+        v-for="(b, i) in suitableBookables"
+        :key="i"
+        :item="b.item"
+        :calculated-price="b.calculatedPrice"
+        class="m-2"
       />
     </UPageList>
 
@@ -21,12 +20,11 @@
     </h2>
     <UPageList>
       <ResultStrip
-          v-for="(b, i) in nonSuitableBookables"
-          :key="i"
-          :item="b.item"
-          :search-params="searchParams"
-          is-not-bookable
-          class="m-2"
+        v-for="(b, i) in nonSuitableBookables"
+        :key="i"
+        :item="b.item"
+        is-not-bookable
+        class="m-2"
       />
     </UPageList>
 
@@ -40,10 +38,6 @@ const props = defineProps({
   bookables: {
     type: Array,
     required: true,
-  },
-  searchParams: {
-    type: Object,
-    default: null,
   },
   includeNonSuitable: {
     type: Boolean,

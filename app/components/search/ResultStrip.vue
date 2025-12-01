@@ -40,13 +40,11 @@
       v-if="!isEvent"
       :bookable="item"
       :calculated-price="calculatedPrice"
-      :search-params="searchParams"
       :is-not-bookable="isNotBookable"
     />
     <ResultStripEventContent
       v-if="isEvent"
       :event="item"
-      :search-params="searchParams"
       :is-not-bookable="isNotBookable"
     />
   </div>
@@ -61,10 +59,6 @@ const props = defineProps({
     required: true,
   },
   calculatedPrice: {
-    type: Object,
-    default: null,
-  },
-  searchParams: {
     type: Object,
     default: null,
   },

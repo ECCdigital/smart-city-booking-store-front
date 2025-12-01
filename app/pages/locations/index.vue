@@ -23,7 +23,7 @@ const allLocations = computed(() => {
   const locations = bookableStore.getLocations;
   return locations.concat(bookableStore.getRooms);
 });
-const filteredLocations = ref([]);
+const filteredLocations = ref([]); //toDo - delete?!?!?!?
 const filteredResultLocations = ref([]);
 const filterResetKey = ref(0);
 
@@ -60,11 +60,9 @@ watch(
 
 //Search
 const searchIsInitialized = ref(false);
-const currentSearchParams = ref({});
-function onSearch({items, searchParams}) {
+function onSearch(items) {
   filteredLocations.value = items;
   filteredResultLocations.value = items;
-  currentSearchParams.value = searchParams;
 }
 function numberOfSuitableBookables() {
   return filteredResultLocations.value.filter((l) => l.status === "suitable")
@@ -130,14 +128,12 @@ function setSortedLocations(locations) {
       <div class="md:basis-3/4">
         <ResultsList
           :bookables="filteredResultLocations"
-          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
           class="hidden md:block"
         />
         <ResultsGrid
           :bookables="filteredResultLocations"
-          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
           class="md:hidden"

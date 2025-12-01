@@ -61,11 +61,9 @@ watch(
 
 //Search
 const searchIsInitialized = ref(false);
-const currentSearchParams = ref({});
-async function onSearch({ items, searchParams }) {
+async function onSearch(items) {
   filteredResources.value = items;
   filteredResultResources.value = items;
-  currentSearchParams.value = searchParams;
 }
 function numberOfSuitableBookables() {
   return filteredResources.value.filter((l) => l.status === "suitable").length;
@@ -129,14 +127,12 @@ function setFilteredResources(resources) {
       <div class="basis-full md:basis-3/4">
         <ResultsList
           :bookables="filteredResultResources"
-          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
           class="hidden md:block"
         />
         <ResultsGrid
           :bookables="filteredResultResources"
-          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
           class="md:hidden"

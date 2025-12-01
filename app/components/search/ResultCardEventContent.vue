@@ -71,10 +71,6 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  searchParams: {
-    type: Object,
-    default: null,
-  },
   isNotBookable: {
     type: Boolean,
     default: false,

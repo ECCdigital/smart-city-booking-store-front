@@ -366,7 +366,7 @@ const cities = computed(() => {
     let city = "";
     if (props.isEvent && b.status === "suitable") {
       city = extractCity(b.item.eventAddress.city);
-    } else if(b.status === "suitable") {
+    } else if (b.status === "suitable") {
       city = extractCity(b.item.location);
     }
     if (city) {
@@ -488,8 +488,8 @@ function onFilter() {
     //toDo - Filterlogik für Distanz ergänzen!!!!!!!!!!!!!!!!!
 
     //const updatedItems =
-    console.log("vor filter",props.bookables)
-    console.log("nach filter",filteredBookables)
+    console.log("vor filter", props.bookables);
+    console.log("nach filter", filteredBookables);
 
     emit("filter", filteredBookables);
   }
@@ -556,14 +556,14 @@ function updateUrl() {
 function readUrl() {
   const route = useRoute();
   const hasFilterQuery =
-      "inclNoSuitable" in route.query ||
-      "pubEv" in route.query ||
-      "regEv" in route.query ||
-      "cities" in route.query ||
-      "price" in route.query;
+    "inclNoSuitable" in route.query ||
+    "pubEv" in route.query ||
+    "regEv" in route.query ||
+    "cities" in route.query ||
+    "price" in route.query;
 
-  if(hasFilterQuery) {
-    filterIsActive.value = true
+  if (hasFilterQuery) {
+    filterIsActive.value = true;
 
     includeNonSuitable.value = route.query.inclNoSuitable !== "false";
     onlyPublicEvents.value = route.query.pubEv === "true";
@@ -571,8 +571,8 @@ function readUrl() {
 
     if (route.query.cities) {
       choosenCities.value = route.query.cities
-          .split(",")
-          .map((c) => decodeURIComponent(c));
+        .split(",")
+        .map((c) => decodeURIComponent(c));
     }
     if (route.query.price) {
       const prices = route.query.price.split(",").map((p) => parseInt(p));
@@ -582,7 +582,7 @@ function readUrl() {
     }
     //toDo - Kategorie aus URL lesen!!!!!!!!!!!!!!!
     //toDo - Distanz aus URL lesen!!!!!!!!!!!!!!!
-    updateUrl()
+    updateUrl();
   }
 }
 onMounted(() => readUrl());

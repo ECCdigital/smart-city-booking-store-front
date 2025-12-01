@@ -2,7 +2,7 @@
   <div
     class="bg-gray-200 dark:bg-gray-700 flex justify-between rounded-md p-2 mb-2"
   >
-    <p class="text-lg basis-2/3 content-center ">
+    <p class="text-lg basis-2/3 content-center">
       {{ props.ticket.title }}
     </p>
     <div>
@@ -35,10 +35,6 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  searchParams: {
-    type: Object,
-    default: null,
-  },
 });
 const ticketsAvailable = computed(
   () => props.ticket.availability?.remaining > 0 || true,
@@ -49,11 +45,12 @@ const contrastToPrimary = computed(() =>
 );
 
 function goToCheckout() {
+  const route = useRoute();
   useCheckoutRedirect().redirectToCheckout(
     props.ticket.id,
     props.ticket.tenantId,
-      props.searchParams?.searchTimePeriod?.start || null,
-      props.searchParams?.searchTimePeriod?.end || null,
+    route.query.start || null,
+    route.query.end || null,
   );
 }
 </script>

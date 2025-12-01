@@ -56,10 +56,6 @@ const props = defineProps({
     type: Object,
     default: null,
   },
-  searchParams: {
-    type: Object,
-    default: null,
-  },
   isNotBookable: {
     type: Boolean,
     default: false,
@@ -75,6 +71,7 @@ const isEvent = computed(() => {
 
 const openEventTicketOptions = ref(false);
 function goToCheckout() {
+  const route = useRoute();
   if (isEvent.value) {
     //use external booking url
     if (props.item.externalBookingUrl) {
@@ -86,8 +83,8 @@ function goToCheckout() {
       useCheckoutRedirect().redirectToCheckout(
         props.item.tickets[0].id,
         props.item.tickets[0].tenantId,
-        props.searchParams?.searchTimePeriod?.start || null,
-        props.searchParams?.searchTimePeriod?.end || null,
+        route.query.start || null,
+        route.query.end || null,
       );
     } else {
       openEventTicketOptions.value = true;
@@ -98,8 +95,8 @@ function goToCheckout() {
     useCheckoutRedirect().redirectToCheckout(
       props.item.id,
       props.item.tenantId,
-      props.searchParams?.searchTimePeriod?.start || null,
-      props.searchParams?.searchTimePeriod?.end || null,
+      route.query.start || null,
+      route.query.end || null,
     );
   }
 }

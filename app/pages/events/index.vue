@@ -58,12 +58,9 @@ watch(
 
 //Search
 const searchIsInitialized = ref(false);
-const currentSearchParams = ref({});
-function onSearch({ items, searchParams }) {
+function onSearch(items) {
   filteredEvents.value = items;
   filteredResultEvents.value = items;
-  console.log(searchParams)
-  currentSearchParams.value = searchParams;
 }
 function numberOfSuitableBookables() {
   return filteredResultEvents.value.filter((e) => e.status === "suitable")
@@ -132,7 +129,6 @@ function setFilteredEvents(events) {
       <div class="md:basis-3/4">
         <ResultsList
           :bookables="filteredResultEvents"
-          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
           is-event-list
@@ -140,7 +136,6 @@ function setFilteredEvents(events) {
         />
         <ResultsGrid
           :bookables="filteredResultEvents"
-          :search-params="currentSearchParams"
           include-non-bookable
           include-non-suitable
           is-event-grid

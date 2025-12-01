@@ -24,7 +24,10 @@
       <!-- Veranstalter & Eigenschaften -->
       <div class="basis-3/5 w-full my-2">
         <p class="w-full my-2">Veranstalter: {{ event.eventOrganizer.name }}</p>
-        <BookableFlagDisplay :flags="event.information.flags" class="line-clamp-3"/>
+        <BookableFlagDisplay
+          :flags="event.information.flags"
+          class="line-clamp-3"
+        />
       </div>
 
       <div class="basis-2/5 w-full grid content-end mt-4">
@@ -71,7 +74,6 @@
     <EventTicketOptionsDialog
       v-model:open="openTicketOptions"
       :tickets="event.tickets"
-      :search-params="searchParams"
       :is-private-event="isPrivateEvent"
       :registration-needed="event.attendees.needsRegistration"
     />
@@ -95,10 +97,6 @@ const props = defineProps({
   },
   price: {
     type: Number,
-    default: null,
-  },
-  searchParams: {
-    type: Object,
     default: null,
   },
   isNotBookable: {
@@ -158,11 +156,12 @@ function goToTicketOptions() {
 
   //direct to checkout if only one ticket type
   if (props.event.tickets.length === 1) {
+    const route = useRoute();
     useCheckoutRedirect().redirectToCheckout(
       props.event.tickets[0].id,
       props.event.tickets[0].tenantId,
-      props.searchParams?.searchTimePeriod?.start || null,
-      props.searchParams?.searchTimePeriod?.end || null,
+      route.query.start || null,
+      route.query.end || null,
     );
   } else {
     openTicketOptions.value = true;

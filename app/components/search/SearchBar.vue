@@ -183,32 +183,25 @@ async function onSearch() {
   updateUrl();
 
   filterResetKey.value++;
-  emit("search", {
-    items: updatedBookableItems,
-    searchParams: {
-      searchTerm: searchTerm.value,
-      searchLocation: searchLocation.value,
-      searchTimePeriod: formatedTimePeriod,
-    },
-  });
+  emit("search", updatedBookableItems);
 }
 
 function updateUrl() {
   const router = useRouter();
   const newQuery = {};
 
-  if(searchTerm.value){
+  if (searchTerm.value) {
     newQuery.term = encodeURIComponent(searchTerm.value);
   } else {
     delete newQuery.term;
   }
-  if(searchLocation.value){
+  if (searchLocation.value) {
     newQuery.location = encodeURIComponent(searchLocation.value);
   } else {
     delete newQuery.location;
   }
 
-  if(searchTimePeriod.value && searchTimePeriod.value.startDate){
+  if (searchTimePeriod.value && searchTimePeriod.value.startDate) {
     const formattedTimePeriod = formateTimePeriod(searchTimePeriod.value);
     newQuery.start = formattedTimePeriod.start || "";
     newQuery.end = formattedTimePeriod.end || "";
