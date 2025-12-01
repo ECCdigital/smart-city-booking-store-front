@@ -362,17 +362,17 @@ function getEventMinPrice(event) {
 const choosenCities = ref([]);
 const cities = computed(() => {
   const cityCount = {};
-    props.bookables.forEach((b) => {
-      let city = "";
-      if(props.isEvent){
-        city = extractCity(b.item.eventAddress.city);
-      } else {
-        city = extractCity(b.item.location);
-      }
-      if (city) {
-        cityCount[city] = (cityCount[city] || 0) + 1;
-      }
-    });
+  props.bookables.forEach((b) => {
+    let city = "";
+    if (props.isEvent && b.status === "suitable") {
+      city = extractCity(b.item.eventAddress.city);
+    } else if(b.status === "suitable") {
+      city = extractCity(b.item.location);
+    }
+    if (city) {
+      cityCount[city] = (cityCount[city] || 0) + 1;
+    }
+  });
   return Object.entries(cityCount)
     .map(([value, count]) => ({ value, count }))
     .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
@@ -422,8 +422,8 @@ function instantFilter() {
     onFilter();
   }
 }
-
 function onFilter() {
+  updateUrl();
   if (props.bookables.length > 0) {
     let filteredBookables = props.bookables;
 
@@ -461,7 +461,9 @@ function onFilter() {
             return false;
           }
           return choosenCities.value.some((city) => {
-            return b.item.eventAddress.city.toLowerCase().includes(city.toLowerCase());
+            return b.item.eventAddress.city
+              .toLowerCase()
+              .includes(city.toLowerCase());
           });
         });
       }
@@ -485,10 +487,13 @@ function onFilter() {
     //toDo - Filterlogik für Kategorie ergänzen!!!!!!!!!!!!!!!!!
     //toDo - Filterlogik für Distanz ergänzen!!!!!!!!!!!!!!!!!
 
+    //const updatedItems =
+    console.log("vor filter",props.bookables)
+    console.log("nach filter",filteredBookables)
+
     emit("filter", filteredBookables);
   }
 }
-
 function removeFilter() {
   includeNonSuitable.value = true;
   onlyPublicEvents.value = false;
@@ -499,7 +504,87 @@ function removeFilter() {
   choosenDistanceRange.value = [distanceRange.value[0], distanceRange.value[1]];
 
   filterIsActive.value = false;
+  updateUrl();
   emit("filter", props.bookables);
 }
+
+function buildQuery() {
+  const route = useRoute();
+  const newQuery = { ...route.query };
+
+  if (!includeNonSuitable.value) {
+    newQuery.inclNoSuitable = "false";
+  } else {
+    delete newQuery.inclNoSuitable;
+  }
+  if (onlyPublicEvents.value) {
+    newQuery.pubEv = "true";
+  } else {
+    delete newQuery.pubEv;
+  }
+  if (onlyRegistrationNeededEvents.value) {
+    newQuery.regEv = "true";
+  } else {
+    delete newQuery.regEv;
+  }
+  if (choosenCities.value.length > 0) {
+    newQuery.cities = choosenCities.value
+      .map((c) => encodeURIComponent(c))
+      .join(",");
+  } else {
+    delete newQuery.cities;
+  }
+  //toDo - URL für Kategorie ergänzen!!!!!!!!!!!!!!!
+  if (
+    choosenPriceRange.value[0] !== priceRange.value[0] ||
+    choosenPriceRange.value[1] !== priceRange.value[1]
+  ) {
+    newQuery.price = choosenPriceRange.value.join(",");
+  } else {
+    delete newQuery.price;
+  }
+  //toDo - URL für Distanz ergänzen!!!!!!!!!!!!!!!
+
+  return newQuery;
+}
+function updateUrl() {
+  const router = useRouter();
+  const newQuery = buildQuery();
+
+  router.replace({ query: newQuery });
+}
+function readUrl() {
+  const route = useRoute();
+  const hasFilterQuery =
+      "inclNoSuitable" in route.query ||
+      "pubEv" in route.query ||
+      "regEv" in route.query ||
+      "cities" in route.query ||
+      "price" in route.query;
+
+  if(hasFilterQuery) {
+    filterIsActive.value = true
+
+    includeNonSuitable.value = route.query.inclNoSuitable !== "false";
+    onlyPublicEvents.value = route.query.pubEv === "true";
+    onlyRegistrationNeededEvents.value = route.query.regEv === "true";
+
+    if (route.query.cities) {
+      choosenCities.value = route.query.cities
+          .split(",")
+          .map((c) => decodeURIComponent(c));
+    }
+    if (route.query.price) {
+      const prices = route.query.price.split(",").map((p) => parseInt(p));
+      if (prices.length === 2) {
+        choosenPriceRange.value = [prices[0], prices[1]];
+      }
+    }
+    //toDo - Kategorie aus URL lesen!!!!!!!!!!!!!!!
+    //toDo - Distanz aus URL lesen!!!!!!!!!!!!!!!
+    updateUrl()
+  }
+}
+onMounted(() => readUrl());
 </script>
 <style scoped></style>
