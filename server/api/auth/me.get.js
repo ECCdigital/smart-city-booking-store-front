@@ -1,5 +1,4 @@
 import AuthService from "~~/server/service/AuthService.js";
-import { apiFetch } from "~~/server/api/utils/apiFetch.js";
 
 export default defineEventHandler(async (event) => {
   const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();

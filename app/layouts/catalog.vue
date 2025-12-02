@@ -13,29 +13,32 @@ useHead({
 </script>
 
 <template>
-  <div class="bg-white dark:bg-gray-900">
+  <div class="">
     <NavigationBar />
     <!-- Hero -->
     <!-- toDo - Hero-Design für lg anpassen!  -->
     <!-- toDo - Hero anpassen für Dark-Mode  -->
     <div
-        class="bg-gray-200  px-10 py-15 flex justify-between shadow-sm hidden md:block"
+        class="bg-gray-200  px-10 py-15 justify-between shadow-sm hidden md:block"
     >
-      <div class="grid content-center max-w-220px">
-        <p class="text-primary font-bold">Marktplatz</p>
-        <p class="text-black text-3xl font-bold">
-          Unsere Angebote und Veranstaltungen
-        </p>
+      <div class="flex">
+        <div class="grid content-center max-w-220px">
+          <p class="text-primary font-bold">Marktplatz</p>
+          <p class="text-black text-3xl font-bold">
+            Unsere Angebote und Veranstaltungen
+          </p>
+        </div>
+        <div style="flex: 1; min-width: 15vw"/>
+        <div>
+          <img
+              src="../assets/logo-kielregion.png"
+              alt="Logo Kiel Region"
+              class="text-center"
+              style="height: 7vw"
+          >
+        </div>
       </div>
-      <div style="flex: 1; min-width: 15vw"/>
-      <div>
-        <img
-            src="../assets/logo-kielregion.png"
-            alt="Logo Kiel Region"
-            class="text-center"
-            style="height: 7vw"
-        >
-      </div>
+
     </div>
     <UPageHero
         title="Unsere Angebote und Veranstaltungen"

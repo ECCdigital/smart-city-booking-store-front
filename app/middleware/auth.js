@@ -1,6 +1,6 @@
 import { useAuth } from "~/composables/auth/useAuth.js";
 
-export default defineNuxtRouteMiddleware(async (to, from) => {
+export default defineNuxtRouteMiddleware(async (to) => {
   const { validateAuth } = useAuth();
 
   const isValid = await validateAuth();

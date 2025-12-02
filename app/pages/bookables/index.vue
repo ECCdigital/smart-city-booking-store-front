@@ -13,13 +13,11 @@ definePageMeta({
   layout: "catalog",
 });
 
-const route = useRoute();
-const catalogSlug = computed(() => route.params.catalogSlug);
-
 const { loadBundle } = useCatalogBundle();
 
+await loadBundle({ include: ["bookables"] });
+
 const bookableStore = useBookableStore();
-await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
 
 const allResources = computed(() => {
   return bookableStore.getResources;
@@ -75,7 +73,7 @@ watch(
       initializeResults();
     }
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 );
 
 //Search
@@ -132,6 +130,11 @@ function setSortedResources(resources) {
           @filter="setFilteredResources"
         />
       </div>
+    </div>
+
+    <div v-if="!filteredResources.length" class="text-center mt-10">
+      <UIcon size="48" name="i-lucide-monitor-off" class="text-gray-400 mb-4" />
+      <p class="text-gray-500">{{ $t("resources.noResources") }}</p>
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">

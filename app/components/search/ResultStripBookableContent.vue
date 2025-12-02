@@ -66,6 +66,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  searchParams: {
+    type: Object,
+    default: null,
+  },
   calculatedPrice: {
     type: Object,
     default: null,

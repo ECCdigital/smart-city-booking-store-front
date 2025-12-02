@@ -13,10 +13,12 @@ export default defineNuxtConfig({
   runtimeConfig: {
     apiBaseUrl: "",
     adminBaseUrl: "",
+    userBaseUrl: "",
     // make values available on the client via `useRuntimeConfig().public`
     public: {
       adminBaseUrl: process.env.ADMIN_BASE_URL || "",
       apiBaseUrl: process.env.API_BASE_URL || "",
+      userBaseUrl: process.env.USER_BASE_URL || "",
     },
   },
   routeRules: {

@@ -56,7 +56,7 @@
       </div>
     </div>
     <!-- Orte -->
-    <div class="my-7">
+    <div v-if="cities.length" class="my-7">
       <p class="mb-3">Orte</p>
       <UCheckboxGroup
         v-model="choosenCities"
@@ -103,7 +103,7 @@
     </div>
 
     <!-- Kategorie -->
-    <div class="my-7">
+    <!--<div class="my-7">
       <p class="mb-3">Kategorie</p>
       <UCheckboxGroup
         v-model="choosenCategories"
@@ -117,6 +117,7 @@
         @change="instantFilter"
       />
     </div>
+    -->
     <!-- Preis -->
     <div class="my-7">
       <p class="mb-3">Preis</p>
@@ -154,6 +155,7 @@
       />
     </div>
     <!-- Distanz -->
+    <!--
     <div v-if="searchIsInitialized" class="my-7">
       <p class="mb-3">Distanz</p>
       <p class="mb-3">
@@ -172,6 +174,7 @@
         @change="instantFilter"
       />
     </div>
+    -->
 
     <div v-if="useAsDialog" class="flex justify-between">
       <UButton

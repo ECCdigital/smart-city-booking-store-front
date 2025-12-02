@@ -39,10 +39,11 @@ const handleForgotPassword = async () => {
 
     <div class="flex w-full lg:w-2/5 items-center justify-center p-6">
       <ForgotPasswordCard
-        :user-data="form"
+        v-model:user-data="form"
+        class="shadow-2xl/50"
         :loading="loading"
         @submit="handleForgotPassword"
-        class="shadow-2xl/50"
+
       />
     </div>
   </div>

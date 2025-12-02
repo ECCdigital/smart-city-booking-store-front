@@ -11,17 +11,15 @@ import FilterButton from "../../components/search/FilterButton.vue";
 
 definePageMeta({ name: "catalog-locations", layout: "catalog" });
 
-const route = useRoute();
-const catalogSlug = computed(() => route.params.catalogSlug);
-
 const { loadBundle } = useCatalogBundle();
 
 const bookableStore = useBookableStore();
-await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
+await loadBundle({ include: ["bookables"] });
 
 const allLocations = computed(() => {
   const locations = bookableStore.getLocations;
-  return locations.concat(bookableStore.getRooms);
+  const rooms = bookableStore.getRooms;
+  return locations.concat(rooms);
 });
 const updatedLocations = ref([]);
 
@@ -33,6 +31,7 @@ const filteredLocations = computed(() =>
 );
 const filterIsActive = ref(false);
 const filterResetKey = ref(0);
+const searchIsInitialized = ref(false);
 
 const sortedIds = ref([]);
 const sortedLocations = computed(() => {
@@ -74,7 +73,7 @@ watch(
       initializeResults();
     }
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 );
 
 //Search
@@ -114,7 +113,7 @@ function setSortedLocations(locations) {
       <span
         v-if="searchIsInitialized"
         class="text-black dark:text-white lg:font-bold"
-        >{{ numberOfSuitableBookables() }} passende Ergebnisse</span
+        >{{ suitableCount }} passende Ergebnisse</span
       >
       <div class="" style="flex: 1" />
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
@@ -131,6 +130,11 @@ function setSortedLocations(locations) {
           @filter="setFilteredLocations"
         />
       </div>
+    </div>
+
+    <div v-if="!filteredResultLocations.length" class="text-center mt-10">
+      <UIcon size="48" name="i-lucide-map-pin-off" class="text-gray-400 mb-4" />
+      <p class="text-gray-500">{{ $t("locations.noLocations") }}</p>
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">

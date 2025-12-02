@@ -127,10 +127,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  userData: {
-    type: Object,
-    required: true,
-  },
+});
+
+const userData = defineModel("userData", {
+  password: "",
+  passwordRepeat: "",
 });
 
 const emit = defineEmits(["submit"]);
@@ -139,7 +140,7 @@ const showPassword = ref(false);
 const showPasswordRepeat = ref(false);
 
 function submitForm() {
-  if (userData.password !== userData.passwordRepeat) {
+  if (userData.value.password !== userData.value.passwordRepeat) {
     alert("Die Passwörter stimmen nicht überein!");
     return;
   }

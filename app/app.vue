@@ -1,5 +1,5 @@
 <template>
-  <UApp :locale="locales[locale]">
+  <UApp :locale="locales[locale]" :toaster="toaster">
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
@@ -14,6 +14,9 @@ const { locale } = useI18n();
 
 const lang = computed(() => locales[locale.value].code);
 const dir = computed(() => locales[locale.value].dir);
+const toaster = {
+  position: "bottom-right",
+};
 
 useHead({
   htmlAttrs: {

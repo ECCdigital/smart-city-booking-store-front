@@ -52,10 +52,11 @@ defineProps({
     type: Boolean,
     default: false,
   },
-  userData: {
-    type: Object,
-    required: true,
-  },
+});
+
+const userData = defineModel("userData", {
+  type: Object,
+  required: true,
 });
 
 const emit = defineEmits(["submit"]);

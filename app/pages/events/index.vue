@@ -10,13 +10,10 @@ import FilterArea from "~/components/search/FilterArea.vue";
 
 definePageMeta({ name: "catalog-events", layout: "catalog" });
 
-const route = useRoute();
-const catalogSlug = computed(() => route.params.catalogSlug);
-
 const { loadBundle } = useCatalogBundle();
 
 const eventStore = useEventStore();
-await loadBundle({ catalogSlug, include: ["events"] });
+await loadBundle({ include: ["events"] });
 
 const allEvents = computed(() => {
   return eventStore.getEvents;
@@ -71,7 +68,7 @@ watch(
       initializeResults();
     }
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 );
 
 //Search
@@ -131,6 +128,15 @@ function setSortedEvents(events) {
           @filter="setFilteredEvents"
         />
       </div>
+    </div>
+
+    <div v-if="!updatedEvents.length" class="text-center mt-10">
+      <UIcon
+        size="48"
+        name="i-lucide-calendar-off"
+        class="text-gray-400 mb-4"
+      />
+      <p class="text-gray-500">{{ $t("events.noEvents") }}</p>
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
