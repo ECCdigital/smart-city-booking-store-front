@@ -66,7 +66,7 @@ const sortOptions = ref([
       onSort();
     },
   },
-  {
+  /*{
     value: "distanceAscending",
     label: "Distanz (aufsteigend)",
     icon: "i-lucide-arrow-up",
@@ -89,8 +89,11 @@ const sortOptions = ref([
       sortMode.value = "distanceDescending";
       onSort();
     },
-  },
+  },*/
 ]);
+
+//watch([sortMode, () => props.itemsToSort], onSort, { deep: true });
+
 
 function displaySortMode() {
   return sortOptions.value.find((option) => option.value === sortMode.value)
@@ -126,8 +129,6 @@ function getPrice(item) {
 }
 
 function onSort() {
-  console.log("Selected sort mode:", sortMode.value);
-
   let sortedItems = [...props.itemsToSort];
   //toDo - Sortierung nach Beliebtheit ergänzen?!
 
@@ -156,7 +157,7 @@ function onSort() {
       */
     return 0;
   });
-  //toDo - add sort logic
+
   emit("sort", sortedItems);
 }
 </script>

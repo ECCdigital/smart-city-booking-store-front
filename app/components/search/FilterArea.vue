@@ -284,7 +284,6 @@ const priceRange = computed(() => {
     validPrices.length > 0 ? Math.ceil(Math.max(...validPrices) / 5) * 5 : 100;
   return [minPrice, maxPrice];
 });
-
 const choosenPriceRange = ref([priceRange.value[0], priceRange.value[1]]);
 const dynamicPriceStep = computed(() => {
   const range = priceRange.value[1] - priceRange.value[0];
@@ -487,11 +486,7 @@ function onFilter() {
     //toDo - Filterlogik für Kategorie ergänzen!!!!!!!!!!!!!!!!!
     //toDo - Filterlogik für Distanz ergänzen!!!!!!!!!!!!!!!!!
 
-    //const updatedItems =
-    console.log("vor filter", props.bookables);
-    console.log("nach filter", filteredBookables);
-
-    emit("filter", filteredBookables);
+    emit("filter", {isActiv: filterIsActive.value, items: filteredBookables});
   }
 }
 function removeFilter() {
