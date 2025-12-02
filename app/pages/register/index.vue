@@ -69,10 +69,10 @@ const handleRegister = async () => {
       <RegisterSuccessCard v-if="success" class="shadow-2xl/50" />
       <RegisterCard
         v-else
-        :user-data="form"
+        v-model:user-data="form"
         :loading="loading"
-        @submit="handleRegister"
         class="shadow-2xl/50"
+        @submit="handleRegister"
       />
     </div>
   </div>

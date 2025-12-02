@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async () => {
   const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
 
   try {

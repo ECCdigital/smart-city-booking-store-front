@@ -1,26 +1,39 @@
 <script setup>
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useBookableStore } from "~~/stores/bookable.js";
-import SearchBar from "../../components/search/SearchBar.vue";
-import SortButton from "../../components/search/SortButton.vue";
-import FilterButton from "../../components/search/FilterButton.vue";
+import SearchBar from "~/components/search/SearchBar.vue";
+import SortButton from "~/components/search/SortButton.vue";
+import FilterButton from "~/components/search/FilterButton.vue";
 import FilterArea from "~/components/search/FilterArea.vue";
 import ResultsList from "~/components/search/ResultsList.vue";
 import ResultsGrid from "~/components/search/ResultsGrid.vue";
 
 definePageMeta({
-  name: "catalog-bookables",
+  name: "tenant-catalog-bookables",
   layout: "catalog",
 });
 
-const { loadBundle } = useCatalogBundle();
+const route = useRoute();
+const catalogSlug = computed(() => route.params.catalogSlug);
+const tenantID = computed(() => route.params.tenantID);
 
-await loadBundle({ include: ["bookables"] });
+const { loadBundle } = useCatalogBundle();
 
 const bookableStore = useBookableStore();
 
+await loadBundle({
+  tenantID: tenantID.value,
+  slug: catalogSlug.value,
+  include: ["bookables"],
+});
+await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
+
 const allResources = computed(() => {
-  return bookableStore.getResources;
+  const tenantFilter = tenantID.value
+    ? (loc) => loc.tenantId === tenantID.value
+    : () => true;
+
+  return bookableStore.getResources.filter(tenantFilter);
 });
 const filteredResources = ref([]);
 const filteredResultResources = ref([]);

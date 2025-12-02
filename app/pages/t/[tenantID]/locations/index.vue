@@ -2,23 +2,35 @@
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useBookableStore } from "~~/stores/bookable.js";
 import "@vuepic/vue-datepicker/dist/main.css";
-import SearchBar from "../../components/search/SearchBar.vue";
-import ResultsList from "../../components/search/ResultsList.vue";
-import ResultsGrid from "../../components/search/ResultsGrid.vue";
-import FilterArea from "../../components/search/FilterArea.vue";
-import SortButton from "../../components/search/SortButton.vue";
-import FilterButton from "../../components/search/FilterButton.vue";
+import SearchBar from "~/components/search/SearchBar.vue";
+import ResultsList from "~/components/search/ResultsList.vue";
+import ResultsGrid from "~/components/search/ResultsGrid.vue";
+import FilterArea from "~/components/search/FilterArea.vue";
+import SortButton from "~/components/search/SortButton.vue";
+import FilterButton from "~/components/search/FilterButton.vue";
 
-definePageMeta({ name: "catalog-locations", layout: "catalog" });
+definePageMeta({ name: "tenant-catalog-locations", layout: "catalog" });
+
+const route = useRoute();
+const catalogSlug = computed(() => route.params.catalogSlug);
+const tenantID = computed(() => route.params.tenantID);
 
 const { loadBundle } = useCatalogBundle();
 
 const bookableStore = useBookableStore();
-await loadBundle({ include: ["bookables"] });
+await loadBundle({
+  tenantID: tenantID.value,
+  slug: catalogSlug.value,
+  include: ["bookables"],
+});
 
 const allLocations = computed(() => {
-  const locations = bookableStore.getLocations;
-  const rooms = bookableStore.getRooms;
+  const tenantFilter = tenantID.value
+    ? (loc) => loc.tenantId === tenantID.value
+    : () => true;
+
+  const locations = bookableStore.getLocations.filter(tenantFilter);
+  const rooms = bookableStore.getRooms.filter(tenantFilter);
   return locations.concat(rooms);
 });
 
@@ -52,11 +64,11 @@ watch(
     // Only initialize if no status exists yet (i.e., no search has been performed yet)
     // Nur initialisieren, wenn noch kein Status existiert (d.h. noch keine Suche)
     /**
-    const hasStatus = filteredLocations.value.some((b) => b?.status);
-    if (!hasStatus) {
-      initializeResults();
-    }
-        **/
+   const hasStatus = filteredLocations.value.some((b) => b?.status);
+   if (!hasStatus) {
+   initializeResults();
+   }
+   **/
 
     initializeResults();
   },

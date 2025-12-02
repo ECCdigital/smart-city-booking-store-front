@@ -30,7 +30,6 @@ const userName = computed(() => {
   return user.value?.firstName || "";
 });
 
-
 const handleLogin = async () => {
   loading.value = true;
   try {
@@ -70,9 +69,9 @@ const handleLogin = async () => {
     <div class="flex w-full lg:w-2/5 items-center justify-center p-6">
       <LoginCard
         :user-data="form"
+        class="shadow-2xl/50"
         :loading="loading"
         @submit="handleLogin"
-        class="shadow-2xl/50"
       />
     </div>
   </div>

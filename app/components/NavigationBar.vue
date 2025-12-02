@@ -4,7 +4,6 @@
       <NavigationLink :tab="tab" />
     </div>
     <div style="flex: 1" />
-
     <TenantSwitcher class="mr-2" />
     <UButton
         v-if="!isAuthenticated"
@@ -28,8 +27,8 @@
       size="xl"
       :icon="colorMode === 'light' ? 'i-lucide-sun' : 'i-lucide-moon'"
       variant="ghost"
-      @click="toggleColorMode"
       :style="{ color: contrastToSecondary }"
+      @click="toggleColorMode"
     />
     <!-- toDo - delete after Testing!!!  -->
     <!-- toDo - https://ui.nuxt.com/docs/components/field-group (with dropdown) -->

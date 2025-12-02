@@ -13,8 +13,7 @@ export default defineEventHandler(async (event) => {
   try {
     const { success } = await AuthService.refreshToken(event, refreshToken);
 
-    if (success) {
-    } else {
+    if (!success) {
       throw createError({
         statusCode: 401,
         statusMessage: "Token refresh failed",
@@ -22,7 +21,7 @@ export default defineEventHandler(async (event) => {
     }
 
     return { success: true };
-  } catch (error) {
+  } catch {
     throw createError({
       statusCode: 401,
       statusMessage: "Token refresh failed",

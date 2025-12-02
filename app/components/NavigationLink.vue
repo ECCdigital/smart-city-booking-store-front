@@ -1,5 +1,5 @@
 <template>
-  <NuxtLink :to="tab.value" :class="linkClass">
+  <NuxtLink  :to="tenantTo(tab.value)" :class="linkClass">
     <div :class="stripeClass" />
     <Icon
       v-if="tab.icon"
@@ -38,9 +38,11 @@ const props = defineProps({
   },
 });
 
+const { tenantTo } = useTenantRoute()
+
 const route = useRoute();
 const isActive = computed(() => {
-  return route.path === props.tab.value;
+  return route.path === tenantTo(props.tab.value);
 });
 
 const contrastToPrimary = computed(() =>

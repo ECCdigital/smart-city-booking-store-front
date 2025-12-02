@@ -115,7 +115,11 @@
   },
 
   "errors": {
-    "noCatalog": "Es wurde kein Katalog gefunden"
+    "noCatalog": "Es wurde kein Katalog gefunden",
+    "noTenantFound": {
+      "title": "Kein Mandant gefunden",
+      "message": "Es wurde kein Mandant für diese Domain gefunden. Bitte überprüfen Sie die URL oder kontaktieren Sie den Support."
+    }
   },
   "tenants": {
     "selectTenant": "Mandant auswählen",
