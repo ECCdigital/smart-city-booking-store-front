@@ -10,6 +10,7 @@
         icon="i-lucide-search"
         placeholder="Wonach suchen Sie?"
         clearable
+        @keyup.enter="onSearch"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <InputText
@@ -17,6 +18,7 @@
         icon="i-lucide-map-pin"
         placeholder="Ort"
         clearable
+        @keyup.enter="onSearch"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <InputTimePeriod
