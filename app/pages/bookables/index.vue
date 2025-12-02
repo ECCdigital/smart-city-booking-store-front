@@ -24,21 +24,41 @@ await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
 const allResources = computed(() => {
   return bookableStore.getResources;
 });
-const filteredResources = ref([]);
-const filteredResultResources = ref([]);
+const updatedResources = ref([]);
+
+const filteredIds = ref([]);
+const filteredResources = computed(() =>
+  updatedResources.value.filter((r) =>
+    filterIsActive.value ? filteredIds.value.includes(r.item.id) : true,
+  ),
+);
+const filterIsActive = ref(false);
 const filterResetKey = ref(0);
+
+const sortedIds = ref([]);
+const sortedResources = computed(() => {
+  if (sortedIds.value.length === 0) {
+    return filteredResources.value;
+  }
+  const sortedResults = [];
+  sortedIds.value.forEach((id) => {
+    const resource = filteredResources.value.find((r) => r.item.id === id);
+    if (resource) {
+      sortedResults.push(resource);
+    }
+  });
+  return sortedResults;
+});
 
 // Initialization: Show all items before the first search
 function initializeResults() {
   // Set status: Bookable -> "suitable", others -> "nonBookable"
-  const withStatus = allResources.value.map((resource) => {
+  updatedResources.value = allResources.value.map((resource) => {
     if (resource.isBookable) {
       return { item: resource, status: "suitable", calculatedPrice: null };
     }
     return { item: resource, status: "nonBookable", calculatedPrice: null };
   });
-  filteredResources.value = withStatus;
-  filteredResultResources.value = withStatus;
 }
 
 //Stay reactive in case the store loads data later.
@@ -46,12 +66,11 @@ watch(
   () => allResources.value,
   (val) => {
     if (!val || val.length === 0) {
-      filteredResources.value = [];
-      filteredResultResources.value = [];
+      updatedResources.value = [];
       return;
     }
     // Only initialize if no status exists yet (i.e., no search has been performed yet)
-    const hasStatus = filteredResources.value.some((b) => b?.status);
+    const hasStatus = updatedResources.value.some((b) => b?.status);
     if (!hasStatus) {
       initializeResults();
     }
@@ -62,19 +81,21 @@ watch(
 //Search
 const searchIsInitialized = ref(false);
 async function onSearch(items) {
-  filteredResources.value = items;
-  filteredResultResources.value = items;
+  updatedResources.value = items;
 }
 function numberOfSuitableBookables() {
-  return filteredResources.value.filter((l) => l.status === "suitable").length;
+  return filteredResources.value.filter((r) => r.status === "suitable").length;
 }
 
 //Sort & Filter
-function setSortedResources(resources) {
-  filteredResultResources.value = resources;
+function setFilteredResources({ isActiv, items }) {
+  filterIsActive.value = isActiv;
+  if (items) {
+    filteredIds.value = items.map((r) => r.item.id);
+  }
 }
-function setFilteredResources(resources) {
-  filteredResultResources.value = resources;
+function setSortedResources(resources) {
+  sortedIds.value = resources.map((l) => l.item.id);
 }
 </script>
 
@@ -99,14 +120,14 @@ function setFilteredResources(resources) {
       <div class="" style="flex: 1" />
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
         <SortButton
-          v-if="filteredResources.length > 0"
-          :items-to-sort="filteredResultResources"
+          v-if="updatedResources.length > 0"
+          :items-to-sort="filteredResources"
           @sort="setSortedResources"
         />
         <FilterButton
-          v-if="filteredResources.length > 0"
+          v-if="updatedResources.length > 0"
           v-model:is-initailized="searchIsInitialized"
-          :bookables="filteredResources"
+          :bookables="updatedResources"
           class="lg:hidden"
           @filter="setFilteredResources"
         />
@@ -114,25 +135,39 @@ function setFilteredResources(resources) {
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
-      <div class="md:basis-1/4 hidden md:block">
+      <div class="lg:basis-1/4 hidden lg:block">
         <FilterArea
-          v-if="filteredResources.length > 0"
+          v-if="updatedResources.length > 0"
           :key="filterResetKey"
           v-model:is-initailized="searchIsInitialized"
-          :bookables="filteredResources"
+          :bookables="updatedResources"
           @filter="setFilteredResources"
         />
       </div>
 
-      <div class="basis-full md:basis-3/4">
+      <div class="basis-full lg:basis-3/4">
+        <div
+          v-if="filteredResources.length === 0"
+          class="w-full text-center mt-10"
+        >
+          <UIcon
+            size="48"
+            name="i-lucide-monitor-off"
+            class="text-gray-400 mb-4"
+          />
+          <p class="text-gray-500">Keine passenden Ressourcen.</p>
+        </div>
+
         <ResultsList
-          :bookables="filteredResultResources"
+          v-if="sortedResources.length > 0"
+          :bookables="sortedResources"
           include-non-bookable
           include-non-suitable
           class="hidden md:block"
         />
         <ResultsGrid
-          :bookables="filteredResultResources"
+          v-if="sortedResources.length > 0"
+          :bookables="sortedResources"
           include-non-bookable
           include-non-suitable
           class="md:hidden"

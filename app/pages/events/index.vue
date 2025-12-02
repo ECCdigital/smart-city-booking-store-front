@@ -21,34 +21,52 @@ await loadBundle({ catalogSlug, include: ["events"] });
 const allEvents = computed(() => {
   return eventStore.getEvents;
 });
-const filteredEvents = ref([]);
-const filteredResultEvents = ref([]);
+const updatedEvents = ref([]);
+
+const filteredIds = ref([]);
+const filteredEvents = computed(() =>
+  updatedEvents.value.filter((e) =>
+    filterIsActive.value ? filteredIds.value.includes(e.item.id) : true,
+  ),
+);
+const filterIsActive = ref(false);
 const filterResetKey = ref(0);
+
+const sortedIds = ref([]);
+const sortedEvents = computed(() => {
+  if (sortedIds.value.length === 0) {
+    return filteredEvents.value;
+  }
+  const sortedResults = [];
+  sortedIds.value.forEach((id) => {
+    const event = filteredEvents.value.find((e) => e.item.id === id);
+    if (event) {
+      sortedResults.push(event);
+    }
+  });
+  return sortedResults;
+});
 
 // Initialization: Show all items before the first search
 function initializeResults() {
   // Set status: Bookable -> "suitable", others -> "nonBookable"
-  const withStatus = allEvents.value.map((event) => {
+  updatedEvents.value = allEvents.value.map((event) => {
     if (event.attendees.publicEvent === true) {
       return { item: event, status: "suitable", calculatedPrice: null };
     }
     return { item: event, status: "nonBookable", calculatedPrice: null };
   });
-
-  filteredEvents.value = withStatus;
-  filteredResultEvents.value = withStatus;
 }
 //Stay reactive in case the store loads data later.
 watch(
   () => allEvents.value,
   (val) => {
     if (!val || val.length === 0) {
-      filteredEvents.value = [];
-      filteredResultEvents.value = [];
+      updatedEvents.value = [];
       return;
     }
     // Only initialize if no status exists yet (i.e., no search has been performed yet)
-    const hasStatus = filteredEvents.value.some((b) => b?.status);
+    const hasStatus = updatedEvents.value.some((b) => b?.status);
     if (!hasStatus) {
       initializeResults();
     }
@@ -59,20 +77,21 @@ watch(
 //Search
 const searchIsInitialized = ref(false);
 function onSearch(items) {
-  filteredEvents.value = items;
-  filteredResultEvents.value = items;
+  updatedEvents.value = items;
 }
 function numberOfSuitableBookables() {
-  return filteredResultEvents.value.filter((e) => e.status === "suitable")
-    .length;
+  return filteredEvents.value.filter((e) => e.status === "suitable").length;
 }
 
 //Sort & Filter
-function setSortedEvents(events) {
-  filteredResultEvents.value = events;
+function setFilteredEvents({ isActiv, items }) {
+  filterIsActive.value = isActiv;
+  if (items) {
+    filteredIds.value = items.map((e) => e.item.id);
+  }
 }
-function setFilteredEvents(events) {
-  filteredResultEvents.value = events;
+function setSortedEvents(events) {
+  sortedIds.value = events.map((e) => e.item.id);
 }
 </script>
 
@@ -98,15 +117,15 @@ function setFilteredEvents(events) {
       <div class="" style="flex: 1" />
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
         <SortButton
-          v-if="filteredEvents.length > 0"
-          :items-to-sort="filteredResultEvents"
+          v-if="updatedEvents.length > 0"
+          :items-to-sort="filteredEvents"
           is-event
           @sort="setSortedEvents"
         />
         <FilterButton
-          v-if="filteredEvents.length > 0"
+          v-if="updatedEvents.length > 0"
           v-model:is-initailized="searchIsInitialized"
-          :bookables="filteredEvents"
+          :bookables="updatedEvents"
           is-event
           class="lg:hidden"
           @filter="setFilteredEvents"
@@ -115,27 +134,40 @@ function setFilteredEvents(events) {
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
-      <div class="md:basis-1/4 hidden md:block">
+      <div class="lg:basis-1/4 hidden lg:block">
         <FilterArea
-          v-if="filteredEvents.length > 0"
+          v-if="updatedEvents.length > 0"
           :key="filterResetKey"
           v-model:is-initailized="searchIsInitialized"
-          :bookables="filteredEvents"
+          :bookables="updatedEvents"
           is-event
           @filter="setFilteredEvents"
         />
       </div>
 
-      <div class="md:basis-3/4">
+      <div class="basis-full lg:basis-3/4">
+        <div
+          v-if="filteredEvents.length === 0"
+          class="w-full text-center mt-10"
+        >
+          <UIcon
+            size="48"
+            name="i-lucide-monitor-off"
+            class="text-gray-400 mb-4"
+          />
+          <p class="text-gray-500">Keine passenden Events.</p>
+        </div>
         <ResultsList
-          :bookables="filteredResultEvents"
+          v-if="sortedEvents.length > 0"
+          :bookables="sortedEvents"
           include-non-bookable
           include-non-suitable
           is-event-list
           class="hidden md:block"
         />
         <ResultsGrid
-          :bookables="filteredResultEvents"
+          v-if="sortedEvents.length > 0"
+          :bookables="sortedEvents"
           include-non-bookable
           include-non-suitable
           is-event-grid

@@ -110,16 +110,6 @@ function setSortedLocations(locations) {
       />
     </div>
 
-    <div class="bg-amber-100">
-      filteredLocations: {{ filteredLocations.length }}
-      <hr >
-      sortedIds: {{sortedIds}}
-      <hr>
-      sortedLocations: {{ sortedLocations.length }}
-      <br >
-      {{ sortedLocations.map((l) => l.item.title).join(", ") }}
-    </div>
-
     <div class="m-10 lg:m-5 sm:flex items-center">
       <span
         v-if="searchIsInitialized"
@@ -145,7 +135,7 @@ function setSortedLocations(locations) {
 
     <div class="flex flex-row lg:my-5 m-5">
       <!-- Filterbereich -->
-      <div class="md:basis-1/4 hidden md:block">
+      <div class="lg:basis-1/4 hidden lg:block">
         <FilterArea
           v-if="updatedLocations.length > 0"
           :key="filterResetKey"
@@ -155,7 +145,7 @@ function setSortedLocations(locations) {
         />
       </div>
 
-      <div class="md:basis-3/4">
+      <div class="basis-full lg:basis-3/4">
         <div
           v-if="filteredLocations.length === 0"
           class="w-full text-center mt-10"
@@ -185,5 +175,3 @@ function setSortedLocations(locations) {
     </div>
   </div>
 </template>
-
-<style></style>

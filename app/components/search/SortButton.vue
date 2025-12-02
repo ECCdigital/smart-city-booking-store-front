@@ -92,7 +92,7 @@ const sortOptions = ref([
   },*/
 ]);
 
-//watch([sortMode, () => props.itemsToSort], onSort, { deep: true });
+watch([sortMode, () => props.itemsToSort], onSort, { deep: true });
 
 
 function displaySortMode() {
@@ -107,13 +107,16 @@ function getPrice(item) {
       return Math.min(
         ...item.item.tickets.map((ticket) => {
           const minPrice = Math.min(
-            ...ticket.priceCategories.map((cat) => cat.priceEur),
+            ...ticket.priceCategories.map((cat) => cat.priceEur)
           );
-          return ticket.priceValueAddedTax
+          const temp =  ticket.priceValueAddedTax
             ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
             : minPrice;
-        }),
+          return temp;
+        })
       );
+    } else {
+      return 0; // Kein Ticket verfügbar
     }
   } else {
     if (item.calculatedPrice) {
@@ -130,6 +133,7 @@ function getPrice(item) {
 
 function onSort() {
   let sortedItems = [...props.itemsToSort];
+  console.log(sortedItems)
   //toDo - Sortierung nach Beliebtheit ergänzen?!
 
   //Default: momentan "Relevanz" nach Fuze-Suche...
