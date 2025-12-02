@@ -3,7 +3,7 @@ import { apiFetch } from "~~/server/api/utils/apiFetch.js";
 
 export default cachedEventHandler(
   async (event) => {
-    const { bookableId, eventId, include, tenantID } = getQuery(event);
+    const { bookableId, eventId, include } = getQuery(event);
 
     const bundle = await apiFetch(event, `/api/catalog/bundle`, {
       method: "GET",

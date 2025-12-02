@@ -8,28 +8,17 @@ import ResultsGrid from "../../components/search/ResultsGrid.vue";
 import FilterArea from "../../components/search/FilterArea.vue";
 import SortButton from "../../components/search/SortButton.vue";
 import FilterButton from "../../components/search/FilterButton.vue";
-import { useTenantStore } from "~~/stores/tenant.js";
 
 definePageMeta({ name: "catalog-locations", layout: "catalog" });
-
-const route = useRoute();
-const catalogSlug = computed(() => route.params.catalogSlug);
-
-const tenantStore = useTenantStore();
-const tenantID = computed(() => tenantStore.getCurrentTenantID || null);
 
 const { loadBundle } = useCatalogBundle();
 
 const bookableStore = useBookableStore();
-await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
+await loadBundle({ include: ["bookables"] });
 
 const allLocations = computed(() => {
-  const tenantFilter = tenantID.value
-    ? (loc) => loc.tenantId === tenantID.value
-    : () => true;
-
-  const locations = bookableStore.getLocations.filter(tenantFilter);
-  const rooms = bookableStore.getRooms.filter(tenantFilter);
+  const locations = bookableStore.getLocations;
+  const rooms = bookableStore.getRooms;
   return locations.concat(rooms);
 });
 
@@ -82,10 +71,9 @@ function onSearch({ items, searchParams }) {
   currentSearchParams.value = searchParams;
 }
 
-const suitableCount = computed(() =>
-    filteredResultLocations.value.filter(
-        (l) => l.status === "suitable"
-    ).length
+const suitableCount = computed(
+  () =>
+    filteredResultLocations.value.filter((l) => l.status === "suitable").length
 );
 
 //Sort & Filter

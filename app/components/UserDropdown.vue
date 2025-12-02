@@ -1,6 +1,6 @@
 <script setup>
 import { useAuthStore } from "~~/stores/auth.js";
-import {useBreakpointCheck} from "~/composables/utils/useBreakpointCheck.js";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 
 const t = useI18n().t;
 
@@ -9,7 +9,6 @@ const authStore = useAuthStore();
 const notification = useNotification();
 
 const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
-
 
 const user = computed(() => authStore.getUser);
 
@@ -49,7 +48,7 @@ async function logout() {
       t("notifications.logoutSuccess.message"),
       t("notifications.logoutSuccess.title")
     );
-  } catch (error) {
+  } catch {
     notification.error(
       t("login.logoutErrorMessage.message"),
       t("login.logoutErrorMessage.title")

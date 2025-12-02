@@ -18,7 +18,7 @@ export default cachedEventHandler(
     if (!tenantExists) {
       throw createError({
         statusCode: 404,
-        statusMessage: "Mandant Not Found",
+        statusMessage: "Tenant Not Found",
       });
     }
 

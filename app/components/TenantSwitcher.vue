@@ -4,12 +4,18 @@ import { useTenantStore } from "~~/stores/tenant.js";
 
 const t = useI18n().t;
 
+const route = useRoute();
+
+const tenantID = useState("tenantID");
+
 const tenantStore = useTenantStore();
 
 const tenants = computed(() => tenantStore.getTenants);
 
 const selectedTenant = computed(() => {
-  return tenantStore.getCurrentTenant;
+  return tenants.value.find(
+    (tenant) => tenant.id === tenantID.value
+  );
 });
 
 const selectedTenantLabel = computed(() => {
@@ -44,15 +50,39 @@ const dropdownItems = computed(() => {
 });
 
 function onSelect(tenant) {
+  const { path, query, hash } = route;
+  const pathWithoutTenant = path.replace(/^\/t\/[^/]+/, "") || "/";
+
   if (tenant.id === selectedTenant.value?.id) {
     tenantStore.setCurrentTenantID(null);
+    return navigateTo({
+      path: pathWithoutTenant,
+      query,
+      hash,
+    });
   } else {
     tenantStore.setCurrentTenantID(tenant.id);
+    const targetPath =
+      pathWithoutTenant === "/"
+        ? `/t/${tenant.id}`
+        : `/t/${tenant.id}${pathWithoutTenant}`;
+    return navigateTo({
+      path: targetPath,
+      query,
+      hash,
+    });
   }
 }
 
 function onClear() {
-  tenantStore.setCurrentTenantID(null);
+  const { path, query, hash } = route;
+  const pathWithoutTenant = path.replace(/^\/t\/[^/]+/, "") || "/";
+
+  return navigateTo({
+    path: pathWithoutTenant,
+    query,
+    hash,
+  });
 }
 </script>
 

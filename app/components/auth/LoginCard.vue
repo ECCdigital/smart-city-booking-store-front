@@ -1,5 +1,8 @@
 <template>
-  <UCard  variant="soft" class="w-full max-w-md rounded-xl bg-white/30 dark:bg-gray-900/40 backdrop-blur-lg">
+  <UCard
+    variant="soft"
+    class="w-full max-w-md rounded-xl bg-white/30 dark:bg-gray-900/40 backdrop-blur-lg"
+  >
     <template #header>
       <h2 class="text-2xl font-semibold text-center">
         {{ $t("login.title") }}
@@ -77,10 +80,11 @@ defineProps({
     type: Boolean,
     default: false,
   },
-  userData: {
-    type: Object,
-    required: true,
-  },
+});
+
+const userData = defineModel("userData", {
+  id: "",
+  password: "",
 });
 
 const emit = defineEmits(["submit"]);

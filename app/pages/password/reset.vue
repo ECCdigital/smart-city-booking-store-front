@@ -52,7 +52,7 @@ const handleResetPassword = async () => {
       class="flex w-full lg:w-2/5 items-center justify-center p-6 "
     >
       <ResetPasswordCard
-        :user-data="form"
+        v-model:user-data="form"
         :loading="loading"
         @submit="handleResetPassword"
 

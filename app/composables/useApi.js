@@ -1,7 +1,7 @@
 export function useApi() {
   const requestFetch = useRequestFetch();
 
-  const apiFetch = (url, opts, key) => {
+  const apiFetch = (url, opts) => {
     return requestFetch(url, {
       ...opts,
       credentials: "include",

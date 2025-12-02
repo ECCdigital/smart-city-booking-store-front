@@ -19,7 +19,7 @@ export const useTenantStore = defineStore("tenant", {
       const { fetchTenants } = useTenants();
       try {
         this.tenants = await fetchTenants();
-      } catch (error) {
+      } catch {
         this.tenants = [];
       } finally {
         this.initialized = true;
@@ -31,7 +31,7 @@ export const useTenantStore = defineStore("tenant", {
   },
   persist: {
     key: "tenant-store",
-    storage: process.client ? localStorage : undefined,
+    storage: import.meta.client ? localStorage : undefined,
     paths: ["currentTenantID"],
   },
 });

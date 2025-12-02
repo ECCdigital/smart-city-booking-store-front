@@ -1,15 +1,15 @@
 <template>
   <UCard
     variant="soft"
-    class="w-full max-w-md rounded-xl bg-white/30 dark:bg-gray-900/30 backdrop-blur-lg"
+    class="w-full max-w-md rounded-xl bg-white/30 backdrop-blur-lg dark:bg-gray-900/30"
   >
     <template #header>
-      <h2 class="text-2xl font-semibold text-center">
+      <h2 class="text-center text-2xl font-semibold">
         {{ $t("register.title") }}
       </h2>
     </template>
 
-    <UForm :state="userData" @submit="submitForm" class="flex flex-col gap-2">
+    <UForm :state="userData" class="flex flex-col gap-2" @submit="submitForm">
       <div class="flex justify-between">
         <UFormField :label="$t('common.firstName')" required>
           <UInput
@@ -20,7 +20,6 @@
           />
         </UFormField>
 
-        <!-- Nachname -->
         <UFormField :label="$t('common.lastName')" required>
           <UInput
             v-model="userData.lastname"
@@ -31,7 +30,6 @@
         </UFormField>
       </div>
 
-      <!-- Firma -->
       <UFormField :label="$t('common.company')">
         <UInput
           v-model="userData.company"
@@ -41,7 +39,6 @@
         />
       </UFormField>
 
-      <!-- E-Mail -->
       <UFormField :label="$t('common.email')" required>
         <UInput
           v-model="userData.email"
@@ -52,7 +49,6 @@
         />
       </UFormField>
 
-      <!-- Passwort -->
       <UFormField :label="$t('common.password')" required>
         <UInput
           v-model="userData.password"
@@ -76,6 +72,7 @@
           </template>
         </UInput>
       </UFormField>
+
       <UProgress
         :color="color"
         :indicator="text"
@@ -109,7 +106,6 @@
         </li>
       </ul>
 
-      <!-- Passwort wiederholen -->
       <UFormField :label="$t('common.repeatPassword')" required>
         <UInput
           v-model="userData.passwordRepeat"
@@ -136,7 +132,6 @@
         </UInput>
       </UFormField>
 
-      <!-- Submit -->
       <UButton
         type="submit"
         color="primary"
@@ -160,19 +155,20 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 const t = useI18n().t;
 
-const props = defineProps({
+defineProps({
   loading: {
     type: Boolean,
     default: false,
   },
-  userData: {
-    type: Object,
-    required: true,
-  },
+});
+
+const userData = defineModel("userData", {
+  type: Object,
+  required: true,
 });
 
 const emit = defineEmits(["submit"]);
@@ -181,8 +177,7 @@ const showPassword = ref(false);
 const showPasswordRepeat = ref(false);
 
 function submitForm() {
-  // Optional: Passwort-Abgleich prüfen
-  if (props.userData.password !== props.userData.passwordRepeat) {
+  if (userData.value.password !== userData.value.passwordRepeat) {
     alert("Die Passwörter stimmen nicht überein!");
     return;
   }
@@ -203,7 +198,7 @@ function checkStrength(str) {
   }));
 }
 
-const strength = computed(() => checkStrength(props.userData.password || ""));
+const strength = computed(() => checkStrength(userData.value.password || ""));
 const score = computed(() => strength.value.filter((req) => req.met).length);
 
 const color = computed(() => {

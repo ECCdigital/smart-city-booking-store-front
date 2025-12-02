@@ -1,5 +1,5 @@
 <script setup>
-const props = defineProps({
+defineProps({
   email: {
     type: String,
     required: false,

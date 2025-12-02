@@ -7,26 +7,16 @@ import SortButton from "~/components/search/SortButton.vue";
 import ResultsList from "~/components/search/ResultsList.vue";
 import ResultsGrid from "~/components/search/ResultsGrid.vue";
 import FilterArea from "~/components/search/FilterArea.vue";
-import { useTenantStore } from "~~/stores/tenant.js";
 
 definePageMeta({ name: "catalog-events", layout: "catalog" });
-
-const route = useRoute();
-const catalogSlug = computed(() => route.params.catalogSlug);
 
 const { loadBundle } = useCatalogBundle();
 
 const eventStore = useEventStore();
-await loadBundle({ catalogSlug, include: ["events"] });
-
-const tenantStore = useTenantStore();
-const tenantID = computed(() => tenantStore.getCurrentTenantID || null);
+await loadBundle({ include: ["events"] });
 
 const allEvents = computed(() => {
-  const tenantFilter = tenantID.value
-    ? (loc) => loc.tenantId === tenantID.value
-    : () => true;
-  return eventStore.getEvents.filter(tenantFilter);
+  return eventStore.getEvents;
 });
 const filteredEvents = ref([]);
 const filteredResultEvents = ref([]);

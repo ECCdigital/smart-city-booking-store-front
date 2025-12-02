@@ -85,8 +85,6 @@ export const useAuthStore = defineStore("auth", {
     async logout() {
       try {
         await $fetch("/api/auth/logout", { method: "POST" });
-      } catch (error) {
-        throw error
       } finally {
         this.invalidateAuth();
       }
@@ -98,7 +96,7 @@ export const useAuthStore = defineStore("auth", {
   },
   persist: {
     key: "auth-store",
-    storage: process.client ? localStorage : undefined,
+    storage: import.meta.client ? localStorage : undefined,
     paths: ["user", "permission", "tokenValid"],
   },
 });
