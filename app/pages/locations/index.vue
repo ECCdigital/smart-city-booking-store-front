@@ -76,8 +76,9 @@ watch(
   { immediate: true, deep: true }
 );
 
+const suitableCount = computed(() => numberOfSuitableBookables());
+
 //Search
-const searchIsInitialized = ref(false);
 function onSearch(items) {
   updatedLocations.value = items;
 }
@@ -132,7 +133,7 @@ function setSortedLocations(locations) {
       </div>
     </div>
 
-    <div v-if="!filteredResultLocations.length" class="text-center mt-10">
+    <div v-if="!updatedLocations.length" class="text-center mt-10">
       <UIcon size="48" name="i-lucide-map-pin-off" class="text-gray-400 mb-4" />
       <p class="text-gray-500">{{ $t("locations.noLocations") }}</p>
     </div>
