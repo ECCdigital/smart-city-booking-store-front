@@ -11,19 +11,21 @@
           :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"
           alt="Bild des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
-        >
+        />
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
-          :src="`/api/img?url=${encodeURIComponent(item.information.teaserImage)}`"
+          :src="`/api/img?url=${encodeURIComponent(
+            item.information.teaserImage
+          )}`"
           alt=""
           class="w-full object-cover rounded-t-xl"
-        >
+        />
         <img
           v-else
           src="../../assets/bookable-default.jpg"
           alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
-        >
+        />
       </div>
       <USeparator color="primary" type="solid" size="xl" class="w-full" />
     </div>
@@ -53,10 +55,6 @@ const props = defineProps({
     required: true,
   },
   calculatedPrice: {
-    type: Number,
-    default: null,
-  },
-  searchParams: {
     type: Object,
     default: null,
   },
@@ -75,6 +73,7 @@ const isEvent = computed(() => {
 
 const openEventTicketOptions = ref(false);
 function goToCheckout() {
+  const route = useRoute();
   if (isEvent.value) {
     //use external booking url
     if (props.item.externalBookingUrl) {
@@ -83,24 +82,24 @@ function goToCheckout() {
     }
     //direct to checkout if only one ticket type
     if (props.item.tickets.length === 1) {
-      useCheckoutRedirect().redirectToCheckout(
-        props.item.tickets[0].id,
-        props.item.tickets[0].tenantId,
-        props.searchParams?.searchTimePeriod?.start || null,
-        props.searchParams?.searchTimePeriod?.end || null,
-      );
+      useCheckoutRedirect().redirectToCheckout({
+        id: props.item.tickets[0].id,
+        tenantId: props.item.tickets[0].tenantId,
+        start: route.query.start,
+        end: route.query.end,
+      });
     } else {
       openEventTicketOptions.value = true;
     }
   }
 
   if (!isEvent.value && !props.isNotBookable) {
-    useCheckoutRedirect().redirectToCheckout(
-      props.item.id,
-      props.item.tenantId,
-      props.searchParams?.searchTimePeriod?.start || null,
-      props.searchParams?.searchTimePeriod?.end || null,
-    );
+    useCheckoutRedirect().redirectToCheckout({
+      id: props.item.id,
+      tenantId: props.item.tenantId,
+      start: route.query.start,
+      end: route.query.end,
+    });
   }
 }
 </script>

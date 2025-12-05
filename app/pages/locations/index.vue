@@ -8,11 +8,11 @@ import ResultsGrid from "../../components/search/ResultsGrid.vue";
 import FilterArea from "../../components/search/FilterArea.vue";
 import SortButton from "../../components/search/SortButton.vue";
 import FilterButton from "../../components/search/FilterButton.vue";
+import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 
 definePageMeta({ name: "catalog-locations", layout: "catalog" });
 
 const { loadBundle } = useCatalogBundle();
-
 const bookableStore = useBookableStore();
 await loadBundle({ include: ["bookables"] });
 
@@ -22,67 +22,20 @@ const allLocations = computed(() => {
   return locations.concat(rooms);
 });
 
-const filteredLocations = ref([]);
-const filteredResultLocations = ref([]);
-const filterResetKey = ref(0);
-const searchIsInitialized = ref(false);
+const {
+  query,
+  searchIsInitialized,
+  filterResetKey,
+  updatedItems: searchedLocations,
+  sortedItems: sortedLocations,
+  suitableCount,
+  setFilterQueryParams,
+  setSortedQueryParams,
+  runSearch,
+  resetResults,
+} = useBookableSearch({ isEvent: false, sourceItems: allLocations });
 
-// Initialization: Show all items before the first search
-function initializeResults() {
-  // Set status: Bookable -> "suitable", others -> "nonBookable"
-  const withStatus = allLocations.value.map((location) => {
-    if (location.isBookable) {
-      return { item: location, status: "suitable", calculatedPrice: null };
-    }
-    return { item: location, status: "nonBookable", calculatedPrice: null };
-  });
-  filteredLocations.value = withStatus;
-  filteredResultLocations.value = withStatus;
-}
 
-//Stay reactive in case the store loads data later.
-watch(
-  () => allLocations.value,
-  (val) => {
-    if (!val || val.length === 0) {
-      filteredLocations.value = [];
-      filteredResultLocations.value = [];
-      return;
-    }
-    // Only initialize if no status exists yet (i.e., no search has been performed yet)
-    // Nur initialisieren, wenn noch kein Status existiert (d.h. noch keine Suche)
-    /**
-    const hasStatus = filteredLocations.value.some((b) => b?.status);
-    if (!hasStatus) {
-      initializeResults();
-    }
-        **/
-
-    initializeResults();
-  },
-  { immediate: true, deep: true }
-);
-
-//Search
-const currentSearchParams = ref({});
-function onSearch({ items, searchParams }) {
-  filteredLocations.value = items;
-  filteredResultLocations.value = items;
-  currentSearchParams.value = searchParams;
-}
-
-const suitableCount = computed(
-  () =>
-    filteredResultLocations.value.filter((l) => l.status === "suitable").length
-);
-
-//Sort & Filter
-function setFilteredLocations(locations) {
-  filteredResultLocations.value = locations;
-}
-function setSortedLocations(locations) {
-  filteredResultLocations.value = locations;
-}
 </script>
 
 <template>
@@ -91,9 +44,13 @@ function setSortedLocations(locations) {
       <SearchBar
         v-model:is-initailized="searchIsInitialized"
         v-model:filter-reset-key="filterResetKey"
-        :items-to-search="allLocations"
-        @initialize="initializeResults"
-        @search="onSearch"
+        :term="query.term"
+        :location="query.location"
+        :time-start="query.start"
+        :time-end="query.end"
+        :is-event="false"
+        @search="runSearch"
+        @reset="resetResults"
       />
     </div>
 
@@ -106,50 +63,58 @@ function setSortedLocations(locations) {
       <div class="" style="flex: 1" />
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
         <SortButton
-          v-if="filteredLocations.length > 0"
-          :items-to-sort="filteredResultLocations"
-          @sort="setSortedLocations"
+          v-if="searchedLocations.length > 0"
+          :sort-mode="query.sortMode"
+          @sort="setSortedQueryParams"
         />
         <FilterButton
-          v-if="filteredLocations.length > 0"
+          v-if="searchedLocations.length > 0"
           v-model:is-initailized="searchIsInitialized"
-          :bookables="filteredLocations"
+          :bookables="searchedLocations"
+          :include-non-suitable="query.inclNoSuitable"
+          :cities="query.cities"
+          :price="query.price"
+          :only-public-events="query.pubEv"
+          :only-registered-events="query.regEv"
           class="lg:hidden"
-          @filter="setFilteredLocations"
+          @filter="setFilterQueryParams"
         />
       </div>
     </div>
 
-    <div v-if="!filteredResultLocations.length" class="text-center mt-10">
+    <div v-if="!sortedLocations.length" class="text-center mt-10">
       <UIcon size="48" name="i-lucide-map-pin-off" class="text-gray-400 mb-4" />
       <p class="text-gray-500">{{ $t("locations.noLocations") }}</p>
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
       <!-- Filterbereich -->
-      <div class="md:basis-1/4 hidden md:block">
+      <div class="lg:basis-1/4 hidden lg:block">
         <FilterArea
-          v-if="filteredLocations.length > 0"
+          v-if="searchedLocations.length > 0"
           :key="filterResetKey"
           v-model:is-initailized="searchIsInitialized"
-          :bookables="filteredLocations"
-          @filter="setFilteredLocations"
+          :include-non-suitable="query.inclNoSuitable"
+          :cities="query.cities"
+          :price="query.price"
+          :only-public-events="query.pubEv"
+          :only-registered-events="query.regEv"
+          :bookables="searchedLocations"
+          @filter="setFilterQueryParams"
         />
       </div>
 
-      <div class="md:basis-3/4">
+      <div class="basis-full lg:basis-3/4">
         <ResultsList
-          v-if="filteredResultLocations.length"
-          :bookables="filteredResultLocations"
-          :search-params="currentSearchParams"
+          v-if="sortedLocations.length > 0"
+          :bookables="sortedLocations"
           include-non-bookable
           include-non-suitable
           class="hidden md:block"
         />
         <ResultsGrid
-          v-if="filteredResultLocations.length"
-          :bookables="filteredResultLocations"
-          :search-params="currentSearchParams"
+          v-if="sortedLocations.length > 0"
+          :bookables="sortedLocations"
           include-non-bookable
           include-non-suitable
           class="md:hidden"
@@ -158,5 +123,3 @@ function setSortedLocations(locations) {
     </div>
   </div>
 </template>
-
-<style></style>

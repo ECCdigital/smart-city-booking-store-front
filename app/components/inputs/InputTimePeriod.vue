@@ -1,27 +1,23 @@
 <template>
   <div class="flex justify-between w-full">
-    <UModal
-        v-model:open="isOpen"
-    >
+    <UModal v-model:open="isOpen">
       <UButton
         size="lg"
         color="neutral"
         variant="ghost"
         icon="i-lucide-calendar-clock"
         class="w-full text-gray-500 font-normal bg-white dark:bg-gray-700 py-2 px-3"
-        :ui="{
-          leadingIcon: 'text-[16px] mr-1',
-        }"
+        :ui="{ leadingIcon: 'text-[16px] mr-1' }"
         @click="setDefaultStartDate()"
       >
         <template v-if="dateRange[0]">
-          <div class="flex justify-between w-full ">
+          <div class="flex justify-between w-full">
             <div class="text-black dark:text-white">
               <span>{{ displayDate(dateRange[0]) }}</span>
               <span v-if="dateRange[1] && !timeRange.start"> - </span>
-              <span v-if="timeRange.start"
-                >, {{ displayTime(timeRange.start) }} -</span
-              >
+              <span v-if="timeRange.start">
+                , {{ displayTime(timeRange.start) }} -
+              </span>
               <span v-if="dateRange[1]"> {{ displayDate(dateRange[1]) }},</span>
               <span v-if="timeRange.end">
                 {{ displayTime(timeRange.end) }}</span
@@ -48,7 +44,9 @@
               </UTooltip>
             </div>
           </div>
+
           <DatePicker v-model="dateRange" />
+
           <div class="py-3 w-full">
             <p
               class="px-1"
@@ -68,6 +66,7 @@
               (Bitte geben Sie eine Uhrzeit für den Beginn Ihrer Buchung an.)
             </p>
           </div>
+
           <div class="py-3 w-full">
             <p
               class="px-1"
@@ -90,86 +89,205 @@
           </div>
 
           <div class="flex justify-end">
-
             <UButton
-                label="OK"
-                variant="ghost"
-                :style="
-              colorMode === 'dark'
-                ? { color: lighterColor }
-                : { color: darkerColor }
-            "
-                @click="onSelectDate"
+              label="OK"
+              variant="ghost"
+              :style="
+                colorMode === 'dark'
+                  ? { color: lighterColor }
+                  : { color: darkerColor }
+              "
+              @click="onSelectDate"
             />
           </div>
         </UCard>
       </template>
     </UModal>
+
     <UButton
-        v-if="dateRange.length > 0 || timeRange.start || timeRange.end"
-        color="neutral"
-        variant="link"
-        size="sm"
-        icon="i-lucide-circle-x"
-        aria-label="Clear input"
-        class="mx-3"
-        @click="onDeleteTimePeriod"
+      v-if="hasAnyValue"
+      color="neutral"
+      variant="link"
+      size="sm"
+      icon="i-lucide-circle-x"
+      aria-label="Clear input"
+      class="mx-3"
+      @click="onDeleteTimePeriod"
     />
   </div>
 </template>
-<script setup>
+
+<script setup lang="ts">
 import DatePicker from "./DatePicker.vue";
 import TimePicker from "./TimePicker.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useColorMode } from "@vueuse/core";
 
-const emit = defineEmits(["selectDate", "removeDate"]);
+/**
+ * Public API:
+ * - v-model:timePeriod -> { start: number | null, end: number | null } (timestamps in ms)
+ */
+type TimePeriod = {
+  start: number | null;
+  end: number | null;
+};
 
-const dateRange = ref([]);
-const timeRange = ref({ start: null, end: null });
+type TimeHM = { hours: number; minutes: number } | null;
+
+const props = defineProps<{
+  modelValue?: TimePeriod; // alias falls du v-model ohne arg möchtest
+  timePeriod?: TimePeriod; // unterstützt beide Varianten
+}>();
+
+const emit = defineEmits<{
+  (e: "update:modelValue", v: TimePeriod): void;
+  (e: "update:timePeriod", v: TimePeriod): void;
+  (e: "selectDate", v: TimePeriod): void; // optional zusätzliches Event
+  (e: "removeDate"): void;
+}>();
+
+// interne States
+const dateRange = ref<Date[]>([]); // [startDate, endDate]
+const timeRange = ref<{ start: TimeHM; end: TimeHM }>({
+  start: null,
+  end: null,
+});
 const isOpen = ref(false);
-const missingValues = ref([]);
+const missingValues = ref<string[]>([]);
 
 const colorMode = useColorMode();
 const darkerColor = computed(() => useContrastColor().darkerColor());
 const lighterColor = computed(() => useContrastColor().lighterColor());
 
-//Functions to display date and time values
-function displayDate(date) {
-  return date.toLocaleDateString("de-DE");
-}
-function displayTime(time) {
-  if (time) {
-    return (
-      time.hours.toString().padStart(2, "0") +
-      ":" +
-      time.minutes.toString().padStart(2, "0")
-    );
+// Hilfen
+const coalesceModel = computed<TimePeriod>(() => {
+  // bevorzugt v-model:timePeriod; fallback auf modelValue
+  const v = props.timePeriod ?? props.modelValue ?? { start: null, end: null };
+  return {
+    start: typeof v.start === "number" ? v.start : null,
+    end: typeof v.end === "number" ? v.end : null,
+  };
+});
+
+const hasAnyValue = computed(
+  () =>
+    dateRange.value.length > 0 ||
+    !!timeRange.value.start ||
+    !!timeRange.value.end
+);
+
+// Mapping eingehender Timestamps -> interne Picker-Modelle
+function syncInFromModel(v: TimePeriod) {
+  if (!v || (!v.start && !v.end)) {
+    dateRange.value = [];
+    timeRange.value = { start: null, end: null };
+    return;
   }
-  return "";
+
+  // Bestimme Startdate/Enddate und Time aus Timestamps
+  const startDate = v.start ? new Date(v.start) : null;
+  const endDate = v.end ? new Date(v.end) : null;
+
+  // Date range
+  const newRange: Date[] = [];
+  if (startDate) newRange.push(new Date(startDate));
+  if (endDate) newRange.push(new Date(endDate));
+  dateRange.value = newRange;
+
+  // Time range
+  const startTime: TimeHM =
+    startDate != null
+      ? {
+          hours: startDate.getHours(),
+          minutes: startDate.getMinutes(),
+        }
+      : null;
+
+  const endTime: TimeHM =
+    endDate != null
+      ? {
+          hours: endDate.getHours(),
+          minutes: endDate.getMinutes(),
+        }
+      : null;
+
+  timeRange.value = { start: startTime, end: endTime };
 }
 
-//Functions to set default values
-function closeTimePeriodInput(){
+// Mapping interner Picker-Modelle -> Timestamps
+function buildTimestampsFromState(): TimePeriod {
+  const [d0, d1] = dateRange.value;
+
+  // Wenn nur Startdatum da ist und Endzeit gesetzt wurde, Enddatum = Startdatum
+  const baseEndDate = d1 ?? d0 ?? null;
+
+  const startTs =
+    d0 && timeRange.value.start
+      ? dateToTimestampWithTime(d0, timeRange.value.start)
+      : null;
+
+  const endTs =
+    baseEndDate && timeRange.value.end
+      ? dateToTimestampWithTime(baseEndDate, timeRange.value.end)
+      : null;
+
+  return { start: startTs, end: endTs };
+}
+
+function dateToTimestampWithTime(
+  dateObj: Date,
+  hm: { hours: number; minutes: number }
+) {
+  const d = new Date(dateObj);
+  d.setHours(hm.hours, hm.minutes, 0, 0);
+  return d.getTime();
+}
+
+// Initial + reactive Sync
+watch(
+  coalesceModel,
+  (v) => {
+    syncInFromModel(v);
+  },
+  { immediate: true, deep: true }
+);
+
+// Anzeige-Helper
+function displayDate(date: Date | string | number | null) {
+  if (!date) return "";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("de-DE");
+}
+function displayTime(time: TimeHM) {
+  if (!time) return "";
+  const h = time.hours.toString().padStart(2, "0");
+  const m = time.minutes.toString().padStart(2, "0");
+  return `${h}:${m}`;
+}
+
+// UI Aktionen
+function closeTimePeriodInput() {
   isOpen.value = false;
   dateRange.value = [];
   timeRange.value = { start: null, end: null };
-
 }
+
 function setDefaultStartDate() {
   if (!dateRange.value[0]) {
     dateRange.value[0] = new Date();
   }
 }
+
 function setDefaultEndTime() {
   removeValidation();
-
   if (!timeRange.value.end && timeRange.value.start) {
     const initialTime = JSON.parse(JSON.stringify(timeRange.value.start));
     initialTime.hours = initialTime.hours + 1;
     timeRange.value.end = initialTime;
   }
 }
+
 function removeValidation() {
   if (timeRange.value.start) {
     missingValues.value = missingValues.value.filter((m) => m !== "startTime");
@@ -179,53 +297,40 @@ function removeValidation() {
   }
 }
 
-//Functions to format date and string for search
-function formateDateToString(dateObj) {
-  if (!dateObj) {
-    return null;
-  }
-  return (
-    dateObj.getUTCFullYear().toString() +
-    "-" +
-    (dateObj.getMonth() + 1).toString().padStart(2, "0") +
-    "-" +
-    dateObj.getDate().toString().padStart(2, "0")
-  );
-}
-function formatTimeToString(timeObj) {
-  if (!timeObj) {
-    return null;
-  }
-  const hours = timeObj.hours.toString().padStart(2, "0");
-  const minutes = timeObj.minutes.toString().padStart(2, "0");
-  return `${hours}:${minutes}`;
-}
-
+// OK-Button -> validieren + emittieren als Timestamps
 function onSelectDate() {
   if (!timeRange.value.start || !timeRange.value.end) {
-    if (!timeRange.value.start) {
+    if (!timeRange.value.start && !missingValues.value.includes("startTime")) {
       missingValues.value.push("startTime");
     }
-    if (!timeRange.value.end) {
+    if (!timeRange.value.end && !missingValues.value.includes("endTime")) {
       missingValues.value.push("endTime");
     }
-  } else {
-    const selectedDate = {
-      startDate: formateDateToString(dateRange.value[0]) || "",
-      endDate: formateDateToString(dateRange.value[1]) || "",
-      startTime: formatTimeToString(timeRange.value.start) || "",
-      endTime: formatTimeToString(timeRange.value.end) || "",
-    };
-
-    isOpen.value = false;
-    emit("selectDate", selectedDate);
+    return;
   }
+
+  const result = buildTimestampsFromState();
+
+  isOpen.value = false;
+
+  emit("update:timePeriod", result);
+  emit("update:modelValue", result);
+
+  // optional: original "selectDate" beibehalten
+  emit("selectDate", result);
 }
+
+// Clear
 function onDeleteTimePeriod() {
   dateRange.value = [];
   timeRange.value = { start: null, end: null };
   missingValues.value = [];
+
+  const cleared: TimePeriod = { start: null, end: null };
+  emit("update:timePeriod", cleared);
+  emit("update:modelValue", cleared);
   emit("removeDate");
 }
 </script>
+
 <style scoped></style>

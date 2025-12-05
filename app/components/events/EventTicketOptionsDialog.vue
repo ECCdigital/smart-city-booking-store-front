@@ -25,7 +25,6 @@
           v-for="(ticket, i) in props.tickets"
           :key="i"
           :ticket="ticket"
-          :search-params="searchParams"
         />
       </div>
     </template>
@@ -39,10 +38,6 @@ const props = defineProps({
   tickets: {
     type: Array,
     required: true,
-  },
-  searchParams: {
-    type: Object,
-    default: null,
   },
   isPrivateEvent: {
     type: Boolean,

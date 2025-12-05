@@ -7,6 +7,7 @@ import SortButton from "~/components/search/SortButton.vue";
 import ResultsList from "~/components/search/ResultsList.vue";
 import ResultsGrid from "~/components/search/ResultsGrid.vue";
 import FilterArea from "~/components/search/FilterArea.vue";
+import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 
 definePageMeta({ name: "tenant-catalog-events", layout: "catalog" });
 
@@ -15,7 +16,6 @@ const catalogSlug = computed(() => route.params.catalogSlug);
 const tenantID = computed(() => route.params.tenantID);
 
 const { loadBundle } = useCatalogBundle();
-
 const eventStore = useEventStore();
 await loadBundle({
   tenantID: tenantID.value,
@@ -29,61 +29,20 @@ const allEvents = computed(() => {
     : () => true;
   return eventStore.getEvents.filter(tenantFilter);
 });
-const filteredEvents = ref([]);
-const filteredResultEvents = ref([]);
-const filterResetKey = ref(0);
 
-// Initialization: Show all items before the first search
-function initializeResults() {
-  // Set status: Bookable -> "suitable", others -> "nonBookable"
-  const withStatus = allEvents.value.map((event) => {
-    if (event.attendees.publicEvent === true) {
-      return { item: event, status: "suitable", calculatedPrice: null };
-    }
-    return { item: event, status: "nonBookable", calculatedPrice: null };
-  });
-
-  filteredEvents.value = withStatus;
-  filteredResultEvents.value = withStatus;
-}
-//Stay reactive in case the store loads data later.
-watch(
-  () => allEvents.value,
-  (val) => {
-    if (!val || val.length === 0) {
-      filteredEvents.value = [];
-      filteredResultEvents.value = [];
-      return;
-    }
-    // Only initialize if no status exists yet (i.e., no search has been performed yet)
-    const hasStatus = filteredEvents.value.some((b) => b?.status);
-    if (!hasStatus) {
-      initializeResults();
-    }
-  },
-  { immediate: true, deep: true }
-);
-
-//Search
-const searchIsInitialized = ref(false);
-const currentSearchParams = ref({});
-function onSearch({ items, searchParams }) {
-  filteredEvents.value = items;
-  filteredResultEvents.value = items;
-  currentSearchParams.value = searchParams;
-}
-function numberOfSuitableBookables() {
-  return filteredResultEvents.value.filter((e) => e.status === "suitable")
-    .length;
-}
-
-//Sort & Filter
-function setSortedEvents(events) {
-  filteredResultEvents.value = events;
-}
-function setFilteredEvents(events) {
-  filteredResultEvents.value = events;
-}
+const {
+  query,
+  queryTimePeriod,
+  searchIsInitialized,
+  filterResetKey,
+  updatedItems: searchedEvents,
+  sortedItems: sortedEvents,
+  suitableCount,
+  setFilterQueryParams,
+  setSortedQueryParams,
+  runSearch,
+  resetResults,
+} = useBookableSearch({ isEvent: true, sourceItems: allEvents });
 </script>
 
 <template>
@@ -92,10 +51,13 @@ function setFilteredEvents(events) {
       <SearchBar
         v-model:is-initailized="searchIsInitialized"
         v-model:filter-reset-key="filterResetKey"
-        :items-to-search="allEvents"
-        is-event
-        @initialize="initializeResults"
-        @search="onSearch"
+        :term="query.term"
+        :location="query.location"
+        :time-start="query.start"
+        :time-end="query.end"
+        :is-event="true"
+        @search="runSearch"
+        @reset="resetResults"
       />
     </div>
 
@@ -103,28 +65,32 @@ function setFilteredEvents(events) {
       <span
         v-if="searchIsInitialized"
         class="text-black dark:text-white lg:font-bold"
-        >{{ numberOfSuitableBookables() }} passende Ergebnisse</span
+        >{{ suitableCount }} passende Ergebnisse</span
       >
       <div class="" style="flex: 1" />
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
         <SortButton
-          v-if="filteredEvents.length > 0"
-          :items-to-sort="filteredResultEvents"
+          v-if="searchedEvents.length > 0"
+          :sort-mode="query.sortMode"
           is-event
-          @sort="setSortedEvents"
+          @sort="setSortedQueryParams"
         />
         <FilterButton
-          v-if="filteredEvents.length > 0"
+          v-if="searchedEvents.length > 0"
           v-model:is-initailized="searchIsInitialized"
-          :bookables="filteredEvents"
-          is-event
+          :bookables="searchedEvents"
+          :include-non-suitable="query.inclNoSuitable"
+          :cities="query.cities"
+          :price="query.price"
+          :only-public-events="query.pubEv"
+          :only-registration-needed-events="query.regEv"
           class="lg:hidden"
-          @filter="setFilteredEvents"
+          is-event
+          @filter="setFilterQueryParams"
         />
       </div>
     </div>
-
-    <div v-if="!filteredResultEvents.length" class="text-center mt-10">
+    <div v-if="!sortedEvents.length" class="text-center mt-10">
       <UIcon
         size="48"
         name="i-lucide-calendar-off"
@@ -134,31 +100,34 @@ function setFilteredEvents(events) {
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
-      <div class="md:basis-1/4 hidden md:block">
+      <div class="lg:basis-1/4 hidden lg:block">
         <FilterArea
-          v-if="filteredEvents.length > 0"
+          v-if="searchedEvents.length > 0"
           :key="filterResetKey"
           v-model:is-initailized="searchIsInitialized"
-          :bookables="filteredEvents"
+          :include-non-suitable="query.inclNoSuitable"
+          :cities="query.cities"
+          :price="query.price"
           is-event
-          @filter="setFilteredEvents"
+          :only-public-events="query.pubEv"
+          :only-registered-events="query.regEv"
+          :bookables="searchedEvents"
+          @filter="setFilterQueryParams"
         />
       </div>
 
-      <div class="md:basis-3/4">
+      <div class="basis-full lg:basis-3/4">
         <ResultsList
-          v-if="filteredResultEvents.length > 0"
-          :bookables="filteredResultEvents"
-          :search-params="currentSearchParams"
+          v-if="sortedEvents.length > 0"
+          :bookables="sortedEvents"
           include-non-bookable
           include-non-suitable
           is-event-list
           class="hidden md:block"
         />
         <ResultsGrid
-          v-if="filteredResultEvents.length > 0"
-          :bookables="filteredResultEvents"
-          :search-params="currentSearchParams"
+          v-if="sortedEvents.length > 0"
+          :bookables="sortedEvents"
           include-non-bookable
           include-non-suitable
           is-event-grid

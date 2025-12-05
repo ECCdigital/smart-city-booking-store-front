@@ -19,7 +19,7 @@
     <div class="flex justify-between h-full overflow-hidden">
       <!-- Eigenschaften -->
       <div class="basis-3/5 w-full my-2">
-        <BookableFlagDisplay :flags="bookable?.flags" class="line-clamp-3"/>
+        <BookableFlagDisplay :flags="bookable?.flags" class="line-clamp-3" />
       </div>
       <div class="basis-2/5 w-full grid content-end">
         <!-- Preis -->
@@ -58,8 +58,8 @@ import { useTenantStore } from "~~/stores/tenant.js";
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
-import {useContrastColor} from "~/composables/utils/useContrastColor.js";
-import {useCheckoutRedirect} from "~/composables/utils/useCheckoutRedirect.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 
 const props = defineProps({
   bookable: {
@@ -85,16 +85,17 @@ const tenantName = computed(() => {
 });
 
 const contrastToPrimary = computed(() =>
-    useContrastColor().contrastToPrimary(),
+  useContrastColor().contrastToPrimary()
 );
 
 function goToCheckout() {
-  useCheckoutRedirect().redirectToCheckout(
-      props.bookable.id,
-      props.bookable.tenantId,
-      props.searchParams?.searchTimePeriod?.start || null,
-      props.searchParams?.searchTimePeriod?.end || null,
-  );
+  const route = useRoute();
+  useCheckoutRedirect().redirectToCheckout({
+    id: props.bookable.id,
+    tenantId: props.bookable.tenantId,
+    start: route.query.start,
+    end: route.query.end,
+  });
 }
 </script>
 <style scoped></style>

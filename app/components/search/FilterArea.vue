@@ -22,7 +22,7 @@
     <div class="my-4 space-y-3">
       <div class="space-y-3">
         <USwitch
-          v-model="includeNonSuitable"
+          v-model="_includeNonSuitable"
           label="Nicht passende Objekte anzeigen."
           :style="
             colorMode === 'dark'
@@ -33,7 +33,7 @@
         />
         <USwitch
           v-if="isEvent"
-          v-model="onlyPublicEvents"
+          v-model="_onlyPublicEvents"
           label="Nur öffentliche Events anzeigen."
           :style="
             colorMode === 'dark'
@@ -44,7 +44,7 @@
         />
         <USwitch
           v-if="isEvent"
-          v-model="onlyRegistrationNeededEvents"
+          v-model="_onlyRegistrationNeededEvents"
           label="Nur anmeldepflichte Events anzeigen."
           :style="
             colorMode === 'dark'
@@ -56,11 +56,11 @@
       </div>
     </div>
     <!-- Orte -->
-    <div v-if="cities.length" class="my-7">
+    <div v-if="possibleCities.length" class="my-7">
       <p class="mb-3">Orte</p>
       <UCheckboxGroup
-        v-model="choosenCities"
-        :items="cities.slice(0, numberOfVisibleCities)"
+        v-model="_cities"
+        :items="possibleCities.slice(0, numberOfVisibleCities)"
         :ui="{ label: 'text-base' }"
         :style="
           colorMode === 'dark'
@@ -80,17 +80,17 @@
       </UCheckboxGroup>
       <div class="flex justify-center w-full mt-2">
         <UButton
-          v-if="numberOfVisibleCities < cities.length"
+          v-if="numberOfVisibleCities < possibleCities.length"
           label="Alle Städe anzeigen"
           variant="ghost"
           @click="
             () => {
-              numberOfVisibleCities = cities.length;
+              numberOfVisibleCities = possibleCities.length;
             }
           "
         />
         <UButton
-          v-if="numberOfVisibleCities === cities.length"
+          v-if="numberOfVisibleCities === possibleCities.length"
           label="Weniger Städe anzeigen"
           variant="ghost"
           @click="
@@ -106,7 +106,7 @@
     <!--<div class="my-7">
       <p class="mb-3">Kategorie</p>
       <UCheckboxGroup
-        v-model="choosenCategories"
+        v-model="_categories"
         :items="categories"
         :ui="{ label: 'text-base' }"
         :style="
@@ -121,9 +121,7 @@
     <!-- Preis -->
     <div class="my-7">
       <p class="mb-3">Preis</p>
-      <p class="mb-3">
-        € {{ choosenPriceRange[0] }} - € {{ choosenPriceRange[1] }}
-      </p>
+      <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
       <div
         v-if="priceBars.some((p) => p > 0)"
         class="flex space-x-1 items-end justify-between max-w-sm"
@@ -142,9 +140,9 @@
       </div>
 
       <USlider
-        v-model="choosenPriceRange"
-        :min="priceRange[0]"
-        :max="priceRange[1]"
+        v-model="_price"
+        :min="possiblePriceRange[0]"
+        :max="possiblePriceRange[1]"
         :step="dynamicPriceStep"
         :style="
           colorMode === 'dark'
@@ -159,10 +157,10 @@
     <div v-if="searchIsInitialized" class="my-7">
       <p class="mb-3">Distanz</p>
       <p class="mb-3">
-        {{ choosenDistanceRange[0] }} km - {{ choosenDistanceRange[1] }} km
+        {{ _distanceRange[0] }} km - {{ _distanceRange[1] }} km
       </p>
       <USlider
-        v-model="choosenDistanceRange"
+        v-model="_distanceRange"
         :min="distanceRange[0]"
         :max="distanceRange[1]"
         :step="10"
@@ -216,60 +214,48 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  includeNonSuitable: {
+    type: Boolean,
+    default: true,
+  },
+  cities: {
+    type: Array,
+    default: () => [],
+  },
+  price: {
+    type: Array,
+    default: () => [],
+  },
+  onlyPublicEvents: {
+    type: Boolean,
+    default: true,
+  },
+  onlyRegistrationNeededEvents: {
+    type: Boolean,
+    default: false,
+  },
+  categories: {
+    type: Array,
+    default: () => [],
+  },
 });
 const emit = defineEmits(["filter"]);
 
+//Filter Variables
 const filterIsActive = ref(false);
+const _includeNonSuitable = ref(props.includeNonSuitable);
+const _cities = ref(props.cities);
+const _onlyPublicEvents = ref(props.onlyPublicEvents);
+const _onlyRegistrationNeededEvents = ref(props.onlyRegistrationNeededEvents);
+const _categories = ref(props.categories);
 
 //Colors
 const colorMode = useColorMode();
 const darkerColor = computed(() => useContrastColor().darkerColor());
 const lighterColor = computed(() => useContrastColor().lighterColor());
 
-//Passende Objekte
-const includeNonSuitable = ref(true);
-const onlyPublicEvents = ref(false);
-const onlyRegistrationNeededEvents = ref(false);
-
-//Kategorien - toDo - anpassen und dynamisch auslesen!!!!!!!!!!!!!!!!!!!!
-const choosenCategories = ref([]);
-const categories = computed(() => {
-  let type = "";
-  if (props.isEvent) {
-    type = "event";
-  } else if (props.bookables.length > 0) {
-    type = props.bookables[0].item.type;
-  }
-  switch (type) {
-    case "event":
-      return eventCategories;
-    case "resource":
-      return resourceCategories;
-    case "event-location":
-      return locationCategories;
-    case "room":
-      return locationCategories;
-  }
-  return null;
-});
-const locationCategories = [
-  { label: "Seminarräume", value: "kategorie1" },
-  { label: "Konferenzräume", value: "kategorie2" },
-  { label: "Werkstätten", value: "kategorie3" },
-];
-const resourceCategories = [
-  { label: "Mobilität", value: "kategorie4" },
-  { label: "Elektorgeräte", value: "kategorie5" },
-  { label: "Gerätestationen", value: "kategorie6" },
-];
-const eventCategories = [
-  { label: "Konzerte", value: "kategorie7" },
-  { label: "Workshops", value: "kategorie8" },
-  { label: "Vorträge", value: "kategorie9" },
-];
-
 //Preis
-const priceRange = computed(() => {
+const possiblePriceRange = computed(() => {
   let validPrices = [];
   if (!props.isEvent) {
     validPrices = props.bookables.map((b) => getBookableMinPrice(b));
@@ -277,7 +263,7 @@ const priceRange = computed(() => {
     validPrices = props.bookables.map((e) => getEventMinPrice(e));
   }
   validPrices = validPrices.filter(
-    (price) => price !== undefined && price !== null && !isNaN(price),
+    (price) => price !== undefined && price !== null && !isNaN(price)
   );
 
   //set endpoints rounded to 5
@@ -287,10 +273,12 @@ const priceRange = computed(() => {
     validPrices.length > 0 ? Math.ceil(Math.max(...validPrices) / 5) * 5 : 100;
   return [minPrice, maxPrice];
 });
+const _price = ref(
+  props.price?.length === 2 ? props.price : possiblePriceRange.value
+);
 
-const choosenPriceRange = ref([priceRange.value[0], priceRange.value[1]]);
 const dynamicPriceStep = computed(() => {
-  const range = priceRange.value[1] - priceRange.value[0];
+  const range = possiblePriceRange.value[1] - possiblePriceRange.value[0];
 
   let step = Math.ceil(range / 20); // 20 steps max
   step = Math.max(5, Math.ceil(step / 5) * 5);
@@ -300,10 +288,11 @@ const priceBars = computed(() => {
   //set number of bars depending on price range
   const barsCount =
     Math.ceil(
-      (priceRange.value[1] - priceRange.value[0]) / dynamicPriceStep.value,
+      (possiblePriceRange.value[1] - possiblePriceRange.value[0]) /
+        dynamicPriceStep.value
     ) || 1;
   const bars = new Array(barsCount).fill(0);
-  const range = priceRange.value[1] - priceRange.value[0];
+  const range = possiblePriceRange.value[1] - possiblePriceRange.value[0];
 
   props.bookables.forEach((b) => {
     let minPrice = null;
@@ -315,8 +304,10 @@ const priceBars = computed(() => {
     //sort price into bars
     if (minPrice !== null) {
       const index = Math.min(
-        Math.floor(((minPrice - priceRange.value[0]) / range) * barsCount),
-        barsCount - 1,
+        Math.floor(
+          ((minPrice - possiblePriceRange.value[0]) / range) * barsCount
+        ),
+        barsCount - 1
       );
       bars[index]++;
     }
@@ -334,7 +325,7 @@ function getBookableMinPrice(bookable) {
   }
   //else return min price from price categories
   const minPrice = Math.min(
-    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || []),
+    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || [])
   );
   return bookable.item.priceValueAddedTax
     ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
@@ -342,7 +333,7 @@ function getBookableMinPrice(bookable) {
 }
 function getTicketMinPrice(ticket) {
   const minPrice = Math.min(
-    ...ticket.priceCategories.map((cat) => cat.priceEur),
+    ...ticket.priceCategories.map((cat) => cat.priceEur)
   );
   return ticket.priceValueAddedTax
     ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
@@ -354,7 +345,7 @@ function getEventMinPrice(event) {
   }
   if (event.item.tickets && event.item.tickets.length > 0) {
     return Math.min(
-      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket)),
+      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket))
     );
   } else {
     return 0;
@@ -362,20 +353,19 @@ function getEventMinPrice(event) {
 }
 
 //Orte
-const choosenCities = ref([]);
-const cities = computed(() => {
+const possibleCities = computed(() => {
   const cityCount = {};
-    props.bookables.forEach((b) => {
-      let city = "";
-      if(props.isEvent){
-        city = extractCity(b.item.eventAddress.city);
-      } else {
-        city = extractCity(b.item.location);
-      }
-      if (city) {
-        cityCount[city] = (cityCount[city] || 0) + 1;
-      }
-    });
+  props.bookables.forEach((b) => {
+    let city = "";
+    if (props.isEvent && b.status === "suitable") {
+      city = extractCity(b.item.eventAddress.city);
+    } else if (b.status === "suitable") {
+      city = extractCity(b.item.location);
+    }
+    if (city) {
+      cityCount[city] = (cityCount[city] || 0) + 1;
+    }
+  });
   return Object.entries(cityCount)
     .map(([value, count]) => ({ value, count }))
     .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
@@ -414,10 +404,7 @@ function extractCity(location) {
 
 //Distanz
 const distanceRange = ref([0, 100]); //in km //toDo - implementieren!!!!!!!!!
-const choosenDistanceRange = ref([
-  distanceRange.value[0],
-  distanceRange.value[1],
-]);
+const _distanceRange = ref([distanceRange.value[0], distanceRange.value[1]]);
 
 function instantFilter() {
   filterIsActive.value = true;
@@ -425,84 +412,51 @@ function instantFilter() {
     onFilter();
   }
 }
-
 function onFilter() {
-  if (props.bookables.length > 0) {
-    let filteredBookables = props.bookables;
+  const filter = {};
 
-    if (!includeNonSuitable.value) {
-      filteredBookables = filteredBookables.filter(
-        (b) => b.status !== "nonSuitable",
-      );
-    }
-    //filter by event properties
-    if (props.isEvent && onlyPublicEvents.value) {
-      filteredBookables = filteredBookables.filter(
-        (e) => e.item.attendees.publicEvent === true,
-      );
-    }
-    if (props.isEvent && onlyRegistrationNeededEvents.value) {
-      filteredBookables = filteredBookables.filter(
-        (e) => e.item.attendees.needsRegistration === true,
-      );
-    }
-
-    //filter by cities
-    if (choosenCities.value.length > 0) {
-      if (!props.isEvent) {
-        filteredBookables = filteredBookables.filter((b) => {
-          if (!b.item.location) {
-            return false;
-          }
-          return choosenCities.value.some((city) => {
-            return b.item.location.toLowerCase().includes(city.toLowerCase());
-          });
-        });
-      } else {
-        filteredBookables = filteredBookables.filter((b) => {
-          if (!b.item.eventAddress.city) {
-            return false;
-          }
-          return choosenCities.value.some((city) => {
-            return b.item.eventAddress.city.toLowerCase().includes(city.toLowerCase());
-          });
-        });
-      }
-    }
-
-    //filter by price
-    filteredBookables = filteredBookables.filter((b) => {
-      let price = 0;
-      if (!props.isEvent) {
-        price = getBookableMinPrice(b) || 0;
-      } else {
-        price = getEventMinPrice(b) || 0;
-      }
-
-      return (
-        price >= choosenPriceRange.value[0] &&
-        price <= choosenPriceRange.value[1]
-      );
-    });
-
-    //toDo - Filterlogik für Kategorie ergänzen!!!!!!!!!!!!!!!!!
-    //toDo - Filterlogik für Distanz ergänzen!!!!!!!!!!!!!!!!!
-
-    emit("filter", filteredBookables);
+  if (!Array.isArray(_price.value) || _price.value.length !== 2) {
+    _price.value = possiblePriceRange.value.slice();
   }
+
+  const sameAsPossible =
+    _price.value?.length === 2 &&
+    _price.value[0] === possiblePriceRange.value[0] &&
+    _price.value[1] === possiblePriceRange.value[1];
+
+  filter.inclNoSuitable = _includeNonSuitable.value;
+  filter.pubEv = _onlyPublicEvents.value;
+  filter.regEv = _onlyRegistrationNeededEvents.value;
+  filter.cities = _cities.value;
+  filter.price = sameAsPossible ? [] : _price.value;
+
+  emit("filter", filter);
 }
 
 function removeFilter() {
-  includeNonSuitable.value = true;
-  onlyPublicEvents.value = false;
-  onlyRegistrationNeededEvents.value = false;
-  choosenCities.value = [];
-  choosenCategories.value = [];
-  choosenPriceRange.value = [priceRange.value[0], priceRange.value[1]];
-  choosenDistanceRange.value = [distanceRange.value[0], distanceRange.value[1]];
+  _includeNonSuitable.value = true;
+  _onlyPublicEvents.value = false;
+  _onlyRegistrationNeededEvents.value = false;
+  _cities.value = [];
+  _categories.value = [];
+  _price.value = possiblePriceRange.value.slice();
+  _distanceRange.value = [distanceRange.value[0], distanceRange.value[1]];
 
-  filterIsActive.value = false;
-  emit("filter", props.bookables);
+  const filter = {};
+
+  filter.inclNoSuitable = _includeNonSuitable.value;
+  filter.pubEv = _onlyPublicEvents.value;
+  filter.regEv = _onlyRegistrationNeededEvents.value;
+  filter.cities = _cities.value;
+
+  const sameAsPossible =
+    _price.value?.length === 2 &&
+    _price.value[0] === possiblePriceRange.value[0] &&
+    _price.value[1] === possiblePriceRange.value[1];
+
+  filter.price = sameAsPossible ? [] : _price.value;
+
+  emit("filter", filter);
 }
 </script>
 <style scoped></style>

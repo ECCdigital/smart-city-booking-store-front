@@ -7,7 +7,6 @@
           :key="i"
           :item="b.item"
           :calculated-price="b.calculatedPrice"
-          :search-params="searchParams"
       />
     </UPageList>
 
@@ -22,7 +21,6 @@
             :key="i"
             :item="b.item"
             :calculated-price="b.calculatedPrice"
-            :search-params="searchParams"
             is-not-bookable
             class="mb-5"
         />
@@ -39,10 +37,6 @@ const props = defineProps({
   bookables: {
     type: Array,
     required: true,
-  },
-  searchParams: {
-    type: Object,
-    default: null,
   },
   includeNonSuitable: {
     type: Boolean,

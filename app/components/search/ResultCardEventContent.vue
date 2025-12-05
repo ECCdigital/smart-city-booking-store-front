@@ -52,7 +52,6 @@
     <EventTicketOptionsDialog
       v-model:open="openTicketOptions"
       :tickets="event.tickets"
-      :is-private-event="isPrivateEvent"
       :registration-needed="event.attendees.needsRegistration"
     />
   </div>
@@ -71,10 +70,6 @@ const props = defineProps({
   event: {
     type: Object,
     required: true,
-  },
-  searchParams: {
-    type: Object,
-    default: null,
   },
   isNotBookable: {
     type: Boolean,

@@ -24,7 +24,7 @@ const props = defineProps({
 });
 const hasAdress = computed(() => {
   return !Object.values(props.event.eventAddress).every(
-      value => value === null || value === undefined || value === ""
+    (value) => value === null || value === undefined || value === "",
   );
 });
 

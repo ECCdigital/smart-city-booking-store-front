@@ -24,7 +24,10 @@
       <!-- Veranstalter & Eigenschaften -->
       <div class="basis-3/5 w-full my-2">
         <p class="w-full my-2">Veranstalter: {{ event.eventOrganizer.name }}</p>
-        <BookableFlagDisplay :flags="event.information.flags" class="line-clamp-3"/>
+        <BookableFlagDisplay
+          :flags="event.information.flags"
+          class="line-clamp-3"
+        />
       </div>
 
       <div class="basis-2/5 w-full grid content-end mt-4">
@@ -71,7 +74,6 @@
     <EventTicketOptionsDialog
       v-model:open="openTicketOptions"
       :tickets="event.tickets"
-      :search-params="searchParams"
       :is-private-event="isPrivateEvent"
       :registration-needed="event.attendees.needsRegistration"
     />
@@ -95,10 +97,6 @@ const props = defineProps({
   },
   price: {
     type: Number,
-    default: null,
-  },
-  searchParams: {
-    type: Object,
     default: null,
   },
   isNotBookable: {
@@ -140,13 +138,13 @@ const tooltipText = computed(() => {
 });
 
 const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary(),
+  useContrastColor().contrastToPrimary()
 );
 
 const bookingDisabled = computed(
   () =>
     props.event.attendees.needsRegistration &&
-    (isPrivateEvent.value || !hasEventTickets.value),
+    (isPrivateEvent.value || !hasEventTickets.value)
 );
 const openTicketOptions = ref(false);
 function goToTicketOptions() {
@@ -158,12 +156,13 @@ function goToTicketOptions() {
 
   //direct to checkout if only one ticket type
   if (props.event.tickets.length === 1) {
-    useCheckoutRedirect().redirectToCheckout(
-      props.event.tickets[0].id,
-      props.event.tickets[0].tenantId,
-      props.searchParams?.searchTimePeriod?.start || null,
-      props.searchParams?.searchTimePeriod?.end || null,
-    );
+    const route = useRoute();
+    useCheckoutRedirect().redirectToCheckout({
+      id: props.event.tickets[0].id,
+      tenantId: props.event.tickets[0].tenantId,
+      start: route.query.start,
+      end: route.query.end,
+    });
   } else {
     openTicketOptions.value = true;
   }
