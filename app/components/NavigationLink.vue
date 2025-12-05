@@ -1,5 +1,5 @@
 <template>
-  <NuxtLink  :to="tenantTo(tab.value)" :class="linkClass">
+  <NuxtLink :to="tenantTo(tab.value)" :class="linkClass">
     <div :class="stripeClass" />
     <Icon
       v-if="tab.icon"
@@ -18,13 +18,13 @@
       >{{ tab.label }}</span
     >
     <span
-        v-if="!isActive"
-        class="hidden sm:inline"
-        :class="labelClass"
-        :style="
+      v-if="!isActive"
+      class="hidden sm:inline"
+      :class="labelClass"
+      :style="
         isActive ? { color: contrastToPrimary } : { color: contrastToSecondary }
       "
-    >{{ tab.label }}</span
+      >{{ tab.label }}</span
     >
   </NuxtLink>
 </template>
@@ -38,18 +38,17 @@ const props = defineProps({
   },
 });
 
-const { tenantTo } = useTenantRoute()
+const { tenantTo, isActivePath } = useTenantRoute();
 
-const route = useRoute();
 const isActive = computed(() => {
-  return route.path === tenantTo(props.tab.value);
+  return isActivePath(props.tab.value);
 });
 
 const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary(),
+  useContrastColor().contrastToPrimary()
 );
 const contrastToSecondary = computed(() =>
-  useContrastColor().contrastToSecondary(),
+  useContrastColor().contrastToSecondary()
 );
 
 const linkClass = computed(() => [

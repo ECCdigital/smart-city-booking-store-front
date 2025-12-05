@@ -37,21 +37,21 @@ const props = defineProps({
   },
 });
 const ticketsAvailable = computed(
-  () => props.ticket.availability?.remaining > 0 || true,
+  () => props.ticket.availability?.remaining > 0 || true
 );
 
 const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary(),
+  useContrastColor().contrastToPrimary()
 );
 
 function goToCheckout() {
   const route = useRoute();
-  useCheckoutRedirect().redirectToCheckout(
-    props.ticket.id,
-    props.ticket.tenantId,
-    route.query.start || null,
-    route.query.end || null,
-  );
+  useCheckoutRedirect().redirectToCheckout({
+    id: props.ticket.id,
+    tenantId: props.ticket.tenantId,
+    start: route.query.start,
+    end: route.query.end,
+  });
 }
 </script>
 

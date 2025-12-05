@@ -8,11 +8,11 @@ import ResultsGrid from "../../components/search/ResultsGrid.vue";
 import FilterArea from "../../components/search/FilterArea.vue";
 import SortButton from "../../components/search/SortButton.vue";
 import FilterButton from "../../components/search/FilterButton.vue";
+import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 
 definePageMeta({ name: "catalog-locations", layout: "catalog" });
 
 const { loadBundle } = useCatalogBundle();
-
 const bookableStore = useBookableStore();
 await loadBundle({ include: ["bookables"] });
 
@@ -21,81 +21,21 @@ const allLocations = computed(() => {
   const rooms = bookableStore.getRooms;
   return locations.concat(rooms);
 });
-const updatedLocations = ref([]);
 
-const filteredIds = ref([]);
-const filteredLocations = computed(() =>
-  updatedLocations.value.filter((l) =>
-    filterIsActive.value ? filteredIds.value.includes(l.item.id) : true,
-  ),
-);
-const filterIsActive = ref(false);
-const filterResetKey = ref(0);
-const searchIsInitialized = ref(false);
+const {
+  query,
+  searchIsInitialized,
+  filterResetKey,
+  updatedItems: searchedLocations,
+  sortedItems: sortedLocations,
+  suitableCount,
+  setFilterQueryParams,
+  setSortedQueryParams,
+  runSearch,
+  resetResults,
+} = useBookableSearch({ isEvent: false, sourceItems: allLocations });
 
-const sortedIds = ref([]);
-const sortedLocations = computed(() => {
-  if(sortedIds.value.length===0){
-    return filteredLocations.value;
-  }
-  const sortedResults = [];
-  sortedIds.value.forEach((id) => {
-    const location = filteredLocations.value.find((l) => l.item.id === id);
-    if (location) {
-      sortedResults.push(location);
-    }
-  });
-  return sortedResults;
-});
 
-// Initialization: Show all items before the first search
-function initializeResults() {
-  // Set status: Bookable -> "suitable", others -> "nonBookable"
-  updatedLocations.value = allLocations.value.map((location) => {
-    if (location.isBookable) {
-      return { item: location, status: "suitable", calculatedPrice: null };
-    }
-    return { item: location, status: "nonBookable", calculatedPrice: null };
-  });
-}
-
-//Stay reactive in case the store loads data later.
-watch(
-  () => allLocations.value,
-  (val) => {
-    if (!val || val.length === 0) {
-      updatedLocations.value = [];
-      return;
-    }
-    // Only initialize if no status exists yet (i.e., no search has been performed yet)
-    const hasStatus = updatedLocations.value.some((b) => b?.status);
-    if (!hasStatus) {
-      initializeResults();
-    }
-  },
-  { immediate: true, deep: true }
-);
-
-const suitableCount = computed(() => numberOfSuitableBookables());
-
-//Search
-function onSearch(items) {
-  updatedLocations.value = items;
-}
-function numberOfSuitableBookables() {
-  return filteredLocations.value.filter((l) => l.status === "suitable").length;
-}
-
-//Sort & Filter
-function setFilteredLocations({ isActiv, items }) {
-  filterIsActive.value = isActiv;
-  if (items) {
-    filteredIds.value = items.map((l) => l.item.id);
-  }
-}
-function setSortedLocations(locations) {
-  sortedIds.value = locations.map((l) => l.item.id);
-}
 </script>
 
 <template>
@@ -104,9 +44,13 @@ function setSortedLocations(locations) {
       <SearchBar
         v-model:is-initailized="searchIsInitialized"
         v-model:filter-reset-key="filterResetKey"
-        :items-to-search="allLocations"
-        @initialize="initializeResults"
-        @search="onSearch"
+        :term="query.term"
+        :location="query.location"
+        :time-start="query.start"
+        :time-end="query.end"
+        :is-event="false"
+        @search="runSearch"
+        @reset="resetResults"
       />
     </div>
 
@@ -119,21 +63,26 @@ function setSortedLocations(locations) {
       <div class="" style="flex: 1" />
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
         <SortButton
-          v-if="updatedLocations.length > 0"
-          :items-to-sort="filteredLocations"
-          @sort="setSortedLocations"
+          v-if="searchedLocations.length > 0"
+          :sort-mode="query.sortMode"
+          @sort="setSortedQueryParams"
         />
         <FilterButton
-          v-if="updatedLocations.length > 0"
+          v-if="searchedLocations.length > 0"
           v-model:is-initailized="searchIsInitialized"
-          :bookables="updatedLocations"
+          :bookables="searchedLocations"
+          :include-non-suitable="query.inclNoSuitable"
+          :cities="query.cities"
+          :price="query.price"
+          :only-public-events="query.pubEv"
+          :only-registered-events="query.regEv"
           class="lg:hidden"
-          @filter="setFilteredLocations"
+          @filter="setFilterQueryParams"
         />
       </div>
     </div>
 
-    <div v-if="!updatedLocations.length" class="text-center mt-10">
+    <div v-if="!sortedLocations.length" class="text-center mt-10">
       <UIcon size="48" name="i-lucide-map-pin-off" class="text-gray-400 mb-4" />
       <p class="text-gray-500">{{ $t("locations.noLocations") }}</p>
     </div>
@@ -142,26 +91,20 @@ function setSortedLocations(locations) {
       <!-- Filterbereich -->
       <div class="lg:basis-1/4 hidden lg:block">
         <FilterArea
-          v-if="updatedLocations.length > 0"
+          v-if="searchedLocations.length > 0"
           :key="filterResetKey"
           v-model:is-initailized="searchIsInitialized"
-          :bookables="updatedLocations"
-          @filter="setFilteredLocations"
+          :include-non-suitable="query.inclNoSuitable"
+          :cities="query.cities"
+          :price="query.price"
+          :only-public-events="query.pubEv"
+          :only-registered-events="query.regEv"
+          :bookables="searchedLocations"
+          @filter="setFilterQueryParams"
         />
       </div>
 
       <div class="basis-full lg:basis-3/4">
-        <div
-          v-if="filteredLocations.length === 0"
-          class="w-full text-center mt-10"
-        >
-          <UIcon
-            size="48"
-            name="i-lucide-monitor-off"
-            class="text-gray-400 mb-4"
-          />
-          <p class="text-gray-500">Keine passenden Orte.</p>
-        </div>
         <ResultsList
           v-if="sortedLocations.length > 0"
           :bookables="sortedLocations"

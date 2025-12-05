@@ -35,6 +35,7 @@ export function useBookables() {
     }
   };
   const getBookablePrice = async (tenantID, bookableId, start, end) => {
+    console.log("Getting price for bookable:", bookableId, start, end);
     const { apiFetch } = useApi();
     try {
       const response = await apiFetch(

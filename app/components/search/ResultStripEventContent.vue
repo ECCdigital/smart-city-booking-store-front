@@ -138,13 +138,13 @@ const tooltipText = computed(() => {
 });
 
 const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary(),
+  useContrastColor().contrastToPrimary()
 );
 
 const bookingDisabled = computed(
   () =>
     props.event.attendees.needsRegistration &&
-    (isPrivateEvent.value || !hasEventTickets.value),
+    (isPrivateEvent.value || !hasEventTickets.value)
 );
 const openTicketOptions = ref(false);
 function goToTicketOptions() {
@@ -157,12 +157,12 @@ function goToTicketOptions() {
   //direct to checkout if only one ticket type
   if (props.event.tickets.length === 1) {
     const route = useRoute();
-    useCheckoutRedirect().redirectToCheckout(
-      props.event.tickets[0].id,
-      props.event.tickets[0].tenantId,
-      route.query.start || null,
-      route.query.end || null,
-    );
+    useCheckoutRedirect().redirectToCheckout({
+      id: props.event.tickets[0].id,
+      tenantId: props.event.tickets[0].tenantId,
+      start: route.query.start,
+      end: route.query.end,
+    });
   } else {
     openTicketOptions.value = true;
   }

@@ -34,6 +34,7 @@ export default defineNuxtConfig({
     "@nuxtjs/i18n",
     "@pinia/nuxt",
     "nuxt-security",
+    "@vueuse/nuxt",
   ],
   css: ["~/assets/css/main.css"],
   i18n: {

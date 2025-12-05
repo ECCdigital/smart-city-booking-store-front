@@ -1,7 +1,5 @@
 <template>
-  <UModal
-      v-model:open="isOpen"
-  >
+  <UModal v-model:open="isOpen">
     <UButton
       label="Filtern"
       icon="i-lucide-funnel"
@@ -11,7 +9,7 @@
       @click="() => (isOpen = true)"
     />
     <template #content>
-      <UCard >
+      <UCard>
         <div class="flex justify-end items-center">
           <UButton
             color="neutral"
@@ -22,15 +20,19 @@
           />
         </div>
         <FilterArea
-            v-model:is-initailized="isInitialized"
-            :bookables="props.bookables"
-            is-event
-            use-as-dialog
-            @filter="onFilter"
+          v-model:is-initailized="isInitialized"
+          :bookables="bookables"
+          :include-non-suitable="includeNonSuitable"
+          :cities="cities"
+          :price="price"
+          :only-public-events="onlyPublicEvents"
+          :only-registered-events="onlyRegistrationNeededEvents"
+          use-as-dialog
+          @filter="onFilter"
         />
       </UCard>
     </template>
-    </UModal>
+  </UModal>
 </template>
 <script setup>
 import FilterArea from "./FilterArea.vue";
@@ -45,14 +47,38 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  includeNonSuitable: {
+    type: Boolean,
+    default: true,
+  },
+  cities: {
+    type: Array,
+    default: () => [],
+  },
+  price: {
+    type: Array,
+    default: () => [],
+  },
+  onlyPublicEvents: {
+    type: Boolean,
+    default: true,
+  },
+  onlyRegistrationNeededEvents: {
+    type: Boolean,
+    default: false,
+  },
+  categories: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const emit = defineEmits(["filter"]);
 const isOpen = ref(false);
 
-function onFilter(filteredBookables) {
+function onFilter(criteria) {
   isOpen.value = false;
-  emit("filter", filteredBookables);
+  emit("filter", criteria);
 }
 </script>
 

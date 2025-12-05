@@ -85,17 +85,17 @@ const tenantName = computed(() => {
 });
 
 const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary(),
+  useContrastColor().contrastToPrimary()
 );
 
 function goToCheckout() {
   const route = useRoute();
-  useCheckoutRedirect().redirectToCheckout(
-    props.bookable.id,
-    props.bookable.tenantId,
-    route.query.start || null,
-    route.query.end || null,
-  );
+  useCheckoutRedirect().redirectToCheckout({
+    id: props.bookable.id,
+    tenantId: props.bookable.tenantId,
+    start: route.query.start,
+    end: route.query.end,
+  });
 }
 </script>
 <style scoped></style>

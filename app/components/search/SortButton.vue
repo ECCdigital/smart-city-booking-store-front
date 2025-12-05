@@ -18,27 +18,27 @@
 const emit = defineEmits(["sort"]);
 
 const props = defineProps({
-  itemsToSort: {
-    type: Array,
-    required: true,
-  },
   isEvent: {
     type: Boolean,
     default: false,
   },
+  sortMode: {
+    type: String,
+    default: "relevance",
+  },
 });
 
-const sortMode = ref("relevance");
+const _sortMode = ref(props.sortMode);
 const sortOptions = ref([
   {
     value: "relevance",
     label: "Relevanz",
     icon: "i-lucide-search-check",
     class: computed(() =>
-      sortMode.value === "relevance" ? "bg-primary/10" : "",
+      _sortMode.value === "relevance" ? "bg-primary/10" : ""
     ),
     onSelect() {
-      sortMode.value = "relevance";
+      _sortMode.value = "relevance";
       onSort();
     },
   },
@@ -47,10 +47,10 @@ const sortOptions = ref([
     label: "Preis (aufsteigend)",
     icon: "i-lucide-arrow-up",
     class: computed(() =>
-      sortMode.value === "priceAscending" ? "bg-primary/10" : "",
+        _sortMode.value === "priceAscending" ? "bg-primary/10" : ""
     ),
     onSelect() {
-      sortMode.value = "priceAscending";
+      _sortMode.value = "priceAscending";
       onSort();
     },
   },
@@ -59,10 +59,10 @@ const sortOptions = ref([
     label: "Preis (absteigend)",
     icon: "i-lucide-arrow-down",
     class: computed(() =>
-      sortMode.value === "priceDescending" ? "bg-primary/10" : "",
+        _sortMode.value === "priceDescending" ? "bg-primary/10" : ""
     ),
     onSelect() {
-      sortMode.value = "priceDescending";
+      _sortMode.value = "priceDescending";
       onSort();
     },
   },
@@ -71,10 +71,10 @@ const sortOptions = ref([
     label: "Distanz (aufsteigend)",
     icon: "i-lucide-arrow-up",
     class: computed(() =>
-      sortMode.value === "distanceAscending" ? "bg-primary/10" : "",
+      _sortMode.value === "distanceAscending" ? "bg-primary/10" : "",
     ),
     onSelect() {
-      sortMode.value = "distanceAscending";
+      _sortMode.value = "distanceAscending";
       onSort();
     },
   },
@@ -83,86 +83,22 @@ const sortOptions = ref([
     label: "Distanz (absteigend)",
     icon: "i-lucide-arrow-down",
     class: computed(() =>
-      sortMode.value === "distanceDescending" ? "bg-primary/10" : "",
+      _sortMode.value === "distanceDescending" ? "bg-primary/10" : "",
     ),
     onSelect() {
-      sortMode.value = "distanceDescending";
+      _sortMode.value = "distanceDescending";
       onSort();
     },
   },*/
 ]);
 
-watch([sortMode, () => props.itemsToSort], onSort, { deep: true });
-
-
 function displaySortMode() {
-  return sortOptions.value.find((option) => option.value === sortMode.value)
+  return sortOptions.value.find((option) => option.value === _sortMode.value)
     .label;
 }
 
-//Preis
-function getPrice(item) {
-  if (props.isEvent) {
-    if (item.item.tickets && item.item.tickets.length > 0) {
-      return Math.min(
-        ...item.item.tickets.map((ticket) => {
-          const minPrice = Math.min(
-            ...ticket.priceCategories.map((cat) => cat.priceEur)
-          );
-          const temp =  ticket.priceValueAddedTax
-            ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
-            : minPrice;
-          return temp;
-        })
-      );
-    } else {
-      return 0; // Kein Ticket verfügbar
-    }
-  } else {
-    if (item.calculatedPrice) {
-      return item.calculatedPrice.userGrossPriceEur;
-    }
-    const minPrice = Math.min(
-      ...(item.item?.priceCategories?.map((cat) => cat.priceEur) || []),
-    );
-    return item.item.priceValueAddedTax
-      ? minPrice + (minPrice * item.item.priceValueAddedTax) / 100
-      : minPrice;
-  }
-}
-
 function onSort() {
-  let sortedItems = [...props.itemsToSort];
-  console.log(sortedItems)
-  //toDo - Sortierung nach Beliebtheit ergänzen?!
-
-  //Default: momentan "Relevanz" nach Fuze-Suche...
-
-  sortedItems = sortedItems.sort((a, b) => {
-    //Sortieren nach Preis
-    if (sortMode.value === "priceAscending") {
-      return getPrice(a) - getPrice(b);
-    }
-    if (sortMode.value === "priceDescending") {
-      return getPrice(b) - getPrice(a);
-    }
-
-    //toDo - Sortierung nach Distanz ergänzen!!
-    // Momentan keine Entfernung vorhanden, also keine Sortierung
-    /*
-      if (mode === "distanceAscending") {
-        return a.calculatedDistance - b.calculatedDistance;
-      }
-      if (mode === "distanceDescending") {
-        return b.calculatedDistance - a.calculatedDistance;
-      } else {
-
-      }
-      */
-    return 0;
-  });
-
-  emit("sort", sortedItems);
+  emit("sort", _sortMode.value);
 }
 </script>
 
