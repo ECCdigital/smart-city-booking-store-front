@@ -36,7 +36,6 @@ const allResources = computed(() => {
 });
 const {
   query,
-  queryTimePeriod,
   searchIsInitialized,
   filterResetKey,
   updatedItems: searchedResources,

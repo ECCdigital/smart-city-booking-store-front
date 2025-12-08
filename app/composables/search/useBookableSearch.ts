@@ -110,7 +110,9 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     const priceRange = query.price;
 
     if (Array.isArray(priceRange) && priceRange.length === 2) {
-      const [min, max] = priceRange;
+      const [minRaw, maxRaw] = priceRange;
+      const min = typeof minRaw === "number" ? minRaw : -Infinity;
+      const max = typeof maxRaw === "number" ? maxRaw : Infinity;
 
       filtered = filtered.filter((i) => {
         let price: number;
@@ -191,8 +193,6 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   );
 
   function setFilterQueryParams(criteria: Partial<CatalogQueryState>) {
-
-    console.log("Setting filter query params:", criteria);
     query.inclNoSuitable =
       typeof criteria.inclNoSuitable === "boolean"
         ? criteria.inclNoSuitable
