@@ -33,14 +33,14 @@
         <!--Aktionen-->
         <div class="w-full mt-2 flex justify-end content-end">
           <!-- toDo - für MVP ausgeblendet! Danach wieder aktivieren!  -->
-          <!--<UButton
+          <UButton
           v-if="!isNotBookable"
           label="Details ansehen"
           variant="ghost"
           class="justify-center px-10"
-          :to="`/catalog/${catalogSlug}/locations/${bookable.id}`"
+          :to="`/bookables/${bookable.id}`"
         />
-        -->
+
           <UButton
             v-if="!isNotBookable"
             label="Buchen"
