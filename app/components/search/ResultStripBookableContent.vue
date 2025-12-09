@@ -32,7 +32,6 @@
 
         <!--Aktionen-->
         <div class="w-full mt-2 flex justify-end content-end">
-          <!-- toDo - für MVP ausgeblendet! Danach wieder aktivieren!  -->
           <UButton
           v-if="!isNotBookable"
           label="Details ansehen"
