@@ -37,8 +37,8 @@
           label="Details ansehen"
           variant="ghost"
           class="justify-center px-10"
-          :to="tenantTo(`bookables/${bookable.id}`)"
-        /><!--@click="goToDetails" -->
+          @click="goToDetails()"
+        /><!--:to="tenantTo(`bookables/${bookable.id}`)" -->
 
           <UButton
             v-if="!isNotBookable"
@@ -89,22 +89,18 @@ const contrastToPrimary = computed(() =>
   useContrastColor().contrastToPrimary()
 );
 
-/*
 function goToDetails() {
-  console.log("***")
   const route = useRoute();
   const router = useRouter();
-  let basePath = route.path;
+  const basePath = route.path;
 
   if (basePath.includes("bookables")) {
-    basePath = "bookables"
+    router.push(`/bookables/${props.bookable.id}`);
   } else if (basePath.includes("locations")) {
-    basePath = "locations";
+    router.push(`/locations/${props.bookable.id}`);
   }
-
-  router.push(`${basePath}/${props.bookable.id}`);
 }
- */
+
 
 function goToCheckout() {
   const route = useRoute();

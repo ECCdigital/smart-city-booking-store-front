@@ -43,7 +43,7 @@ function getMinPrice() {
 }
 function displayMinDefaultPrice() {
   if (
-    props.bookable.priceCategories &&
+      props.bookable && props.bookable.priceCategories &&
     props.bookable.priceCategories.length === 0
   ) {
     return null;

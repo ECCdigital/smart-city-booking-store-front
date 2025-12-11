@@ -29,9 +29,44 @@
         @remove-date="removeSearchTimePeriod"
     />
   </div>
-  <BookablePriceCategoriesDisplay :item="item" :is-not-bookable="isNotBookable"/>
+  <BookablePriceCategoriesDisplay
+      v-if="!timePeriod || (!timePeriod.start && !timePeriod.end)"
+      :item="item"
+      :is-not-bookable="isNotBookable"
+      @checkout="goToCheckout"
+  />
+  <div v-else class="bg-gray-300 rounded-lg p-3 mb-2 flex content-center">
+    <span class="font-bold mr-1 content-center ">{{ item?.title }}</span>
+    <span class="content-center ">
+       / {{timeSpan}}
+    </span>
+    <div class="flex-1" />
+    <BookablePriceDisplay
+        v-if="updatedItems[0]"
+        :bookable="updatedItems[0]"
+        :calculated-price="updatedItems[0]?.calculatedPrice"
+        class="mx-2 font-bold content-center "
+    />
+    <UButton
+        v-if="!isNotBookable"
+        label="Buchen"
+        class="justify-center px-5"
+        :style="{ color: contrastToPrimary }"
+        @click="goToCheckout()"
+    />
+  </div>
 
 
+
+
+  <div class="bg-amber-100">
+    {{item}}
+  </div>
+  <div class="bg-amber-200">
+    {{updatedItems}}
+  </div>
+<div class="bg-amber-300">...
+</div>
 
 </div>
 </template>
@@ -41,6 +76,9 @@ import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue"
 import InputTimePeriod from "~/components/inputs/InputTimePeriod.vue";
 import {useCatalogQueryState} from "~/composables/search/useCatalogQueryState.js";
 import BookablePriceCategoriesDisplay from "~/components/bookables/BookablePriceCategoriesDisplay.vue";
+import {useBookableSearch} from "~/composables/search/useBookableSearch.js";
+import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
+import {useCheckoutRedirect} from "~/composables/utils/useCheckoutRedirect.js";
 
 const props = defineProps({
   item: {
@@ -50,10 +88,20 @@ const props = defineProps({
 });
 
 const { state: query } = useCatalogQueryState();
+const {
+  updatedItems,
+  runSearch,
+  resetResults,
+} = useBookableSearch({ isEvent: false, sourceItems: [props.item] });
 
 const timePeriod = ref({
   start: query.start,
   end: query.end,
+});
+const timeSpan = computed(() => {
+  const diffMs = timePeriod.value.end - timePeriod.value.start;
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  return diffHours + " Std."
 });
 
 const tenantName = computed(() => {
@@ -64,11 +112,33 @@ const isNotBookable = ref(false); // toDo - implement logic to determine bookabi
 
 function setSearchTimePeriod(tp) {
   timePeriod.value = tp;
+  runSearch({
+    term: '',
+    location: '',
+    timeStart: timePeriod.value.start,
+    timeEnd: timePeriod.value.end,
+    isEvent: false
+  })
 }
 function removeSearchTimePeriod() {
   timePeriod.value = null;
+  resetResults()
 }
 
+function goToCheckout(checkoutData) {
+  if(checkoutData){
+    useCheckoutRedirect().redirectToCheckout(checkoutData);
+  } else {
+    const route = useRoute();
+    useCheckoutRedirect().redirectToCheckout({
+      id: props.item.id,
+      tenantId: props.item.tenantId,
+      start: route.query.start,
+      end: route.query.end,
+    });
+  }
+
+}
 
 </script>
 

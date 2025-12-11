@@ -32,13 +32,12 @@
         label="Buchen"
         class="justify-center px-5"
         :style="{ color: contrastToPrimary }"
-        @click="goToCheckout"
+        @click="onCheckout"
     />
   </div>
 </template>
 <script setup>
 import {useContrastColor} from "~/composables/utils/useContrastColor.js";
-import {useCheckoutRedirect} from "~/composables/utils/useCheckoutRedirect.js";
 
 const props = defineProps({
   item: {
@@ -51,6 +50,7 @@ const props = defineProps({
     default: false,
   },
 })
+const emit = defineEmits(["checkout"]);
 
 const contrastToPrimary = computed(() =>
     useContrastColor().contrastToPrimary()
@@ -82,9 +82,9 @@ function intervalSuffix(type) {
   }
 }
 
-function goToCheckout() {
+function onCheckout() {
   const route = useRoute();
-  useCheckoutRedirect().redirectToCheckout({
+  emit("checkout",{
     id: props.item.id,
     tenantId: props.item.tenantId,
     start: route.query.start,
