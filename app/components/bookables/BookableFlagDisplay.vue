@@ -3,11 +3,11 @@
     <UBadge
       v-for="(flag, i) in props.flags.slice(0, 10)"
       :key="i"
-      icon="i-lucide-check"
+      :icon="isDetailMode? 'i-lucide-hash' : 'i-lucide-check'"
       size="md"
       color="neutral"
-      variant="ghost"
-      style="padding-left: 0; padding-right: 15px"
+      :variant="isDetailMode? 'solid' : 'ghost'"
+      :class="badgeStyle"
     >
       {{ flag }}
     </UBadge>
@@ -16,7 +16,7 @@
       size="md"
       color="neutral"
       variant="soft"
-      style=""
+      :class="badgeStyle"
       >+ {{ flags.length - 10 }} Weitere</UBadge
     >
   </div>
@@ -27,7 +27,19 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  isDetailMode: {
+    type: Boolean,
+    default: false,
+  },
 });
+
+const badgeStyle = computed(() => {
+  if(props.isDetailMode) {
+    return "bg-gray-300 rounded-full text-sm mr-2 mb-2 text-black";
+  } else {
+    return "pl-1";
+  }
+})
 </script>
 
 <style scoped></style>

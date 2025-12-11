@@ -37,8 +37,8 @@
           label="Details ansehen"
           variant="ghost"
           class="justify-center px-10"
-          :to="`/bookables/${bookable.id}`"
-        />
+          :to="tenantTo(`bookables/${bookable.id}`)"
+        /><!--@click="goToDetails" -->
 
           <UButton
             v-if="!isNotBookable"
@@ -78,6 +78,8 @@ const props = defineProps({
     default: false,
   },
 });
+const { tenantTo } = useTenantRoute();
+
 
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.bookable.tenantId).name;
@@ -86,6 +88,23 @@ const tenantName = computed(() => {
 const contrastToPrimary = computed(() =>
   useContrastColor().contrastToPrimary()
 );
+
+/*
+function goToDetails() {
+  console.log("***")
+  const route = useRoute();
+  const router = useRouter();
+  let basePath = route.path;
+
+  if (basePath.includes("bookables")) {
+    basePath = "bookables"
+  } else if (basePath.includes("locations")) {
+    basePath = "locations";
+  }
+
+  router.push(`${basePath}/${props.bookable.id}`);
+}
+ */
 
 function goToCheckout() {
   const route = useRoute();

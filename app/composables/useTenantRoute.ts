@@ -5,6 +5,10 @@ export const useTenantRoute = () => {
   const route = useRoute();
 
   const tenantID = computed(() => route.params.tenantID as string | undefined);
+  const itemID = computed(() => {
+     const id = route.params.locationID || route.params.bookableID || route.params.eventID;
+     return id as string | undefined;
+  });
 
   function tenantPath(path: string) {
     if (!tenantID.value) return path;
@@ -54,7 +58,11 @@ export const useTenantRoute = () => {
   }
 
   function isActivePath(path: string) {
-    const targetPath = tenantPath(path);
+    let targetPath = tenantPath(path);
+
+    if(itemID.value){
+        targetPath += `/${itemID.value}`;
+    }
     return route.path === targetPath;
   }
 
