@@ -5,7 +5,7 @@
       class="bg-gray-300 rounded-lg p-3 mb-2 flex content-center"
   >
     <span class="font-bold mr-1 content-center ">{{ item?.title }}</span>
-    <span v-if="priceCategory.interval.end || priceCategory.interval.start" class="content-center ">
+    <span v-if="priceCategory.interval.end || priceCategory.interval.start" class="content-center">
        / {{
         getInterval(
             priceCategory.interval.start,
@@ -14,6 +14,7 @@
         )
       }}
     </span>
+    <span v-else class="content-center">/ {{getUnit(priceCategory.priceType)}}</span>
     <UBadge
         v-if="priceCategory.fixedPrice"
         class="ml-2"
@@ -70,7 +71,7 @@ function getGrossPrice(price){
 
 
 function getInterval(start, end, priceType) {
-  const suffix = intervalSuffix(priceType);
+  const suffix = getUnit(priceType);
   let interval = "";
   if (!start) {
     interval = `bis ${end}`;
@@ -83,17 +84,18 @@ function getInterval(start, end, priceType) {
   }
   return `${interval} ${suffix}`;
 }
-function intervalSuffix(type) {
+function getUnit(type) {
   if (type === "per-hour") {
     return "Std.";
   } else if (type === "per-day") {
-    return "Tage";
+    return "Tag(e)";
   } else if (type === "per-square-meter")
     return "m²";
   else {
     return "Stück";
   }
 }
+
 
 function onCheckout() {
   const route = useRoute();
