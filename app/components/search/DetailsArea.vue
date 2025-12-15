@@ -2,28 +2,7 @@
 <template>
 <div class="mx-10 mb-15">
   <!-- toDo - weitere Bilder einfügen *** -->
-
-  <div class="-mt-10" style="max-height: 350px; height: 300px; overflow: hidden;">
-    <img
-        v-if="!isEvent && item?.imgUrl"
-        :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
-        alt=""
-        class="w-full h-full object-contain rounded-l-xl"
-    >
-    <img
-        v-else-if="isEvent && item?.information?.teaserImage"
-        :src="`/api/img?url=${encodeURIComponent(item.information.teaserImage)}`"
-        alt=""
-        class="w-full h-full object-contain rounded-l-xl"
-    >
-    <img
-        v-else
-        src="../../assets/bookable-default.jpg"
-        alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
-        class="h-full w-full object-contain rounded-l-xl"
-    >
-  </div>
-
+  <DetailsAreaImages :item="item" :is-event="isEvent" />
 
   <div class="w-full flex justify-between my-5">
     <UButton
@@ -51,10 +30,12 @@
 
   <!-- toDo - usw... -->
 </div>
+
 </template>
 <script setup>
 import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 import DetailsAreaBookableContent from "~/components/search/DetailsAreaBookableContent.vue";
+import DetailsAreaImages from "~/components/search/DetailsAreaImages.vue";
 
 const props = defineProps({
   item: {
