@@ -10,7 +10,7 @@
 
   <BookableFlagDisplay :flags="item?.information.flags" is-detail-mode class="my-5" />
 
-  <div v-html="item.information.teaserText" />
+  <div v-html="htmlTeaserText" />
 
   <div class="mt-5">
     <span class="font-bold">
@@ -88,6 +88,7 @@ import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue"
 import EventInfoDisplay from "~/components/events/EventInfoDisplay.vue";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import EventTicketStrip from "~/components/events/EventTicketStrip.vue";
+import {useSanitizeHtml} from "~/composables/utils/useSanitizeHtml.js";
 
 
 const props = defineProps({
@@ -99,6 +100,11 @@ const props = defineProps({
 
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.item.tenantId).name;
+});
+
+const { sanitizeHtml } = useSanitizeHtml();
+const htmlTeaserText = computed(() => {
+  return sanitizeHtml(props.item.information.teaserText || "");
 });
 /*const { state: query } = useCatalogQueryState();
 const {

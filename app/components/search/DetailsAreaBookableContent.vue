@@ -8,7 +8,8 @@
 
   <BookableFlagDisplay :flags="item?.flags" is-detail-mode class="my-5" />
 
-  <div v-html="item.description" />
+  <div v-html="htmlDescription" />
+
   <USeparator class="w-full my-10" :ui="{ border: 'border-gray-300' }" />
 
   <div>
@@ -90,6 +91,7 @@ import {useBookableSearch} from "~/composables/search/useBookableSearch.js";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import {useCheckoutRedirect} from "~/composables/utils/useCheckoutRedirect.js";
 import {useContrastColor} from "~/composables/utils/useContrastColor.js";
+import {useSanitizeHtml} from "~/composables/utils/useSanitizeHtml.js";
 
 const props = defineProps({
   item: {
@@ -104,6 +106,11 @@ const {
   runSearch,
   resetResults,
 } = useBookableSearch({ isEvent: false, sourceItems: [props.item] });
+
+const { sanitizeHtml } = useSanitizeHtml();
+const htmlDescription = computed(() => {
+  return sanitizeHtml(props.item.description || "");
+});
 
 const timePeriod = ref({
   start: query.start,
