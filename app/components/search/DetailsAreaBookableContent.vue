@@ -65,7 +65,9 @@
         :style="{ color: contrastToPrimary }"
     />
   </div>
-  <div v-if="item.priceValueAddedTax" class="text-gray-500 text-sm italic">(Alle Preise inklusive Mehrwertsteuer.)</div>
+  <div v-if="item.priceValueAddedTax" class="text-gray-500 text-sm italic">
+    (Alle Preise inklusive Mehrwertsteuer.)
+  </div>
 
   <!--
   <div class="bg-amber-100">

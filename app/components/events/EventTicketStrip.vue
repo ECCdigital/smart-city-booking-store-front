@@ -11,6 +11,10 @@
             :bookable="ticket"
             class="grid place-content-end text-md font-bold"
         />
+        <div v-if="ticket.priceValueAddedTax" class="text-gray-500 text-xs italic">
+          (inkl. MwSt.)
+        </div>
+
       </div>
       <div class="content-center">
         <UTooltip

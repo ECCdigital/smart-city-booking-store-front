@@ -70,16 +70,17 @@
 
 
   <!-- toDo - *** *** *** *** TESTING SPACE *** *** *** *** -->
-  <!-- <div class="bg-amber-100">
-    {{props.item}}
-  </div>
-  <div class="bg-amber-200">
-    {{ item.attendees.publicEvent }} ***
-  </div>
-  <div class="bg-amber-300">
-    ...
-  </div>
-  -->
+  <!--
+  <div class="bg-amber-100">
+   {{props.item}}
+ </div>
+ <!-v class="bg-amber-200">
+   {{ item.attendees.publicEvent }} ***
+ </div>
+ <div class="bg-amber-300">
+   ...
+ </div>
+ -->
 </div>
 </template>
 <script setup>
