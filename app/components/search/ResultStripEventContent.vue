@@ -40,15 +40,13 @@
 
         <!--Aktionen-->
         <div class="w-full mt-2 flex justify-end content-end">
-          <!-- toDo - für MVP ausgeblendet! Danach wieder aktivieren!  -->
-          <!--<UButton
-          v-if="!isNotBookable"
+          <UButton
           label="Details ansehen"
           variant="ghost"
           class="justify-center px-10"
-          :to="`/catalog/${catalogSlug}/events/${event.id}`"
+          @click="goToDetails()"
         />
-        -->
+
           <UTooltip :disabled="disableTooltip" :text="tooltipText">
             <div>
               <UButton
@@ -110,6 +108,7 @@ const htmlTeaserText = computed(() => {
   return sanitizeHtml(props.event.information.teaserText || "");
 });
 
+const { tenantTo } = useTenantRoute();
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.event.tenantId).name;
 });
@@ -146,6 +145,7 @@ const bookingDisabled = computed(
     props.event.attendees.needsRegistration &&
     (isPrivateEvent.value || !hasEventTickets.value)
 );
+
 const openTicketOptions = ref(false);
 function goToTicketOptions() {
   //external booking url
@@ -166,6 +166,11 @@ function goToTicketOptions() {
   } else {
     openTicketOptions.value = true;
   }
+}
+
+function goToDetails(){
+  const router = useRouter();
+  router.push(tenantTo(`events/${props.event.id}`));
 }
 </script>
 <style scoped>

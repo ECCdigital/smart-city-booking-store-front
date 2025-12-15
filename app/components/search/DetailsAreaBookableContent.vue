@@ -15,7 +15,6 @@
     <h3 class="text-xl font-bold">Verfügbarkeit</h3>
     <UAlert
         v-if="!timePeriod || (!timePeriod.start && !timePeriod.end)"
-        color="error"
         title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
         icon="i-lucide-info"
         variant="ghost"
@@ -29,6 +28,7 @@
         @remove-date="removeSearchTimePeriod"
     />
   </div>
+
   <BookablePriceCategoriesDisplay
       v-if="(!timePeriod.start && !timePeriod.end)"
       :item="item"
@@ -69,7 +69,7 @@
   <!--
   <div class="bg-amber-100">
      {{item}}
-  </div>-->
+  </div>
   <div class="bg-amber-200">
     {{searchedItems}} -{{searchedItems.length}}
   </div>
@@ -166,10 +166,5 @@ function goToCheckout(checkoutData) {
     });
   }
 }
-
 </script>
-
-
-<style scoped>
-
-</style>
+<style scoped></style>

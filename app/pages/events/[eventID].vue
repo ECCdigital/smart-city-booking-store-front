@@ -1,6 +1,7 @@
 <script setup>
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useEventStore } from "~~/stores/event.js";
+import DetailsArea from "~/components/search/DetailsArea.vue";
 
 definePageMeta({
   layout: "bookable",
@@ -27,9 +28,9 @@ if (!event.value) {
 </script>
 
 <template>
-  <article v-if="event">
-    <h1>{{ event?.information?.name }}</h1>
-  </article>
+  <div v-if="event">
+    <DetailsArea :item="event" is-event/>
+  </div>
   <p v-else>Event nicht gefunden.</p>
 </template>
 

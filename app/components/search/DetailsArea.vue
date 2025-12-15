@@ -2,7 +2,7 @@
 <template>
 <div class="mx-10 mb-15">
   <!-- toDo - weitere Bilder einfügen *** -->
-  <DetailsAreaImages :item="item" :is-event="isEvent" />
+  <DetailsAreaImages :item="item" :is-event="props.isEvent" />
 
   <div class="w-full flex justify-between my-5">
     <UButton
@@ -23,7 +23,8 @@
   </div>
 
   <div class="flex">
-    <DetailsAreaBookableContent :item="props.item" :is-event="props.isEvent" class=" basis-2/3"/>
+    <DetailsAreaBookableContent v-if="!isEvent" :item="props.item" class=" basis-2/3"/>
+    <DetailsAreaEventContent v-else :item="props.item" class=" basis-2/3"/>
     <!-- toDo - add map view -->
     <USkeleton class="basis-1/3" style="max-height: 300px" />
   </div>
@@ -36,6 +37,7 @@
 import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 import DetailsAreaBookableContent from "~/components/search/DetailsAreaBookableContent.vue";
 import DetailsAreaImages from "~/components/search/DetailsAreaImages.vue";
+import DetailsAreaEventContent from "~/components/search/DetailsAreaEventContent.vue";
 
 const props = defineProps({
   item: {
