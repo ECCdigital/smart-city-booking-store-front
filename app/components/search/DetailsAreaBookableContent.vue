@@ -44,8 +44,8 @@
     <div class="flex-1" />
     <BookablePriceDisplay
         v-if="searchedItems.length > 0"
-        :bookable="searchedItems[0]"
-        :calculated-price="searchedItems[0]?.calculatedPrice"
+        :bookable="searchedItems[0].item"
+        :calculated-price="searchedItems[0].calculatedPrice"
         class="mx-2 font-bold content-center "
     />
 
@@ -69,7 +69,7 @@
   <!--
   <div class="bg-amber-100">
      {{item}}
-  </div>
+  </div>-->
   <div class="bg-amber-200">
     {{searchedItems}} -{{searchedItems.length}}
   </div>
