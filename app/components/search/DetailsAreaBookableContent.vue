@@ -30,9 +30,10 @@
     />
   </div>
   <BookablePriceCategoriesDisplay
-      v-if="!timePeriod || (!timePeriod.start && !timePeriod.end)"
+      v-if="(!timePeriod.start && !timePeriod.end)"
       :item="item"
-      :is-not-bookable="isNotBookable"
+      :is-bookable="isBookable"
+      :no-selected-time="(!timePeriod.start && !timePeriod.end)"
       @checkout="goToCheckout"
   />
   <div v-else class="bg-gray-300 rounded-lg p-3 mb-2 flex content-center">
@@ -42,31 +43,40 @@
     </span>
     <div class="flex-1" />
     <BookablePriceDisplay
-        v-if="updatedItems[0]"
-        :bookable="updatedItems[0]"
-        :calculated-price="updatedItems[0]?.calculatedPrice"
+        v-if="searchedItems.length > 0"
+        :bookable="searchedItems[0]"
+        :calculated-price="searchedItems[0]?.calculatedPrice"
         class="mx-2 font-bold content-center "
     />
+
     <UButton
-        v-if="!isNotBookable"
+        v-if="isBookable"
         label="Buchen"
         class="justify-center px-5"
         :style="{ color: contrastToPrimary }"
         @click="goToCheckout()"
     />
+    <UButton
+        v-else
+        label="Nicht verfügbar"
+        variant="soft"
+        class="justify-center px-5"
+        :style="{ color: contrastToPrimary }"
+    />
   </div>
+  <div v-if="item.priceValueAddedTax" class="text-gray-500 text-sm italic">(Alle Preise inklusive Mehrwertsteuer.)</div>
 
-
-
-
+  <!--
   <div class="bg-amber-100">
-    {{item}}
+     {{item}}
   </div>
   <div class="bg-amber-200">
-    {{updatedItems}}
+    {{searchedItems}} -{{searchedItems.length}}
   </div>
-<div class="bg-amber-300">...
-</div>
+  <div class="bg-amber-300">
+    ...
+  </div>
+  -->
 
 </div>
 </template>
@@ -79,6 +89,7 @@ import BookablePriceCategoriesDisplay from "~/components/bookables/BookablePrice
 import {useBookableSearch} from "~/composables/search/useBookableSearch.js";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import {useCheckoutRedirect} from "~/composables/utils/useCheckoutRedirect.js";
+import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 
 const props = defineProps({
   item: {
@@ -89,7 +100,7 @@ const props = defineProps({
 
 const { state: query } = useCatalogQueryState();
 const {
-  updatedItems,
+  updatedItems: searchedItems,
   runSearch,
   resetResults,
 } = useBookableSearch({ isEvent: false, sourceItems: [props.item] });
@@ -107,12 +118,18 @@ const timeSpan = computed(() => {
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.item.tenantId).name;
 });
-const isNotBookable = ref(false); // toDo - implement logic to determine bookability
+const isBookable = computed(() => {
+  if(searchedItems.value[0].status === 'bookable'){return true}
+  else if(searchedItems.value[0].status === 'suitable'){return true}
+  return false
+})
+const contrastToPrimary = computed(() =>
+    useContrastColor().contrastToPrimary()
+);
 
-
-function setSearchTimePeriod(tp) {
+async function setSearchTimePeriod(tp) {
   timePeriod.value = tp;
-  runSearch({
+  await runSearch({
     term: '',
     location: '',
     timeStart: timePeriod.value.start,
@@ -124,6 +141,17 @@ function removeSearchTimePeriod() {
   timePeriod.value = null;
   resetResults()
 }
+onMounted(async () => {
+  if (timePeriod.value.start && timePeriod.value.end) {
+    await runSearch({
+      term: '',
+      location: '',
+      timeStart: timePeriod.value.start,
+      timeEnd: timePeriod.value.end,
+      isEvent: false
+    })
+  }
+});
 
 function goToCheckout(checkoutData) {
   if(checkoutData){
@@ -137,7 +165,6 @@ function goToCheckout(checkoutData) {
       end: route.query.end,
     });
   }
-
 }
 
 </script>

@@ -1,7 +1,7 @@
 
 <template>
 <div class="mx-10 mb-15">
-  <!-- toDo - Bilder einfügen *** -->
+  <!-- toDo - weitere Bilder einfügen *** -->
 
   <div class="-mt-10" style="max-height: 350px; height: 300px; overflow: hidden;">
     <img
@@ -46,7 +46,7 @@
   <div class="flex">
     <DetailsAreaBookableContent :item="props.item" :is-event="props.isEvent" class=" basis-2/3"/>
     <!-- toDo - add map view -->
-    <USkeleton class="basis-1/3" />
+    <USkeleton class="basis-1/3" style="max-height: 300px" />
   </div>
 
   <!-- toDo - usw... -->

@@ -33,12 +33,11 @@
         <!--Aktionen-->
         <div class="w-full mt-2 flex justify-end content-end">
           <UButton
-          v-if="!isNotBookable"
-          label="Details ansehen"
-          variant="ghost"
-          class="justify-center px-10"
-          @click="goToDetails()"
-        /><!--:to="tenantTo(`bookables/${bookable.id}`)" -->
+            label="Details ansehen"
+            variant="ghost"
+            class="justify-center px-10"
+            @click="goToDetails()"
+          />
 
           <UButton
             v-if="!isNotBookable"
@@ -95,9 +94,9 @@ function goToDetails() {
   const basePath = route.path;
 
   if (basePath.includes("bookables")) {
-    router.push(`/bookables/${props.bookable.id}`);
+    router.push(tenantTo(`bookables/${props.bookable.id}`));
   } else if (basePath.includes("locations")) {
-    router.push(`/locations/${props.bookable.id}`);
+    router.push(tenantTo(`locations/${props.bookable.id}`));
   }
 }
 

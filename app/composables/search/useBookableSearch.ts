@@ -192,7 +192,6 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
   function setFilterQueryParams(criteria: Partial<CatalogQueryState>) {
 
-    console.log("Setting filter query params:", criteria);
     query.inclNoSuitable =
       typeof criteria.inclNoSuitable === "boolean"
         ? criteria.inclNoSuitable
@@ -328,7 +327,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       if (!isEvent) {
         availabilityChecks = await Promise.all(
           items.map(async (item) => {
-            const availability = options.getAvailability
+              const availability = options.getAvailability
               ? await options.getAvailability(
                   item.item,
                   timePeriod.start,
@@ -392,6 +391,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
             timePeriod.start !== null &&
             !isEvent
           ) {
+              console.log(options.getPriceForPeriod) // ????????????????????????????????
             price = options.getPriceForPeriod
               ? await options.getPriceForPeriod(
                   item.item,

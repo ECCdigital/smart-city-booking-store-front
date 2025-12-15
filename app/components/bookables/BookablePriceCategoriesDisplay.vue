@@ -7,7 +7,7 @@
     <span class="font-bold mr-1 content-center ">{{ item?.title }}</span>
     <span v-if="priceCategory.interval.end || priceCategory.interval.start" class="content-center ">
        / {{
-        getPrice(
+        getInterval(
             priceCategory.interval.start,
             priceCategory.interval.end,
             item.priceType
@@ -25,11 +25,11 @@
 
     <div class="flex-1" />
     <span v-if="priceCategory.priceEur === 0" class="mx-2 font-bold content-center ">Kostenlos</span>
-    <span v-else class="mx-2 font-bold content-center ">{{ priceCategory.priceEur }} €</span>
+    <span v-else-if="priceCategory.priceEur" class="mx-2 font-bold content-center ">{{ getGrossPrice(priceCategory.priceEur) }} €</span>
     <!-- toDo - add user price!!!! -->
     <UButton
-        v-if="!isNotBookable"
         label="Buchen"
+        :disabled="noSelectedTime"
         class="justify-center px-5"
         :style="{ color: contrastToPrimary }"
         @click="onCheckout"
@@ -44,11 +44,15 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  isNotBookable: {
+  isBookable: {
     type: Boolean,
     required: false,
     default: false,
   },
+  noSelectedTime: {
+    type: Boolean,
+    default: false,
+  }
 })
 const emit = defineEmits(["checkout"]);
 
@@ -56,7 +60,16 @@ const contrastToPrimary = computed(() =>
     useContrastColor().contrastToPrimary()
 );
 
-function getPrice(start, end, priceType) {
+function getGrossPrice(price){
+  if(props.item.priceValueAddedTax){
+    const gross = price + (price * props.item.priceValueAddedTax) / 100;
+    return gross.toFixed(2).toString().replace(/\./g, ",");
+  }
+  return price
+}
+
+
+function getInterval(start, end, priceType) {
   const suffix = intervalSuffix(priceType);
   let interval = "";
   if (!start) {
