@@ -21,7 +21,24 @@
   <USeparator class="w-full my-10" :ui="{ border: 'border-gray-300' }" />
 
   <div>
-    <h3 class="text-xl font-bold">Ticketoptionen</h3>
+    <h3 class="text-xl font-bold mb-5">Ticketoptionen & Verfügbarkeit</h3>
+    <div v-if="hasTimeRelatedPrices">
+      <UAlert
+          v-if="!timePeriod || (!timePeriod.start && !timePeriod.end)"
+          title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
+          icon="i-lucide-info"
+          variant="ghost"
+          class="p-2 text-red-500"
+      />
+      <InputTimePeriod
+          :time-period="timePeriod"
+          class="border rounded-lg mt-2 mb-5"
+          style="max-width: 500px; width: 400px"
+          @select-date="setSearchTimePeriod"
+          @remove-date="removeSearchTimePeriod"
+      />
+    </div>
+
 
     <!--externe Tickets -->
     <div v-if="item.externalBookingUrl" class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center">
@@ -49,7 +66,7 @@
         description="Für dieses Event ist keine Anmeldung notwendig. Sie können auch ohne vorherige Anmeldung an der Veranstaltung teilnehmen."
     />
     
-    <!-- toDo - Hinweis wenn keine Tickets hinterlegt sind -->
+    <!-- keine Tickets hinterlegt -->
     <EventInfoDisplay
         v-if="item.attendees.publicEvent && item.attendees.needsRegistration && item.tickets.length === 0"
         title="Keine Tickets verfügbar."
@@ -57,30 +74,15 @@
     />
     
 
-    <!-- toDo - Auflistung der Ticketoptionen -->
+    <!-- Auflistung der Ticketoptionen -->
     <EventTicketStrip
-        v-for="(ticket, i) in props.item.tickets"
+        v-for="(ticket, i) in tickets"
         :key="i"
         :ticket="ticket"
         details-mode
     />
 
   </div>
-
-
-
-  <!-- toDo - *** *** *** *** TESTING SPACE *** *** *** *** -->
-  <!--
-  <div class="bg-amber-100">
-   {{props.item}}
- </div>
- <!-v class="bg-amber-200">
-   {{ item.attendees.publicEvent }} ***
- </div>
- <div class="bg-amber-300">
-   ...
- </div>
- -->
 </div>
 </template>
 <script setup>
@@ -90,6 +92,10 @@ import EventInfoDisplay from "~/components/events/EventInfoDisplay.vue";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import EventTicketStrip from "~/components/events/EventTicketStrip.vue";
 import {useSanitizeHtml} from "~/composables/utils/useSanitizeHtml.js";
+import InputTimePeriod from "~/components/inputs/InputTimePeriod.vue";
+import {useContrastColor} from "~/composables/utils/useContrastColor.js";
+import {useCatalogQueryState} from "~/composables/search/useCatalogQueryState.js";
+import {useBookableSearch} from "~/composables/search/useBookableSearch.js";
 
 
 const props = defineProps({
@@ -99,31 +105,67 @@ const props = defineProps({
   },
 });
 
+const { state: query } = useCatalogQueryState();
+const timePeriod = ref({
+  start: query.start,
+  end: query.end,
+});
+const {
+  updatedItems: searchedEvents,
+  runSearch,
+  resetResults,
+} = useBookableSearch({ isEvent: true, sourceItems: [props.item] });
+
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.item.tenantId).name;
 });
+const tickets = computed(() => {
+  if(searchedEvents.value.length > 0){
+    return searchedEvents.value[0].item.tickets;
+  }
+  return props.item.tickets;
+})
 
 const { sanitizeHtml } = useSanitizeHtml();
 const htmlTeaserText = computed(() => {
   return sanitizeHtml(props.item.information.teaserText || "");
 });
-/*const { state: query } = useCatalogQueryState();
-const {
-  updatedItems: searchedEvents,
-  runSearch,
-  resetResults,
-} = useBookableSearch({ isEvent: false, sourceItems: [props.item] });
+
+const hasTimeRelatedPrices = computed(() => {
+  return props.item.tickets.some((ticket) => ticket.priceCategories.length > 1);
+});
 
 
-const isBookable = computed(() => {
-  if(searchedItems.value[0].status === 'bookable'){return true}
-  else if(searchedItems.value[0].status === 'suitable'){return true}
-  return false
-})
+onMounted(async () => {
+  if (timePeriod.value.start && timePeriod.value.end) {
+    await runSearch({
+      term: '',
+      location: '',
+      timeStart: timePeriod.value.start,
+      timeEnd: timePeriod.value.end,
+      isEvent: true
+    })
+  }
+});
+
 const contrastToPrimary = computed(() =>
     useContrastColor().contrastToPrimary()
 );
-*/
+
+async function setSearchTimePeriod(tp) {
+  timePeriod.value = tp;
+  await runSearch({
+    term: '',
+    location: '',
+    timeStart: timePeriod.value.start,
+    timeEnd: timePeriod.value.end,
+    isEvent: false
+  })
+}
+function removeSearchTimePeriod() {
+  timePeriod.value = null;
+  resetResults()
+}
 
 function goToExternalCheckout() {
   window.open(props.item.externalBookingUrl, "_blank");

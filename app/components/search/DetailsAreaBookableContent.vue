@@ -1,5 +1,5 @@
 <template>
-<div class="mr-20">
+<div class="md:mr-20 mb-10">
   <!-- Title -->
   <p class="text-sm font-bold text-primary">
     {{ tenantName }}
@@ -30,14 +30,7 @@
     />
   </div>
 
-  <BookablePriceCategoriesDisplay
-      v-if="(!timePeriod.start && !timePeriod.end)"
-      :item="item"
-      :is-bookable="isBookable"
-      :no-selected-time="(!timePeriod.start && !timePeriod.end)"
-      @checkout="goToCheckout"
-  />
-  <div v-else class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center">
+  <div v-if="(timePeriod.start && timePeriod.end)" class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center">
     <span class="font-bold mr-1 content-center ">{{ item?.title }}</span>
     <span class="content-center ">
        / {{timeSpan}}
@@ -65,22 +58,6 @@
         :style="{ color: contrastToPrimary }"
     />
   </div>
-  <div v-if="item.priceValueAddedTax" class="text-gray-500 text-sm italic">
-    (Alle Preise inklusive Mehrwertsteuer.)
-  </div>
-
-  <!--
-  <div class="bg-amber-100">
-     {{item}}
-  </div>
-  <div class="bg-amber-200">
-    {{searchedItems}} -{{searchedItems.length}}
-  </div>
-  <div class="bg-amber-300">
-    ...
-  </div>
-  -->
-
 </div>
 </template>
 <script setup>
@@ -88,7 +65,6 @@ import {useTenantStore} from "~~/stores/tenant.js";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import InputTimePeriod from "~/components/inputs/InputTimePeriod.vue";
 import {useCatalogQueryState} from "~/composables/search/useCatalogQueryState.js";
-import BookablePriceCategoriesDisplay from "~/components/bookables/BookablePriceCategoriesDisplay.vue";
 import {useBookableSearch} from "~/composables/search/useBookableSearch.js";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import {useCheckoutRedirect} from "~/composables/utils/useCheckoutRedirect.js";

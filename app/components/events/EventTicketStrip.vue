@@ -9,6 +9,7 @@
       <div class="content-center">
         <BookablePriceDisplay
             :bookable="ticket"
+            :calculated-price="ticket.calculatedPrice"
             class="grid place-content-end text-md font-bold"
         />
         <div v-if="ticket.priceValueAddedTax" class="text-gray-500 text-xs italic">
@@ -33,6 +34,7 @@
 
     </div>
   </div>
+  {{ticket}}
 </template>
 <script setup>
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
