@@ -37,7 +37,7 @@
       :no-selected-time="(!timePeriod.start && !timePeriod.end)"
       @checkout="goToCheckout"
   />
-  <div v-else class="bg-gray-300 rounded-lg p-3 mb-2 flex content-center">
+  <div v-else class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center">
     <span class="font-bold mr-1 content-center ">{{ item?.title }}</span>
     <span class="content-center ">
        / {{timeSpan}}

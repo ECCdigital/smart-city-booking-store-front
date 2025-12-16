@@ -1,6 +1,6 @@
 
 <template>
-<div class="mx-10 mb-15">
+<div class="" style="max-width: 1600px; margin: auto; padding: 0 15px;">
   <!-- toDo - weitere Bilder einfügen *** -->
   <DetailsAreaImages :item="item" :is-event="props.isEvent" />
 

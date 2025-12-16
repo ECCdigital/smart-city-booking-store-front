@@ -2,7 +2,7 @@
   <div
       v-for="(priceCategory, i) in props.item.priceCategories"
       :key="i"
-      class="bg-gray-300 rounded-lg p-3 mb-2 flex content-center"
+      class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center"
   >
     <span class="font-bold mr-1 content-center ">{{ item?.title }}</span>
     <span v-if="priceCategory.interval.end || priceCategory.interval.start" class="content-center">
