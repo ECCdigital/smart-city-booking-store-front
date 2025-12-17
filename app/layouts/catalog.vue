@@ -14,53 +14,48 @@ useHead({
 
 <template>
   <div class="">
-    <NavigationBar />
+    <NavigationBar/>
     <!-- Hero -->
     <!-- toDo - Hero-Design für lg anpassen!  -->
-    <!-- toDo - Hero anpassen für Dark-Mode  -->
     <div
-        class="bg-gray-200  px-10 py-15 justify-between shadow-sm hidden md:block"
+        class="bg-gray-200 dark:bg-gray-950 px-10 py-15 justify-between shadow-sm hidden md:flex"
     >
-      <div class="flex">
-        <div class="grid content-center max-w-220px">
-          <p class="text-primary font-bold">Marktplatz</p>
-          <p class="text-black text-3xl font-bold">
-            Unsere Angebote und Veranstaltungen
-          </p>
-        </div>
-        <div style="flex: 1; min-width: 15vw"/>
-        <div>
-          <img
-              src="../assets/logo-kielregion.png"
-              alt="Logo Kiel Region"
-              class="text-center"
-              style="height: 7vw"
-          >
-        </div>
+      <div class="grid content-center max-w-220px">
+        <p class="text-primary font-bold">Marktplatz</p>
+        <p class="text-black dark:text-white text-3xl font-bold">
+          Unsere Angebote und Veranstaltungen
+        </p>
       </div>
+      <div style="flex: 1; min-width: 15vw"/>
+      <img
+          alt="Logo Kiel Region"
+          class="dark:grayscale dark:brightness-500 "
+          src="../assets/logo-kielregion.png"
+          style="height: 7vw"
+      >
 
     </div>
     <UPageHero
-        title="Unsere Angebote und Veranstaltungen"
         :ui="{
         container:
           'bg-[url(/assets/kiel_bootshafen.jpg)] contrast-70 p-10 pb-25 shadow-lg',
         title: 'text-2xl text-black',
       }"
         class="md:hidden z-0"
+        title="Unsere Angebote und Veranstaltungen"
     >
       <template #headline>
         <div class="flex justify-center">
           <img
-              src="../assets/logo-kielregion.png"
               alt="Logo Kiel Region"
               class="text-center"
+              src="../assets/logo-kielregion.png"
               style="height: 15vw"
           >
         </div>
       </template>
     </UPageHero>
-    <NuxtPage />
+    <NuxtPage/>
   </div>
 </template>
 
