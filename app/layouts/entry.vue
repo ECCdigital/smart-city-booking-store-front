@@ -16,8 +16,6 @@ useHead({
   <div class="">
     <NavigationBar/>
     <!-- Hero -->
-    <!-- toDo - Hero-Design für lg anpassen!  -->
-    <!-- toDo - Hero anpassen für Dark-Mode  -->
     <div
         class="bg-gray-200 dark:bg-gray-950 flex px-10 py-40 justify-between shadow-sm"
     >
@@ -34,7 +32,6 @@ useHead({
             class="dark:grayscale dark:brightness-500 "
           style="height: 7vw"
       >
-      <!-- toDo - alternatives Logo für den Darkmode -->
     </div>
     <NuxtPage/>
   </div>
