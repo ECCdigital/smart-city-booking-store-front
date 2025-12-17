@@ -71,7 +71,15 @@ const contrastToPrimary = computed(() =>
     useContrastColor().contrastToPrimary()
 );
 
-function share(){
+const notification = useNotification();
+async function share() {
+  await navigator.clipboard.writeText(window.location.href);
+  notification.success(
+      "Der Link zur aktuellen Suche wurde in Ihre Zwischenablage kopiert.",
+      "Link erfolgreich kopiert!"
+  );
+
+
   console.log("*** versuche die Details zu teilen ***");
 }
 </script>
