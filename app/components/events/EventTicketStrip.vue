@@ -34,7 +34,6 @@
 
     </div>
   </div>
-  {{ticket}}
 </template>
 <script setup>
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";

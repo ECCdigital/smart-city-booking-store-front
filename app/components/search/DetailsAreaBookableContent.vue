@@ -30,10 +30,10 @@
     />
   </div>
 
-  <div v-if="(timePeriod.start && timePeriod.end)" class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center">
+  <div v-if="timePeriod && (timePeriod.start && timePeriod.end)" class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center">
     <span class="font-bold mr-1 content-center ">{{ item?.title }}</span>
     <span class="content-center ">
-       / {{timeSpan}}
+       {{unit}}
     </span>
     <div class="flex-1" />
     <BookablePriceDisplay
@@ -94,20 +94,39 @@ const timePeriod = ref({
   start: query.start,
   end: query.end,
 });
-const timeSpan = computed(() => {
+const unit = computed(() => {
+  if(!timePeriod.value){return ""}
+
+  const type = props.item?.priceType;
+
   const diffMs = timePeriod.value.end - timePeriod.value.start;
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  return diffHours + " Std."
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+  if(type === "per-day"){
+    if(diffDays > 1){
+      return "/ " + diffDays + " Tage";
+    } else {
+      return "/ " + diffDays + " Tag";
+    }
+  }
+
+  if(type === "per-hour" && diffHours) {
+    return "/ " + diffHours + " Std."
+  }
+  return " "
 });
 
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.item.tenantId).name;
 });
+
 const isBookable = computed(() => {
-  if(searchedItems.value[0].status === 'bookable'){return true}
-  else if(searchedItems.value[0].status === 'suitable'){return true}
+  if(searchedItems.value.length > 0 && searchedItems.value[0].status === 'bookable'){return true}
+  else if(searchedItems.value.length > 0 && searchedItems.value[0].status === 'suitable'){return true}
   return false
 })
+
 const contrastToPrimary = computed(() =>
     useContrastColor().contrastToPrimary()
 );
