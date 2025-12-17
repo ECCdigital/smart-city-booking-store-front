@@ -1,15 +1,18 @@
 <template>
   <!-- Strip for md and larger screens -->
-  <div class="hidden md:block">
+  <div class="hidden md:block ">
     <div
-      class="flex justify-between bg-white dark:bg-gray-700 -mt-5 p-2 z-100 rounded shadow-lg"
-      style="position: relative; width: 60vw"
+      class="flex justify-between bg-white dark:bg-gray-700 z-100 rounded shadow-lg"
+      :class="entryPageMode? 'p-5 space-x-1 -mt-10' : 'p-2 -mt-5'"
+      style="position: relative"
+      :style="entryPageMode? 'width:80vw; height: 100px ' : 'width:60vw'"
     >
       <InputText
         v-model="_term"
         icon="i-lucide-search"
         placeholder="Wonach suchen Sie?"
         clearable
+        class="rounded-md"
         @keyup.enter="onSearch"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
@@ -18,11 +21,12 @@
         icon="i-lucide-map-pin"
         placeholder="Ort"
         clearable
+        class="rounded-md"
         @keyup.enter="onSearch"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <InputTimePeriod
-        v-model:timePeriod="_timePeriod"
+        v-model:time-period="_timePeriod"
         @select-date="setSearchTimePeriod"
         @remove-date="removeSearchTimePeriod"
       />
@@ -83,7 +87,7 @@ const filterResetKey = defineModel("filter-reset-key", {
 });
 
 const props = defineProps({
-  isEvent: {
+  entryPageMode:{
     type: Boolean,
     default: false,
   },
