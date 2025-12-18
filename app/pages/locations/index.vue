@@ -54,6 +54,7 @@ const {
     </div>
 
     <div class="m-10 lg:m-5 sm:flex items-center">
+      {{allLocations.length}}
       <span
         v-if="searchIsInitialized"
         class="text-black dark:text-white lg:font-bold"

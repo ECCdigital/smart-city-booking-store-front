@@ -36,10 +36,10 @@
 </template>
 <script setup>
 import NavigationLink from "./NavigationLink.vue";
-import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck";
-import { useColorMode } from "@vueuse/core";
-import { useAuthStore } from "~~/stores/auth.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import {useBreakpointCheck} from "~/composables/utils/useBreakpointCheck";
+import {useColorMode} from "@vueuse/core";
+import {useAuthStore} from "~~/stores/auth.js";
+import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 import TenantSwitcher from "~/components/TenantSwitcher.vue";
 import UserDropdown from "~/components/UserDropdown.vue";
 
@@ -62,8 +62,7 @@ const tabs = computed(() => [
 ]);
 
 const contrastToSecondary = computed(() => {
-  const temp = useContrastColor().contrastToSecondary();
-  return temp;
+  return useContrastColor().contrastToSecondary();
 });
 
 const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
