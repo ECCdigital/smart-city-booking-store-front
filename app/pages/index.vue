@@ -41,7 +41,7 @@
       </div>
     </div>
 
-    <!--
+
     <div id="testSpace" class="bg-fuchsia-200">
     {{allItems.length}}
       <hr>
@@ -49,9 +49,11 @@
         {{i+1}}.) {{item.title || item.information.name}}--{{item.category}}
       </p>
     </div>
-  -->
+    <div id="testSpace" class="bg-fuchsia-300">
+      {{allItems[0]}}
+</div>
 
-  </div>
+    </div>
 </template>
 
 <script setup>
@@ -142,7 +144,7 @@ function runSearch() {
 :deep(.mainCategoryCard:hover .avatar-hover) {
   transform: scale(1.15);
   transition: transform 0.2s;
-  rotate: 10deg;
+  rotate: 2deg;
 }
 
 </style>
