@@ -1,6 +1,6 @@
 <script setup>
-import { useAuthStore } from "~~/stores/auth.js";
-import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
+import {useAuthStore} from "~~/stores/auth.js";
+import {useBreakpointCheck} from "~/composables/utils/useBreakpointCheck.js";
 import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 
 const t = useI18n().t;
@@ -11,13 +11,10 @@ const notification = useNotification();
 
 const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
 const contrastToSecondary = computed(() => {
-      const temp = useContrastColor().contrastToSecondary()
-      console.log("temp", temp);
-      return temp;
+  return useContrastColor().contrastToSecondary();
     }
 );
 const nameColor = computed(() => {
-  console.log("contrastToSecondary.value", contrastToSecondary.value);
   if(contrastToSecondary.value === '#ffffff'){
     return 'text-white';
   } else {
