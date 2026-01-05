@@ -27,20 +27,14 @@
           >
             <template #header>
               <div class="w-full flex justify-center mt-5">
-                <UAvatar
-                    :icon="category.icon"
-                    size="3xl"
-                    class="bg-primary avatar-hover"
-                    :ui="{icon: 'text-black dark:text-white'}"
-                /><!--   -->
+                <div class="bg-primary rounded-full p-3 pb-1 shadow-lg avatar-hover">
+                  <UIcon :name="category.icon" size="24" class="avatar-hover" :style="{color: contrastToPrimary}"/>
+                </div>
               </div>
             </template>
             <div class="text-center -mt-5 space-y-1">
               <p class="text-xl font-bold">{{category.title}}</p>
               <p>{{category.description}}</p>
-
-              <!--<p class="bg-fuchsia-700">{{ contrastToPrimary }}</p>-->
-
             </div>
           </UCard>
         </div>
@@ -65,7 +59,7 @@ import {useBookableSearch} from "~/composables/search/useBookableSearch.js";
 import SearchBar from "~/components/search/SearchBar.vue";
 import {useBookableStore} from "~~/stores/bookable.js";
 import {useEventStore} from "~~/stores/event.js";
-//import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 
 definePageMeta({
@@ -73,9 +67,10 @@ definePageMeta({
   middleware: ["catalog-auth"],
 });
 
-/*const contrastToPrimary = computed(() =>
-    useContrastColor().contrastToPrimary()
-);*/
+const contrastToPrimary = computed(() => {
+  return useContrastColor().contrastToPrimary()
+  }
+);
 const {loadBundle} = useCatalogBundle();
 const bookableStore = useBookableStore();
 const eventStore = useEventStore();
