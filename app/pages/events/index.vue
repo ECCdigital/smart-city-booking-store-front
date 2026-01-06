@@ -43,7 +43,6 @@ const {
         :location="query.location"
         :time-start="query.start"
         :time-end="query.end"
-        :is-event="true"
         @search="runSearch"
         @reset="resetResults"
       />
