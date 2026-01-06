@@ -40,16 +40,15 @@
 
         <!--Aktionen-->
         <div class="w-full mt-2 flex justify-end content-end">
-          <!-- toDo - für MVP ausgeblendet! Danach wieder aktivieren!  -->
-          <!--<UButton
+          <UButton
           v-if="!isNotBookable"
           label="Details ansehen"
-          variant="ghost"
+          :variant="entryPageMode? 'solid' : 'ghost'"
           class="justify-center px-10"
-          :to="`/catalog/${catalogSlug}/events/${event.id}`"
+          @click="goToDetails()"
         />
-        -->
-          <UTooltip :disabled="disableTooltip" :text="tooltipText">
+
+          <UTooltip v-if="!entryPageMode" :disabled="disableTooltip" :text="tooltipText">
             <div>
               <UButton
                 v-if="!isNotBookable && event.attendees.needsRegistration"
@@ -64,7 +63,7 @@
                 label="Keine Anmeldung nötig"
                 variant="soft"
                 disabled
-                class="bookingButton justify-center px-3"
+                class="bookingButton justify-center px-3 text-white"
               />
             </div>
           </UTooltip>
@@ -100,6 +99,10 @@ const props = defineProps({
     default: null,
   },
   isNotBookable: {
+    type: Boolean,
+    default: false,
+  },
+  entryPageMode: {
     type: Boolean,
     default: false,
   },
@@ -166,6 +169,9 @@ function goToTicketOptions() {
   } else {
     openTicketOptions.value = true;
   }
+}
+function goToDetails() {
+  console.log("would like to go to details");
 }
 </script>
 <style scoped>

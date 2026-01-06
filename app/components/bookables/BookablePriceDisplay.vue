@@ -39,7 +39,17 @@ const props = defineProps({
 });
 
 function getMinPrice() {
-  return Math.min(...props.bookable.priceCategories.map((cat) => cat.priceEur));
+  if(props.bookable.priceCategories.every((c) => c.priceEur === 0)){
+    console.log("all prices are 0 for", props.bookable.title)
+    return null;
+  }
+  //exclude holiday price categories
+  const pricesWithoutHolidays = props.bookable.priceCategories.filter(
+    (c) => c.holidays.length === 0,
+  );
+  //toDo - wenn nur eine Kategorie mit Preis 0, dann "null" zurückgeben
+
+  return Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
 }
 function displayMinDefaultPrice() {
   if (
@@ -49,8 +59,10 @@ function displayMinDefaultPrice() {
     return null;
   }
 
+  console.log(props.bookable)
   const min = getMinPrice();
-  if (min === 0) {
+  console.log("min price for:", min, props.bookable.title)
+  if (min === null) {
     return "Kostenlos";
   }
   const includeTax = props.bookable.priceValueAddedTax

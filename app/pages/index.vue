@@ -2,18 +2,20 @@
   <div class="bg-white dark:bg-gray-900">
     <div class="flex justify-center bg-gray-200 dark:bg-gray-950">
       <SearchBar
-          entry-page-mode
-          :term="query.term"
           :location="query.location"
-          :time-start="query.start"
+          :term="query.term"
           :time-end="query.end"
-          @search="runSearch"
+          :time-start="query.start"
+          entry-page-mode
           @reset="resetResults"
+          @search="runSearch"
       />
     </div>
 
     <div class="bg-gray-200 dark:bg-gray-950">
-      <div class="grid md:grid-cols-2 lg:flex justify-self-center space-x-3" style="max-width: 90vw; margin: auto; padding: 50px 0">
+      <div
+class="grid md:grid-cols-2 lg:flex justify-self-center space-x-3"
+           style="max-width: 90vw; margin: auto; padding: 50px 0">
         <div
             v-for="(category,i) in tempCategories"
             :key="i"
@@ -21,39 +23,42 @@
             style="width: 400px"
         >
           <UCard
-              variant="solid"
               class="mainCategoryCard h-full bg-white dark:bg-gray-700 text-black dark:text-gray-200 shadow-lg  hover:scale-125 hover:border-3 hover:-m-3 hover:border-primary"
+              variant="solid"
 
           >
             <template #header>
               <div class="w-full flex justify-center mt-5">
                 <div class="bg-primary rounded-full p-3 pb-1 shadow-lg avatar-hover">
-                  <UIcon :name="category.icon" size="24" class="avatar-hover" :style="{color: contrastToPrimary}"/>
+                  <UIcon :name="category.icon" :style="{color: contrastToPrimary}" class="avatar-hover" size="24"/>
                 </div>
               </div>
             </template>
             <div class="text-center -mt-5 space-y-1">
-              <p class="text-xl font-bold">{{category.title}}</p>
-              <p>{{category.description}}</p>
+              <p class="text-xl font-bold">{{ category.title }}</p>
+              <p>{{ category.description }}</p>
             </div>
           </UCard>
         </div>
       </div>
     </div>
-
-
-    <div id="testSpace" class="bg-fuchsia-200">
-    {{allItems.length}}
-      <hr>
-      <p v-for="(item, i) in allItems" :key="i">
-        {{i+1}}.) {{item.title || item.information.name}}--{{item.category}}
-      </p>
+    <div class="flex flex-row justify-center mb-10 lg:my-5 m-5">
+      <div class="basis-full lg:basis-3/4">
+        <ResultsList
+            v-if="suitableItems.length > 0"
+            :bookables="suitableItems"
+            entry-page-mode
+            class="hidden md:block"
+        />
+        <ResultsGrid
+            v-if="suitableItems.length > 0"
+            :bookables="suitableItems"
+            entry-page-mode
+            class="md:hidden"
+        />
+      </div>
     </div>
-    <div id="testSpace" class="bg-fuchsia-300">
-      {{allItems[0]}}
-</div>
-
-    </div>
+  </div>
 </template>
 
 <script setup>
@@ -61,7 +66,9 @@ import {useBookableSearch} from "~/composables/search/useBookableSearch.js";
 import SearchBar from "~/components/search/SearchBar.vue";
 import {useBookableStore} from "~~/stores/bookable.js";
 import {useEventStore} from "~~/stores/event.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import {useContrastColor} from "~/composables/utils/useContrastColor.js";
+import ResultsList from "~/components/search/ResultsList.vue";
+import ResultsGrid from "~/components/search/ResultsGrid.vue";
 
 
 definePageMeta({
@@ -70,15 +77,15 @@ definePageMeta({
 });
 
 const contrastToPrimary = computed(() => {
-  return useContrastColor().contrastToPrimary()
-  }
+      return useContrastColor().contrastToPrimary()
+    }
 );
 const {loadBundle} = useCatalogBundle();
 const bookableStore = useBookableStore();
 const eventStore = useEventStore();
 await loadBundle({include: ["bookables", "events"]});
 
-const allItems =computed(() => {
+const allItems = computed(() => {
   const locations = updateBookables(bookableStore.getLocations, "location")
   const rooms = updateBookables(bookableStore.getRooms, "room")
   const resources = updateBookables(bookableStore.getResources, "resource")
@@ -94,9 +101,14 @@ const allItems =computed(() => {
 
 const {
   query,
+  updatedItems: searchedItems,
+  runSearch,
   resetResults
-} = useBookableSearch({ isEvent: false, sourceItems: allItems });
+} = useBookableSearch({isEvent: false, sourceItems: allItems});
 
+const suitableItems = computed(() => {
+  return searchedItems.value.filter((i) => i.status === "suitable");
+});
 //toDo - read categories from instance settings
 const tempCategories = [
   {
@@ -125,7 +137,7 @@ const tempCategories = [
   }
 ]
 
-function updateBookables(itemList, itemName){
+function updateBookables(itemList, itemName) {
   return itemList.filter((i) => i.isBookable).map((i) => {
     return {
       ...i,
@@ -134,10 +146,6 @@ function updateBookables(itemList, itemName){
   });
 }
 
-function runSearch() {
-  console.log("Help... Don't know what to do here yet.");
-  // toDo - *** *** Implement search functionality *** ***
-}
 </script>
 
 <style scoped>

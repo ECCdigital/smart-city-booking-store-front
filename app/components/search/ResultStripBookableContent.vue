@@ -32,17 +32,16 @@
 
         <!--Aktionen-->
         <div class="w-full mt-2 flex justify-end content-end">
-          <!-- toDo - für MVP ausgeblendet! Danach wieder aktivieren!  -->
-          <!--<UButton
+          <UButton
           v-if="!isNotBookable"
           label="Details ansehen"
-          variant="ghost"
+          :variant="entryPageMode? 'solid' : 'ghost'"
           class="justify-center px-10"
-          :to="`/catalog/${catalogSlug}/locations/${bookable.id}`"
+          @click="goToDetails()"
         />
-        -->
+
           <UButton
-            v-if="!isNotBookable"
+            v-if="!isNotBookable && !entryPageMode"
             label="Buchen"
             class="justify-center px-10"
             :style="{ color: contrastToPrimary }"
@@ -78,6 +77,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  entryPageMode: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const tenantName = computed(() => {
@@ -88,6 +91,10 @@ const contrastToPrimary = computed(() =>
   useContrastColor().contrastToPrimary()
 );
 
+
+function goToDetails() {
+  console.log("would like to go to details");
+}
 function goToCheckout() {
   const route = useRoute();
   useCheckoutRedirect().redirectToCheckout({

@@ -211,11 +211,19 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
   function initializeResults() {
     if (!isEvent) {
-      updatedItems.value = toValue(sourceItems).map((item: any) => ({
-        item,
-        status: item.isBookable ? "suitable" : "nonBookable",
-        calculatedPrice: null,
-      }));
+      updatedItems.value = toValue(sourceItems).map((item: any) => {
+          let isBookable = true;
+          if(!item.isBookable) {
+              isBookable = false;
+          } else if(item.category === 'event' && item.attendees.publicEvent === false) {
+              isBookable = false;
+          }
+          return {
+              item,
+              status: isBookable ? "suitable" : "nonBookable",
+              calculatedPrice: null,
+          }
+      });
     } else {
       updatedItems.value = toValue(sourceItems).map((item: any) => {
         if (item.attendees.publicEvent === true) {
@@ -253,9 +261,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     let itemsWithStatus = setItemStatus(() => toValue(sourceItems));
 
-    if (isEvent) {
-      itemsWithStatus = await checkTickets(itemsWithStatus);
-    }
+    itemsWithStatus = await checkTickets(itemsWithStatus);
 
     let bookableItems = itemsWithStatus.filter(
       (i: any) => i.status === "isBookable"
@@ -274,6 +280,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       { start: criteria.timeStart, end: criteria.timeEnd }
     );
 
+    console.log('Updated Items after search:', updatedItems.value);
     searchIsInitialized.value = true;
   }
 
@@ -286,93 +293,110 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
   function setItemStatus(itemsToSearch: () => any[]) {
     return toValue(itemsToSearch).map((item: any) => {
-      if (!isEvent && item.isBookable) {
-        return { item: item, status: "isBookable" };
-      } else if (isEvent) {
-        return { item: item, status: "isBookable" };
-      } else {
-        return { item: item, status: "nonBookable" };
+        if (isEvent) {
+            return { item, status: "isBookable" };
+        }
+        if (item.category === "event" || (item.category !== "event" && item.isBookable)) {
+            return { item, status: "isBookable" };
+        }
+        return { item, status: "nonBookable" };
       }
-    });
+    );
   }
 
   function searchForSearchTerm(searchTerm: string, items: any[]) {
-    if (searchTerm && !isEvent) {
-      items = new Fuse(items, bookableSearchTermOptions)
-        .search(searchTerm)
-        .map((result) => result.item);
-    } else if (searchTerm && isEvent) {
-      items = new Fuse(items, eventSearchTermOptions)
-        .search(searchTerm)
-        .map((result) => result.item);
-    }
-    return items;
+      if (!searchTerm) return items;
+
+      if (!isEvent) {
+
+          const allEvents = items.filter(item => item.item.category === "event");
+          const allBookables = items.filter(item => item.item.category !== "event");
+
+          const foundEvents = new Fuse(allEvents, eventSearchTermOptions)
+              .search(searchTerm)
+              .map(result => result.item);
+
+          const foundBookables = new Fuse(allBookables, bookableSearchTermOptions)
+              .search(searchTerm)
+              .map(result => result.item);
+
+          return [...foundEvents, ...foundBookables];
+      } else {
+          return new Fuse(items, eventSearchTermOptions)
+              .search(searchTerm)
+              .map(result => result.item);
+      }
   }
 
   function searchForLocation(searchLocation: string, items: any[]) {
-    if (searchLocation && !isEvent) {
-      items = new Fuse(items, bookableSearchLocationOptions)
-        .search(searchLocation)
-        .map((result) => result.item);
-    } else if (searchLocation && isEvent) {
-      items = new Fuse(items, eventSearchLocationOptions)
-        .search(searchLocation)
-        .map((result) => result.item);
-    }
-    return items;
+      if(!searchLocation) return items;
+
+      if(!isEvent) {
+          const allEvents = items.filter(item => item.item.category === "event");
+          const allBookables = items.filter(item => item.item.category !== "event");
+
+          const foundEvents = new Fuse(allEvents, eventSearchLocationOptions)
+              .search(searchLocation)
+              .map(result => result.item);
+
+          const foundBookables = new Fuse(allBookables, bookableSearchLocationOptions)
+              .search(searchLocation)
+              .map(result => result.item);
+
+          return [...foundEvents, ...foundBookables];
+      } else {
+            return new Fuse(items, eventSearchLocationOptions)
+                .search(searchLocation)
+                .map(result => result.item);
+      }
   }
 
   async function searchForTimePeriod(timePeriod: any, items: any[]) {
-    if (timePeriod && timePeriod.start !== null) {
-      let availabilityChecks: any[] = [];
-      if (!isEvent) {
-        availabilityChecks = await Promise.all(
-          items.map(async (item) => {
-            const availability = options.getAvailability
-              ? await options.getAvailability(
-                  item.item,
-                  timePeriod.start,
-                  timePeriod.end
-                )
-              : await useBookables().getBookableAvailability(
-                  item.item.tenantId,
-                  item.item.id,
-                  timePeriod.start,
-                  timePeriod.end
-                );
+    if (timePeriod && timePeriod.start === null) {
+        return items;
+    }
+
+    const checkAvailability = async (item: any) => {
+        if(isEvent || item.item.category === "event") {
+            const formattedEventTimePeriod = formateTimePeriod({
+                startDate: item.item.information.startDate,
+                startTime: item.item.information.startTime,
+                endDate: item.item.information.endDate,
+                endTime: item.item.information.endTime,
+            });
+
+            const isWithinPeriod =
+                !!formattedEventTimePeriod &&
+                timePeriod.start !== null &&
+                timePeriod.end !== null &&
+                formattedEventTimePeriod.start >= timePeriod.start &&
+                formattedEventTimePeriod.end <= timePeriod.end;
+
             return {
-              item,
-              isAvailable:
-                availability.isAvailable && availability.remaining > 0,
+                item,
+                isAvailable: isWithinPeriod,
             };
-          })
-        );
-      } else if (isEvent) {
-        availabilityChecks = items.map((item) => {
-          const formattedEventTimePeriod = formateTimePeriod({
-            startDate: item.item.information.startDate,
-            startTime: item.item.information.startTime,
-            endDate: item.item.information.endDate,
-            endTime: item.item.information.endTime,
-          });
+        } else {
+            const availability = options.getAvailability
+                ? await options.getAvailability(item, timePeriod.start!, timePeriod.end!)
+                : await useBookables().getBookableAvailability(
+                    item.item.tenantId,
+                    item.item.id,
+                    timePeriod.start!,
+                    timePeriod.end!
+                );
 
-          const isWithinPeriod =
-            formattedEventTimePeriod &&
-            timePeriod &&
-            formattedEventTimePeriod.start >= timePeriod.start &&
-            formattedEventTimePeriod.end <= timePeriod.end;
+            return {
+                item,
+                isAvailable: availability.isAvailable && availability.remaining > 0,
+            };
+        }
+    }
 
-          return {
-            item,
-            isAvailable: isWithinPeriod,
-          };
-        });
-      }
-      items = availabilityChecks
+    const availabilityChecks = await Promise.all(items.map(checkAvailability));
+    return availabilityChecks
         .filter((result) => result.isAvailable)
         .map((result) => result.item);
-    }
-    return items;
   }
 
   async function updateItemStatus(
@@ -380,7 +404,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     bookableItems: any[],
     timePeriod: any
   ) {
-    return await Promise.all(
+      return await Promise.all(
       itemsWithStatus.map(async (item) => {
         if (item.status === "isBookable") {
           const isSuitable = bookableItems.includes(item);
@@ -388,26 +412,29 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           let price = null;
           if (
             timePeriod &&
-            timePeriod.start !== null &&
-            timePeriod.start !== null &&
-            !isEvent
+              timePeriod.start !== null &&
+              timePeriod.start !== null &&
+               (!isEvent && item.item.category !== 'event') //toDo - und oder oder???
           ) {
-            price = options.getPriceForPeriod
-              ? await options.getPriceForPeriod(
-                  item.item,
-                  timePeriod.start,
-                  timePeriod.end
-                )
-              : await useBookables().getBookablePrice(
-                  item.item.tenantId,
-                  item.item.id,
-                  timePeriod.start,
-                  timePeriod.end
-                );
-          } else if (timePeriod && isEvent) {
-            //check price and availability for events
-            //toDo - needed??
+
+              try{
+                  price = options.getPriceForPeriod
+                      ? await options.getPriceForPeriod(
+                          item.item,
+                          timePeriod.start,
+                          timePeriod.end
+                      )
+                      : await useBookables().getBookablePrice(
+                          item.item.tenantId,
+                          item.item.id,
+                          timePeriod.start,
+                          timePeriod.end
+                      );
+              } catch {
+                  price = null;
+              }
           }
+
           return {
             ...item,
             status: isSuitable ? "suitable" : "nonSuitable",
@@ -456,33 +483,37 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   async function checkTickets(events: { item: any; status: string }[]) {
-    return await Promise.all(
+      return await Promise.all(
       events.map(async (event) => {
-        const updatedTickets = await Promise.all(
-          event.item.tickets.map(async (ticket: any) => {
-            const ticketPrice = await useBookables().getBookablePrice(
-              event.item.tenantId,
-              ticket.id
+          if(isEvent || event.item.category === 'event') {
+            const updatedTickets = await Promise.all(
+                event.item.tickets.map(async (ticket: any) => {
+                    const ticketPrice = await useBookables().getBookablePrice(
+                        event.item.tenantId,
+                        ticket.id
+                    );
+                    const ticketAvailability =
+                        await useBookables().getBookableAvailability(
+                            event.item.tenantId,
+                            ticket.id
+                        );
+                    return {
+                        ...ticket,
+                        calculatedPrice: ticketPrice,
+                        availability: ticketAvailability,
+                    };
+                })
             );
-            const ticketAvailability =
-              await useBookables().getBookableAvailability(
-                event.item.tenantId,
-                ticket.id
-              );
             return {
-              ...ticket,
-              calculatedPrice: ticketPrice,
-              availability: ticketAvailability,
+                ...event,
+                item: {
+                    ...event.item,
+                    tickets: updatedTickets,
+                },
             };
-          })
-        );
-        return {
-          ...event,
-          item: {
-            ...event.item,
-            tickets: updatedTickets,
-          },
-        };
+        } else {
+         return event
+        }
       })
     );
   }

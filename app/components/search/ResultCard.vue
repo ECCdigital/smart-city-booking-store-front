@@ -5,13 +5,20 @@
     @click="goToCheckout"
   >
     <div id="header" class="flex flex-col h-36">
-      <div class="flex h-9/10">
+      <div class="flex h-9/10 relative">
+        <UBadge
+            v-if="entryPageMode"
+            class="absolute top-2 left-2 z-10"
+            color="primary"
+            size="md"
+            :label="categoryName"
+        />
         <img
           v-if="!isEvent && item?.imgUrl"
           :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"
           alt="Bild des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
-        />
+        >
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
@@ -19,13 +26,13 @@
           )}`"
           alt=""
           class="w-full object-cover rounded-t-xl"
-        />
+        >
         <img
           v-else
           src="../../assets/bookable-default.jpg"
           alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
-        />
+        >
       </div>
       <USeparator color="primary" type="solid" size="xl" class="w-full" />
     </div>
@@ -62,12 +69,31 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  entryPageMode: {
+    type: Boolean,
+    default: false,
+  },
 });
 const isEvent = computed(() => {
   if ("type" in props.item) {
     return false;
   } else {
     return true;
+  }
+});
+//toDo - read dynamically from instance
+const categoryName = computed(() => {
+  switch (props.item?.category){
+    case "room":
+      return "Räume";
+    case "location":
+      return "Veranstaltungsorte";
+    case "resource":
+      return "Geräte";
+    case "event":
+      return "Veranstaltungen";
+    default:
+      return "";
   }
 });
 
