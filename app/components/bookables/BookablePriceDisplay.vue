@@ -19,11 +19,11 @@
     <p v-else>
       {{ displayMinDefaultPrice() }}
     </p>
-    <!--
+
     <p class="text-xs font-normal text-gray-600 dark:text-gray-300">
       {{ displayPricePerUnit() }}
     </p>
-    -->
+
   </div>
 </template>
 <script setup>
@@ -39,15 +39,14 @@ const props = defineProps({
 });
 
 function getMinPrice() {
+  //all prices are free
   if(props.bookable.priceCategories.every((c) => c.priceEur === 0)){
-    console.log("all prices are 0 for", props.bookable.title)
     return null;
   }
   //exclude holiday price categories
   const pricesWithoutHolidays = props.bookable.priceCategories.filter(
     (c) => c.holidays.length === 0,
   );
-  //toDo - wenn nur eine Kategorie mit Preis 0, dann "null" zurückgeben
 
   return Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
 }
@@ -59,9 +58,7 @@ function displayMinDefaultPrice() {
     return null;
   }
 
-  console.log(props.bookable)
   const min = getMinPrice();
-  console.log("min price for:", min, props.bookable.title)
   if (min === null) {
     return "Kostenlos";
   }
@@ -82,27 +79,28 @@ function displayPrice(currentPrice) {
   }
 }
 
-/*
+
 function displayPricePerUnit() {
   const minPrice = getMinPrice();
-  if (minPrice === 0) {
+  if (minPrice === null || minPrice === 0) {
     return "";
   }
 
-  let includeTaxes = ""
-  if(props.bookable.priceValueAddedTax > 0){
-    includeTaxes = "(zzgl. MwSt.)"
-  }
+  const includeTaxes = "(inkl. MwSt.)"
+  /*if(props.bookable.priceValueAddedTax > 0){
+    includeTaxes = "(inkl. MwSt.)"
+  }*/
+
   switch (props.bookable.priceType) {
     case "per-hour":
-      return minPrice + " € / Stunde " + includeTaxes;
+      return " pro Stunde " + includeTaxes;
     case "per-item":
-      return minPrice + " € / Stück " + includeTaxes;
+      return " pro Stück " + includeTaxes;
     case "per-day":
-      return minPrice + " € / Tag " + includeTaxes;
+      return " pro Tag " + includeTaxes;
   }
 }
-*/
+
 </script>
 
 <style scoped></style>
