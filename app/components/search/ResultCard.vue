@@ -1,6 +1,6 @@
 <template>
   <div
-    class="shadow-lg h-full bg-white dark:bg-gray-700 rounded-xl"
+    class="shadow-lg bg-white dark:bg-gray-700 rounded-xl"
     :class="isNotBookable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer'"
     @click="goToCheckout"
   >

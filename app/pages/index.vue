@@ -91,7 +91,8 @@
             Weniger anzeigen...
           </p>
         </div>
-        <div class="flex flex-col space-y-2">
+
+        <div class="grid space-y-2">
           <div
               v-for="(chunk, rowIdx) in chunkedLatestEventsList"
               :key="rowIdx"
@@ -100,21 +101,27 @@
             <div
                 v-for="(b, i) in chunk"
                 :key="i"
-                class="basis-1/3 h-full"
+                class="flex basis-1/3"
             >
               <ResultCard
                   :item="b.item"
                   :calculated-price="b.calculatedPrice"
                   entry-page-mode
-                  class="h-full"
-              />
+                  class="flex flex-col h-full w-full"
+              /><!--  -->
             </div>
+            <!-- Fill empty spaces if chunk has less than 3 items -->
+            <div
+                v-for="n in (3 - chunk.length)"
+                :key="'empty-' + n"
+                class="flex basis-1/3"
+                style="visibility: hidden;"
+            />
           </div>
         </div>
       </div>
     </div>
-  </div>
-</template>
+</div></template>
 
 <script setup>
 import {useBookableSearch} from "~/composables/search/useBookableSearch.js";
@@ -188,187 +195,11 @@ const currentWeek = computed(() => {
 
 const latestEvents = computed(() => {
   const allEvents = searchedItems.value.filter((i) => i.item.category === "event");
-  const currentWeekEvents = allEvents.filter((e) => {
+  return allEvents.filter((e) => {
     const eventStartDate = new Date(e.item.information.startDate);
     const eventEndDate = new Date(e.item.information.endDate);
     return eventStartDate >= currentWeek.value[0] && eventEndDate <= currentWeek.value[1];
   });
-
-  //toDo *********************************************************************************
-  //toDo - for testing
-  /*
-  currentWeekEvents.push({item:{
-    "id": "2e7310a7-6fd3-43c1-a8bb-677991f00c53",
-      "tenantId": "diz",
-      "attendees": {
-        "publicEvent": true,
-        "needsRegistration": false,
-        "free": true,
-        "maxAttendees": null,
-        "priceCategories": []
-      },
-      "eventAddress": {
-        "street": "Dorfstr. ",
-            "houseNumber": "12",
-            "additional": "",
-            "city": "Dersau",
-            "zip": "24326"
-      },
-      "eventLocation": {
-        "name": "Feuerwerk Dersau",
-            "phoneNumber": "",
-            "emailAddress": "test@test.de",
-            "select": null,
-            "room": null,
-            "url": ""
-      },
-      "eventOrganizer": {
-        "name": "Feuerwehr Dersau",
-            "addContactPerson": true,
-            "contactPersonName": "Fehrwehrhauptmann Brandt",
-            "contactPersonPhoneNumber": "0123456789",
-            "contactPersonEmailAddress": "test@test.de",
-            "contactPersonImage": null,
-            "speakers": []
-      },
-      "information": {
-        "name": "Test 1",
-            "teaserText": "<p>TestTestTest Test Test Test.</p>",
-            "description": "",
-            "teaserImage": null,
-            "startDate": "2026-01-10",
-            "startTime": "17:00",
-            "endDate": "2026-01-10",
-            "endTime": "21:00",
-            "tags": [],
-            "flags": [
-          "Weihnachten",
-          "Tradition",
-          "Feuer",
-          "Feuerwehr"
-        ]
-      },
-      "isPublic": true,
-      "ownerUserId": "dominique.brandt@e-c-crew.de",
-      "schedules": []
-    }
-  });
-  currentWeekEvents.push({item:{
-      "id": "2e7310a7-6fd3-43c1-a8bb-677991f00c53",
-      "tenantId": "diz",
-      "attendees": {
-        "publicEvent": true,
-        "needsRegistration": false,
-        "free": true,
-        "maxAttendees": null,
-        "priceCategories": []
-      },
-      "eventAddress": {
-        "street": "Dorfstr. ",
-        "houseNumber": "12",
-        "additional": "",
-        "city": "Dersau",
-        "zip": "24326"
-      },
-      "eventLocation": {
-        "name": "Feuerwerk Dersau",
-        "phoneNumber": "",
-        "emailAddress": "test@test.de",
-        "select": null,
-        "room": null,
-        "url": ""
-      },
-      "eventOrganizer": {
-        "name": "Feuerwehr Dersau",
-        "addContactPerson": true,
-        "contactPersonName": "Fehrwehrhauptmann Brandt",
-        "contactPersonPhoneNumber": "0123456789",
-        "contactPersonEmailAddress": "test@test.de",
-        "contactPersonImage": null,
-        "speakers": []
-      },
-      "information": {
-        "name": "test 3",
-        "teaserText": "<p>Test Test Test Test.</p>",
-        "description": "",
-        "teaserImage": null,
-        "startDate": "2026-01-10",
-        "startTime": "17:00",
-        "endDate": "2026-01-10",
-        "endTime": "21:00",
-        "tags": [],
-        "flags": [
-          "Weihnachten",
-          "Tradition",
-          "Feuer",
-          "Feuerwehr"
-        ]
-      },
-      "isPublic": true,
-      "ownerUserId": "dominique.brandt@e-c-crew.de",
-      "schedules": []
-    }
-  });
-  currentWeekEvents.push({item:{
-      "id": "2e7310a7-6fd3-63c1-a8bb-677991f00c53",
-      "tenantId": "diz",
-      "attendees": {
-        "publicEvent": true,
-        "needsRegistration": false,
-        "free": true,
-        "maxAttendees": null,
-        "priceCategories": []
-      },
-      "eventAddress": {
-        "street": "Dorfstr. ",
-        "houseNumber": "12",
-        "additional": "",
-        "city": "Dersau",
-        "zip": "24326"
-      },
-      "eventLocation": {
-        "name": "Feuerwerk Dersau",
-        "phoneNumber": "",
-        "emailAddress": "test@test.de",
-        "select": null,
-        "room": null,
-        "url": ""
-      },
-      "eventOrganizer": {
-        "name": "Feuerwehr Dersau",
-        "addContactPerson": true,
-        "contactPersonName": "Fehrwehrhauptmann Brandt",
-        "contactPersonPhoneNumber": "0123456789",
-        "contactPersonEmailAddress": "test@test.de",
-        "contactPersonImage": null,
-        "speakers": []
-      },
-      "information": {
-        "name": "test 2",
-        "teaserText": "<p>Test Test Test Test.</p>",
-        "description": "",
-        "teaserImage": null,
-        "startDate": "2026-01-10",
-        "startTime": "17:00",
-        "endDate": "2026-01-10",
-        "endTime": "21:00",
-        "tags": [],
-        "flags": [
-          "Weihnachten",
-          "Tradition",
-          "Feuer",
-          "Feuerwehr"
-        ]
-      },
-      "isPublic": true,
-      "ownerUserId": "dominique.brandt@e-c-crew.de",
-      "schedules": []
-    }
-  });
-  */
-  //toDo *********************************************************************************
-
-  return currentWeekEvents;
 });
 const showAllLatestEvents = ref(false);
 const latestEventsList = computed(() => {
