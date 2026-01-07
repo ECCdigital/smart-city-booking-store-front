@@ -42,12 +42,14 @@
       :bookable="item"
       :calculated-price="calculatedPrice"
       :is-not-bookable="isNotBookable"
+      :entry-page-mode="entryPageMode"
     />
     <ResultCardEventContent
       v-if="isEvent"
       v-model:open-ticket-options="openEventTicketOptions"
       :event="item"
       :is-not-bookable="isNotBookable"
+      :entry-page-mode="entryPageMode"
     />
   </div>
 </template>
@@ -99,33 +101,38 @@ const categoryName = computed(() => {
 
 const openEventTicketOptions = ref(false);
 function goToCheckout() {
-  const route = useRoute();
-  if (isEvent.value) {
-    //use external booking url
-    if (props.item.externalBookingUrl) {
-      window.open(props.item.externalBookingUrl, "_blank");
-      return;
+  if(!props.entryPageMode){
+    const route = useRoute();
+    if (isEvent.value) {
+      //use external booking url
+      if (props.item.externalBookingUrl) {
+        window.open(props.item.externalBookingUrl, "_blank");
+        return;
+      }
+      //direct to checkout if only one ticket type
+      if (props.item.tickets.length === 1) {
+        useCheckoutRedirect().redirectToCheckout({
+          id: props.item.tickets[0].id,
+          tenantId: props.item.tickets[0].tenantId,
+          start: route.query.start,
+          end: route.query.end,
+        });
+      } else {
+        openEventTicketOptions.value = true;
+      }
     }
-    //direct to checkout if only one ticket type
-    if (props.item.tickets.length === 1) {
+
+    if (!isEvent.value && !props.isNotBookable) {
       useCheckoutRedirect().redirectToCheckout({
-        id: props.item.tickets[0].id,
-        tenantId: props.item.tickets[0].tenantId,
+        id: props.item.id,
+        tenantId: props.item.tenantId,
         start: route.query.start,
         end: route.query.end,
       });
-    } else {
-      openEventTicketOptions.value = true;
     }
-  }
-
-  if (!isEvent.value && !props.isNotBookable) {
-    useCheckoutRedirect().redirectToCheckout({
-      id: props.item.id,
-      tenantId: props.item.tenantId,
-      start: route.query.start,
-      end: route.query.end,
-    });
+  } else {
+    //toDo - go to details page
+    console.log("want to go to details page");
   }
 }
 </script>
