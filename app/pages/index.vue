@@ -36,62 +36,7 @@
     </div>
 
     <div :class="searchIsInitialized? 'bg-gray-200 dark:bg-gray-950' : ''">
-      <div style="max-width: 90vw; margin: auto; padding: 50px 0">
-        <div class="flex items-end mb-5">
-          <h2 class="text-2xl font-bold mt-7">
-            Veranstaltungen dieser Woche
-          </h2>
-          <p class="ml-1 mt-8">
-            (
-            {{currentWeek[0].toLocaleDateString()}} -
-            {{currentWeek[1].toLocaleDateString()}}
-            )
-          </p>
-          <div class="flex-1" />
-          <p
-              v-if="latestEvents.length > 3 && !showAllLatestEvents"
-              class="text-primary text-bold"
-              @click="showAllLatestEvents = true"
-          >
-            Alle anzeigen...
-          </p>
-          <p
-              v-if="latestEvents.length > 3 && showAllLatestEvents"
-              class="text-primary text-bold"
-              @click="showAllLatestEvents = false"
-          >
-            Weniger anzeigen...
-          </p>
-        </div>
-
-        <div class="grid space-y-2">
-          <div
-              v-for="(chunk, rowIdx) in chunkedLatestEventsList"
-              :key="rowIdx"
-              class="flex space-x-2"
-          >
-            <div
-                v-for="(b, i) in chunk"
-                :key="i"
-                class="flex basis-1/3"
-            >
-              <ResultCard
-                  :item="b.item"
-                  :calculated-price="b.calculatedPrice"
-                  entry-page-mode
-                  class="flex flex-col h-full w-full"
-              /><!--  -->
-            </div>
-            <!-- Fill empty spaces if chunk has less than 3 items -->
-            <div
-                v-for="n in (3 - chunk.length)"
-                :key="'empty-' + n"
-                class="flex basis-1/3"
-                style="visibility: hidden;"
-            />
-          </div>
-        </div>
-      </div>
+      <LatestEventsArea v-if="searchedItems" :items="searchedItems" />
     </div>
   </div>
 </template>
@@ -103,8 +48,8 @@ import {useBookableStore} from "~~/stores/bookable.js";
 import {useEventStore} from "~~/stores/event.js";
 import ResultsList from "~/components/search/ResultsList.vue";
 import ResultsGrid from "~/components/search/ResultsGrid.vue";
-import ResultCard from "~/components/search/ResultCard.vue";
 import MainCategoryArea from "~/components/MainCategoryArea.vue";
+import LatestEventsArea from "~/components/LatestEventsArea.vue";
 
 
 definePageMeta({
@@ -142,80 +87,6 @@ const {
 const suitableItems = computed(() => {
   return searchedItems.value.filter((i) => i.status === "suitable");
 });
-
-const currentWeek = computed(() => {
-  const now = new Date();
-  // Hilfsfunktion: Montag der aktuellen Woche
-  const day = now.getDay(); // 0 = Sonntag, 1 = Montag, ...
-  const diffToMonday = (day === 0 ? -6 : 1) - day; // Abstand in Tagen zu Montag
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diffToMonday);
-  monday.setHours(0, 0, 0, 0);
-
-  // Sonntag: Montag + 6 Tage
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  sunday.setHours(23, 59, 59, 999);
-  console.log("Current week range:", monday, "to", sunday);
-
-  return [monday, sunday];
-})
-
-
-const latestEvents = computed(() => {
-  const allEvents = searchedItems.value.filter((i) => i.item.category === "event");
-  return allEvents.filter((e) => {
-    const eventStartDate = new Date(e.item.information.startDate);
-    const eventEndDate = new Date(e.item.information.endDate);
-    return eventStartDate >= currentWeek.value[0] && eventEndDate <= currentWeek.value[1];
-  });
-});
-const showAllLatestEvents = ref(false);
-const latestEventsList = computed(() => {
-  if (showAllLatestEvents.value) {
-    return latestEvents.value;
-  } else {
-    return latestEvents.value.slice(0, 3);
-  }
-});
-const chunkedLatestEventsList = computed(() => {
-  const chunkSize = 3;
-  const arr = latestEventsList.value;
-  const result = [];
-  for (let i = 0; i < arr.length; i += chunkSize) {
-    result.push(arr.slice(i, i + chunkSize));
-  }
-  return result;
-});
-
-
-//toDo - read categories from instance settings
-const tempCategories = [
-  {
-    value: "location",
-    title: "Veranstaltungsorte",
-    description: "Veranstaltungatsorte in Ihrer Nähe",
-    icon: "i-lucide-building-2"
-  },
-  {
-    value: "room",
-    title: "Räume",
-    description: "Co-Working Spaces, Seminarräume u.v.m.",
-    icon: "i-lucide-door-open"
-  },
-  {
-    value: "resource",
-    title: "Geräte & Fahrzeuge",
-    description: "Technik, Fahrzeuge & mehr mieten",
-    icon: "i-lucide-wrench"
-  },
-  {
-    value: "event",
-    title: "Veranstaltungen",
-    description: "Events & Kurse in Ihrer Nähe",
-    icon: "i-lucide-calendar-check-2"
-  }
-]
 
 function updateBookables(itemList, itemName) {
   return itemList.filter((i) => i.isBookable).map((i) => {
