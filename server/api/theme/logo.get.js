@@ -13,8 +13,7 @@ export default defineEventHandler(async (event) => {
     const fetchedThemeBundle = await apiFetch(event, `/api/catalog/themes`, {
       method: "GET",
     });
-
-    logoUrl = fetchedThemeBundle?.logoUrl;
+    logoUrl = fetchedThemeBundle?.logoUrl ?? null;
   } catch (error) {
     log.error(`Error fetching theme: ${error}`);
   }
@@ -22,17 +21,17 @@ export default defineEventHandler(async (event) => {
   if (logoUrl) {
     try {
       const response = await fetch(logoUrl);
-
       if (!response.ok || !response.body) {
         throw new Error(
           `Failed to fetch logoUrl: ${response.status} ${response.statusText}`
         );
       }
 
-      const contentType =
-        response.headers.get("content-type") ?? "application/octet-stream";
-
-      setHeader(event, "Content-Type", contentType);
+      setHeader(
+        event,
+        "Content-Type",
+        response.headers.get("content-type") ?? "application/octet-stream"
+      );
       setHeader(event, "Cache-Control", "public, max-age=300");
 
       return sendStream(event, Readable.fromWeb(response.body));
@@ -41,12 +40,18 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const defaultLogoPath = join(process.cwd(), "public", "app-logo.png");
+  const candidates = [
+    join(process.cwd(), "public", "app-logo.png"),
+    join(process.cwd(), ".output", "public", "app-logo.png"),
+    join(process.cwd(), "..", "public", "app-logo.png"),
+  ];
+
+  const defaultLogoPath = candidates.find((p) => existsSync(p));
 
   if (!existsSync(defaultLogoPath)) {
     throw createError({
       statusCode: 404,
-      statusMessage: "Default logo not found: /public/app-logo.png",
+      statusMessage: "Default logo not found: /app-logo.png",
     });
   }
 
