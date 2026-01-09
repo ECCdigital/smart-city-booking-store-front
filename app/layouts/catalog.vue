@@ -7,6 +7,11 @@ useHead({
       rel: "stylesheet",
       href: `/api/theme/css`,
     },
+    {
+      rel: "preload",
+      href: `/api/theme/logo`,
+      as: "image",
+    },
   ],
 });
 
