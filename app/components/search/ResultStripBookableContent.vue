@@ -32,20 +32,19 @@
 
         <!--Aktionen-->
         <div class="w-full mt-2 flex justify-end content-end">
-          <!-- toDo - für MVP ausgeblendet! Danach wieder aktivieren!  -->
-          <!--<UButton
-          v-if="!isNotBookable"
-          label="Details ansehen"
-          variant="ghost"
-          class="justify-center px-10"
-          :to="`/catalog/${catalogSlug}/locations/${bookable.id}`"
-        />
-        -->
+          <UButton
+            label="Details ansehen"
+            variant="ghost"
+            class="justify-center px-10"
+            :style="{ cursor:'pointer' }"
+            @click="goToDetails()"
+          />
+
           <UButton
             v-if="!isNotBookable"
             label="Buchen"
             class="justify-center px-10"
-            :style="{ color: contrastToPrimary }"
+            :style="{ color: contrastToPrimary, cursor:'pointer' }"
             @click="goToCheckout"
           />
         </div>
@@ -79,6 +78,8 @@ const props = defineProps({
     default: false,
   },
 });
+const { tenantTo } = useTenantRoute();
+
 
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.bookable.tenantId).name;
@@ -87,6 +88,19 @@ const tenantName = computed(() => {
 const contrastToPrimary = computed(() =>
   useContrastColor().contrastToPrimary()
 );
+
+function goToDetails() {
+  const route = useRoute();
+  const router = useRouter();
+  const basePath = route.path;
+
+  if (basePath.includes("bookables")) {
+    router.push(tenantTo(`bookables/${props.bookable.id}`));
+  } else if (basePath.includes("locations")) {
+    router.push(tenantTo(`locations/${props.bookable.id}`));
+  }
+}
+
 
 function goToCheckout() {
   const route = useRoute();
