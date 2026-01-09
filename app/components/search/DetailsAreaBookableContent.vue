@@ -1,62 +1,84 @@
 <template>
-<div class="md:mr-20 mb-10">
+<div class="">
   <!-- Title -->
-  <p class="text-sm font-bold text-primary">
-    {{ tenantName }}
-  </p>
-  <h2 class="text-2xl font-bold">{{ item?.title }}</h2>
-
-  <BookableFlagDisplay :flags="item?.flags" is-detail-mode class="my-5" />
-
-  <div v-html="htmlDescription" />
-
-  <USeparator class="w-full my-10" :ui="{ border: 'border-gray-300' }" />
-
-  <div>
-    <h3 class="text-xl font-bold">Verfügbarkeit</h3>
-    <UAlert
-        v-if="!timePeriod || (!timePeriod.start && !timePeriod.end)"
-        title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
-        icon="i-lucide-info"
-        variant="ghost"
-        class="p-2 text-red-500"
-    />
-    <InputTimePeriod
-        :time-period="timePeriod"
-        class="border rounded-lg mt-2 mb-5"
-        style="max-width: 500px; width: 400px"
-        @select-date="setSearchTimePeriod"
-        @remove-date="removeSearchTimePeriod"
+  <div class="flex justify-between">
+    <div>
+      <p class="text-sm font-bold text-primary">
+        {{ tenantName }}
+      </p>
+      <h2 class="text-2xl font-bold">{{ item?.title }}</h2>
+    </div>
+    <UButton
+        label="Jetzt buchen"
+        icon="i-lucide-shopping-cart"
+        :disabled="!isBookable"
+        class="justify-center px-5"
+        :style="{ color: contrastToPrimary, cursor: 'pointer' }"
+        @click="goToCheckout()"
     />
   </div>
 
-  <div v-if="timePeriod && (timePeriod.start && timePeriod.end)" class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center">
-    <span class="font-bold mr-1 content-center ">{{ item?.title }}</span>
-    <span class="content-center ">
-       {{unit}}
-    </span>
-    <div class="flex-1" />
-    <BookablePriceDisplay
-        v-if="searchedItems.length > 0"
-        :bookable="searchedItems[0].item"
-        :calculated-price="searchedItems[0].calculatedPrice"
-        class="mx-2 font-bold content-center "
-    />
+  <div class="md:flex">
+    <div class="md:mr-20 mb-10 basis-2/3">
+      <BookableFlagDisplay :flags="item?.flags" is-detail-mode class="my-5" />
 
-    <UButton
-        v-if="isBookable"
-        label="Buchen"
-        class="justify-center px-5"
-        :style="{ color: contrastToPrimary }"
-        @click="goToCheckout()"
-    />
-    <UButton
-        v-else
-        label="Nicht verfügbar"
-        variant="soft"
-        class="justify-center px-5"
-        :style="{ color: contrastToPrimary }"
-    />
+      <div v-html="htmlDescription" />
+
+      <USeparator class="w-full my-10" :ui="{ border: 'border-gray-300' }" />
+
+      <div>
+        <h3 class="text-xl font-bold">Verfügbarkeit</h3>
+        <UAlert
+            v-if="!timePeriod || (!timePeriod.start && !timePeriod.end)"
+            title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
+            icon="i-lucide-info"
+            variant="ghost"
+            class="p-2 text-red-500"
+        />
+        <InputTimePeriod
+            :time-period="timePeriod"
+            class="border rounded-lg mt-2 mb-5"
+            style="max-width: 500px; width: 400px"
+            @select-date="setSearchTimePeriod"
+            @remove-date="removeSearchTimePeriod"
+        />
+      </div>
+
+      <div v-if="timePeriod && (timePeriod.start && timePeriod.end)" class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center">
+        <span class="font-bold mr-1 content-center ">{{ item?.title }}</span>
+        <span class="content-center ">
+          {{unit}}
+        </span>
+        <div class="flex-1" />
+        <BookablePriceDisplay
+            v-if="items.length > 0"
+            :bookable="items[0].item"
+            :calculated-price="items[0].calculatedPrice"
+            class="mx-2 font-bold content-center "
+        />
+
+        <UButton
+            v-if="isBookable"
+            label="Buchen"
+            class="justify-center px-5"
+            :style="{ color: contrastToPrimary }"
+            @click="goToCheckout()"
+        />
+        <UButton
+            v-else
+            label="Nicht verfügbar"
+            variant="soft"
+            class="justify-center px-5"
+            :style="{ color: contrastToPrimary }"
+        />
+    </div>
+  </div>
+
+    <!-- toDo - add map view -->
+    <div class="basis-1/3 space-y-3 pt-5">
+      <AddressInformationArea :is-event="isEvent" :item="item" />
+      <PriceInformationArea :is-event="isEvent" :item="item" />
+    </div>
   </div>
 </div>
 </template>
@@ -70,6 +92,8 @@ import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vu
 import {useCheckoutRedirect} from "~/composables/utils/useCheckoutRedirect.js";
 import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 import {useSanitizeHtml} from "~/composables/utils/useSanitizeHtml.js";
+import AddressInformationArea from "~/components/AddressInformationArea.vue";
+import PriceInformationArea from "~/components/PriceInformationArea.vue";
 
 const props = defineProps({
   item: {
@@ -80,7 +104,7 @@ const props = defineProps({
 
 const { state: query } = useCatalogQueryState();
 const {
-  updatedItems: searchedItems,
+  updatedItems: items,
   runSearch,
   resetResults,
 } = useBookableSearch({ isEvent: false, sourceItems: [props.item] });
@@ -122,8 +146,8 @@ const tenantName = computed(() => {
 });
 
 const isBookable = computed(() => {
-  if(searchedItems.value.length > 0 && searchedItems.value[0].status === 'bookable'){return true}
-  else if(searchedItems.value.length > 0 && searchedItems.value[0].status === 'suitable'){return true}
+  if(items.value.length ===1 && items.value[0].status === 'bookable'){return true}
+  else if(items.value.length === 1 && items.value[0].status === 'suitable'){return true}
   return false
 })
 

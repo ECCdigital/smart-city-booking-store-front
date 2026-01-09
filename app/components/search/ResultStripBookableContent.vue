@@ -36,6 +36,7 @@
             label="Details ansehen"
             variant="ghost"
             class="justify-center px-10"
+            :style="{ cursor:'pointer' }"
             @click="goToDetails()"
           />
 
@@ -43,7 +44,7 @@
             v-if="!isNotBookable"
             label="Buchen"
             class="justify-center px-10"
-            :style="{ color: contrastToPrimary }"
+            :style="{ color: contrastToPrimary, cursor:'pointer' }"
             @click="goToCheckout"
           />
         </div>
