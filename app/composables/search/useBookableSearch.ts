@@ -110,7 +110,9 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     const priceRange = query.price;
 
     if (Array.isArray(priceRange) && priceRange.length === 2) {
-      const [min, max] = priceRange;
+      const [minRaw, maxRaw] = priceRange;
+      const min = typeof minRaw === "number" ? minRaw : -Infinity;
+      const max = typeof maxRaw === "number" ? maxRaw : Infinity;
 
       filtered = filtered.filter((i) => {
         let price: number;
@@ -191,7 +193,6 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   );
 
   function setFilterQueryParams(criteria: Partial<CatalogQueryState>) {
-
     query.inclNoSuitable =
       typeof criteria.inclNoSuitable === "boolean"
         ? criteria.inclNoSuitable
@@ -327,7 +328,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       if (!isEvent) {
         availabilityChecks = await Promise.all(
           items.map(async (item) => {
-              const availability = options.getAvailability
+            const availability = options.getAvailability
               ? await options.getAvailability(
                   item.item,
                   timePeriod.start,
@@ -391,7 +392,6 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
             timePeriod.start !== null &&
             !isEvent
           ) {
-              console.log(options.getPriceForPeriod) // ????????????????????????????????
             price = options.getPriceForPeriod
               ? await options.getPriceForPeriod(
                   item.item,

@@ -7,6 +7,11 @@ useHead({
       rel: "stylesheet",
       href: `/api/theme/css`,
     },
+    {
+      rel: "preload",
+      href: `/api/theme/logo`,
+      as: "image",
+    },
   ],
 });
 
@@ -19,7 +24,7 @@ useHead({
     <!-- toDo - Hero-Design für lg anpassen!  -->
     <!-- toDo - Hero anpassen für Dark-Mode  -->
     <div
-        class="bg-gray-200  px-10 py-15 justify-between shadow-sm hidden md:block"
+      class="bg-gray-200 px-10 py-15 justify-between shadow-sm hidden md:block"
     >
       <div class="flex">
         <div class="grid content-center max-w-220px">
@@ -28,35 +33,34 @@ useHead({
             Unsere Angebote und Veranstaltungen
           </p>
         </div>
-        <div style="flex: 1; min-width: 15vw"/>
+        <div style="flex: 1; min-width: 15vw" />
         <div>
           <img
-              src="../assets/logo-kielregion.png"
-              alt="Logo Kiel Region"
-              class="text-center"
-              style="height: 7vw"
-          >
+            :src="`/api/theme/logo`"
+            alt="logo"
+            class="text-center"
+            style="max-height: 7vh"
+          />
         </div>
       </div>
-
     </div>
     <UPageHero
-        title="Unsere Angebote und Veranstaltungen"
-        :ui="{
+      title="Unsere Angebote und Veranstaltungen"
+      :ui="{
         container:
           'bg-[url(/assets/kiel_bootshafen.jpg)] contrast-70 p-10 pb-25 shadow-lg',
         title: 'text-2xl text-black',
       }"
-        class="md:hidden z-0"
+      class="md:hidden z-0"
     >
       <template #headline>
         <div class="flex justify-center">
           <img
-              src="../assets/logo-kielregion.png"
-              alt="Logo Kiel Region"
-              class="text-center"
-              style="height: 15vw"
-          >
+            :src="`/api/theme/logo`"
+            alt="logo"
+            class="text-center"
+            style="max-height: 15vw"
+          />
         </div>
       </template>
     </UPageHero>
