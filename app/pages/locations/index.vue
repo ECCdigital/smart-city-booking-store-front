@@ -57,7 +57,7 @@ const {
       <span
         v-if="searchIsInitialized"
         class="text-black dark:text-white lg:font-bold"
-        >{{ suitableCount }} passende Ergebnisse</span
+        >{{ suitableCount }}  {{ $t("filter.fittingResults") }}</span
       >
       <div class="" style="flex: 1" />
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
