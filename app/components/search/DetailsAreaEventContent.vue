@@ -168,7 +168,11 @@ const htmlText = computed(() => {
 });
 
 const hasTimeRelatedPrices = computed(() => {
-  return props.item.tickets.some((ticket) => ticket.priceCategories.length > 1);
+  return props.item.tickets.some(
+      (ticket) => ticket.priceCategories.some(
+          (c) => c.weekdays.length > 0
+      )
+  );
 });
 
 
