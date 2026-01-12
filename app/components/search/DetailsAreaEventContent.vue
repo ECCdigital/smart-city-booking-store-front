@@ -148,16 +148,6 @@ const tickets = computed(() => {
   }
   return props.item.tickets;
 })
-const ticketAvailable = computed(() => {
-  //toDo - ***********************************************
-  // toDo - remaining beachten
-  //toDo - ***********************************************
-  if(currentEvent.value?.tickets && currentEvent.value.tickets.length <0){
-    return false;
-  }
-  console.log(currentEvent.value)
-  return true
-})
 
 const { sanitizeHtml } = useSanitizeHtml();
 const htmlText = computed(() => {
