@@ -197,7 +197,6 @@
   </div>
 </template>
 <script setup>
-import { useColorMode } from "@vueuse/core";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });

@@ -102,6 +102,7 @@
 
   "forgotPassword": {
     "title": "Passwort zurücksetzen",
+    "headline": "Passwort vergessen?",
     "description": "Geben Sie Ihre E-Mail-Adresse ein, um einen Link zum Zurücksetzen Ihres Passworts zu erhalten.",
     "submit": "Link senden",
     "remembered": "Passwort erinnert?"

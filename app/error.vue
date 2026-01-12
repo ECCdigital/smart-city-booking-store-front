@@ -38,7 +38,7 @@ const getErrorInfo = (code?: number) =>
 </script>
 
 <template>
-  <div class="error-page">
+  <PageBackground class="error-page" theme="dark" variant="poly" :vignette="true" intensity="normal" >
     <div class="error-card">
       <UIcon
         size="48"
@@ -58,7 +58,7 @@ const getErrorInfo = (code?: number) =>
         <button class="btn-secondary" @click="$router.back()">Zurück</button>
       </div>
     </div>
-  </div>
+  </PageBackground>
 </template>
 
 <style scoped>
@@ -67,7 +67,6 @@ const getErrorInfo = (code?: number) =>
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   padding: 1rem;
   font-family: system-ui, -apple-system, sans-serif;
 }
@@ -79,6 +78,7 @@ const getErrorInfo = (code?: number) =>
   border-radius: 1.5rem;
   padding: 3rem 2.5rem;
   text-align: center;
+  height: 600px;
   max-width: 480px;
   width: 100%;
   animation: fadeIn 0.5s ease-out;

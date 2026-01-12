@@ -37,10 +37,8 @@ const handleResetPassword = async () => {
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-gradient-to-br from-secondary via-secondary to-primary">
-    <div
-      class="hidden lg:flex w-3/5 items-center justify-center text-white"
-    >
+  <PageBackground variant="poly" :vignette="true" intensity="normal">
+    <div class="hidden lg:flex w-3/5 items-center justify-center text-white">
       <div class="max-w-md text-center">
         <h1 class="text-4xl font-bold mb-4">
           {{ $t("resetPassword.headline") }}
@@ -48,15 +46,12 @@ const handleResetPassword = async () => {
       </div>
     </div>
 
-    <div
-      class="flex w-full lg:w-2/5 items-center justify-center p-6 "
-    >
+    <div class="flex w-full lg:w-2/5 items-center justify-center p-6">
       <ResetPasswordCard
         v-model:user-data="form"
         :loading="loading"
         @submit="handleResetPassword"
-
       />
     </div>
-  </div>
+  </PageBackground>
 </template>

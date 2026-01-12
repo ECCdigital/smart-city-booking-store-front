@@ -54,10 +54,9 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <div
-    class="flex min-h-screen bg-gradient-to-br from-secondary via-secondary to-primary"
-  >
-    <div class="hidden lg:flex w-3/5 items-center justify-center text-white">
+  <PageBackground variant="poly" :vignette="true" intensity="normal">
+
+  <div class="hidden lg:flex w-3/5 items-center justify-center text-white">
       <div class="max-w-md text-center">
         <h1 class="text-4xl font-bold mb-4">
           {{ $t("register.welcome") }}
@@ -75,5 +74,5 @@ const handleRegister = async () => {
         @submit="handleRegister"
       />
     </div>
-  </div>
+  </PageBackground>
 </template>

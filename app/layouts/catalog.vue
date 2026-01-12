@@ -14,7 +14,6 @@ useHead({
     },
   ],
 });
-
 </script>
 
 <template>
@@ -23,8 +22,12 @@ useHead({
     <!-- Hero -->
     <!-- toDo - Hero-Design für lg anpassen!  -->
     <!-- toDo - Hero anpassen für Dark-Mode  -->
-    <div
-      class="bg-gray-200 px-10 py-15 justify-between shadow-sm hidden md:block"
+    <HeroBackground
+      variant="poly"
+      theme="light"
+      height="sm"
+      :fade-bottom="false"
+      class="px-10 py-15 justify-between  z-0"
     >
       <div class="flex">
         <div class="grid content-center max-w-220px">
@@ -43,27 +46,7 @@ useHead({
           />
         </div>
       </div>
-    </div>
-    <UPageHero
-      title="Unsere Angebote und Veranstaltungen"
-      :ui="{
-        container:
-          'bg-[url(/assets/kiel_bootshafen.jpg)] contrast-70 p-10 pb-25 shadow-lg',
-        title: 'text-2xl text-black',
-      }"
-      class="md:hidden z-0"
-    >
-      <template #headline>
-        <div class="flex justify-center">
-          <img
-            :src="`/api/theme/logo`"
-            alt="logo"
-            class="text-center"
-            style="max-height: 15vw"
-          />
-        </div>
-      </template>
-    </UPageHero>
+    </HeroBackground>
     <NuxtPage />
   </div>
 </template>

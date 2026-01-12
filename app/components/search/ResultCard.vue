@@ -20,12 +20,7 @@
           alt=""
           class="w-full object-cover rounded-t-xl"
         />
-        <img
-          v-else
-          src="../../assets/bookable-default.jpg"
-          alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
-          class="w-full object-cover rounded-t-xl"
-        />
+        <ImagePlaceholder v-else class="w-full h-full rounded-t-xl" />
       </div>
       <USeparator color="primary" type="solid" size="xl" class="w-full" />
     </div>
@@ -48,6 +43,7 @@
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 import ResultCardBookableContent from "~/components/search/ResultCardBookableContent.vue";
 import ResultCardEventContent from "~/components/search/ResultCardEventContent.vue";
+import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
 
 const props = defineProps({
   item: {

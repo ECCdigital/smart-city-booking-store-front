@@ -11,20 +11,19 @@
           :disabled="props.disabled"
           :action-row="{ showPreview: false }"
           :ui="
-        mode === 'dark'
+        mode.value === 'dark'
           ? {
               input: 'darkBackground',
             }
           : {}
       "
-          :dark="mode === 'dark'"
+          :dark="mode.value === 'dark'"
       />
     </div>
   </UTooltip>
 </template>
 <script setup>
 import VueDatePicker from "@vuepic/vue-datepicker";
-import { useColorMode } from "@vueuse/core";
 import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 
 const mode = useColorMode();
