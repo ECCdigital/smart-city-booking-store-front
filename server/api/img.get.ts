@@ -9,7 +9,7 @@ import {
 import dns from "node:dns/promises";
 import net from "node:net";
 
-const MAX_BYTES = 5 * 1024 * 1024; // 5MB Limit
+const MAX_BYTES = 10 * 1024 * 1024; // 10MB Limit
 const TIMEOUT_MS = 8000;
 
 function isPrivateIp(ip: string) {

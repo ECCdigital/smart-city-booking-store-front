@@ -20,7 +20,6 @@ useHead({
   <div class="">
     <NavigationBar />
     <!-- Hero -->
-    <!-- toDo - Hero-Design für lg anpassen!  -->
     <!-- toDo - Hero anpassen für Dark-Mode  -->
     <HeroBackground
       variant="poly"
@@ -41,7 +40,6 @@ useHead({
           <img
             :src="`/api/theme/logo`"
             alt="logo"
-            class="text-center"
             style="max-height: 7vh"
           />
         </div>

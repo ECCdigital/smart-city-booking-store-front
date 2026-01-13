@@ -24,10 +24,7 @@
           class="w-full h-full object-cover rounded-l-xl"
         />
         <ClientOnly v-else>
-          <ImagePlaceholder
-            :theme="theme"
-            class="w-full h-full rounded-l-xl"
-          />
+          <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-xl" />
           <template #fallback>
             <div
               class="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"
