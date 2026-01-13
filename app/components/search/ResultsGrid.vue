@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Passende Ergebnisse & Default Anzeige -->
-    <UPageList v-if="suitableBookables.length > 0" class="m-5 space-y-5">
+    <UPageList v-if="suitableBookables.length > 0" class="m-2 md:m-5 space-y-5">
       <ResultCard
           v-for="(b, i) in suitableBookables"
           :key="i"

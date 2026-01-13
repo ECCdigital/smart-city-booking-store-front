@@ -1,7 +1,7 @@
 <template>
   <div class="flex justify-center">
     <div
-        class="-mt-10 bg-gray-300/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg"
+        class="mt-5 md:-mt-10 bg-gray-300/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg"
         style="max-height: 450px; height: 400px; width: 70vw;overflow: hidden;"
     >
       <img

@@ -95,18 +95,18 @@ function onClear() {
     }"
   >
     <UButton
-      class="w-auto min-w-[180px] bg-white/30 dark:bg-gray-900/40 backdrop-blur-lg"
+      class="w-auto md:min-w-[180px] bg-white/30 dark:bg-gray-900/40 backdrop-blur-lg"
       color="neutral"
       variant="outline"
     >
       <div class="flex items-center gap-2">
         <UIcon name="i-lucide-building" size="24" />
-        <div class="flex flex-col items-start leading-tight">
+        <div class="flex flex-col items-start leading-tight hidden md:block">
           <span class="text-[10px] uppercase tracking-wide">
             {{ t("tenants.tenant") }}
           </span>
 
-          <span class="text-xs font-semibold leading-tight">
+          <span class="text-xs font-semibold leading-tight hidden md:block">
             {{ selectedTenantLabel }}
           </span>
         </div>

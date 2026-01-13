@@ -1,8 +1,9 @@
 
 <template>
-<div style="max-width: 1600px; margin: auto; padding: 0 15px 50px 15px;">
+  <div class="max-w-[1600px] px-2 md:px-[15px] pb-[50px]">
   <!-- toDo - weitere Bilder einfügen *** -->
   <DetailsAreaImages :item="item" :is-event="props.isEvent" />
+
 
   <div class="w-full flex justify-between my-5">
     <UButton
@@ -19,10 +20,12 @@
         :style="{color: contrastToPrimary, cursor: 'pointer'}"
         @click="share()"
     />
+
   </div>
 
   <DetailsAreaBookableContent v-if="!isEvent" :item="props.item"/>
   <DetailsAreaEventContent v-else :item="props.item" />
+
 </div>
 
 </template>

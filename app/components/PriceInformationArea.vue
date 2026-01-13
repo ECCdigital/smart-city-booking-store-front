@@ -1,7 +1,10 @@
 <template>
   <div class="bg-gray-200 dark:bg-gray-700 rounded-md p-3">
     <p class="font-bold mt-2">Preisinformationen</p>
-    <p v-if="props.item.priceValueAddedTax" class="text-gray-500 text-sm italic">
+    <p
+      v-if="props.item.priceValueAddedTax"
+      class="text-gray-500 text-sm italic"
+    >
       (Alle Preise inklusive Mehrwertsteuer.)
     </p>
 

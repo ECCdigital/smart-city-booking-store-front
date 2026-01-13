@@ -5,7 +5,7 @@
     <p class="text-lg basis-2/3 content-center">
       {{ props.ticket.title }}
     </p>
-    <div :class="detailsMode? 'flex content-center space-x-1' :''">
+    <div :class="detailsMode? 'md:flex content-center space-x-1' :''">
       <div class="content-center">
         <BookablePriceDisplay
             :bookable="ticket"
