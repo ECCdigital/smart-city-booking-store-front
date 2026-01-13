@@ -71,7 +71,7 @@
       >
         <template #label="{ item }">
           <div class="flex">
-            {{ item.value }}
+            {{ item.lable }}
             <span class="text-gray-500 ml-2 text-sm content-center"
               >({{ item.count }})</span
             >
@@ -367,7 +367,11 @@ const possibleCities = computed(() => {
     }
   });
   return Object.entries(cityCount)
-    .map(([value, count]) => ({ value, count }))
+    .map(([value, count]) => ({
+      lable: value,
+      value: value.toLowerCase(),
+      count,
+    }))
     .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
 });
 

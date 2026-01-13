@@ -24,7 +24,7 @@ export function useCatalogQueryState() {
     cities: route.query.cities
       ? (route.query.cities as string)
           .split(",")
-          .map((c) => decodeURIComponent(c))
+          .map((c) => decodeURIComponent(c.toLowerCase()))
       : [],
 
     price: route.query.price

@@ -160,7 +160,6 @@ function onSearch() {
     location: _location.value,
     timeStart: _timePeriod.value ? _timePeriod.value.start : null,
     timeEnd: _timePeriod.value ? _timePeriod.value.end : null,
-    isEvent: props.isEvent,
   });
 }
 </script>
