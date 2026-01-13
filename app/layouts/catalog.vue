@@ -42,7 +42,7 @@ useHead({
             alt="logo"
             class="text-center"
             style="max-height: 7vh"
-          />
+          >
         </div>
       </div>
     </HeroBackground>
