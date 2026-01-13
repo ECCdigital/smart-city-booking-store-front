@@ -2,7 +2,7 @@
   <div
     class="shadow-lg h-full bg-white dark:bg-gray-700 rounded-xl"
     :class="isNotBookable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer'"
-    @click="goToCheckout"
+    @click="goToDetails"
   >
     <div id="header" class="flex flex-col h-36">
       <div class="flex h-9/10">
@@ -11,7 +11,7 @@
           :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"
           alt="Bild des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
-        />
+        >
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
@@ -19,13 +19,13 @@
           )}`"
           alt=""
           class="w-full object-cover rounded-t-xl"
-        />
+        >
         <img
           v-else
           src="../../assets/bookable-default.jpg"
           alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
-        />
+        >
       </div>
       <USeparator color="primary" type="solid" size="xl" class="w-full" />
     </div>
@@ -45,7 +45,7 @@
   </div>
 </template>
 <script setup>
-import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
+//import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 import ResultCardBookableContent from "~/components/search/ResultCardBookableContent.vue";
 import ResultCardEventContent from "~/components/search/ResultCardEventContent.vue";
 
@@ -71,8 +71,10 @@ const isEvent = computed(() => {
   }
 });
 
+const { tenantTo } = useTenantRoute();
 const openEventTicketOptions = ref(false);
-function goToCheckout() {
+
+/*function goToCheckout() {
   const route = useRoute();
   if (isEvent.value) {
     //use external booking url
@@ -102,6 +104,23 @@ function goToCheckout() {
     });
   }
 }
+ */
+
+function goToDetails() {
+  const route = useRoute();
+  const router = useRouter();
+  const basePath = route.path;
+  console.log("goToDetails", basePath);
+
+  if (basePath.includes("bookables")) {
+    router.push(tenantTo(`bookables/${props.item.id}`));
+  } else if (basePath.includes("locations")) {
+    router.push(tenantTo(`locations/${props.item.id}`));
+  } else if(basePath.includes("events")) {
+    router.push(tenantTo(`events/${props.item.id}`));
+  }
+}
+
 </script>
 
 <style scoped></style>
