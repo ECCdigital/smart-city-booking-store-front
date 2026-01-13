@@ -93,7 +93,7 @@
               label="OK"
               variant="ghost"
               :style="
-                colorMode === 'dark'
+                colorMode.value === 'dark'
                   ? { color: lighterColor }
                   : { color: darkerColor }
               "
@@ -121,7 +121,6 @@
 import DatePicker from "./DatePicker.vue";
 import TimePicker from "./TimePicker.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
-import { useColorMode } from "@vueuse/core";
 
 /**
  * Public API:

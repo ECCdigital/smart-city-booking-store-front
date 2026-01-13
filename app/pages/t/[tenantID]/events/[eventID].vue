@@ -6,7 +6,7 @@ import DetailsArea from "~/components/search/DetailsArea.vue";
 definePageMeta({
   layout: "bookable",
   middleware: ["catalog-auth"],
-  name: "tenant-event-id",
+  name: "event-id",
 });
 
 

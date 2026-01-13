@@ -102,6 +102,7 @@
 
   "forgotPassword": {
     "title": "Passwort zurücksetzen",
+    "headline": "Passwort vergessen?",
     "description": "Geben Sie Ihre E-Mail-Adresse ein, um einen Link zum Zurücksetzen Ihres Passworts zu erhalten.",
     "submit": "Link senden",
     "remembered": "Passwort erinnert?"
@@ -163,7 +164,8 @@
     "locationName": "Name des Standorts",
     "locationAddress": "Adresse des Standorts",
     "locationDescription": "Beschreibung des Standorts",
-    "noLocations": "Keine Standorte gefunden"
+    "noLocations": "Keine Standorte gefunden",
+    "noLocation": "Kein Standort gefunden"
   },
   "events": {
     "events": "Veranstaltungen",
@@ -174,7 +176,8 @@
     "eventName": "Name der Veranstaltung",
     "eventDate": "Datum der Veranstaltung",
     "eventDescription": "Beschreibung der Veranstaltung",
-    "noEvents": "Keine Veranstaltungen gefunden"
+    "noEvents": "Keine Veranstaltungen gefunden",
+    "noEvent": "Keine Veranstaltung gefunden"
   },
   "resources": {
     "resources": "Ressourcen",
@@ -185,6 +188,11 @@
     "resourceName": "Name der Ressource",
     "resourceType": "Typ der Ressource",
     "resourceDescription": "Beschreibung der Ressource",
-    "noResources": "Keine Ressourcen gefunden"
+    "noResources": "Keine Ressourcen gefunden",
+    "noResource": "Keine Ressource gefunden"
+  },
+
+  "filter": {
+    "fittingResults": "passende Ergebnisse"
   }
 }

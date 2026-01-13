@@ -35,8 +35,14 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "nuxt-security",
     "@vueuse/nuxt",
+    "@nuxtjs/color-mode",
   ],
   css: ["~/assets/css/main.css"],
+  colorMode: {
+    classSuffix: "",
+    preference: "system",
+    fallback: "dark",
+  },
   i18n: {
     locales: [
       {

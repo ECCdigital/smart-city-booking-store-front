@@ -5,7 +5,6 @@
         <NavigationLink :tab="tab" />
       </div>
     </div>
-    <!--<div style="flex: 1" class="bg-fuchsia-300"/>-->
     <div class="flex items-center">
       <TenantSwitcher class="mr-2" />
       <UButton
@@ -28,13 +27,11 @@
       <UButton
           class="pl-2 pt-1"
           size="xl"
-          :icon="colorMode === 'light' ? 'i-lucide-sun' : 'i-lucide-moon'"
+          :icon="!isDark ? 'i-lucide-sun' : 'i-lucide-moon'"
           variant="ghost"
           :style="{ color: contrastToSecondary }"
-          @click="toggleColorMode"
+          @click="isDark = !isDark"
       />
-      <!-- toDo - delete after Testing!!!  -->
-      <!-- toDo - https://ui.nuxt.com/docs/components/field-group (with dropdown) -->
     </div>
 
   </div>
@@ -42,7 +39,6 @@
 <script setup>
 import NavigationLink from "./NavigationLink.vue";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck";
-import { useColorMode } from "@vueuse/core";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import TenantSwitcher from "~/components/TenantSwitcher.vue";
@@ -67,8 +63,7 @@ const tabs = computed(() => [
 ]);
 
 const contrastToSecondary = computed(() => {
-  const temp = useContrastColor().contrastToSecondary();
-  return temp;
+  return useContrastColor().contrastToSecondary();
 });
 
 const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
@@ -78,17 +73,16 @@ const barClass = computed(() => [
 ]);
 
 const colorMode = useColorMode();
-function toggleColorMode() {
-  if (colorMode.value === "dark") {
-    colorMode.value = "light";
-  } else {
-    colorMode.value = "dark";
-  }
-}
+const isDark = computed({
+  get() {
+    return colorMode.value === "dark";
+  },
+  set(_isDark) {
+    colorMode.preference = _isDark ? "dark" : "light";
+  },
+});
 
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isLoggedIn);
 </script>
-<style scoped>
-
-</style>
+<style scoped></style>

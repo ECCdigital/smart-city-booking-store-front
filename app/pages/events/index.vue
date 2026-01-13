@@ -50,9 +50,9 @@ const {
 
     <div class="m-10 lg:m-5 sm:flex items-center">
       <span
-        v-if="searchIsInitialized"
-        class="text-black dark:text-white lg:font-bold"
-        >{{ suitableCount }} passende Ergebnisse</span
+          v-if="searchIsInitialized"
+          class="text-black dark:text-white lg:font-bold"
+      >{{ suitableCount }}  {{ $t("filter.fittingResults") }}</span
       >
       <div class="" style="flex: 1" />
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
