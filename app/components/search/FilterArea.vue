@@ -197,7 +197,7 @@
   </div>
 </template>
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -382,16 +382,14 @@ function extractCity(location) {
     return extractCityFromString(location);
   } else if (
     location &&
-    typeof location === "object" &&
-    !location.address.city
+    typeof location === "object"
   ) {
-    return extractCityFromString(location.display_address);
-  } else if(
-      location &&
-      typeof location === "object" &&
-      location.address.city
-  ) {
-    return location.address.city;
+
+    if(location.address && location.address.city) {
+      return location.address.city;
+    } else if(location.address){
+      return extractCityFromString(location.display_address)
+    }
   }
   return "";
 }
