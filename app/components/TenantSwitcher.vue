@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { useTenantStore } from "~~/stores/tenant.js";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 
 const t = useI18n().t;
 
@@ -12,10 +13,10 @@ const tenantStore = useTenantStore();
 
 const tenants = computed(() => tenantStore.getTenants);
 
+const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
+
 const selectedTenant = computed(() => {
-  return tenants.value.find(
-    (tenant) => tenant.id === tenantID.value
-  );
+  return tenants.value.find((tenant) => tenant.id === tenantID.value);
 });
 
 const selectedTenantLabel = computed(() => {
@@ -43,7 +44,7 @@ const dropdownItems = computed(() => {
       id: tenant.id,
       onSelect: () => onSelect(tenant),
       slot: "prefix",
-    }))
+    })),
   );
 
   return items;
@@ -91,27 +92,31 @@ function onClear() {
     :items="dropdownItems"
     :ui="{
       content:
-        'w-(--reka-dropdown-menu-trigger-width) ring-0 shadow-lg bg-white/30 dark:bg-gray-900/40 backdrop-blur-lg',
+        'ring-0 shadow-lg bg-white/30 dark:bg-gray-900/40 backdrop-blur-lg',
     }"
   >
-    <UButton
-      class="w-auto md:min-w-[180px] bg-white/30 dark:bg-gray-900/40 backdrop-blur-lg"
-      color="neutral"
-      variant="outline"
-    >
-      <div class="flex items-center gap-2">
-        <UIcon name="i-lucide-building" size="24" />
-        <div class="flex flex-col items-start leading-tight hidden md:block">
-          <span class="text-[10px] uppercase tracking-wide">
-            {{ t("tenants.tenant") }}
-          </span>
+    <UChip :show="!isGreaterThanMd && !!selectedTenant" inset>
+      <UButton
+        class="w-auto md:min-w-[150px] bg-white/30 dark:bg-gray-900/40 backdrop-blur-lg"
+        color="neutral"
+        variant="outline"
+      >
+        <div class="flex items-center gap-2">
+          <UIcon name="i-lucide-building" size="24" />
+          <div class="hidden md:block">
+            <div class="flex flex-col items-start leading-tight">
+              <span class="text-[10px] uppercase tracking-wide">
+                {{ t("tenants.tenant") }}
+              </span>
 
-          <span class="text-xs font-semibold leading-tight hidden md:block">
-            {{ selectedTenantLabel }}
-          </span>
+              <span class="text-xs font-semibold leading-tight">
+                {{ selectedTenantLabel }}
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
-    </UButton>
+      </UButton>
+    </UChip>
 
     <template #prefix-trailing="{ item }">
       <UIcon

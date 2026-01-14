@@ -1,5 +1,5 @@
 <template>
-  <div :class="barClass" class="flex justify-between -mr-1">
+  <div :class="barClass" class="flex justify-between">
     <div class="flex">
       <div v-for="(tab, k) in tabs" :key="k">
         <NavigationLink :tab="tab" />
