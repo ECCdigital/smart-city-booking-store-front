@@ -11,5 +11,10 @@ export function useBreakpointCheck() {
     return width.value >= 768;
   };
 
-  return { isGreaterThanSm, isGreaterThanMd };
+  const isGreaterThanLg = () => {
+    const { width } = useWindowSize();
+    return width.value >= 1024;
+  }
+
+  return { isGreaterThanSm, isGreaterThanMd, isGreaterThanLg };
 }
