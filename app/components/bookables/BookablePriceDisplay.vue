@@ -1,5 +1,6 @@
 <template>
   <div class="text-right">
+    <!-- special price for user -->
     <p
       v-if="
         props.calculatedPrice &&
@@ -13,8 +14,25 @@
         {{ displayPrice(calculatedPrice.userGrossPriceEur) }}
       </span>
     </p>
+
+    <!-- free for users -->
+    <p
+        v-else-if="
+        props.calculatedPrice &&
+        !!calculatedPrice.freeBookingAllowed
+      "
+    >
+      <span class="text-gray-500 line-through mr-2">
+        {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
+      </span>
+      <span>
+        Kostenlos
+      </span>
+    </p>
+
+    <!-- regular calculated price -->
     <p v-else-if="props.calculatedPrice">
-      {{ displayPrice(calculatedPrice?.regularGrossPriceEur) }}
+      {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
     </p>
     <p v-else>
       {{ displayMinDefaultPrice() }}
