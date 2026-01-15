@@ -41,13 +41,14 @@
         <!--Aktionen-->
         <div class="w-full mt-2 flex justify-end content-end">
           <UButton
+          v-if="!isNotBookable"
           label="Details ansehen"
-          variant="ghost"
+          :variant="entryPageMode? 'solid' : 'ghost'"
           class="justify-center px-10"
           :style="{ cursor:'pointer' }"
           @click="goToDetails()"
         />
-          <EventBookingButton :event="event" />
+          <EventBookingButton v-if="!entryPageMode" :event="event" />
         </div>
       </div>
     </div>
@@ -79,6 +80,10 @@ const props = defineProps({
     default: null,
   },
   isNotBookable: {
+    type: Boolean,
+    default: false,
+  },
+  entryPageMode: {
     type: Boolean,
     default: false,
   },

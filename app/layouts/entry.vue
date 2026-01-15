@@ -14,38 +14,41 @@ useHead({
     },
   ],
 });
+
 </script>
 
 <template>
   <div class="">
     <NavigationBar/>
     <!-- Hero -->
-    <!-- toDo - Hero anpassen für Dark-Mode  -->
+
     <HeroBackground
-      variant="poly"
-      theme="light"
-      height="sm"
-      :fade-bottom="false"
-      class="px-10 py-15 justify-between  z-0"
+        variant="poly"
+        theme="light"
+        height="xl"
+        :fade-bottom="false"
+        class="px-10 py-15 justify-between  z-0"
     >
-      <div class="flex">
+      <div
+          class="flex justify-between"
+      >
         <div class="grid content-center max-w-220px">
-          <p class="text-primary font-bold">Marktplatz</p>
-          <p class="text-black text-3xl font-bold">
-            Unsere Angebote und Veranstaltungen
+          <p class="text-primary text-2xl font-bold">Marktplatz</p>
+          <p class="text-black text-5xl font-bold">
+            Entdecken Sie die KielRegion
           </p>
         </div>
-        <div style="flex: 1; min-width: 15vw" />
-        <div>
-          <img
+        <div style="flex: 1; min-width: 15vw"/>
+        <img
             :src="`/api/theme/logo`"
             alt="logo"
             style="max-height: 7vh"
-          />
-        </div>
+        />
       </div>
     </HeroBackground>
-    <NuxtPage />
+
+
+    <NuxtPage/>
   </div>
 </template>
 

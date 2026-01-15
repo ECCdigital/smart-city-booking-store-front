@@ -61,7 +61,7 @@ const tabs = computed(() => [
 ]);
 
 const contrastToSecondary = computed(() => {
-  useContrastColor().contrastToSecondary();
+  return useContrastColor().contrastToSecondary();
 });
 
 const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());

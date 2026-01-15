@@ -8,7 +8,14 @@
     ]"
   >
     <div class="basis-1/4 flex items-center">
-      <div class="basis-9/10 w-full h-full">
+      <div class="basis-9/10 w-full h-full relative">
+        <UBadge
+            v-if="entryPageMode"
+            class="absolute top-2 left-2 z-10"
+            color="primary"
+            size="md"
+            :label="categoryName"
+        />
         <img
           v-if="!isEvent && item?.imgUrl"
           :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
@@ -43,13 +50,15 @@
     <ResultStripBookableContent
       v-if="!isEvent"
       :bookable="item"
-      :calculated-price="calculatedPrice"
+      :calculated-price="price"
       :is-not-bookable="isNotBookable"
+      :entry-page-mode="entryPageMode"
     />
     <ResultStripEventContent
       v-if="isEvent"
       :event="item"
       :is-not-bookable="isNotBookable"
+      :entry-page-mode="entryPageMode"
     />
   </div>
 </template>
@@ -79,15 +88,40 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  entryPageMode: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const isEvent = computed(() => {
-  if ("type" in props.item) {
-    return false;
-  } else {
-    return true;
+  return !("type" in props.item);
+});
+
+//toDo - read dynamically from instance
+const categoryName = computed(() => {
+  switch (props.item?.category){
+    case "room":
+      return "Räume";
+    case "location":
+      return "Veranstaltungsorte";
+    case "resource":
+      return "Geräte";
+      case "event":
+      return "Veranstaltungen";
+    default:
+      return "";
   }
 });
+
+const price = computed(() => {
+      if (props.entryPageMode) {
+        return null;
+      }
+      return props.calculatedPrice
+    }
+)
+
 </script>
 
 <style scoped></style>

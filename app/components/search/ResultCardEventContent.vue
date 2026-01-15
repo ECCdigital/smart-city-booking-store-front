@@ -75,6 +75,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  entryPageMode: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const { sanitizeHtml } = useSanitizeHtml();

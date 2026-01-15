@@ -7,6 +7,7 @@
         :key="i"
         :item="b.item"
         :calculated-price="b.calculatedPrice"
+        :entry-page-mode="entryPageMode"
         class="m-2"
       />
     </UPageList>
@@ -48,6 +49,10 @@ const props = defineProps({
     default: false,
   },
   isEventList: {
+    type: Boolean,
+    default: false,
+  },
+  entryPageMode: {
     type: Boolean,
     default: false,
   },
