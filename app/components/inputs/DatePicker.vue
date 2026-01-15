@@ -11,20 +11,19 @@
     auto-apply
     :enable-time-picker="false"
     :action-row="{ showPreview: true, showSelect: false }"
-    :ui="mode==='dark' ? {
+    :ui="mode.value ==='dark' ? {
       calendar: 'calendarWidth noBorder darkBackground',
       menu: 'noBorder darkBackground',
     } : {
       calendar: 'calendarWidth',
       menu: 'noBorder',
     }"
-    :dark=" mode==='dark' "
+    :dark=" mode.value ==='dark' "
     @range-start="onStartRange"
   />
 </template>
 <script setup>
 import VueDatePicker from "@vuepic/vue-datepicker";
-import { useColorMode } from '@vueuse/core'
 
 const model = defineModel();
 const mode = useColorMode()

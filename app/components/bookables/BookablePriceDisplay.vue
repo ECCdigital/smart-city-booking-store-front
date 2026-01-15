@@ -51,12 +51,13 @@ function getMinPrice() {
   return Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
 }
 function displayMinDefaultPrice() {
+  const categories = props.bookable.priceCategories || [];
   if (
-    props.bookable.priceCategories &&
-    props.bookable.priceCategories.length === 0
+      categories.length === 0
   ) {
     return null;
   }
+  const prefix = categories.length > 1 ? "ab " : "";
 
   const min = getMinPrice();
   if (min === null) {
@@ -65,7 +66,7 @@ function displayMinDefaultPrice() {
   const includeTax = props.bookable.priceValueAddedTax
     ? min + (min * props.bookable.priceValueAddedTax) / 100
     : min;
-  return "ab " + includeTax.toFixed(2).toString().replace(/\./g, ",") + " €";
+  return prefix + includeTax.toFixed(2).toString().replace(/\./g, ",") + " €";
 }
 
 function displayPrice(currentPrice) {

@@ -5,23 +5,33 @@
     <p class="text-lg basis-2/3 content-center">
       {{ props.ticket.title }}
     </p>
-    <div>
-      <BookablePriceDisplay
-        :bookable="ticket"
-        class="grid place-content-end text-md font-bold"
-      />
-      <UTooltip
-        :disabled="ticketsAvailable"
-        text="Dieser Tickettyp ist ausverkauft."
-      >
-        <UButton
-          label="Buchen"
-          class="justify-center px-5"
-          :style="{ color: contrastToPrimary }"
-          :disabled="!ticketsAvailable"
-          @click="goToCheckout"
+    <div :class="detailsMode? 'flex content-center space-x-1' :''">
+      <div class="content-center">
+        <BookablePriceDisplay
+            :bookable="ticket"
+            :calculated-price="ticket.calculatedPrice"
+            class="grid place-content-end text-md font-bold"
         />
-      </UTooltip>
+        <div v-if="ticket.priceValueAddedTax" class="text-gray-500 text-xs italic">
+          (inkl. MwSt.)
+        </div>
+
+      </div>
+      <div class="content-center">
+        <UTooltip
+            :disabled="ticketsAvailable"
+            text="Dieser Tickettyp ist ausverkauft."
+        >
+          <UButton
+              label="Buchen"
+              class="justify-center px-5"
+              :style="{ color: contrastToPrimary }"
+              :disabled="!ticketsAvailable"
+              @click="goToCheckout"
+          />
+        </UTooltip>
+      </div>
+
     </div>
   </div>
 </template>
@@ -34,6 +44,10 @@ const props = defineProps({
   ticket: {
     type: Object,
     required: true,
+  },
+  detailsMode: {
+    type: Boolean,
+    default: false,
   },
 });
 const ticketsAvailable = computed(

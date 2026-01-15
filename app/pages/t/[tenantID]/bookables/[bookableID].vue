@@ -6,14 +6,14 @@ import DetailsArea from "~/components/search/DetailsArea.vue";
 definePageMeta({
   layout: "bookable",
   middleware: ["catalog-auth"],
-  name: "tenant-location-id",
+  name: "bookable-id",
 });
 
 const route = useRoute();
 const bookableStore = useBookableStore();
 
 const catalogSlug = computed(() => route.params.catalogSlug);
-const bookableID = computed(() => route.params.locationID);
+const bookableID = computed(() => route.params.bookableID);
 
 const { loadBundle } = useCatalogBundle();
 
@@ -30,7 +30,7 @@ if (!bookable.value) {
   <div v-if="bookable">
     <DetailsArea :item="bookable" />
   </div>
-  <p v-else>Ort nicht gefunden.</p>
+  <p v-else>Bookable nicht gefunden.</p>
 </template>
 
 <style scoped></style>

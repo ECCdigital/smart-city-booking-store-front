@@ -1,11 +1,12 @@
 <script setup>
 import { useBookableStore } from "~~/stores/bookable.js";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
+import DetailsArea from "~/components/search/DetailsArea.vue";
 
 definePageMeta({
   layout: "bookable",
   middleware: ["catalog-auth"],
-  name: "bookable-id",
+  name: "tenant-bookable-id",
 });
 
 const route = useRoute();
@@ -26,10 +27,9 @@ if (!bookable.value) {
 </script>
 
 <template>
-  <article v-if="bookable">
-    <h1>{{ bookable.name || bookable.title }}</h1>
-    <p v-if="bookable.description">{{ bookable.description }}</p>
-  </article>
+  <div v-if="bookable">
+    <DetailsArea :item="bookable" />
+  </div>
   <p v-else>Bookable nicht gefunden.</p>
 </template>
 

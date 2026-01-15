@@ -45,28 +45,10 @@
           label="Details ansehen"
           :variant="entryPageMode? 'solid' : 'ghost'"
           class="justify-center px-10"
+          :style="{ cursor:'pointer' }"
           @click="goToDetails()"
         />
-
-          <UTooltip v-if="!entryPageMode" :disabled="disableTooltip" :text="tooltipText">
-            <div>
-              <UButton
-                v-if="!isNotBookable && event.attendees.needsRegistration"
-                label="Buchen"
-                :disabled="bookingDisabled"
-                class="bookingButton justify-center px-10"
-                :style="{ color: contrastToPrimary }"
-                @click="goToTicketOptions"
-              />
-              <UButton
-                v-if="!isNotBookable && !event.attendees.needsRegistration"
-                label="Keine Anmeldung nötig"
-                variant="soft"
-                disabled
-                class="bookingButton justify-center px-3 text-white"
-              />
-            </div>
-          </UTooltip>
+          <EventBookingButton v-if="!entryPageMode" :event="event" />
         </div>
       </div>
     </div>
@@ -86,8 +68,7 @@ import EventAdressInformation from "~/components/events/EventAdressInformation.v
 import EventTicketOptionsDialog from "~/components/events/EventTicketOptionsDialog.vue";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import { useTenantStore } from "~~/stores/tenant.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
-import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
+import EventBookingButton from "~/components/events/EventBookingButton.vue";
 
 const props = defineProps({
   event: {
@@ -113,69 +94,21 @@ const htmlTeaserText = computed(() => {
   return sanitizeHtml(props.event.information.teaserText || "");
 });
 
+const { tenantTo } = useTenantRoute();
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.event.tenantId).name;
 });
 
-const hasEventTickets = computed(() => {
-  return props.event.externalBookingUrl || props.event.tickets.length > 0;
-});
 const isPrivateEvent = computed(() => {
   return !props.event.attendees.publicEvent || false;
 });
 
-const disableTooltip = computed(() => {
-  if (!props.event.attendees.needsRegistration) {
-    return true;
-  }
-  return isPrivateEvent.value && !hasEventTickets.value;
-});
-const tooltipText = computed(() => {
-  if (isPrivateEvent.value) {
-    return "Das Event ist nicht öffentlich und kann nicht gebucht werden.";
-  } else if (!hasEventTickets.value) {
-    return "Für dieses Event sind keine Tickets verfügbar.";
-  } else {
-    return "";
-  }
-});
-
-const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary()
-);
-
-const bookingDisabled = computed(
-  () =>
-    props.event.attendees.needsRegistration &&
-    (isPrivateEvent.value || !hasEventTickets.value)
-);
 const openTicketOptions = ref(false);
-function goToTicketOptions() {
-  //external booking url
-  if (props.event.externalBookingUrl) {
-    window.open(props.event.externalBookingUrl, "_blank");
-    return;
-  }
 
-  //direct to checkout if only one ticket type
-  if (props.event.tickets.length === 1) {
-    const route = useRoute();
-    useCheckoutRedirect().redirectToCheckout({
-      id: props.event.tickets[0].id,
-      tenantId: props.event.tickets[0].tenantId,
-      start: route.query.start,
-      end: route.query.end,
-    });
-  } else {
-    openTicketOptions.value = true;
-  }
-}
-function goToDetails() {
-  console.log("would like to go to details");
+function goToDetails(){
+  const router = useRouter();
+  router.push(tenantTo(`events/${props.event.id}`));
 }
 </script>
 <style scoped>
-.bookingButton:disabled {
-  background-color: #cccccc;
-}
 </style>

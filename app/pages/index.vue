@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white dark:bg-gray-900">
-    <div class="flex justify-center bg-gray-200 dark:bg-gray-950">
+    <div class="flex justify-center ">
       <SearchBar
           :location="query.location"
           :term="query.term"
@@ -13,7 +13,7 @@
     </div>
 
     <!-- Main Categories -->
-    <div class="bg-gray-200 dark:bg-gray-950">
+    <div class="">
       <MainCategoryArea />
     </div>
 

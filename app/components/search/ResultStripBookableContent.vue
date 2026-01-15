@@ -82,6 +82,8 @@ const props = defineProps({
     default: false,
   },
 });
+const { tenantTo } = useTenantRoute();
+
 
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.bookable.tenantId).name;
@@ -91,10 +93,19 @@ const contrastToPrimary = computed(() =>
   useContrastColor().contrastToPrimary()
 );
 
-
 function goToDetails() {
-  console.log("would like to go to details");
+  const route = useRoute();
+  const router = useRouter();
+  const basePath = route.path;
+
+  if (basePath.includes("bookables")) {
+    router.push(tenantTo(`bookables/${props.bookable.id}`));
+  } else if (basePath.includes("locations")) {
+    router.push(tenantTo(`locations/${props.bookable.id}`));
+  }
 }
+
+
 function goToCheckout() {
   const route = useRoute();
   useCheckoutRedirect().redirectToCheckout({

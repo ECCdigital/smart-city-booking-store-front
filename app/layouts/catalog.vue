@@ -7,55 +7,45 @@ useHead({
       rel: "stylesheet",
       href: `/api/theme/css`,
     },
+    {
+      rel: "preload",
+      href: `/api/theme/logo`,
+      as: "image",
+    },
   ],
 });
-
 </script>
 
 <template>
   <div class="">
     <NavigationBar/>
     <!-- Hero -->
-    <!-- toDo - Hero-Design für lg anpassen!  -->
-    <div
-        class="bg-gray-200 dark:bg-gray-950 px-10 py-15 justify-between shadow-sm hidden md:flex"
+    <!-- toDo - Hero anpassen für Dark-Mode  -->
+    <HeroBackground
+      variant="poly"
+      theme="light"
+      height="sm"
+      :fade-bottom="false"
+      class="px-10 py-15 justify-between  z-0"
     >
-      <div class="grid content-center max-w-220px">
-        <p class="text-primary font-bold">Marktplatz</p>
-        <p class="text-black dark:text-white text-3xl font-bold">
-          Unsere Angebote und Veranstaltungen
-        </p>
-      </div>
-      <div style="flex: 1; min-width: 15vw"/>
-      <img
-          alt="Logo Kiel Region"
-          class="dark:grayscale dark:brightness-500 "
-          src="../assets/logo-kielregion.png"
-          style="height: 7vw"
-      >
-
-    </div>
-    <UPageHero
-        :ui="{
-        container:
-          'bg-[url(/assets/kiel_bootshafen.jpg)] contrast-70 p-10 pb-25 shadow-lg',
-        title: 'text-2xl text-black',
-      }"
-        class="md:hidden z-0"
-        title="Unsere Angebote und Veranstaltungen"
-    >
-      <template #headline>
-        <div class="flex justify-center">
-          <img
-              alt="Logo Kiel Region"
-              class="text-center"
-              src="../assets/logo-kielregion.png"
-              style="height: 15vw"
-          >
+      <div class="flex">
+        <div class="grid content-center max-w-220px">
+          <p class="text-primary font-bold">Marktplatz</p>
+          <p class="text-black text-3xl font-bold">
+            Unsere Angebote und Veranstaltungen
+          </p>
         </div>
-      </template>
-    </UPageHero>
-    <NuxtPage/>
+        <div style="flex: 1; min-width: 15vw" />
+        <div>
+          <img
+            :src="`/api/theme/logo`"
+            alt="logo"
+            style="max-height: 7vh"
+          />
+        </div>
+      </div>
+    </HeroBackground>
+    <NuxtPage />
   </div>
 </template>
 

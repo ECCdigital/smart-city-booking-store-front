@@ -7,18 +7,18 @@
     <div id="header" class="flex flex-col h-36">
       <div class="flex h-9/10 relative">
         <UBadge
-            v-if="entryPageMode"
-            class="absolute top-2 left-2 z-10"
-            color="primary"
-            size="md"
-            :label="categoryName"
+          v-if="entryPageMode"
+          class="absolute top-2 left-2 z-10"
+          color="primary"
+          size="md"
+          :label="categoryName"
         />
         <img
           v-if="!isEvent && item?.imgUrl"
           :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"
           alt="Bild des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
-        >
+        />
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
@@ -26,13 +26,10 @@
           )}`"
           alt=""
           class="w-full object-cover rounded-t-xl"
-        >
-        <img
-          v-else
-          src="../../assets/bookable-default.jpg"
-          alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
-          class="w-full object-cover rounded-t-xl"
-        >
+        />
+        <ClientOnly v-else>
+          <ImagePlaceholder :theme="theme" class="w-full h-full rounded-t-xl" />
+        </ClientOnly>
       </div>
       <USeparator color="primary" type="solid" size="xl" class="w-full" />
     </div>
@@ -57,6 +54,15 @@
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 import ResultCardBookableContent from "~/components/search/ResultCardBookableContent.vue";
 import ResultCardEventContent from "~/components/search/ResultCardEventContent.vue";
+import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
+
+const colorMode = useColorMode();
+
+const theme = computed(() => {
+  if (colorMode.value === "dark") return "dark";
+  if (colorMode.value === "light") return "light";
+  return "light";
+});
 
 const props = defineProps({
   item: {
@@ -85,7 +91,7 @@ const isEvent = computed(() => {
 });
 //toDo - read dynamically from instance
 const categoryName = computed(() => {
-  switch (props.item?.category){
+  switch (props.item?.category) {
     case "room":
       return "Räume";
     case "location":
@@ -99,9 +105,12 @@ const categoryName = computed(() => {
   }
 });
 
+const { tenantTo } = useTenantRoute();
+
+
 const openEventTicketOptions = ref(false);
 function goToCheckout() {
-  if(!props.entryPageMode){
+  if (!props.entryPageMode) {
     const route = useRoute();
     if (isEvent.value) {
       //use external booking url
@@ -131,8 +140,8 @@ function goToCheckout() {
       });
     }
   } else {
-    //toDo - go to details page
-    console.log("want to go to details page");
+    const router = useRouter();
+    router.push(tenantTo(`events/${props.item.id}`));
   }
 }
 </script>

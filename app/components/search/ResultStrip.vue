@@ -21,21 +21,24 @@
           :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
           alt=""
           class="w-full h-full object-cover rounded-l-xl"
-        >
+        />
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
-          :src="`/api/img?url=${encodeURIComponent(item.information.teaserImage)}`"
+          :src="`/api/img?url=${encodeURIComponent(
+            item.information.teaserImage
+          )}`"
           alt=""
           class="w-full h-full object-cover rounded-l-xl"
-        >
-        <img
-          v-else
-          src="../../assets/bookable-default.jpg"
-          alt="Platzhalterbild: graue Dreiecke, keine spezifische Darstellung des Buchungsobjekts"
-          class="h-full w-full object-cover rounded-l-xl"
-        >
+        />
+        <ClientOnly v-else>
+          <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-xl" />
+          <template #fallback>
+            <div
+              class="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"
+            />
+          </template>
+        </ClientOnly>
       </div>
-
 
       <USeparator
         orientation="vertical"
@@ -62,6 +65,15 @@
 <script setup>
 import ResultStripEventContent from "~/components/search/ResultStripEventContent.vue";
 import ResultStripBookableContent from "~/components/search/ResultStripBookableContent.vue";
+import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
+
+const colorMode = useColorMode();
+
+const theme = computed(() => {
+  if (colorMode.value === "dark") return "dark";
+  if (colorMode.value === "light") return "light";
+  return "light";
+});
 
 const props = defineProps({
   item: {
