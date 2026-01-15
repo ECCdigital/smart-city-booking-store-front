@@ -51,7 +51,6 @@
   </div>
 </template>
 <script setup>
-import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 import ResultCardBookableContent from "~/components/search/ResultCardBookableContent.vue";
 import ResultCardEventContent from "~/components/search/ResultCardEventContent.vue";
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
@@ -114,12 +113,18 @@ function goToDetails() {
   const router = useRouter();
   const basePath = route.path;
 
-  if (basePath.includes("bookables")) {
-    router.push(tenantTo(`bookables/${props.item.id}`));
-  } else if (basePath.includes("locations")) {
-    router.push(tenantTo(`locations/${props.item.id}`));
-  } else if(basePath.includes("events")) {
+  //TODO - Wir sollten dynamisch den Typ ermitteln und nicht über den Pfad gehen
+
+  if (props.entryPageMode) {
     router.push(tenantTo(`events/${props.item.id}`));
+  } else {
+    if (basePath.includes("bookables")) {
+      router.push(tenantTo(`bookables/${props.item.id}`));
+    } else if (basePath.includes("locations")) {
+      router.push(tenantTo(`locations/${props.item.id}`));
+    } else if (basePath.includes("events")) {
+      router.push(tenantTo(`events/${props.item.id}`));
+    }
   }
 }
 </script>
