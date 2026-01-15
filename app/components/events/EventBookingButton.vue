@@ -4,32 +4,32 @@
       <div class="h-full">
         <UButton
             v-if="!isNotBookable && event.attendees.needsRegistration"
-            :label="isDirectConnection ? 'Jetzt buchen' : 'Buchen'"
-            :icon="isDirectConnection ? 'i-lucide-shopping-cart' : ''"
-            :disabled="bookingDisabled"
-            :color="bookingDisabled? '' : 'primary'"
-            class="bookingButton justify-center h-full"
             :class="[
-                isDirectConnection? 'px-5' : 'px-10',
+                isDirectConnection? 'px-5 mt-5 md:my-0' : 'px-10',
                 bookingDisabled? 'bg-gray-400/30 dark:bg-gray-200/40 text-gray-800 dark:text-gray-900' : ''
                 ]"
+            :color="bookingDisabled? '' : 'primary'"
+            :disabled="bookingDisabled"
+            :icon="isDirectConnection ? 'i-lucide-shopping-cart' : ''"
+            :label="isDirectConnection ? 'Jetzt buchen' : 'Buchen'"
             :style="{cursor: bookingDisabled? 'not-allowed' : 'pointer', color: bookingDisabled? '' : contrastToPrimary }"
+            class="bookingButton justify-center h-full"
             @click="goToTicketOptions"
         />
         <UButton
             v-if="!isNotBookable && !event.attendees.needsRegistration"
-            label="Keine Anmeldung nötig"
+            class="bookingButton justify-center px-3 bg-gray-400/30 dark:bg-gray-200/40 text-gray-800 dark:text-gray-900 mt-5 md:my-0"
             color=""
             disabled
-            class="bookingButton justify-center px-3 bg-gray-400/30 dark:bg-gray-200/40 text-gray-800 dark:text-gray-900"
+            label="Keine Anmeldung nötig"
         />
       </div>
     </UTooltip>
     <EventTicketOptionsDialog
         v-model:open="openTicketOptions"
-        :tickets="event.tickets"
         :is-private-event="isPrivateEvent"
         :registration-needed="event.attendees.needsRegistration"
+        :tickets="event.tickets"
     />
   </div>
 </template>
@@ -85,6 +85,7 @@ const bookingDisabled = computed(
 );
 
 const openTicketOptions = ref(false);
+
 function goToTicketOptions() {
   //external booking url
   if (props.event.externalBookingUrl) {

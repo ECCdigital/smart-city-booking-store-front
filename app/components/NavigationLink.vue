@@ -4,6 +4,7 @@
     <Icon
       v-if="tab.icon"
       :name="tab.icon"
+      class=""
       :class="iconClass"
       :style="
         isActive ? { color: contrastToPrimary } : { color: contrastToSecondary }
@@ -11,6 +12,7 @@
     />
     <span
       v-if="isActive"
+      class="hidden sm:block"
       :class="labelClass"
       :style="
         isActive ? { color: contrastToPrimary } : { color: contrastToSecondary }
@@ -45,10 +47,10 @@ const isActive = computed(() => {
 });
 
 const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary()
+  useContrastColor().contrastToPrimary(),
 );
 const contrastToSecondary = computed(() =>
-  useContrastColor().contrastToSecondary()
+  useContrastColor().contrastToSecondary(),
 );
 
 const linkClass = computed(() => [
@@ -61,7 +63,7 @@ const stripeClass = computed(() => [
   "absolute top-0 left-0 w-full h-1",
   isActive.value ? "bg-[var(--color-secondary)]/40" : "bg-transparent",
 ]);
-const iconClass = computed(() => ["text-lg mr-2"]);
+const iconClass = computed(() => ["text-lg sm:mr-2"]);
 const labelClass = computed(() => ["text-base"]);
 </script>
 <style scoped></style>

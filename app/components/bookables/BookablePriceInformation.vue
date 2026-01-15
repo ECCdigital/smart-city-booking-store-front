@@ -19,7 +19,7 @@
           }}
         </div>
         <div v-else-if="priceCategory.weekdays.length > 0" class="text-right">
-          <p v-for="(day,i) in priceCategory.weekdays" :key="i">
+          <p v-for="(day, i) in priceCategory.weekdays" :key="i">
             {{getWeekdayName(day)}}
           </p>
         </div>
@@ -65,6 +65,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  isEventWithMultipleCategories: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const relevantPriceCategories = computed(() => {
@@ -97,7 +101,9 @@ const holidayHint = computed(() => {
 })
 
 function hasPriceConditions(priceCategory) {
-  if(priceCategory.weekdays.length > 0 ||
+  if(props.isEventWithMultipleCategories){
+    return true
+  } else if(priceCategory.weekdays.length > 0 ||
       priceCategory.interval.start ||
       priceCategory.interval.end ||
           priceCategory.fixedPrice

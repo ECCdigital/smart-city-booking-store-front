@@ -1,7 +1,15 @@
 <template>
+  <div v-if="props.event.tickets.length < 1 && event.attendees.publicEvent">
+    <p class="text-gray-500 text-sm italic py-2">
+      Für dieses Event sind derzeit keine Ticketoptionen hinterlegt.
+    </p>
+  </div>
   <div v-for="(ticket, index) in props.event.tickets" :key="index">
-    <span v-if="event.tickets.length > 1" class="font-medium mt-5">{{ticket.title}}</span>
-    <BookablePriceInformation :item="ticket" />
+    <p v-if="event.tickets.length > 1" class="font-medium mt-3">{{ticket.title}}</p>
+    <BookablePriceInformation
+        :item="ticket"
+        :is-event-with-multiple-categories="hasMultiplePriceCategories"
+    />
   </div>
 </template>
 <script setup>
@@ -12,6 +20,12 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-})
-</script>s
+});
+
+const hasMultiplePriceCategories = computed(() => {
+  return props.event.tickets.length > 1 && props.event.tickets.some(
+      (ticket) => ticket.priceCategories.length > 1
+  );
+});
+</script>
 <style scoped></style>

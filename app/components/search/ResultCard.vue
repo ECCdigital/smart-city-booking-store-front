@@ -2,7 +2,7 @@
   <div
     class="shadow-lg bg-white dark:bg-gray-700 rounded-xl"
     :class="isNotBookable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer'"
-    @click="goToCheckout"
+    @click="goToDetails()"
   >
     <div id="header" class="flex flex-col h-36">
       <div class="flex h-9/10 relative">
@@ -107,40 +107,18 @@ const categoryName = computed(() => {
 
 const { tenantTo } = useTenantRoute();
 
-
 const openEventTicketOptions = ref(false);
-function goToCheckout() {
-  if (!props.entryPageMode) {
-    const route = useRoute();
-    if (isEvent.value) {
-      //use external booking url
-      if (props.item.externalBookingUrl) {
-        window.open(props.item.externalBookingUrl, "_blank");
-        return;
-      }
-      //direct to checkout if only one ticket type
-      if (props.item.tickets.length === 1) {
-        useCheckoutRedirect().redirectToCheckout({
-          id: props.item.tickets[0].id,
-          tenantId: props.item.tickets[0].tenantId,
-          start: route.query.start,
-          end: route.query.end,
-        });
-      } else {
-        openEventTicketOptions.value = true;
-      }
-    }
 
-    if (!isEvent.value && !props.isNotBookable) {
-      useCheckoutRedirect().redirectToCheckout({
-        id: props.item.id,
-        tenantId: props.item.tenantId,
-        start: route.query.start,
-        end: route.query.end,
-      });
-    }
-  } else {
-    const router = useRouter();
+function goToDetails() {
+  const route = useRoute();
+  const router = useRouter();
+  const basePath = route.path;
+
+  if (basePath.includes("bookables")) {
+    router.push(tenantTo(`bookables/${props.item.id}`));
+  } else if (basePath.includes("locations")) {
+    router.push(tenantTo(`locations/${props.item.id}`));
+  } else if(basePath.includes("events")) {
     router.push(tenantTo(`events/${props.item.id}`));
   }
 }

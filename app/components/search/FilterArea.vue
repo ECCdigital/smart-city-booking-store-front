@@ -197,7 +197,7 @@
   </div>
 </template>
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -262,7 +262,7 @@ const possiblePriceRange = computed(() => {
     validPrices = props.bookables.map((e) => getEventMinPrice(e));
   }
   validPrices = validPrices.filter(
-    (price) => price !== undefined && price !== null && !isNaN(price)
+    (price) => price !== undefined && price !== null && !isNaN(price),
   );
 
   //set endpoints rounded to 5
@@ -273,7 +273,7 @@ const possiblePriceRange = computed(() => {
   return [minPrice, maxPrice];
 });
 const _price = ref(
-  props.price?.length === 2 ? props.price : possiblePriceRange.value
+  props.price?.length === 2 ? props.price : possiblePriceRange.value,
 );
 
 const dynamicPriceStep = computed(() => {
@@ -288,7 +288,7 @@ const priceBars = computed(() => {
   const barsCount =
     Math.ceil(
       (possiblePriceRange.value[1] - possiblePriceRange.value[0]) /
-        dynamicPriceStep.value
+        dynamicPriceStep.value,
     ) || 1;
   const bars = new Array(barsCount).fill(0);
   const range = possiblePriceRange.value[1] - possiblePriceRange.value[0];
@@ -304,9 +304,9 @@ const priceBars = computed(() => {
     if (minPrice !== null) {
       const index = Math.min(
         Math.floor(
-          ((minPrice - possiblePriceRange.value[0]) / range) * barsCount
+          ((minPrice - possiblePriceRange.value[0]) / range) * barsCount,
         ),
-        barsCount - 1
+        barsCount - 1,
       );
       bars[index]++;
     }
@@ -324,7 +324,7 @@ function getBookableMinPrice(bookable) {
   }
   //else return min price from price categories
   const minPrice = Math.min(
-    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || [])
+    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || []),
   );
   return bookable.item.priceValueAddedTax
     ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
@@ -332,7 +332,7 @@ function getBookableMinPrice(bookable) {
 }
 function getTicketMinPrice(ticket) {
   const minPrice = Math.min(
-    ...ticket.priceCategories.map((cat) => cat.priceEur)
+    ...ticket.priceCategories.map((cat) => cat.priceEur),
   );
   return ticket.priceValueAddedTax
     ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
@@ -344,7 +344,7 @@ function getEventMinPrice(event) {
   }
   if (event.item.tickets && event.item.tickets.length > 0) {
     return Math.min(
-      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket))
+      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket)),
     );
   } else {
     return 0;
@@ -361,10 +361,12 @@ const possibleCities = computed(() => {
     } else if (b.status === "suitable") {
       city = extractCity(b.item.location);
     }
+
     if (city) {
       cityCount[city] = (cityCount[city] || 0) + 1;
     }
   });
+
   return Object.entries(cityCount)
     .map(([value, count]) => ({
       lable: value,
@@ -376,8 +378,25 @@ const possibleCities = computed(() => {
 
 const numberOfVisibleCities = ref(5); //toDo - später auf 10 setzen!!!!!!!!! ***
 function extractCity(location) {
-  if (!location || typeof location !== "string") return "";
+  if (location && typeof location === "string") {
+    return extractCityFromString(location);
+  } else if (
+    location &&
+    typeof location === "object"
+  ) {
 
+    if(location.address && location.address.city) {
+      return location.address.city;
+    } else if(location.address){
+      return extractCityFromString(location.display_address)
+    }
+  }
+  return "";
+}
+function extractCityFromString(location) {
+  if (!location) {
+    return "";
+  }
   const trimmed = location.trim();
 
   //1.) if no digits are present -> probably just the city (split and take last part)

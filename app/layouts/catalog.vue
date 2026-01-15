@@ -1,5 +1,6 @@
 <script setup>
 import NavigationBar from "~/components/NavigationBar.vue";
+import {useBreakpointCheck} from "~/composables/utils/useBreakpointCheck.js";
 
 useHead({
   link: [
@@ -14,34 +15,45 @@ useHead({
     },
   ],
 });
+
+const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
+
 </script>
 
 <template>
-  <div class="">
-    <NavigationBar/>
+  <div>
+    <NavigationBar />
     <!-- Hero -->
     <!-- toDo - Hero anpassen für Dark-Mode  -->
     <HeroBackground
       variant="poly"
       theme="light"
-      height="sm"
+      :height="isGreaterThanMd ? 'sm' : 'md'"
       :fade-bottom="false"
-      class="px-10 py-15 justify-between  z-0"
+      class="px-10 py-10 md:py-15 justify-between z-0"
     >
-      <div class="flex">
-        <div class="grid content-center max-w-220px">
-          <p class="text-primary font-bold">Marktplatz</p>
-          <p class="text-black text-3xl font-bold">
+      <div class="md:flex">
+        <div class="md:hidden mb-5 flex justify-center">
+          <img
+              :src="`/api/theme/logo`"
+              alt="logo"
+              class="text-center max-h-[5vh]
+"
+          >
+        </div>
+        <div class="grid content-center max-w-220px text-center md:text-left">
+          <p class="text-primary font-bold text-sm md:text-md">Marktplatz</p>
+          <p class="text-black text-xl md:text-3xl font-bold">
             Unsere Angebote und Veranstaltungen
           </p>
         </div>
-        <div style="flex: 1; min-width: 15vw" />
-        <div>
+        <div class="hidden md:block" style="flex: 1; min-width: 15vw" />
+        <div class="grid content-center">
           <img
             :src="`/api/theme/logo`"
             alt="logo"
-            style="max-height: 7vh"
-          />
+            class="text-center md:max-h-[7vh] hidden md:block"
+          >
         </div>
       </div>
     </HeroBackground>
