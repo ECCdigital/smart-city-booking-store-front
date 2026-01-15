@@ -116,7 +116,14 @@ function goToDetails() {
   //TODO - Wir sollten dynamisch den Typ ermitteln und nicht über den Pfad gehen
 
   if (props.entryPageMode) {
-    router.push(tenantTo(`events/${props.item.id}`));
+
+    if (props.item.category === "event") {
+      router.push(tenantTo(`events/${props.item.id}`));
+    } else if (props.item.category === "location") {
+      router.push(tenantTo(`locations/${props.item.id}`));
+    } else {
+      router.push(tenantTo(`bookables/${props.item.id}`));
+    }
   } else {
     if (basePath.includes("bookables")) {
       router.push(tenantTo(`bookables/${props.item.id}`));

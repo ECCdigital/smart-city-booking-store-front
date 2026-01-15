@@ -98,11 +98,21 @@ function goToDetails() {
   const router = useRouter();
   const basePath = route.path;
 
-  if (basePath.includes("bookables")) {
-    router.push(tenantTo(`bookables/${props.bookable.id}`));
-  } else if (basePath.includes("locations")) {
-    router.push(tenantTo(`locations/${props.bookable.id}`));
+  if(!props.entryPageMode) {
+    if (basePath.includes("bookables")) {
+      router.push(tenantTo(`bookables/${props.bookable.id}`));
+    } else if (basePath.includes("locations")) {
+      router.push(tenantTo(`locations/${props.bookable.id}`));
+    }
+  } else {
+    if(props.bookable.type === "event-location") {
+      router.push(tenantTo(`locations/${props.bookable.id}`));
+    } else {
+      router.push(tenantTo(`bookables/${props.bookable.id}`));
+    }
   }
+
+
 }
 
 
