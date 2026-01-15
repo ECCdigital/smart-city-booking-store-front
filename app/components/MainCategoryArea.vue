@@ -1,13 +1,12 @@
 <template>
   <div
-      class="grid md:grid-cols-2 lg:flex justify-self-center space-x-3"
+      class="grid sm:grid-cols-2 lg:flex justify-self-center space-x-3"
       style="max-width: 90vw; margin: auto; padding: 50px 0"
   >
     <div
         v-for="(category,i) in tempCategories"
         :key="i"
-        class="rounded-b-xl p-5"
-        style="width: 400px"
+        class="rounded-b-xl p-5 w-full sm:w-[300px] lg:w-[380px]"
     >
       <MainCategoryCard :category="category"/>
     </div>

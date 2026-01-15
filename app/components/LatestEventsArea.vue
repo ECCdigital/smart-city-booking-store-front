@@ -13,12 +13,11 @@
         Alle Events ansehen
       </p>
     </div>
-    <!-- toDo - Anzahl der Events anpassen an numberOfVisibleEvents -->
-    <div class="flex space-x-2">
+    <div class="md:flex md:space-x-2">
       <div
         v-for="(b, i) in latestEvents.slice(0, numberOfVisibleEvents)"
         :key="i"
-        class="flex basis-1/3"
+        class="flex basis-1/3 mb-2"
       >
         <ResultCard
           :item="b.item"
