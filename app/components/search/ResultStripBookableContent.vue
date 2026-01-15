@@ -33,18 +33,18 @@
         <!--Aktionen-->
         <div class="w-full mt-2 flex justify-end content-end">
           <UButton
-            label="Details ansehen"
-            variant="ghost"
-            class="justify-center px-10"
-            :style="{ cursor:'pointer' }"
-            @click="goToDetails()"
-          />
+          v-if="!isNotBookable"
+          label="Details ansehen"
+          :variant="entryPageMode? 'solid' : 'ghost'"
+          class="justify-center px-10"
+          @click="goToDetails()"
+        />
 
           <UButton
-            v-if="!isNotBookable"
+            v-if="!isNotBookable && !entryPageMode"
             label="Buchen"
             class="justify-center px-10"
-            :style="{ color: contrastToPrimary, cursor:'pointer' }"
+            :style="{ color: contrastToPrimary }"
             @click="goToCheckout"
           />
         </div>
@@ -74,6 +74,10 @@ const props = defineProps({
     default: null,
   },
   isNotBookable: {
+    type: Boolean,
+    default: false,
+  },
+  entryPageMode: {
     type: Boolean,
     default: false,
   },
