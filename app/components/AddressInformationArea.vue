@@ -1,27 +1,13 @@
 <template>
   <div class="bg-gray-200 dark:bg-gray-700 rounded-md p-3">
-    <div v-if="item.location && item.location.coordinates">
+    <div v-if="item.location && item.location.coordinates" class="mb-2">
       <AddressMap :coordinates="item.location.coordinates" />
     </div>
     <div
       v-else-if="item.location && item.location.display_address"
-      style="height: 300px"
+      class="mb-2"
     >
-      <LMap
-        v-if="mapReady"
-        ref="mapRef"
-        :zoom="mapZoom"
-        :center="mapCenter"
-        :use-global-leaflet="false"
-      >
-        <LTileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="&copy; OpenStreetMap contributors"
-          layer-type="base"
-          name="OpenStreetMap"
-        />
-      </LMap>
-      <USkeleton v-else class="h-full w-full" />
+      <AddressMap :address-string="item.location.display_address" />
     </div>
 
     <EventsEventAdressInformation v-if="props.isEvent" :event="item" />
