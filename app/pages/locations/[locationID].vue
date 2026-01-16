@@ -30,7 +30,12 @@ if (!bookable.value) {
   <div v-if="bookable">
     <DetailsArea :item="bookable" />
   </div>
-  <p v-else>Ort nicht gefunden.</p>
+
+  <div v-else class="text-center mt-10">
+    <UIcon size="48" name="i-lucide-map-pin-off" class="text-gray-400 mb-4" />
+    <p class="text-gray-500">{{ $t("locations.noLocation") }}</p>
+    <UButton :label="$t('common.back')" to="/locations" class="mt-4" />
+  </div>
 </template>
 
 <style scoped></style>

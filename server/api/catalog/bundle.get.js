@@ -12,27 +12,32 @@ export default cachedEventHandler(
     const result = { catalog: bundle.catalog, tenants: bundle.tenants };
 
     if (result.catalog.type === "instance") {
+      //TODO: Optimize to avoid N+1 requests
       for (const tenant of result.tenants) {
-        if (bookableId) {
-          result.bookable = await apiFetch(
-            event,
-            `/json/${tenant.id}/bookables/${bookableId}`,
-            { method: "GET" }
-          );
-          if (result.bookable) {
-            return result;
+        try {
+          if (bookableId) {
+            result.bookable = await apiFetch(
+              event,
+              `/json/${tenant.id}/bookables/${bookableId}`,
+              { method: "GET" }
+            );
+            if (result.bookable) {
+              return result;
+            }
           }
-        }
 
-        if (eventId) {
-          result.event = await apiFetch(
-            event,
-            `/json/${tenant.id}/events/${eventId}`,
-            { method: "GET" }
-          );
-          if (result.event) {
-            return result;
+          if (eventId) {
+            result.event = await apiFetch(
+              event,
+              `/json/${tenant.id}/events/${eventId}`,
+              { method: "GET" }
+            );
+            if (result.event) {
+              return result;
+            }
           }
+        } catch (error) {
+          // Ignore not found errors for individual tenants
         }
       }
 

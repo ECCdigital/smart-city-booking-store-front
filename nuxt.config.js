@@ -33,7 +33,7 @@ export default defineNuxtConfig({
     "@nuxt/ui",
     "@nuxtjs/i18n",
     "@pinia/nuxt",
-    //"nuxt-security",
+    "nuxt-security",
     "@vueuse/nuxt",
     "@nuxtjs/color-mode",
   ],
