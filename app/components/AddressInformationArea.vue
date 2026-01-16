@@ -8,8 +8,16 @@
     </div>
     <div v-else />
 
-    <EventsEventAdressInformation v-if="props.isEvent" :event="item" />
-    <BookablesBookableAdressInformation v-else :bookable="item" class="bg-red-200"/>
+    <EventsEventAdressInformation
+      v-if="props.isEvent"
+      :event="item"
+      enable-copy-button
+    />
+    <BookablesBookableAdressInformation
+      v-else
+      :bookable="item"
+      enable-copy-button
+    />
   </div>
 </template>
 <script setup>
@@ -40,12 +48,12 @@ const hasAddressString = computed(() => {
   return !!props.item.location?.display_address;
 });
 const adressString = computed(() => {
-  if(props.isEvent) {
-    const address = props.item.eventAddress
-    return `${address.street || ""} ${address.houseNumber || ""}, ${address.zip || ""} ${address.city || ""}`.trim()
+  if (props.isEvent) {
+    const address = props.item.eventAddress;
+    return `${address.street || ""} ${address.houseNumber || ""}, ${address.zip || ""} ${address.city || ""}`.trim();
   } else {
-    return props.item.location?.display_address || ""
+    return props.item.location?.display_address || "";
   }
-})
+});
 </script>
 <style scoped></style>
