@@ -9,14 +9,7 @@
     <div v-else />
 
     <EventsEventAdressInformation v-if="props.isEvent" :event="item" />
-    <BookablesBookableAdressInformation v-else :bookable="item" />
-  </div>
-  <div class="bg-pink-200">
-    {{ item }}
-    <hr >
-    hasCoordinates: {{ hasCoordinates }} ...
-    <hr >
-    hasAddressString: {{ hasAddressString }}
+    <BookablesBookableAdressInformation v-else :bookable="item" class="bg-red-200"/>
   </div>
 </template>
 <script setup>

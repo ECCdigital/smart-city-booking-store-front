@@ -7,10 +7,12 @@
       }}</span>
     <span v-else class="italic p-3">Keine Adresse bekannt.</span>
   </p>
+  <!--
   <p v-if="location.length">
     <UIcon name="i-lucide-navigation" class="size-5" />
     <span class="p-3">Distance coming soon </span>
   </p>
+  -->
 </div>
 </template>
 <script setup>

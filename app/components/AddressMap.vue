@@ -14,8 +14,11 @@
       <LMarker :lat-lng="addressCoordinates" />
     </LMap>
   </div>
-  <div v-else class="text-center text-sm italic text-gray-600 my-5">
-    (Adresse konnte nicht gefunden werden.)
+  <div v-else-if="!fetchedCoordinates">
+    <USkeleton class="h-[300px] w-full" />
+  </div>
+  <div v-else class="h-[300px] w-full grid place-content-center text-sm italic text-gray-600 my-5">
+    <p>(Adresse konnte nicht gefunden werden.)</p>
   </div>
 </template>
 <script setup>
@@ -35,6 +38,7 @@ const props = defineProps({
 });
 
 const addressCoordinates = ref([]);
+const fetchedCoordinates = ref(false);
 onMounted(() => {
   getCoordinates();
 });
@@ -51,17 +55,13 @@ const getCoordinates = async () => {
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(props.addressString)}&limit=1&accept-language=de`,
       );
 
-      console.log("Nominatim-Antwort:", response);
-      console.log("***")
-
       let coordinates = [];
-      console.log("***", coordinates)
       if (response[0] && response[0].lat && response[0].lon) {
-        console.log("Gefundene Koordinaten:", response[0].lat, response[0].lon);
         const { lat, lon } = response[0];
         coordinates = [parseFloat(lat), parseFloat(lon)];
       }
       addressCoordinates.value = coordinates;
+      fetchedCoordinates.value = true;
     } catch (error) {
       console.error("Suche fehlgeschlagen:", error);
     }
