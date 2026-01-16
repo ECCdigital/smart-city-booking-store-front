@@ -1,11 +1,6 @@
 <template>
   <div v-if="addressCoordinates.length > 0" style="height: 300px">
-    <!--<div class="bg-pink-600 text-white text-xs">
-      {{ addressCoordinates }}
-    </div>
-    -->
     <LMap
-      v-if="addressCoordinates.length > 0"
       :zoom="props.zoom"
       :center="addressCoordinates"
       :use-global-leaflet="false"
@@ -14,11 +9,13 @@
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
         layer-type="base"
-        name="OpenStreetMap"
+        name="Light  OpenStreetMap"
       />
       <LMarker :lat-lng="addressCoordinates" />
     </LMap>
-    <USkeleton v-else class="h-full w-full" />
+  </div>
+  <div v-else class="text-center text-sm italic text-gray-600 my-5">
+    (Adresse konnte nicht gefunden werden.)
   </div>
 </template>
 <script setup>
@@ -55,8 +52,10 @@ const getCoordinates = async () => {
       );
 
       console.log("Nominatim-Antwort:", response);
+      console.log("***")
 
       let coordinates = [];
+      console.log("***", coordinates)
       if (response[0] && response[0].lat && response[0].lon) {
         console.log("Gefundene Koordinaten:", response[0].lat, response[0].lon);
         const { lat, lon } = response[0];
