@@ -36,6 +36,7 @@ export default defineNuxtConfig({
     "nuxt-security",
     "@vueuse/nuxt",
     "@nuxtjs/color-mode",
+      "@nuxtjs/leaflet"
   ],
   css: ["~/assets/css/main.css"],
   colorMode: {
@@ -66,4 +67,15 @@ export default defineNuxtConfig({
       redirectOn: "root",
     },
   },
+    security: {
+        headers: {
+            contentSecurityPolicy: {
+                'img-src': [
+                    "'self'",
+                    "data:",
+                    "https://*.tile.openstreetmap.org",
+                ],
+            }
+        }
+    }
 });
