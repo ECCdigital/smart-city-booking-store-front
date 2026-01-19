@@ -66,10 +66,8 @@ async function goToListview(searchParams) {
   }
 
   if (searchParams.searchType === "bookables") {
-    console.log("go to bookables");
     await router.push(tenantTo(`bookables`));
   } else if (searchParams.searchType === "events") {
-    console.log("go to events");
     await router.push(tenantTo(`events`));
   }
 }
