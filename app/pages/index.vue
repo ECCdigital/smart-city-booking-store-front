@@ -17,25 +17,7 @@
       <MainCategoryArea />
     </div>
 
-    <!-- Results -->
-    <div v-if="searchIsInitialized" class="flex flex-row justify-center mb-10 lg:my-5 m-5">
-      <div class="basis-full lg:basis-3/4">
-        <ResultsList
-            v-if="suitableItems.length > 0"
-            :bookables="suitableItems"
-            entry-page-mode
-            class="hidden md:block"
-        />
-        <ResultsGrid
-            v-if="suitableItems.length > 0"
-            :bookables="suitableItems"
-            entry-page-mode
-            class="md:hidden"
-        />
-      </div>
-    </div>
-
-    <div :class="searchIsInitialized? 'bg-gray-200 dark:bg-gray-950' : ''">
+    <div class="bg-gray-200 dark:bg-gray-950">
       <LatestEventsArea v-if="searchedItems" :items="searchedItems" />
     </div>
   </div>
@@ -46,8 +28,6 @@ import {useBookableSearch} from "~/composables/search/useBookableSearch.js";
 import SearchBar from "~/components/search/SearchBar.vue";
 import {useBookableStore} from "~~/stores/bookable.js";
 import {useEventStore} from "~~/stores/event.js";
-import ResultsList from "~/components/search/ResultsList.vue";
-import ResultsGrid from "~/components/search/ResultsGrid.vue";
 import MainCategoryArea from "~/components/MainCategoryArea.vue";
 import LatestEventsArea from "~/components/LatestEventsArea.vue";
 
@@ -78,15 +58,11 @@ const allItems = computed(() => {
 
 const {
   query,
-  searchIsInitialized,
   updatedItems: searchedItems,
   runSearch,
   resetResults
 } = useBookableSearch({isEvent: false, sourceItems: allItems});
 
-const suitableItems = computed(() => {
-  return searchedItems.value.filter((i) => i.status === "suitable");
-});
 
 function updateBookables(itemList, itemName) {
   return itemList.filter((i) => i.isBookable).map((i) => {
