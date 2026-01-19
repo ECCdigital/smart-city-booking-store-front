@@ -21,6 +21,12 @@ export function useCatalogQueryState() {
     inclNoSuitable: route.query.inclNoSuitable !== "false",
     pubEv: route.query.pubEv === "true",
     regEv: route.query.regEv === "true",
+    cat: route.query.cat
+      ? (route.query.cat as string)
+          .split(",")
+          .map((c) => decodeURIComponent(c.toLowerCase()))
+      : [],
+
     cities: route.query.cities
       ? (route.query.cities as string)
           .split(",")
@@ -51,6 +57,10 @@ export function useCatalogQueryState() {
     if (state.pubEv) q.pubEv = "true";
     if (state.regEv) q.regEv = "true";
 
+    if (state.cat.length > 0) {
+      q.cat = state.cat.map((c) => encodeURIComponent(c)).join(",");
+    }
+
     if (state.cities.length > 0) {
       q.cities = state.cities.map((c) => encodeURIComponent(c)).join(",");
     }
@@ -71,7 +81,7 @@ export function useCatalogQueryState() {
     (q) => {
       router.replace({ query: q });
     },
-    { deep: true }
+    { deep: true },
   );
 
   return {

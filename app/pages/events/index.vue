@@ -68,6 +68,7 @@ const {
           v-model:is-initailized="searchIsInitialized"
           :bookables="searchedEvents"
           :include-non-suitable="query.inclNoSuitable"
+          :cat="query.cat"
           :cities="query.cities"
           :price="query.price"
           :only-public-events="query.pubEv"

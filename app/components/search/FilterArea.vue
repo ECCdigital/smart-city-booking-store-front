@@ -55,6 +55,23 @@
         />
       </div>
     </div>
+
+    <!-- Kategorie -->
+    <div v-if="!isEvent" class="my-7">
+      <p class="mb-3">Kategorie</p>
+      <UCheckboxGroup
+        v-model="_categories"
+        :items="possibleCategories"
+        :ui="{ label: 'text-base' }"
+        :style="
+          colorMode === 'dark'
+            ? '--ui-primary: ' + lighterColor
+            : '--ui-primary: ' + darkerColor
+        "
+        @change="instantFilter"
+      />
+    </div>
+
     <!-- Orte -->
     <div v-if="possibleCities.length" class="my-7">
       <p class="mb-3">Orte</p>
@@ -102,22 +119,6 @@
       </div>
     </div>
 
-    <!-- Kategorie -->
-    <!--<div class="my-7">
-      <p class="mb-3">Kategorie</p>
-      <UCheckboxGroup
-        v-model="_categories"
-        :items="categories"
-        :ui="{ label: 'text-base' }"
-        :style="
-          colorMode === 'dark'
-            ? '--ui-primary: ' + lighterColor
-            : '--ui-primary: ' + darkerColor
-        "
-        @change="instantFilter"
-      />
-    </div>
-    -->
     <!-- Preis -->
     <div class="my-7">
       <p class="mb-3">Preis</p>
@@ -197,7 +198,7 @@
   </div>
 </template>
 <script setup>
-import {useContrastColor} from "~/composables/utils/useContrastColor.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -217,6 +218,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  categories: {
+    type: Array,
+    default: () => [],
+  },
   cities: {
     type: Array,
     default: () => [],
@@ -233,10 +238,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  categories: {
-    type: Array,
-    default: () => [],
-  },
 });
 const emit = defineEmits(["filter"]);
 
@@ -252,6 +253,25 @@ const _categories = ref(props.categories);
 const colorMode = useColorMode();
 const darkerColor = computed(() => useContrastColor().darkerColor());
 const lighterColor = computed(() => useContrastColor().lighterColor());
+
+//Kategorien
+//toDo - read from instance later !!!!
+const possibleCategories = computed(() => {
+  return [
+    {
+      value: "room",
+      label: "Räume",
+    },
+    {
+      value: "event-location",
+      label: "Veranstaltungsorte",
+    },
+    {
+      value: "resource",
+      label: "Geräte",
+    },
+  ];
+});
 
 //Preis
 const possiblePriceRange = computed(() => {
@@ -380,15 +400,11 @@ const numberOfVisibleCities = ref(5); //toDo - später auf 10 setzen!!!!!!!!! **
 function extractCity(location) {
   if (location && typeof location === "string") {
     return extractCityFromString(location);
-  } else if (
-    location &&
-    typeof location === "object"
-  ) {
-
-    if(location.address && location.address.city) {
+  } else if (location && typeof location === "object") {
+    if (location.address && location.address.city) {
       return location.address.city;
-    } else if(location.address){
-      return extractCityFromString(location.display_address)
+    } else if (location.address) {
+      return extractCityFromString(location.display_address);
     }
   }
   return "";
@@ -449,6 +465,7 @@ function onFilter() {
   filter.inclNoSuitable = _includeNonSuitable.value;
   filter.pubEv = _onlyPublicEvents.value;
   filter.regEv = _onlyRegistrationNeededEvents.value;
+  filter.cat = _categories.value;
   filter.cities = _cities.value;
   filter.price = sameAsPossible ? [] : _price.value;
 
@@ -469,6 +486,7 @@ function removeFilter() {
   filter.inclNoSuitable = _includeNonSuitable.value;
   filter.pubEv = _onlyPublicEvents.value;
   filter.regEv = _onlyRegistrationNeededEvents.value;
+  filter.cat = _categories.value;
   filter.cities = _cities.value;
 
   const sameAsPossible =
