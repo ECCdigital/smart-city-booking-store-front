@@ -5,7 +5,7 @@
     size="lg"
     variant="ghost"
     :placeholder="props.placeholder"
-    class="w-full bg-white dark:bg-gray-700"
+    class="w-full bg-white dark:bg-gray-700 "
   >
     <template v-if="clearable && model?.length" #trailing>
       <UTooltip text="Eintrag löschen">
