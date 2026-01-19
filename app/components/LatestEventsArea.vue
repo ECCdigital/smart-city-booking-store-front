@@ -38,6 +38,8 @@ const props = defineProps({
   },
 });
 
+const { tenantTo } = useTenantRoute();
+
 const isGreaterThanLg = computed(() => useBreakpointCheck().isGreaterThanLg());
 
 const latestEvents = computed(() => {
