@@ -39,6 +39,7 @@ const {
       <SearchBar
         v-model:is-initailized="searchIsInitialized"
         v-model:filter-reset-key="filterResetKey"
+        search-type="events"
         :term="query.term"
         :location="query.location"
         :time-start="query.start"

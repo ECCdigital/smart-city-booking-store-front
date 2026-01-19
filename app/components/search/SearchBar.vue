@@ -1,16 +1,25 @@
 <template>
   <!-- Strip for md and larger screens -->
-  <div class="hidden md:block ">
+  <div class="hidden md:block">
     <div
       class="flex justify-between bg-white dark:bg-gray-700 z-100 rounded shadow-lg"
-      :class="entryPageMode? 'p-5 space-x-1 -mt-10' : 'p-2 -mt-5'"
+      :class="entryPageMode ? 'p-5 space-x-1 -mt-10' : 'p-2 -mt-5'"
       style="position: relative"
-      :style="entryPageMode? 'width:80vw; height: 100px ' : 'width:60vw'"
+      :style="entryPageMode ? 'width:80vw; height: 100px ' : 'width:70vw'"
     >
+      <USelect
+        v-model="_searchType"
+        :items="types"
+        placeholder="Was suchen Sie?"
+        size="lg"
+        variant="ghost"
+        class="rounded-md w-full bg-white dark:bg-gray-700"
+      />
+      <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <InputText
         v-model="_term"
         icon="i-lucide-search"
-        placeholder="Wonach suchen Sie?"
+        placeholder="Stichwort"
         clearable
         class="rounded-md"
         @keyup.enter="onSearch"
@@ -44,10 +53,20 @@
     :ui="{ root: 'p-0', body: 'p-0' }"
     style="position: relative; width: 80vw"
   >
+    <USelect
+        v-model="_searchType"
+        :items="types"
+        icon="i-lucide-search"
+        placeholder="Was suchen Sie?"
+        size="lg"
+        variant="ghost"
+        class="rounded-md w-full bg-white dark:bg-gray-700"
+    />
+    <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputText
       v-model="_term"
-      icon="i-lucide-search"
-      placeholder="Wonach suchen Sie?"
+      icon="i-lucide-book-search"
+      placeholder="Stichwort"
       clearable
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
@@ -87,9 +106,13 @@ const filterResetKey = defineModel("filter-reset-key", {
 });
 
 const props = defineProps({
-  entryPageMode:{
+  entryPageMode: {
     type: Boolean,
     default: false,
+  },
+  searchType: {
+    type: String,
+    default: null,
   },
   term: {
     type: String,
@@ -113,6 +136,7 @@ const props = defineProps({
   },
 });
 
+const _searchType = ref(props.searchType);
 const _term = ref(props.term);
 const _location = ref(props.location);
 const _timePeriod = ref({
@@ -120,10 +144,21 @@ const _timePeriod = ref({
   end: props.timeEnd,
 });
 
+const types = ref([
+  {
+    label: "Bookables",
+    value: "bookables",
+  },
+  {
+    label: "Veranstaltungen",
+    value: "events",
+  },
+]);
+
 const emit = defineEmits(["search", "reset"]);
 
 const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary()
+  useContrastColor().contrastToPrimary(),
 );
 
 function setSearchTimePeriod(tp) {
@@ -156,6 +191,7 @@ function onSearch() {
   isInitialized.value = true;
 
   emit("search", {
+    searchType: _searchType.value,
     term: _term.value,
     location: _location.value,
     timeStart: _timePeriod.value ? _timePeriod.value.start : null,

@@ -586,6 +586,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     filteredItems,
     sortedItems,
     suitableCount,
+      setSearchQueryParams,
     setFilterQueryParams,
     setSortedQueryParams,
     runSearch,

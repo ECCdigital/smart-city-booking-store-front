@@ -7,8 +7,7 @@
           :time-end="query.end"
           :time-start="query.start"
           entry-page-mode
-          @reset="resetResults"
-          @search="runSearch"
+          @search="goToListview"
       />
     </div>
 
@@ -18,18 +17,17 @@
     </div>
 
     <div class="bg-gray-200 dark:bg-gray-950">
-      <LatestEventsArea v-if="searchedItems" :items="searchedItems" />
+      <LatestEventsArea v-if="allEvents" :items="allEvents" />
     </div>
   </div>
 </template>
 
 <script setup>
-import {useBookableSearch} from "~/composables/search/useBookableSearch.js";
 import SearchBar from "~/components/search/SearchBar.vue";
-import {useBookableStore} from "~~/stores/bookable.js";
 import {useEventStore} from "~~/stores/event.js";
 import MainCategoryArea from "~/components/MainCategoryArea.vue";
 import LatestEventsArea from "~/components/LatestEventsArea.vue";
+import {useCatalogQueryState} from "~/composables/search/useCatalogQueryState.js";
 
 
 definePageMeta({
@@ -37,40 +35,43 @@ definePageMeta({
   middleware: ["catalog-auth"],
 });
 
+const { tenantTo } = useTenantRoute();
+
 const {loadBundle} = useCatalogBundle();
-const bookableStore = useBookableStore();
 const eventStore = useEventStore();
 await loadBundle({include: ["bookables", "events"]});
 
-const allItems = computed(() => {
-  const locations = updateBookables(bookableStore.getLocations, "location")
-  const rooms = updateBookables(bookableStore.getRooms, "room")
-  const resources = updateBookables(bookableStore.getResources, "resource")
 
-  const events = eventStore.getEvents.map((e) => {
-    return {
-      ...e,
-      category: "event"
-    }
-  });
-  return locations.concat(rooms).concat(resources).concat(events);
-});
-
-const {
-  query,
-  updatedItems: searchedItems,
-  runSearch,
-  resetResults
-} = useBookableSearch({isEvent: false, sourceItems: allItems});
+const allEvents = computed(() => {
+  return eventStore.getEvents
+})
 
 
-function updateBookables(itemList, itemName) {
-  return itemList.filter((i) => i.isBookable).map((i) => {
-    return {
-      ...i,
-      category: itemName
-    }
-  });
+const { state: query } = useCatalogQueryState();
+async function goToListview(searchParams) {
+  const router = useRouter();
+  const route = useRoute();
+
+  if(searchParams.term){
+    route.query.q = searchParams.term;
+  }
+  if(searchParams.location){
+    route.query.loc = searchParams.location;
+  }
+  if(searchParams.timeStart){
+    route.query.start = searchParams.timeStart;
+  }
+  if(searchParams.timeEnd){
+    route.query.end = searchParams.timeEnd;
+  }
+
+  if (searchParams.searchType === "bookables") {
+    console.log("go to bookables");
+    await router.push(tenantTo(`bookables`));
+  } else if (searchParams.searchType === "events") {
+    console.log("go to events");
+    await router.push(tenantTo(`events`));
+  }
 }
 
 </script>

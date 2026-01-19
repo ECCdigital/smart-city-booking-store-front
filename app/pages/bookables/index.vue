@@ -18,8 +18,11 @@ const { loadBundle } = useCatalogBundle();
 const bookableStore = useBookableStore();
 await loadBundle({ include: ["bookables"] });
 
-const allResources = computed(() => {
-  return bookableStore.getResources;
+const allBookables = computed(() => {
+  const resources = bookableStore.getResources;
+  const locations = bookableStore.getLocations;
+  const rooms = bookableStore.getRooms;
+  return resources.concat(locations).concat(rooms);
 });
 
 const {
@@ -33,7 +36,7 @@ const {
   setSortedQueryParams,
   runSearch,
   resetResults,
-} = useBookableSearch({ isEvent: false, sourceItems: allResources });
+} = useBookableSearch({ isEvent: false, sourceItems: allBookables });
 </script>
 
 <template>
@@ -42,6 +45,7 @@ const {
       <SearchBar
         v-model:is-initailized="searchIsInitialized"
         v-model:filter-reset-key="filterResetKey"
+        search-type="bookables"
         :term="query.term"
         :location="query.location"
         :time-start="query.start"
@@ -54,9 +58,9 @@ const {
 
     <div class="m-10 lg:m-5 sm:flex items-center">
       <span
-          v-if="searchIsInitialized"
-          class="text-black dark:text-white lg:font-bold"
-      >{{ suitableCount }}  {{ $t("filter.fittingResults") }}</span
+        v-if="searchIsInitialized"
+        class="text-black dark:text-white lg:font-bold"
+        >{{ suitableCount }} {{ $t("filter.fittingResults") }}</span
       >
       <div class="" style="flex: 1" />
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">

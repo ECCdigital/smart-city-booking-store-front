@@ -1,9 +1,7 @@
 <template>
   <div style="max-width: 90vw; margin: auto; padding: 50px 0">
     <div class="flex items-end mb-5">
-      <h2 class="text-2xl font-bold mt-7">
-        Anstehende Veranstaltungen
-      </h2>
+      <h2 class="text-2xl font-bold mt-7">Anstehende Veranstaltungen</h2>
       <div class="flex-1" />
       <p
         v-if="latestEvents.length > 3"
@@ -20,7 +18,7 @@
         class="flex basis-1/3 mb-2"
       >
         <ResultCard
-          :item="b.item"
+          :item="b"
           :calculated-price="b.calculatedPrice"
           entry-page-mode
           class="flex flex-col h-full w-full"
@@ -31,7 +29,7 @@
 </template>
 <script setup>
 import ResultCard from "~/components/search/ResultCard.vue";
-import {useBreakpointCheck} from "~/composables/utils/useBreakpointCheck.js";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 
 const props = defineProps({
   items: {
@@ -43,26 +41,25 @@ const props = defineProps({
 const isGreaterThanLg = computed(() => useBreakpointCheck().isGreaterThanLg());
 
 const latestEvents = computed(() => {
-  return props.items
-    .filter((i) => i.item.category === "event")
-    .sort(
-      (a, b) =>
-        new Date(a.item.information.startDate).getTime() -
-        new Date(b.item.information.startDate).getTime(),
-    );
+  const events = props.items;
+  return events.sort(
+    (a, b) =>
+      new Date(a.information.startDate).getTime() -
+      new Date(b.information.startDate).getTime(),
+  );
 });
 
 const numberOfVisibleEvents = computed(() => {
-  if(isGreaterThanLg.value){
-    return 4
+  if (isGreaterThanLg.value) {
+    return 4;
   } else {
-    return 3
+    return 3;
   }
-})
+});
 
 function goToEventsPage() {
   const router = useRouter();
-  router.push("/events");
+  router.push(tenantTo(`events`))
 }
 </script>
 <style scoped></style>
