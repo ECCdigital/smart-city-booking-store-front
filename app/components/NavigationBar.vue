@@ -46,20 +46,16 @@ import UserDropdown from "~/components/UserDropdown.vue";
 
 const tabs = computed(() => [
   {
-    label: "Orte",
-    icon: "i-lucide-map-pin",
-    value: `/locations`,
+    label: "Bookables",
+    icon: "i-lucide-shopping-basket",
+    value: `/bookables`,
   },
   {
     label: "Veranstaltungen",
     icon: "i-lucide-calendar",
     value: `/events`,
   },
-  {
-    label: "Geräte & Ressourcen",
-    icon: "i-lucide-monitor",
-    value: `/bookables`,
-  },
+
 ]);
 
 const contrastToSecondary = computed(() => {
