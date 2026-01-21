@@ -50,6 +50,7 @@
   <!--Card for smaller screens -->
   <UCard
     class="bg-white dark:bg-gray-700 mx-5 -mt-15 p-0 shadow-lg md:hidden"
+    :class="entryPageMode ? '-mt-20' : '-mt-15'"
     :ui="{ root: 'p-0', body: 'p-0' }"
     style="position: relative; width: 80vw"
   >
