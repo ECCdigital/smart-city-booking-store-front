@@ -377,7 +377,7 @@ const possibleCities = computed(() => {
   props.bookables.forEach((b) => {
     let city = "";
     if (props.isEvent && b.status === "suitable") {
-      city = extractCity(b.item.eventAddress.city);
+      city = extractCity(b.item.eventAddress.city); //toDo - adjust for new location object !!!
     } else if (b.status === "suitable") {
       city = extractCity(b.item.location);
     }
@@ -403,7 +403,7 @@ function extractCity(location) {
   } else if (location && typeof location === "object") {
     if (location.address && location.address.city) {
       return location.address.city;
-    } else if (location.address) {
+    } else if (location.display_address) {
       return extractCityFromString(location.display_address);
     }
   }

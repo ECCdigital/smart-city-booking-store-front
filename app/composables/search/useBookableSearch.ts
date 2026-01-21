@@ -39,7 +39,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   };
 
   const bookableSearchLocationOptions = {
-    keys: ["item.description", "item.location"],
+    keys: ["item.description", "item.location.display_address"],
     includeScore: true,
     shouldSort: true,
     threshold: 0.3,
@@ -593,7 +593,6 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     filteredItems,
     sortedItems,
     suitableCount,
-    setSearchQueryParams,
     setFilterQueryParams,
     setSortedQueryParams,
     runSearch,

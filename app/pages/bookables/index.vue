@@ -50,7 +50,6 @@ const {
         :location="query.location"
         :time-start="query.start"
         :time-end="query.end"
-        :is-event="false"
         @search="runSearch"
         @reset="resetResults"
       />
