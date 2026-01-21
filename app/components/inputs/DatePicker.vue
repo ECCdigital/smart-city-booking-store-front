@@ -41,7 +41,7 @@ function onStartRange(startDate) {
 }
 
 .calendarWidth {
-  width: 400px;
+  width: 450px;
   max-width: 100%;
 }
 .noBorder {
