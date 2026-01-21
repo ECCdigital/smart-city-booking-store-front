@@ -14,6 +14,9 @@
         size="lg"
         variant="ghost"
         class="rounded-md w-full bg-white dark:bg-gray-700"
+        :ui="{
+          placeholder: hasMissingType ? 'text-red-500 font-bold' : '',
+        }"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <InputText
@@ -155,7 +158,7 @@ const types = ref([
     value: "events",
   },
 ]);
-
+const hasMissingType = computed(() => isInitialized.value && !_searchType.value);
 const emit = defineEmits(["search", "reset"]);
 
 const contrastToPrimary = computed(() =>
@@ -171,6 +174,14 @@ function removeSearchTimePeriod() {
 }
 
 function onSearch() {
+  if(hasMissingType.value){
+    const notification = useNotification();
+    notification.success(
+        "Bitte legen Sie fest, wonach Sie suchen möchten.",
+        "Unklare Suchanfrage"
+    );
+    return;
+  }
   if (_timePeriod.value) {
     if (!_timePeriod.value.end && _timePeriod.value.start) {
       _timePeriod.value.end = _timePeriod.value.start;
