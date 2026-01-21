@@ -9,6 +9,7 @@ export interface CatalogQueryState {
   inclNoSuitable: boolean;
   pubEv: boolean;
   regEv: boolean;
+    cat: string[];
   cities: string[];
   price: number[];
 

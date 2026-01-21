@@ -23,6 +23,7 @@
           v-model:is-initailized="isInitialized"
           :bookables="bookables"
           :include-non-suitable="includeNonSuitable"
+          :categories="categories"
           :cities="cities"
           :price="price"
           :only-public-events="onlyPublicEvents"
@@ -51,6 +52,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  categories: {
+    type: Array,
+    default: () => [],
+  },
   cities: {
     type: Array,
     default: () => [],
@@ -66,10 +71,6 @@ const props = defineProps({
   onlyRegistrationNeededEvents: {
     type: Boolean,
     default: false,
-  },
-  categories: {
-    type: Array,
-    default: () => [],
   },
 });
 

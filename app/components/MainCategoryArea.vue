@@ -18,18 +18,18 @@ import MainCategoryCard from "~/components/MainCategoryCard.vue";
 //toDo - read categories from instance settings
 const tempCategories = [
   {
-    value: "location",
+    value: "event-location",
     title: "Veranstaltungsorte",
     description: "Veranstaltungatsorte in Ihrer Nähe",
     icon: "i-lucide-building-2",
-    to: '/locations'
+    to: '/bookables'
   },
   {
     value: "room",
     title: "Räume",
     description: "Co-Working Spaces, Seminarräume u.v.m.",
     icon: "i-lucide-door-open",
-    to: '/locations'
+    to: '/bookables'
   },
   {
     value: "resource",

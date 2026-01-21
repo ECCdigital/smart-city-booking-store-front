@@ -24,6 +24,7 @@
 </template>
 <script setup>
 import VueDatePicker from "@vuepic/vue-datepicker";
+import '@vuepic/vue-datepicker/dist/main.css'
 
 const model = defineModel();
 const mode = useColorMode()
@@ -40,7 +41,7 @@ function onStartRange(startDate) {
 }
 
 .calendarWidth {
-  width: 400px;
+  width: 450px;
   max-width: 100%;
 }
 .noBorder {

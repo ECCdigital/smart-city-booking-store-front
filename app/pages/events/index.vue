@@ -39,6 +39,7 @@ const {
       <SearchBar
         v-model:is-initailized="searchIsInitialized"
         v-model:filter-reset-key="filterResetKey"
+        search-type="events"
         :term="query.term"
         :location="query.location"
         :time-start="query.start"
@@ -67,6 +68,7 @@ const {
           v-model:is-initailized="searchIsInitialized"
           :bookables="searchedEvents"
           :include-non-suitable="query.inclNoSuitable"
+          :cat="query.cat"
           :cities="query.cities"
           :price="query.price"
           :only-public-events="query.pubEv"

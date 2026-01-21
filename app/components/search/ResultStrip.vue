@@ -10,7 +10,6 @@
     <div class="basis-1/4 flex items-center">
       <div class="basis-9/10 w-full h-full relative">
         <UBadge
-            v-if="entryPageMode"
             class="absolute top-2 left-2 z-10"
             color="primary"
             size="md"
@@ -21,7 +20,7 @@
           :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
           alt=""
           class="w-full h-full object-cover rounded-l-xl"
-        />
+        >
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
@@ -29,7 +28,7 @@
           )}`"
           alt=""
           class="w-full h-full object-cover rounded-l-xl"
-        />
+        >
         <ClientOnly v-else>
           <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-xl" />
           <template #fallback>
@@ -100,15 +99,18 @@ const isEvent = computed(() => {
 
 //toDo - read dynamically from instance
 const categoryName = computed(() => {
-  switch (props.item?.category){
+  if(isEvent.value){
+    return "Veranstaltung";
+  }
+  switch (props.item?.type){
     case "room":
-      return "Räume";
-    case "location":
-      return "Veranstaltungsorte";
+      return "Raum";
+    case "event-location":
+      return "Veranstaltungsort";
     case "resource":
-      return "Geräte";
-      case "event":
-      return "Veranstaltungen";
+      return "Gerät";
+    case "event":
+      return "Veranstaltung";
     default:
       return "";
   }
@@ -121,7 +123,6 @@ const price = computed(() => {
       return props.calculatedPrice
     }
 )
-
 </script>
 
 <style scoped></style>

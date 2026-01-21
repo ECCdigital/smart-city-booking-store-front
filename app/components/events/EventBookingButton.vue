@@ -3,7 +3,7 @@
     <UTooltip :disabled="disableTooltip" :text="tooltipText">
       <div class="h-full">
         <UButton
-            v-if="!isNotBookable && event.attendees.needsRegistration"
+            v-if="event.attendees.needsRegistration"
             :class="[
                 isDirectConnection? 'px-5 mt-5 md:my-0' : 'px-10',
                 bookingDisabled? 'bg-gray-400/30 dark:bg-gray-200/40 text-gray-800 dark:text-gray-900' : ''
@@ -17,7 +17,7 @@
             @click="goToTicketOptions"
         />
         <UButton
-            v-if="!isNotBookable && !event.attendees.needsRegistration"
+            v-if="!event.attendees.needsRegistration"
             class="bookingButton justify-center px-3 bg-gray-400/30 dark:bg-gray-200/40 text-gray-800 dark:text-gray-900 mt-5 md:my-0"
             color=""
             disabled

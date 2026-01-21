@@ -7,7 +7,6 @@
     <div id="header" class="flex flex-col h-36">
       <div class="flex h-9/10 relative">
         <UBadge
-          v-if="entryPageMode"
           class="absolute top-2 left-2 z-10"
           color="primary"
           size="md"
@@ -18,7 +17,7 @@
           :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"
           alt="Bild des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
-        />
+        >
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
@@ -26,7 +25,7 @@
           )}`"
           alt=""
           class="w-full object-cover rounded-t-xl"
-        />
+        >
         <ClientOnly v-else>
           <ImagePlaceholder :theme="theme" class="w-full h-full rounded-t-xl" />
         </ClientOnly>
@@ -90,15 +89,18 @@ const isEvent = computed(() => {
 });
 //toDo - read dynamically from instance
 const categoryName = computed(() => {
-  switch (props.item?.category) {
+  if(isEvent.value){
+    return "Veranstaltung";
+  }
+  switch (props.item?.type) {
     case "room":
-      return "Räume";
-    case "location":
-      return "Veranstaltungsorte";
+      return "Raum";
+    case "event-location":
+      return "Veranstaltungsort";
     case "resource":
-      return "Geräte";
+      return "Gerät";
     case "event":
-      return "Veranstaltungen";
+      return "Veranstaltung";
     default:
       return "";
   }
