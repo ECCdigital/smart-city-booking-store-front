@@ -65,6 +65,9 @@
         size="lg"
         variant="ghost"
         class="rounded-md w-full bg-white dark:bg-gray-700"
+        :ui="{
+          placeholder: hasMissingType ? 'text-red-500 font-bold' : '',
+        }"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputText
