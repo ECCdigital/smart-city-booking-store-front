@@ -1,17 +1,29 @@
 <template>
-<div>
-  <p>
-    <UIcon name="i-lucide-map-pin" class="size-5" />
-    <span v-if="location.length" class="p-3">{{
-        location
-      }}</span>
-    <span v-else class="italic p-3">Keine Adresse bekannt.</span>
-  </p>
+  <div>
+    <div class="flex">
+      <div class="grid place-content-center">
+        <UIcon name="i-lucide-map-pin" class="size-5" />
+      </div>
+      <div v-if="location.length" class="p-3">{{ location }}</div>
+      <div v-else class="italic p-3">Keine Adresse bekannt.</div>
+      <div class="flex-1" />
+      <div
+        v-if="location.length && enableCopyButton"
+        class="grid place-content-center"
+      >
+        <UIcon
+          name="i-lucide-copy"
+          class="size-5 cursor-pointer"
+          @click="copyAddressToClipboard"
+        />
+      </div>
+    </div>
+    <!--
   <p v-if="location.length">
     <UIcon name="i-lucide-navigation" class="size-5" />
     <span class="p-3">Distance coming soon </span>
   </p>
-</div>
+  --></div>
 </template>
 <script setup>
 const props = defineProps({
@@ -19,20 +31,35 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  enableCopyButton: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const location = computed(() => {
-  if(typeof props.bookable.location === 'string') {
+  if (typeof props.bookable.location === "string") {
     return props.bookable.location;
-  } else if (props.bookable.location && typeof props.bookable.location === 'object') {
-    return props.bookable.location.display_address || '';
+  } else if (
+    props.bookable.location &&
+    typeof props.bookable.location === "object"
+  ) {
+    return props.bookable.location.display_address || "";
   } else {
-    return '';
+    return "";
   }
 });
+
+const copyAddressToClipboard = async () => {
+  if (location.value.length) {
+    await navigator.clipboard.writeText(location.value);
+    const notification = useNotification();
+    notification.success(
+      "Die Adresse wurde in Ihre Zwischenablage kopiert.",
+      "Adresse erfolgreich kopiert!",
+    );
+  }
+};
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>
