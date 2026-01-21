@@ -36,12 +36,11 @@
     </p>
     <p v-else>
       {{ displayMinDefaultPrice() }}
+      <br>
+      <span class="text-xs font-normal text-gray-600 dark:text-gray-300">
+        {{ displayPricePerUnit() }}
+      </span>
     </p>
-
-    <p class="text-xs font-normal text-gray-600 dark:text-gray-300">
-      {{ displayPricePerUnit() }}
-    </p>
-
   </div>
 </template>
 <script setup>
@@ -58,7 +57,7 @@ const props = defineProps({
 
 function getMinPrice() {
   //all prices are free
-  if(props.bookable.priceCategories.every((c) => c.priceEur === 0)){
+  if(props.bookable.priceCategories.every((c) => c.priceEur === 0 || c.priceEur === null)){
     return null;
   }
   //exclude holiday price categories
