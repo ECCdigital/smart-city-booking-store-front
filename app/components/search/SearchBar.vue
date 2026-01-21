@@ -8,6 +8,7 @@
       :style="entryPageMode ? 'width:80vw; height: 100px ' : 'width:70vw'"
     >
       <USelect
+        v-if="entryPageMode"
         v-model="_searchType"
         :items="types"
         placeholder="Was suchen Sie?"
@@ -58,16 +59,16 @@
     style="position: relative; width: 80vw"
   >
     <USelect
-        v-model="_searchType"
-        :items="types"
-        icon="i-lucide-search"
-        placeholder="Was suchen Sie?"
-        size="lg"
-        variant="ghost"
-        class="rounded-md w-full bg-white dark:bg-gray-700"
-        :ui="{
-          placeholder: hasMissingType ? 'text-red-500 font-bold' : '',
-        }"
+      v-model="_searchType"
+      :items="types"
+      icon="i-lucide-search"
+      placeholder="Was suchen Sie?"
+      size="lg"
+      variant="ghost"
+      class="rounded-md w-full bg-white dark:bg-gray-700"
+      :ui="{
+        placeholder: hasMissingType ? 'text-red-500 font-bold' : '',
+      }"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputText
@@ -153,7 +154,7 @@ const _timePeriod = ref({
 
 const types = ref([
   {
-    label: "Bookables",
+    label: "Buchungsobjekte",
     value: "bookables",
   },
   {
@@ -161,11 +162,13 @@ const types = ref([
     value: "events",
   },
 ]);
-const hasMissingType = computed(() => isInitialized.value && !_searchType.value);
+const hasMissingType = computed(
+  () => isInitialized.value && !_searchType.value
+);
 const emit = defineEmits(["search", "reset"]);
 
 const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary(),
+  useContrastColor().contrastToPrimary()
 );
 
 function setSearchTimePeriod(tp) {
@@ -177,11 +180,11 @@ function removeSearchTimePeriod() {
 }
 
 function onSearch() {
-  if(hasMissingType.value){
+  if (hasMissingType.value) {
     const notification = useNotification();
     notification.success(
-        "Bitte legen Sie fest, wonach Sie suchen möchten.",
-        "Unklare Suchanfrage"
+      "Bitte legen Sie fest, wonach Sie suchen möchten.",
+      "Unklare Suchanfrage"
     );
     return;
   }

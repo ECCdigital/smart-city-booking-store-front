@@ -36,9 +36,8 @@ const colorModeName = computed(() => colorMode.value);
           <img
             :src="`/api/theme/logo`"
             alt="logo"
-            :class="colorMode.value === 'dark' ? 'darkLogo' : ' '"
-            style="max-height: 6vh"
-          >
+            class="max-h-[6vh] dark:invert dark:hue-rotate-180"
+          />
         </div>
         <div class="grid content-center max-w-220px text-center md:text-left">
           <p class="text-primary text-2xl font-bold">{{ hero?.title }}</p>
@@ -51,9 +50,8 @@ const colorModeName = computed(() => colorMode.value);
           <img
             :src="`/api/theme/logo`"
             alt="logo"
-            class="max-h-[7vh] hidden md:block"
-            :class="colorMode.value === 'dark' ? 'darkLogo' : ' '"
-          >
+            class="max-h-[7vh] hidden md:block dark:invert dark:hue-rotate-180"
+          />
         </div>
       </div>
     </HeroBackground>
@@ -62,8 +60,4 @@ const colorModeName = computed(() => colorMode.value);
   </div>
 </template>
 
-<style scoped>
-.darkLogo {
-  filter: invert(1) hue-rotate(180deg);
-}
-</style>
+<style scoped></style>

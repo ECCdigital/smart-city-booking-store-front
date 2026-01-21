@@ -46,7 +46,7 @@ import UserDropdown from "~/components/UserDropdown.vue";
 
 const tabs = computed(() => [
   {
-    label: "Bookables",
+    label: "Buchungsobjekte",
     icon: "i-lucide-shopping-basket",
     value: `/bookables`,
   },
