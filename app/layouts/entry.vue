@@ -17,6 +17,7 @@ useHead({
 
 const { data: hero } = await useFetch("/api/theme/hero");
 const colorMode = useColorMode();
+const colorModeName = computed(() => colorMode.value);
 </script>
 
 <template>
@@ -25,7 +26,7 @@ const colorMode = useColorMode();
     <!-- Hero -->
     <HeroBackground
       variant="poly"
-      :theme="colorMode.value"
+      :theme="colorMode.value === 'dark' ? 'dark' : 'light'"
       height="xl"
       :fade-bottom="false"
       class="px-10 py-15 justify-between z-0"

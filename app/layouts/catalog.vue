@@ -26,10 +26,9 @@ const colorMode = useColorMode();
   <div>
     <NavigationBar />
     <!-- Hero -->
-    <!-- toDo - Hero anpassen für Dark-Mode  -->
     <HeroBackground
       variant="poly"
-      :theme="colorMode.value"
+      :theme="colorMode.value === 'dark' ? 'dark' : 'light'"
       :height="isGreaterThanMd ? 'sm' : 'md'"
       :fade-bottom="false"
       class="px-10 py-10 md:py-15 justify-between z-0"
