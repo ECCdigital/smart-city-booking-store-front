@@ -1,7 +1,9 @@
 <script setup>
-import {useAuthStore} from "~~/stores/auth.js";
-import {useBreakpointCheck} from "~/composables/utils/useBreakpointCheck.js";
-import {useContrastColor} from "~/composables/utils/useContrastColor.js";
+import { useAuthStore } from "~~/stores/auth.js";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+
+const { isGreaterThanSm } = useBreakpointCheck();
 
 const t = useI18n().t;
 
@@ -9,14 +11,12 @@ const config = useRuntimeConfig();
 const authStore = useAuthStore();
 const notification = useNotification();
 
-const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
 const contrastToSecondary = computed(() => {
   return useContrastColor().contrastToSecondary();
-    }
-);
+});
 const nameColor = computed(() => {
-  if(contrastToSecondary.value === '#ffffff'){
-    return 'text-white';
+  if (contrastToSecondary.value === "#ffffff") {
+    return "text-white";
   } else {
     return "text-black";
   }
@@ -91,7 +91,7 @@ async function logout() {
           avatar: {
             size: 'h-8 w-8',
           },
-          name:  nameColor
+          name: nameColor,
         }"
       />
     </UButton>

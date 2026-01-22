@@ -40,14 +40,14 @@ const props = defineProps({
 
 const { tenantTo } = useTenantRoute();
 
-const isGreaterThanLg = computed(() => useBreakpointCheck().isGreaterThanLg());
+const { isGreaterThanLg } = useBreakpointCheck();
 
 const latestEvents = computed(() => {
   const events = props.items;
   return events.sort(
     (a, b) =>
       new Date(a.information.startDate).getTime() -
-      new Date(b.information.startDate).getTime(),
+      new Date(b.information.startDate).getTime()
   );
 });
 
@@ -61,7 +61,7 @@ const numberOfVisibleEvents = computed(() => {
 
 function goToEventsPage() {
   const router = useRouter();
-  router.push(tenantTo(`events`))
+  router.push(tenantTo(`events`));
 }
 </script>
 <style scoped></style>

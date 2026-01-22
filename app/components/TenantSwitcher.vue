@@ -3,6 +3,8 @@ import { computed } from "vue";
 import { useTenantStore } from "~~/stores/tenant.js";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 
+const { isGreaterThanMd } = useBreakpointCheck();
+
 const t = useI18n().t;
 
 const route = useRoute();
@@ -12,8 +14,6 @@ const tenantID = useState("tenantID");
 const tenantStore = useTenantStore();
 
 const tenants = computed(() => tenantStore.getTenants);
-
-const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
 
 const selectedTenant = computed(() => {
   return tenants.value.find((tenant) => tenant.id === tenantID.value);
@@ -44,7 +44,7 @@ const dropdownItems = computed(() => {
       id: tenant.id,
       onSelect: () => onSelect(tenant),
       slot: "prefix",
-    })),
+    }))
   );
 
   return items;

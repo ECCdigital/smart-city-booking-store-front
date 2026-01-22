@@ -16,7 +16,7 @@ useHead({
   ],
 });
 
-const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
+const { isGreaterThanMd } = useBreakpointCheck();
 const colorMode = useColorMode();
 
 const theme = computed(() => {

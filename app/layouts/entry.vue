@@ -17,7 +17,6 @@ useHead({
 
 const { data: hero } = await useFetch("/api/theme/hero");
 const colorMode = useColorMode();
-const colorModeName = computed(() => colorMode.value);
 </script>
 
 <template>
