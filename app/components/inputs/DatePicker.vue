@@ -1,5 +1,9 @@
 <template>
-  <div ref="containerRef" class="w-full">
+  <div
+    ref="containerRef"
+    class="w-full"
+    :style="{ '--picker-width': pickerWidth }"
+  >
     <VueDatePicker
       v-model="model"
       format="dd.MM.yyyy"
@@ -11,9 +15,6 @@
       auto-apply
       :enable-time-picker="false"
       :action-row="{ showPreview: true, showSelect: false }"
-      :ui="{
-        menu: `!bg-transparent w-[${pickerWidth}]`,
-      }"
       :dark="isDark"
       @range-start="onStartRange"
     />
@@ -33,7 +34,7 @@ function onStartRange(startDate) {
 }
 
 const containerRef = ref(null);
-const pickerWidth = ref("450px");
+const pickerWidth = ref("100%");
 
 onMounted(() => {
   if (containerRef.value) {
@@ -43,6 +44,13 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+:deep(.dp__menu),
+:deep(.dp__main) {
+  width: var(--picker-width) !important;
+  max-width: 100%;
+}
+
 .dp__action_buttons .dp__action_select {
   background-color: var(--color-primary) !important;
 }

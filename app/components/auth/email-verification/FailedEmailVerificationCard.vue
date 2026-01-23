@@ -17,10 +17,7 @@ const errorMessages = {
 </script>
 
 <template>
-  <UCard
-    variant="soft"
-    class="w-full max-w-md rounded-xl bg-white/60 dark:bg-gray-900/80 backdrop-blur-lg"
-  >
+  <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
     <template #header>
       <div class="flex flex-col justify-center items-center">
         <UIcon size="32" name="i-lucide-circle-x" class="text-error" />

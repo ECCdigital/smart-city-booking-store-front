@@ -39,7 +39,7 @@
       <template #content>
         <UCard
           variant="soft"
-          class="w-90vw !bg-white/60 dark:!bg-gray-900/80 backdrop-blur-lg"
+          class="w-90vw glass"
         >
           <div class="flex justify-between items-center">
             <p class="text-lg font-bold my-5">Zeitraum auswählen</p>

@@ -1,7 +1,7 @@
 <template>
   <UCard
     variant="soft"
-    class="w-full max-w-md rounded-xl bg-white/60 dark:bg-gray-900/80 backdrop-blur-lg"
+    class="w-full max-w-md rounded-xl glass"
   >
     <template #header>
       <h2 class="text-center text-2xl font-semibold">

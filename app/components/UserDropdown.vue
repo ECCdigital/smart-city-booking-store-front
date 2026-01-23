@@ -71,8 +71,7 @@ async function logout() {
   <UDropdownMenu
     :items="items"
     :ui="{
-      content:
-        'ring-0 shadow-lg bg-white/60 dark:bg-gray-900/80 backdrop-blur-lg',
+      content: 'ring-0 shadow-lg glass',
     }"
   >
     <UButton
