@@ -9,11 +9,6 @@
           variant="ghost"
           class="rounded-full py-2 px-3"
           :class="filterIsActive ? '' : ''"
-          :style="
-            colorMode === 'dark'
-              ? { color: lighterColor }
-              : { color: darkerColor }
-          "
           @click="removeFilter"
         />
       </UTooltip>
@@ -24,33 +19,18 @@
         <USwitch
           v-model="_includeNonSuitable"
           label="Nicht passende Objekte anzeigen."
-          :style="
-            colorMode === 'dark'
-              ? '--ui-primary: ' + lighterColor
-              : '--ui-primary: ' + darkerColor
-          "
           @change="instantFilter"
         />
         <USwitch
           v-if="isEvent"
           v-model="_onlyPublicEvents"
           label="Nur öffentliche Events anzeigen."
-          :style="
-            colorMode === 'dark'
-              ? '--ui-primary: ' + lighterColor
-              : '--ui-primary: ' + darkerColor
-          "
           @change="instantFilter"
         />
         <USwitch
           v-if="isEvent"
           v-model="_onlyRegistrationNeededEvents"
           label="Nur anmeldepflichte Events anzeigen."
-          :style="
-            colorMode === 'dark'
-              ? '--ui-primary: ' + lighterColor
-              : '--ui-primary: ' + darkerColor
-          "
           @change="instantFilter"
         />
       </div>
@@ -63,11 +43,6 @@
         v-model="_categories"
         :items="possibleCategories"
         :ui="{ label: 'text-base' }"
-        :style="
-          colorMode === 'dark'
-            ? '--ui-primary: ' + lighterColor
-            : '--ui-primary: ' + darkerColor
-        "
         @change="instantFilter"
       />
     </div>
@@ -79,11 +54,6 @@
         v-model="_cities"
         :items="possibleCities.slice(0, numberOfVisibleCities)"
         :ui="{ label: 'text-base' }"
-        :style="
-          colorMode === 'dark'
-            ? '--ui-primary: ' + lighterColor
-            : '--ui-primary: ' + darkerColor
-        "
         @change="instantFilter"
       >
         <template #label="{ item }">
@@ -130,12 +100,10 @@
         <div
           v-for="(count, index) in priceBars"
           :key="index"
-          class="w-full"
+          class="w-full bg-primary opacity-40"
           style="max-height: 50px"
           :style="{
             height: (count / Math.max(...priceBars)) * 50 + 'px',
-            backgroundColor: colorMode === 'dark' ? lighterColor : darkerColor,
-            opacity: 0.4,
           }"
         />
       </div>
@@ -145,11 +113,6 @@
         :min="possiblePriceRange[0]"
         :max="possiblePriceRange[1]"
         :step="dynamicPriceStep"
-        :style="
-          colorMode === 'dark'
-            ? '--ui-primary: ' + lighterColor
-            : '--ui-primary: ' + darkerColor
-        "
         @change="instantFilter"
       />
     </div>
@@ -249,11 +212,6 @@ const _onlyPublicEvents = ref(props.onlyPublicEvents);
 const _onlyRegistrationNeededEvents = ref(props.onlyRegistrationNeededEvents);
 const _categories = ref(props.categories);
 
-//Colors
-const colorMode = useColorMode();
-const darkerColor = computed(() => useContrastColor().darkerColor());
-const lighterColor = computed(() => useContrastColor().lighterColor());
-
 //Kategorien
 //toDo - read from instance later !!!!
 const possibleCategories = computed(() => {
@@ -282,7 +240,7 @@ const possiblePriceRange = computed(() => {
     validPrices = props.bookables.map((e) => getEventMinPrice(e));
   }
   validPrices = validPrices.filter(
-    (price) => price !== undefined && price !== null && !isNaN(price),
+    (price) => price !== undefined && price !== null && !isNaN(price)
   );
 
   //set endpoints rounded to 5
@@ -293,7 +251,7 @@ const possiblePriceRange = computed(() => {
   return [minPrice, maxPrice];
 });
 const _price = ref(
-  props.price?.length === 2 ? props.price : possiblePriceRange.value,
+  props.price?.length === 2 ? props.price : possiblePriceRange.value
 );
 
 const dynamicPriceStep = computed(() => {
@@ -308,7 +266,7 @@ const priceBars = computed(() => {
   const barsCount =
     Math.ceil(
       (possiblePriceRange.value[1] - possiblePriceRange.value[0]) /
-        dynamicPriceStep.value,
+        dynamicPriceStep.value
     ) || 1;
   const bars = new Array(barsCount).fill(0);
   const range = possiblePriceRange.value[1] - possiblePriceRange.value[0];
@@ -324,9 +282,9 @@ const priceBars = computed(() => {
     if (minPrice !== null) {
       const index = Math.min(
         Math.floor(
-          ((minPrice - possiblePriceRange.value[0]) / range) * barsCount,
+          ((minPrice - possiblePriceRange.value[0]) / range) * barsCount
         ),
-        barsCount - 1,
+        barsCount - 1
       );
       bars[index]++;
     }
@@ -344,7 +302,7 @@ function getBookableMinPrice(bookable) {
   }
   //else return min price from price categories
   const minPrice = Math.min(
-    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || []),
+    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || [])
   );
   return bookable.item.priceValueAddedTax
     ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
@@ -352,7 +310,7 @@ function getBookableMinPrice(bookable) {
 }
 function getTicketMinPrice(ticket) {
   const minPrice = Math.min(
-    ...ticket.priceCategories.map((cat) => cat.priceEur),
+    ...ticket.priceCategories.map((cat) => cat.priceEur)
   );
   return ticket.priceValueAddedTax
     ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
@@ -364,7 +322,7 @@ function getEventMinPrice(event) {
   }
   if (event.item.tickets && event.item.tickets.length > 0) {
     return Math.min(
-      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket)),
+      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket))
     );
   } else {
     return 0;
@@ -499,4 +457,5 @@ function removeFilter() {
   emit("filter", filter);
 }
 </script>
-<style scoped></style>
+<style scoped>
+</style>

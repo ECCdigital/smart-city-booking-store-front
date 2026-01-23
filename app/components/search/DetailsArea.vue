@@ -41,9 +41,9 @@ const props = defineProps({
   },
 });
 
-const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary(),
-);
+
+const { contrastToPrimary } = useContrastColor();
+
 
 const notification = useNotification();
 async function share() {

@@ -1,3 +1,5 @@
+import { computed } from "vue";
+
 export function useContrastColor() {
   const FALLBACK_PRIMARY = "#000000";
   const FALLBACK_SECONDARY = "#000000";
@@ -6,21 +8,33 @@ export function useContrastColor() {
   const readCssVar = (name, fallback) => {
     if (!import.meta.client) return fallback;
 
-    const root = document.documentElement;
-    const v = getComputedStyle(root).getPropertyValue(name).trim();
-    return v || fallback;
+    try {
+      const root = document?.documentElement;
+      if (!root) return fallback;
+
+      const v = getComputedStyle(root).getPropertyValue(name).trim();
+      return v || fallback;
+    } catch {
+      return fallback;
+    }
   };
 
-  const primaryColor = computed(() =>
-    readCssVar("--color-primary", FALLBACK_PRIMARY)
-  );
+  const primaryColor = ref(FALLBACK_PRIMARY);
+  const secondaryColor = ref(FALLBACK_SECONDARY);
 
-  const secondaryColor = computed(() =>
-    readCssVar("--color-secondary", FALLBACK_SECONDARY)
-  );
+  if (import.meta.client) {
+    onMounted(() => {
+      primaryColor.value = readCssVar("--ui-primary", FALLBACK_PRIMARY);
+      secondaryColor.value = readCssVar("--ui-secondary", FALLBACK_SECONDARY);
+    });
+  }
 
-  const contrastToPrimary = () => getContrastColor(primaryColor.value);
-  const contrastToSecondary = () => getContrastColor(secondaryColor.value);
+  const contrastToPrimary = computed(() =>
+    getContrastColor(primaryColor.value)
+  );
+  const contrastToSecondary = computed(() =>
+    getContrastColor(secondaryColor.value)
+  );
 
   function getContrastColor(hex) {
     if (hex && hex.startsWith("#") && hex.length >= 7) {
@@ -35,10 +49,12 @@ export function useContrastColor() {
     return FALLBACK_CONTRAST;
   }
 
-  const lighterColor = () =>
-    getLighterColor(primaryColor.value, secondaryColor.value);
-  const darkerColor = () =>
-    getDarkerColor(primaryColor.value, secondaryColor.value);
+  const lighterColor = computed(() =>
+    getLighterColor(primaryColor.value, secondaryColor.value)
+  );
+  const darkerColor = computed(() =>
+    getDarkerColor(primaryColor.value, secondaryColor.value)
+  );
 
   function hexToRgb(hex) {
     const cleanHex = hex.replace("#", "");

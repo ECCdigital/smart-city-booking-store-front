@@ -36,13 +36,13 @@ export default defineNuxtConfig({
     "nuxt-security",
     "@vueuse/nuxt",
     "@nuxtjs/color-mode",
-      "@nuxtjs/leaflet"
+    "@nuxtjs/leaflet",
   ],
   css: ["~/assets/css/main.css"],
   colorMode: {
     classSuffix: "",
     preference: "system",
-    fallback: "dark",
+    fallback: "light",
   },
   i18n: {
     locales: [
@@ -67,15 +67,11 @@ export default defineNuxtConfig({
       redirectOn: "root",
     },
   },
-    security: {
-        headers: {
-            contentSecurityPolicy: {
-                'img-src': [
-                    "'self'",
-                    "data:",
-                    "https://*.tile.openstreetmap.org",
-                ],
-            }
-        }
-    }
+  security: {
+    headers: {
+      contentSecurityPolicy: {
+        "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org"],
+      },
+    },
+  },
 });

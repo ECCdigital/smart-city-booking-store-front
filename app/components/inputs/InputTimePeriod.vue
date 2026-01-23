@@ -1,6 +1,6 @@
 <template>
   <div class="flex justify-between w-full">
-    <UModal v-model:open="isOpen">
+    <UModal v-model:open="isOpen" title="Zeitraum auswählen" description="Wählen Sie den gewünschten Zeitraum aus.">
       <UButton
         size="lg"
         color="neutral"
@@ -155,8 +155,7 @@ const isOpen = ref(false);
 const missingValues = ref<string[]>([]);
 
 const colorMode = useColorMode();
-const darkerColor = computed(() => useContrastColor().darkerColor());
-const lighterColor = computed(() => useContrastColor().lighterColor());
+const { darkerColor, lighterColor } = useContrastColor();
 
 // Hilfen
 const coalesceModel = computed<TimePeriod>(() => {

@@ -69,7 +69,7 @@
               title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
               icon="i-lucide-info"
               variant="ghost"
-              class="p-2 text-red-500"
+              class="p-2 text-info"
             />
             <InputTimePeriod
               :time-period="timePeriod"
@@ -218,9 +218,7 @@ onMounted(async () => {
   }
 });
 
-const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary(),
-);
+const { contrastToPrimary } = useContrastColor();
 
 async function setSearchTimePeriod(tp) {
   timePeriod.value = tp;

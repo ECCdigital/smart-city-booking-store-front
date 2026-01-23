@@ -4,10 +4,6 @@ import NavigationBar from "~/components/NavigationBar.vue";
 useHead({
   link: [
     {
-      rel: "stylesheet",
-      href: `/api/theme/css`,
-    },
-    {
       rel: "preload",
       href: `/api/theme/logo`,
       as: "image",
@@ -30,7 +26,7 @@ useHead({
       <div class="flex">
         <div class="grid content-center max-w-220px">
           <p class="text-primary font-bold">Marktplatz</p>
-          <p class="text-black text-3xl font-bold">
+          <p class="text-black dark:text-white text-xl md:text-3xl font-bold">
             Unsere Angebote und Veranstaltungen
           </p>
         </div>
@@ -39,7 +35,7 @@ useHead({
           <img
             :src="`/api/theme/logo`"
             alt="logo"
-            class="text-center"
+            class="text-center dark:invert dark:hue-rotate-180"
             style="max-height: 7vh"
           />
         </div>

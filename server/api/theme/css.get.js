@@ -6,13 +6,15 @@ export default defineEventHandler(async (event) => {
 
   let theme = defaultTheme;
 
-
   try {
     const fetchedThemeBundle = await apiFetch(event, `/api/catalog/themes`, {
       method: "GET",
     });
 
-    if (fetchedThemeBundle.theme?.colors?.primary && fetchedThemeBundle.theme?.colors?.secondary) {
+    if (
+      fetchedThemeBundle.theme?.colors?.primary &&
+      fetchedThemeBundle.theme?.colors?.secondary
+    ) {
       theme = fetchedThemeBundle.theme.colors;
     } else {
       log.warn(
@@ -26,6 +28,10 @@ export default defineEventHandler(async (event) => {
   setHeader(event, "Content-Type", "text/css");
   return `
     :root {
+      --ui-primary: ${theme.primary};
+      --ui-secondary: ${theme.secondary};
+    }
+    .dark {
       --ui-primary: ${theme.primary};
       --ui-secondary: ${theme.secondary};
     }

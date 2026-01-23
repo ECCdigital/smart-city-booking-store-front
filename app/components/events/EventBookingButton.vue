@@ -73,9 +73,7 @@ const tooltipText = computed(() => {
   }
 });
 
-const contrastToPrimary = computed(() =>
-    useContrastColor().contrastToPrimary()
-);
+const { contrastToPrimary } = useContrastColor();
 
 
 const bookingDisabled = computed(

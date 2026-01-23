@@ -27,9 +27,9 @@ import VueDatePicker from "@vuepic/vue-datepicker";
 import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 
 const mode = useColorMode();
-const contrastToPrimary = computed(() =>
-    useContrastColor().contrastToPrimary(),
-);
+
+const { contrastToPrimary } = useContrastColor();
+
 
 const model = defineModel();
 const props = defineProps({

@@ -11,9 +11,7 @@ const config = useRuntimeConfig();
 const authStore = useAuthStore();
 const notification = useNotification();
 
-const contrastToSecondary = computed(() => {
-  return useContrastColor().contrastToSecondary();
-});
+const { contrastToSecondary } = useContrastColor();
 const nameColor = computed(() => {
   if (contrastToSecondary.value === "#ffffff") {
     return "text-white";

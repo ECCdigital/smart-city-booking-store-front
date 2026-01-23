@@ -10,17 +10,18 @@
     <div class="basis-1/4 flex items-center">
       <div class="basis-9/10 w-full h-full relative">
         <UBadge
-            class="absolute top-2 left-2 z-10"
-            color="primary"
-            size="md"
-            :label="categoryName"
+          class="absolute top-2 left-2 z-10 custom-badge"
+          color="primary"
+          size="md"
+          :label="categoryName"
+          :style="{ '--badge-text-color': contrastToPrimary }"
         />
         <img
           v-if="!isEvent && item?.imgUrl"
           :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
           alt=""
           class="w-full h-full object-cover rounded-l-xl"
-        >
+        />
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
@@ -28,7 +29,7 @@
           )}`"
           alt=""
           class="w-full h-full object-cover rounded-l-xl"
-        >
+        />
         <ClientOnly v-else>
           <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-xl" />
           <template #fallback>
@@ -65,6 +66,7 @@
 import ResultStripEventContent from "~/components/search/ResultStripEventContent.vue";
 import ResultStripBookableContent from "~/components/search/ResultStripBookableContent.vue";
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const colorMode = useColorMode();
 
@@ -99,10 +101,10 @@ const isEvent = computed(() => {
 
 //toDo - read dynamically from instance
 const categoryName = computed(() => {
-  if(isEvent.value){
+  if (isEvent.value) {
     return "Veranstaltung";
   }
-  switch (props.item?.type){
+  switch (props.item?.type) {
     case "room":
       return "Raum";
     case "event-location":
@@ -117,12 +119,17 @@ const categoryName = computed(() => {
 });
 
 const price = computed(() => {
-      if (props.entryPageMode) {
-        return null;
-      }
-      return props.calculatedPrice
-    }
-)
+  if (props.entryPageMode) {
+    return null;
+  }
+  return props.calculatedPrice;
+});
+
+const { contrastToPrimary } = useContrastColor();
 </script>
 
-<style scoped></style>
+<style scoped>
+.custom-badge :deep(span) {
+  color: var(--badge-text-color) !important;
+}
+</style>
