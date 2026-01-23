@@ -72,7 +72,7 @@ async function logout() {
     :items="items"
     :ui="{
       content:
-        'ring-0 shadow-lg bg-white/30 dark:bg-gray-900/40 backdrop-blur-lg',
+        'ring-0 shadow-lg bg-white/60 dark:bg-gray-900/80 backdrop-blur-lg',
     }"
   >
     <UButton

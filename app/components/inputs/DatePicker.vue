@@ -1,54 +1,59 @@
 <template>
-  <VueDatePicker
-    v-model="model"
-    format="dd.MM.yyyy"
-    :min-date="new Date()"
-    locale="de"
-    month-name-format="long"
-    teleport-center
-    range
-    inline
-    auto-apply
-    :enable-time-picker="false"
-    :action-row="{ showPreview: true, showSelect: false }"
-    :ui="mode.value ==='dark' ? {
-      calendar: 'calendarWidth noBorder darkBackground',
-      menu: 'noBorder darkBackground',
-    } : {
-      calendar: 'calendarWidth',
-      menu: 'noBorder',
-    }"
-    :dark=" mode.value ==='dark' "
-    @range-start="onStartRange"
-  />
+  <div ref="containerRef" class="w-full">
+    <VueDatePicker
+      v-model="model"
+      format="dd.MM.yyyy"
+      :min-date="new Date()"
+      locale="de"
+      month-name-format="long"
+      range
+      inline
+      auto-apply
+      :enable-time-picker="false"
+      :action-row="{ showPreview: true, showSelect: false }"
+      :ui="{
+        menu: `!bg-transparent w-[${pickerWidth}]`,
+      }"
+      :dark="isDark"
+      @range-start="onStartRange"
+    />
+  </div>
 </template>
+
 <script setup>
 import VueDatePicker from "@vuepic/vue-datepicker";
-import '@vuepic/vue-datepicker/dist/main.css'
+import "@vuepic/vue-datepicker/dist/main.css";
 
 const model = defineModel();
-const mode = useColorMode()
+const mode = useColorMode();
+const isDark = computed(() => mode.value === "dark");
 
 function onStartRange(startDate) {
   model.value = [startDate, null];
 }
+
+const containerRef = ref(null);
+const pickerWidth = ref("450px");
+
+onMounted(() => {
+  if (containerRef.value) {
+    pickerWidth.value = `${containerRef.value.offsetWidth}px`;
+  }
+});
 </script>
 
-<style>
+<style scoped>
 .dp__action_buttons .dp__action_select {
   background-color: var(--color-primary) !important;
-  color: #fff !important;
 }
 
-.calendarWidth {
-  width: 450px;
-  max-width: 100%;
-}
-.noBorder {
-  border: none;
+:deep(.dp__theme_light) {
+  --dp-primary-color: var(--color-primary);
+  --dp-primary-text-color: #fff;
 }
 
-.darkBackground {
-  background-color: rgb(17, 24, 39);
+:deep(.dp__theme_dark) {
+  --dp-primary-color: var(--color-primary);
+  --dp-primary-text-color: #fff;
 }
 </style>

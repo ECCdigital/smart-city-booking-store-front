@@ -5,7 +5,7 @@
 <template>
   <UCard
       variant="soft"
-      class="w-full max-w-md rounded-xl bg-white/30 dark:bg-gray-900/30 backdrop-blur-lg"
+      class="w-full max-w-md rounded-xl bg-white/60 dark:bg-gray-900/80 backdrop-blur-lg"
   >
     <template #header>
       <div class="flex flex-col justify-center items-center">

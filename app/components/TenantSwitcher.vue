@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useTenantStore } from "~~/stores/tenant.js";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const { isGreaterThanMd } = useBreakpointCheck();
 
@@ -85,6 +86,8 @@ function onClear() {
     hash,
   });
 }
+
+const { contrastToPrimary, contrastToSecondary } = useContrastColor();
 </script>
 
 <template>
@@ -92,31 +95,53 @@ function onClear() {
     :items="dropdownItems"
     :ui="{
       content:
-        'ring-0 shadow-lg bg-white/30 dark:bg-gray-900/40 backdrop-blur-lg',
+        'ring-0 shadow-lg bg-white/60 dark:bg-gray-900/80 backdrop-blur-lg',
     }"
   >
-    <UChip :show="!isGreaterThanMd && !!selectedTenant" inset>
-      <UButton
-        class="w-auto md:min-w-[150px] bg-white/30 dark:bg-gray-900/40 backdrop-blur-lg"
-        color="neutral"
-        variant="outline"
+    <button
+      :class="[
+        'flex items-center px-4 relative h-12 transition-colors',
+        selectedTenant
+          ? 'text-[var(--color-on-primary)] bg-[var(--color-primary)]'
+          : 'hover:bg-white/10',
+      ]"
+    >
+      <div
+        v-if="selectedTenant"
+        class="absolute top-0 left-0 w-full h-1 bg-[var(--color-secondary)]/40"
+      />
+      <UIcon
+        name="i-lucide-building-2"
+        class="text-lg"
+        :class="isGreaterThanMd ? 'mr-2' : ''"
+        :style="
+          selectedTenant
+            ? { color: contrastToPrimary }
+            : { color: contrastToSecondary }
+        "
+      />
+      <span
+        v-if="isGreaterThanMd"
+        class="text-base"
+        :style="
+          selectedTenant
+            ? { color: contrastToPrimary }
+            : { color: contrastToSecondary }
+        "
       >
-        <div class="flex items-center gap-2">
-          <UIcon name="i-lucide-building" size="24" />
-          <div class="hidden md:block">
-            <div class="flex flex-col items-start leading-tight">
-              <span class="text-[10px] uppercase tracking-wide">
-                {{ t("tenants.tenant") }}
-              </span>
-
-              <span class="text-xs font-semibold leading-tight">
-                {{ selectedTenantLabel }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </UButton>
-    </UChip>
+        {{ selectedTenantLabel }}
+      </span>
+      <UIcon
+        name="i-lucide-chevron-down"
+        size="14"
+        class="ml-2"
+        :style="
+          selectedTenant
+            ? { color: contrastToPrimary }
+            : { color: contrastToSecondary }
+        "
+      />
+    </button>
 
     <template #prefix-trailing="{ item }">
       <UIcon
