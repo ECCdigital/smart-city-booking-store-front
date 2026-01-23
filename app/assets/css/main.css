@@ -1,2 +1,10 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+.glass {
+  @apply bg-slate-50/60 dark:bg-gray-900/80 backdrop-blur-lg;
+}
+
+.glass-light {
+  @apply bg-slate-50/20 dark:bg-gray-900/40 backdrop-blur-lg;
+}

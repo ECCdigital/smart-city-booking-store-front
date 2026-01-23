@@ -29,10 +29,8 @@ const props = defineProps({
 
 const {tenantTo} = useTenantRoute();
 
-const contrastToPrimary = computed(() => {
-      return useContrastColor().contrastToPrimary()
-    }
-);
+const { contrastToPrimary } = useContrastColor();
+
 
 const router = useRouter()
 

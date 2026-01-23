@@ -23,9 +23,22 @@ useHead({
     lang,
     dir,
   },
+  link: [
+    {
+      rel: "stylesheet",
+      href: `/api/theme/css`,
+    },
+  ],
 });
 
 const instanceStore = useInstanceStore();
 
 instanceStore.fetchInstance();
 </script>
+
+
+<style>
+.glass {
+
+}
+</style>

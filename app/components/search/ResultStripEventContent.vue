@@ -39,16 +39,31 @@
         />
 
         <!--Aktionen-->
-        <div class="w-full mt-2 flex justify-end content-end">
+        <div
+          v-if="!entryPageMode"
+          class="w-full mt-2 flex justify-end content-end gap-2"
+        >
           <UButton
-          v-if="!isNotBookable"
-          label="Details ansehen"
-          :variant="entryPageMode? 'solid' : 'ghost'"
-          class="justify-center px-10"
-          :style="{ cursor:'pointer' }"
-          @click="goToDetails()"
-        />
-          <EventBookingButton v-if="!entryPageMode" :event="event" />
+            v-if="!isNotBookable"
+            label="Details ansehen"
+            variant="ghost"
+            class="justify-center px-10 text-color-dark dark:text-color-light"
+            :style="{ cursor: 'pointer' }"
+            @click="goToDetails()"
+          />
+          <EventBookingButton :event="event" />
+        </div>
+
+        <div v-else class="w-full mt-2 flex justify-end content-end gap-2">
+          <UButton
+            v-if="!isNotBookable"
+            label="Details ansehen"
+            variant="solid"
+            class="justify-center px-10 text-color-dark dark:text-color-light"
+            :style="{ cursor: 'pointer', color: contrastToPrimary }"
+            @click="goToDetails()"
+          />
+          <EventBookingButton :event="event" />
         </div>
       </div>
     </div>
@@ -69,6 +84,7 @@ import EventTicketOptionsDialog from "~/components/events/EventTicketOptionsDial
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import { useTenantStore } from "~~/stores/tenant.js";
 import EventBookingButton from "~/components/events/EventBookingButton.vue";
+import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 
 const props = defineProps({
   event: {
@@ -105,10 +121,11 @@ const isPrivateEvent = computed(() => {
 
 const openTicketOptions = ref(false);
 
-function goToDetails(){
+function goToDetails() {
   const router = useRouter();
   router.push(tenantTo(`events/${props.event.id}`));
 }
+
+const { contrastToPrimary } = useContrastColor();
 </script>
-<style scoped>
-</style>
+<style scoped></style>

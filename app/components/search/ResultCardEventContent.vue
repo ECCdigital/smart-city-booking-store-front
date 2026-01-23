@@ -45,7 +45,7 @@
           label="Keine Anmeldung nötig"
           variant="soft"
           disabled
-          class="justify-center px-3"
+          class="justify-center px-3 text-color-dark dark:text-color-light"
         />
       </div>
     </div>

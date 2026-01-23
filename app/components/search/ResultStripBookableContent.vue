@@ -31,14 +31,17 @@
         />
 
         <!--Aktionen-->
-        <div class="w-full mt-2 flex justify-end content-end">
+        <div
+          v-if="!entryPageMode"
+          class="w-full mt-2 flex justify-end content-end gap-2"
+        >
           <UButton
-          v-if="!isNotBookable"
-          label="Details ansehen"
-          :variant="entryPageMode? 'solid' : 'ghost'"
-          class="justify-center px-10"
-          @click="goToDetails()"
-        />
+            v-if="!isNotBookable"
+            label="Details ansehen"
+            :variant="entryPageMode ? 'solid' : 'ghost'"
+            class="justify-center px-10 text-color-dark dark:text-color-light"
+            @click="goToDetails()"
+          />
 
           <UButton
             v-if="!isNotBookable && !entryPageMode"
@@ -46,6 +49,17 @@
             class="justify-center px-10"
             :style="{ color: contrastToPrimary }"
             @click="goToCheckout"
+          />
+        </div>
+
+        <div v-else class="w-full mt-2 flex justify-end content-end gap-2">
+          <UButton
+            v-if="!isNotBookable"
+            label="Details ansehen"
+            variant="solid"
+            class="justify-center px-10 text-color-dark dark:text-color-light"
+            :style="{ cursor: 'pointer', color: contrastToPrimary }"
+            @click="goToDetails()"
           />
         </div>
       </div>
@@ -84,37 +98,31 @@ const props = defineProps({
 });
 const { tenantTo } = useTenantRoute();
 
-
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.bookable.tenantId).name;
 });
 
-const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary()
-);
+const { contrastToPrimary } = useContrastColor();
 
 function goToDetails() {
   const route = useRoute();
   const router = useRouter();
   const basePath = route.path;
 
-  if(!props.entryPageMode) {
+  if (!props.entryPageMode) {
     if (basePath.includes("bookables")) {
       router.push(tenantTo(`bookables/${props.bookable.id}`));
     } else if (basePath.includes("locations")) {
       router.push(tenantTo(`locations/${props.bookable.id}`));
     }
   } else {
-    if(props.bookable.type === "event-location") {
+    if (props.bookable.type === "event-location") {
       router.push(tenantTo(`locations/${props.bookable.id}`));
     } else {
       router.push(tenantTo(`bookables/${props.bookable.id}`));
     }
   }
-
-
 }
-
 
 function goToCheckout() {
   const route = useRoute();

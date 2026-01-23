@@ -43,7 +43,7 @@ const badgeStyle = computed(() => {
   }
 });
 
-const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
+const { isGreaterThanMd } = useBreakpointCheck();
 
 const numberOfFlagsToShow = computed(() => {
   if (props.isDetailMode && !isGreaterThanMd.value) {

@@ -5,10 +5,6 @@ import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 useHead({
   link: [
     {
-      rel: "stylesheet",
-      href: `/api/theme/css`,
-    },
-    {
       rel: "preload",
       href: `/api/theme/logo`,
       as: "image",
@@ -16,14 +12,9 @@ useHead({
   ],
 });
 
-const isGreaterThanMd = computed(() => useBreakpointCheck().isGreaterThanMd());
+const { isGreaterThanMd } = useBreakpointCheck();
 const colorMode = useColorMode();
 
-const theme = computed(() => {
-  if (colorMode.value === "dark") return "dark";
-  if (colorMode.value === "light") return "light";
-  return "light";
-});
 </script>
 
 <template>
@@ -32,7 +23,7 @@ const theme = computed(() => {
     <!-- Hero -->
     <HeroBackground
       variant="poly"
-      :theme="theme"
+      :theme="colorMode.value === 'dark' ? 'dark' : 'light'"
       :height="isGreaterThanMd ? 'sm' : 'md'"
       :fade-bottom="false"
       class="px-10 py-10 md:py-15 justify-between z-0"

@@ -167,9 +167,8 @@ const hasMissingType = computed(
 );
 const emit = defineEmits(["search", "reset"]);
 
-const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary()
-);
+const { contrastToPrimary } = useContrastColor();
+
 
 function setSearchTimePeriod(tp) {
   _timePeriod.value = tp;

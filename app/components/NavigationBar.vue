@@ -5,9 +5,11 @@
         <NavigationLink :tab="tab" />
       </div>
     </div>
-    <div class="flex items-center">
-      <TenantSwitcher class="mr-2" />
-      <UButton
+    <ClientOnly>
+      <div class="flex items-center">
+        <TenantSwitcher class="mr-2" />
+
+        <UButton
           v-if="!isAuthenticated"
           :label="isGreaterThanSm ? 'Anmelden' : ' '"
           :icon="isGreaterThanSm ? '' : 'i-lucide-log-in'"
@@ -15,25 +17,25 @@
           class="block px-2"
           :style="{ color: contrastToSecondary }"
           to="/login"
-      />
-      <UButton
+        />
+        <UButton
           v-if="!isAuthenticated && isGreaterThanSm"
           label="Registrieren"
           class="hidden sm:block px-4 text-black dark:text-white bg-white dark:bg-black"
           to="/register"
-      />
+        />
 
-      <UserDropdown v-if="isAuthenticated" />
-      <UButton
+        <UserDropdown v-if="isAuthenticated" />
+        <UButton
           class="pl-2 pt-1"
           size="xl"
           :icon="!isDark ? 'i-lucide-sun' : 'i-lucide-moon'"
           variant="ghost"
           :style="{ color: contrastToSecondary }"
           @click="isDark = !isDark"
-      />
-    </div>
-
+        />
+      </div>
+    </ClientOnly>
   </div>
 </template>
 <script setup>
@@ -55,18 +57,15 @@ const tabs = computed(() => [
     icon: "i-lucide-calendar",
     value: `/events`,
   },
-
 ]);
 
-const contrastToSecondary = computed(() => {
-  return useContrastColor().contrastToSecondary();
-});
 
-const isGreaterThanSm = computed(() => useBreakpointCheck().isGreaterThanSm());
+const { contrastToSecondary } = useContrastColor();
 
-const barClass = computed(() => [
-  "bg-[var(--color-secondary)]",
-]);
+
+const { isGreaterThanSm } = useBreakpointCheck();
+
+const barClass = computed(() => ["bg-[var(--color-secondary)]"]);
 
 const colorMode = useColorMode();
 const isDark = computed({

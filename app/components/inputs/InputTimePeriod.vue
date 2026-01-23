@@ -1,6 +1,14 @@
 <template>
   <div class="flex justify-between w-full">
-    <UModal v-model:open="isOpen">
+    <UModal
+      v-model:open="isOpen"
+      title="Zeitraum auswählen"
+      :overlay="false"
+      description="Wählen Sie den gewünschten Zeitraum aus."
+      :ui="{
+        content: 'bg-transparent divide-y-0 flex flex-col focus:outline-none',
+      }"
+    >
       <UButton
         size="lg"
         color="neutral"
@@ -29,7 +37,10 @@
       </UButton>
 
       <template #content>
-        <UCard style="max-width: 90vw">
+        <UCard
+          variant="soft"
+          class="w-90vw glass"
+        >
           <div class="flex justify-between items-center">
             <p class="text-lg font-bold my-5">Zeitraum auswählen</p>
             <div>
@@ -45,7 +56,7 @@
             </div>
           </div>
 
-          <DatePicker v-model="dateRange" />
+          <DatePicker class="date-picker-container" v-model="dateRange" />
 
           <div class="py-3 w-full">
             <p
@@ -92,11 +103,7 @@
             <UButton
               label="OK"
               variant="ghost"
-              :style="
-                colorMode.value === 'dark'
-                  ? { color: lighterColor }
-                  : { color: darkerColor }
-              "
+              class="dark:text-light text-dark"
               @click="onSelectDate"
             />
           </div>
@@ -155,8 +162,7 @@ const isOpen = ref(false);
 const missingValues = ref<string[]>([]);
 
 const colorMode = useColorMode();
-const darkerColor = computed(() => useContrastColor().darkerColor());
-const lighterColor = computed(() => useContrastColor().lighterColor());
+const { darkerColor, lighterColor } = useContrastColor();
 
 // Hilfen
 const coalesceModel = computed<TimePeriod>(() => {

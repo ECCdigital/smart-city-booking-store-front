@@ -2,34 +2,26 @@
   <UTooltip text="Wählen Sie erst ein Startdatum." :disabled="!disabled">
     <div>
       <VueDatePicker
-          v-model="model"
-          time-picker
-          format="HH:mm"
-          cancel-text="Abbrechen"
-          select-text="OK"
-          teleport-center
-          :disabled="props.disabled"
-          :action-row="{ showPreview: false }"
-          :ui="
-        mode.value === 'dark'
-          ? {
-              input: 'darkBackground',
-            }
-          : {}
-      "
-          :dark="mode.value === 'dark'"
+        v-model="model"
+        time-picker
+        format="HH:mm"
+        cancel-text="Abbrechen"
+        select-text="OK"
+        teleport-center
+        :disabled="props.disabled"
+        :action-row="{ showPreview: false }"
+        :ui="{
+          input: '!bg-transparent !text-black dark:!text-white',
+          menu: '!bg-white dark:!bg-gray-900',
+          calendar: '!bg-transparent',
+        }"
+        :dark="isDark"
       />
     </div>
   </UTooltip>
 </template>
 <script setup>
 import VueDatePicker from "@vuepic/vue-datepicker";
-import {useContrastColor} from "~/composables/utils/useContrastColor.js";
-
-const mode = useColorMode();
-const contrastToPrimary = computed(() =>
-    useContrastColor().contrastToPrimary(),
-);
 
 const model = defineModel();
 const props = defineProps({
@@ -38,12 +30,27 @@ const props = defineProps({
     default: false,
   },
 });
+
+const mode = useColorMode();
+
+const isDark = computed(() => mode.value === "dark");
 </script>
 
 <style>
 .dp__action_buttons .dp__action_select {
   background-color: var(--color-primary) !important;
-  color: v-bind(contrastToPrimary) !important;
+}
+
+.dp__theme_light {
+  --dp-background-color: transparent;
+}
+
+.dp__theme_dark {
+  --dp-background-color: transparent;
+}
+
+.dp__action_cancel {
+  border: none;
 }
 
 .darkBackground {

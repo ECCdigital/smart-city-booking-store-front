@@ -11,7 +11,6 @@
       <UButton
         label="Jetzt buchen"
         icon="i-lucide-shopping-cart"
-        :disabled="!isBookable"
         class="justify-center px-5 mt-5 md:my-0"
         :style="{ color: contrastToPrimary, cursor: 'pointer' }"
         @click="goToCheckout()"
@@ -60,7 +59,7 @@
         />
 
         <PriceInformationArea
-          :is-event="isEvent"
+          :is-event="false"
           :item="item"
           class="md:hidden mb-5"
         />
@@ -73,7 +72,7 @@
             title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
             icon="i-lucide-info"
             variant="ghost"
-            class="p-2 text-red-500"
+            class="p-2 text-info"
           />
           <InputTimePeriod
             :time-period="timePeriod"
@@ -121,9 +120,9 @@
       <div class="basis-1/3 space-y-3 pt-5">
         <!-- <USkeleton class="h-[250px] w-full" /> -->
         <!-- toDo - remove hidden from address, when map is available -->
-        <AddressInformationArea :is-event="isEvent" :item="item" class="hidden md:block"/>
+        <AddressInformationArea :is-event="false" :item="item" class="hidden md:block"/>
         <PriceInformationArea
-          :is-event="isEvent"
+          :is-event="false"
           :item="item"
           class="hidden md:block"
         />
@@ -206,9 +205,8 @@ const isBookable = computed(() => {
   return false;
 });
 
-const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary(),
-);
+const { contrastToPrimary } = useContrastColor();
+
 
 async function setSearchTimePeriod(tp) {
   timePeriod.value = tp;

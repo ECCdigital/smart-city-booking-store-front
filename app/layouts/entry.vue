@@ -4,10 +4,6 @@ import NavigationBar from "~/components/NavigationBar.vue";
 useHead({
   link: [
     {
-      rel: "stylesheet",
-      href: `/api/theme/css`,
-    },
-    {
       rel: "preload",
       href: `/api/theme/logo`,
       as: "image",
@@ -17,7 +13,6 @@ useHead({
 
 const { data: hero } = await useFetch("/api/theme/hero");
 const colorMode = useColorMode();
-const colorModeName = computed(() => colorMode.value);
 </script>
 
 <template>

@@ -1,13 +1,5 @@
 <script setup>
 
-useHead({
-  link: [
-    {
-      rel: "stylesheet",
-      href: `/api/theme/css`,
-    },
-  ],
-});
 
 </script>
 

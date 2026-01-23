@@ -54,9 +54,8 @@ const ticketsAvailable = computed(
   () => props.ticket.availability?.remaining > 0 || true
 );
 
-const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary()
-);
+const { contrastToPrimary } = useContrastColor();
+
 
 function goToCheckout() {
   const route = useRoute();

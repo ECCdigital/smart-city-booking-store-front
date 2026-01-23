@@ -46,7 +46,7 @@ export function useNotification() {
       variant: type,
       icon: payload.icon || mapIcon(type),
       ui: {
-        root: "bg-white/40 dark:bg-gray-900/40 backdrop-blur-lg",
+        root: "glass",
       },
     });
   }

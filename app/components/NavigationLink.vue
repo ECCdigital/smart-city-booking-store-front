@@ -46,12 +46,7 @@ const isActive = computed(() => {
   return isActivePath(props.tab.value);
 });
 
-const contrastToPrimary = computed(() =>
-  useContrastColor().contrastToPrimary(),
-);
-const contrastToSecondary = computed(() =>
-  useContrastColor().contrastToSecondary(),
-);
+const { contrastToPrimary, contrastToSecondary } = useContrastColor();
 
 const linkClass = computed(() => [
   "flex items-center px-4 relative h-12",
