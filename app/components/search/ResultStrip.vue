@@ -113,6 +113,8 @@ const categoryName = computed(() => {
       return "Gerät";
     case "event":
       return "Veranstaltung";
+    case "ticket":
+      return "Ticket";
     default:
       return "";
   }

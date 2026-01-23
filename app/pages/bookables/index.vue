@@ -19,10 +19,7 @@ const bookableStore = useBookableStore();
 await loadBundle({ include: ["bookables"] });
 
 const allBookables = computed(() => {
-  const resources = bookableStore.getResources;
-  const locations = bookableStore.getLocations;
-  const rooms = bookableStore.getRooms;
-  return resources.concat(locations).concat(rooms);
+  return  bookableStore.getBookables
 });
 
 const {

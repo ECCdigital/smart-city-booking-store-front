@@ -228,6 +228,10 @@ const possibleCategories = computed(() => {
       value: "resource",
       label: "Geräte",
     },
+    {
+      value: "ticket",
+      label: "Tickets",
+    },
   ];
 });
 
@@ -457,5 +461,4 @@ function removeFilter() {
   emit("filter", filter);
 }
 </script>
-<style scoped>
-</style>
+<style scoped></style>

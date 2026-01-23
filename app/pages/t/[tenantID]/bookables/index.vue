@@ -25,14 +25,13 @@ await loadBundle({
   slug: catalogSlug.value,
   include: ["bookables"],
 });
-await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
 
 const allResources = computed(() => {
   const tenantFilter = tenantID.value
     ? (loc) => loc.tenantId === tenantID.value
     : () => true;
 
-  return bookableStore.getResources.filter(tenantFilter);
+  return bookableStore.getBookables.filter(tenantFilter);
 });
 const {
   query,

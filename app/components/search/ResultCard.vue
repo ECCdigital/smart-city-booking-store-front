@@ -17,7 +17,7 @@
           :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"
           alt="Bild des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
-        >
+        />
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
@@ -25,7 +25,7 @@
           )}`"
           alt=""
           class="w-full object-cover rounded-t-xl"
-        >
+        />
         <ClientOnly v-else>
           <ImagePlaceholder :theme="theme" class="w-full h-full rounded-t-xl" />
         </ClientOnly>
@@ -89,7 +89,7 @@ const isEvent = computed(() => {
 });
 //toDo - read dynamically from instance
 const categoryName = computed(() => {
-  if(isEvent.value){
+  if (isEvent.value) {
     return "Veranstaltung";
   }
   switch (props.item?.type) {
@@ -101,6 +101,8 @@ const categoryName = computed(() => {
       return "Gerät";
     case "event":
       return "Veranstaltung";
+    case "ticket":
+      return "Ticket";
     default:
       return "";
   }
@@ -118,7 +120,6 @@ function goToDetails() {
   //TODO - Wir sollten dynamisch den Typ ermitteln und nicht über den Pfad gehen
 
   if (props.entryPageMode) {
-
     if (props.item.category === "event") {
       router.push(tenantTo(`events/${props.item.id}`));
     } else if (props.item.category === "location") {
