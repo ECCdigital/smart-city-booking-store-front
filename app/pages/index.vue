@@ -1,18 +1,20 @@
 <template>
   <div class="bg-white dark:bg-gray-900">
-    <div class="flex justify-center ">
-      <SearchBar
-          :location="query.location"
-          :term="query.term"
-          :time-end="query.end"
-          :time-start="query.start"
-          entry-page-mode
-          @search="goToListview"
-      />
+    <div class="relative h-0 bg-transparent">
+      <div class="flex justify-center">
+        <SearchBar
+            :location="query.location"
+            :term="query.term"
+            :time-end="query.end"
+            :time-start="query.start"
+            entry-page-mode
+            @search="goToListview"
+        />
+      </div>
     </div>
 
     <!-- Main Categories -->
-    <div class="">
+    <div class="pt-10 bg-gray-200 dark:bg-gray-950">
       <MainCategoryArea />
     </div>
 
