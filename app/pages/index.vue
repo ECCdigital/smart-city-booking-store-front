@@ -1,24 +1,24 @@
 <template>
-  <div class="bg-white dark:bg-gray-900">
+  <div>
     <div class="relative h-0 bg-transparent">
       <div class="flex justify-center">
         <SearchBar
-            :location="query.location"
-            :term="query.term"
-            :time-end="query.end"
-            :time-start="query.start"
-            entry-page-mode
-            @search="goToListview"
+          :location="query.location"
+          :term="query.term"
+          :time-end="query.end"
+          :time-start="query.start"
+          entry-page-mode
+          @search="goToListview"
         />
       </div>
     </div>
 
     <!-- Main Categories -->
-    <div class="pt-10 bg-gray-200 dark:bg-gray-950">
+    <div class="pt-10 bg-neutral-50 dark:bg-gray-950">
       <MainCategoryArea />
     </div>
 
-    <div class="bg-gray-200 dark:bg-gray-950">
+    <div class="bg-neutral-50 dark:bg-gray-950">
       <LatestEventsArea v-if="allEvents" :items="allEvents" />
     </div>
   </div>
@@ -26,11 +26,10 @@
 
 <script setup>
 import SearchBar from "~/components/search/SearchBar.vue";
-import {useEventStore} from "~~/stores/event.js";
+import { useEventStore } from "~~/stores/event.js";
 import MainCategoryArea from "~/components/MainCategoryArea.vue";
 import LatestEventsArea from "~/components/LatestEventsArea.vue";
-import {useCatalogQueryState} from "~/composables/search/useCatalogQueryState.js";
-
+import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 
 definePageMeta({
   layout: "entry",
@@ -39,31 +38,29 @@ definePageMeta({
 
 const { tenantTo } = useTenantRoute();
 
-const {loadBundle} = useCatalogBundle();
+const { loadBundle } = useCatalogBundle();
 const eventStore = useEventStore();
-await loadBundle({include: ["bookables", "events"]});
-
+await loadBundle({ include: ["bookables", "events"] });
 
 const allEvents = computed(() => {
-  return eventStore.getEvents
-})
-
+  return eventStore.getEvents;
+});
 
 const { state: query } = useCatalogQueryState();
 async function goToListview(searchParams) {
   const router = useRouter();
   const route = useRoute();
 
-  if(searchParams.term){
+  if (searchParams.term) {
     route.query.q = searchParams.term;
   }
-  if(searchParams.location){
+  if (searchParams.location) {
     route.query.loc = searchParams.location;
   }
-  if(searchParams.timeStart){
+  if (searchParams.timeStart) {
     route.query.start = searchParams.timeStart;
   }
-  if(searchParams.timeEnd){
+  if (searchParams.timeEnd) {
     route.query.end = searchParams.timeEnd;
   }
 
@@ -73,7 +70,6 @@ async function goToListview(searchParams) {
     await router.push(tenantTo(`events`));
   }
 }
-
 </script>
 
 <style scoped></style>

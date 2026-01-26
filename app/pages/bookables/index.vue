@@ -37,7 +37,7 @@ const {
 </script>
 
 <template>
-  <div>
+  <div class="bg-neutral-50 dark:bg-gray-950">
     <div class="flex justify-center">
       <SearchBar
         v-model:is-initailized="searchIsInitialized"
