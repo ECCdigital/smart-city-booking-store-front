@@ -93,28 +93,30 @@
     <div class="my-7">
       <p class="mb-3">Preis</p>
       <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
-      <div
-        v-if="priceBars.some((p) => p > 0)"
-        class="flex space-x-1 items-end justify-between max-w-sm"
-      >
+      <div class="mx-2">
         <div
-          v-for="(count, index) in priceBars"
-          :key="index"
-          class="w-full bg-primary opacity-40"
-          style="max-height: 50px"
-          :style="{
+            v-if="priceBars.some((p) => p > 0)"
+            class="flex space-x-1 items-end justify-between max-w-sm mx-2"
+        >
+          <div
+              v-for="(count, index) in priceBars"
+              :key="index"
+              class="w-full bg-primary opacity-40"
+              style="max-height: 50px"
+              :style="{
             height: (count / Math.max(...priceBars)) * 50 + 'px',
           }"
+          />
+        </div>
+
+        <USlider
+            v-model="_price"
+            :min="possiblePriceRange[0]"
+            :max="possiblePriceRange[1]"
+            :step="dynamicPriceStep"
+            @change="instantFilter"
         />
       </div>
-
-      <USlider
-        v-model="_price"
-        :min="possiblePriceRange[0]"
-        :max="possiblePriceRange[1]"
-        :step="dynamicPriceStep"
-        @change="instantFilter"
-      />
     </div>
     <!-- Distanz -->
     <!--
