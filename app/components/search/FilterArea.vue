@@ -1,5 +1,5 @@
 <template>
-  <div :class="useAsDialog ? '' : 'my-2 p-2 border border-gray-200 rounded'">
+  <div :class="useAsDialog ? 'overflow-auto max-h-[80vh]' : 'my-2 p-2 border border-gray-200 rounded'">
     <div class="flex justify-between items-center">
       <p class="my-4 font-bold">Ergebnisse filtern</p>
       <UTooltip v-if="!useAsDialog" text="Filter zurücksetzen">
