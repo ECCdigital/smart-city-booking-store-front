@@ -38,7 +38,4 @@ instanceStore.fetchInstance();
 
 
 <style>
-.glass {
-
-}
 </style>
