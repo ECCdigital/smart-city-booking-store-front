@@ -118,7 +118,7 @@
 
         <USlider
           v-model="_price"
-          :min="possiblePriceRange[0]"
+          :min="dynamicMinPrice"
           :max="dynamicMaxPrice"
           :step="dynamicPriceStep"
           @change="instantFilter"
@@ -261,12 +261,13 @@ const possiblePriceRange = computed(() => {
     validPrices.length > 0 ? Math.ceil(Math.max(...validPrices) / 5) * 5 : 100;
   return [minPrice, maxPrice];
 });
-const _price = ref(
-  props.price?.length === 2 ? props.price : possiblePriceRange.value,
-);
+
 
 const dynamicPriceStep = computed(() => {
   const range = possiblePriceRange.value[1] - possiblePriceRange.value[0];
+  if(range === 0){
+    return possiblePriceRange.value[0];
+  }
 
   let step = Math.ceil(range / 20); // 20 steps max
   step = Math.max(5, Math.ceil(step / 5) * 5);
@@ -283,6 +284,15 @@ const dynamicMaxPrice = computed(() => {
     );
   }
 })
+const dynamicMinPrice = computed(() => {
+  if(possiblePriceRange.value[0] === dynamicMaxPrice.value){
+    return 0
+  }
+  return possiblePriceRange.value[0];
+});
+const _price = ref(
+    props.price?.length === 2 ? props.price : [dynamicMinPrice.value, dynamicMaxPrice.value],
+);
 const priceBars = computed(() => {
   //set number of bars depending on price range
   const barsCount =
@@ -303,6 +313,11 @@ const priceBars = computed(() => {
     }
     //sort price into bars
     if (minPrice !== null) {
+      if(minPrice === possiblePriceRange.value[0]){
+        //put into first bar
+        bars[0]++;
+        return;
+      }
       const index = Math.min(
         Math.floor(
           ((minPrice - possiblePriceRange.value[0]) / range) * barsCount,
