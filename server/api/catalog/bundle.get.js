@@ -1,7 +1,7 @@
-// server/api/catalog/bundle.get.ts
 import { apiFetch } from "~~/server/api/utils/apiFetch.js";
+import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 
-export default cachedEventHandler(
+export default createConditionalCachedHandler(
   async (event) => {
     const { bookableId, eventId, include } = getQuery(event);
 
@@ -12,7 +12,6 @@ export default cachedEventHandler(
     const result = { catalog: bundle.catalog, tenants: bundle.tenants };
 
     if (result.catalog.type === "instance") {
-      //TODO: Optimize to avoid N+1 requests
       for (const tenant of result.tenants) {
         try {
           if (bookableId) {
@@ -37,34 +36,30 @@ export default cachedEventHandler(
             }
           }
         } catch (error) {
-          // Ignore not found errors for individual tenants
+          // Ignore not found errors
         }
       }
 
       if (include?.includes("bookables")) {
+        result.bookables = [];
         for (const tenant of result.tenants) {
           const tenantBookables = await apiFetch(
             event,
             `/json/${tenant.id}/bookables/`,
             { method: "GET" }
           );
-          if (!result.bookables) {
-            result.bookables = [];
-          }
           result.bookables.push(...tenantBookables);
         }
       }
 
       if (include?.includes("events")) {
+        result.events = [];
         for (const tenant of result.tenants) {
           const tenantEvents = await apiFetch(
             event,
             `/json/${tenant.id}/events/`,
             { method: "GET" }
           );
-          if (!result.events) {
-            result.events = [];
-          }
           result.events.push(...tenantEvents);
         }
       }
@@ -113,7 +108,9 @@ export default cachedEventHandler(
         result.bookables = await apiFetch(
           event,
           `/json/${tenantId}/bookables/`,
-          { method: "GET" }
+          {
+            method: "GET",
+          }
         );
       }
 
@@ -124,12 +121,7 @@ export default cachedEventHandler(
       }
     }
 
-    //TODO: Handle catalog.type === "aggregated"
-
     return result;
   },
-  {
-    maxAge: 300,
-    swr: true,
-  }
+  { maxAge: 300, swr: true }
 );

@@ -22,33 +22,30 @@ const tempCategories = [
     title: "Veranstaltungsorte",
     description: "Veranstaltungatsorte in Ihrer Nähe",
     icon: "i-lucide-building-2",
-    to: '/bookables'
+    to: "/bookables",
   },
   {
     value: "room",
     title: "Räume",
     description: "Co-Working Spaces, Seminarräume u.v.m.",
     icon: "i-lucide-door-open",
-    to: '/bookables'
+    to: "/bookables",
   },
   {
     value: "resource",
     title: "Geräte & Fahrzeuge",
     description: "Technik, Fahrzeuge & mehr mieten",
     icon: "i-lucide-wrench",
-    to: '/bookables'
+    to: "/bookables",
   },
   {
     value: "event",
     title: "Veranstaltungen",
     description: "Events & Kurse in Ihrer Nähe",
     icon: "i-lucide-calendar-check-2",
-    to: '/events'
-  }
-]
+    to: "/events",
+  },
+];
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>

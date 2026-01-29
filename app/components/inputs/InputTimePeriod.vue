@@ -161,8 +161,6 @@ const timeRange = ref<{ start: TimeHM; end: TimeHM }>({
 const isOpen = ref(false);
 const missingValues = ref<string[]>([]);
 
-const colorMode = useColorMode();
-const { darkerColor, lighterColor } = useContrastColor();
 
 // Hilfen
 const coalesceModel = computed<TimePeriod>(() => {

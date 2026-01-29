@@ -9,17 +9,17 @@ interface UseBookableSearchOptions<TItem> {
   getAvailability?: (
     item: TItem,
     start: number,
-    end: number,
+    end: number
   ) => Promise<{ isAvailable: boolean; remaining: number }>;
   getPriceForPeriod?: (
     item: TItem,
     start: number,
-    end: number,
+    end: number
   ) => Promise<{ userGrossPriceEur: number } | null>;
 }
 
 export function useBookableSearch<TItem extends { isBookable: boolean }>(
-  options: UseBookableSearchOptions<TItem>,
+  options: UseBookableSearchOptions<TItem>
 ) {
   const { sourceItems, isEvent } = options;
 
@@ -83,7 +83,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     if (isEvent && query.regEv) {
       filtered = filtered.filter(
-        (e) => e.item.attendees.needsRegistration === true,
+        (e) => e.item.attendees.needsRegistration === true
       );
     }
 
@@ -110,7 +110,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           return query.cities.some((city) =>
             b.item.location.display_address
               .toLowerCase()
-              .includes(city.toLowerCase()),
+              .includes(city.toLowerCase())
           );
         });
       }
@@ -143,7 +143,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       return item.calculatedPrice.userGrossPriceEur;
     }
     const minPrice = Math.min(
-      ...(item.item?.priceCategories?.map((cat: any) => cat.priceEur) || []),
+      ...(item.item?.priceCategories?.map((cat: any) => cat.priceEur) || [])
     );
     return item.item.priceValueAddedTax
       ? minPrice + (minPrice * item.item.priceValueAddedTax) / 100
@@ -168,8 +168,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       return bookable.calculatedPrice.userGrossPriceEur;
     }
     const minPrice = Math.min(
-      ...(bookable.item?.priceCategories?.map((cat: any) => cat.priceEur) ||
-        []),
+      ...(bookable.item?.priceCategories?.map((cat: any) => cat.priceEur) || [])
     );
     return bookable.item.priceValueAddedTax
       ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
@@ -182,7 +181,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
     if (event.item.tickets && event.item.tickets.length > 0) {
       return Math.min(
-        ...event.item.tickets.map((ticket: any) => getTicketMinPrice(ticket)),
+        ...event.item.tickets.map((ticket: any) => getTicketMinPrice(ticket))
       );
     } else {
       return 0;
@@ -191,7 +190,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
   function getTicketMinPrice(ticket: any) {
     const minPrice = Math.min(
-      ...ticket.priceCategories.map((cat: any) => cat.priceEur),
+      ...ticket.priceCategories.map((cat: any) => cat.priceEur)
     );
     return ticket.priceValueAddedTax
       ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
@@ -199,7 +198,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   const suitableCount = computed(
-    () => sortedItems.value.filter((l) => l.status === "suitable").length,
+    () => sortedItems.value.filter((l) => l.status === "suitable").length
   );
 
   function setFilterQueryParams(criteria: Partial<CatalogQueryState>) {
@@ -278,20 +277,20 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     itemsWithStatus = await checkTickets(itemsWithStatus);
 
     let bookableItems = itemsWithStatus.filter(
-      (i: any) => i.status === "isBookable",
+      (i: any) => i.status === "isBookable"
     );
 
     bookableItems = searchForSearchTerm(criteria.term, bookableItems);
     bookableItems = searchForLocation(criteria.location, bookableItems);
     bookableItems = await searchForTimePeriod(
       { start: criteria.timeStart, end: criteria.timeEnd },
-      bookableItems,
+      bookableItems
     );
 
     updatedItems.value = await updateItemStatus(
       itemsWithStatus,
       bookableItems,
-      { start: criteria.timeStart, end: criteria.timeEnd },
+      { start: criteria.timeStart, end: criteria.timeEnd }
     );
 
     searchIsInitialized.value = true;
@@ -325,7 +324,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     if (!isEvent) {
       const allEvents = items.filter((item) => item.item.category === "event");
       const allBookables = items.filter(
-        (item) => item.item.category !== "event",
+        (item) => item.item.category !== "event"
       );
 
       const foundEvents = new Fuse(allEvents, eventSearchTermOptions)
@@ -350,7 +349,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     if (!isEvent) {
       const allEvents = items.filter((item) => item.item.category === "event");
       const allBookables = items.filter(
-        (item) => item.item.category !== "event",
+        (item) => item.item.category !== "event"
       );
 
       const foundEvents = new Fuse(allEvents, eventSearchLocationOptions)
@@ -359,7 +358,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
       const foundBookables = new Fuse(
         allBookables,
-        bookableSearchLocationOptions,
+        bookableSearchLocationOptions
       )
         .search(searchLocation)
         .map((result) => result.item);
@@ -402,13 +401,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           ? await options.getAvailability(
               item,
               timePeriod.start!,
-              timePeriod.end!,
+              timePeriod.end!
             )
           : await useBookables().getBookableAvailability(
               item.item.tenantId,
               item.item.id,
               timePeriod.start!,
-              timePeriod.end!,
+              timePeriod.end!
             );
 
         return {
@@ -427,7 +426,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   async function updateItemStatus(
     itemsWithStatus: any[],
     bookableItems: any[],
-    timePeriod: any,
+    timePeriod: any
   ) {
     return await Promise.all(
       itemsWithStatus.map(async (item) => {
@@ -447,13 +446,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
                 ? await options.getPriceForPeriod(
                     item.item,
                     timePeriod.start,
-                    timePeriod.end,
+                    timePeriod.end
                   )
                 : await useBookables().getBookablePrice(
                     item.item.tenantId,
                     item.item.id,
                     timePeriod.start,
-                    timePeriod.end,
+                    timePeriod.end
                   );
             } catch {
               price = null;
@@ -472,7 +471,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
             calculatedPrice: null,
           };
         }
-      }),
+      })
     );
   }
 
@@ -489,17 +488,17 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       };
 
       newTimePeriod.start = new Date(
-        timePeriod.startDate + " " + timePeriod.startTime,
+        timePeriod.startDate + " " + timePeriod.startTime
       ).getTime();
 
       newTimePeriod.end = "";
       if (!timePeriod.endDate && timePeriod.endTime) {
         newTimePeriod.end = new Date(
-          timePeriod.startDate + " " + timePeriod.endTime,
+          timePeriod.startDate + " " + timePeriod.endTime
         ).getTime();
       } else {
         newTimePeriod.end = new Date(
-          timePeriod.endDate + " " + timePeriod.endTime,
+          timePeriod.endDate + " " + timePeriod.endTime
         ).getTime();
       }
       return newTimePeriod;
@@ -515,19 +514,19 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
             event.item.tickets.map(async (ticket: any) => {
               const ticketPrice = await useBookables().getBookablePrice(
                 event.item.tenantId,
-                ticket.id,
+                ticket.id
               );
               const ticketAvailability =
                 await useBookables().getBookableAvailability(
                   event.item.tenantId,
-                  ticket.id,
+                  ticket.id
                 );
               return {
                 ...ticket,
                 calculatedPrice: ticketPrice,
                 availability: ticketAvailability,
               };
-            }),
+            })
           );
           return {
             ...event,
@@ -539,7 +538,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         } else {
           return event;
         }
-      }),
+      })
     );
   }
 
@@ -568,7 +567,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
       initializeResults();
     },
-    { immediate: true, deep: true },
+    { immediate: true, deep: true }
   );
 
   onMounted(async () => {

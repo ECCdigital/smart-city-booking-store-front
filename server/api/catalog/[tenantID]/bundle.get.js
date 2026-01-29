@@ -1,6 +1,7 @@
 import { apiFetch } from "~~/server/api/utils/apiFetch.js";
+import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 
-export default cachedEventHandler(
+export default createConditionalCachedHandler(
   async (event) => {
     const tenantID = getRouterParam(event, "tenantID");
     const { bookableId, eventId, include } = getQuery(event);
@@ -66,8 +67,5 @@ export default cachedEventHandler(
 
     return result;
   },
-  {
-    maxAge: 300,
-    swr: true,
-  }
+  { maxAge: 300, swr: true }
 );

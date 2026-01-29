@@ -51,7 +51,7 @@
             :style="{ cursor: 'pointer' }"
             @click="goToDetails()"
           />
-          <EventBookingButton :event="event" />
+          <EventBookingButton v-if="event" :event="event" />
         </div>
 
         <div v-else class="w-full mt-2 flex justify-end content-end gap-2">
@@ -63,7 +63,7 @@
             :style="{ cursor: 'pointer', color: contrastToPrimary }"
             @click="goToDetails()"
           />
-          <EventBookingButton :event="event" />
+          <EventBookingButton v-if="event" :event="event" />
         </div>
       </div>
     </div>

@@ -10,20 +10,30 @@ export function useCatalogBundle() {
   const bookableStore = useBookableStore();
   const eventStore = useEventStore();
   const tenantStore = useTenantStore();
+  const config = useRuntimeConfig();
+
+  const cacheEnabled = config.public.cacheEnabled;
 
   async function loadBundle({ tenantID, bookableID, eventID, include = [] }) {
+    const cacheKey = `catalog:${tenantID}:${
+      bookableID || eventID || include.sort().join(",")
+    }`;
 
-      const { data, error } = await useAsyncData(
-          `catalog:${tenantID}:${bookableID || eventID || include.sort().join(",")}`,
-          () =>
-              fetchCatalogBundle({
-                tenantID,
-                bookableID,
-                eventID,
-                include: include.join(","),
-              }),
-          { server: true }
-      );
+    const { data, error } = await useAsyncData(
+      cacheKey,
+      () =>
+        fetchCatalogBundle({
+          tenantID,
+          bookableID,
+          eventID,
+          include: include.join(","),
+        }),
+      {
+        server: true,
+        getCachedData: cacheEnabled ? undefined : () => undefined,
+        dedupe: cacheEnabled ? "defer" : "cancel",
+      }
+    );
 
     if (error.value) {
       handleError(error.value.data);
@@ -45,11 +55,18 @@ export function useCatalogBundle() {
       eventStore.addOrUpdate(data.value.event);
     }
     if (data.value?.tenants) {
-        tenantStore.$patch({ tenants: data.value.tenants });
+      tenantStore.$patch({ tenants: data.value.tenants });
     }
 
     return data.value;
   }
 
-  return { loadBundle };
+  function clearBundleCache(tenantID, bookableID, eventID, include = []) {
+    const cacheKey = `catalog:${tenantID}:${
+      bookableID || eventID || include.sort().join(",")
+    }`;
+    clearNuxtData(cacheKey);
+  }
+
+  return { loadBundle, clearBundleCache };
 }
