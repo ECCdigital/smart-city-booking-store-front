@@ -1,5 +1,11 @@
 <template>
-  <div :class="useAsDialog ? 'overflow-auto max-h-[80vh]' : 'my-2 p-2 border border-gray-200 rounded'">
+  <div
+    :class="
+      useAsDialog
+        ? 'overflow-auto max-h-[80vh]'
+        : 'my-2 p-2 border border-gray-200 rounded'
+    "
+  >
     <div class="flex justify-between items-center">
       <p class="my-4 font-bold">Ergebnisse filtern</p>
       <UTooltip v-if="!useAsDialog" text="Filter zurücksetzen">
@@ -95,26 +101,27 @@
       <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
       <div class="mx-2">
         <div
-            v-if="priceBars.some((p) => p > 0)"
-            class="flex space-x-1 items-end justify-between max-w-sm mx-2"
+          v-if="priceBars.some((p) => p > 0)"
+          class="flex items-end justify-between mx-2"
+          style="width: 100%; padding-right: 15px"
         >
           <div
-              v-for="(count, index) in priceBars"
-              :key="index"
-              class="w-full bg-primary opacity-40"
-              style="max-height: 50px"
-              :style="{
-            height: (count / Math.max(...priceBars)) * 50 + 'px',
-          }"
+            v-for="(count, index) in priceBars"
+            :key="index"
+            class="w-full bg-primary opacity-40 mr-1"
+            style="max-height: 50px"
+            :style="{
+              height: (count / Math.max(...priceBars)) * 50 + 'px',
+            }"
           />
         </div>
 
         <USlider
-            v-model="_price"
-            :min="possiblePriceRange[0]"
-            :max="possiblePriceRange[1]"
-            :step="dynamicPriceStep"
-            @change="instantFilter"
+          v-model="_price"
+          :min="possiblePriceRange[0]"
+          :max="dynamicMaxPrice"
+          :step="dynamicPriceStep"
+          @change="instantFilter"
         />
       </div>
     </div>
@@ -163,8 +170,6 @@
   </div>
 </template>
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
-
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
   bookables: {
@@ -246,7 +251,7 @@ const possiblePriceRange = computed(() => {
     validPrices = props.bookables.map((e) => getEventMinPrice(e));
   }
   validPrices = validPrices.filter(
-    (price) => price !== undefined && price !== null && !isNaN(price)
+    (price) => price !== undefined && price !== null && !isNaN(price),
   );
 
   //set endpoints rounded to 5
@@ -257,7 +262,7 @@ const possiblePriceRange = computed(() => {
   return [minPrice, maxPrice];
 });
 const _price = ref(
-  props.price?.length === 2 ? props.price : possiblePriceRange.value
+  props.price?.length === 2 ? props.price : possiblePriceRange.value,
 );
 
 const dynamicPriceStep = computed(() => {
@@ -267,15 +272,27 @@ const dynamicPriceStep = computed(() => {
   step = Math.max(5, Math.ceil(step / 5) * 5);
   return step;
 });
+const dynamicMaxPrice = computed(() => {
+  const remainder =
+    possiblePriceRange.value[1] % dynamicPriceStep.value;
+  if (remainder === 0) {
+    return possiblePriceRange.value[1];
+  } else {
+    return (
+        possiblePriceRange.value[1] + (dynamicPriceStep.value - remainder)
+    );
+  }
+})
 const priceBars = computed(() => {
   //set number of bars depending on price range
   const barsCount =
     Math.ceil(
-      (possiblePriceRange.value[1] - possiblePriceRange.value[0]) /
-        dynamicPriceStep.value
+      (dynamicMaxPrice.value - possiblePriceRange.value[0]) /
+        dynamicPriceStep.value,
     ) || 1;
+
   const bars = new Array(barsCount).fill(0);
-  const range = possiblePriceRange.value[1] - possiblePriceRange.value[0];
+  const range = dynamicMaxPrice.value - possiblePriceRange.value[0];
 
   props.bookables.forEach((b) => {
     let minPrice = null;
@@ -288,9 +305,9 @@ const priceBars = computed(() => {
     if (minPrice !== null) {
       const index = Math.min(
         Math.floor(
-          ((minPrice - possiblePriceRange.value[0]) / range) * barsCount
+          ((minPrice - possiblePriceRange.value[0]) / range) * barsCount,
         ),
-        barsCount - 1
+        barsCount - 1,
       );
       bars[index]++;
     }
@@ -308,7 +325,7 @@ function getBookableMinPrice(bookable) {
   }
   //else return min price from price categories
   const minPrice = Math.min(
-    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || [])
+    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || []),
   );
   return bookable.item.priceValueAddedTax
     ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
@@ -316,7 +333,7 @@ function getBookableMinPrice(bookable) {
 }
 function getTicketMinPrice(ticket) {
   const minPrice = Math.min(
-    ...ticket.priceCategories.map((cat) => cat.priceEur)
+    ...ticket.priceCategories.map((cat) => cat.priceEur),
   );
   return ticket.priceValueAddedTax
     ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
@@ -328,7 +345,7 @@ function getEventMinPrice(event) {
   }
   if (event.item.tickets && event.item.tickets.length > 0) {
     return Math.min(
-      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket))
+      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket)),
     );
   } else {
     return 0;
