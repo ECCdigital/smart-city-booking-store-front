@@ -1,7 +1,7 @@
 <template>
   <div
       class="grid sm:grid-cols-2 lg:flex justify-self-center space-x-3"
-      style="max-width: 90vw; margin: auto; padding: 50px 0"
+      style="max-width: 100%; margin: auto; padding: 50px 0"
   >
     <div
         v-for="(category,i) in tempCategories"

@@ -27,13 +27,15 @@ if (!bookable.value) {
 </script>
 
 <template>
-  <div v-if="bookable">
-    <DetailsArea :item="bookable" />
-  </div>
-  <div v-else class="text-center mt-10">
-    <UIcon size="48" name="i-lucide-monitor-off" class="text-gray-400 mb-4" />
-    <p class="text-gray-500">{{ $t("resources.noResource") }}</p>
-    <UButton :label="$t('common.back')" to="/locations" class="mt-4" />
+  <div class="container">
+    <div v-if="bookable">
+      <DetailsArea :item="bookable" />
+    </div>
+    <div v-else class="text-center mt-10">
+      <UIcon size="48" name="i-lucide-monitor-off" class="text-gray-400 mb-4" />
+      <p class="text-gray-500">{{ $t("resources.noResource") }}</p>
+      <UButton :label="$t('common.back')" to="/bookables" class="mt-4" />
+    </div>
   </div>
 </template>
 

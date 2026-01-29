@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-[1400px] px-2 md:px-[15px] pb-[50px]" style="margin: auto;">
+  <div class="px-2 pb-[50px]">
     <!-- toDo - weitere Bilder einfügen *** -->
     <DetailsAreaImages :item="item" :is-event="props.isEvent" />
 
