@@ -1,5 +1,5 @@
 import { logger } from "~~/server/api/utils/logger.js";
-import { apiFetch } from "~~/server/api/utils/apiFetch.js";
+import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 
 const defaultTheme = {
@@ -14,7 +14,7 @@ export default createConditionalCachedHandler(
     let theme = defaultTheme;
 
     try {
-      const fetchedThemeBundle = await apiFetch(event, `/api/catalog/themes`, {
+      const fetchedThemeBundle = await serverFetch(event, `/api/catalog/themes`, {
         method: "GET",
       });
 

@@ -1,4 +1,4 @@
-import { apiFetch } from "~~/server/api/utils/apiFetch.js";
+import { serverFetch } from "~~/server/api/utils/serverFetch.js";
 import { logger } from "~~/server/api/utils/logger.js";
 import type { ThemeBundle } from "~~/shared/types/api.js";
 
@@ -12,7 +12,7 @@ export default createConditionalCachedHandler(
     const log = logger.child({ caller: "server/api/theme/hero.get" });
 
     try {
-      const bundle = await apiFetch(event, `/api/catalog/themes`, {
+      const bundle = await serverFetch(event, `/api/catalog/themes`, {
         method: "GET",
       }) as ThemeBundle;
 

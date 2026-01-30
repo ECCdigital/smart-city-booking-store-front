@@ -1,5 +1,5 @@
 import { logger } from "../utils/logger";
-import {apiFetch} from "~~/server/api/utils/apiFetch.js";
+import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 
 export default defineEventHandler(async (event) => {
   const log = logger.child({ caller: "server/api/theme/[..slug].get" });
@@ -9,23 +9,20 @@ export default defineEventHandler(async (event) => {
 
   let theme = defaultTheme;
 
-  try {
-    const fetchedTheme = await apiFetch( event,
-      `/api/catalog/themes/${slug}`,
-      {
-        method: "GET",
-      }
-    );
+  const { data, error } = await serverFetch(event, `/api/catalog/themes/${slug}`, {
+    method: "GET",
+  });
 
-    if (fetchedTheme?.colors?.primary && fetchedTheme?.colors?.secondary) {
-      theme = fetchedTheme.colors;
-    } else {
-      log.warn(
-        `Theme for slug "${slug}" does not have primary or secondary colors, using default theme.`
-      );
-    }
-  } catch (error) {
+  if (error) {
     log.error(`Error fetching theme for slug "${slug}": ${error}`);
+  }
+
+  if (data?.colors?.primary && data?.colors?.secondary) {
+    theme = data.colors;
+  } else {
+    log.warn(
+      `Theme for slug "${slug}" does not have primary or secondary colors, using default theme.`
+    );
   }
 
   setHeader(event, "Content-Type", "text/css");

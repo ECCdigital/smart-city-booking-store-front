@@ -1,21 +1,22 @@
-import {apiFetch} from "~~/server/api/utils/apiFetch.js";
+import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 
 export default defineEventHandler(async (event) => {
   const tenantID = getRouterParam(event, "tenantID");
 
-  try {
-      return await apiFetch(
-        event,
-        `/json/${tenantID}/bookables/`,
-        {
-            method: "GET",
-        },
-    );
-  } catch (error) {
+  const { data, error } = await serverFetch(
+    event,
+    `/json/${tenantID}/bookables/`,
+    {
+      method: "GET",
+    }
+  );
+  if (error) {
     throw createError({
       statusCode: error.status || 500,
       statusMessage: "Failed to fetch bookables",
       data: error.message,
     });
   }
+
+  return data;
 });

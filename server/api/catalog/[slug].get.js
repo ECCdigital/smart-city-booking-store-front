@@ -1,5 +1,5 @@
 import { logger } from "../utils/logger";
-import { apiFetch } from "~~/server/api/utils/apiFetch.js";
+import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 
 export default defineEventHandler(async (event) => {
   const log = logger.child({ caller: "server/api/catalog/[slug].get" });
@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, "slug");
 
   try {
-    const fetchedCatalog = await apiFetch(event, `/api/catalog/${slug}`, {
+    const fetchedCatalog = await serverFetch(event, `/api/catalog/${slug}`, {
       method: "GET",
     });
 

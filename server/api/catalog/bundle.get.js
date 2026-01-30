@@ -1,37 +1,58 @@
-import { apiFetch } from "~~/server/api/utils/apiFetch.js";
+import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
+
+const errorMapping = {
+  503: {
+    statusCode: 400,
+    statusMessage: "catalog_disabled",
+  },
+};
 
 export default createConditionalCachedHandler(
   async (event) => {
     const { bookableId, eventId, include } = getQuery(event);
 
-    const bundle = await apiFetch(event, `/api/catalog/bundle`, {
+    const { data, error } = await serverFetch(event, `/api/catalog/bundle`, {
       method: "GET",
     });
 
-    const result = { catalog: bundle.catalog, tenants: bundle.tenants };
+    if (error) {
+      const mappedError = errorMapping[error.status] || {
+        status: error.status || 500,
+        message: error.message|| "Error fetching catalog bundle",
+      };
+
+      throw createError({
+        statusCode: mappedError.statusCode,
+        statusMessage: mappedError.statusMessage,
+      });
+    }
+
+    const result = { catalog: data.catalog, tenants: data.tenants };
 
     if (result.catalog.type === "instance") {
       for (const tenant of result.tenants) {
         try {
           if (bookableId) {
-            result.bookable = await apiFetch(
+            const { data, error } = await serverFetch(
               event,
               `/json/${tenant.id}/bookables/${bookableId}`,
               { method: "GET" }
             );
-            if (result.bookable) {
+            if (!error) {
+              result.bookable = data.bookable;
               return result;
             }
           }
 
           if (eventId) {
-            result.event = await apiFetch(
+            const { data, error } = await serverFetch(
               event,
               `/json/${tenant.id}/events/${eventId}`,
               { method: "GET" }
             );
-            if (result.event) {
+            if (!error) {
+              result.event = data.event;
               return result;
             }
           }
@@ -43,24 +64,28 @@ export default createConditionalCachedHandler(
       if (include?.includes("bookables")) {
         result.bookables = [];
         for (const tenant of result.tenants) {
-          const tenantBookables = await apiFetch(
+          const { data, error } = await serverFetch(
             event,
             `/json/${tenant.id}/bookables/`,
             { method: "GET" }
           );
-          result.bookables.push(...tenantBookables);
+          if (!error) {
+            result.bookables.push(...data);
+          }
         }
       }
 
       if (include?.includes("events")) {
         result.events = [];
         for (const tenant of result.tenants) {
-          const tenantEvents = await apiFetch(
+          const { data, error } = await serverFetch(
             event,
             `/json/${tenant.id}/events/`,
             { method: "GET" }
           );
-          result.events.push(...tenantEvents);
+          if (!error) {
+            result.events.push(...data);
+          }
         }
       }
     }
@@ -75,49 +100,61 @@ export default createConditionalCachedHandler(
       }
 
       if (bookableId) {
-        result.bookable = await apiFetch(
+        const { data, error } = await serverFetch(
           event,
           `/json/${tenantId}/bookables/${bookableId}`,
           { method: "GET" }
         );
-        if (!result.bookable) {
+        if (!data.bookable || error) {
           throw createError({
             statusCode: 404,
             statusMessage: "Bookable not found",
           });
         }
+        result.bookable = data.bookable;
         return result;
       }
 
       if (eventId) {
-        result.event = await apiFetch(
+        const { data, error } = await serverFetch(
           event,
           `/json/${tenantId}/events/${eventId}`,
           { method: "GET" }
         );
-        if (!result.event) {
+        if (!result.event || error) {
           throw createError({
             statusCode: 404,
             statusMessage: "Event not found",
           });
         }
+        result.event = data.event;
         return result;
       }
 
       if (include?.includes("bookables")) {
-        result.bookables = await apiFetch(
+        const { data, error } = await serverFetch(
           event,
           `/json/${tenantId}/bookables/`,
           {
             method: "GET",
           }
         );
+        if (!error) {
+          result.bookables = data.bookables;
+        }
       }
 
       if (include?.includes("events")) {
-        result.events = await apiFetch(event, `/json/${tenantId}/events/`, {
-          method: "GET",
-        });
+        const { data, error } = await serverFetch(
+          event,
+          `/json/${tenantId}/events/`,
+          {
+            method: "GET",
+          }
+        );
+      }
+      if (!error) {
+        result.events = data.events;
       }
     }
 
