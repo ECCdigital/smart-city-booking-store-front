@@ -1,6 +1,6 @@
 import { createReadStream, existsSync } from "node:fs";
 import { join } from "node:path";
-import { apiFetch } from "~~/server/api/utils/apiFetch.js";
+import { serverFetch } from "~~/server/api/utils/serverFetch.js";
 import { logger } from "~~/server/api/utils/logger.js";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 import type { ThemeBundle } from "~~/shared/types/api.js";
@@ -12,7 +12,7 @@ export default createConditionalCachedHandler(
     let logoUrl: string | null = null;
 
     try {
-      const fetchedThemeBundle = (await apiFetch(event, `/api/catalog/themes`, {
+      const fetchedThemeBundle = (await serverFetch(event, `/api/catalog/themes`, {
         method: "GET",
       })) as ThemeBundle;
       logoUrl = fetchedThemeBundle?.logoUrl ?? null;

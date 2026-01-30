@@ -1,4 +1,4 @@
-import { apiFetch } from "../../../utils/apiFetch.js";
+import { serverFetch } from "../../../utils/serverFetch.ts";
 
 export default defineEventHandler(async (event) => {
   const tenantID = getRouterParam(event, "tenantID");
@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
   try {
-    return await apiFetch(
+    return await serverFetch(
       event,
       `/api/${tenantID}/bookables/${bookableID}/occupancy?timeBegin=${body.start}&timeEnd=${body.end}`,
       {

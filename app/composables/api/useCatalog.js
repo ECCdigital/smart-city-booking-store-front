@@ -1,24 +1,12 @@
 export function useCatalog() {
   const fetchCatalog = async (tenantID = null) => {
-    const { apiFetch } = useApi();
+    const api = useApiClient();
+    const url = tenantID ? `/api/catalog/${tenantID}` : `/api/catalog/`;
 
-    try {
-      let response;
-      if (!tenantID) {
-        response = await apiFetch(`/api/catalog/`, {
-          method: "GET",
-        });
-      } else {
-        response = await apiFetch(`/api/catalog/${tenantID}`, {
-          method: "GET",
-        });
-      }
+    const { data, error } = await api.get(url);
+    if (error) throw error;
 
-      return response;
-    } catch (error) {
-      console.error("Error fetching catalog:", error);
-      throw error;
-    }
+    return data;
   };
 
   const fetchCatalogBundle = async ({
@@ -27,35 +15,24 @@ export function useCatalog() {
     eventID = null,
     include = null,
   }) => {
-    const { apiFetch } = useApi();
+    const api = useApiClient();
+    const url = tenantID
+      ? `/api/catalog/${tenantID}/bundle`
+      : `/api/catalog/bundle`;
 
-    try {
-      let response;
-      if (!tenantID) {
-        response = await apiFetch(`/api/catalog/bundle`, {
-          params: {
-            bookableId: bookableID,
-            eventId: eventID,
-            include,
-          },
-          method: "GET",
-        });
-      } else {
-        response = await apiFetch(`/api/catalog/${tenantID}/bundle`, {
-          params: {
-            bookableId: bookableID,
-            eventId: eventID,
-            include,
-          },
-          method: "GET",
-        });
-      }
-
-      return response;
-    } catch (error) {
-      console.error("Error fetching catalog bundle:", error);
+    const { data, error } = await api.get(url, {
+      params: {
+        bookableId: bookableID,
+        eventId: eventID,
+        include,
+      },
+    });
+    if (error) {
+      console.error("Error fetching catalog bundle2:", error);
       throw error;
     }
+
+    return data;
   };
 
   return {

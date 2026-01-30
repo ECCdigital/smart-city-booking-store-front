@@ -1,17 +1,15 @@
 export function useTenants() {
   const fetchTenants = async () => {
-    const { apiFetch } = useApi();
+    const api = useApiClient();
 
-    try {
-      const response = await apiFetch("/api/tenants", {
-        method: "GET",
-      });
+    const { data, error } = await api.get("/api/tenants");
 
-      return response;
-    } catch (error) {
+    if (error) {
       console.error("Error fetching tenants:", error);
       throw error;
     }
+
+    return data;
   };
   return {
     fetchTenants,

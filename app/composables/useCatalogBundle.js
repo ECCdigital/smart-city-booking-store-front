@@ -3,6 +3,7 @@ import { useBookableStore } from "~~/stores/bookable.js";
 import { useEventStore } from "~~/stores/event.js";
 import { useTenantStore } from "~~/stores/tenant.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
+import { sendRedirect } from "h3";
 
 export function useCatalogBundle() {
   const { fetchCatalogBundle } = useCatalog();
@@ -13,11 +14,13 @@ export function useCatalogBundle() {
   const config = useRuntimeConfig();
 
   const cacheEnabled = config.public.cacheEnabled;
+  const adminBaseUrl = config.public.adminBaseUrl;
 
   async function loadBundle({ tenantID, bookableID, eventID, include = [] }) {
     const cacheKey = `catalog:${tenantID}:${
       bookableID || eventID || include.sort().join(",")
     }`;
+    const event = import.meta.server ? useRequestEvent() : null;
 
     const { data, error } = await useAsyncData(
       cacheKey,
@@ -36,7 +39,13 @@ export function useCatalogBundle() {
     );
 
     if (error.value) {
-      handleError(error.value.data);
+      if (error.value.statusMessage === "catalog_disabled") {
+        if (import.meta.server && event) {
+          return await sendRedirect(event, adminBaseUrl, 302);
+        }
+        return navigateTo(adminBaseUrl, { external: true });
+      }
+      throw error.value;
     }
 
     if (data.value?.catalog) {

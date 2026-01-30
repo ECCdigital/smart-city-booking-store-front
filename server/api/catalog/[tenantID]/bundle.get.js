@@ -1,4 +1,4 @@
-import { apiFetch } from "~~/server/api/utils/apiFetch.js";
+import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 
 export default createConditionalCachedHandler(
@@ -6,7 +6,7 @@ export default createConditionalCachedHandler(
     const tenantID = getRouterParam(event, "tenantID");
     const { bookableId, eventId, include } = getQuery(event);
 
-    const bundle = await apiFetch(event, `/api/catalog/bundle`, {
+    const bundle = await serverFetch(event, `/api/catalog/bundle`, {
       method: "GET",
     });
 
@@ -24,7 +24,7 @@ export default createConditionalCachedHandler(
     }
 
     if (bookableId) {
-      result.bookable = await apiFetch(
+      result.bookable = await serverFetch(
         event,
         `/json/${tenantID}/bookables/${bookableId}`,
         { method: "GET" }
@@ -39,7 +39,7 @@ export default createConditionalCachedHandler(
     }
 
     if (eventId) {
-      result.event = await apiFetch(
+      result.event = await serverFetch(
         event,
         `/json/${tenantID}/events/${eventId}`,
         { method: "GET" }
@@ -54,13 +54,13 @@ export default createConditionalCachedHandler(
     }
 
     if (include?.includes("bookables")) {
-      result.bookables = await apiFetch(event, `/json/${tenantID}/bookables/`, {
+      result.bookables = await serverFetch(event, `/json/${tenantID}/bookables/`, {
         method: "GET",
       });
     }
 
     if (include?.includes("events")) {
-      result.events = await apiFetch(event, `/json/${tenantID}/events/`, {
+      result.events = await serverFetch(event, `/json/${tenantID}/events/`, {
         method: "GET",
       });
     }

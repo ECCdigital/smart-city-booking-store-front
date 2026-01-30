@@ -1,17 +1,14 @@
 export function useEvents() {
   const fetchEvents = async (tenantID) => {
-    const { apiFetch } = useApi();
+    const api = useApiClient();
 
-    try {
-      const response = await apiFetch(`/api/events/${tenantID}`, {
-        method: "GET",
-      });
+    const { data, error } = await api.get(`/api/events/${tenantID}`);
 
-      return response;
-    } catch (error) {
-      console.error("Error fetching events:", error);
+    if (error) {
       throw error;
     }
+
+    return data;
   };
   return {
     fetchEvents,

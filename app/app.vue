@@ -36,9 +36,7 @@ const instanceStore = useInstanceStore();
 instanceStore.fetchInstance();
 </script>
 
-
 <style>
 .glass {
-
 }
 </style>
