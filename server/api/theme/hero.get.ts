@@ -1,5 +1,4 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.js";
-import { logger } from "~~/server/api/utils/logger.js";
 import type { ThemeBundle } from "~~/shared/types/api.js";
 
 const DEFAULT_HERO = {
@@ -9,21 +8,22 @@ const DEFAULT_HERO = {
 
 export default createConditionalCachedHandler(
   async (event) => {
-    const log = logger.child({ caller: "server/api/theme/hero.get" });
-
-    try {
-      const bundle = await serverFetch(event, `/api/catalog/themes`, {
+    const { data, error } = await serverFetch<ThemeBundle>(
+      event,
+      `/api/catalog/themes`,
+      {
         method: "GET",
-      }) as ThemeBundle;
+      }
+    );
 
-      return {
-        title: bundle?.hero?.title || DEFAULT_HERO.title,
-        subtitle: bundle?.hero?.subtitle || DEFAULT_HERO.subtitle,
-      };
-    } catch (error) {
-      log.error(`Error fetching hero config: ${error}`);
+    if (error) {
       return DEFAULT_HERO;
     }
+
+    return {
+      title: data?.hero?.title || DEFAULT_HERO.title,
+      subtitle: data?.hero?.subtitle || DEFAULT_HERO.subtitle,
+    };
   },
   { maxAge: 300 }
 );

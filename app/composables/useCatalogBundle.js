@@ -20,6 +20,7 @@ export function useCatalogBundle() {
     const cacheKey = `catalog:${tenantID}:${
       bookableID || eventID || include.sort().join(",")
     }`;
+    console.log("Loading catalog bundle with cache key:", cacheKey);
     const event = import.meta.server ? useRequestEvent() : null;
 
     const { data, error } = await useAsyncData(

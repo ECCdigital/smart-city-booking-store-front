@@ -11,13 +11,15 @@ export default createConditionalCachedHandler(
 
     let logoUrl: string | null = null;
 
-    try {
-      const fetchedThemeBundle = (await serverFetch(event, `/api/catalog/themes`, {
+    const { data, error } = await serverFetch<ThemeBundle>(
+      event,
+      `/api/catalog/themes`,
+      {
         method: "GET",
-      })) as ThemeBundle;
-      logoUrl = fetchedThemeBundle?.logoUrl ?? null;
-    } catch (error) {
-      log.error(`Error fetching theme: ${error}`);
+      }
+    );
+    if (!error) {
+      logoUrl = data?.logoUrl ?? null;
     }
 
     if (logoUrl) {

@@ -13,23 +13,18 @@ export default createConditionalCachedHandler(
 
     let theme = defaultTheme;
 
-    try {
-      const fetchedThemeBundle = await serverFetch(event, `/api/catalog/themes`, {
-        method: "GET",
-      });
+    const { data, error } = await serverFetch(event, `/api/catalog/themes`, {
+      method: "GET",
+    });
 
-      if (
-        fetchedThemeBundle.theme?.colors?.primary &&
-        fetchedThemeBundle.theme?.colors?.secondary
-      ) {
-        theme = fetchedThemeBundle.theme.colors;
+    if (!error) {
+      if (data.theme?.colors?.primary && data.theme?.colors?.secondary) {
+        theme = data.theme.colors;
       } else {
         log.warn(
           `Theme does not have primary or secondary colors, using default theme.`
         );
       }
-    } catch (error) {
-      log.error(`Error fetching theme: ${error}`);
     }
 
     setHeader(event, "Content-Type", "text/css");

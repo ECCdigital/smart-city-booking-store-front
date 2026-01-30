@@ -19,7 +19,7 @@ export default createConditionalCachedHandler(
     if (error) {
       const mappedError = errorMapping[error.status] || {
         status: error.status || 500,
-        message: error.message|| "Error fetching catalog bundle",
+        message: error.message || "Error fetching catalog bundle",
       };
 
       throw createError({
@@ -40,7 +40,7 @@ export default createConditionalCachedHandler(
               { method: "GET" }
             );
             if (!error) {
-              result.bookable = data.bookable;
+              result.bookable = data;
               return result;
             }
           }
@@ -52,7 +52,7 @@ export default createConditionalCachedHandler(
               { method: "GET" }
             );
             if (!error) {
-              result.event = data.event;
+              result.event = data;
               return result;
             }
           }
@@ -152,9 +152,10 @@ export default createConditionalCachedHandler(
             method: "GET",
           }
         );
-      }
-      if (!error) {
-        result.events = data.events;
+
+        if (!error) {
+          result.events = data;
+        }
       }
     }
 

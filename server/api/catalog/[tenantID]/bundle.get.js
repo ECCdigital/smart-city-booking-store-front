@@ -6,11 +6,19 @@ export default createConditionalCachedHandler(
     const tenantID = getRouterParam(event, "tenantID");
     const { bookableId, eventId, include } = getQuery(event);
 
-    const bundle = await serverFetch(event, `/api/catalog/bundle`, {
+    const { data, error } = await serverFetch(event, `/api/catalog/bundle`, {
       method: "GET",
     });
 
-    const result = { catalog: bundle.catalog, tenants: bundle.tenants };
+    if (error) {
+      throw createError({
+        statusCode: error.status || 500,
+        statusMessage: "Failed to fetch catalog bundle",
+        data: error.message,
+      });
+    }
+
+    const result = { catalog: data.catalog, tenants: data.tenants };
 
     const tenantExists = result.tenants.some(
       (tenant) => tenant.id === tenantID
@@ -24,45 +32,61 @@ export default createConditionalCachedHandler(
     }
 
     if (bookableId) {
-      result.bookable = await serverFetch(
+      const { data, error } = await serverFetch(
         event,
         `/json/${tenantID}/bookables/${bookableId}`,
         { method: "GET" }
       );
-      if (!result.bookable) {
+      if (error) {
         throw createError({
           statusCode: 404,
           statusMessage: "Bookable not Found",
         });
       }
+      result.bookable = data;
       return result;
     }
 
     if (eventId) {
-      result.event = await serverFetch(
+      const { data, error } = await serverFetch(
         event,
         `/json/${tenantID}/events/${eventId}`,
         { method: "GET" }
       );
-      if (!result.event) {
+      if (error) {
         throw createError({
           statusCode: 404,
           statusMessage: "Event not Found",
         });
       }
+      result.event = data;
       return result;
     }
 
     if (include?.includes("bookables")) {
-      result.bookables = await serverFetch(event, `/json/${tenantID}/bookables/`, {
-        method: "GET",
-      });
+      const { data, error } = await serverFetch(
+        event,
+        `/json/${tenantID}/bookables/`,
+        {
+          method: "GET",
+        }
+      );
+      if (!error) {
+        result.bookables = data;
+      }
     }
 
     if (include?.includes("events")) {
-      result.events = await serverFetch(event, `/json/${tenantID}/events/`, {
-        method: "GET",
-      });
+      const { data, error } = await serverFetch(
+        event,
+        `/json/${tenantID}/events/`,
+        {
+          method: "GET",
+        }
+      );
+      if (!error) {
+        result.events = data;
+      }
     }
 
     return result;

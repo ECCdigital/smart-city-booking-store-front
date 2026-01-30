@@ -412,7 +412,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
         return {
           item,
-          isAvailable: availability.isAvailable && availability.remaining > 0,
+          isAvailable: availability.isAvailable,
         };
       }
     };

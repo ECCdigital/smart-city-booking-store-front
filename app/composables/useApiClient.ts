@@ -16,6 +16,8 @@ export function useApiClient() {
     opts: NitroFetchOptions<NitroFetchRequest> = {}
   ): Promise<Result<T>> {
     try {
+      console.log(`API Request: ${opts.method ?? "GET"} ${url}`);
+      console.log("Options:", JSON.stringify(opts));
       const data = await requestFetch<T>(url, {
         ...opts,
         credentials: "include",
