@@ -28,13 +28,11 @@ const userName = computed(() => {
 
 const items = [
   [
-    /**
     {
       label: t("navigation.users"),
       icon: "i-lucide-user",
       to: "/users",
     },
-        **/
     {
       label: t("navigation.admin"),
       icon: "i-lucide-user-star",
@@ -43,6 +41,11 @@ const items = [
     },
   ],
   [
+    {
+      label: t("navigation.settings"),
+      icon: "i-lucide-settings",
+      to: "/settings",
+    },
     {
       label: t("common.logout"),
       icon: "i-lucide-log-out",
