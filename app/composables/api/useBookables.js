@@ -1,59 +1,50 @@
 export function useBookables() {
   const fetchBookables = async (tenantID) => {
-    const { apiFetch } = useApi();
+    const api = useApiClient();
 
-    try {
-      const response = await apiFetch(`/api/bookables/${tenantID}`, {
-        method: "GET",
-      });
+    const { data, error } = await api.get(`/api/bookables/${tenantID}`);
 
-      return response;
-    } catch (error) {
-      console.error("Error fetching bookables:", error);
+    if (error) {
       throw error;
     }
+
+    return data;
   };
   const getBookableAvailability = async (tenantID, bookableId, start, end) => {
-    const { apiFetch } = useApi();
-    try {
-      const response = await apiFetch(
-        `/api/bookables/${tenantID}/availability/${bookableId}`,
-        {
-          method: "POST",
-          body: {
-            start: start,
-            end: end,
-          },
-        },
-      );
+    const api = useApiClient();
 
-      //console.log(response);
-      return response;
-    } catch (error) {
+    const { data, error } = await api.post(
+      `/api/bookables/${tenantID}/availability/${bookableId}`,
+      {
+        start: start,
+        end: end,
+      }
+    );
+
+    if (error) {
       console.error("Error checking bookable availability:", error);
       throw error;
     }
+
+    return data;
   };
   const getBookablePrice = async (tenantID, bookableId, start, end) => {
-    const { apiFetch } = useApi();
-    try {
-      const response = await apiFetch(
-        `/api/bookables/${tenantID}/price/${bookableId}`,
-        {
-          method: "POST",
-          body: {
-            start: start,
-            end: end,
-          },
-        },
-      );
+    const api = useApiClient();
 
-      //console.log(response);
-      return response;
-    } catch (error) {
+    const { data, error } = await api.post(
+      `/api/bookables/${tenantID}/price/${bookableId}`,
+      {
+        start: start,
+        end: end,
+      }
+    );
+
+    if (error) {
       console.error("Error checking bookable price:", error);
       throw error;
     }
+
+    return data;
   };
   return {
     fetchBookables,

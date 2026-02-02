@@ -3,6 +3,7 @@ import { useBookableStore } from "~~/stores/bookable.js";
 import { useEventStore } from "~~/stores/event.js";
 import { useTenantStore } from "~~/stores/tenant.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
+import { sendRedirect } from "h3";
 
 export function useCatalogBundle() {
   const { fetchCatalogBundle } = useCatalog();
@@ -10,23 +11,42 @@ export function useCatalogBundle() {
   const bookableStore = useBookableStore();
   const eventStore = useEventStore();
   const tenantStore = useTenantStore();
+  const config = useRuntimeConfig();
+
+  const cacheEnabled = config.public.cacheEnabled;
+  const adminBaseUrl = config.public.adminBaseUrl;
 
   async function loadBundle({ tenantID, bookableID, eventID, include = [] }) {
+    const cacheKey = `catalog:${tenantID}:${
+      bookableID || eventID || include.sort().join(",")
+    }`;
+    console.log("Loading catalog bundle with cache key:", cacheKey);
+    const event = import.meta.server ? useRequestEvent() : null;
 
-      const { data, error } = await useAsyncData(
-          `catalog:${tenantID}:${bookableID || eventID || include.sort().join(",")}`,
-          () =>
-              fetchCatalogBundle({
-                tenantID,
-                bookableID,
-                eventID,
-                include: include.join(","),
-              }),
-          { server: true }
-      );
+    const { data, error } = await useAsyncData(
+      cacheKey,
+      () =>
+        fetchCatalogBundle({
+          tenantID,
+          bookableID,
+          eventID,
+          include: include.join(","),
+        }),
+      {
+        server: true,
+        getCachedData: cacheEnabled ? undefined : () => undefined,
+        dedupe: cacheEnabled ? "defer" : "cancel",
+      }
+    );
 
     if (error.value) {
-      handleError(error.value.data);
+      if (error.value.statusMessage === "catalog_disabled") {
+        if (import.meta.server && event) {
+          return await sendRedirect(event, adminBaseUrl, 302);
+        }
+        return navigateTo(adminBaseUrl, { external: true });
+      }
+      throw error.value;
     }
 
     if (data.value?.catalog) {
@@ -45,11 +65,18 @@ export function useCatalogBundle() {
       eventStore.addOrUpdate(data.value.event);
     }
     if (data.value?.tenants) {
-        tenantStore.$patch({ tenants: data.value.tenants });
+      tenantStore.$patch({ tenants: data.value.tenants });
     }
 
     return data.value;
   }
 
-  return { loadBundle };
+  function clearBundleCache(tenantID, bookableID, eventID, include = []) {
+    const cacheKey = `catalog:${tenantID}:${
+      bookableID || eventID || include.sort().join(",")
+    }`;
+    clearNuxtData(cacheKey);
+  }
+
+  return { loadBundle, clearBundleCache };
 }

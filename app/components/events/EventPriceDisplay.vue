@@ -17,7 +17,7 @@
 const props = defineProps({
   eventTickets: {
     type: Array,
-    required: true,
+    default: () => [],
   },
   isFree: {
     type: Boolean,
