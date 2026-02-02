@@ -16,8 +16,6 @@ export function useApiClient() {
     opts: NitroFetchOptions<NitroFetchRequest> = {}
   ): Promise<Result<T>> {
     try {
-      console.log(`API Request: ${opts.method ?? "GET"} ${url}`);
-      console.log("Options:", JSON.stringify(opts));
       const data = await requestFetch<T>(url, {
         ...opts,
         credentials: "include",
@@ -27,7 +25,6 @@ export function useApiClient() {
     } catch (err) {
       const error = err as FetchError;
 
-      console.error("Error fetching data:", error);
       return {
         data: null,
         error: {

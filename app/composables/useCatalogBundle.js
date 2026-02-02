@@ -20,7 +20,6 @@ export function useCatalogBundle() {
     const cacheKey = `catalog:${tenantID}:${
       bookableID || eventID || include.sort().join(",")
     }`;
-    console.log("Loading catalog bundle with cache key:", cacheKey);
     const event = import.meta.server ? useRequestEvent() : null;
 
     const { data, error } = await useAsyncData(
@@ -45,6 +44,12 @@ export function useCatalogBundle() {
           return await sendRedirect(event, adminBaseUrl, 302);
         }
         return navigateTo(adminBaseUrl, { external: true });
+      }
+      if (error.value.statusMessage === "unauthorized") {
+        if (import.meta.server && event) {
+          return await sendRedirect(event, `/login`, 302);
+        }
+        return navigateTo(`/login`);
       }
       throw error.value;
     }

@@ -6,6 +6,10 @@ const errorMapping = {
     statusCode: 400,
     statusMessage: "catalog_disabled",
   },
+  401: {
+    statusCode: 401,
+    statusMessage: "unauthorized",
+  },
 };
 
 export default createConditionalCachedHandler(
