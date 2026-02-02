@@ -25,10 +25,18 @@
 </template>
 <script setup>
 import { useAuthStore } from "~~/stores/auth.js";
+import { useBookingStore } from "~~/stores/bookings.js";
 
 definePageMeta({
   layout: "catalog",
 });
+
+const bookingsStore = useBookingStore();
+await bookingsStore.fetchBookings()
+
+const allBookings = computed(() => bookingsStore.getBookings);
+
+
 const user = computed(() => useAuthStore().getUser);
 
 const userNavigation = [
