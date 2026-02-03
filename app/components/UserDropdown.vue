@@ -43,18 +43,18 @@ const items = [
     {
       label: "Buchungen",
       icon: "i-lucide-book-marked",
-      to: { path: "/users", query: { tab: "bookings" } },
+      to: { path: "/user", query: { tab: "bookings" } },
     },
     {
       label: "Rechnungen",
       icon: "i-lucide-wallet-cards",
-      to: { path: "/users", query: { tab: "invoices" } },
+      to: { path: "/user", query: { tab: "invoices" } },
       disabled: true,
     },
     {
       label: "Favoriten",
       icon: "i-lucide-book-heart",
-      to: { path: "/users", query: { tab: "favorites" } }, //
+      to: { path: "/user", query: { tab: "favorites" } }, //
       disabled: true,
     },
   ],

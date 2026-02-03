@@ -35,7 +35,7 @@ import { useAuthStore } from "~~/stores/auth.js";
 import { useBookingStore } from "~~/stores/bookings.js";
 
 definePageMeta({
-  name: "users",
+  name: "user",
   layout: "catalog",
 });
 
