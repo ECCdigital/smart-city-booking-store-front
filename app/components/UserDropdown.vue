@@ -29,15 +29,33 @@ const userName = computed(() => {
 const items = [
   [
     {
-      label: t("navigation.users"),
-      icon: "i-lucide-user",
-      to: "/users",
-    },
-    {
       label: t("navigation.admin"),
       icon: "i-lucide-user-star",
       to: config.public.adminBaseUrl,
       target: "_blank",
+    },
+  ],
+  [
+    {
+      label: "Benutzerkonto",
+      class: "font-bold cursor-default hover:bg-transparent",
+    },
+    {
+      label: "Buchungen",
+      icon: "i-lucide-book-marked",
+      to: { path: "/users", query: { tab: "bookings" } },
+    },
+    {
+      label: "Rechnungen",
+      icon: "i-lucide-wallet-cards",
+      to: { path: "/users", query: { tab: "invoices" } },
+      disabled: true,
+    },
+    {
+      label: "Favoriten",
+      icon: "i-lucide-book-heart",
+      to: { path: "/users", query: { tab: "favorites" } }, //
+      disabled: true,
     },
   ],
   [
@@ -59,12 +77,12 @@ async function logout() {
     await authStore.logout();
     notification.success(
       t("notifications.logoutSuccess.message"),
-      t("notifications.logoutSuccess.title")
+      t("notifications.logoutSuccess.title"),
     );
   } catch {
     notification.error(
       t("login.logoutErrorMessage.message"),
-      t("login.logoutErrorMessage.title")
+      t("login.logoutErrorMessage.title"),
     );
   }
 }
@@ -72,9 +90,12 @@ async function logout() {
 
 <template>
   <UDropdownMenu
+    size="lg"
     :items="items"
     :ui="{
       content: 'ring-0 shadow-lg glass',
+      itemLeadingIcon: 'mt-1',
+      item: 'before:bg-transparent data-highlighted:before:bg-transparent'
     }"
   >
     <UButton

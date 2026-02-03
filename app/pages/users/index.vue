@@ -35,6 +35,7 @@ import { useAuthStore } from "~~/stores/auth.js";
 import { useBookingStore } from "~~/stores/bookings.js";
 
 definePageMeta({
+  name: "users",
   layout: "catalog",
 });
 
@@ -68,6 +69,21 @@ function setActiveItem (item) {
   console.log("Setting active item to:", item);
   activeItem.value = item;
 };
+
+onMounted(() => {
+  const route = useRoute()
+  if (route.query.tab) {
+    activeItem.value = route.query.tab
+  }
+})
+watch(
+    () => useRoute().query.tab,
+    (newTab) => {
+      if (newTab) {
+        activeItem.value = newTab;
+      }
+    }
+);
 </script>
 
 <style scoped></style>
