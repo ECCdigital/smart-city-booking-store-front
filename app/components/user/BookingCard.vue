@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col bg-green-100" :class="bookingCardClasses">
+  <div class="flex flex-col" :class="bookingCardClasses">
     <!-- title and booking-id -->
     <div class="mb-3 h-1/3">
       <div class="flex justify-between">
@@ -22,7 +22,7 @@
       </h3>
     </div>
 
-    <div class="flex flex-col h-2/3 bg-green-200">
+    <div class="flex flex-col h-2/3">
       <!-- time -->
       <div class="h-1/3 mb-3">
         <div
@@ -32,6 +32,7 @@
           <UIcon name="i-lucide-clock" class="w-4 h-4 mr-1" />
           Zeitraum
         </div>
+        <div v-else class="h-[44px]"/>
         <div v-if="bookingTimeSlot" class="text-sm font-medium">
           {{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}
         </div>
@@ -52,6 +53,10 @@
 
       <!-- Status Badges -->
 
+      <div class="mb-2">
+        <div class="text-sm text-medium text-gray-500 dark:text-gray-400 mb-1">
+          Gebucht am: {{ formatDate(booking.timeCreated) }}
+        </div>
         <div class="flex flex-wrap gap-2">
           <!-- status -->
           <div
@@ -71,6 +76,7 @@
             <UIcon :name="bookingPayment.icon" class="w-4 h-4 mr-1 mt-0.5" />
             {{ bookingPayment.label }}
           </div>
+        </div>
       </div>
     </div>
   </div>
