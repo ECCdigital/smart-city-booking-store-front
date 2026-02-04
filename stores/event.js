@@ -14,6 +14,7 @@ export const useEventStore = defineStore("event", {
       const { fetchEvents } = useEvents();
       try {
         this.events = await fetchEvents(tenantID);
+        console.log(this.events)
         return this.events;
       } catch (error) {
         console.error("Error fetching events:", error);

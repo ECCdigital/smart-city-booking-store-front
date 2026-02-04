@@ -1,7 +1,7 @@
 <template>
   <div>
     <p>
-      <UIcon name="i-lucide-clock" class="size-5" />
+      <UIcon v-if="useIcon" name="i-lucide-clock" class="size-5" />
       <span v-if="props.event.information?.startDate" class="p-3">
         {{ showDate() }}
       </span>
@@ -12,6 +12,7 @@
 <script setup>
 const props = defineProps({
   event: { type: Object, required: true },
+  useIcon: { type: Boolean, default: true },
 });
 
 const LOCALE = "de-DE";
