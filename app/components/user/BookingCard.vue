@@ -55,7 +55,7 @@
 
       <div class="mb-2">
         <div class="text-sm text-medium text-gray-500 dark:text-gray-400 mb-1">
-          Gebucht am: {{ formatDate(booking.timeCreated) }}
+          Gebucht am: {{booking.displayBookingDate}}
         </div>
         <div class="flex flex-wrap gap-2">
           <!-- status -->
@@ -133,14 +133,14 @@ const bookingStatus = computed(() => {
     return {
       label: "Storniert",
       color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-      icon: "i-lucide-x-circle",
+      icon: "i-lucide-x",
     };
   } else if (props.booking.isCommitted) {
     return {
       label: "Bestätigt",
       color:
         "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      icon: "i-lucide-check-circle",
+      icon: "i-lucide-check",
     };
   }
   //toDo - abgeschlossen??
@@ -160,7 +160,7 @@ const bookingPayment = computed(() => {
       label: "Bezahlt",
       color:
         "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      icon: "i-lucide-check-circle",
+      icon: "i-lucide-check",
     };
   } else {
     return {

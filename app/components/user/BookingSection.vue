@@ -9,7 +9,6 @@
         variant="outline"
         placeholder="Suchen..."
         class="mt-2 md:mt-0 w-full md:w-auto"
-        @keydown.enter="onSearch"
       />
     </div>
 
@@ -31,11 +30,29 @@ import Fuse from "fuse.js";
 const bookingsStore = useBookingStore();
 await bookingsStore.fetchBookings();
 
-const allBookings = computed(() => bookingsStore.getBookings);
+const allBookings = computed(() => {
+  return bookingsStore.getBookings.map((b) => ({
+    ...b,
+    displayBookingDate: new Date(b.timeCreated).toLocaleDateString("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    statusLabel: b.isRejected
+      ? "Storniert"
+      : b.isCommitted
+        ? "Bestätigt"
+        : "Ausstehend",
+    payedLabel: b.isPayed ? "bezahlt" : "nicht bezahlt",
+  }));
+});
 const searchedBookings = computed(() => {
   if (!searchQuery.value) {
     return allBookings.value;
   }
+
   const fuse = new Fuse(allBookings.value, searchOptions);
   const results = fuse.search(searchQuery.value);
   return results.map((result) => result.item);
@@ -54,16 +71,19 @@ if (
 
 const searchQuery = ref("");
 const searchOptions = {
-  keys: ["bookableItems._bookableUsed.title"], //toDo - ergänzen!!!!!!!!!!!!!!!!!!!!!!
+  keys: [
+    "id",
+    "bookableItems._bookableUsed.title",
+    "displayBookingDate",
+    "statusLabel",
+    "payedLabel",
+  ],
   includeScore: true,
   shouldSort: true,
   threshold: 0.3,
   findAllMatches: true,
-  ignoreLocation: true
-}
-function onSearch(){
-  console.log("Searching for:", searchQuery.value);
-}
+  ignoreLocation: true,
+};
 </script>
 
 <style scoped></style>
