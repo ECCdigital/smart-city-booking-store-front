@@ -1,22 +1,18 @@
 <template>
-    <div
-      class="md:basis-1/6 border border-gray-200 rounded m-2 md:m-0 md:p-2 md:space-y-1 flex md:block"
-    ><div
-        v-for="(item, i) in userNavigation"
-        :key="i"
-    >
+  <div
+    class="md:basis-1/6 border border-gray-200 rounded m-2 md:m-0 md:p-2 md:space-y-1 flex md:block"
+  >
+    <div v-for="(item, i) in userNavigation" :key="i">
       <NuxtLink
-
-          class="basis-1/3 md:basis-full flex rounded p-2 cursor-pointer w-full"
-          :class="isActive(item.value) ? activeLinkStyle : inactiveLinkStyle"
-          :to="item.value"
+        class="basis-1/3 md:basis-full flex rounded p-2 cursor-pointer w-full"
+        :class="isActive(item.value) ? activeLinkStyle : inactiveLinkStyle"
+        :to="item.value"
       >
         <UIcon :name="item.icon" class="mr-3 mt-1" />
         {{ item.label }}
       </NuxtLink>
     </div>
-
-    </div>
+  </div>
 </template>
 <script setup>
 const userNavigation = computed(() => [
@@ -47,10 +43,7 @@ const activeLinkStyle = computed(
 );
 
 function isActive(path) {
-  console.log("path: ", path);
-  console.log("route.path: ", route.path);
-  return true
-  //return route.path.includes(path);
+  return route.path === path;
 }
 </script>
 

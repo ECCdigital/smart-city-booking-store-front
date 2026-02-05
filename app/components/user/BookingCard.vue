@@ -32,7 +32,7 @@
           <UIcon name="i-lucide-clock" class="w-4 h-4 mr-1" />
           Zeitraum
         </div>
-        <div v-else class="h-[44px]"/>
+        <div v-else class="h-[44px]" />
         <div v-if="bookingTimeSlot" class="text-sm font-medium">
           {{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}
         </div>
@@ -55,22 +55,12 @@
 
       <div class="mb-2">
         <div class="text-sm text-medium text-gray-500 dark:text-gray-400 mb-1">
-          Gebucht am: {{booking.displayBookingDate}}
+          Gebucht am: {{ booking.displayBookingDate }}
         </div>
         <div class="flex flex-wrap gap-2">
           <!-- status -->
           <BookingStatusChip :booking="booking" />
 
-          <!-- payment -->
-          <!--<div
-            v-if="bookingPayment"
-            class="flex px-3 py-1 rounded-full text-xs font-medium"
-            :class="bookingPayment.color"
-          >
-            <UIcon :name="bookingPayment.icon" class="w-4 h-4 mr-1 mt-0.5" />
-            {{ bookingPayment.label }}
-          </div>
-          -->
           <BookingPayedChip :booking-is-payed="booking.isPayed" />
         </div>
       </div>
@@ -125,9 +115,6 @@ const bookingPrice = computed(() => {
   }
   return "0,00 €";
 });
-
-
-
 
 // helpers
 const formatDate = (dateString) => {

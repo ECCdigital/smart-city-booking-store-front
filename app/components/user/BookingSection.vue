@@ -3,7 +3,6 @@
     <div class="md:flex justify-between items-center w-full">
       <h2 class="text-2xl font-bold">Ihre Buchungen</h2>
       <UInput
-        v-if="!choosenBooking"
         v-model="searchQuery"
         icon="i-lucide-search"
         size="md"
@@ -13,17 +12,11 @@
       />
     </div>
 
-    <BookingDetailsSection v-if="choosenBooking" :booking="choosenBooking" @go-back="() => choosenBooking = null"/>
-
-    <div
-      v-else
-      class="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6"
-    >
+    <div class="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6">
       <BookingCard
         v-for="booking in searchedBookings"
         :key="booking.id"
         :booking="booking"
-        @open-details="() => (choosenBooking = booking)"
       />
     </div>
   </div>
@@ -33,7 +26,6 @@ import { useBookingStore } from "~~/stores/bookings.js";
 import BookingCard from "~/components/user/BookingCard.vue";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import Fuse from "fuse.js";
-import BookingDetailsSection from "~/components/user/BookingDetailsSection.vue";
 
 const bookingsStore = useBookingStore();
 await bookingsStore.fetchBookings();
@@ -92,8 +84,6 @@ const searchOptions = {
   findAllMatches: true,
   ignoreLocation: true,
 };
-
-const choosenBooking = ref(null);
 </script>
 
 <style scoped></style>

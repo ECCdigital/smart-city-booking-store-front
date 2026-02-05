@@ -2,7 +2,10 @@
   <div class="bg-primary/20 p-3 rounded mb-3">
     <div class="md:flex justify-between text-gray-700 dark:text-gray-300">
       <p class="font-bold flex items-center justify-between md:justify-start">
-        <span :class="bookable._bookableUsed.title.length > 100 ? 'text-sm' : ''">{{ bookable._bookableUsed.title }}</span>
+        <span
+          :class="bookable._bookableUsed.title.length > 100 ? 'text-sm' : ''"
+          >{{ bookable._bookableUsed.title }}</span
+        >
         <UButton
           icon="i-lucide-square-arrow-out-up-right"
           variant="soft"
