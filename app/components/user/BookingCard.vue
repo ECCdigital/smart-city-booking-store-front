@@ -59,16 +59,10 @@
         </div>
         <div class="flex flex-wrap gap-2">
           <!-- status -->
-          <div
-            class="flex px-3 py-1 rounded-full text-xs font-medium"
-            :class="bookingStatus.color"
-          >
-            <UIcon :name="bookingStatus.icon" class="w-4 h-4 mr-1 mt-0.5" />
-            {{ bookingStatus.label }}
-          </div>
+          <BookingStatusChip :booking="booking" />
 
           <!-- payment -->
-          <div
+          <!--<div
             v-if="bookingPayment"
             class="flex px-3 py-1 rounded-full text-xs font-medium"
             :class="bookingPayment.color"
@@ -76,6 +70,8 @@
             <UIcon :name="bookingPayment.icon" class="w-4 h-4 mr-1 mt-0.5" />
             {{ bookingPayment.label }}
           </div>
+          -->
+          <BookingPayedChip :booking-is-payed="booking.isPayed" />
         </div>
       </div>
     </div>
@@ -85,6 +81,8 @@
 <script setup>
 import { useEventStore } from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
+import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
+import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 
 const props = defineProps({
   booking: {
@@ -100,6 +98,7 @@ const props = defineProps({
     }),
   },
 });
+const emit = defineEmits(["open-details"]);
 
 const eventStore = useEventStore();
 
@@ -128,49 +127,8 @@ const bookingPrice = computed(() => {
   return "0,00 €";
 });
 
-const bookingStatus = computed(() => {
-  if (props.booking.isRejected) {
-    return {
-      label: "Storniert",
-      color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-      icon: "i-lucide-x",
-    };
-  } else if (props.booking.isCommitted) {
-    return {
-      label: "Bestätigt",
-      color:
-        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      icon: "i-lucide-check",
-    };
-  }
-  //toDo - abgeschlossen??
 
-  return {
-    label: "Ausstehend",
-    color: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-    icon: "i-lucide-hourglass",
-  };
-});
 
-const bookingPayment = computed(() => {
-  if (props.booking.priceEur === 0) {
-    return null;
-  } else if (props.booking.isPayed) {
-    return {
-      label: "Bezahlt",
-      color:
-        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      icon: "i-lucide-check",
-    };
-  } else {
-    return {
-      label: "Nicht bezahlt",
-      color:
-        "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-      icon: "i-lucide-hourglass",
-    };
-  }
-});
 
 // helpers
 const formatDate = (dateString) => {
@@ -204,7 +162,6 @@ const event = computed(() => {
 });
 
 function openDetails() {
-  console.log("Open booking details for booking ID:", props.booking.id);
-  // Hier können Sie die Logik zum Öffnen der Buchungsdetails implementieren
+  emit("open-details");
 }
 </script>
