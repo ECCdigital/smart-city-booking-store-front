@@ -5,7 +5,7 @@
 definePageMeta({
   name: "user",
   layout: "user",
-  middleware: ['user-redirect']
+  middleware: ["user-redirect", "user-auth"],
 });
 </script>
 

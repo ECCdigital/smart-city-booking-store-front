@@ -19,6 +19,7 @@
 definePageMeta({
   name: "invoices",
   layout: "user",
+  middleware: ["user-auth"],
 });
 </script>
 

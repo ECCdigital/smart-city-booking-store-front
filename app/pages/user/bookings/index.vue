@@ -9,10 +9,9 @@ import BookingSection from "~/components/user/BookingSection.vue";
 definePageMeta({
   name: "bookings",
   layout: "user",
+  middleware: ["user-auth"],
 });
 </script>
-
-
 
 <style scoped>
 

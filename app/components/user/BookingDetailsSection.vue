@@ -5,7 +5,7 @@
       icon="i-lucide-arrow-left"
       class="justify-center px-5 mt-2 bg-gray-300 text-black"
       :style="{ cursor: 'pointer' }"
-      @click="goBack"
+      @click="$router.back()"
     />
     <h3 class="text-xl font-bold my-5">Buchungsdetails</h3>
 

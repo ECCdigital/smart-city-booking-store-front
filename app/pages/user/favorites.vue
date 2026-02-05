@@ -15,6 +15,7 @@
 definePageMeta({
   name: "favorites",
   layout: "user",
+  middleware: ["user-auth"],
 });
 </script>
 

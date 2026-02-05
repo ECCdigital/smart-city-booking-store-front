@@ -1,33 +1,37 @@
 <template>
     <div
       class="md:basis-1/6 border border-gray-200 rounded m-2 md:m-0 md:p-2 md:space-y-1 flex md:block"
-    >
-      <NuxtLink
+    ><div
         v-for="(item, i) in userNavigation"
         :key="i"
-        class="basis-1/3 md:basis-full flex rounded p-2 cursor-pointer w-full"
-        :class="isActive(item.value) ? activeLinkStyle : inactiveLinkStyle"
-        :to="item.value"
+    >
+      <NuxtLink
+
+          class="basis-1/3 md:basis-full flex rounded p-2 cursor-pointer w-full"
+          :class="isActive(item.value) ? activeLinkStyle : inactiveLinkStyle"
+          :to="item.value"
       >
         <UIcon :name="item.icon" class="mr-3 mt-1" />
         {{ item.label }}
       </NuxtLink>
     </div>
+
+    </div>
 </template>
 <script setup>
 const userNavigation = computed(() => [
   {
-    value: "bookings",
+    value: "/user/bookings",
     label: "Buchungen",
     icon: "i-lucide-book-marked",
   },
   {
-    value: "invoices",
+    value: "/user/invoices",
     label: "Rechnungen",
     icon: "i-lucide-wallet-cards",
   },
   {
-    value: "favorites",
+    value: "/user/favorites",
     label: "Favoriten",
     icon: "i-lucide-book-heart",
   },
@@ -43,7 +47,10 @@ const activeLinkStyle = computed(
 );
 
 function isActive(path) {
-  return route.path.includes(path);
+  console.log("path: ", path);
+  console.log("route.path: ", route.path);
+  return true
+  //return route.path.includes(path);
 }
 </script>
 

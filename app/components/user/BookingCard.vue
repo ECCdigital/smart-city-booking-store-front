@@ -98,7 +98,6 @@ const props = defineProps({
     }),
   },
 });
-const emit = defineEmits(["open-details"]);
 
 const eventStore = useEventStore();
 
@@ -162,6 +161,7 @@ const event = computed(() => {
 });
 
 function openDetails() {
-  emit("open-details");
+  const router = useRouter();
+  router.push({ path: `/user/bookings/${props.booking.id}` });
 }
 </script>
