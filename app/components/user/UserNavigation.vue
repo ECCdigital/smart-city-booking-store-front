@@ -1,5 +1,4 @@
 <template>
-  <div>
     <div
       class="md:basis-1/6 border border-gray-200 rounded m-2 md:m-0 md:p-2 md:space-y-1 flex md:block"
     >
@@ -14,7 +13,6 @@
         {{ item.label }}
       </NuxtLink>
     </div>
-  </div>
 </template>
 <script setup>
 const userNavigation = computed(() => [
