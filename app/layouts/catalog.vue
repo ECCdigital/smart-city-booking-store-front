@@ -52,7 +52,7 @@ const colorMode = useColorMode();
         </div>
       </div>
     </HeroBackground>
-    <NuxtPage/>
+    <slot/>
   </div>
 </template>
 
