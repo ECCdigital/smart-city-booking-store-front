@@ -79,6 +79,8 @@ async function logout() {
       t("notifications.logoutSuccess.message"),
       t("notifications.logoutSuccess.title"),
     );
+    const router = useRouter();
+    await router.push("/login");
   } catch {
     notification.error(
       t("login.logoutErrorMessage.message"),
