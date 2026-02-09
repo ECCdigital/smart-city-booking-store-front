@@ -27,15 +27,17 @@
       </div>
       <div class="">
         <p class="font-medium">Status</p>
-        <div class="">
-          <BookingStatusChip :booking="booking" />
-        </div>
+        <BookingStatusChip :booking="booking" />
       </div>
+    </div>
+    <div v-if="booking.isRejected" class="mb-5">
+      <p class="font-medium">Ablehnungsgrund</p>
+      <p>{{ booking.rejectionReason }}</p>
     </div>
     <div v-if="bookingTimeSlot" class="mb-5">
       <div class="">
         <p class="font-medium">Buchungszeitraum</p>
-        <p>{{ bookingTimeSlot[0] }} - {{bookingTimeSlot[1]}}</p>
+        <p>{{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}</p>
       </div>
     </div>
 
@@ -64,12 +66,38 @@
           </div>
           <div>
             <p>Status</p>
-            <div class="">
-              <BookingPayedChip :booking-is-payed="booking.isPayed" />
-            </div>
+            <BookingPayedChip :booking-is-payed="booking.isPayed" />
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- invoices and receipts  -->
+    <div v-if="paymentDocuments.length > 0" class="mb-5">
+      <p class="font-medium">Rechnungen und Zahlungsbelege</p>
+      <BookingDetailsAttachmentCard
+        v-for="(attachment, i) in paymentDocuments"
+        :key="i"
+        :attachment="attachment"
+        is-payment-document
+      />
+    </div>
+
+    <!-- attachments  -->
+    <div v-if="otherDocuments.length > 0" class="mb-5">
+      <p class="font-medium">Anhänge</p>
+      <BookingDetailsAttachmentCard
+        v-for="(attachment, i) in otherDocuments"
+        :key="i"
+        :attachment="attachment"
+        :bookables="bookableTitles"
+      />
+    </div>
+
+    <!-- comments  -->
+    <div v-if="booking.comment" class="mb-5">
+      <p class="font-medium">Ihr Kommentar</p>
+      <p>{{ booking.comment }}</p>
     </div>
   </div>
 </template>
@@ -78,6 +106,7 @@ import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetail
 import { useTenantStore } from "~~/stores/tenant.js";
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
+import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
 
 const props = defineProps({
   booking: {
@@ -85,7 +114,6 @@ const props = defineProps({
     required: true,
   },
 });
-const emit = defineEmits(["go-back"]);
 
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.booking.tenantId).name;
@@ -106,55 +134,77 @@ const bookingPrice = computed(() => {
 });
 
 const paymentMethode = computed(() => {
-  switch (props.booking.paymentProvider) {
-    case "giroCockpit": {
-      return "Online-Zahlung";
+  if (!props.booking.isPayed) {
+    switch (props.booking.paymentProvider) {
+      case "giroCockpit": {
+        return "Online-Zahlung";
+      }
+      case "pmPayment": {
+        return "Online-Zahlung";
+      }
+      case "invoice": {
+        return "Rechnung";
+      }
+      default: {
+        return "Unbekannt";
+      }
     }
-    case "pmPayment": {
-      return "pmPayment";
+  } else {
+    switch (props.booking.paymentMethode) {
+      case "CASH":
+        return "Bar";
+      case "TRANSFER":
+        return "Überweisung";
+      case "CREDIT_CARD":
+        return "Kreditkarte";
+      case "DEBIT_CARD":
+        return "EC-Karte";
+      case "PAYPAL":
+        return "PayPal";
+      case "OTHER":
+        return "Sonstiges";
+      case "GIROPAY":
+        return "Giropay";
+      case "APPLE_PAY":
+        return "Apple Pay";
+      case "GOOGLE_PAY":
+        return "Google Pay";
+      case "EPS":
+        return "EPS";
+      case "IDEAL":
+        return "iDEAL";
+      case "MAESTRO":
+        return "Maestro";
+      case "PAYDIRECT":
+        return "paydirekt";
+      case "SOFORT":
+        return "SOFORT-Überweisung";
+      case "BLUECODE":
+        return "Bluecode";
     }
-    case "invoice":
-      return "Rechnung";
   }
   return "Nicht angegeben";
-  /*
-  translatePayMethod(paymentMethod) {
-      switch (paymentMethod) {
-        case "CASH":
-          return "Bar";
-        case "TRANSFER":
-          return "Überweisung";
-        case "CREDIT_CARD":
-          return "Kreditkarte";
-        case "DEBIT_CARD":
-          return "EC-Karte";
-        case "PAYPAL":
-          return "PayPal";
-        case "OTHER":
-          return "Sonstiges";
-        case "GIROPAY":
-          return "Giropay";
-        case "APPLE_PAY":
-          return "Apple Pay";
-        case "GOOGLE_PAY":
-          return "Google Pay";
-        case "EPS":
-          return "EPS";
-        case "IDEAL":
-          return "iDEAL";
-        case "MAESTRO":
-          return "Maestro";
-        case "PAYDIRECT":
-          return "paydirekt";
-        case "SOFORT":
-          return "SOFORT-Überweisung";
-        case "BLUECODE":
-          return "Bluecode";
-        default:
-          return "Unbekannt";
-      }
-    },
-  * */
+});
+
+const paymentDocuments = computed(() => {
+  return props.booking.attachments.filter(
+    (attachment) =>
+      attachment.type === "invoice" || attachment.type === "receipt",
+  );
+});
+
+const otherDocuments = computed(() => {
+  return props.booking.attachments.filter(
+    (attachment) =>
+      attachment.type !== "invoice" && attachment.type !== "receipt",
+  );
+});
+
+const bookableTitles = computed(() => {
+  return props.booking.bookableItems.map((item) => ({
+    title: item._bookableUsed.title,
+    id: item._bookableUsed.id,
+  }));
 });
 
 //help functions
@@ -173,10 +223,6 @@ const formatPrice = (price) => {
     currency: "EUR",
   }).format(price);
 };
-
-function goBack() {
-  emit("go-back");
-}
 </script>
 
 <style scoped></style>

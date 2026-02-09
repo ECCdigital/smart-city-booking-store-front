@@ -31,22 +31,24 @@ const bookingsStore = useBookingStore();
 await bookingsStore.fetchBookings();
 
 const allBookings = computed(() => {
-  return bookingsStore.getBookings.map((b) => ({
-    ...b,
-    displayBookingDate: new Date(b.timeCreated).toLocaleDateString("de-DE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-    statusLabel: b.isRejected
-      ? "Storniert"
-      : b.isCommitted
-        ? "Bestätigt"
-        : "Ausstehend",
-    payedLabel: b.isPayed ? "bezahlt" : "nicht bezahlt",
-  }));
+  return bookingsStore.getBookings
+    .sort((a, b) => b.timeCreated - a.timeCreated)
+    .map((b) => ({
+      ...b,
+      displayBookingDate: new Date(b.timeCreated).toLocaleDateString("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      statusLabel: b.isRejected
+        ? "Storniert"
+        : b.isCommitted
+          ? "Bestätigt"
+          : "Ausstehend",
+      payedLabel: b.isPayed ? "bezahlt" : "nicht bezahlt",
+    }));
 });
 const searchedBookings = computed(() => {
   if (!searchQuery.value) {
