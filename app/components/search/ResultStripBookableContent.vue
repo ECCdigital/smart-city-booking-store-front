@@ -2,10 +2,10 @@
   <div class="basis-3/4 p-4 flex flex-col justify-between">
     <div>
       <!-- Title -->
-      <p class="text-lg font-bold">
+      <p class="font-bold" :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'">
         {{ bookable?.title }}
       </p>
-      <p>{{ tenantName }}</p>
+      <p>{{ tenantName }} </p>
 
       <!-- Adresse und Entfernung -->
       <BookableAdressInformation :bookable="bookable" class="w-full my-5" />
@@ -96,8 +96,12 @@ const props = defineProps({
     default: false,
   },
 });
-const { tenantTo } = useTenantRoute();
 
+const hasLongTitle = computed(() => {
+  return (props.bookable?.title?.length ?? 0) > 60;
+});
+
+const { tenantTo } = useTenantRoute();
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.bookable.tenantId).name;
 });
