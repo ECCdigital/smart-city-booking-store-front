@@ -8,7 +8,7 @@
         size="md"
         variant="outline"
         placeholder="Suchen..."
-        class="mt-2 md:mt-0 w-full md:w-auto"
+        class="mt-2 md:mt-0 w-full md:w-[40%]"
       />
     </div>
 
