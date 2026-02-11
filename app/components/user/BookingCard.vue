@@ -30,7 +30,8 @@
           class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-1"
         >
           <UIcon name="i-lucide-clock" class="w-4 h-4 mr-1" />
-          Zeitraum
+          <span v-if="event && !bookingTimeSlot">Veranstaltungszeit</span>
+          <span v-else>Zeitraum</span>
         </div>
         <div v-else class="h-[44px]" />
         <div v-if="bookingTimeSlot" class="text-sm font-medium">

@@ -86,22 +86,22 @@ const sortItems = () => [
     },
   },
   {
-    label: "Zeitraum (neueste zuerst)",
-    icon: "i-lucide-calendar-arrow-down",
-    value: "date-desc",
-    class: sortOption.value === "date-desc" ? "bg-primary/20" : "",
-    onSelect() {
-      sortOption.value = "date-desc";
-      onSetFilter();
-    },
-  },
-  {
-    label: "Zeitraum (älteste zuerst)",
+    label: "Zeitraum (frühste zuerst)",
     icon: "i-lucide-calendar-arrow-up",
     value: "date-asc",
     class: sortOption.value === "date-asc" ? "bg-primary/20 mb-1" : "mb-1",
     onSelect() {
       sortOption.value = "date-asc";
+      onSetFilter();
+    },
+  },
+  {
+    label: "Zeitraum (späteste zuerst)",
+    icon: "i-lucide-calendar-arrow-down",
+    value: "date-desc",
+    class: sortOption.value === "date-desc" ? "bg-primary/20" : "",
+    onSelect() {
+      sortOption.value = "date-desc";
       onSetFilter();
     },
   },

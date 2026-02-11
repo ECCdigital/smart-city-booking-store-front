@@ -30,6 +30,7 @@ import BookingCard from "~/components/user/BookingCard.vue";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import Fuse from "fuse.js";
 import BookingsFilter from "~/components/user/bookings/BookingsFilter.vue";
+import { useEventStore } from "~~/stores/event.js";
 
 const bookingsStore = useBookingStore();
 await bookingsStore.fetchBookings();
@@ -90,6 +91,7 @@ if (
   await loadBundle({ include: ["events"] });
 }
 
+//search
 const searchQuery = ref("");
 const searchOptions = {
   keys: [
@@ -106,6 +108,7 @@ const searchOptions = {
   ignoreLocation: true,
 };
 
+//filter and sorting
 const filters = ref(null);
 
 function setFilter(filter) {
@@ -174,25 +177,57 @@ function sortBookings(bookings) {
       sortedBookings.sort((a, b) => b.priceEur - a.priceEur);
       break;
     case "date-asc":
-      sortedBookings.sort((a, b) => a.timeBegin - b.timeBegin);
+      sortedBookings.sort((a, b) => {
+        const aTime =
+          a.timeBegin != null
+            ? a.timeBegin
+            : a.eventTime && a.eventTime[0] != null
+              ? a.eventTime[0]
+              : null;
+        const bTime =
+          b.timeBegin != null
+            ? b.timeBegin
+            : b.eventTime && b.eventTime[0] != null
+              ? b.eventTime[0]
+              : null;
+        if (aTime == null && bTime == null) return 0;
+        if (aTime == null) return 1;
+        if (bTime == null) return -1;
+        return aTime - bTime;
+      });
       break;
     case "date-desc":
-      sortedBookings.sort((a, b) => b.timeBegin - a.timeBegin);
+      sortedBookings.sort((a, b) => {
+        const aTime =
+          a.timeBegin != null
+            ? a.timeBegin
+            : a.eventTime && a.eventTime[0] != null
+              ? a.eventTime[0]
+              : null;
+        const bTime =
+          b.timeBegin != null
+            ? b.timeBegin
+            : b.eventTime && b.eventTime[0] != null
+              ? b.eventTime[0]
+              : null;
+        if (aTime == null && bTime == null) return 0;
+        if (aTime == null) return 1;
+        if (bTime == null) return -1;
+        return bTime - aTime;
+      });
       break;
     case "title-asc":
-      sortedBookings.sort(
-        (a, b) =>
-            a.bookableItems[0]._bookableUsed.title.localeCompare(
-                b.bookableItems[0]._bookableUsed.title,
-            ),
+      sortedBookings.sort((a, b) =>
+        a.bookableItems[0]._bookableUsed.title.localeCompare(
+          b.bookableItems[0]._bookableUsed.title,
+        ),
       );
       break;
     case "title-desc":
-      sortedBookings.sort(
-        (a, b) =>
-            b.bookableItems[0]._bookableUsed.title.localeCompare(
-                a.bookableItems[0]._bookableUsed.title,
-            ),
+      sortedBookings.sort((a, b) =>
+        b.bookableItems[0]._bookableUsed.title.localeCompare(
+          a.bookableItems[0]._bookableUsed.title,
+        ),
       );
       break;
 
@@ -201,6 +236,13 @@ function sortBookings(bookings) {
   }
   return sortedBookings;
 }
+
+//events
+/*async function getEventTime(eventId) {
+  //toDo - build function to read event time from booking (upcoming)
+  console.log("want to get event time for eventId ", eventId);
+  return null;
+}*/
 </script>
 
 <style scoped></style>
