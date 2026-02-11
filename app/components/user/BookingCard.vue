@@ -116,6 +116,17 @@ const bookingPrice = computed(() => {
   return "0,00 €";
 });
 
+//events
+const eventId = computed(() => {
+  return props.booking.bookableItems[0]?._bookableUsed.eventId || null;
+});
+const event = computed(() => {
+  if (!eventId.value) {
+    return null;
+  }
+  return eventStore.getEventById(eventId.value);
+});
+
 // helpers
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString("de-DE", {
@@ -136,16 +147,6 @@ const formatPrice = (price) => {
 
 const bookingCardClasses =
   "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md rounded-lg p-4 my-2 hover:shadow-lg transition-shadow";
-
-const eventId = computed(() => {
-  return props.booking.bookableItems[0]?._bookableUsed.eventId || null;
-});
-const event = computed(() => {
-  if (!eventId.value) {
-    return null;
-  }
-  return eventStore.getEventById(eventId.value);
-});
 
 function openDetails() {
   const router = useRouter();
