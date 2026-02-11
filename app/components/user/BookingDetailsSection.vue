@@ -80,6 +80,8 @@
         :key="i"
         :attachment="attachment"
         is-payment-document
+        :booking-id="booking.id"
+        :tenant-id="booking.tenantId"
       />
     </div>
 

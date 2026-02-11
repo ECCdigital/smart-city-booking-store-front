@@ -7,7 +7,9 @@
       {{ attachment.title }}
       <p v-if="!isPaymentDocument" class="text-sm">
         {{ attachmentType }} für
-        <span class="italic">{{ getBookableTitle(attachment.bookableId) }}</span>
+        <span class="italic">{{
+          getBookableTitle(attachment.bookableId)
+        }}</span>
       </p>
       <div v-if="!isPaymentDocument" class="mt-1 flex items-center">
         Akzeptiert:
@@ -23,7 +25,7 @@
         />
       </div>
       <div v-if="isPaymentDocument" class="mt-2 text-sm flex items-center">
-        <UIcon name="i-lucide-calendar-clock" class="size-3 mr-1"/>
+        <UIcon name="i-lucide-calendar-clock" class="size-3 mr-1" />
         Erstellt: {{ formatDate(attachment.timeCreated) }}
       </div>
     </div>
@@ -35,24 +37,36 @@
         class="text-gray-700 dark:text-gray-300"
         :href="!isPaymentDocument ? attachment.url : ''"
         target="_blank"
+        @click="downloadAttachment()"
       />
       <!--toDo - check functionality!!!!!!!!!!!!!!!!!  -->
     </div>
   </div>
+  {{ attachment }}
 </template>
 <script setup>
+import { useBookings } from "~/composables/api/useBookings.js";
+
 const props = defineProps({
   attachment: {
     type: Object,
     required: true,
   },
-  isPaymentDocument:{
+  isPaymentDocument: {
     type: Boolean,
     default: false,
   },
   bookables: {
     type: Array,
     default: () => [],
+  },
+  bookingId: {
+    type: String,
+    default: null,
+  },
+  tenantId: {
+    type: String,
+    default: null,
   },
 });
 
@@ -78,7 +92,6 @@ const attachmentType = computed(() => {
 });
 
 const formatDate = (dateString) => {
-  console.log(dateString)
   return new Date(dateString).toLocaleDateString("de-DE", {
     day: "2-digit",
     month: "2-digit",
@@ -89,12 +102,48 @@ const formatDate = (dateString) => {
 };
 
 function getBookableTitle(bookableId) {
-  if(!props.bookables || props.bookables.length === 0) {
+  if (!props.bookables || props.bookables.length === 0) {
     return "Unbekanntes Buchungsobjekt";
   }
-  return props.bookables.find(
-    (bookable) => bookable.id === bookableId
-  ).title
+  return props.bookables.find((bookable) => bookable.id === bookableId).title;
+}
+
+async function downloadAttachment() {
+  if (!props.isPaymentDocument) {
+    return;
+  }
+  if (props.bookingId && props.tenantId) {
+    let blob = null;
+    if (props.attachment.type === "receipt") {
+      blob = await useBookings().getBookingReceipt(
+        props.tenantId,
+        props.bookingId,
+        props.attachment.title,
+      );
+    } else if (props.attachment.type === "invoice") {
+      blob = await useBookings().getBookingInvoice(
+        props.tenantId,
+        props.bookingId,
+        props.attachment.title,
+      );
+    }
+
+    if (!blob) {
+      return;
+    }
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", props.attachment.title);
+    document.body.appendChild(link);
+    link.click();
+  } else {
+    const notification = useNotification();
+    notification.error(
+      "Das Dokument konnte nicht heruntergeladen werden.",
+      "Download fehlgeschlagen",
+    );
+  }
 }
 </script>
 
