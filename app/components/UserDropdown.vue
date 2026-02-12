@@ -49,7 +49,7 @@ const items = [
       label: "Rechnungen",
       icon: "i-lucide-wallet-cards",
       to: { path: "/user/invoices" },
-      //disabled: true,
+      disabled: true,
     },
     {
       label: "Favoriten",
