@@ -25,18 +25,20 @@
   </div>
 </template>
 <script setup>
-import { useBookingStore } from "~~/stores/bookings.js";
 import BookingCard from "~/components/user/BookingCard.vue";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import Fuse from "fuse.js";
 import BookingsFilter from "~/components/user/bookings/BookingsFilter.vue";
-import { useEventStore } from "~~/stores/event.js";
 
-const bookingsStore = useBookingStore();
-await bookingsStore.fetchBookings();
+const props = defineProps({
+  bookings: {
+    type: Array,
+    required: false,
+    default: null,
+  },
+});
 
-const allBookings = computed(() => {
-  return bookingsStore.getBookings
+const allBookings = computed(() => props.bookings
     .sort((a, b) => b.timeCreated - a.timeCreated)
     .map((b) => ({
       ...b,
@@ -53,8 +55,8 @@ const allBookings = computed(() => {
           ? "Bestätigt"
           : "Ausstehend",
       payedLabel: b.isPayed ? "bezahlt" : "nicht bezahlt",
-    }));
-});
+    }))
+);
 const searchedBookings = computed(() => {
   if (!searchQuery.value) {
     return allBookings.value;
