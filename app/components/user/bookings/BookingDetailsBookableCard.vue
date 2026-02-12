@@ -3,15 +3,26 @@
     <div class="md:flex justify-between text-gray-700 dark:text-gray-300">
       <p class="font-bold flex items-center justify-between md:justify-start">
         <span
-          :class="bookable._bookableUsed.title.length > 100 ? 'text-sm' : ''"
-          >{{ bookable._bookableUsed.title }}</span
+          :class="bookableTitle.length > 100 ? 'text-sm' : ''"
+          >{{ bookableTitle }}</span
         >
-        <UButton
-          icon="i-lucide-square-arrow-out-up-right"
-          variant="soft"
-          class="text-gray-700 dark:text-gray-300 cursor-pointer"
-          @click="goToBookable(bookable.bookableId)"
-        />
+        <UTooltip text="Zum Buchungsobjekt gehen" class="ml-2">
+          <UButton
+              icon="i-lucide-square-arrow-out-up-right"
+              variant="soft"
+              class="text-gray-700 dark:text-gray-300 cursor-pointer"
+              @click="goToBookable(bookable.bookableId)"
+          />
+        </UTooltip>
+        <UTooltip v-if="eventId" text="Zum Event gehen" class="ml-2">
+          <UButton
+              icon="i-lucide-calendar"
+              variant="soft"
+              class="text-gray-700 dark:text-gray-300 cursor-pointer"
+              @click="goToEvent()"
+          />
+        </UTooltip>
+
       </p>
       <div class="hidden md:block">
         <span class="text-sm mr-1">{{ bookable.amount }}x</span>
@@ -37,6 +48,9 @@ const props = defineProps({
   },
 });
 
+const bookableTitle = computed(() => props.bookable._bookableUsed.title)
+const eventId = computed(() => props.bookable._bookableUsed.eventId);
+
 const bookingPrice = computed(() => {
   if (props.bookable.userGrossPriceEur > 0) {
     return formatPrice(props.bookable.userGrossPriceEur);
@@ -54,7 +68,15 @@ const formatPrice = (price) => {
 function goToBookable(bookableId) {
   const router = useRouter();
   const routeData = router.resolve({
-    path: `bookables/${bookableId}`,
+    path: `/bookables/${bookableId}`,
+    query: {},
+  });
+  window.open(routeData.href, "_blank");
+}
+function goToEvent() {
+  const router = useRouter();
+  const routeData = router.resolve({
+    path: `/events/${eventId.value}`,
     query: {},
   });
   window.open(routeData.href, "_blank");
