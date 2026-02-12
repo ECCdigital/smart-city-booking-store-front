@@ -9,7 +9,7 @@
         :to="item.disabled ? '' : item.value"
       >
         <UIcon :name="item.icon" class="mr-3 mt-1" />
-        {{ item.label }}-{{ item.disabled }}
+        {{ item.label }}
       </NuxtLink>
     </div>
   </div>
