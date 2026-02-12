@@ -1,7 +1,6 @@
 <template>
   <div>
     <BookingSection v-if="bookings" :bookings="bookings"/>
-    {{bookings.length}}
   </div>
 </template>
 <script setup>

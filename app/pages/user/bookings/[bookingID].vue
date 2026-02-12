@@ -14,13 +14,17 @@ definePageMeta({
 
 });
 
-const route = useRoute()
 const bookingStore = useBookingStore()
+await bookingStore.fetchBookings();
 
+const route = useRoute()
 const routeParams = computed(() => route.params)
 const bookingID = computed(() => routeParams.value.bookingID)
 
 const booking = computed(() => {
+  if(!bookingID.value) {
+    return null
+  }
   return bookingStore.getBookingById(bookingID.value)
 })
 </script>

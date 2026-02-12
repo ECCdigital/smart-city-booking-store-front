@@ -1,5 +1,5 @@
 <template>
-  <div class="" style="max-width: 800px">
+  <div class="mb-15" style="max-width: 800px">
     <UButton
       label="Zurück"
       icon="i-lucide-arrow-left"
@@ -42,6 +42,7 @@
     </div>
 
     <!-- bookable information  -->
+
     <div class="mb-5">
       <p class="font-medium">Gebuchte Objekte</p>
       <BookingDetailsBookableCard
@@ -104,9 +105,9 @@
   </div>
 </template>
 <script setup>
-import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import { useTenantStore } from "~~/stores/tenant.js";
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
+import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
 
@@ -117,9 +118,15 @@ const props = defineProps({
   },
 });
 
+const tenantsStore = useTenantStore();
 const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.booking.tenantId).name;
+  const tenant = tenantsStore.getTenantById(props.booking.tenantId);
+  if(tenant) {
+    return tenant.name;
+  }
+  return "Unbekannt";
 });
+
 const bookingTimeSlot = computed(() => {
   if (props.booking.timeBegin && props.booking.timeEnd) {
     const beginn = formatDate(props.booking.timeBegin);
@@ -128,6 +135,7 @@ const bookingTimeSlot = computed(() => {
   }
   return null;
 });
+
 const bookingPrice = computed(() => {
   if (props.booking.priceEur > 0) {
     return formatPrice(props.booking.priceEur);
@@ -219,6 +227,7 @@ const formatDate = (dateString) => {
     minute: "2-digit",
   });
 };
+
 const formatPrice = (price) => {
   return new Intl.NumberFormat("de-DE", {
     style: "currency",
