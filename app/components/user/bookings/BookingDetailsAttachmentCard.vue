@@ -39,10 +39,8 @@
         target="_blank"
         @click="downloadAttachment()"
       />
-      <!--toDo - check functionality!!!!!!!!!!!!!!!!!  -->
     </div>
   </div>
-  {{ attachment }}
 </template>
 <script setup>
 import { useBookings } from "~/composables/api/useBookings.js";
