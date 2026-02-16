@@ -35,7 +35,7 @@
   </div>
 </template>
 <script setup>
-import {computed} from "vue";
+import { computed } from "vue";
 
 const props = defineProps({
   password: {
@@ -45,7 +45,6 @@ const props = defineProps({
 });
 
 const t = useI18n().t;
-
 
 function checkStrength(str) {
   const requirements = [

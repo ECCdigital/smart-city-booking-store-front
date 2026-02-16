@@ -1,25 +1,25 @@
 <template>
   <UFormField :label="label" :required="isRequired">
     <UInput
-        v-model="password"
-        :type="showPassword ? 'text' : 'password'"
-        :ui="{ trailing: 'pe-1' }"
-        placeholder="••••••••"
-        variant="outline"
-        class=""
-        :class="inputStyleClasses"
-        :required="isRequired"
+      v-model="password"
+      :type="showPassword ? 'text' : 'password'"
+      :ui="{ trailing: 'pe-1' }"
+      placeholder="••••••••"
+      variant="outline"
+      class=""
+      :class="inputStyleClasses"
+      :required="isRequired"
     >
       <template #trailing>
         <UButton
-            color="neutral"
-            variant="link"
-            size="sm"
-            :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-            :aria-label="showPassword ? 'Hide password' : 'Show password'"
-            :aria-pressed="showPassword"
-            aria-controls="password"
-            @click="showPassword = !showPassword"
+          color="neutral"
+          variant="link"
+          size="sm"
+          :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+          :aria-label="showPassword ? 'Hide password' : 'Show password'"
+          :aria-pressed="showPassword"
+          aria-controls="password"
+          @click="showPassword = !showPassword"
         />
       </template>
     </UInput>
@@ -47,6 +47,4 @@ const props = defineProps({
 
 const showPassword = ref(false);
 </script>
-<style scoped>
-
-</style>
+<style scoped></style>

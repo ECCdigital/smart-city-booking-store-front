@@ -27,8 +27,9 @@ const handleResetPassword = async () => {
 
     // Token aus Query oder Route (z. B. /password/reset?token=XYZ)
     const token = route.query.token as string;
+    console.log("Resetting password with token:", token);
 
-    await resetPassword({ token, password: form.value.password });
+    //await resetPassword({ token, password: form.value.password });
     await navigateTo("/login");
   } finally {
     loading.value = false;

@@ -4,36 +4,22 @@
 
     <div>
       <p class="mt-2 mb-5">
-        Verwalten Sie Ihre persönlichen Angaben. Sie haben die Möglichkeit, Ihr
-        Passwort zu ändern oder Ihren Account dauerhaft zu löschen.
+        Verwalten Sie Ihre persönlichen Angaben. Sie haben außerdem die Möglichkeit, Ihr
+        Passwort zu ändern.
       </p>
 
       <!-- Personal Information Section -->
       <div class="mb-10 space-y-5">
         <div class="flex justify-between md:justify-normal mb-2 md:mb-5">
           <h3 class="text-xl font-bold">Persönliche Angaben</h3>
-          <UTooltip
-            v-if="!enableEditingPersonalInfo"
-            text="Angaben ändern"
-            class="ml-2"
-          >
             <UButton
+                v-if="!enableEditingPersonalInfo"
               icon="i-lucide-edit"
               label="Bearbeiten"
               color="neutral"
               variant="soft"
               @click="() => (enableEditingPersonalInfo = true)"
             />
-          </UTooltip>
-          <UTooltip v-else text="Änderungen speichern" class="ml-2">
-            <UButton
-              icon="i-lucide-save"
-              label="Speichern"
-              color="primary"
-              variant="solid"
-              @click="saveUpdatedUser()"
-            />
-          </UTooltip>
         </div>
         <div class="md:flex space-y-2 md:space-y-0">
           <SettingsInputField
@@ -64,34 +50,29 @@
             class="basis-1/2"
           />
         </div>
+        <UButton
+            v-if="enableEditingPersonalInfo"
+            icon="i-lucide-save"
+            label="Änderungen speichern"
+            color="primary"
+            variant="solid"
+            class="mt-2 md:mt-5"
+            @click="saveUpdatedUser()"
+        />
       </div>
 
       <!-- Contact Information Section -->
       <div class="mb-10 space-y-5">
         <div class="flex justify-between md:justify-normal mb-2 md:mb-5">
           <h3 class="text-xl font-bold">Kontaktdaten</h3>
-          <UTooltip
-            v-if="!enableEditingContactInfo"
-            text="Angaben ändern"
-            class="ml-2"
-          >
             <UButton
+                v-if="!enableEditingContactInfo"
               icon="i-lucide-edit"
               label="Bearbeiten"
               color="neutral"
               variant="soft"
               @click="() => (enableEditingContactInfo = true)"
             />
-          </UTooltip>
-          <UTooltip v-else text="Änderungen speichern" class="ml-2">
-            <UButton
-              icon="i-lucide-save"
-              label="Speichern"
-              color="primary"
-              variant="solid"
-              @click="saveUpdatedUser()"
-            />
-          </UTooltip>
         </div>
         <div class="md:flex space-y-2 md:space-y-0 my-3">
           <SettingsInputField
@@ -150,13 +131,84 @@
             @update="updateUser"
           />
         </div>
+        <UButton
+            v-if="enableEditingContactInfo"
+            icon="i-lucide-save"
+            label="Änderungen speichern"
+            color="primary"
+            variant="solid"
+            class="mt-2 md:mt-5"
+            @click="saveUpdatedUser()"
+        />
+      </div>
+
+      <!-- Security Information Section -->
+      <div class="mb-10 space-y-5">
+        <div class="flex justify-between md:justify-normal mb-2 md:mb-5">
+          <h3 class="text-xl font-bold">Sicherheit</h3>
+          <UButton
+            v-if="!enableEditingPassword"
+            icon="i-lucide-edit"
+            label="Passwort ändern"
+            color="neutral"
+            variant="soft"
+            class="ml-2"
+            @click="() => (enableEditingPassword = true)"
+          />
+        </div>
+        <div class="flex basis-1/2 mb-5 md:mb-2">
+          Account verifiziert?
+          <UIcon
+            v-if="currentUser.isVerified"
+            name="i-lucide-square-check-big"
+            class="ml-2 mt-1 text-green-600 dark:text-green-500"
+          />
+          <UIcon
+            v-else
+            name="i-lucide-square"
+            class="ml-2 mt-1 text-red-600 dark:text-red-500"
+          />
+        </div>
+        <div
+          v-if="enableEditingPassword"
+          class="md:flex space-y-2 md:space-y-0 my-3"
+        >
+          <div class="basis-1/2 mb-5 md:mb-2">
+            <PasswordInput
+              v-model="newPassword"
+              label="Neues Passwort"
+              input-style-classes="w-full md:w-[70%]"
+            />
+            <PasswordProgress
+              :password="newPassword"
+              class="mt-1 w-full md:w-[70%]"
+            />
+          </div>
+          <PasswordInput
+            v-model="repeatedPassword"
+            label="Neues Passwort (Wiederholung)"
+            input-style-classes="w-full md:w-[70%]"
+            class="basis-1/2"
+          />
+        </div>
+        <UButton
+            v-if="enableEditingPassword"
+            icon="i-lucide-save"
+            label="Speichern"
+            color="primary"
+            variant="solid"
+            class="mt-2 md:mt-3"
+            @click="changePassword()"
+        />
       </div>
     </div>
   </div>
 </template>
 <script setup>
 import SettingsInputField from "~/components/user/settings/SettingsInputField.vue";
-import {useAuthStore} from "~~/stores/auth.js";
+import { useAuthStore } from "~~/stores/auth.js";
+import PasswordInput from "~/components/auth/PasswordInput.vue";
+import PasswordProgress from "~/components/auth/PasswordProgress.vue";
 
 const props = defineProps({
   user: {
@@ -170,8 +222,12 @@ const notification = useNotification();
 
 const currentUser = ref(JSON.parse(JSON.stringify(props.user)));
 
+const newPassword = ref("");
+const repeatedPassword = ref("");
+
 const enableEditingPersonalInfo = ref(false);
 const enableEditingContactInfo = ref(false);
+const enableEditingPassword = ref(false);
 
 // helpers
 const formatDate = (dateString) => {
@@ -190,12 +246,29 @@ function updateUser({ updatedField, updatedValue }) {
 async function saveUpdatedUser() {
   await authStore.updateUser(currentUser.value);
   notification.success(
-      "Ihre Änderungen wurden erfolgreich gespeichert.",
-      "Änderungen gespeichert",
+    "Ihre Änderungen wurden erfolgreich gespeichert.",
+    "Änderungen gespeichert",
   );
 
   enableEditingPersonalInfo.value = false;
   enableEditingContactInfo.value = false;
+}
+function changePassword() {
+  if (newPassword.value !== repeatedPassword.value) {
+    notification.error(
+      "Die eingegebenen Passwörter stimmen nicht überein.",
+      "Passwortänderung fehlgeschlagen",
+    );
+    return;
+  }
+  authStore.changePassword(currentUser.value.id, newPassword.value);
+  notification.success(
+    "Ihr Passwort wurde erfolgreich geändert.",
+    "Passwort geändert",
+  );
+  enableEditingPassword.value = false;
+  newPassword.value = "";
+  repeatedPassword.value = "";
 }
 </script>
 <style scoped></style>
