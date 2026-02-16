@@ -33,7 +33,7 @@ if (!event.value) {
   <div v-else class="text-center mt-10">
     <UIcon size="48" name="i-lucide-calendar-off" class="text-gray-400 mb-4" />
     <p class="text-gray-500">{{ $t("events.noEvent") }}</p>
-    <UButton :label="$t('common.back')" to="/locations" class="mt-4" />
+    <UButton :label="$t('common.back')" to="/events" class="mt-4" />
   </div>
 </template>
 
