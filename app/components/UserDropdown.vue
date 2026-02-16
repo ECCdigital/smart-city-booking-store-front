@@ -23,7 +23,9 @@ const nameColor = computed(() => {
 const user = computed(() => authStore.getUser);
 
 const userName = computed(() => {
-  return user.value?.firstName + " " + user.value?.lastName;
+  const fullname = user.value?.firstName + " " + user.value?.lastName;
+  const suffix = fullname.length > 20 ? "..." : "";
+  return fullname.slice(0, 20)+suffix;
 });
 
 const items = [
