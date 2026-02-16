@@ -1,21 +1,20 @@
 <template>
-  <div class="md:container bg-neutral-50 dark:bg-gray-950 md:flex h-[60vh] pt-7">
-    <div class="px-5">
-        <h2 class="text-2xl font-bold">Einstellungen</h2>
-        {{ user }}
-
-    </div>
+  <div>
+    <SettingsSection v-if="user" :user="user"/>
   </div>
 </template>
 <script setup>
-import {useAuthStore} from "~~/stores/auth.js";
+import SettingsSection from "~/components/user/settings/SettingsSection.vue";
+import { useAuthStore } from "~~/stores/auth.js";
 
 definePageMeta({
   name: "settings",
-  layout: "catalog",
+  layout: "settings",
+  middleware: ["user-auth"],
 });
 
-const user = computed(() => useAuthStore().getUser);
+const authStore = useAuthStore();
+const user = computed(() => authStore.getUser);
 </script>
 <style scoped>
 

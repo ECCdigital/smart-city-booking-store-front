@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import {useUsers} from "~/composables/api/useUsers.js";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -92,6 +93,18 @@ export const useAuthStore = defineStore("auth", {
     invalidateAuth() {
       this.clearAuthPayload();
       this.authChecked = false;
+    },
+    async updateUser(user) {
+      const { updateUser } = useUsers();
+      try {
+        await updateUser(user);
+
+        this.user = user;
+        return this.user;
+      } catch (error) {
+        console.error("Error updating user in store:", error);
+        this.user = null;
+      }
     },
   },
   persist: {
