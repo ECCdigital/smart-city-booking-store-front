@@ -19,7 +19,7 @@
     </div>
 
     <div class="bg-neutral-50 dark:bg-gray-950">
-      <LatestEventsArea v-if="allEvents" :items="allEvents" />
+      <LatestEventsArea v-if="allEvents.length > 0" :items="allEvents" />
     </div>
   </div>
 </template>
