@@ -23,10 +23,10 @@ const userNavigation = computed(() => [
     disabled: false,
   },
   {
-    value: "/settings",
-    label: "Sicherheit",
-    icon: "i-lucide-key-round",
-    disabled: true,
+    value: "/settings/appearance",
+    label: "Darstellung",
+    icon: "i-lucide-paintbrush",
+    disabled: false,
   },
 ]);
 
