@@ -2,9 +2,9 @@
   <div
       class="md:basis-1/6 border border-gray-200 rounded m-2 md:m-0 md:p-2 md:space-y-1 flex md:block"
   >
-    <div v-for="(item, i) in userNavigation" :key="i">
+    <div v-for="(item, i) in userNavigation" :key="i" class="basis-1/2 md:basis-full  flex w-full">
       <NuxtLink
-          class="basis-1/2 md:basis-full flex rounded p-2 w-full"
+          class="flex rounded p-2 w-full justify-center md:justify-start items-center text-center md:text-left"
           :class="getLinkClasses(item)"
           :to="item.disabled ? '' : item.value"
       >

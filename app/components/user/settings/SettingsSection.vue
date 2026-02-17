@@ -1,10 +1,12 @@
 <template>
-  <div class="container-md pb-15">
+  <div class="w-full container-sm">
+
     <h1 class="text-2xl font-bold">Einstellungen</h1>
 
     <div>
       <p class="mt-2 mb-5">
-        Verwalten Sie Ihre persönlichen Angaben. Sie haben außerdem die Möglichkeit, Ihr
+        Verwalten Sie Ihre persönlichen Angaben.
+        Sie haben außerdem die Möglichkeit, Ihr
         Passwort zu ändern.
       </p>
 

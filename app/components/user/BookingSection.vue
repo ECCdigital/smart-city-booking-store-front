@@ -1,7 +1,7 @@
 <template>
   <div class="w-full">
     <div class="md:flex justify-between items-center w-full">
-      <h2 class="text-2xl font-bold">Ihre Buchungen</h2>
+      <h1 class="text-2xl font-bold">Ihre Buchungen</h1>
       <div class="w-full md:w-[40%] flex">
         <UInput
           v-model="searchQuery"
