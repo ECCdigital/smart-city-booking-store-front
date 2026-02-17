@@ -17,10 +17,28 @@
 
     <div class="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6">
       <BookingCard
-        v-for="booking in filteredBookings"
+        v-for="booking in paginatedBookings"
         :key="booking.id"
         :booking="booking"
       />
+    </div>
+
+    <div class="flex justify-center mt-2 mb-10">
+      <UPagination
+        v-model:page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="filteredBookings.length"
+        :sibling-count="1"
+        show-edges
+      >
+        <template #first>
+          <span class="hidden" />
+        </template>
+
+        <template #last>
+          <span class="hidden" />
+        </template>
+      </UPagination>
     </div>
   </div>
 </template>
@@ -38,7 +56,8 @@ const props = defineProps({
   },
 });
 
-const allBookings = computed(() => props.bookings
+const allBookings = computed(() =>
+  props.bookings
     .sort((a, b) => b.timeCreated - a.timeCreated)
     .map((b) => ({
       ...b,
@@ -55,7 +74,7 @@ const allBookings = computed(() => props.bookings
           ? "Bestätigt"
           : "Ausstehend",
       payedLabel: b.isPayed ? "bezahlt" : "nicht bezahlt",
-    }))
+    })),
 );
 const searchedBookings = computed(() => {
   if (!searchQuery.value) {
@@ -82,6 +101,12 @@ const filteredBookings = computed(() => {
   return bookings;
 });
 
+const paginatedBookings = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return filteredBookings.value.slice(start, end);
+});
+
 const { loadBundle } = useCatalogBundle();
 if (
   allBookings.value.some((booking) => {
@@ -92,6 +117,10 @@ if (
 ) {
   await loadBundle({ include: ["events"] });
 }
+
+//pagination
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
 
 //search
 const searchQuery = ref("");
