@@ -1,6 +1,6 @@
 <template>
   <div class="container-md pb-15">
-    <h2 class="text-2xl font-bold">Einstellungen</h2>
+    <h1 class="text-2xl font-bold">Einstellungen</h1>
 
     <div>
       <p class="mt-2 mb-5">
