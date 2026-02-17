@@ -26,14 +26,6 @@
         />
 
         <UserDropdown v-if="isAuthenticated" />
-        <UButton
-          class="pl-2 pt-1"
-          size="xl"
-          :icon="!isDark ? 'i-lucide-sun' : 'i-lucide-moon'"
-          variant="ghost"
-          :style="{ color: contrastToSecondary }"
-          @click="isDark = !isDark"
-        />
       </div>
     </ClientOnly>
   </div>
@@ -66,16 +58,6 @@ const { contrastToSecondary } = useContrastColor();
 const { isGreaterThanSm } = useBreakpointCheck();
 
 const barClass = computed(() => ["bg-[var(--color-secondary)]"]);
-
-const colorMode = useColorMode();
-const isDark = computed({
-  get() {
-    return colorMode.value === "dark";
-  },
-  set(_isDark) {
-    colorMode.preference = _isDark ? "dark" : "light";
-  },
-});
 
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isLoggedIn);
