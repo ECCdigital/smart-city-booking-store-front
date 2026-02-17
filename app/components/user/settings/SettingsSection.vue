@@ -40,6 +40,7 @@
             @update="updateUser"
           />
         </div>
+        <!--
         <div class="md:flex space-y-2 md:space-y-0 my-3">
           <SettingsInputField
             field-id="created"
@@ -50,6 +51,7 @@
             class="basis-1/2"
           />
         </div>
+        -->
         <UButton
             v-if="enableEditingPersonalInfo"
             icon="i-lucide-save"
