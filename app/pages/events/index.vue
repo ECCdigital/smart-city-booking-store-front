@@ -11,7 +11,7 @@ const eventStore = useEventStore();
 await loadBundle({ include: ["events"] });
 
 const allEvents = computed(() => {
-  return []//eventStore.getEvents;
+  return eventStore.getEvents;
 });
 
 </script>
