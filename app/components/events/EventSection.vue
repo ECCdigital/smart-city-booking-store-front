@@ -29,18 +29,18 @@
             @sort="setSortedQueryParams"
         />
         <FilterButton
-            v-if="searchedEvents.length > 0"
-            v-model:is-initailized="searchIsInitialized"
-            :bookables="searchedEvents"
-            :include-non-suitable="query.inclNoSuitable"
-            :cat="query.cat"
-            :cities="query.cities"
-            :price="query.price"
-            :only-public-events="query.pubEv"
-            :only-registration-needed-events="query.regEv"
-            class="lg:hidden"
-            is-event
-            @filter="setFilterQueryParams"
+          v-if="searchedEvents.length > 0"
+          v-model:is-initailized="searchIsInitialized"
+          :bookables="searchedEvents"
+          :include-non-suitable="query.inclNoSuitable"
+          :categories="query.cat"
+          :cities="query.cities"
+          :price="query.price"
+          :only-public-events="query.pubEv"
+          :only-registration-needed-events="query.regEv"
+          class="lg:hidden"
+          is-event
+          @filter="setFilterQueryParams"
         />
       </div>
     </div>

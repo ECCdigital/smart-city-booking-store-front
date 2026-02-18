@@ -30,8 +30,9 @@
           :cities="cities"
           :price="price"
           :only-public-events="onlyPublicEvents"
-          :only-registered-events="onlyRegistrationNeededEvents"
+          :only-registration-needed-events="onlyRegistrationNeededEvents"
           use-as-dialog
+          :is-event="isEvent"
           @filter="onFilter"
         />
       </UCard>
@@ -83,8 +84,8 @@ const isOpen = ref(false);
 
 const hasFilters = computed(() => {
   const route = useRoute();
-  return route.query && Object.keys(route.query).length > 0;
-
+  const keysToCheck = ["inclNoSuitable", "pubEv", "regEv", "cities", "categories", "price"];
+  return route.query && keysToCheck.some(key => key in route.query);
 })
 
 function onFilter(criteria) {
