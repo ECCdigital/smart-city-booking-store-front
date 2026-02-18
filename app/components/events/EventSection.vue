@@ -44,14 +44,6 @@
         />
       </div>
     </div>
-    <div v-if="!sortedEvents.length" class="text-center mt-10">
-      <UIcon
-          size="48"
-          name="i-lucide-calendar-off"
-          class="text-gray-400 mb-4"
-      />
-      <p class="text-gray-500">{{ $t("events.noEvents") }}</p>
-    </div>
 
     <div class="flex flex-row lg:my-5 m-5">
       <div class="lg:basis-1/4 hidden lg:block">
@@ -71,6 +63,14 @@
       </div>
 
       <div class="basis-full lg:basis-3/4">
+        <div v-if="!sortedEvents.length" class="text-center mt-10">
+          <UIcon
+            size="48"
+            name="i-lucide-calendar-off"
+            class="text-gray-400 mb-4"
+          />
+          <p class="text-gray-500">{{ $t("events.noEvents") }}</p>
+        </div>
         <ResultsList
             v-if="sortedEvents.length > 0"
             :bookables="sortedEvents"

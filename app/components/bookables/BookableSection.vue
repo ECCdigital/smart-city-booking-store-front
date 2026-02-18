@@ -43,11 +43,6 @@
       </div>
     </div>
 
-    <div v-if="!sortedResources.length" class="text-center mt-10">
-      <UIcon size="48" name="i-lucide-monitor-off" class="text-gray-400 mb-4" />
-      <p class="text-gray-500">{{ $t("resources.noResources") }}</p>
-    </div>
-
     <div class="flex flex-row lg:my-5 m-5">
       <div class="lg:basis-1/4 hidden lg:block">
         <FilterArea
@@ -66,6 +61,14 @@
       </div>
 
       <div class="basis-full lg:basis-3/4">
+        <div v-if="!sortedResources.length" class="text-center mt-10">
+          <UIcon
+            size="48"
+            name="i-lucide-monitor-off"
+            class="text-gray-400 mb-4"
+          />
+          <p class="text-gray-500">{{ $t("resources.noResources") }}</p>
+        </div>
         <ResultsList
             v-if="sortedResources.length > 0"
             :bookables="sortedResources"
