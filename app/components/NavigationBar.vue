@@ -1,6 +1,11 @@
 <template>
   <div :class="barClass" class="flex justify-between">
     <div class="flex">
+      <UTooltip text="Zurück zur Startseite">
+        <NavigationLink
+          :tab="{ value: '/', icon: 'i-lucide-home', label: '' }"
+        />
+      </UTooltip>
       <div v-for="(tab, k) in tabs" :key="k">
         <NavigationLink :tab="tab" />
       </div>
@@ -59,9 +64,7 @@ const tabs = computed(() => [
   },
 ]);
 
-
 const { contrastToSecondary } = useContrastColor();
-
 
 const { isGreaterThanSm } = useBreakpointCheck();
 

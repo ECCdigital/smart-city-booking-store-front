@@ -17,7 +17,7 @@
         </div>
 
       </div>
-      <div class="content-center">
+      <div class="flex md:block justify-end md:content-center">
         <UTooltip
             :disabled="ticketsAvailable"
             text="Dieser Tickettyp ist ausverkauft."

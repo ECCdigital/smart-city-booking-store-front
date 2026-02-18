@@ -10,11 +10,11 @@
       <p class="my-4 font-bold">Ergebnisse filtern</p>
       <UTooltip v-if="!useAsDialog" text="Filter zurücksetzen">
         <UButton
-          v-if="!useAsDialog && filterIsActive"
+          v-if="!useAsDialog && isActive"
           icon="i-lucide-trash"
           variant="ghost"
           class="rounded-full py-2 px-3"
-          :class="filterIsActive ? '' : ''"
+          :class="isActive ? '' : ''"
           @click="removeFilter"
         />
       </UTooltip>
@@ -149,7 +149,7 @@
 
     <div v-if="useAsDialog" class="flex justify-between">
       <UButton
-        v-if="filterIsActive"
+        v-if="isActive"
         label="Filter entfernen"
         icon="i-lucide-trash"
         color="neutral"
@@ -159,7 +159,7 @@
       />
       <div v-else class="flex-1" />
       <UButton
-        label="Filtern"
+        label="Filter anwenden"
         icon="i-lucide-funnel"
         color="neutral"
         variant="soft"
@@ -170,6 +170,8 @@
   </div>
 </template>
 <script setup>
+import {useRoute} from "#imports";
+
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
   bookables: {
@@ -212,7 +214,11 @@ const props = defineProps({
 const emit = defineEmits(["filter"]);
 
 //Filter Variables
-const filterIsActive = ref(false);
+const isActive = computed(() => {
+  const route = useRoute();
+  const keysToCheck = ["inclNoSuitable", "pubEv", "regEv", "cities", "categories", "price"];
+  return route.query && keysToCheck.some(key => key in route.query);
+})
 const _includeNonSuitable = ref(props.includeNonSuitable);
 const _cities = ref(props.cities);
 const _onlyPublicEvents = ref(props.onlyPublicEvents);
@@ -441,7 +447,6 @@ const distanceRange = ref([0, 100]); //in km //toDo - implementieren!!!!!!!!!
 const _distanceRange = ref([distanceRange.value[0], distanceRange.value[1]]);
 
 function instantFilter() {
-  filterIsActive.value = true;
   if (!props.useAsDialog) {
     onFilter();
   }
