@@ -44,9 +44,8 @@
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
-      <div class="lg:basis-1/4 hidden lg:block">
+      <div v-if="searchedResources.length > 0" class="lg:basis-1/4 hidden lg:block">
         <FilterArea
-          v-if="searchedResources.length > 0"
           :key="filterResetKey"
           v-model:is-initailized="searchIsInitialized"
           :include-non-suitable="query.inclNoSuitable"
@@ -60,8 +59,8 @@
         />
       </div>
 
-      <div class="basis-full lg:basis-3/4">
-        <div v-if="!sortedResources.length" class="text-center mt-10">
+      <div :class="searchedResources.length > 0 ? 'basis-full lg:basis-3/4' : 'basis-full'">
+        <div v-if="!sortedResources.length" class="text-center mt-10 lg:mt-25">
           <UIcon
             size="48"
             name="i-lucide-monitor-off"
