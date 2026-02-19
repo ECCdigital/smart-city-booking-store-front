@@ -1,5 +1,5 @@
 <template>
-  <UFormField :label="label" class="md:w-[350px]">
+  <UFormField :label="label" class="">
     <UInput
       v-model="currentValue"
       :icon="icon"

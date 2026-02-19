@@ -39,6 +39,7 @@
             :value="currentUser.lastName"
             icon="i-lucide-user"
             :is-disabled="!enableEditingPersonalInfo"
+            class="basis-1/2"
             @update="updateUser"
           />
         </div>
@@ -104,6 +105,7 @@
             :value="currentUser.phone"
             icon="i-lucide-phone"
             :is-disabled="!enableEditingContactInfo"
+            class="basis-1/2"
             @update="updateUser"
           />
         </div>
@@ -132,6 +134,7 @@
             :value="currentUser.city"
             icon="i-lucide-house"
             :is-disabled="!enableEditingContactInfo"
+            class="basis-1/2"
             @update="updateUser"
           />
         </div>
