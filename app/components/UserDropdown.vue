@@ -64,7 +64,7 @@ const items = [
     {
       label: t("navigation.settings"),
       icon: "i-lucide-settings",
-      to: "/settings",
+      to: "/user/settings",
     },
     {
       label: t("common.logout"),

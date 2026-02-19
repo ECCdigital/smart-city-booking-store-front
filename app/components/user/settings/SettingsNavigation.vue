@@ -17,13 +17,13 @@
 <script setup>
 const userNavigation = computed(() => [
   {
-    value: "/settings",
+    value: "/user/settings",
     label: "Persönliche Daten",
     icon: "i-lucide-user-round-pen",
     disabled: false,
   },
   {
-    value: "/settings/appearance",
+    value: "/user/settings/appearance",
     label: "Darstellung",
     icon: "i-lucide-paintbrush",
     disabled: false,
