@@ -1,13 +1,16 @@
 <template>
   <UModal v-model:open="isOpen">
-    <UButton
-      label="Filtern"
-      icon="i-lucide-funnel"
-      color="neutral"
-      variant="soft"
-      class="rounded-full py-2 px-3"
-      @click="() => (isOpen = true)"
-    />
+    <UChip :show="hasFilters" inset>
+      <UButton
+          label="Filtern"
+          icon="i-lucide-funnel"
+          color="neutral"
+          variant="soft"
+          class="rounded-full py-2 px-3"
+          @click="() => (isOpen = true)"
+      />
+    </UChip>
+
     <template #content>
       <UCard>
         <div class="flex justify-end items-center">
@@ -27,8 +30,9 @@
           :cities="cities"
           :price="price"
           :only-public-events="onlyPublicEvents"
-          :only-registered-events="onlyRegistrationNeededEvents"
+          :only-registration-needed-events="onlyRegistrationNeededEvents"
           use-as-dialog
+          :is-event="isEvent"
           @filter="onFilter"
         />
       </UCard>
@@ -37,6 +41,7 @@
 </template>
 <script setup>
 import FilterArea from "./FilterArea.vue";
+import {useRoute} from "#imports";
 
 const isInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -76,6 +81,12 @@ const props = defineProps({
 
 const emit = defineEmits(["filter"]);
 const isOpen = ref(false);
+
+const hasFilters = computed(() => {
+  const route = useRoute();
+  const keysToCheck = ["inclNoSuitable", "pubEv", "regEv", "cities", "categories", "price"];
+  return route.query && keysToCheck.some(key => key in route.query);
+})
 
 function onFilter(criteria) {
   isOpen.value = false;

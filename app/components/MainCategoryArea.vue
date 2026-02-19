@@ -20,7 +20,7 @@ const tempCategories = [
   {
     value: "event-location",
     title: "Veranstaltungsorte",
-    description: "Veranstaltungatsorte in Ihrer Nähe",
+    description: "Veranstaltungsorte in Ihrer Nähe",
     icon: "i-lucide-building-2",
     to: "/bookables",
   },

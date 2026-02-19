@@ -4,7 +4,6 @@ import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const { tenantTo } = useTenantRoute();
-const { isGreaterThanSm } = useBreakpointCheck();
 
 const t = useI18n().t;
 
@@ -15,9 +14,9 @@ const notification = useNotification();
 const { contrastToSecondary } = useContrastColor();
 const nameColor = computed(() => {
   if (contrastToSecondary.value === "#ffffff") {
-    return "text-white";
+    return "text-white hidden md:inline";
   } else {
-    return "text-black";
+    return "text-black hidden md:inline";
   }
 });
 
@@ -113,7 +112,7 @@ async function logout() {
       class="flex items-center gap-2 outline-none cursor-pointer"
     >
       <UUser
-        :name="isGreaterThanSm ? userName : ''"
+        :name="userName"
         :avatar="{
           icon: 'i-lucide-user',
         }"

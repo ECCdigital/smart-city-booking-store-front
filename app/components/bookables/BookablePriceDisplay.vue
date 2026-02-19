@@ -17,17 +17,12 @@
 
     <!-- free for users -->
     <p
-        v-else-if="
-        props.calculatedPrice &&
-        !!calculatedPrice.freeBookingAllowed
-      "
+      v-else-if="props.calculatedPrice && !!calculatedPrice.freeBookingAllowed"
     >
       <span class="text-gray-500 line-through mr-2">
         {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
       </span>
-      <span>
-        Kostenlos
-      </span>
+      <span> Kostenlos </span>
     </p>
 
     <!-- regular calculated price -->
@@ -36,7 +31,7 @@
     </p>
     <p v-else>
       {{ displayMinDefaultPrice() }}
-      <br>
+      <br />
       <span class="text-xs font-normal text-gray-600 dark:text-gray-300">
         {{ displayPricePerUnit() }}
       </span>
@@ -57,7 +52,11 @@ const props = defineProps({
 
 function getMinPrice() {
   //all prices are free
-  if(props.bookable.priceCategories.every((c) => c.priceEur === 0 || c.priceEur === null)){
+  if (
+    props.bookable.priceCategories.every(
+      (c) => c.priceEur === 0 || c.priceEur === null,
+    )
+  ) {
     return null;
   }
   //exclude holiday price categories
@@ -69,9 +68,7 @@ function getMinPrice() {
 }
 function displayMinDefaultPrice() {
   const categories = props.bookable.priceCategories || [];
-  if (
-      categories.length === 0
-  ) {
+  if (categories.length === 0) {
     return null;
   }
   const prefix = categories.length > 1 ? "ab " : "";
@@ -97,14 +94,13 @@ function displayPrice(currentPrice) {
   }
 }
 
-
 function displayPricePerUnit() {
   const minPrice = getMinPrice();
   if (minPrice === null || minPrice === 0) {
     return "";
   }
 
-  const includeTaxes = "(inkl. MwSt.)"
+  const includeTaxes = "(inkl. MwSt.)";
   /*if(props.bookable.priceValueAddedTax > 0){
     includeTaxes = "(inkl. MwSt.)"
   }*/
@@ -118,7 +114,6 @@ function displayPricePerUnit() {
       return " pro Tag " + includeTaxes;
   }
 }
-
 </script>
 
 <style scoped></style>

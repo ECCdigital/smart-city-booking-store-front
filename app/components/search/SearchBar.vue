@@ -59,6 +59,7 @@
     style="position: relative; width: 80vw"
   >
     <USelect
+      v-if="entryPageMode"
       v-model="_searchType"
       :items="types"
       icon="i-lucide-search"
@@ -163,12 +164,11 @@ const types = ref([
   },
 ]);
 const hasMissingType = computed(
-  () => isInitialized.value && !_searchType.value
+  () => isInitialized.value && !_searchType.value,
 );
 const emit = defineEmits(["search", "reset"]);
 
 const { contrastToPrimary } = useContrastColor();
-
 
 function setSearchTimePeriod(tp) {
   _timePeriod.value = tp;
@@ -183,7 +183,7 @@ function onSearch() {
     const notification = useNotification();
     notification.success(
       "Bitte legen Sie fest, wonach Sie suchen möchten.",
-      "Unklare Suchanfrage"
+      "Unklare Suchanfrage",
     );
     return;
   }

@@ -52,17 +52,19 @@
             </template>
           </UModal>
         </div>
-
         <USeparator
           class="w-full my-5 md:my-10"
           :ui="{ border: 'border-gray-300' }"
         />
 
+        <!-- Price Information & Map (sm-view) -->
         <PriceInformationArea
           :is-event="false"
           :item="item"
-          class="md:hidden mb-5"
+          class="md:hidden mb-2"
         />
+        <AddressInformationArea :is-event="false" :item="item" class="md:hidden mb-5"/>
+
 
         <!-- Availability -->
         <div>
@@ -82,7 +84,6 @@
             @remove-date="removeSearchTimePeriod"
           />
         </div>
-
         <div
           v-if="timePeriod && timePeriod.start && timePeriod.end"
           class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center"
@@ -116,10 +117,8 @@
         </div>
       </div>
 
-      <!-- toDo - add map view -->
+      <!-- Price Information & Map -->
       <div class="basis-1/3 space-y-3 pt-5">
-        <!-- <USkeleton class="h-[250px] w-full" /> -->
-        <!-- toDo - remove hidden from address, when map is available -->
         <AddressInformationArea :is-event="false" :item="item" class="hidden md:block"/>
         <PriceInformationArea
           :is-event="false"

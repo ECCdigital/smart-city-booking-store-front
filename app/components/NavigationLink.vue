@@ -4,7 +4,6 @@
     <Icon
       v-if="tab.icon"
       :name="tab.icon"
-      class=""
       :class="iconClass"
       :style="
         isActive ? { color: contrastToPrimary } : { color: contrastToSecondary }
@@ -58,7 +57,13 @@ const stripeClass = computed(() => [
   "absolute top-0 left-0 w-full h-1",
   isActive.value ? "bg-[var(--color-secondary)]/40" : "bg-transparent",
 ]);
-const iconClass = computed(() => ["text-lg sm:mr-2"]);
+const iconClass = computed(() => {
+  if (props.tab.label) {
+    return ["text-lg sm:mr-2"];
+  } else {
+    return ["text-lg"];
+  }
+});
 const labelClass = computed(() => ["text-base"]);
 </script>
 <style scoped></style>

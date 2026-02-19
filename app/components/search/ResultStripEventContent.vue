@@ -2,7 +2,7 @@
   <div class="basis-3/4 p-4 flex flex-col">
     <div>
       <!-- Title -->
-      <p class="text-lg font-bold">
+      <p class="font-bold" :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'">
         {{ event.information.name }}
       </p>
       <p>{{ tenantName }}</p>
@@ -103,6 +103,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+});
+
+const hasLongTitle = computed(() => {
+  return (props.event?.information.name?.length ?? 0) > 60;
 });
 
 const { sanitizeHtml } = useSanitizeHtml();
