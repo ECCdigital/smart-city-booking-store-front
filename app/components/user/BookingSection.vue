@@ -47,6 +47,7 @@ import BookingCard from "~/components/user/BookingCard.vue";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import Fuse from "fuse.js";
 import BookingsFilter from "~/components/user/bookings/BookingsFilter.vue";
+import {useBreakpointCheck} from "~/composables/utils/useBreakpointCheck.js";
 
 const props = defineProps({
   bookings: {
@@ -119,8 +120,14 @@ if (
 }
 
 //pagination
+const { isGreaterThanLg } = useBreakpointCheck();
 const currentPage = ref(1);
-const itemsPerPage = ref(10);
+const itemsPerPage = computed(() => {
+  if (isGreaterThanLg) {
+    return 12
+  }
+  return 10
+})
 
 //search
 const searchQuery = ref("");
