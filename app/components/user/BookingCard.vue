@@ -38,7 +38,7 @@
           {{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}
         </div>
         <EventTimeInformation
-          v-else-if="eventId"
+          v-else-if="eventId && event"
           :event="event"
           :use-icon="false"
           class="text-sm font-medium -mx-3"
