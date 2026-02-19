@@ -47,7 +47,7 @@ import BookingCard from "~/components/user/BookingCard.vue";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import Fuse from "fuse.js";
 import BookingsFilter from "~/components/user/bookings/BookingsFilter.vue";
-import {useBreakpointCheck} from "~/composables/utils/useBreakpointCheck.js";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 
 const props = defineProps({
   bookings: {
@@ -58,7 +58,7 @@ const props = defineProps({
 });
 
 const allBookings = computed(() =>
-  props.bookings
+  [...props.bookings]
     .sort((a, b) => b.timeCreated - a.timeCreated)
     .map((b) => ({
       ...b,
@@ -72,19 +72,17 @@ const allBookings = computed(() =>
       statusLabel: b.isRejected
         ? "Storniert"
         : b.isCommitted
-          ? "Bestätigt"
-          : "Ausstehend",
+        ? "Bestätigt"
+        : "Ausstehend",
       payedLabel: b.isPayed ? "bezahlt" : "nicht bezahlt",
-    })),
+    }))
 );
-const searchedBookings = computed(() => {
-  if (!searchQuery.value) {
-    return allBookings.value;
-  }
 
-  const fuse = new Fuse(allBookings.value, searchOptions);
-  const results = fuse.search(searchQuery.value);
-  return results.map((result) => result.item);
+const fuseInstance = computed(() => new Fuse(allBookings.value, searchOptions));
+
+const searchedBookings = computed(() => {
+  if (!searchQuery.value) return allBookings.value;
+  return fuseInstance.value.search(searchQuery.value).map((r) => r.item);
 });
 
 const filteredBookings = computed(() => {
@@ -109,14 +107,16 @@ const paginatedBookings = computed(() => {
 });
 
 const { loadBundle } = useCatalogBundle();
+const bundleLoaded = ref(false);
+
 if (
-  allBookings.value.some((booking) => {
-    return booking.bookableItems.some(
-      (item) => item._bookableUsed.type === "ticket",
-    );
-  })
+  allBookings.value.some((booking) =>
+    booking.bookableItems.some((item) => item._bookableUsed.type === "ticket")
+  )
 ) {
-  await loadBundle({ include: ["events"] });
+  loadBundle({ include: ["events"] }).then(() => {
+    bundleLoaded.value = true;
+  });
 }
 
 //pagination
@@ -124,10 +124,10 @@ const { isGreaterThanLg } = useBreakpointCheck();
 const currentPage = ref(1);
 const itemsPerPage = computed(() => {
   if (isGreaterThanLg) {
-    return 12
+    return 12;
   }
-  return 10
-})
+  return 10;
+});
 
 //search
 const searchQuery = ref("");
@@ -220,14 +220,14 @@ function sortBookings(bookings) {
           a.timeBegin != null
             ? a.timeBegin
             : a.eventTime && a.eventTime[0] != null
-              ? a.eventTime[0]
-              : null;
+            ? a.eventTime[0]
+            : null;
         const bTime =
           b.timeBegin != null
             ? b.timeBegin
             : b.eventTime && b.eventTime[0] != null
-              ? b.eventTime[0]
-              : null;
+            ? b.eventTime[0]
+            : null;
         if (aTime == null && bTime == null) return 0;
         if (aTime == null) return 1;
         if (bTime == null) return -1;
@@ -240,14 +240,14 @@ function sortBookings(bookings) {
           a.timeBegin != null
             ? a.timeBegin
             : a.eventTime && a.eventTime[0] != null
-              ? a.eventTime[0]
-              : null;
+            ? a.eventTime[0]
+            : null;
         const bTime =
           b.timeBegin != null
             ? b.timeBegin
             : b.eventTime && b.eventTime[0] != null
-              ? b.eventTime[0]
-              : null;
+            ? b.eventTime[0]
+            : null;
         if (aTime == null && bTime == null) return 0;
         if (aTime == null) return 1;
         if (bTime == null) return -1;
@@ -257,15 +257,15 @@ function sortBookings(bookings) {
     case "title-asc":
       sortedBookings.sort((a, b) =>
         a.bookableItems[0]._bookableUsed.title.localeCompare(
-          b.bookableItems[0]._bookableUsed.title,
-        ),
+          b.bookableItems[0]._bookableUsed.title
+        )
       );
       break;
     case "title-desc":
       sortedBookings.sort((a, b) =>
         b.bookableItems[0]._bookableUsed.title.localeCompare(
-          a.bookableItems[0]._bookableUsed.title,
-        ),
+          a.bookableItems[0]._bookableUsed.title
+        )
       );
       break;
 

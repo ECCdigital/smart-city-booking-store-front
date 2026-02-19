@@ -1,6 +1,7 @@
 <template>
   <div>
-    <BookingSection v-if="bookings" :bookings="bookings"/>
+    <USkeleton v-if="pending" class="h-64 w-full" />
+    <BookingSection v-else-if="bookings?.length" :bookings="bookings" />
   </div>
 </template>
 <script setup>
@@ -16,9 +17,11 @@ definePageMeta({
 const bookingsStore = useBookingStore();
 await bookingsStore.fetchBookings();
 
-const bookings = computed(() => {
-  return bookingsStore.getBookings
-})
+const { pending } = useAsyncData("bookings", () =>
+    bookingsStore.fetchBookings()
+);
+
+const bookings = computed(() => bookingsStore.getBookings);
 </script>
 
 <style scoped>
