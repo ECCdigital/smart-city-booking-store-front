@@ -3,6 +3,7 @@ import { useAuthStore } from "~~/stores/auth.js";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
+const { tenantTo } = useTenantRoute();
 const { isGreaterThanSm } = useBreakpointCheck();
 
 const t = useI18n().t;
@@ -45,18 +46,18 @@ const items = [
     {
       label: "Buchungen",
       icon: "i-lucide-book-marked",
-      to: { path: "/user/bookings"},
+      onSelect: () => goTo("/user/bookings"),
     },
     {
       label: "Rechnungen",
       icon: "i-lucide-wallet-cards",
-      to: { path: "/user/invoices" },
+      onSelect: () => goTo("/user/invoices"),
       disabled: true,
     },
     {
       label: "Favoriten",
       icon: "i-lucide-book-heart",
-      to: { path: "/user/favorites" },
+      onSelect: () => goTo("/user/favorites"),
       disabled: true,
     },
   ],
@@ -64,7 +65,7 @@ const items = [
     {
       label: t("navigation.settings"),
       icon: "i-lucide-settings",
-      to: "/user/settings",
+      onSelect: () => goTo("/user/settings")
     },
     {
       label: t("common.logout"),
@@ -73,6 +74,11 @@ const items = [
     },
   ],
 ];
+function goTo(targetString) {
+  const router = useRouter();
+  const tenantTargetString = tenantTo(targetString);
+  router.push(tenantTargetString);
+}
 
 async function logout() {
   try {

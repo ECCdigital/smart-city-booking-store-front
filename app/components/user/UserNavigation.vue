@@ -7,7 +7,7 @@
         <NuxtLink
             class="sm:flex rounded p-2 w-full justify-center md:justify-start items-center text-center md:text-left"
             :class="getLinkClasses(item)"
-            :to="item.disabled ? '' : item.value"
+            :to="item.disabled ? '' : tenantTo(item.value)"
         >
           <UIcon :name="item.icon" class="mr-3 mt-1" />
           <div>{{ item.label }}</div>
@@ -18,6 +18,8 @@
   </div>
 </template>
 <script setup>
+const { tenantTo } = useTenantRoute();
+
 const userNavigation = computed(() => [
   {
     value: "/user/bookings",
