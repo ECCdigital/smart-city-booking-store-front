@@ -18,7 +18,7 @@ const colorMode = useColorMode();
 </script>
 
 <template>
-  <div>
+  <div class="bg-neutral-50 dark:bg-gray-950">
     <NavigationBar />
     <!-- Hero -->
     <HeroBackground
@@ -34,7 +34,7 @@ const colorMode = useColorMode();
             :src="`/api/theme/logo`"
             alt="logo"
             class="text-center max-h-[5vh] dark:invert dark:hue-rotate-180"
-          />
+          >
         </div>
         <div class="grid content-center max-w-220px text-center md:text-left">
           <p class="text-primary font-bold text-sm md:text-md">Marktplatz</p>
@@ -48,11 +48,11 @@ const colorMode = useColorMode();
             :src="`/api/theme/logo`"
             alt="logo"
             class="text-center md:max-h-[7vh] hidden md:block dark:invert dark:hue-rotate-180"
-          />
+          >
         </div>
       </div>
     </HeroBackground>
-    <NuxtPage />
+    <slot/>
   </div>
 </template>
 

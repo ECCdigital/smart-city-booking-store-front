@@ -56,7 +56,7 @@
             </div>
           </div>
 
-          <DatePicker class="date-picker-container" v-model="dateRange" />
+          <DatePicker v-model="dateRange" class="date-picker-container" />
 
           <div class="py-3 w-full">
             <p
@@ -268,6 +268,7 @@ function displayTime(time: TimeHM) {
   const m = time.minutes.toString().padStart(2, "0");
   return `${h}:${m}`;
 }
+
 
 // UI Aktionen
 function closeTimePeriodInput() {

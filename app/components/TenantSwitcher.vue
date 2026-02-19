@@ -24,7 +24,7 @@ const selectedTenantLabel = computed(() => {
   return selectedTenant.value?.name ?? t("tenants.selectTenant");
 });
 
-const dropdownItems = computed(() => {
+const tenantOptions = computed(() => {
   const items = [];
 
   if (selectedTenant.value) {
@@ -92,7 +92,8 @@ const { contrastToPrimary, contrastToSecondary } = useContrastColor();
 
 <template>
   <UDropdownMenu
-    :items="dropdownItems"
+      v-if="tenantOptions.length > 0"
+    :items="tenantOptions"
     :ui="{
       content:
         'ring-0 shadow-lg glass',

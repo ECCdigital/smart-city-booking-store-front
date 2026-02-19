@@ -3,7 +3,6 @@ import { useAuthStore } from "~~/stores/auth.js";
 export const useAuth = () => {
   const authStore = useAuthStore();
 
-
   const register = async (userData) => {
     const response = await $fetch("/api/auth/signup", {
       method: "POST",
@@ -19,6 +18,12 @@ export const useAuth = () => {
     });
     return response;
   };
+  const changePassword = async (id, password) => {
+    return await $fetch("/api/auth/change-password", {
+      method: "POST",
+      body: { id, password },
+    });
+  };
 
   return {
     user: readonly(computed(() => authStore.user)),
@@ -31,5 +36,6 @@ export const useAuth = () => {
     logout: authStore.logout,
     register,
     verifyEmail,
+    changePassword,
   };
 };

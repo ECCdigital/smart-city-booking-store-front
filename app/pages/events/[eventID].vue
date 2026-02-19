@@ -27,13 +27,19 @@ if (!event.value) {
 </script>
 
 <template>
-  <div v-if="event">
-    <DetailsArea :item="event" is-event />
-  </div>
-  <div v-else class="text-center mt-10">
-    <UIcon size="48" name="i-lucide-calendar-off" class="text-gray-400 mb-4" />
-    <p class="text-gray-500">{{ $t("events.noEvent") }}</p>
-    <UButton :label="$t('common.back')" to="/events" class="mt-4" />
+  <div class="container">
+    <div v-if="event">
+      <DetailsArea :item="event" is-event />
+    </div>
+    <div v-else class="text-center mt-10">
+      <UIcon
+        size="48"
+        name="i-lucide-calendar-off"
+        class="text-gray-400 mb-4"
+      />
+      <p class="text-gray-500">{{ $t("events.noEvent") }}</p>
+      <UButton :label="$t('common.back')" to="/events" class="mt-4" />
+    </div>
   </div>
 </template>
 

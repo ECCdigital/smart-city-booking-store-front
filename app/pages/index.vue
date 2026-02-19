@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container bg-neutral-50 dark:bg-gray-950">
     <div class="relative h-0 bg-transparent">
       <div class="flex justify-center">
         <SearchBar

@@ -12,3 +12,24 @@ body {
 .glass-light {
   @apply bg-slate-50/20 dark:bg-gray-900/40 backdrop-blur-lg;
 }
+
+.container {
+    max-width: 1400px;
+    margin: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.container-md {
+    max-width: 900px;
+    margin: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.container-sm {
+    max-width: 600px;
+    margin: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}

@@ -13,10 +13,9 @@ useHead({
 </script>
 
 <template>
-  <div>
+  <div class="bg-neutral-50 dark:bg-gray-950">
     <NavigationBar />
 
-    <!-- toDo - adjust header for details -->
     <HeroBackground
       variant="poly"
       theme="light"
@@ -37,7 +36,7 @@ useHead({
             alt="logo"
             class="text-center dark:invert dark:hue-rotate-180"
             style="max-height: 7vh"
-          />
+          >
         </div>
       </div>
     </HeroBackground>
