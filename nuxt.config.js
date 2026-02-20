@@ -11,16 +11,12 @@ export default defineNuxtConfig({
   pages: true,
 
   runtimeConfig: {
-    apiBaseUrl: "",
-    adminBaseUrl: "",
-    userBaseUrl: "",
-    cacheEnabled: process.env.CACHE_ENABLED !== "false",
+    cacheEnabled: process.env.NUXT_CACHE_ENABLED !== "false",
     // make values available on the client via `useRuntimeConfig().public`
     public: {
-      adminBaseUrl: process.env.ADMIN_BASE_URL || "",
-      apiBaseUrl: process.env.API_BASE_URL || "",
-      userBaseUrl: process.env.USER_BASE_URL || "",
-      cacheEnabled: process.env.CACHE_ENABLED !== "false",
+      adminBaseUrl:  "",
+      apiBaseUrl:  "",
+      userBaseUrl:  "",
     },
   },
   routeRules: {
