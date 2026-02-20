@@ -8,6 +8,7 @@ export function useInstance() {
     });
 
     if (error.value) {
+      console.error("Error fetching instance:", error.value);
       throw new Error("Failed to fetch instance");
     }
 

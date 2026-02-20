@@ -11,7 +11,7 @@ export function createConditionalCachedHandler<T extends EventHandlerRequest>(
   handler: EventHandler<T>,
   options: CacheOptions = {}
 ): EventHandler<T> {
-  const cacheEnabled = process.env.CACHE_ENABLED !== "false";
+  const cacheEnabled = process.env.NUXT_CACHE_ENABLED !== "false";
 
   if (cacheEnabled) {
     return cachedEventHandler(handler, {

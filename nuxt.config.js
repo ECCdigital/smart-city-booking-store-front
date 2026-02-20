@@ -11,7 +11,10 @@ export default defineNuxtConfig({
   pages: true,
 
   runtimeConfig: {
-    cacheEnabled: process.env.NUXT_CACHE_ENABLED !== "false",
+    adminBaseUrl:  "",
+    apiBaseUrl:  "",
+    userBaseUrl:"",
+    cacheEnabled: false,
     // make values available on the client via `useRuntimeConfig().public`
     public: {
       adminBaseUrl:  "",
