@@ -22,11 +22,14 @@ export default defineEventHandler(async (event) => {
 
     return { success: true, data: response };
   } catch (error) {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && refreshToken) {
       const { success, accessToken: newAccessToken } =
-        await AuthService.refreshToken(event, refreshToken);
+          await AuthService.refreshToken(event, refreshToken);
 
       if (!success) {
+        deleteCookie(event, "access-token");
+        deleteCookie(event, "refresh-token");
+
         throw createError({
           statusCode: 401,
           statusMessage: "Token refresh failed",
@@ -43,9 +46,8 @@ export default defineEventHandler(async (event) => {
     }
 
     throw createError({
-      success: false,
       statusCode: error.response?.status || 500,
-      statusMessage: error.response?.data?.message || "Failed to get user info",
+      statusMessage: "Failed to get user info",
     });
   }
 });

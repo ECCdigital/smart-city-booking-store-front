@@ -1,15 +1,14 @@
 <template>
   <div class="w-full">
-    <div class="md:flex justify-between items-center w-full">
-      <h1 class="text-2xl font-bold">Ihre Buchungen</h1>
+    <div class="flex justify-end items-center w-full mb-4">
       <div class="w-full md:w-[40%] flex">
         <UInput
-          v-model="searchQuery"
-          icon="i-lucide-search"
-          size="md"
-          variant="outline"
-          placeholder="Suchen..."
-          class="mt-2 md:mt-0 w-full"
+            v-model="searchQuery"
+            icon="i-lucide-search"
+            size="md"
+            variant="outline"
+            placeholder="Suchen..."
+            class="w-full"
         />
         <BookingsFilter @set-filter="setFilter" />
       </div>

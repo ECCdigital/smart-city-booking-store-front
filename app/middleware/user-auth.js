@@ -6,14 +6,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
   try {
     const isValid = await validateAuth();
 
-    if(!isValid) {
+    if (!isValid) {
       return navigateTo(`/login?redirect=${to.fullPath}`);
-    };
-
+    }
   } catch (error) {
-      if (error.statusCode === 401) {
-          return navigateTo(`/login?redirect=${to.fullPath}`);
-      }
-      console.warn("User pages not found for auth check.");
+    if (error.statusCode === 401 && to.path !== "/login") {
+      return navigateTo(`/login?redirect=${to.fullPath}`);
+    }
+    console.warn("User pages not found for auth check.");
   }
-})
+});

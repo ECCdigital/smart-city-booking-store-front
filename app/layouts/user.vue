@@ -16,6 +16,10 @@
 import CatalogLayout from '~/layouts/catalog.vue'
 import UserNavigation from "~/components/user/UserNavigation.vue";
 
+definePageMeta({
+  requiresAuth: true
+})
+
 export default {
   components: {
     UserNavigation,

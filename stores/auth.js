@@ -40,7 +40,7 @@ export const useAuthStore = defineStore("auth", {
         const fetchError = error?.value;
 
         if (fetchError || data.value?.success === false) {
-          this.clearAuthPayload();
+          this.invalidateAuth();
           return false;
         }
 
