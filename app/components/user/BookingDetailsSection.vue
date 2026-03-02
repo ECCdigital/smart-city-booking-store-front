@@ -110,6 +110,7 @@ import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue"
 import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
+import {useFormatting} from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   booking: {
@@ -117,6 +118,8 @@ const props = defineProps({
     required: true,
   },
 });
+
+const { formatDate, formatPrice } = useFormatting()
 
 const tenantsStore = useTenantStore();
 const tenantName = computed(() => {
@@ -216,24 +219,6 @@ const bookableTitles = computed(() => {
     id: item._bookableUsed.id,
   }));
 });
-
-//help functions
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const formatPrice = (price) => {
-  return new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency: "EUR",
-  }).format(price);
-};
 </script>
 
 <style scoped></style>

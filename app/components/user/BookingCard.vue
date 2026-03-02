@@ -74,6 +74,7 @@ import { useEventStore } from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
+import {useFormatting} from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   booking: {
@@ -91,6 +92,7 @@ const props = defineProps({
 });
 
 const eventStore = useEventStore();
+const { formatDate, formatPrice } = useFormatting()
 
 const bookingTitle = computed(() => {
   if (props.booking.bookableItems && props.booking.bookableItems.length > 0) {
@@ -127,24 +129,6 @@ const event = computed(() => {
   }
   return eventStore.getEventById(eventId.value);
 });
-
-// helpers
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const formatPrice = (price) => {
-  return new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency: "EUR",
-  }).format(price);
-};
 
 const bookingCardClasses =
   "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md rounded-lg p-4 my-2 hover:shadow-lg transition-shadow";

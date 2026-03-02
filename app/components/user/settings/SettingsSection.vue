@@ -235,16 +235,7 @@ const enableEditingPersonalInfo = ref(false);
 const enableEditingContactInfo = ref(false);
 const enableEditingPassword = ref(false);
 
-// helpers
-/*const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};*/
+
 
 function updateUser({ updatedField, updatedValue }) {
   currentUser.value[updatedField] = updatedValue;
