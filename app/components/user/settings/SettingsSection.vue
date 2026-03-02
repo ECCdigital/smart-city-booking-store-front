@@ -1,26 +1,18 @@
 <template>
-  <div class="w-full container-md">
-    <h1 class="text-2xl font-bold">Einstellungen</h1>
-
+  <div>
     <div>
-      <p class="mt-2 mb-5">
-        Verwalten Sie Ihre persönlichen Angaben.
-        Sie haben außerdem die Möglichkeit, Ihr
-        Passwort zu ändern.
-      </p>
-
       <!-- Personal Information Section -->
       <div class="mb-10 space-y-5">
         <div class="flex justify-between md:justify-normal mb-2 md:mb-5">
           <h3 class="text-xl font-bold">Persönliche Angaben</h3>
-            <UButton
-                v-if="!enableEditingPersonalInfo"
-              icon="i-lucide-edit"
-              label="Bearbeiten"
-              color="neutral"
-              variant="soft"
-              @click="() => (enableEditingPersonalInfo = true)"
-            />
+          <UButton
+            v-if="!enableEditingPersonalInfo"
+            icon="i-lucide-edit"
+            label="Bearbeiten"
+            color="neutral"
+            variant="soft"
+            @click="() => (enableEditingPersonalInfo = true)"
+          />
         </div>
         <div class="md:flex space-y-2 md:space-y-0">
           <SettingsInputField
@@ -55,13 +47,13 @@
         </div>
         -->
         <UButton
-            v-if="enableEditingPersonalInfo"
-            icon="i-lucide-save"
-            label="Änderungen speichern"
-            color="primary"
-            variant="solid"
-            class="mt-2 md:mt-5"
-            @click="saveUpdatedUser()"
+          v-if="enableEditingPersonalInfo"
+          icon="i-lucide-save"
+          label="Änderungen speichern"
+          color="primary"
+          variant="solid"
+          class="mt-2 md:mt-5"
+          @click="saveUpdatedUser()"
         />
       </div>
 
@@ -69,14 +61,14 @@
       <div class="mb-10 space-y-5">
         <div class="flex justify-between md:justify-normal mb-2 md:mb-5">
           <h3 class="text-xl font-bold">Kontaktdaten</h3>
-            <UButton
-                v-if="!enableEditingContactInfo"
-              icon="i-lucide-edit"
-              label="Bearbeiten"
-              color="neutral"
-              variant="soft"
-              @click="() => (enableEditingContactInfo = true)"
-            />
+          <UButton
+            v-if="!enableEditingContactInfo"
+            icon="i-lucide-edit"
+            label="Bearbeiten"
+            color="neutral"
+            variant="soft"
+            @click="() => (enableEditingContactInfo = true)"
+          />
         </div>
         <div class="md:flex space-y-2 md:space-y-0 my-3">
           <SettingsInputField
@@ -138,13 +130,13 @@
           />
         </div>
         <UButton
-            v-if="enableEditingContactInfo"
-            icon="i-lucide-save"
-            label="Änderungen speichern"
-            color="primary"
-            variant="solid"
-            class="mt-2 md:mt-5"
-            @click="saveUpdatedUser()"
+          v-if="enableEditingContactInfo"
+          icon="i-lucide-save"
+          label="Änderungen speichern"
+          color="primary"
+          variant="solid"
+          class="mt-2 md:mt-5"
+          @click="saveUpdatedUser()"
         />
       </div>
 
@@ -198,13 +190,13 @@
           />
         </div>
         <UButton
-            v-if="enableEditingPassword"
-            icon="i-lucide-save"
-            label="Speichern"
-            color="primary"
-            variant="solid"
-            class="mt-2 md:mt-3"
-            @click="changePassword()"
+          v-if="enableEditingPassword"
+          icon="i-lucide-save"
+          label="Speichern"
+          color="primary"
+          variant="solid"
+          class="mt-2 md:mt-3"
+          @click="changePassword()"
         />
       </div>
     </div>
@@ -234,8 +226,6 @@ const repeatedPassword = ref("");
 const enableEditingPersonalInfo = ref(false);
 const enableEditingContactInfo = ref(false);
 const enableEditingPassword = ref(false);
-
-
 
 function updateUser({ updatedField, updatedValue }) {
   currentUser.value[updatedField] = updatedValue;
