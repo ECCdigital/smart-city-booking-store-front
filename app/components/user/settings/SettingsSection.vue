@@ -1,6 +1,5 @@
 <template>
-  <div class="w-full container-sm">
-
+  <div class="w-full container-md">
     <h1 class="text-2xl font-bold">Einstellungen</h1>
 
     <div>
@@ -237,7 +236,7 @@ const enableEditingContactInfo = ref(false);
 const enableEditingPassword = ref(false);
 
 // helpers
-const formatDate = (dateString) => {
+/*const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString("de-DE", {
     day: "2-digit",
     month: "2-digit",
@@ -245,7 +244,7 @@ const formatDate = (dateString) => {
     hour: "2-digit",
     minute: "2-digit",
   });
-};
+};*/
 
 function updateUser({ updatedField, updatedValue }) {
   currentUser.value[updatedField] = updatedValue;
