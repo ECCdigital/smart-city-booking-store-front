@@ -1,12 +1,12 @@
 <template>
   <div class="w-full md:w-[40%] flex">
     <UInput
-        v-model="searchQuery"
-        icon="i-lucide-search"
-        size="md"
-        variant="outline"
-        placeholder="Suchen..."
-        class="w-full"
+      v-model="searchQuery"
+      icon="i-lucide-search"
+      size="md"
+      variant="outline"
+      placeholder="Suchen..."
+      class="w-full"
     />
     <BookingsFilter @set-filter="setFilter" />
   </div>
@@ -19,7 +19,7 @@ const props = defineProps({
   bookings: {
     type: Array,
     required: true,
-  }
+  },
 });
 const emit = defineEmits(["update:bookings"]);
 
@@ -53,10 +53,12 @@ watch(searchQuery, (newQuery) => {
 //filter and sorting
 const filters = ref([]);
 watch(filters, (newFilter) => {
-  if(!newFilter) {
+  if (!newFilter) {
     emit("update:bookings", props.bookings);
   } else {
     let filtered = props.bookings;
+
+    filtered = filterForActiveBookings(filtered);
 
     filtered = filterForPaymentStatus(filtered);
 
@@ -72,10 +74,21 @@ function setFilter(filter) {
   filters.value = filter;
 }
 
+function filterForActiveBookings(bookings) {
+  if (!filters.value || !filters.value.activeBookings) {
+    return bookings;
+  }
+  const currentTime = new Date().getTime();
+
+  return bookings.filter(
+    (b) => b.timeBegin < currentTime && b.timeEnd > currentTime,
+  );
+}
+
 function filterForPaymentStatus(bookings) {
   if (
-      !filters.value ||
-      (!filters.value.paymentsConfirmed && !filters.value.paymentsUnconfirmed)
+    !filters.value ||
+    (!filters.value.paymentsConfirmed && !filters.value.paymentsUnconfirmed)
   ) {
     return bookings;
   }
@@ -92,10 +105,10 @@ function filterForPaymentStatus(bookings) {
 
 function filterForStatus(bookings) {
   if (
-      !filters.value ||
-      (!filters.value.statusConfirmed &&
-          !filters.value.statusRejected &&
-          !filters.value.statusPending)
+    !filters.value ||
+    (!filters.value.statusConfirmed &&
+      !filters.value.statusRejected &&
+      !filters.value.statusPending)
   ) {
     return bookings;
   }
@@ -136,17 +149,17 @@ function sortBookings(bookings) {
     case "date-asc":
       sortedBookings.sort((a, b) => {
         const aTime =
-            a.timeBegin != null
-                ? a.timeBegin
-                : a.eventTime && a.eventTime[0] != null
-                    ? a.eventTime[0]
-                    : null;
+          a.timeBegin != null
+            ? a.timeBegin
+            : a.eventTime && a.eventTime[0] != null
+              ? a.eventTime[0]
+              : null;
         const bTime =
-            b.timeBegin != null
-                ? b.timeBegin
-                : b.eventTime && b.eventTime[0] != null
-                    ? b.eventTime[0]
-                    : null;
+          b.timeBegin != null
+            ? b.timeBegin
+            : b.eventTime && b.eventTime[0] != null
+              ? b.eventTime[0]
+              : null;
         if (aTime == null && bTime == null) return 0;
         if (aTime == null) return 1;
         if (bTime == null) return -1;
@@ -156,17 +169,17 @@ function sortBookings(bookings) {
     case "date-desc":
       sortedBookings.sort((a, b) => {
         const aTime =
-            a.timeBegin != null
-                ? a.timeBegin
-                : a.eventTime && a.eventTime[0] != null
-                    ? a.eventTime[0]
-                    : null;
+          a.timeBegin != null
+            ? a.timeBegin
+            : a.eventTime && a.eventTime[0] != null
+              ? a.eventTime[0]
+              : null;
         const bTime =
-            b.timeBegin != null
-                ? b.timeBegin
-                : b.eventTime && b.eventTime[0] != null
-                    ? b.eventTime[0]
-                    : null;
+          b.timeBegin != null
+            ? b.timeBegin
+            : b.eventTime && b.eventTime[0] != null
+              ? b.eventTime[0]
+              : null;
         if (aTime == null && bTime == null) return 0;
         if (aTime == null) return 1;
         if (bTime == null) return -1;
@@ -175,16 +188,16 @@ function sortBookings(bookings) {
       break;
     case "title-asc":
       sortedBookings.sort((a, b) =>
-          a.bookableItems[0]._bookableUsed.title.localeCompare(
-              b.bookableItems[0]._bookableUsed.title
-          )
+        a.bookableItems[0]._bookableUsed.title.localeCompare(
+          b.bookableItems[0]._bookableUsed.title,
+        ),
       );
       break;
     case "title-desc":
       sortedBookings.sort((a, b) =>
-          b.bookableItems[0]._bookableUsed.title.localeCompare(
-              a.bookableItems[0]._bookableUsed.title
-          )
+        b.bookableItems[0]._bookableUsed.title.localeCompare(
+          a.bookableItems[0]._bookableUsed.title,
+        ),
       );
       break;
 
@@ -195,7 +208,4 @@ function sortBookings(bookings) {
 }
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>
