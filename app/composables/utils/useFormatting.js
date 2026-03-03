@@ -8,6 +8,11 @@ export function useFormatting() {
             minute: "2-digit",
         });
     }
+    function formateDateToTimestamp(date, time="00:00") {
+        const isoString = `${date}T${time}:00`;
+        const isoDate = new Date(isoString);
+        return isoDate.getTime();
+    }
 
     function formatPrice(price) {
         return new Intl.NumberFormat("de-DE", {
@@ -16,5 +21,5 @@ export function useFormatting() {
         }).format(price);
     }
 
-    return { formatDate, formatPrice };
+    return { formatDate, formatPrice,formateDateToTimestamp };
 }

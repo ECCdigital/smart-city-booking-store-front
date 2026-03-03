@@ -1,29 +1,28 @@
 <template>
   <div
-      class="flex flex-col"
-      :class="[
-    bookingCardClasses,
-    isActive
-      ? 'border-2 border-primary/60 shadow-primary/20'
-      : 'border border-gray-200 dark:border-gray-700'
-  ]"
+    class="flex flex-col"
+    :class="[
+      bookingCardClasses,
+      isActive
+        ? 'border-2 border-primary/60 shadow-primary/20'
+        : 'border border-gray-200 dark:border-gray-700',
+    ]"
   >
     <!-- title and booking-id -->
     <div class="mb-3 h-1/3">
       <div class="flex justify-between">
         <div class="flex">
           <div
-              class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full"
+            class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full"
           >
-          #{{ booking.id }}
+            #{{ booking.id }}
           </div>
           <div
-              v-if="isActive"
-              class="bg-primary/60 text-gray-800 dark:text-gray-200 text-xs font-semibold px-2 py-1 rounded-full"
+            v-if="isActive"
+            class="bg-primary/60 text-gray-800 dark:text-gray-200 text-xs font-semibold px-2 py-1 rounded-full"
           >
             Aktiv
           </div>
-
         </div>
         <UButton
           icon="i-lucide-ellipsis"
@@ -109,7 +108,7 @@ const props = defineProps({
 });
 
 const eventStore = useEventStore();
-const { formatDate, formatPrice } = useFormatting();
+const { formatDate, formatPrice, formateDateToTimestamp } = useFormatting();
 
 const currentTime = ref(new Date().getTime());
 const isActive = computed(() => {
@@ -117,6 +116,20 @@ const isActive = computed(() => {
     return (
       currentTime.value >= props.booking.timeBegin &&
       currentTime.value <= props.booking.timeEnd
+    );
+  }
+  if (event.value) {
+    console.log("event", event.value.information.name, event.value);
+    const startTimestamp = formateDateToTimestamp(
+      event.value.information.startDate,
+      event.value.information.startTime,
+    );
+    const endTimestamp = formateDateToTimestamp(
+      event.value.information.endDate,
+      event.value.information.endTime,
+    );
+    return (
+      currentTime.value >= startTimestamp && currentTime.value <= endTimestamp
     );
   }
   return false;
