@@ -1,6 +1,6 @@
 <template>
   <div class="w-full">
-    <h1 class="text-2xl font-bold mb-6">Ihre Buchungen</h1>
+    <PageHeader title="Ihre Buchungen" />
     <BookingsSkeleton v-if="pending" :skeleton-count="9" />
     <BookingSection v-else-if="bookings?.length" :bookings="bookings" />
     <BookingEmptyState v-else />

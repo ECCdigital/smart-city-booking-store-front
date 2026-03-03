@@ -1,15 +1,6 @@
 <template>
   <div class="mb-15" style="max-width: 800px">
-    <UButton
-      label="Zurück"
-      icon="i-lucide-arrow-left"
-      class="justify-center px-5 mt-2 bg-gray-300 text-black"
-      :style="{ cursor: 'pointer' }"
-      @click="$router.back()"
-    />
-    <h3 class="text-xl font-bold my-5">Buchungsdetails</h3>
-
-    <!-- basis information -->
+        <!-- basis information -->
     <div class="flex mb-5">
       <div class="basis-1/2">
         <p class="font-medium">Buchungsnummer</p>
@@ -111,6 +102,7 @@ import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetail
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
 import {useFormatting} from "~/composables/utils/useFormatting.js";
+import BackButton from "~/components/BackButton.vue";
 
 const props = defineProps({
   booking: {

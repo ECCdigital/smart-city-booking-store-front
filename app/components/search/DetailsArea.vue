@@ -4,13 +4,7 @@
     <DetailsAreaImages :item="item" :is-event="props.isEvent" />
 
     <div class="w-full flex justify-between my-5">
-      <UButton
-        label="Zurück"
-        icon="i-lucide-arrow-left"
-        class="justify-center px-5 bg-gray-300 text-black"
-        :style="{ cursor: 'pointer' }"
-        @click="$router.back()"
-      />
+      <BackButton />
       <UButton
         label="Teilen"
         icon="i-lucide-share-2"
