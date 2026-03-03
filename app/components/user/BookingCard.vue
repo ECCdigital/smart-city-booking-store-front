@@ -1,13 +1,30 @@
 <template>
-  <div class="flex flex-col" :class="bookingCardClasses">
+  <div
+      class="flex flex-col"
+      :class="[
+    bookingCardClasses,
+    isActive
+      ? 'border-2 border-primary/60 shadow-primary/20'
+      : 'border border-gray-200 dark:border-gray-700'
+  ]"
+  >
     <!-- title and booking-id -->
     <div class="mb-3 h-1/3">
       <div class="flex justify-between">
-        <span
-          class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full"
-        >
+        <div class="flex">
+          <div
+              class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full"
+          >
           #{{ booking.id }}
-        </span>
+          </div>
+          <div
+              v-if="isActive"
+              class="bg-primary/60 text-gray-800 dark:text-gray-200 text-xs font-semibold px-2 py-1 rounded-full"
+          >
+            Aktiv
+          </div>
+
+        </div>
         <UButton
           icon="i-lucide-ellipsis"
           class="rounded-3xl"
@@ -74,7 +91,7 @@ import { useEventStore } from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
-import {useFormatting} from "~/composables/utils/useFormatting.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   booking: {
@@ -92,7 +109,18 @@ const props = defineProps({
 });
 
 const eventStore = useEventStore();
-const { formatDate, formatPrice } = useFormatting()
+const { formatDate, formatPrice } = useFormatting();
+
+const currentTime = ref(new Date().getTime());
+const isActive = computed(() => {
+  if (props.booking.timeBegin && props.booking.timeEnd) {
+    return (
+      currentTime.value >= props.booking.timeBegin &&
+      currentTime.value <= props.booking.timeEnd
+    );
+  }
+  return false;
+});
 
 const bookingTitle = computed(() => {
   if (props.booking.bookableItems && props.booking.bookableItems.length > 0) {
@@ -131,7 +159,7 @@ const event = computed(() => {
 });
 
 const bookingCardClasses =
-  "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md rounded-lg p-4 my-2 hover:shadow-lg transition-shadow";
+  "bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 my-2 hover:shadow-lg transition-shadow";
 
 function openDetails() {
   const router = useRouter();
