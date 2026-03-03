@@ -45,9 +45,7 @@ watch(searchQuery, (newQuery) => {
   if (!newQuery) {
     emit("update:bookings", props.bookings);
   } else {
-    console.log("searching for", newQuery);
     const results = fuseInstance.value.search(newQuery).map((r) => r.item);
-    console.log("search results", results);
     emit("update:bookings", results);
   }
 });
@@ -55,7 +53,6 @@ watch(searchQuery, (newQuery) => {
 //filter and sorting
 const filters = ref([]);
 watch(filters, (newFilter) => {
-  console.log("filters changed", newFilter);
   if(!newFilter) {
     emit("update:bookings", props.bookings);
   } else {
@@ -118,13 +115,11 @@ function filterForStatus(bookings) {
 }
 
 function sortBookings(bookings) {
-  console.log("sorting bookings with option", filters.value.sortOption, bookings);
   if (!filters.value || !filters.value.sortOption) {
     return bookings;
   }
 
   const sortedBookings = [...bookings];
-  console.log("sorting bookings", sortedBookings);
   switch (filters.value.sortOption) {
     case "bookingDate-asc":
       sortedBookings.sort((a, b) => a.timeCreated - b.timeCreated);
@@ -133,13 +128,9 @@ function sortBookings(bookings) {
       sortedBookings.sort((a, b) => b.timeCreated - a.timeCreated);
       break;
     case "price-asc":
-      console.log("sorting by price asc");
-      console.log(sortedBookings.map(b => b.priceEur));
       sortedBookings.sort((a, b) => a.priceEur - b.priceEur);
       break;
     case "price-desc":
-      console.log("sorting by price desc");
-      console.log(sortedBookings.map(b => b.priceEur));
       sortedBookings.sort((a, b) => b.priceEur - a.priceEur);
       break;
     case "date-asc":
@@ -200,7 +191,6 @@ function sortBookings(bookings) {
     default:
       break;
   }
-  console.log("sorted bookings", sortedBookings.map(b => b.priceEur));
   return sortedBookings;
 }
 </script>
