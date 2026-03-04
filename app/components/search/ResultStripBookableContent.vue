@@ -40,7 +40,7 @@
             label="Details ansehen"
             :variant="entryPageMode ? 'solid' : 'ghost'"
             class="justify-center px-10 text-color-dark dark:text-color-light"
-            @click="goToDetails()"
+            @click="goToDetails(bookable.id, bookable.type)"
           />
 
           <UButton
@@ -59,7 +59,7 @@
             variant="solid"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer', color: contrastToPrimary }"
-            @click="goToDetails()"
+            @click="goToDetails(bookable.id, bookable.type)"
           />
         </div>
       </div>
@@ -73,6 +73,7 @@ import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue"
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
+import {useRedirection} from "~/composables/utils/useRedirection.js";
 
 const props = defineProps({
   bookable: {
@@ -101,32 +102,13 @@ const hasLongTitle = computed(() => {
   return (props.bookable?.title?.length ?? 0) > 60;
 });
 
-const { tenantTo } = useTenantRoute();
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.bookable.tenantId).name;
 });
 
+const {goToDetails} = useRedirection()
+
 const { contrastToPrimary } = useContrastColor();
-
-function goToDetails() {
-  const route = useRoute();
-  const router = useRouter();
-  const basePath = route.path;
-
-  if (!props.entryPageMode) {
-    if (basePath.includes("bookables")) {
-      router.push(tenantTo(`bookables/${props.bookable.id}`));
-    } else if (basePath.includes("locations")) {
-      router.push(tenantTo(`locations/${props.bookable.id}`));
-    }
-  } else {
-    if (props.bookable.type === "event-location") {
-      router.push(tenantTo(`locations/${props.bookable.id}`));
-    } else {
-      router.push(tenantTo(`bookables/${props.bookable.id}`));
-    }
-  }
-}
 
 function goToCheckout() {
   const route = useRoute();

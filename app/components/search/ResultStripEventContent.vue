@@ -49,7 +49,7 @@
             variant="ghost"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer' }"
-            @click="goToDetails()"
+            @click="goToDetails(event.id, 'event')"
           />
           <EventBookingButton v-if="event" :event="event" />
         </div>
@@ -61,7 +61,7 @@
             variant="solid"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer', color: contrastToPrimary }"
-            @click="goToDetails()"
+            @click="goToDetails(event.id, 'event')"
           />
           <EventBookingButton v-if="event" :event="event" />
         </div>
@@ -85,6 +85,7 @@ import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import { useTenantStore } from "~~/stores/tenant.js";
 import EventBookingButton from "~/components/events/EventBookingButton.vue";
 import {useContrastColor} from "~/composables/utils/useContrastColor.js";
+import {useRedirection} from "~/composables/utils/useRedirection.js";
 
 const props = defineProps({
   event: {
@@ -105,6 +106,8 @@ const props = defineProps({
   },
 });
 
+const {goToDetails} = useRedirection()
+
 const hasLongTitle = computed(() => {
   return (props.event?.information.name?.length ?? 0) > 60;
 });
@@ -114,7 +117,6 @@ const htmlTeaserText = computed(() => {
   return sanitizeHtml(props.event.information.teaserText || "");
 });
 
-const { tenantTo } = useTenantRoute();
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.event.tenantId).name;
 });
@@ -124,11 +126,6 @@ const isPrivateEvent = computed(() => {
 });
 
 const openTicketOptions = ref(false);
-
-function goToDetails() {
-  const router = useRouter();
-  router.push(tenantTo(`events/${props.event.id}`));
-}
 
 const { contrastToPrimary } = useContrastColor();
 </script>

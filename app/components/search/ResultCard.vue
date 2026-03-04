@@ -2,7 +2,7 @@
   <div
     class="shadow-lg bg-white dark:bg-gray-700 rounded-xl"
     :class="isNotBookable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer'"
-    @click="goToDetails()"
+    @click="goToDetails(item?.id, item?.category)"
   >
     <div id="header" class="flex flex-col h-36">
       <div class="flex h-9/10 relative">
@@ -52,8 +52,10 @@ import ResultCardBookableContent from "~/components/search/ResultCardBookableCon
 import ResultCardEventContent from "~/components/search/ResultCardEventContent.vue";
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
+import { useRedirection } from "~/composables/utils/useRedirection.js";
 
 const colorMode = useColorMode();
+const { goToDetails } = useRedirection();
 
 const theme = computed(() => {
   if (colorMode.value === "dark") return "dark";
@@ -83,36 +85,7 @@ const isEvent = computed(() => {
   return props.item.type === "event";
 });
 
-
-const { tenantTo } = useTenantRoute();
-
 const openEventTicketOptions = ref(false);
-
-function goToDetails() {
-  const route = useRoute();
-  const router = useRouter();
-  const basePath = route.path;
-
-  //TODO - Wir sollten dynamisch den Typ ermitteln und nicht über den Pfad gehen
-
-  if (props.entryPageMode) {
-    if (props.item.category === "event") {
-      router.push(tenantTo(`events/${props.item.id}`));
-    } else if (props.item.category === "location") {
-      router.push(tenantTo(`locations/${props.item.id}`));
-    } else {
-      router.push(tenantTo(`bookables/${props.item.id}`));
-    }
-  } else {
-    if (basePath.includes("bookables")) {
-      router.push(tenantTo(`bookables/${props.item.id}`));
-    } else if (basePath.includes("locations")) {
-      router.push(tenantTo(`locations/${props.item.id}`));
-    } else if (basePath.includes("events")) {
-      router.push(tenantTo(`events/${props.item.id}`));
-    }
-  }
-}
 </script>
 
 <style scoped></style>
