@@ -206,7 +206,6 @@ const isBookable = computed(() => {
 
 const { contrastToPrimary } = useContrastColor();
 
-
 async function setSearchTimePeriod(tp) {
   timePeriod.value = tp;
   await runSearch({

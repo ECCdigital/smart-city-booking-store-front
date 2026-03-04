@@ -22,7 +22,7 @@ export const useEventStore = defineStore("event", {
       }
     },
     async getEventTimeById(eventId) {
-      const event = this.events.find((event) => event.id === eventId)
+      const event = this.events.find((event) => event.id === eventId);
       if (!event) {
         return null;
       }
@@ -34,7 +34,7 @@ export const useEventStore = defineStore("event", {
       const endTimestamp = new Date(endString).getTime();
 
       return [startTimestamp, endTimestamp];
-      },
+    },
     addOrUpdate(event) {
       const index = this.events.findIndex((e) => e.id === event.id);
       if (index !== -1) {

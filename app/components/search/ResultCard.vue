@@ -16,7 +16,7 @@
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
-            item.information.teaserImage
+            item.information.teaserImage,
           )}`"
           alt=""
           class="w-full object-cover rounded-t-xl"
@@ -27,7 +27,6 @@
       </div>
       <USeparator color="primary" type="solid" size="xl" class="w-full" />
     </div>
-
     <ResultCardBookableContent
       v-if="!isEvent"
       :bookable="item"
