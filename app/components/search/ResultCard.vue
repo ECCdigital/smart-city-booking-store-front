@@ -77,11 +77,7 @@ const props = defineProps({
   },
 });
 const isEvent = computed(() => {
-  if ("type" in props.item) {
-    return false;
-  } else {
-    return true;
-  }
+  return props.item.type === "event";
 });
 
 

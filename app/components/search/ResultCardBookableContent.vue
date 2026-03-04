@@ -19,7 +19,7 @@
 
       <!-- Eigenschaften -->
       <div class="w-full my-5">
-        <BookableFlagDisplay :flags="bookable?.flags" />
+        <BookableFlagDisplay v-if="bookable.flags" :flags="bookable.flags" />
       </div>
     </div>
 

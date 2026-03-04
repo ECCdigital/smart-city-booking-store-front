@@ -96,8 +96,6 @@ const props = defineProps({
 });
 
 const isEvent = computed(() => {
-  return !("type" in props.item);
-});
 
 //toDo - read dynamically from instance
 const categoryName = computed(() => {
@@ -118,6 +116,8 @@ const categoryName = computed(() => {
     default:
       return "";
   }
+  return props.item.type === "event";
+  //return !("type" in props.item);
 });
 
 const price = computed(() => {
