@@ -6,7 +6,11 @@
   >
     <div id="header" class="flex flex-col h-36">
       <div class="flex h-9/10 relative">
-        <BookableTypeBadge :type="item?.type" :is-event="isEvent" />
+        <BookableTypeBadge
+          :type="item?.type"
+          :is-event="isEvent"
+          class="absolute top-2 left-2"
+        />
         <img
           v-if="!isEvent && item?.imgUrl"
           :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"

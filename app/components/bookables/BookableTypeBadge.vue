@@ -1,7 +1,7 @@
 <template>
-  <UBadge
-    class="absolute top-2 left-2 z-10"
-    color="primary"
+<UBadge
+    class="z-10"
+    :color="color"
     size="md"
     :label="categoryName"
   />
@@ -11,6 +11,10 @@ const props = defineProps({
   type: {
     type: String,
     required: true,
+  },
+  color: {
+    type: String,
+    default: "primary",
   },
   isEvent: {
     type: Boolean,

@@ -9,27 +9,26 @@
   >
     <div class="basis-1/4 flex items-center">
       <div class="basis-9/10 w-full h-full relative">
-        <UBadge
-          class="absolute top-2 left-2 z-10 custom-badge"
-          color="primary"
-          size="md"
-          :label="categoryName"
-          :style="{ '--badge-text-color': contrastToPrimary }"
+        <BookableTypeBadge
+          :type="item?.type"
+          :is-event="isEvent"
+          class="absolute top-2 left-2"
         />
+
         <img
           v-if="!isEvent && item?.imgUrl"
           :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
           alt=""
           class="w-full h-full object-cover rounded-l-xl"
-        />
+        >
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
-            item.information.teaserImage
+            item.information.teaserImage,
           )}`"
           alt=""
           class="w-full h-full object-cover rounded-l-xl"
-        />
+        >
         <ClientOnly v-else>
           <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-xl" />
           <template #fallback>
@@ -66,7 +65,7 @@
 import ResultStripEventContent from "~/components/search/ResultStripEventContent.vue";
 import ResultStripBookableContent from "~/components/search/ResultStripBookableContent.vue";
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 
 const colorMode = useColorMode();
 
@@ -96,26 +95,6 @@ const props = defineProps({
 });
 
 const isEvent = computed(() => {
-
-//toDo - read dynamically from instance
-const categoryName = computed(() => {
-  if (isEvent.value) {
-    return "Veranstaltung";
-  }
-  switch (props.item?.type) {
-    case "room":
-      return "Raum";
-    case "event-location":
-      return "Veranstaltungsort";
-    case "resource":
-      return "Gerät";
-    case "event":
-      return "Veranstaltung";
-    case "ticket":
-      return "Ticket";
-    default:
-      return "";
-  }
   return props.item.type === "event";
   //return !("type" in props.item);
 });
@@ -126,12 +105,6 @@ const price = computed(() => {
   }
   return props.calculatedPrice;
 });
-
-const { contrastToPrimary } = useContrastColor();
 </script>
 
-<style scoped>
-.custom-badge :deep(span) {
-  color: var(--badge-text-color) !important;
-}
-</style>
+<style scoped></style>
