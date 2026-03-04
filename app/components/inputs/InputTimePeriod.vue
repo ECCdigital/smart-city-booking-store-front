@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between w-full">
+  <div class="flex justify-between w-full bg-white dark:bg-gray-700">
     <UModal
       v-model:open="isOpen"
       title="Zeitraum auswählen"
@@ -14,7 +14,7 @@
         color="neutral"
         variant="ghost"
         icon="i-lucide-calendar-clock"
-        class="w-full text-gray-400 dark:text-gray-500 font-normal bg-white dark:bg-gray-700 py-2 px-3"
+        class="w-full text-gray-600 dark:text-gray-200 font-normal rounded-lg bg-white dark:bg-gray-700 py-2 px-3"
         :ui="{ leadingIcon: 'text-[16px] mr-1' }"
         @click="setDefaultStartDate()"
       >

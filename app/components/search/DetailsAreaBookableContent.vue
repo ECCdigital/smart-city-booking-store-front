@@ -74,12 +74,11 @@
             title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
             icon="i-lucide-info"
             variant="ghost"
-            class="p-2 text-info"
+            class="p-2 text-info w-full"
           />
           <InputTimePeriod
             :time-period="timePeriod"
-            class="border rounded-lg mt-2 mb-5"
-            style="max-width: 500px; min-width: 250px"
+            class="border dark:border-gray-600  rounded-lg mt-2 mb-5 w-full"
             @select-date="setSearchTimePeriod"
             @remove-date="removeSearchTimePeriod"
           />
