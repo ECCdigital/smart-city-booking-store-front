@@ -6,18 +6,13 @@
   >
     <div id="header" class="flex flex-col h-36">
       <div class="flex h-9/10 relative">
-        <UBadge
-          class="absolute top-2 left-2 z-10"
-          color="primary"
-          size="md"
-          :label="categoryName"
-        />
+        <BookableTypeBadge :type="item?.type" :is-event="isEvent" />
         <img
           v-if="!isEvent && item?.imgUrl"
           :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"
           alt="Bild des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
-        />
+        >
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
@@ -25,7 +20,7 @@
           )}`"
           alt=""
           class="w-full object-cover rounded-t-xl"
-        />
+        >
         <ClientOnly v-else>
           <ImagePlaceholder :theme="theme" class="w-full h-full rounded-t-xl" />
         </ClientOnly>
@@ -53,6 +48,7 @@
 import ResultCardBookableContent from "~/components/search/ResultCardBookableContent.vue";
 import ResultCardEventContent from "~/components/search/ResultCardEventContent.vue";
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
+import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 
 const colorMode = useColorMode();
 
@@ -87,26 +83,7 @@ const isEvent = computed(() => {
     return true;
   }
 });
-//toDo - read dynamically from instance
-const categoryName = computed(() => {
-  if (isEvent.value) {
-    return "Veranstaltung";
-  }
-  switch (props.item?.type) {
-    case "room":
-      return "Raum";
-    case "event-location":
-      return "Veranstaltungsort";
-    case "resource":
-      return "Gerät";
-    case "event":
-      return "Veranstaltung";
-    case "ticket":
-      return "Ticket";
-    default:
-      return "";
-  }
-});
+
 
 const { tenantTo } = useTenantRoute();
 
