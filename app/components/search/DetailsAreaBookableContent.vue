@@ -8,13 +8,15 @@
         </p>
         <h2 class="text-2xl font-bold">{{ item?.title }}</h2>
       </div>
-      <UButton
-        label="Jetzt buchen"
-        icon="i-lucide-shopping-cart"
-        class="justify-center px-5 mt-5 md:my-0"
-        :style="{ color: contrastToPrimary, cursor: 'pointer' }"
-        @click="goToCheckout()"
-      />
+      <div class="grid content-center">
+        <UButton
+          label="Jetzt buchen"
+          icon="i-lucide-shopping-cart"
+          class="justify-center px-5 mt-5 md:my-0"
+          :style="{ color: contrastToPrimary, cursor: 'pointer' }"
+          @click="goToCheckout()"
+        />
+      </div>
     </div>
 
     <div class="md:flex">
@@ -63,8 +65,11 @@
           :item="item"
           class="md:hidden mb-2"
         />
-        <AddressInformationArea :is-event="false" :item="item" class="md:hidden mb-5"/>
-
+        <AddressInformationArea
+          :is-event="false"
+          :item="item"
+          class="md:hidden mb-5"
+        />
 
         <!-- Availability -->
         <div>
@@ -78,7 +83,7 @@
           />
           <InputTimePeriod
             :time-period="timePeriod"
-            class="border dark:border-gray-600  rounded-lg mt-2 mb-5 w-full"
+            class="border dark:border-gray-600 rounded-lg mt-2 mb-5 w-full"
             @select-date="setSearchTimePeriod"
             @remove-date="removeSearchTimePeriod"
           />
@@ -87,7 +92,7 @@
           v-if="timePeriod && timePeriod.start && timePeriod.end"
           class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center"
         >
-          <span class="font-bold mr-1 content-center">{{ item?.title }}</span>
+          <span class="font-bold mr-1 content-center line-clamp-2 basis-2/3">{{ item?.title }}</span>
           <span class="content-center">
             {{ unit }}
           </span>
@@ -118,7 +123,11 @@
 
       <!-- Price Information & Map -->
       <div class="basis-1/3 space-y-3 pt-5">
-        <AddressInformationArea :is-event="false" :item="item" class="hidden md:block"/>
+        <AddressInformationArea
+          :is-event="false"
+          :item="item"
+          class="hidden md:block"
+        />
         <PriceInformationArea
           :is-event="false"
           :item="item"
@@ -204,7 +213,6 @@ const isBookable = computed(() => {
 });
 
 const { contrastToPrimary } = useContrastColor();
-
 
 async function setSearchTimePeriod(tp) {
   timePeriod.value = tp;
