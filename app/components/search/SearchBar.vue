@@ -14,7 +14,7 @@
         placeholder="Was suchen Sie?"
         size="lg"
         variant="ghost"
-        class="rounded-md w-full bg-white dark:bg-gray-700"
+        class="rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent"
         :ui="{
           placeholder: hasMissingType
             ? 'text-red-500 font-bold'
@@ -31,9 +31,9 @@
         icon="i-lucide-search"
         placeholder="Stichwort"
         clearable
-        class="rounded-md"
+        class="rounded-md "
         :ui="{
-          base: 'placeholder:text-gray-400 dark:text-gray-200',
+          base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
         }"
         @keyup.enter="onSearch"
@@ -46,7 +46,7 @@
         clearable
         class="rounded-md"
         :ui="{
-          base: 'placeholder:text-gray-400 dark:text-gray-200',
+          base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
         }"
         @keyup.enter="onSearch"
@@ -80,7 +80,7 @@
       placeholder="Was suchen Sie?"
       size="lg"
       variant="ghost"
-      class="rounded-md w-full bg-white dark:bg-gray-700"
+      class="rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent"
       :ui="{
         placeholder: hasMissingType
           ? 'text-red-500 font-bold'
@@ -99,7 +99,7 @@
       placeholder="Stichwort"
       clearable
       :ui="{
-        base: 'placeholder:text-gray-400 dark:text-gray-200',
+        base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
         leadingIcon: 'text-gray-400 dark:text-gray-200',
       }"
     />
@@ -110,7 +110,7 @@
       placeholder="Ort"
       clearable
       :ui="{
-        base: 'placeholder:text-gray-400 dark:text-gray-200',
+        base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
         leadingIcon: 'text-gray-400 dark:text-gray-200',
       }"
     />

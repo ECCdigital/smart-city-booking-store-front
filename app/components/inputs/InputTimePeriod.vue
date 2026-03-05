@@ -14,7 +14,7 @@
         color="neutral"
         variant="ghost"
         icon="i-lucide-calendar-clock"
-        class="w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-lg bg-white dark:bg-gray-700 py-2 px-3"
+        class="w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-lg bg-white dark:bg-gray-700 hover:bg-transparent py-2 px-3"
         :ui="{ leadingIcon: 'text-[16px] dark:text-gray-200 mr-1' }"
         @click="setDefaultStartDate()"
       >
