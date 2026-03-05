@@ -17,7 +17,7 @@
   <div v-else-if="!fetchedCoordinates">
     <USkeleton class="h-[300px] w-full" />
   </div>
-  <div v-else class="h-[300px] w-full grid place-content-center text-sm italic text-gray-600 my-5">
+  <div v-else class="h-[300px] w-full grid place-content-center text-sm italic text-gray-600 dark:text-gray-400 my-5">
     <p>(Adresse konnte nicht gefunden werden.)</p>
   </div>
 </template>

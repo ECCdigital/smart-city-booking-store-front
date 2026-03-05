@@ -75,7 +75,7 @@
             />
             <InputTimePeriod
               :time-period="timePeriod"
-              class="border dark:border-gray-600 rounded-lg mt-2 mb-5 w-full"
+              class="border border-gray-400 dark:border-gray-600 rounded-lg mt-2 mb-5 w-full"
               @select-date="setSearchTimePeriod"
               @remove-date="removeSearchTimePeriod"
             />
