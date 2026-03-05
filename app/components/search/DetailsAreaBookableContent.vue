@@ -90,34 +90,39 @@
         </div>
         <div
           v-if="timePeriod && timePeriod.start && timePeriod.end"
-          class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center"
+          class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 md:flex justify-between content-center"
         >
-          <span class="font-bold mr-1 content-center line-clamp-2 basis-2/3">{{ item?.title }}</span>
-          <span class="content-center">
-            {{ unit }}
-          </span>
-          <div class="flex-1" />
-          <BookablePriceDisplay
-            v-if="items.length > 0"
-            :bookable="items[0].item"
-            :calculated-price="items[0].calculatedPrice"
-            class="mx-2 font-bold content-center"
-          />
+          <div class="font-bold mr-1 content-center line-clamp-2">
+            {{ item?.title }}
+          </div>
+          <div
+            class="flex justify-end mt-3 md:mt-0 ml-2"
+          >
+            <BookablePriceDisplay
+              v-if="items.length > 0"
+              :bookable="items[0].item"
+              :calculated-price="items[0].calculatedPrice"
+              class="mx-2 font-bold content-center w-20"
+            />
+            <div class="content-center">
+              <UButton
+                  v-if="isBookable"
+                  label="Buchen"
+                  class="justify-center px-5"
+                  :style="{ color: contrastToPrimary }"
+                  @click="goToCheckout()"
+              />
+              <UButton
+                  v-else
+                  label="Nicht verfügbar"
+                  variant="soft"
+                  class="justify-center px-5"
+                  :style="{ color: contrastToPrimary }"
+              />
+            </div>
 
-          <UButton
-            v-if="isBookable"
-            label="Buchen"
-            class="justify-center px-5"
-            :style="{ color: contrastToPrimary }"
-            @click="goToCheckout()"
-          />
-          <UButton
-            v-else
-            label="Nicht verfügbar"
-            variant="soft"
-            class="justify-center px-5"
-            :style="{ color: contrastToPrimary }"
-          />
+
+          </div>
         </div>
       </div>
 
