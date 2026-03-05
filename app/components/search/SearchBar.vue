@@ -16,16 +16,26 @@
         variant="ghost"
         class="rounded-md w-full bg-white dark:bg-gray-700"
         :ui="{
-          placeholder: hasMissingType ? 'text-red-500 font-bold' : '',
+          placeholder: hasMissingType
+            ? 'text-red-500 font-bold'
+            : 'text-gray-400 dark:text-gray-200/60',
         }"
       />
-      <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
+      <USeparator
+        v-if="entryPageMode"
+        orientation="vertical"
+        :ui="{ border: 'border-gray-300' }"
+      />
       <InputText
         v-model="_term"
         icon="i-lucide-search"
         placeholder="Stichwort"
         clearable
         class="rounded-md"
+        :ui="{
+          base: 'placeholder:text-gray-400 dark:text-gray-200',
+          leadingIcon: 'text-gray-400 dark:text-gray-200',
+        }"
         @keyup.enter="onSearch"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
@@ -35,6 +45,10 @@
         placeholder="Ort"
         clearable
         class="rounded-md"
+        :ui="{
+          base: 'placeholder:text-gray-400 dark:text-gray-200',
+          leadingIcon: 'text-gray-400 dark:text-gray-200',
+        }"
         @keyup.enter="onSearch"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
@@ -68,15 +82,26 @@
       variant="ghost"
       class="rounded-md w-full bg-white dark:bg-gray-700"
       :ui="{
-        placeholder: hasMissingType ? 'text-red-500 font-bold' : '',
+        placeholder: hasMissingType
+          ? 'text-red-500 font-bold'
+          : 'text-gray-400 dark:text-gray-200/60',
+        leadingIcon: 'text-gray-400 dark:text-gray-200',
       }"
     />
-    <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
+    <USeparator
+      v-if="entryPageMode"
+      class="w-full"
+      :ui="{ border: 'border-gray-300' }"
+    />
     <InputText
       v-model="_term"
       icon="i-lucide-book-search"
       placeholder="Stichwort"
       clearable
+      :ui="{
+        base: 'placeholder:text-gray-400 dark:text-gray-200',
+        leadingIcon: 'text-gray-400 dark:text-gray-200',
+      }"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputText
@@ -84,6 +109,10 @@
       icon="i-lucide-map-pin"
       placeholder="Ort"
       clearable
+      :ui="{
+        base: 'placeholder:text-gray-400 dark:text-gray-200',
+        leadingIcon: 'text-gray-400 dark:text-gray-200',
+      }"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputTimePeriod
