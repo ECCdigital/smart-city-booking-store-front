@@ -2,7 +2,10 @@
   <div class="basis-3/4 p-4 flex flex-col">
     <div>
       <!-- Title -->
-      <p class="font-bold" :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'">
+      <p
+        class="font-bold"
+        :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'"
+      >
         {{ event.information.name }}
       </p>
       <p>{{ tenantName }}</p>
@@ -32,47 +35,30 @@
 
       <div class="basis-2/5 w-full grid content-end mt-4">
         <EventPriceDisplay
-          v-if="!isNotBookable"
+          v-if="!isNotBookable && !isNotSuitable"
           :event-tickets="event.tickets"
           :is-free="event.attendees.free"
           class="grid place-content-end text-md font-bold mt-2"
         />
 
         <!--Aktionen-->
-        <div
-          v-if="!entryPageMode"
-          class="w-full mt-2 flex justify-end content-end gap-2"
-        >
+        <div class="w-full mt-2 flex justify-end content-end gap-2">
           <UButton
-            v-if="!isNotBookable"
             label="Details ansehen"
             variant="ghost"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer' }"
             @click="goToDetails()"
           />
-          <EventBookingButton v-if="event" :event="event" />
-        </div>
-
-        <div v-else class="w-full mt-2 flex justify-end content-end gap-2">
-          <UButton
-            v-if="!isNotBookable"
-            label="Details ansehen"
-            variant="solid"
-            class="justify-center px-10 text-color-dark dark:text-color-light"
-            :style="{ cursor: 'pointer', color: contrastToPrimary }"
-            @click="goToDetails()"
+          <EventBookingButton
+            v-if="!isNotSuitable && event"
+            :event="event"
+            :is-not-bookable="isNotBookable"
+            :is-not-suitable="isNotSuitable"
           />
-          <EventBookingButton v-if="event" :event="event" />
         </div>
       </div>
     </div>
-    <EventTicketOptionsDialog
-      v-model:open="openTicketOptions"
-      :tickets="event.tickets"
-      :is-private-event="isPrivateEvent"
-      :registration-needed="event.attendees.needsRegistration"
-    />
   </div>
 </template>
 <script setup>
@@ -80,11 +66,9 @@ import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import EventPriceDisplay from "~/components/events/EventPriceDisplay.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import EventAdressInformation from "~/components/events/EventAdressInformation.vue";
-import EventTicketOptionsDialog from "~/components/events/EventTicketOptionsDialog.vue";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import { useTenantStore } from "~~/stores/tenant.js";
 import EventBookingButton from "~/components/events/EventBookingButton.vue";
-import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 
 const props = defineProps({
   event: {
@@ -94,6 +78,10 @@ const props = defineProps({
   price: {
     type: Number,
     default: null,
+  },
+  isNotSuitable: {
+    type: Boolean,
+    default: false,
   },
   isNotBookable: {
     type: Boolean,
@@ -119,17 +107,9 @@ const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.event.tenantId).name;
 });
 
-const isPrivateEvent = computed(() => {
-  return !props.event.attendees.publicEvent || false;
-});
-
-const openTicketOptions = ref(false);
-
 function goToDetails() {
   const router = useRouter();
   router.push(tenantTo(`events/${props.event.id}`));
 }
-
-const { contrastToPrimary } = useContrastColor();
 </script>
 <style scoped></style>

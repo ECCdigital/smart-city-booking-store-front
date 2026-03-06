@@ -3,7 +3,7 @@
     v-if="props.item"
     class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl max-h-72 h-72"
     :class="[
-      isNotBookable ? 'opacity-70' : ' ',
+      isNotSuitable ? 'opacity-70' : ' ',
       isEvent ? 'max-h-100 h-100' : 'max-h-72 h-72',
     ]"
   >
@@ -21,7 +21,7 @@
           :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
           alt=""
           class="w-full h-full object-cover rounded-l-xl"
-        />
+        >
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
@@ -29,7 +29,7 @@
           )}`"
           alt=""
           class="w-full h-full object-cover rounded-l-xl"
-        />
+        >
         <ClientOnly v-else>
           <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-xl" />
           <template #fallback>
@@ -51,12 +51,14 @@
       v-if="!isEvent"
       :bookable="item"
       :calculated-price="price"
+      :is-not-suitable="isNotSuitable"
       :is-not-bookable="isNotBookable"
       :entry-page-mode="entryPageMode"
     />
     <ResultStripEventContent
       v-if="isEvent"
       :event="item"
+      :is-not-suitable="isNotSuitable"
       :is-not-bookable="isNotBookable"
       :entry-page-mode="entryPageMode"
     />
@@ -84,6 +86,10 @@ const props = defineProps({
   calculatedPrice: {
     type: Object,
     default: null,
+  },
+  isNotSuitable: {
+    type: Boolean,
+    default: false,
   },
   isNotBookable: {
     type: Boolean,
