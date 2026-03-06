@@ -1,7 +1,7 @@
 <template>
   <div
     class="shadow-lg bg-white dark:bg-gray-700 rounded-xl"
-    :class="isNotBookable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer'"
+    :class="isNotSuitable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer'"
     @click="goToDetails()"
   >
     <div id="header" class="flex flex-col h-36">
@@ -17,7 +17,7 @@
           :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"
           alt="Bild des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
-        />
+        >
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
@@ -25,7 +25,7 @@
           )}`"
           alt=""
           class="w-full object-cover rounded-t-xl"
-        />
+        >
         <ClientOnly v-else>
           <ImagePlaceholder :theme="theme" class="w-full h-full rounded-t-xl" />
         </ClientOnly>
@@ -38,6 +38,7 @@
       :bookable="item"
       :calculated-price="calculatedPrice"
       :is-not-bookable="isNotBookable"
+      :is-not-suitable="isNotSuitable"
       :entry-page-mode="entryPageMode"
     />
     <ResultCardEventContent
@@ -45,6 +46,7 @@
       v-model:open-ticket-options="openEventTicketOptions"
       :event="item"
       :is-not-bookable="isNotBookable"
+      :is-not-suitable="isNotSuitable"
       :entry-page-mode="entryPageMode"
     />
   </div>
@@ -70,6 +72,10 @@ const props = defineProps({
   calculatedPrice: {
     type: Object,
     default: null,
+  },
+  isNotSuitable: {
+    type: Boolean,
+    default: false,
   },
   isNotBookable: {
     type: Boolean,

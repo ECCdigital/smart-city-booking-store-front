@@ -30,18 +30,18 @@
 
     <!-- Preis -->
     <div
-      v-if="!isNotBookable"
+      v-if="!isNotSuitable"
       class="w-full flex flex-col justify-end text-md font-bold"
     >
       <EventPriceDisplay
-        v-if="!isNotBookable"
+        v-if="!isNotSuitable"
         :event-tickets="event.tickets"
         :is-free="event.attendees.free"
         class="grid place-content-end text-md font-bold mt-2"
       />
       <div class="flex justify-end mt-2">
         <UButton
-          v-if="!isNotBookable && !event.attendees.needsRegistration"
+          v-if="!isNotSuitable && !event.attendees.needsRegistration"
           label="Keine Anmeldung nötig"
           variant="soft"
           disabled
@@ -70,6 +70,10 @@ const props = defineProps({
   event: {
     type: Object,
     required: true,
+  },
+  isNotSuitable: {
+    type: Boolean,
+    default: false,
   },
   isNotBookable: {
     type: Boolean,
