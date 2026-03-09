@@ -120,7 +120,7 @@
         </div>
 
         <!-- Related Bookables -->
-        <div>
+        <div id="relatedBookables">
           <h3 class="text-xl font-bold">Könnte Sie auch interessieren:</h3>
         </div>
         <BookableRelatedItems />
