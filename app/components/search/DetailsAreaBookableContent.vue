@@ -10,12 +10,21 @@
       </div>
       <div class="grid content-center">
         <UButton
+            v-if="item.isBookable"
           label="Jetzt buchen"
           icon="i-lucide-shopping-cart"
           class="justify-center px-5 mt-5 md:my-0"
           :style="{ color: contrastToPrimary, cursor: 'pointer' }"
           @click="goToCheckout()"
         />
+        <UButton
+          v-else-if="item.relatedBookableIds.length >0"
+          label="Buchungsoptionen ansehen"
+          icon="i-lucide-list"
+          class="justify-center px-5 mt-5 md:my-0"
+          :style="{ color: contrastToPrimary, cursor: 'pointer' }"
+          @click="goToRelatedItems()"
+          />
       </div>
     </div>
 
@@ -124,6 +133,7 @@
 
           </div>
         </div>
+        <div id="relatedBookables"/>
       </div>
 
       <!-- Price Information & Map -->
@@ -256,6 +266,12 @@ function goToCheckout(checkoutData) {
       start: route.query.start,
       end: route.query.end,
     });
+  }
+}
+function goToRelatedItems() {
+  const el = document.getElementById("relatedBookables");
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth" });
   }
 }
 </script>
