@@ -214,7 +214,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   const suitableCount = computed(
-    () => sortedItems.value.filter((l) => l.status === "suitable").length,
+    () => sortedItems.value.filter((l) => l.status !== "nonSuitable").length,
   );
 
   function setFilterQueryParams(criteria: Partial<CatalogQueryState>) {
@@ -292,12 +292,11 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     itemsWithStatus = await checkTickets(itemsWithStatus);
 
-    let bookableItems = itemsWithStatus.filter(
-      (i: any) => i.status === "isBookable",
-    );
+    let bookableItems = itemsWithStatus;
 
     bookableItems = searchForSearchTerm(criteria.term, bookableItems);
     bookableItems = searchForLocation(criteria.location, bookableItems);
+
     bookableItems = await searchForTimePeriod(
       { start: criteria.timeStart, end: criteria.timeEnd },
       bookableItems,
@@ -440,15 +439,14 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   async function updateItemStatus(
-    itemsWithStatus: any[],
-    bookableItems: any[],
+    itemsWithStatus: any[], //alle 58
+    bookableItems: any[], //8 aus Suche (bookable & nonBookable)
     timePeriod: any,
   ) {
     return await Promise.all(
       itemsWithStatus.map(async (item) => {
+        const isSuitable = bookableItems.includes(item);
         if (item.status === "isBookable") {
-          const isSuitable = bookableItems.includes(item);
-
           let price = null;
           if (
             timePeriod &&
@@ -483,7 +481,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         } else {
           return {
             ...item,
-            status: "nonBookable",
+            status: isSuitable ? "nonBookable" : "nonSuitable",
             calculatedPrice: null,
           };
         }
