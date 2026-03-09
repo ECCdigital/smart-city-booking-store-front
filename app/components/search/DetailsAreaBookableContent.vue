@@ -129,8 +129,6 @@
                   :style="{ color: contrastToPrimary }"
               />
             </div>
-
-
           </div>
         </div>
         <div id="relatedBookables"/>
@@ -188,30 +186,6 @@ const showFullDescription = ref(false);
 const timePeriod = ref({
   start: query.start,
   end: query.end,
-});
-const unit = computed(() => {
-  if (!timePeriod.value) {
-    return "";
-  }
-
-  const type = props.item?.priceType;
-
-  const diffMs = timePeriod.value.end - timePeriod.value.start;
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-  if (type === "per-day") {
-    if (diffDays > 1) {
-      return "/ " + diffDays + " Tage";
-    } else {
-      return "/ " + diffDays + " Tag";
-    }
-  }
-
-  if (type === "per-hour" && diffHours) {
-    return "/ " + diffHours + " Std.";
-  }
-  return " ";
 });
 
 const tenantName = computed(() => {
