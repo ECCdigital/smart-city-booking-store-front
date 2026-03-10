@@ -1,6 +1,6 @@
 <template>
   <div
-    class="md:basis-1/6 border border-gray-200 rounded m-2 md:m-0 md:p-2 md:space-y-1 flex md:block"
+    class="md:basis-1/6 border border-gray-200 rounded m-2 md:m-0 md:p-2 md:space-y-1 flex md:block md:h-64"
   >
     <div
       v-for="(item, i) in userNavigation"
@@ -9,11 +9,13 @@
     >
       <UTooltip text="Coming soon..." :disabled="!item.disabled">
         <NuxtLink
-          class="sm:flex rounded p-2 w-full justify-center md:justify-start items-center text-center md:text-left"
+          class="grid sm:flex rounded p-2 w-full justify-center md:justify-start items-center text-center md:text-left"
           :class="getLinkClasses(item)"
           :to="item.disabled ? '' : tenantTo(item.value)"
         >
-          <UIcon :name="item.icon" class="mr-3 mt-1" />
+          <div class="flex justify-center">
+            <UIcon :name="item.icon" class="sm:mr-3 mt-1" />
+          </div>
           <div>{{ item.label }}</div>
         </NuxtLink>
       </UTooltip>

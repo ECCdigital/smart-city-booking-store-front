@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold">Ihre Rechnungen</h2>
+    <PageHeader title="Ihre Rechnungen" />
 
     <div class="flex flex-col items-center justify-center py-24 text-center">
       <div class="text-4xl mb-4">🧾</div>

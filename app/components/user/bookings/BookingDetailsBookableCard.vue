@@ -41,6 +41,8 @@
   </div>
 </template>
 <script setup>
+import {useFormatting} from "~/composables/utils/useFormatting.js";
+
 const props = defineProps({
   bookable: {
     type: Object,
@@ -51,19 +53,14 @@ const props = defineProps({
 const bookableTitle = computed(() => props.bookable._bookableUsed.title)
 const eventId = computed(() => props.bookable._bookableUsed.eventId);
 
+const { formatPrice } = useFormatting()
+
 const bookingPrice = computed(() => {
   if (props.bookable.userGrossPriceEur > 0) {
     return formatPrice(props.bookable.userGrossPriceEur);
   }
   return "0,00 €";
 });
-
-const formatPrice = (price) => {
-  return new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency: "EUR",
-  }).format(price);
-};
 
 function goToBookable(bookableId) {
   const router = useRouter();

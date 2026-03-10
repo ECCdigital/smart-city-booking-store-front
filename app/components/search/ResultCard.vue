@@ -86,6 +86,33 @@ const isEvent = computed(() => {
 });
 
 const openEventTicketOptions = ref(false);
+
+
+function goToDetails() {
+  const route = useRoute();
+  const router = useRouter();
+  const basePath = route.path;
+
+  //TODO - Wir sollten dynamisch den Typ ermitteln und nicht über den Pfad gehen
+
+  if (props.entryPageMode) {
+    if (props.item.category === "event" || isEvent.value) {
+      router.push(tenantTo(`events/${props.item.id}`));
+    } else if (props.item.category === "location") {
+      router.push(tenantTo(`locations/${props.item.id}`));
+    } else {
+      router.push(tenantTo(`bookables/${props.item.id}`));
+    }
+  } else {
+    if (basePath.includes("bookables")) {
+      router.push(tenantTo(`bookables/${props.item.id}`));
+    } else if (basePath.includes("locations")) {
+      router.push(tenantTo(`locations/${props.item.id}`));
+    } else if (basePath.includes("events")) {
+      router.push(tenantTo(`events/${props.item.id}`));
+    }
+  }
+}
 </script>
 
 <style scoped></style>
