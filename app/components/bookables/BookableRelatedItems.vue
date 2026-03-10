@@ -4,7 +4,7 @@
   >
     <!-- toDo - change to -> v-for="bookable in item.relatedBookables" -->
     <div
-        v-for="item in _relatedBookables"
+        v-for="item in relatedBookables"
         :key="item.id"
         class="flex justify-between items-center bg-white dark:bg-gray-700 rounded-lg shadow-sm px-4 py-2 border border-gray-200 dark:border-gray-500 min-w-[250px]"
     >
@@ -41,22 +41,6 @@ const props = defineProps({
 });
 
 const {goToDetails} = useRedirection()
-
-const _relatedBookables = computed( () => {
-  if(props.relatedBookables.length === 0) {
-    return testRelatedBookables
-  }
-  return props.relatedBookables
-})
-
-const testRelatedBookables = [
-  { id: 123, title: "Beamer", type: "resource" },
-  { id: 456, title: "Toiletten", type: "room" },
-  { id: 154, title: "Parkplatz für extra große Angeber-Autos", type: "resource" },
-  { id: 789, title: "Kaffeeküche", type: "event-location" },
-  { id: 321, title: "Reinigung", type: "ticket" },
-  { id: 721, title: "Einführungskurs", type: "event" },
-];
 </script>
 
 <style scoped></style>

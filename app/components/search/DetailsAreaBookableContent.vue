@@ -120,12 +120,10 @@
         </div>
 
         <!-- Related Bookables -->
-        <div id="relatedBookables">
+        <div v-if="item.relatedBookables.length" id="relatedBookables">
           <h3 class="text-xl font-bold">Könnte Sie auch interessieren:</h3>
         </div>
-        <BookableRelatedItems />
-        <!-- toDo - *** related bookables einfügen *** -->
-        <!-- <BookableRelatedItems :related-bookables="item.relatedBookables" /> -->
+        <BookableRelatedItems :related-bookables="item.relatedBookables" />
       </div>
 
       <!-- Price Information & Map -->
