@@ -35,7 +35,7 @@ export function useCatalogBundle() {
         server: true,
         getCachedData: cacheEnabled ? undefined : () => undefined,
         dedupe: cacheEnabled ? "defer" : "cancel",
-      }
+      },
     );
 
     if (error.value) {
@@ -64,7 +64,11 @@ export function useCatalogBundle() {
       bookableStore.addOrUpdate(data.value.bookable);
     }
     if (data.value?.events) {
-      eventStore.$patch({ events: data.value.events });
+      const eventsWithType = data.value.events.map((event) => ({
+        ...event,
+        type: "event",
+      }));
+      eventStore.$patch({ events: eventsWithType });
     }
     if (data.value?.event) {
       eventStore.addOrUpdate(data.value.event);

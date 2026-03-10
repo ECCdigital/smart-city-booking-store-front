@@ -1,15 +1,6 @@
 <template>
   <div class="mb-15" style="max-width: 800px">
-    <UButton
-      label="Zurück"
-      icon="i-lucide-arrow-left"
-      class="justify-center px-5 mt-2 bg-gray-300 text-black"
-      :style="{ cursor: 'pointer' }"
-      @click="$router.back()"
-    />
-    <h3 class="text-xl font-bold my-5">Buchungsdetails</h3>
-
-    <!-- basis information -->
+        <!-- basis information -->
     <div class="flex mb-5">
       <div class="basis-1/2">
         <p class="font-medium">Buchungsnummer</p>
@@ -110,6 +101,8 @@ import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue"
 import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
+import {useFormatting} from "~/composables/utils/useFormatting.js";
+import BackButton from "~/components/BackButton.vue";
 
 const props = defineProps({
   booking: {
@@ -117,6 +110,8 @@ const props = defineProps({
     required: true,
   },
 });
+
+const { formatDate, formatPrice } = useFormatting()
 
 const tenantsStore = useTenantStore();
 const tenantName = computed(() => {
@@ -216,24 +211,6 @@ const bookableTitles = computed(() => {
     id: item._bookableUsed.id,
   }));
 });
-
-//help functions
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const formatPrice = (price) => {
-  return new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency: "EUR",
-  }).format(price);
-};
 </script>
 
 <style scoped></style>

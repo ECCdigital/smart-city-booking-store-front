@@ -35,7 +35,6 @@ const { contrastToPrimary } = useContrastColor();
 const router = useRouter()
 
 function goToCategory() {
-  console.log("Navigating to bookables with category:", props.category.value)
   const route = useRoute()
   route.query.cat = props.category.value
 

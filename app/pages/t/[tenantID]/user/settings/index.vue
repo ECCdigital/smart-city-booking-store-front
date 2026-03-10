@@ -1,11 +1,17 @@
 <template>
-  <div>
-    <SettingsSection v-if="user" :user="user"/>
+  <div class="w-full container-md">
+    <PageHeader
+      title="Einstellungen"
+      description="Verwalten Sie Ihre persönlichen Angaben. Sie haben außerdem die
+      Möglichkeit, Ihr Passwort zu ändern."
+    />
+    <SettingsSection v-if="user" :user="user" />
   </div>
 </template>
 <script setup>
 import SettingsSection from "~/components/user/settings/SettingsSection.vue";
 import { useAuthStore } from "~~/stores/auth.js";
+import PageHeader from "~/components/PageHeader.vue";
 
 definePageMeta({
   name: "tenant-settings",
@@ -16,6 +22,4 @@ definePageMeta({
 const authStore = useAuthStore();
 const user = computed(() => authStore.getUser);
 </script>
-<style scoped>
-
-</style>
+<style scoped></style>

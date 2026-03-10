@@ -99,7 +99,7 @@
         </div>
         <div
           v-if="timePeriod && timePeriod.start && timePeriod.end"
-          class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 md:flex justify-between content-center"
+          class="bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-500 shadow-sm rounded-lg p-3 mb-2 md:flex justify-between content-center"
         >
           <div class="font-bold mr-1 content-center line-clamp-2">
             {{ item?.title }}
@@ -131,7 +131,12 @@
             </div>
           </div>
         </div>
-        <div id="relatedBookables"/>
+
+        <!-- Related Bookables -->
+        <div id="relatedBookables" v-if="item.relatedBookables.length">
+          <h3 class="text-xl font-bold">Könnte Sie auch interessieren:</h3>
+        </div>
+        <BookableRelatedItems :related-bookables="item.relatedBookables" />
       </div>
 
       <!-- Price Information & Map -->
@@ -162,6 +167,7 @@ import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import AddressInformationArea from "~/components/AddressInformationArea.vue";
 import PriceInformationArea from "~/components/PriceInformationArea.vue";
+import BookableRelatedItems from "~/components/bookables/BookableRelatedItems.vue";
 
 const props = defineProps({
   item: {

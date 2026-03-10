@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold">Ihre Favoriten</h2>
+    <PageHeader title="Ihre Favoriten" />
     <div class="flex flex-col items-center justify-center py-24 text-center">
       <div class="text-4xl mb-4">⭐</div>
       <h1 class="text-xl font-semibold mb-2">Ihre Favoriten kommen bald</h1>
