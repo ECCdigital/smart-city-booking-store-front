@@ -63,8 +63,11 @@
           :item="item"
           class="md:hidden mb-2"
         />
-        <AddressInformationArea :is-event="false" :item="item" class="md:hidden mb-5"/>
-
+        <AddressInformationArea
+          :is-event="false"
+          :item="item"
+          class="md:hidden mb-5"
+        />
 
         <!-- Availability -->
         <div>
@@ -86,7 +89,7 @@
         </div>
         <div
           v-if="timePeriod && timePeriod.start && timePeriod.end"
-          class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center"
+          class="bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-500 shadow-sm rounded-lg p-3 mb-2 flex content-center"
         >
           <span class="font-bold mr-1 content-center">{{ item?.title }}</span>
           <span class="content-center">
@@ -115,11 +118,21 @@
             :style="{ color: contrastToPrimary }"
           />
         </div>
+
+        <!-- Related Bookables -->
+        <div v-if="item.relatedBookables.length" id="relatedBookables">
+          <h3 class="text-xl font-bold">Könnte Sie auch interessieren:</h3>
+        </div>
+        <BookableRelatedItems :related-bookables="item.relatedBookables" />
       </div>
 
       <!-- Price Information & Map -->
       <div class="basis-1/3 space-y-3 pt-5">
-        <AddressInformationArea :is-event="false" :item="item" class="hidden md:block"/>
+        <AddressInformationArea
+          :is-event="false"
+          :item="item"
+          class="hidden md:block"
+        />
         <PriceInformationArea
           :is-event="false"
           :item="item"
@@ -141,6 +154,7 @@ import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import AddressInformationArea from "~/components/AddressInformationArea.vue";
 import PriceInformationArea from "~/components/PriceInformationArea.vue";
+import BookableRelatedItems from "~/components/bookables/BookableRelatedItems.vue";
 
 const props = defineProps({
   item: {
@@ -205,7 +219,6 @@ const isBookable = computed(() => {
 });
 
 const { contrastToPrimary } = useContrastColor();
-
 
 async function setSearchTimePeriod(tp) {
   timePeriod.value = tp;
