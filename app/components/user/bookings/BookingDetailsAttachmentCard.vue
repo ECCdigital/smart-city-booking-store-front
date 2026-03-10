@@ -44,6 +44,7 @@
 </template>
 <script setup>
 import { useBookings } from "~/composables/api/useBookings.js";
+import {useFormatting} from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   attachment: {
@@ -68,6 +69,8 @@ const props = defineProps({
   },
 });
 
+const { formatDate } = useFormatting()
+
 const attachmentType = computed(() => {
   switch (props.attachment.type) {
     case "invoice":
@@ -88,16 +91,6 @@ const attachmentType = computed(() => {
       return "Unbekannter Anhangstyp";
   }
 });
-
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 function getBookableTitle(bookableId) {
   if (!props.bookables || props.bookables.length === 0) {

@@ -17,7 +17,7 @@
           :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"
           alt="Bild des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
-        />
+        >
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
           :src="`/api/img?url=${encodeURIComponent(
@@ -25,7 +25,7 @@
           )}`"
           alt=""
           class="w-full object-cover rounded-t-xl"
-        />
+        >
         <ClientOnly v-else>
           <ImagePlaceholder :theme="theme" class="w-full h-full rounded-t-xl" />
         </ClientOnly>
@@ -120,7 +120,7 @@ function goToDetails() {
   //TODO - Wir sollten dynamisch den Typ ermitteln und nicht über den Pfad gehen
 
   if (props.entryPageMode) {
-    if (props.item.category === "event") {
+    if (props.item.category === "event" || isEvent.value) {
       router.push(tenantTo(`events/${props.item.id}`));
     } else if (props.item.category === "location") {
       router.push(tenantTo(`locations/${props.item.id}`));

@@ -44,6 +44,7 @@
 const emit = defineEmits(["setFilter"]);
 
 const sortOption = ref(null);
+const showActiveBookings = ref(false);
 const showStatusConfirmed = ref(false);
 const showStatusRejected = ref(false);
 const showStatusPending = ref(false);
@@ -51,6 +52,7 @@ const showPaymentsConfirmed = ref(false);
 const showPaymentsUnconfirmed = ref(false);
 const hasFiltersApplied = computed(() => {
   return (
+    showActiveBookings.value ||
     showStatusConfirmed.value ||
     showStatusRejected.value ||
     showStatusPending.value ||
@@ -155,6 +157,17 @@ const filterItems = () => [
     disabled: true,
   },
   {
+    label: "Aktive Buchungen",
+    icon: "i-lucide-tv-minimal-play",
+    type: "checkbox",
+    checked: showActiveBookings.value,
+    class: showActiveBookings.value ? "bg-primary/20" : "",
+    onUpdateChecked(checked) {
+      showActiveBookings.value = checked;
+      onSetFilter();
+    },
+  },
+  {
     label: "Status:",
     class: "cursor-default opacity-50 hover:bg-transparent",
     disabled: true,
@@ -244,6 +257,7 @@ function getSortIconByValue(value) {
 function onSetFilter() {
   emit("setFilter", {
     sortOption: sortOption.value,
+    activeBookings: showActiveBookings.value,
     statusConfirmed: showStatusConfirmed.value,
     statusRejected: showStatusRejected.value,
     statusPending: showStatusPending.value,

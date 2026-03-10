@@ -1,19 +1,5 @@
 <template>
   <div class="w-full">
-    <div class="flex justify-end items-center w-full mb-4">
-      <div class="w-full md:w-[40%] flex">
-        <UInput
-            v-model="searchQuery"
-            icon="i-lucide-search"
-            size="md"
-            variant="outline"
-            placeholder="Suchen..."
-            class="w-full"
-        />
-        <BookingsFilter @set-filter="setFilter" />
-      </div>
-    </div>
-
     <div class="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6">
       <BookingCard
         v-for="booking in paginatedBookings"
@@ -26,7 +12,7 @@
       <UPagination
         v-model:page="currentPage"
         :items-per-page="itemsPerPage"
-        :total="filteredBookings.length"
+        :total="allBookings.length"
         :sibling-count="1"
         show-edges
       >
@@ -44,8 +30,6 @@
 <script setup>
 import BookingCard from "~/components/user/BookingCard.vue";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
-import Fuse from "fuse.js";
-import BookingsFilter from "~/components/user/bookings/BookingsFilter.vue";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 
 const props = defineProps({
@@ -58,7 +42,6 @@ const props = defineProps({
 
 const allBookings = computed(() =>
   [...props.bookings]
-    .sort((a, b) => b.timeCreated - a.timeCreated)
     .map((b) => ({
       ...b,
       displayBookingDate: new Date(b.timeCreated).toLocaleDateString("de-DE", {
@@ -77,32 +60,10 @@ const allBookings = computed(() =>
     }))
 );
 
-const fuseInstance = computed(() => new Fuse(allBookings.value, searchOptions));
-
-const searchedBookings = computed(() => {
-  if (!searchQuery.value) return allBookings.value;
-  return fuseInstance.value.search(searchQuery.value).map((r) => r.item);
-});
-
-const filteredBookings = computed(() => {
-  if (!filters.value) {
-    return searchedBookings.value;
-  }
-
-  let bookings = searchedBookings.value;
-  bookings = filterForPaymentStatus(bookings);
-
-  bookings = filterForStatus(bookings);
-
-  bookings = sortBookings(bookings);
-
-  return bookings;
-});
-
 const paginatedBookings = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value;
   const end = start + itemsPerPage.value;
-  return filteredBookings.value.slice(start, end);
+  return allBookings.value.slice(start, end);
 });
 
 const { loadBundle } = useCatalogBundle();
@@ -127,152 +88,6 @@ const itemsPerPage = computed(() => {
   }
   return 10;
 });
-
-//search
-const searchQuery = ref("");
-const searchOptions = {
-  keys: [
-    "id",
-    "bookableItems._bookableUsed.title",
-    "displayBookingDate",
-    "statusLabel",
-    "payedLabel",
-  ],
-  includeScore: true,
-  shouldSort: true,
-  threshold: 0.3,
-  findAllMatches: true,
-  ignoreLocation: true,
-};
-
-//filter and sorting
-const filters = ref(null);
-
-function setFilter(filter) {
-  filters.value = filter;
-}
-
-function filterForPaymentStatus(bookings) {
-  if (
-    !filters.value ||
-    (!filters.value.paymentsConfirmed && !filters.value.paymentsUnconfirmed)
-  ) {
-    return bookings;
-  }
-  return bookings.filter((b) => {
-    if (filters.value.paymentsConfirmed && b.isPayed) {
-      return true;
-    }
-    if (filters.value.paymentsUnconfirmed && !b.isPayed) {
-      return true;
-    }
-    return false;
-  });
-}
-
-function filterForStatus(bookings) {
-  if (
-    !filters.value ||
-    (!filters.value.statusConfirmed &&
-      !filters.value.statusRejected &&
-      !filters.value.statusPending)
-  ) {
-    return bookings;
-  }
-
-  return bookings.filter((b) => {
-    if (filters.value.statusRejected && b.isRejected) {
-      return true;
-    }
-    if (filters.value.statusConfirmed && b.isCommitted && !b.isRejected) {
-      return true;
-    }
-    if (filters.value.statusPending && !b.isCommitted && !b.isRejected) {
-      return true;
-    }
-    return false;
-  });
-}
-
-function sortBookings(bookings) {
-  if (!filters.value || !filters.value.sortOption) {
-    return bookings;
-  }
-
-  const sortedBookings = [...bookings];
-  switch (filters.value.sortOption) {
-    case "bookingDate-asc":
-      sortedBookings.sort((a, b) => a.timeCreated - b.timeCreated);
-      break;
-    case "bookingsDate-desc":
-      sortedBookings.sort((a, b) => b.timeCreated - a.timeCreated);
-      break;
-    case "price-asc":
-      sortedBookings.sort((a, b) => a.priceEur - b.priceEur);
-      break;
-    case "price-desc":
-      sortedBookings.sort((a, b) => b.priceEur - a.priceEur);
-      break;
-    case "date-asc":
-      sortedBookings.sort((a, b) => {
-        const aTime =
-          a.timeBegin != null
-            ? a.timeBegin
-            : a.eventTime && a.eventTime[0] != null
-            ? a.eventTime[0]
-            : null;
-        const bTime =
-          b.timeBegin != null
-            ? b.timeBegin
-            : b.eventTime && b.eventTime[0] != null
-            ? b.eventTime[0]
-            : null;
-        if (aTime == null && bTime == null) return 0;
-        if (aTime == null) return 1;
-        if (bTime == null) return -1;
-        return aTime - bTime;
-      });
-      break;
-    case "date-desc":
-      sortedBookings.sort((a, b) => {
-        const aTime =
-          a.timeBegin != null
-            ? a.timeBegin
-            : a.eventTime && a.eventTime[0] != null
-            ? a.eventTime[0]
-            : null;
-        const bTime =
-          b.timeBegin != null
-            ? b.timeBegin
-            : b.eventTime && b.eventTime[0] != null
-            ? b.eventTime[0]
-            : null;
-        if (aTime == null && bTime == null) return 0;
-        if (aTime == null) return 1;
-        if (bTime == null) return -1;
-        return bTime - aTime;
-      });
-      break;
-    case "title-asc":
-      sortedBookings.sort((a, b) =>
-        a.bookableItems[0]._bookableUsed.title.localeCompare(
-          b.bookableItems[0]._bookableUsed.title
-        )
-      );
-      break;
-    case "title-desc":
-      sortedBookings.sort((a, b) =>
-        b.bookableItems[0]._bookableUsed.title.localeCompare(
-          a.bookableItems[0]._bookableUsed.title
-        )
-      );
-      break;
-
-    default:
-      break;
-  }
-  return sortedBookings;
-}
 
 //events
 /*async function getEventTime(eventId) {
