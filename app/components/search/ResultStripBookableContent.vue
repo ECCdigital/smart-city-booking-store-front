@@ -2,10 +2,13 @@
   <div class="basis-3/4 p-4 flex flex-col justify-between">
     <div>
       <!-- Title -->
-      <p class="font-bold" :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'">
+      <p
+        class="font-bold"
+        :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'"
+      >
         {{ bookable?.title }}
       </p>
-      <p>{{ tenantName }} </p>
+      <p>{{ tenantName }}</p>
 
       <!-- Adresse und Entfernung -->
       <BookableAdressInformation :bookable="bookable" class="w-full my-5" />
@@ -24,7 +27,7 @@
       <div class="basis-2/5 w-full grid content-end">
         <!-- Preis -->
         <BookablePriceDisplay
-          v-if="!isNotBookable"
+          v-if="!isNotBookable && !isNotSuitable"
           :bookable="bookable"
           :calculated-price="calculatedPrice"
           class="grid place-content-end text-md font-bold"
@@ -36,20 +39,28 @@
           class="w-full mt-2 flex justify-end content-end gap-2"
         >
           <UButton
-            v-if="!isNotBookable"
             label="Details ansehen"
             :variant="entryPageMode ? 'solid' : 'ghost'"
             class="justify-center px-10 text-color-dark dark:text-color-light"
+            :style="{ cursor: 'pointer' }"
             @click="goToDetails(bookable.id, bookable.type)"
           />
-
-          <UButton
-            v-if="!isNotBookable && !entryPageMode"
-            label="Buchen"
-            class="justify-center px-10"
-            :style="{ color: contrastToPrimary }"
-            @click="goToCheckout"
-          />
+          <UTooltip
+            :show="isNotBookable"
+            text="Prüfen Sie zur Buchung die Optionen in den Details."
+          >
+            <UButton
+              v-if="!isNotSuitable && !entryPageMode"
+              label="Buchen"
+              class="justify-center px-10"
+              :disabled="isNotBookable"
+              :style="{
+                color: contrastToPrimary,
+                cursor: isNotBookable ? '' : 'pointer',
+              }"
+              @click="goToCheckout"
+            />
+          </UTooltip>
         </div>
 
         <div v-else class="w-full mt-2 flex justify-end content-end gap-2">
@@ -87,6 +98,10 @@ const props = defineProps({
   calculatedPrice: {
     type: Object,
     default: null,
+  },
+  isNotSuitable: {
+    type: Boolean,
+    default: false,
   },
   isNotBookable: {
     type: Boolean,

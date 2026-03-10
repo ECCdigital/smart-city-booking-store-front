@@ -1,8 +1,8 @@
 <template>
   <div
     class="shadow-lg bg-white dark:bg-gray-700 rounded-xl"
-    :class="isNotBookable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer'"
-    @click="goToDetails(item?.id, item?.category)"
+    :class="isNotSuitable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer'"
+    @click="goToDetails(item?.id, item?.type)"
   >
     <div id="header" class="flex flex-col h-36">
       <div class="flex h-9/10 relative">
@@ -36,6 +36,7 @@
       :bookable="item"
       :calculated-price="calculatedPrice"
       :is-not-bookable="isNotBookable"
+      :is-not-suitable="isNotSuitable"
       :entry-page-mode="entryPageMode"
     />
     <ResultCardEventContent
@@ -43,6 +44,7 @@
       v-model:open-ticket-options="openEventTicketOptions"
       :event="item"
       :is-not-bookable="isNotBookable"
+      :is-not-suitable="isNotSuitable"
       :entry-page-mode="entryPageMode"
     />
   </div>
@@ -72,6 +74,10 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  isNotSuitable: {
+    type: Boolean,
+    default: false,
+  },
   isNotBookable: {
     type: Boolean,
     default: false,
@@ -86,33 +92,6 @@ const isEvent = computed(() => {
 });
 
 const openEventTicketOptions = ref(false);
-
-
-function goToDetails() {
-  const route = useRoute();
-  const router = useRouter();
-  const basePath = route.path;
-
-  //TODO - Wir sollten dynamisch den Typ ermitteln und nicht über den Pfad gehen
-
-  if (props.entryPageMode) {
-    if (props.item.category === "event" || isEvent.value) {
-      router.push(tenantTo(`events/${props.item.id}`));
-    } else if (props.item.category === "location") {
-      router.push(tenantTo(`locations/${props.item.id}`));
-    } else {
-      router.push(tenantTo(`bookables/${props.item.id}`));
-    }
-  } else {
-    if (basePath.includes("bookables")) {
-      router.push(tenantTo(`bookables/${props.item.id}`));
-    } else if (basePath.includes("locations")) {
-      router.push(tenantTo(`locations/${props.item.id}`));
-    } else if (basePath.includes("events")) {
-      router.push(tenantTo(`events/${props.item.id}`));
-    }
-  }
-}
 </script>
 
 <style scoped></style>

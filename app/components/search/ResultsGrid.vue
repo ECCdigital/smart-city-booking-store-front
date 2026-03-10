@@ -6,6 +6,7 @@
           v-for="(b, i) in suitableBookables"
           :key="i"
           :item="b.item"
+          :is-not-bookable="checkIfNotBookable(b)"
           :calculated-price="b.calculatedPrice"
           :entry-page-mode="entryPageMode"
       />
@@ -22,7 +23,7 @@
             :key="i"
             :item="b.item"
             :calculated-price="b.calculatedPrice"
-            is-not-bookable
+            is-not-suitable
             class="mb-5"
         />
       </UPageList>
@@ -58,12 +59,16 @@ const props = defineProps({
 });
 
 const suitableBookables = computed(() =>
-  props.bookables.filter((b) => b.status === "suitable"),
+    props.bookables.filter((b) => b.status === "suitable" || b.status === "nonBookable"),
 );
 
 const nonSuitableBookables = computed(() =>
   props.bookables.filter((b) => b.status === "nonSuitable"),
 );
+
+function checkIfNotBookable(bookable) {
+  return bookable.status === "nonBookable";
+}
 </script>
 
 <style scoped></style>

@@ -25,11 +25,11 @@
 
     <!-- Preis -->
     <div
-      v-if="!isNotBookable"
+      v-if="!isNotSuitable"
       class="w-full flex justify-end text-md font-bold"
     >
       <BookablePriceDisplay
-        v-if="!isNotBookable"
+        v-if="!isNotSuitable"
         :bookable="bookable"
         :calculated-price="calculatedPrice"
       />
@@ -54,6 +54,10 @@ const props = defineProps({
   calculatedPrice: {
     type: Object,
     default: null,
+  },
+  isNotSuitable: {
+    type: Boolean,
+    default: false,
   },
   isNotBookable: {
     type: Boolean,

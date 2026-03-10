@@ -12,9 +12,6 @@
             :calculated-price="ticket.calculatedPrice"
             class="grid place-content-end text-md font-bold"
         />
-        <div v-if="ticket.priceValueAddedTax" class="text-gray-500 text-xs italic">
-          (inkl. MwSt.)
-        </div>
 
       </div>
       <div class="flex md:block justify-end md:content-center">

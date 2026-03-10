@@ -13,6 +13,10 @@
       <span>
         {{ displayPrice(calculatedPrice.userGrossPriceEur) }}
       </span>
+      <br >
+      <span class="text-xs font-normal text-gray-600 dark:text-gray-300">
+        {{ displayPricePerUnit() }}
+      </span>
     </p>
 
     <!-- free for users -->
@@ -29,10 +33,9 @@
     <p v-else-if="props.calculatedPrice">
       {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
     </p>
-    <p v-else>
+    <p v-else class="grid">
       {{ displayMinDefaultPrice() }}
-      <br />
-      <span class="text-xs font-normal text-gray-600 dark:text-gray-300">
+      <span class="text-xs mt-0 font-normal text-gray-600 dark:text-gray-300">
         {{ displayPricePerUnit() }}
       </span>
     </p>

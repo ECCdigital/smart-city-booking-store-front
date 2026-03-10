@@ -8,11 +8,13 @@
         </p>
         <h2 class="text-2xl font-bold">{{ item?.information.name }}</h2>
       </div>
-      <EventBookingButton
-        v-if="currentEvent"
-        :event="currentEvent"
-        is-direct-connection
-      />
+      <div class="grid content-center">
+        <EventBookingButton
+          v-if="currentEvent"
+          :event="currentEvent"
+          is-direct-connection
+        />
+      </div>
     </div>
 
     <div class="md:flex">
@@ -55,28 +57,29 @@
           <span class="font-bold"> Veranstalter: </span>
           {{ item.eventOrganizer.name }}
         </div>
-        <USeparator class="w-full my-5 md:my-10" :ui="{ border: 'border-gray-300' }" />
+        <USeparator
+          class="w-full my-5 md:my-10"
+          :ui="{ border: 'border-gray-300' }"
+        />
 
         <!-- Price Information & Map (sm-view) -->
         <PriceInformationArea is-event :item="item" class="md:hidden mb-2" />
-        <AddressInformationArea is-event :item="item" class="md:hidden mb-5"/>
-
+        <AddressInformationArea is-event :item="item" class="md:hidden mb-5" />
 
         <!-- Availability -->
         <div>
           <h3 class="text-xl font-bold mb-5">Ticketoptionen & Verfügbarkeit</h3>
-          <div v-if="hasTimeRelatedPrices">
+          <div v-if="hasTimeRelatedPrices" class="">
             <UAlert
               v-if="!timePeriod || (!timePeriod.start && !timePeriod.end)"
               title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
               icon="i-lucide-info"
               variant="ghost"
-              class="p-2 text-info"
+              class="p-2 text-info w-full"
             />
             <InputTimePeriod
               :time-period="timePeriod"
-              class="border rounded-lg mt-2 mb-5"
-              style="max-width: 500px; min-width: 250px"
+              class="border border-gray-400 dark:border-gray-600 rounded-lg mt-2 mb-5 w-full"
               @select-date="setSearchTimePeriod"
               @remove-date="removeSearchTimePeriod"
             />
@@ -136,8 +139,8 @@
 
       <!-- Price Information & Map -->
       <div class="basis-1/3 space-y-3 pt-2 md:pt-5">
-        <AddressInformationArea is-event :item="item" class="hidden md:block"/>
-        <PriceInformationArea is-event :item="item" class="hidden md:block"/>
+        <AddressInformationArea is-event :item="item" class="hidden md:block" />
+        <PriceInformationArea is-event :item="item" class="hidden md:block" />
       </div>
     </div>
   </div>

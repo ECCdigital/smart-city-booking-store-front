@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between w-full">
+  <div class="flex justify-between w-full bg-white dark:bg-gray-700">
     <UModal
       v-model:open="isOpen"
       title="Zeitraum auswählen"
@@ -14,8 +14,8 @@
         color="neutral"
         variant="ghost"
         icon="i-lucide-calendar-clock"
-        class="w-full text-gray-400 dark:text-gray-500 font-normal bg-white dark:bg-gray-700 py-2 px-3"
-        :ui="{ leadingIcon: 'text-[16px] mr-1' }"
+        class="w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-lg bg-white dark:bg-gray-700 hover:bg-transparent py-2 px-3"
+        :ui="{ leadingIcon: 'text-[16px] dark:text-gray-200 mr-1' }"
         @click="setDefaultStartDate()"
       >
         <template v-if="dateRange[0]">
@@ -37,10 +37,7 @@
       </UButton>
 
       <template #content>
-        <UCard
-          variant="soft"
-          class="w-90vw glass"
-        >
+        <UCard variant="soft" class="w-90vw glass max-h-screen overflow-y-auto">
           <div class="flex justify-between items-center">
             <p class="text-lg font-bold my-5">Zeitraum auswählen</p>
             <div>
@@ -161,7 +158,6 @@ const timeRange = ref<{ start: TimeHM; end: TimeHM }>({
 const isOpen = ref(false);
 const missingValues = ref<string[]>([]);
 
-
 // Hilfen
 const coalesceModel = computed<TimePeriod>(() => {
   // bevorzugt v-model:timePeriod; fallback auf modelValue
@@ -176,7 +172,7 @@ const hasAnyValue = computed(
   () =>
     dateRange.value.length > 0 ||
     !!timeRange.value.start ||
-    !!timeRange.value.end
+    !!timeRange.value.end,
 );
 
 // Mapping eingehender Timestamps -> interne Picker-Modelle
@@ -239,7 +235,7 @@ function buildTimestampsFromState(): TimePeriod {
 
 function dateToTimestampWithTime(
   dateObj: Date,
-  hm: { hours: number; minutes: number }
+  hm: { hours: number; minutes: number },
 ) {
   const d = new Date(dateObj);
   d.setHours(hm.hours, hm.minutes, 0, 0);
@@ -252,7 +248,7 @@ watch(
   (v) => {
     syncInFromModel(v);
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 // Anzeige-Helper
@@ -268,7 +264,6 @@ function displayTime(time: TimeHM) {
   const m = time.minutes.toString().padStart(2, "0");
   return `${h}:${m}`;
 }
-
 
 // UI Aktionen
 function closeTimePeriodInput() {

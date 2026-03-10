@@ -8,13 +8,24 @@
         </p>
         <h2 class="text-2xl font-bold">{{ item?.title }}</h2>
       </div>
-      <UButton
-        label="Jetzt buchen"
-        icon="i-lucide-shopping-cart"
-        class="justify-center px-5 mt-5 md:my-0"
-        :style="{ color: contrastToPrimary, cursor: 'pointer' }"
-        @click="goToCheckout()"
-      />
+      <div class="grid content-center">
+        <UButton
+            v-if="item.isBookable"
+          label="Jetzt buchen"
+          icon="i-lucide-shopping-cart"
+          class="justify-center px-5 mt-5 md:my-0"
+          :style="{ color: contrastToPrimary, cursor: 'pointer' }"
+          @click="goToCheckout()"
+        />
+        <UButton
+          v-else-if="item.relatedBookableIds.length >0"
+          label="Buchungsoptionen ansehen"
+          icon="i-lucide-list"
+          class="justify-center px-5 mt-5 md:my-0"
+          :style="{ color: contrastToPrimary, cursor: 'pointer' }"
+          @click="goToRelatedItems()"
+          />
+      </div>
     </div>
 
     <div class="md:flex">
@@ -77,50 +88,52 @@
             title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
             icon="i-lucide-info"
             variant="ghost"
-            class="p-2 text-info"
+            class="p-2 text-info w-full"
           />
           <InputTimePeriod
             :time-period="timePeriod"
-            class="border rounded-lg mt-2 mb-5"
-            style="max-width: 500px; min-width: 250px"
+            class="border dark:border-gray-600 rounded-lg mt-2 mb-5 w-full"
             @select-date="setSearchTimePeriod"
             @remove-date="removeSearchTimePeriod"
           />
         </div>
         <div
           v-if="timePeriod && timePeriod.start && timePeriod.end"
-          class="bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-500 shadow-sm rounded-lg p-3 mb-2 flex content-center"
+          class="bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-500 shadow-sm rounded-lg p-3 mb-2 md:flex justify-between content-center"
         >
-          <span class="font-bold mr-1 content-center">{{ item?.title }}</span>
-          <span class="content-center">
-            {{ unit }}
-          </span>
-          <div class="flex-1" />
-          <BookablePriceDisplay
-            v-if="items.length > 0"
-            :bookable="items[0].item"
-            :calculated-price="items[0].calculatedPrice"
-            class="mx-2 font-bold content-center"
-          />
-
-          <UButton
-            v-if="isBookable"
-            label="Buchen"
-            class="justify-center px-5"
-            :style="{ color: contrastToPrimary }"
-            @click="goToCheckout()"
-          />
-          <UButton
-            v-else
-            label="Nicht verfügbar"
-            variant="soft"
-            class="justify-center px-5"
-            :style="{ color: contrastToPrimary }"
-          />
+          <div class="font-bold mr-1 content-center line-clamp-2">
+            {{ item?.title }}
+          </div>
+          <div
+            class="flex justify-end mt-3 md:mt-0 ml-2"
+          >
+            <BookablePriceDisplay
+              v-if="items.length > 0"
+              :bookable="items[0].item"
+              :calculated-price="items[0].calculatedPrice"
+              class="mx-2 font-bold content-center w-20"
+            />
+            <div class="content-center">
+              <UButton
+                  v-if="isBookable"
+                  label="Buchen"
+                  class="justify-center px-5"
+                  :style="{ color: contrastToPrimary }"
+                  @click="goToCheckout()"
+              />
+              <UButton
+                  v-else
+                  label="Nicht verfügbar"
+                  variant="soft"
+                  class="justify-center px-5"
+                  :style="{ color: contrastToPrimary }"
+              />
+            </div>
+          </div>
         </div>
 
         <!-- Related Bookables -->
-        <div v-if="item.relatedBookables.length" id="relatedBookables">
+        <div id="relatedBookables" v-if="item.relatedBookables.length">
           <h3 class="text-xl font-bold">Könnte Sie auch interessieren:</h3>
         </div>
         <BookableRelatedItems :related-bookables="item.relatedBookables" />
@@ -180,30 +193,6 @@ const timePeriod = ref({
   start: query.start,
   end: query.end,
 });
-const unit = computed(() => {
-  if (!timePeriod.value) {
-    return "";
-  }
-
-  const type = props.item?.priceType;
-
-  const diffMs = timePeriod.value.end - timePeriod.value.start;
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-  if (type === "per-day") {
-    if (diffDays > 1) {
-      return "/ " + diffDays + " Tage";
-    } else {
-      return "/ " + diffDays + " Tag";
-    }
-  }
-
-  if (type === "per-hour" && diffHours) {
-    return "/ " + diffHours + " Std.";
-  }
-  return " ";
-});
 
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.item.tenantId).name;
@@ -257,6 +246,12 @@ function goToCheckout(checkoutData) {
       start: route.query.start,
       end: route.query.end,
     });
+  }
+}
+function goToRelatedItems() {
+  const el = document.getElementById("relatedBookables");
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth" });
   }
 }
 </script>
