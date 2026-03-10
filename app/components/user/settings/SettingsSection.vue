@@ -108,6 +108,7 @@
             icon="i-lucide-house"
             :is-disabled="!enableEditingContactInfo"
             class="basis-1/2"
+            @update="updateUser"
           />
         </div>
         <div class="md:flex space-y-2 md:space-y-0 my-3 mt-3">
@@ -118,6 +119,7 @@
             icon="i-lucide-house"
             :is-disabled="!enableEditingContactInfo"
             class="basis-1/2"
+            @update="updateUser"
           />
           <SettingsInputField
             field-id="city"
