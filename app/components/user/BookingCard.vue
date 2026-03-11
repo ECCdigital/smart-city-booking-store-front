@@ -164,11 +164,11 @@ const actionOptions = computed(() => {
     });
   }
 
-  if (props.booking.timeBegin && props.booking.timeEnd) {
+  if (eventId.value || (props.booking.timeBegin && props.booking.timeEnd)) {
     options.push({
       label: "Termin herunterladen",
       icon: "i-lucide-calendar-arrow-down",
-      onSelect: downloadBookingIcal(props.booking.id, props.booking.tenantId),
+      onSelect: onDownloadIcal,
     });
   }
 
@@ -217,6 +217,9 @@ const bookingCardClasses =
 function openDetails() {
   const router = useRouter();
   router.push({ path: `/user/bookings/${props.booking.id}` });
+}
+function onDownloadIcal() {
+  downloadBookingIcal(props.booking.id, props.booking.tenantId);
 }
 function openMobileKey() {
   console.log("open mobile key for booking", props.booking.id);

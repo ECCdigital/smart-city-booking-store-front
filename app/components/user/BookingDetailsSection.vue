@@ -25,10 +25,11 @@
       <p class="font-medium">Ablehnungsgrund</p>
       <p>{{ booking.rejectionReason }}</p>
     </div>
-    <div v-if="bookingTimeSlot" class="mb-5">
+    <div v-if="bookingTimeSlot || eventId" class="mb-5">
       <div class="">
         <div class="flex space-x-1">
-          <p class="font-medium">Buchungszeitraum</p>
+          <p v-if="bookingTimeSlot" class="font-medium">Buchungszeitraum</p>
+          <p v-else-if="eventId" class="font-medium">Veranstaltungszeit</p>
           <UTooltip text="Als Termin herunterladen">
             <UButton
               icon="i-lucide-download"
@@ -39,13 +40,19 @@
             />
           </UTooltip>
         </div>
-        <p>{{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}</p>
+        <p v-if="bookingTimeSlot">{{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}</p>
+        <EventTimeInformation
+            v-if="eventId && event"
+            :event="event"
+            :use-icon="false"
+            class="-mx-3"
+        />
       </div>
     </div>
 
     <!-- bookable information  -->
 
-    <div class="mb-5">
+    <div v-if="booking.bookableItems && booking.bookableItems.length > 0" class="mb-5">
       <p class="font-medium">Gebuchte Objekte</p>
       <BookingDetailsBookableCard
         v-for="(bookable, i) in booking.bookableItems"
@@ -107,13 +114,15 @@
   </div>
 </template>
 <script setup>
-import { useTenantStore } from "~~/stores/tenant.js";
+import {useTenantStore} from "~~/stores/tenant.js";
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
 import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
-import { useFormatting } from "~/composables/utils/useFormatting.js";
+import {useFormatting} from "~/composables/utils/useFormatting.js";
 import {useIcalDownload} from "~/composables/api/useIcalDownload.js";
+import {useEventStore} from "~~/stores/event.js";
+import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 
 
 const props = defineProps({
@@ -122,6 +131,8 @@ const props = defineProps({
     required: true,
   },
 });
+
+const eventStore = useEventStore();
 
 const { formatDate, formatPrice } = useFormatting();
 const { downloadBookingIcal } = useIcalDownload();
@@ -133,6 +144,17 @@ const tenantName = computed(() => {
     return tenant.name;
   }
   return "Unbekannt";
+});
+
+
+const eventId = computed(() => {
+  return props.booking.bookableItems[0]?._bookableUsed.eventId || null;
+});
+const event = computed(() => {
+  if (!eventId.value) {
+    return null;
+  }
+  return eventStore.getEventById(eventId.value);
 });
 
 const bookingTimeSlot = computed(() => {
