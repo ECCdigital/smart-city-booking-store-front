@@ -16,7 +16,25 @@ export function useIcalDownload() {
     return data;
   };
 
+  const downloadBookingIcal = async (bookingId, tenantId) => {
+    const api = useApiClient();
+
+    console.log("Downloading iCal for booking ID:", bookingId, "and tenant ID:", tenantId);
+
+    const { data, error } = await api.get(`/api/bookings/ical`, {
+      params: { bookingId, tenantId },
+    });
+    if (error) {
+      console.error("Error downloading iCal:", error);
+      throw error;
+    }
+
+    console.log("iCal data received:", data);
+    return data;
+  }
+
   return {
     downloadEventIcal,
+      downloadBookingIcal
   };
 }

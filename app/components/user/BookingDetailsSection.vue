@@ -1,6 +1,6 @@
 <template>
   <div class="mb-15" style="max-width: 800px">
-        <!-- basis information -->
+    <!-- basis information -->
     <div class="flex mb-5">
       <div class="basis-1/2">
         <p class="font-medium">Buchungsnummer</p>
@@ -27,7 +27,19 @@
     </div>
     <div v-if="bookingTimeSlot" class="mb-5">
       <div class="">
-        <p class="font-medium">Buchungszeitraum</p>
+        <div class="flex space-x-1">
+          <p class="font-medium">Buchungszeitraum</p>
+          <UTooltip text="Als Termin herunterladen">
+            <UButton
+              icon="i-lucide-download"
+              variant="soft"
+              color="neutral"
+              class="text-gray-700 dark:text-gray-300 cursor-pointer"
+              @click="downloadAppointment()"
+            />
+          </UTooltip>
+        </div>
+        <!-- toDo - add button for ical download -->
         <p>{{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}</p>
       </div>
     </div>
@@ -101,8 +113,9 @@ import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue"
 import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
-import {useFormatting} from "~/composables/utils/useFormatting.js";
-import BackButton from "~/components/BackButton.vue";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
+import {useIcalDownload} from "~/composables/api/useIcalDownload.js";
+
 
 const props = defineProps({
   booking: {
@@ -111,12 +124,13 @@ const props = defineProps({
   },
 });
 
-const { formatDate, formatPrice } = useFormatting()
+const { formatDate, formatPrice } = useFormatting();
+const { downloadBookingIcal } = useIcalDownload();
 
 const tenantsStore = useTenantStore();
 const tenantName = computed(() => {
   const tenant = tenantsStore.getTenantById(props.booking.tenantId);
-  if(tenant) {
+  if (tenant) {
     return tenant.name;
   }
   return "Unbekannt";
@@ -211,6 +225,11 @@ const bookableTitles = computed(() => {
     id: item._bookableUsed.id,
   }));
 });
+
+async function downloadAppointment() {
+  console.log(props.booking);
+  await downloadBookingIcal(props.booking.id, props.booking.tenantId);
+}
 </script>
 
 <style scoped></style>
