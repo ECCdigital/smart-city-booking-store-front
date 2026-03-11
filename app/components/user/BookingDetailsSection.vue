@@ -39,7 +39,6 @@
             />
           </UTooltip>
         </div>
-        <!-- toDo - add button for ical download -->
         <p>{{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}</p>
       </div>
     </div>
@@ -227,7 +226,6 @@ const bookableTitles = computed(() => {
 });
 
 async function downloadAppointment() {
-  console.log(props.booking);
   await downloadBookingIcal(props.booking.id, props.booking.tenantId);
 }
 </script>
