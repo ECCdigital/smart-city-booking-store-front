@@ -7,21 +7,20 @@
       <BackButton />
       <div class="space-x-1">
         <UButton
-            v-if="isEvent"
-            label="Termin herunterladen"
-            icon="i-lucide-calendar-arrow-down"
-            class="justify-center px-5"
-            :style="{ color: contrastToPrimary, cursor: 'pointer' }"
-            @click="downloadAppointment()"
+          v-if="isEvent"
+          label="Termin herunterladen"
+          icon="i-lucide-calendar-arrow-down"
+          class="justify-center px-5"
+          :style="{ color: contrastToPrimary, cursor: 'pointer' }"
+          @click="downloadAppointment()"
         />
         <UButton
-            label="Teilen"
-            icon="i-lucide-share-2"
-            class="justify-center px-5"
-            :style="{ color: contrastToPrimary, cursor: 'pointer' }"
-            @click="share()"
+          label="Teilen"
+          icon="i-lucide-share-2"
+          class="justify-center px-5"
+          :style="{ color: contrastToPrimary, cursor: 'pointer' }"
+          @click="share()"
         />
-
       </div>
     </div>
 
@@ -34,7 +33,7 @@ import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import DetailsAreaBookableContent from "~/components/search/DetailsAreaBookableContent.vue";
 import DetailsAreaImages from "~/components/search/DetailsAreaImages.vue";
 import DetailsAreaEventContent from "~/components/search/DetailsAreaEventContent.vue";
-import {useIcalDownload} from "~/composables/api/useIcalDownload.js";
+import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 
 const props = defineProps({
   item: {
@@ -47,10 +46,8 @@ const props = defineProps({
   },
 });
 
-
 const { contrastToPrimary } = useContrastColor();
 const { downloadEventIcal } = useIcalDownload();
-
 
 const notification = useNotification();
 async function share() {
@@ -61,7 +58,7 @@ async function share() {
   );
 }
 
-async function downloadAppointment(){
+async function downloadAppointment() {
   await downloadEventIcal(props.item.id, props.item.tenantId);
 }
 </script>
