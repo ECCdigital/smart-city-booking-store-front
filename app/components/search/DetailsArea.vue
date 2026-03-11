@@ -62,8 +62,7 @@ async function share() {
 }
 
 async function downloadAppointment(){
-  console.log("Downloading appointment for event: ", props.item);
-  await downloadEventIcal(props.item.id)
+  await downloadEventIcal(props.item.id, props.item.tenantId);
 }
 </script>
 <style scoped></style>
