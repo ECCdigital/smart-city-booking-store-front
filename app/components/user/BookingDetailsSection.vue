@@ -25,11 +25,12 @@
       <p class="font-medium">Ablehnungsgrund</p>
       <p>{{ booking.rejectionReason }}</p>
     </div>
-    <div v-if="bookingTimeSlot || eventId" class="mb-5">
-      <div class="">
+
+    <div v-if="bookingTimeSlot || eventIds.length > 0" class="mb-5 flex">
+      <div class="basis-1/2">
         <div class="flex space-x-1">
           <p v-if="bookingTimeSlot" class="font-medium">Buchungszeitraum</p>
-          <p v-else-if="eventId" class="font-medium">Veranstaltungszeit</p>
+          <p v-else-if="eventIds.length > 0" class="font-medium">Veranstaltungszeit</p>
           <UTooltip text="Als Termin herunterladen">
             <UButton
               icon="i-lucide-download"
@@ -41,12 +42,18 @@
           </UTooltip>
         </div>
         <p v-if="bookingTimeSlot">{{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}</p>
-        <EventTimeInformation
-            v-if="eventId && event"
-            :event="event"
-            :use-icon="false"
-            class="-mx-3"
-        />
+        <div v-if="eventIds.length > 0 && events.length > 0" class="space-y-0.5">
+          <div v-for="event in events" :key="event.id" class="rounded-md bg-gray-200 p-1">
+            <span>{{event.information.name}}</span>
+            <EventTimeInformation
+                :event="event"
+                :use-icon="false"
+                class="-mx-3"
+            />
+          </div>
+        </div>
+
+
       </div>
     </div>
 
@@ -147,15 +154,27 @@ const tenantName = computed(() => {
 });
 
 
-const eventId = computed(() => {
-  return props.booking.bookableItems[0]?._bookableUsed.eventId || null;
+const eventIds = computed(() => {
+  return props.booking.bookableItems.filter((item) => item._bookableUsed.eventId).map((item) => item._bookableUsed.eventId);
 });
-const event = computed(() => {
-  if (!eventId.value) {
-    return null;
+
+const events = ref([]);
+watch(eventIds, async (newEventIds) => {
+  if (newEventIds.length === 0) {
+    events.value = [];
+    return;
   }
-  return eventStore.getEventById(eventId.value);
-});
+  const nonredundantEventIds = [...new Set(newEventIds)];
+  const fetchedEvents = [];
+  for (const eventId of nonredundantEventIds) {
+    const event = await eventStore.getEventById(eventId);
+    if (event) {
+      fetchedEvents.push(event);
+    }
+  }
+  events.value = fetchedEvents;
+}, { immediate: true });
+
 
 const bookingTimeSlot = computed(() => {
   if (props.booking.timeBegin && props.booking.timeEnd) {
