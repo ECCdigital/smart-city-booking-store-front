@@ -102,7 +102,6 @@ import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetail
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
 import {useFormatting} from "~/composables/utils/useFormatting.js";
-import BackButton from "~/components/BackButton.vue";
 
 const props = defineProps({
   booking: {

@@ -119,7 +119,6 @@ const isActive = computed(() => {
     );
   }
   if (event.value) {
-    console.log("event", event.value.information.name, event.value);
     const startTimestamp = formateDateToTimestamp(
       event.value.information.startDate,
       event.value.information.startTime,
