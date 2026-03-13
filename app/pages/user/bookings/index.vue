@@ -10,7 +10,7 @@
     </div>
 
     <div v-if="activeBookingsWithLocking?.length">
-      <h2 class="text-xl font-bold">Aktive Buchungen mit Schließberechtigung</h2>
+      <h2 class="text-xl font-bold">Aktuelle Buchungen mit Schließberechtigung</h2>
       <BookingSection  :bookings="activeBookingsWithLocking" :use-pagination="activeBookingsWithLocking.length > 10"/>
 
       <h2 class=" mt-5 text-xl font-bold">Alle Buchungen</h2>
@@ -47,9 +47,11 @@ const activeBookingsWithLocking = computed(() => {
   const withLockerInfo = filteredBookings.value.filter(booking => booking.lockerInfo.length > 0 && booking.lockerInfo.some(info => info.lockerSystem === "ifbs"));
 
   const currentTime = new Date().getTime();
+  const twoHoursMs = 2 * 60 * 60 * 1000;
+
 
   return withLockerInfo.filter(
-      (b) => b.timeBegin < currentTime && b.timeEnd > currentTime,
+      (b) => b.timeBegin -twoHoursMs < currentTime && b.timeEnd + twoHoursMs > currentTime,
   );
 })
 
