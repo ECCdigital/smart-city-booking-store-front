@@ -63,6 +63,7 @@
           :tenant-id="booking.tenantId"
           :booking-id="booking.id"
           :locker-info="booking.lockerInfo"
+          :is-active="isActive"
         />
       </div>
     </div>
