@@ -59,7 +59,7 @@
 
       <div class="h-1/2 grid justify-center content-center ">
         <!-- Haupt-Action Button -->
-        <OpenMobileKeyButton
+        <OpenIfbsKeyButton
           :tenant-id="booking.tenantId"
           :booking-id="booking.id"
           :locker-info="booking.lockerInfo"
@@ -69,7 +69,7 @@
   </div>
 </template>
 <script setup>
-import OpenMobileKeyButton from "~/components/mobileKey/OpenMobileKeyButton.vue";
+import OpenIfbsKeyButton from "~/components/mobileKey/OpenIfbsKeyButton.vue";
 import {useFormatting} from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({

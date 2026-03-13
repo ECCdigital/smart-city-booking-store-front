@@ -2,11 +2,12 @@
   <div>
     <div class="flex justify-between mt-5 md:mt-0" style="max-width: 800px">
       <BackButton />
-      <OpenMobileKeyButton
+      <OpenIfbsKeyButton
         v-if="hasIfbsLockerInfo"
         :locker-info="booking.lockerInfo"
         :booking-id="booking.id"
         :tenant-id="booking.tenantId"
+        :is-active="isActive"
       />
     </div>
     <PageHeader title="Buchungsdetails" class="my-5" />
@@ -17,7 +18,7 @@
 import { useBookingStore } from "~~/stores/bookings.js";
 import BookingDetailsSection from "~/components/user/BookingDetailsSection.vue";
 import BackButton from "~/components/BackButton.vue";
-import OpenMobileKeyButton from "~/components/mobileKey/OpenMobileKeyButton.vue";
+import OpenIfbsKeyButton from "~/components/mobileKey/OpenIfbsKeyButton.vue";
 
 definePageMeta({
   name: "tenant-bookings-booking-id",
