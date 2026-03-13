@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 
   const { data, error } = await serverFetch(
     event,
-    `/api/${tenantID}/bookings/${bookingId}/mobile-key/${processId}/open`,
+    `/api/${tenantID}/bookings/${bookingId}/access/${processId}/open`,
     {
       method: "POST",
     },
