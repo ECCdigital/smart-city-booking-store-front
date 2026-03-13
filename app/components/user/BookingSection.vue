@@ -8,7 +8,7 @@
       />
     </div>
 
-    <div class="flex justify-center mt-2 mb-10">
+    <div v-if="usePagination" class="flex justify-center mt-2 mb-10">
       <UPagination
         v-model:page="currentPage"
         :items-per-page="itemsPerPage"
@@ -37,6 +37,10 @@ const props = defineProps({
     type: Array,
     required: false,
     default: null,
+  },
+  usePagination: {
+    type: Boolean,
+    default: true,
   },
 });
 

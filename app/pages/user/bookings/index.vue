@@ -9,6 +9,13 @@
       />
     </div>
 
+    <div v-if="activeBookingsWithLocking?.length">
+      <h2 class="text-xl font-bold">Aktive Buchungen mit Schließberechtigung</h2>
+      <BookingSection  :bookings="activeBookingsWithLocking" :use-pagination="activeBookingsWithLocking.length > 10"/>
+
+      <h2 class=" mt-5 text-xl font-bold">Alle Buchungen</h2>
+    </div>
+
     <BookingsSkeleton v-if="pending" :skeleton-count="9" />
     <BookingSection v-else-if="filteredBookings?.length" :bookings="filteredBookings" />
     <BookingEmptyState v-else />
@@ -35,6 +42,16 @@ const { pending } = useAsyncData("bookings", () =>
 
 const bookings = computed(() => bookingsStore.getBookings);
 const filteredBookings = ref(bookings.value.sort((a, b) => b.timeCreated - a.timeCreated));
+
+const activeBookingsWithLocking = computed(() => {
+  const withLockerInfo = filteredBookings.value.filter(booking => booking.lockerInfo.length > 0 && booking.lockerInfo.some(info => info.lockerSystem === "ifbs"));
+
+  const currentTime = new Date().getTime();
+
+  return withLockerInfo.filter(
+      (b) => b.timeBegin < currentTime && b.timeEnd > currentTime,
+  );
+})
 
 function setFilteredBookings(bookings) {
   filteredBookings.value = bookings.map(b => ({ ...b }));
