@@ -1,6 +1,5 @@
 <script setup>
 import { useAuthStore } from "~~/stores/auth.js";
-import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const { tenantTo } = useTenantRoute();

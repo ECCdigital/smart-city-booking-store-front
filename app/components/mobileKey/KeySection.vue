@@ -31,7 +31,6 @@ required: true
 })
 
 
-
 // Gefilterte Buchungen mit IFBS Locker System
 const filteredLockerBookings = computed(() => {
   return props.bookings.filter(booking => {

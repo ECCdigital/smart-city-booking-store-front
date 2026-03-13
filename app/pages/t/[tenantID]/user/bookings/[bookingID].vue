@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="flex justify-between mt-5 md:mt-0" style="max-width: 800px">
-      <BackButton/>
+      <BackButton />
       <OpenMobileKeyButton
         v-if="hasIfbsLockerInfo"
         :locker-info="booking.lockerInfo"
@@ -14,7 +14,7 @@
   </div>
 </template>
 <script setup>
-import {useBookingStore} from "~~/stores/bookings.js";
+import { useBookingStore } from "~~/stores/bookings.js";
 import BookingDetailsSection from "~/components/user/BookingDetailsSection.vue";
 import BackButton from "~/components/BackButton.vue";
 import OpenMobileKeyButton from "~/components/mobileKey/OpenMobileKeyButton.vue";
@@ -42,7 +42,7 @@ const hasIfbsLockerInfo = computed(() => {
   if (!booking.value) {
     return false;
   }
-  return booking.value.lockerInfo.some(info => info.lockerSystem === "ifbs")
+  return booking.value.lockerInfo.some((info) => info.lockerSystem === "ifbs");
 });
 </script>
 <style scoped></style>

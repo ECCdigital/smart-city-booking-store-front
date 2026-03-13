@@ -52,8 +52,6 @@ const userNavigation = computed(() => [
   },
 ]);
 
-const route = useRoute();
-
 const inactiveLinkStyle = computed(
   () => "bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 hover:dark:bg-gray-800"
 );

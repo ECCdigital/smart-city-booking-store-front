@@ -1,6 +1,6 @@
 <template>
   <div class="mb-15" style="max-width: 800px">
-        <!-- basis information -->
+    <!-- basis information -->
     <div class="flex mb-5">
       <div class="basis-1/2">
         <p class="font-medium">Buchungsnummer</p>
@@ -101,7 +101,7 @@ import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue"
 import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
-import {useFormatting} from "~/composables/utils/useFormatting.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   booking: {
@@ -110,12 +110,12 @@ const props = defineProps({
   },
 });
 
-const { formatDate, formatPrice } = useFormatting()
+const { formatDate, formatPrice } = useFormatting();
 
 const tenantsStore = useTenantStore();
 const tenantName = computed(() => {
   const tenant = tenantsStore.getTenantById(props.booking.tenantId);
-  if(tenant) {
+  if (tenant) {
     return tenant.name;
   }
   return "Unbekannt";
