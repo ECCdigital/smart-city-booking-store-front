@@ -48,6 +48,11 @@ const items = [
       onSelect: () => goTo("/user/bookings"),
     },
     {
+      label: "Schlüssel",
+      icon: "i-lucide-key-round",
+      onSelect: () => goTo("/user/keys"),
+    },
+    {
       label: "Rechnungen",
       icon: "i-lucide-wallet-cards",
       onSelect: () => goTo("/user/invoices"),

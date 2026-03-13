@@ -33,6 +33,12 @@ const userNavigation = computed(() => [
     disabled: false,
   },
   {
+    value: "/user/keys",
+    label: "Schlüssel",
+    icon: "i-lucide-key-round",
+    disabled: false,
+  },
+  {
     value: "/user/invoices",
     label: "Rechnungen",
     icon: "i-lucide-wallet-cards",
