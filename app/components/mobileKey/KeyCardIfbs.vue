@@ -36,10 +36,27 @@
 
       <h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2 mt-2">
         Fahrradbox
-        #{{ booking.lockerInfo[0]?.ifbsMetadata?.nummer || "IFBS Box" }}
+        <span v-for="(info, index) in booking.lockerInfo" :key="index">
+          {{ info.ifbsMetadata?.nummer
+            ? (index === booking.lockerInfo.length - 2
+                ? `#${info.ifbsMetadata.nummer} & `
+                : index < booking.lockerInfo.length - 2
+                  ? `#${info.ifbsMetadata.nummer}, `
+                  : `#${info.ifbsMetadata.nummer} `)
+            : "" }}
+        </span>
       </h3>
         <div class="text-sm text-gray-500 dark:text-gray-400 mb-3 mt-1">
-          Box #{{ booking.lockerInfo[0]?.ifbsMetadata?.boxId }}
+          Box-ID
+          <span v-for="(info, index) in booking.lockerInfo" :key="index">
+          {{ info.ifbsMetadata?.boxId
+              ? (index === booking.lockerInfo.length - 2
+                  ? `#${info.ifbsMetadata.boxId} & `
+                  : index < booking.lockerInfo.length - 2
+                      ? `#${info.ifbsMetadata.boxId}, `
+                      : `#${info.ifbsMetadata.boxId} `)
+              : "" }}
+        </span>
         </div>
     </div>
 
