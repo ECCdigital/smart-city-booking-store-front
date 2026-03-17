@@ -31,6 +31,7 @@
           class="rounded-3xl"
           variant="soft"
           color="neutral"
+          @click="openDetails"
         />
       </div>
 
@@ -115,6 +116,10 @@ const isActive = computed(() => {
 const keyCardClasses =
     "bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 my-2 hover:shadow-lg transition-shadow";
 
+function openDetails() {
+  const router = useRouter();
+  router.push({ path: `/user/keys/${props.booking.id}` });
+}
 </script>
 
 <style scoped></style>
