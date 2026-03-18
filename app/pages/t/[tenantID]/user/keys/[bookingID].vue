@@ -1,10 +1,14 @@
 <template>
-<div>
-  {{booking}}
-</div>
+  <div>
+    <BackButton class="mt-5 md:mt-0" />
+    <PageHeader title="Schlüsseldetails" class="my-5" />
+    <KeyDetailsSection :booking="booking" />
+  </div>
 </template>
 <script setup>
-import {useBookingStore} from "~~/stores/bookings.js";
+import { useBookingStore } from "~~/stores/bookings.js";
+import KeyDetailsSection from "~/components/mobileKey/KeyDetailsSection.vue";
+import BackButton from "~/components/BackButton.vue";
 
 definePageMeta({
   name: "keys-process-id",
@@ -27,7 +31,4 @@ const booking = computed(() => {
 });
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>

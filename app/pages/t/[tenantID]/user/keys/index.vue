@@ -2,7 +2,6 @@
   <div class="w-full">
     <PageHeader
       title="Ihre Schlüssel"
-      description="Hier finden Sie Ihre aktiven Buchungen mit Schließsystem-Zugriff."
       class="mb-3 md:mb-0"
     />
 

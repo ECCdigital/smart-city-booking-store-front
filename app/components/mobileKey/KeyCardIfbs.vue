@@ -76,7 +76,6 @@
       </div>
 
       <div class="h-1/2 grid justify-center content-center ">
-        <!-- Haupt-Action Button -->
         <OpenIfbsKeyButton
           :tenant-id="booking.tenantId"
           :booking-id="booking.id"
@@ -99,7 +98,6 @@ const props = defineProps({
 });
 
 const { formatDate } = useFormatting();
-
 
 const currentTime = ref(new Date().getTime());
 const isActive = computed(() => {

@@ -1,17 +1,20 @@
 <template>
   <div>
-    {{ booking }}
+    <BackButton class="mt-5 md:mt-0" />
+    <PageHeader title="Schlüsseldetails" class="my-5" />
+    <KeyDetailsSection :booking="booking" />
   </div>
 </template>
 <script setup>
-import {useBookingStore} from "~~/stores/bookings.js";
+import { useBookingStore } from "~~/stores/bookings.js";
+import KeyDetailsSection from "~/components/mobileKey/KeyDetailsSection.vue";
+import BackButton from "~/components/BackButton.vue";
 
 definePageMeta({
   name: "tenant-keys-process-id",
   layout: "user",
   middleware: ["user-auth"],
 });
-
 
 const bookingStore = useBookingStore();
 await bookingStore.fetchBookings();
@@ -28,7 +31,4 @@ const booking = computed(() => {
 });
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>
