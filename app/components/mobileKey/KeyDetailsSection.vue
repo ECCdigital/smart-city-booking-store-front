@@ -29,7 +29,7 @@
       </div>
     </div>
     <div class="mb-5">
-      <p class="font-medium">Objekte mit Zugriff auf Schließanlagen</p>
+      <p class="font-medium mb-2">Objekte mit Zugriff auf Schließanlagen</p>
       <KeyDetailsBookableCard
         v-for="(info, i) in booking.lockerInfo"
         :key="i"
