@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="flex mb-5">
+    <div class="md:flex mb-5">
       <div class="basis-1/2">
         <div class="font-medium space-x-1">
           Buchungsnummer
@@ -15,7 +15,7 @@
         </div>
         <p>{{ booking.id }}</p>
       </div>
-      <div v-if="bookingTimeSlot" class="basis-1/2">
+      <div v-if="bookingTimeSlot" class="basis-1/2 mt-5 md:mt-0">
         <div class="font-medium flex">
           Buchungszeitraum
           <div
@@ -28,7 +28,7 @@
         <p>{{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}</p>
       </div>
     </div>
-    <div class="mb-5">
+    <div class="mb-25">
       <p class="font-medium mb-2">Objekte mit Zugriff auf Schließanlagen</p>
       <KeyDetailsBookableCard
         v-for="(info, i) in booking.lockerInfo"

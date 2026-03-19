@@ -1,12 +1,12 @@
 <template>
-  <div>
+  <div class="">
     <UTooltip :text="getTooltipText(lockerInfo[0])">
       <UButton
         v-if="lockerInfo.length === 1"
         label="Fahrradbox öffnen"
         icon="i-lucide-key-round"
         :disabled="!lockerInfo[0].isConfirmed || !isActive"
-        class="justify-center px-5 bg-primary text-black"
+        class="justify-center px-5 bg-primary text-black w-full"
         :class="
           lockerInfo[0].isConfirmed ? 'cursor-pointer' : 'cursor-not-allowed'
         "
@@ -21,7 +21,7 @@
           label="Fahrradboxen anzeigen"
           icon="i-lucide-key-round"
           :disabled="!isActive"
-          class="justify-center px-5 bg-primary text-black"
+          class="justify-center px-5 bg-primary text-black w-full"
           :class="isActive ? 'cursor-pointer' : 'cursor-not-allowed'"
           @click="openKeySelection"
         />

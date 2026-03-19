@@ -16,7 +16,7 @@
           <div class="flex justify-center">
             <UIcon :name="item.icon" class="sm:mr-3 mt-1" />
           </div>
-          <div>{{ item.label }}</div>
+          <div class="text-sm md:text-md mt-1 md:mt-0">{{ item.label }}</div>
         </NuxtLink>
       </UTooltip>
     </div>
