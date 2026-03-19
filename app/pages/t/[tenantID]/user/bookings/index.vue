@@ -54,7 +54,7 @@ const activeBookingsWithLocking = computed(() => {
   const twoHoursMs = 2 * 60 * 60 * 1000;
 
   return withLockerInfo.filter(
-      (b) => b.timeBegin -twoHoursMs < currentTime && b.timeEnd + twoHoursMs > currentTime,
+      (b) => b.timeBegin -twoHoursMs < currentTime && b.timeEnd + twoHoursMs > currentTime && b.isRejected === false,
   );
 })
 

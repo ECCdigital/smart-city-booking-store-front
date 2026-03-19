@@ -100,6 +100,9 @@ const { formatDate } = useFormatting();
 
 const currentTime = ref(new Date().getTime());
 const isActive = computed(() => {
+  if(props.booking.isRejected) {
+    return false;
+  }
   if (props.booking.timeBegin && props.booking.timeEnd) {
     return (
         currentTime.value >= props.booking.timeBegin &&
