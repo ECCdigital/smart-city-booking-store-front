@@ -1,12 +1,12 @@
 <template>
-  <div class="w-full">
+  <div class="w-full pb-25">
     <!--Current Keys -->
-    <p v-if="allLockerBookings.length > 0" class="mt-2 mb-5">
+    <p v-if="allLockerBookings.length > 0" class="mt-2 mb-5 ">
       Hier finden Sie Ihre Buchungen mit Schließsystem-Zugriff.
     </p>
     <div v-if="currentLockerBookings.length > 0">
       <h2 class="text-xl font-bold">Aktuelle Schlüssel</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 mt-4">
         <KeyCardIfbs
           v-for="booking in currentLockerBookings"
           :key="booking.id"
@@ -18,7 +18,7 @@
     <!--Upcoming Keys -->
     <div v-if="upcomingLockerBookings.length > 0">
       <h2 class="text-xl font-bold">Kommende Schlüssel</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 mt-4">
         <KeyCardIfbs
           v-for="booking in upcomingLockerBookings"
           :key="booking.id"
@@ -29,7 +29,7 @@
 
     <!--Past Keys -->
     <div v-if="expiredLockerBookings.length > 0">
-      <div class="flex">
+      <div class="flex space-x-1">
         <h2 class="text-xl font-bold">Ausgelaufene Schlüssel</h2>
         <UButton
           :icon="showExpiredKeys ? 'i-lucide-eye-off' : 'i-lucide-eye'"
@@ -39,7 +39,7 @@
           @click="() => {showExpiredKeys = !showExpiredKeys}"
         />
       </div>
-      <div v-if="showExpiredKeys" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div v-if="showExpiredKeys" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8  mt-4">
         <KeyCardIfbs
           v-for="booking in expiredLockerBookings"
           :key="booking.id"

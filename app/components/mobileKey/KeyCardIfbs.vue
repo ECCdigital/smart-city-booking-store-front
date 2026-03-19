@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col booking-card"
+    class="flex flex-col"
     :class="[
       keyCardClasses,
       isActive
@@ -8,8 +8,7 @@
         : 'border border-gray-200 dark:border-gray-700',
     ]"
   >
-    <!-- Title and booking-id (h-1/3) -->
-    <div class="mb-3 h-2/5 ">
+    <div class="mb-3 h-2/5">
       <div class="flex justify-between">
         <div class="flex flex-wrap gap-2 items-center">
           <UTooltip :text="`Buchungs-ID: ${booking.id}`">
@@ -112,7 +111,7 @@ const isActive = computed(() => {
 });
 
 const keyCardClasses =
-    "bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 my-2 hover:shadow-lg transition-shadow";
+    "bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow";
 
 function openDetails() {
   const router = useRouter();
