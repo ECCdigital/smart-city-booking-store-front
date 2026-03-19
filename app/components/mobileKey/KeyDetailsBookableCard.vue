@@ -48,23 +48,39 @@
         :booking-id="bookingId"
         :locker-info="lockerInfoArray"
         :is-active="isActive"
+        @key-opened="setOpenedKey"
       />
+      <UTooltip
+        text="
+        Versuchen Sie die Box zu öffnen, bevor Sie den Status prüfen.Wenn die Box bereits geöffnet ist, können Sie hier den aktuellen Status prüfen."
+        :disabled="currentlyOpenedKey"
+      >
       <UButton
         label="Status prüfen"
         icon="i-lucide-rotate-cw"
         variant="outline"
-        :disabled="!lockerInfo.isConfirmed || !isActive"
+        :color="
+          !lockerInfo.isConfirmed || !isActive || !currentlyOpenedKey
+            ? 'neutral'
+            : 'primary'
+        "
+        :disabled="!lockerInfo.isConfirmed || !isActive || !currentlyOpenedKey"
+        :loading="isLoading"
         class="justify-center px-5 w-full"
         :class="
-          lockerInfo.isConfirmed ? 'cursor-pointer' : 'cursor-not-allowed'
+          !lockerInfo.isConfirmed || !isActive || !currentlyOpenedKey
+            ? 'cursor-not-allowed '
+            : 'cursor-pointer'
         "
         @click="checkStatus()"
       />
+      </UTooltip>
     </div>
   </div>
 </template>
 <script setup>
 import OpenIfbsKeyButton from "~/components/mobileKey/OpenIfbsKeyButton.vue";
+import { useMobileKey } from "~/composables/api/useMobileKey.js";
 
 const props = defineProps({
   bookable: {
@@ -85,6 +101,10 @@ const props = defineProps({
   },
 });
 
+const { checkMobileKeyStatus } = useMobileKey();
+const notification = useNotification();
+const isLoading = ref(false);
+
 const bookableUsed = computed(() => {
   if (props.bookable) {
     return props.bookable._bookableUsed;
@@ -101,6 +121,11 @@ const bookableUsed = computed(() => {
 const bookableTitle = computed(() => bookableUsed.value.title || "");
 const eventId = computed(() => bookableUsed.value.eventId);
 const lockerInfoArray = computed(() => [props.lockerInfo]);
+
+const currentlyOpenedKey = ref(null);
+function setOpenedKey(key) {
+  currentlyOpenedKey.value = key;
+}
 
 function goToBookable(bookableId) {
   const router = useRouter();
@@ -119,8 +144,29 @@ function goToEvent() {
   window.open(routeData.href, "_blank");
 }
 
-function checkStatus() {
+async function checkStatus() {
   console.log("Want to check status for lockerInfo", lockerInfoArray.value);
+  try {
+    isLoading.value = true;
+    if (currentlyOpenedKey.value) {
+      await checkMobileKeyStatus(
+        props.tenantId,
+        props.lockerInfo.processId,
+        props.bookingId,
+        currentlyOpenedKey.value,
+      );
+    } else {
+      notification.error(
+        "Versuchen Sie die Box zu öffnen, bevor Sie den Status prüfen.",
+        "Fehler beim Prüfen des Schlüssels",
+      );
+    }
+  } catch (e) {
+    console.error("Error opening mobile key", e);
+    notification.error("", "Fehler beim Prüfen des Schlüssels");
+  } finally {
+    isLoading.value = false;
+  }
 }
 </script>
 

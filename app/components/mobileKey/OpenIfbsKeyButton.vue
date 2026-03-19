@@ -10,6 +10,7 @@
         :class="
           lockerInfo[0].isConfirmed ? 'cursor-pointer' : 'cursor-not-allowed'
         "
+        :loading="isLoading"
         @click="onOpenMobileKey(lockerInfo[0].processId)"
       />
     </UTooltip>
@@ -50,6 +51,7 @@
                 :class="
                   locker.isConfirmed ? 'cursor-pointer ' : 'cursor-not-allowed'
                 "
+                :loading="isLoading"
                 @click="onOpenMobileKey(locker.processId)"
               />
             </UTooltip>
@@ -82,6 +84,7 @@ const props = defineProps({
     default: false,
   },
 });
+const emit = defineEmits(["keyOpened"]);
 const { openMobileKey } = useMobileKey();
 
 const { loadBundle } = useCatalogBundle();
@@ -92,6 +95,9 @@ const bookableIds = computed(() =>
   props.lockerInfo.map((locker) => locker.bookableId),
 );
 const bookables = ref([]);
+
+const isLoading = ref(false);
+const notification = useNotification();
 
 function getTooltipText(logic = null) {
   if (!props.isActive) {
@@ -123,9 +129,25 @@ function getBookableTitle(bookableId) {
   return bookable ? bookable.title : "Unbekanntes Buchungsobjekt";
 }
 
-function onOpenMobileKey(processId) {
-  console.log("try to open mobile key", props.lockerInfo);
-  openMobileKey(props.tenantId, processId, props.bookingId);
+async function onOpenMobileKey(processId) {
+  try {
+    isLoading.value = true;
+    const result = await openMobileKey(props.tenantId, processId, props.bookingId);
+    console.log("Mobile key opened successfully", result);
+    notification.success(
+        "Die Fahrradbox wurde erfolgreich geöffnet.",
+        "Fahrradbox geöffnet"
+    );
+    emit("keyOpened", result.providerResponse.OpenBox_ID);
+  } catch (e) {
+    console.error("Error opening mobile key", e);
+    notification.error(
+        "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut oder wenden Sie sich an den Support.",
+        "Fehler beim Öffnen der Fahrradbox"
+    );
+  } finally {
+    isLoading.value = false;
+  }
 }
 </script>
 
