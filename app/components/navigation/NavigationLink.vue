@@ -30,7 +30,7 @@
   </NuxtLink>
 </template>
 <script setup>
-import { useContrastColor } from "../composables/utils/useContrastColor.js";
+import { useContrastColor } from "../../composables/utils/useContrastColor.js";
 
 const props = defineProps({
   tab: {

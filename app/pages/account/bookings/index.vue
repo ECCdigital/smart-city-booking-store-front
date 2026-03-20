@@ -22,7 +22,9 @@ import BookingSearchFilterArea from "~/components/user/bookings/BookingSearchFil
 
 definePageMeta({
   name: "bookings",
-  layout: "user",
+  layout: "panel",
+  navigation: "user",
+  requiresAuth: true,
 });
 
 const bookingsStore = useBookingStore();

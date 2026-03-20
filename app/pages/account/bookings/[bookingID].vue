@@ -11,10 +11,10 @@ import BookingDetailsSection from "~/components/user/BookingDetailsSection.vue";
 import BackButton from "~/components/BackButton.vue";
 
 definePageMeta({
-  name: "bookings-booking-id",
-  layout: "user",
-  middleware: ["user-auth"],
-
+  name: "booking",
+  layout: "panel",
+  navigation: "user",
+  requiresAuth: true,
 });
 
 const bookingStore = useBookingStore()

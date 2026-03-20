@@ -176,6 +176,6 @@ const bookingCardClasses =
 
 function openDetails() {
   const router = useRouter();
-  router.push({ path: `/user/bookings/${props.booking.id}` });
+  router.push({ path: `/account/bookings/${props.booking.id}` });
 }
 </script>

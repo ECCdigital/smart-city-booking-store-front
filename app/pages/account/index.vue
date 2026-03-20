@@ -4,8 +4,9 @@
 <script setup>
 definePageMeta({
   name: "user",
-  layout: "user",
-  middleware: ["user-redirect", "user-auth"],
+  layout: "panel",
+  navigation: "user",
+  requiresAuth: true,
 });
 </script>
 

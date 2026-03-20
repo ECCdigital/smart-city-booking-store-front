@@ -15,8 +15,9 @@ import PageHeader from "~/components/PageHeader.vue";
 
 definePageMeta({
   name: "appearance",
-  layout: "settings",
-  middleware: ["user-auth"],
+  layout: "panel",
+  navigation: "settings",
+  requiresAuth: true,
 });
 </script>
 <style scoped>

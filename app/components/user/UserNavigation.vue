@@ -27,13 +27,13 @@ const { tenantTo, isActivePath } = useTenantRoute();
 
 const userNavigation = computed(() => [
   {
-    value: "/user/bookings",
+    value: "/account/bookings",
     label: "Buchungen",
     icon: "i-lucide-book-marked",
     disabled: false,
   },
   {
-    value: "/user/invoices",
+    value: "/account/invoices",
     label: "Rechnungen",
     icon: "i-lucide-wallet-cards",
     disabled: true,
@@ -45,8 +45,6 @@ const userNavigation = computed(() => [
     disabled: true,
   },
 ]);
-
-const route = useRoute();
 
 const inactiveLinkStyle = computed(
   () => "bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 hover:dark:bg-gray-800"
