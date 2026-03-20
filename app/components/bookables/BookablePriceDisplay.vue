@@ -105,21 +105,37 @@ function displayPricePerUnit() {
   if (minPrice === null || minPrice === 0) {
     return "";
   }
-
-  let includeTaxes = "";
-  if(props.bookable.priceValueAddedTax > 0){
-    includeTaxes = "(inkl. MwSt.)"
+  
+  let priceType = props.bookable.priceType;
+  if (
+    props.bookable.priceCategories &&
+    props.bookable.priceCategories.some((c) => c.external)
+  ) {
+    priceType = props.bookable.priceCategories.find(
+      (c) => c.external && c.priceEur === minPrice,
+    ).unit;
   }
 
-  if(props.bookable.priceType){
-    switch (props.bookable.priceType) {
-      case "per-hour":
-        return " pro Stunde " + includeTaxes;
-      case "per-item":
-        return " pro Stück " + includeTaxes;
-      case "per-day":
-        return " pro Tag " + includeTaxes;
-    }
+  let includeTaxes = "";
+  if (props.bookable.priceValueAddedTax > 0) {
+    includeTaxes = "(inkl. MwSt.)";
+  }
+
+  switch (priceType) {
+    case "per-hour":
+      return " pro Stunde " + includeTaxes;
+    case "per-item":
+      return " pro Stück " + includeTaxes;
+    case "per-day":
+      return " pro Tag " + includeTaxes;
+    case "day":
+      return " pro Tag " + includeTaxes;
+    case "week":
+      return " pro Woche " + includeTaxes;
+    case "month":
+      return " pro Monat " + includeTaxes;
+    case "year":
+      return " pro Jahr " + includeTaxes;
   }
 }
 </script>
