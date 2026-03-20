@@ -51,29 +51,33 @@
         @key-opened="setOpenedKey"
       />
       <UTooltip
+        v-if="currentlyOpenedKey"
         text="
         Versuchen Sie die Box zu öffnen, bevor Sie den Status prüfen.Wenn die Box bereits geöffnet ist, können Sie hier den aktuellen Status prüfen."
         :disabled="currentlyOpenedKey"
       >
-      <UButton
-        label="Status prüfen"
-        icon="i-lucide-rotate-cw"
-        variant="outline"
-        :color="
-          !lockerInfo.isConfirmed || !isActive || !currentlyOpenedKey
-            ? 'neutral'
-            : 'primary'
-        "
-        :disabled="!lockerInfo.isConfirmed || !isActive || !currentlyOpenedKey"
-        :loading="isLoading"
-        class="justify-center px-5 w-full"
-        :class="
-          !lockerInfo.isConfirmed || !isActive || !currentlyOpenedKey
-            ? 'cursor-not-allowed '
-            : 'cursor-pointer'
-        "
-        @click="checkStatus()"
-      />
+        <UButton
+          v-if="currentlyOpenedKey"
+          label="Status prüfen"
+          icon="i-lucide-rotate-cw"
+          variant="outline"
+          :color="
+            !lockerInfo.isConfirmed || !isActive || !currentlyOpenedKey
+              ? 'neutral'
+              : 'primary'
+          "
+          :disabled="
+            !lockerInfo.isConfirmed || !isActive || !currentlyOpenedKey
+          "
+          :loading="isLoading"
+          class="justify-center px-5 w-full"
+          :class="
+            !lockerInfo.isConfirmed || !isActive || !currentlyOpenedKey
+              ? 'cursor-not-allowed '
+              : 'cursor-pointer'
+          "
+          @click="checkStatus()"
+        />
       </UTooltip>
     </div>
   </div>
@@ -153,12 +157,12 @@ async function checkStatus() {
         props.tenantId,
         props.lockerInfo.processId,
         props.bookingId,
-        currentlyOpenedKey.value,
+        currentlyOpenedKey.value
       );
     } else {
       notification.error(
         "Versuchen Sie die Box zu öffnen, bevor Sie den Status prüfen.",
-        "Fehler beim Prüfen des Schlüssels",
+        "Fehler beim Prüfen des Schlüssels"
       );
     }
   } catch (e) {
