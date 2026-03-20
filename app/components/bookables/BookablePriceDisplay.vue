@@ -64,11 +64,17 @@ function getMinPrice() {
   ) {
     return null;
   }
-  //exclude holiday price categories
-  const pricesWithoutHolidays = props.bookable.priceCategories.filter(
-    (c) => !c.holidays || c.holidays.length === 0,
+
+  //exclude external service fees
+  const pricesWithoutServiceFees = props.bookable.priceCategories.filter(
+    (c) => !c.external || (c.external && c.unit !== "service-fee"),
   );
 
+  //exclude holiday price categories
+  const pricesWithoutHolidays = pricesWithoutServiceFees.filter(
+    (c) => !c.holidays || c.holidays.length === 0,
+  );
+  
   return Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
 }
 function displayMinDefaultPrice() {
