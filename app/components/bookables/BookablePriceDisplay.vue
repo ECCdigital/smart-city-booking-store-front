@@ -66,7 +66,7 @@ function getMinPrice() {
   }
   //exclude holiday price categories
   const pricesWithoutHolidays = props.bookable.priceCategories.filter(
-    (c) => c.holidays && c.holidays.length === 0,
+    (c) => !c.holidays || c.holidays.length === 0,
   );
 
   return Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
