@@ -42,7 +42,7 @@
   </div>
 </template>
 <script setup>
-import { useFormatting } from "~/composables/utils/useFormatting.js";
+import {useFormatting} from "~/composables/utils/useFormatting.js";
 import KeyDetailsBookableCard from "~/components/mobileKey/KeyDetailsBookableCard.vue";
 
 const props = defineProps({
@@ -74,13 +74,11 @@ const isActive = computed(() => {
 });
 
 function getBookableForKey(id) {
-  const temp = props.booking.bookableItems.find((b) => b.bookableId === id);
-  console.log("getBookableForKey", id, temp);
-  return temp;
+  return props.booking.bookableItems.find((b) => b.bookableId === id);
 }
 function goToBooking(bookingId) {
   const router = useRouter();
-  router.push({ path: `/user/bookings/${bookingId}` });
+  router.push({ path: `/account/bookings/${bookingId}` });
 }
 </script>
 
