@@ -30,9 +30,11 @@
     </p>
 
     <!-- regular calculated price -->
-    <p v-else-if="props.calculatedPrice">
+    <p v-else-if="calculatedPrice">
       {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
     </p>
+
+    <!-- price without calculation -->
     <p v-else class="grid">
       {{ displayMinDefaultPrice() }}
       <span class="text-xs mt-0 font-normal text-gray-600 dark:text-gray-300">
@@ -62,11 +64,17 @@ function getMinPrice() {
   ) {
     return null;
   }
-  //exclude holiday price categories
-  const pricesWithoutHolidays = props.bookable.priceCategories.filter(
-    (c) => c.holidays.length === 0,
+
+  //exclude external service fees
+  const pricesWithoutServiceFees = props.bookable.priceCategories.filter(
+    (c) => !c.external || (c.external && c.unit !== "service-fee"),
   );
 
+  //exclude holiday price categories
+  const pricesWithoutHolidays = pricesWithoutServiceFees.filter(
+    (c) => !c.holidays || c.holidays.length === 0,
+  );
+  
   return Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
 }
 function displayMinDefaultPrice() {
@@ -80,6 +88,7 @@ function displayMinDefaultPrice() {
   if (min === null) {
     return "Kostenlos";
   }
+
   const includeTax = props.bookable.priceValueAddedTax
     ? min + (min * props.bookable.priceValueAddedTax) / 100
     : min;
@@ -102,19 +111,37 @@ function displayPricePerUnit() {
   if (minPrice === null || minPrice === 0) {
     return "";
   }
+  
+  let priceType = props.bookable.priceType;
+  if (
+    props.bookable.priceCategories &&
+    props.bookable.priceCategories.some((c) => c.external)
+  ) {
+    priceType = props.bookable.priceCategories.find(
+      (c) => c.external && c.priceEur === minPrice,
+    ).unit;
+  }
 
-  const includeTaxes = "(inkl. MwSt.)";
-  /*if(props.bookable.priceValueAddedTax > 0){
-    includeTaxes = "(inkl. MwSt.)"
-  }*/
+  let includeTaxes = "";
+  if (props.bookable.priceValueAddedTax > 0) {
+    includeTaxes = "(inkl. MwSt.)";
+  }
 
-  switch (props.bookable.priceType) {
+  switch (priceType) {
     case "per-hour":
       return " pro Stunde " + includeTaxes;
     case "per-item":
       return " pro Stück " + includeTaxes;
     case "per-day":
       return " pro Tag " + includeTaxes;
+    case "day":
+      return " pro Tag " + includeTaxes;
+    case "week":
+      return " pro Woche " + includeTaxes;
+    case "month":
+      return " pro Monat " + includeTaxes;
+    case "year":
+      return " pro Jahr " + includeTaxes;
   }
 }
 </script>
