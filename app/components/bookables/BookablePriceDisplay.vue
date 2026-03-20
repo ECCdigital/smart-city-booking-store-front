@@ -82,6 +82,7 @@ function displayMinDefaultPrice() {
   if (min === null) {
     return "Kostenlos";
   }
+
   const includeTax = props.bookable.priceValueAddedTax
     ? min + (min * props.bookable.priceValueAddedTax) / 100
     : min;
@@ -105,10 +106,10 @@ function displayPricePerUnit() {
     return "";
   }
 
-  const includeTaxes = "(inkl. MwSt.)";
-  /*if(props.bookable.priceValueAddedTax > 0){
+  let includeTaxes = "";
+  if(props.bookable.priceValueAddedTax > 0){
     includeTaxes = "(inkl. MwSt.)"
-  }*/
+  }
 
   if(props.bookable.priceType){
     switch (props.bookable.priceType) {
