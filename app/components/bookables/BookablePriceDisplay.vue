@@ -30,9 +30,11 @@
     </p>
 
     <!-- regular calculated price -->
-    <p v-else-if="props.calculatedPrice">
+    <p v-else-if="calculatedPrice">
       {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
     </p>
+
+    <!-- price without calculation -->
     <p v-else class="grid">
       {{ displayMinDefaultPrice() }}
       <span class="text-xs mt-0 font-normal text-gray-600 dark:text-gray-300">
@@ -64,7 +66,7 @@ function getMinPrice() {
   }
   //exclude holiday price categories
   const pricesWithoutHolidays = props.bookable.priceCategories.filter(
-    (c) => c.holidays.length === 0,
+    (c) => c.holidays && c.holidays.length === 0,
   );
 
   return Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
@@ -108,13 +110,15 @@ function displayPricePerUnit() {
     includeTaxes = "(inkl. MwSt.)"
   }*/
 
-  switch (props.bookable.priceType) {
-    case "per-hour":
-      return " pro Stunde " + includeTaxes;
-    case "per-item":
-      return " pro Stück " + includeTaxes;
-    case "per-day":
-      return " pro Tag " + includeTaxes;
+  if(props.bookable.priceType){
+    switch (props.bookable.priceType) {
+      case "per-hour":
+        return " pro Stunde " + includeTaxes;
+      case "per-item":
+        return " pro Stück " + includeTaxes;
+      case "per-day":
+        return " pro Tag " + includeTaxes;
+    }
   }
 }
 </script>
