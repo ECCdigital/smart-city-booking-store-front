@@ -13,13 +13,13 @@
         <div class="flex flex-wrap gap-2 items-center">
           <UTooltip :text="`Buchungs-ID: ${booking.id}`">
             <div
-                class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full"
+              class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full"
             >
               #{{ booking.id }}
             </div>
           </UTooltip>
           <div
-              v-if="isActive"
+            v-if="isActive"
             class="bg-primary/60 text-gray-800 dark:text-gray-200 text-xs font-semibold px-2 py-1 rounded-full"
           >
             Aktiv
@@ -37,31 +37,35 @@
       <h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2 mt-2">
         Fahrradbox
         <span v-for="(info, index) in booking.lockerInfo" :key="index">
-          {{ info.ifbsMetadata?.nummer
-            ? (index === booking.lockerInfo.length - 2
+          {{
+            info.ifbsMetadata?.nummer
+              ? index === booking.lockerInfo.length - 2
                 ? `#${info.ifbsMetadata.nummer} & `
                 : index < booking.lockerInfo.length - 2
                   ? `#${info.ifbsMetadata.nummer}, `
-                  : `#${info.ifbsMetadata.nummer} `)
-            : "" }}
+                  : `#${info.ifbsMetadata.nummer} `
+              : ""
+          }}
         </span>
       </h3>
-        <div class="text-sm text-gray-500 dark:text-gray-400 mb-3 mt-1">
-          Box-ID
-          <span v-for="(info, index) in booking.lockerInfo" :key="index">
-          {{ info.ifbsMetadata?.boxId
-              ? (index === booking.lockerInfo.length - 2
-                  ? `#${info.ifbsMetadata.boxId} & `
-                  : index < booking.lockerInfo.length - 2
-                      ? `#${info.ifbsMetadata.boxId}, `
-                      : `#${info.ifbsMetadata.boxId} `)
-              : "" }}
+      <div class="text-sm text-gray-500 dark:text-gray-400 mb-3 mt-1">
+        Box-ID
+        <span v-for="(info, index) in booking.lockerInfo" :key="index">
+          {{
+            info.ifbsMetadata?.boxId
+              ? index === booking.lockerInfo.length - 2
+                ? `#${info.ifbsMetadata.boxId} & `
+                : index < booking.lockerInfo.length - 2
+                  ? `#${info.ifbsMetadata.boxId}, `
+                  : `#${info.ifbsMetadata.boxId} `
+              : ""
+          }}
         </span>
-        </div>
+      </div>
     </div>
 
     <div class="flex flex-col h-3/5 px-4 mt-3">
-      <div class="h-1/2 mb-3 ">
+      <div class="h-1/2 mb-3">
         <div
           class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-1"
         >
@@ -74,7 +78,7 @@
         </div>
       </div>
 
-      <div class="h-1/2 grid justify-center content-center ">
+      <div class="h-1/2 grid justify-center content-center">
         <OpenIfbsKeyButton
           :tenant-id="booking.tenantId"
           :booking-id="booking.id"
@@ -87,7 +91,7 @@
 </template>
 <script setup>
 import OpenIfbsKeyButton from "~/components/mobileKey/OpenIfbsKeyButton.vue";
-import {useFormatting} from "~/composables/utils/useFormatting.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   booking: {
@@ -100,13 +104,13 @@ const { formatDate } = useFormatting();
 
 const currentTime = ref(new Date().getTime());
 const isActive = computed(() => {
-  if(props.booking.isRejected) {
+  if (props.booking.isRejected) {
     return false;
   }
   if (props.booking.timeBegin && props.booking.timeEnd) {
     return (
-        currentTime.value >= props.booking.timeBegin &&
-        currentTime.value <= props.booking.timeEnd
+      currentTime.value >= props.booking.timeBegin &&
+      currentTime.value <= props.booking.timeEnd
     );
   }
 
@@ -114,7 +118,7 @@ const isActive = computed(() => {
 });
 
 const keyCardClasses =
-    "bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow";
+  "bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow";
 
 function openDetails() {
   const router = useRouter();

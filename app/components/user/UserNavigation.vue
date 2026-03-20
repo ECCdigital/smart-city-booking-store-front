@@ -1,6 +1,6 @@
 <template>
   <div
-    class="md:basis-1/6 border border-gray-200 rounded m-2 md:m-0 md:p-2 md:space-y-1 flex md:block md:h-64"
+    class="md:basis-1/6 border border-gray-200 rounded mb-5 md:mb-0 m-2 md:m-0 md:p-2 md:space-y-1 flex md:block md:h-64"
   >
     <div
       v-for="(item, i) in userNavigation"
