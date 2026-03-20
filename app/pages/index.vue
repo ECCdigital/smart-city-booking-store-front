@@ -32,8 +32,14 @@ import LatestEventsArea from "~/components/LatestEventsArea.vue";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 
 definePageMeta({
-  layout: "entry",
-  middleware: ["catalog-auth"],
+  layout: "catalog",
+  middleware: ["catalog-auth", "catalog-guard"],
+  hero: {
+    height: "xl",
+    titleClass: "text-2xl",
+    subtitleClass: "text-5xl",
+    showOnMobile: true,
+  },
 });
 
 const { tenantTo } = useTenantRoute();

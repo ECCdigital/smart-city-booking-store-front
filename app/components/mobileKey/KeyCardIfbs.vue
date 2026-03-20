@@ -122,7 +122,7 @@ const keyCardClasses =
 
 function openDetails() {
   const router = useRouter();
-  router.push({ path: `/user/keys/${props.booking.id}` });
+  router.push({ path: `/account/keys/${props.booking.id}` });
 }
 </script>
 

@@ -12,8 +12,9 @@ import BackButton from "~/components/BackButton.vue";
 
 definePageMeta({
   name: "tenant-keys-process-id",
-  layout: "user",
-  middleware: ["user-auth"],
+  layout: "panel",
+  navigation: "user",
+  requiresAuth: true,
 });
 
 const bookingStore = useBookingStore();

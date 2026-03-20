@@ -39,12 +39,6 @@ export function useCatalogBundle() {
     );
 
     if (error.value) {
-      if (error.value.statusMessage === "catalog_disabled") {
-        if (import.meta.server && event) {
-          return await sendRedirect(event, adminBaseUrl, 302);
-        }
-        return navigateTo(adminBaseUrl, { external: true });
-      }
       if (error.value.statusMessage === "unauthorized") {
         if (import.meta.server && event) {
           return await sendRedirect(event, `/login`, 302);

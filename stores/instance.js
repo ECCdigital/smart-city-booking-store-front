@@ -5,6 +5,9 @@ export const useInstanceStore = defineStore("instance", {
     initialized: false,
     instance: null,
   }),
+  getters: {
+    catalogEnabled: (state) => state.instance?.enableCatalog ?? false,
+  },
   actions: {
     async initialize() {
       if (!this.initialized) {

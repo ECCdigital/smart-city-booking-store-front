@@ -13,7 +13,9 @@ import { useBookingStore } from "~~/stores/bookings.js";
 
 definePageMeta({
   name: "keys",
-  layout: "user",
+  layout: "panel",
+  navigation: "user",
+  requiresAuth: true,
 });
 
 const bookingsStore = useBookingStore();

@@ -15,10 +15,10 @@
 <script setup>
 definePageMeta({
   name: "invoices",
-  layout: "user",
-  middleware: ["user-auth"],
+  layout: "panel",
+  navigation: "user",
+  requiresAuth: true,
 });
 </script>
 
 <style scoped></style>
-
