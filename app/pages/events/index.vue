@@ -4,7 +4,6 @@ import { useEventStore } from "~~/stores/event.js";
 import EventSection from "~/components/events/EventSection.vue";
 
 definePageMeta({
-  name: "catalog-events",
   layout: "catalog",
   hero: {
     height: "sm",

@@ -21,7 +21,6 @@ import BackButton from "~/components/BackButton.vue";
 import OpenIfbsKeyButton from "~/components/mobileKey/OpenIfbsKeyButton.vue";
 
 definePageMeta({
-  name: "booking",
   layout: "panel",
   navigation: "user",
   requiresAuth: true,

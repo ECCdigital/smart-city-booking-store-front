@@ -3,9 +3,6 @@ import { ref } from "vue";
 import ForgotPasswordCard from "~/components/auth/ForgotPasswordCard.vue";
 import { useAuth } from "~/composables/auth/useAuth";
 
-definePageMeta({
-  name: "forgot-password",
-});
 
 const form = ref({
   email: "",

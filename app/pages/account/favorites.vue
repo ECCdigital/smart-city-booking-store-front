@@ -13,7 +13,6 @@
 </template>
 <script setup>
 definePageMeta({
-  name: "favorites",
   layout: "panel",
   navigation: "user",
   requiresAuth: true,

@@ -164,6 +164,8 @@ async function onOpenMobileKey(processId) {
       props.bookingId,
     );
 
+    console.log("Open mobile key result:", result);
+
     currentBoxId.value = result.providerResponse.OpenBox_ID;
 
     await onCheckBoxStatus();
@@ -177,6 +179,13 @@ async function onOpenMobileKey(processId) {
 }
 async function onCheckBoxStatus() {
   isLoading.value = true;
+
+  console.log("Checking mobile key status with params:", {
+    tenantId: props.tenantId,
+    processId: currentProcessId.value,
+    bookingId: props.bookingId,
+    boxId: currentBoxId.value,
+  });
 
   const status = await checkMobileKeyStatus(
     props.tenantId,

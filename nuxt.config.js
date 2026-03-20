@@ -27,6 +27,7 @@ export default defineNuxtConfig({
   },
 
   modules: [
+    "~~/modules/tenant-routes",
     "@nuxt/eslint",
     "@nuxt/fonts",
     "@nuxt/icon",
@@ -58,6 +59,7 @@ export default defineNuxtConfig({
         file: "en.json",
       },
     ],
+    customRoutes: "page",
     defaultLocale: "de",
     strategy: "prefix_except_default",
     lazy: true,

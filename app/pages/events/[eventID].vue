@@ -6,7 +6,6 @@ import DetailsArea from "~/components/search/DetailsArea.vue";
 definePageMeta({
   layout: "catalog",
   middleware: ["catalog-auth"],
-  name: "tenant-event-id",
   hero: {
     height: "sm",
     showOnMobile: true,

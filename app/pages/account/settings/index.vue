@@ -15,7 +15,6 @@ import { useAuthStore } from "~~/stores/auth.js";
 import PageHeader from "~/components/PageHeader.vue";
 
 definePageMeta({
-  name: "settings",
   layout: "panel",
   navigation: "settings",
   requiresAuth: true,

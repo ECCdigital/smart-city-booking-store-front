@@ -12,19 +12,33 @@ import KeySection from "~/components/mobileKey/KeySection.vue";
 import { useBookingStore } from "~~/stores/bookings.js";
 
 definePageMeta({
-  name: "keys",
   layout: "panel",
   navigation: "user",
   requiresAuth: true,
 });
 
 const bookingsStore = useBookingStore();
-await bookingsStore.fetchBookings();
+
+const { pending } = useAsyncData("bookings", async () => {
+  return await bookingsStore.fetchBookings();
+});
 
 const bookings = computed(() => bookingsStore.getBookings);
-const filteredBookings = ref(
-  bookings.value.sort((a, b) => b.timeCreated - a.timeCreated),
+
+const sortedBookings = computed(() =>
+    [...bookings.value].sort((a, b) => b.timeCreated - a.timeCreated)
 );
+
+const filteredBookings = ref(null);
+
+watch(
+    sortedBookings,
+    (val) => {
+      filteredBookings.value = val;
+    },
+    { immediate: true }
+);
+
 </script>
 
 <style scoped></style>

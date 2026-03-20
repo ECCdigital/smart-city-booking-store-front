@@ -4,9 +4,6 @@ import RegisterCard from "~/components/auth/RegisterCard.vue";
 import { useAuth } from "~/composables/auth/useAuth.js";
 import RegisterSuccessCard from "~/components/auth/RegisterSuccessCard.vue";
 
-definePageMeta({
-  name: "register",
-});
 
 const form = ref({
   firstname: "",

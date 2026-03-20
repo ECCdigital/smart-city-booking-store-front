@@ -6,7 +6,6 @@ import { useAuthStore } from "~~/stores/auth.js";
 
 definePageMeta({
   layout: "default",
-  name: "login",
 });
 
 const t = useI18n().t;

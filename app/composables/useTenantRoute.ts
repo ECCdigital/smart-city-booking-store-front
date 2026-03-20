@@ -6,13 +6,16 @@ export const useTenantRoute = () => {
 
   const tenantID = computed(() => route.params.tenantID as string | undefined);
   const itemID = computed(() => {
-     const id = route.params.locationID || route.params.bookableID || route.params.eventID;
-     return id as string | undefined;
+    const id =
+      route.params.locationID ||
+      route.params.bookableID ||
+      route.params.eventID;
+    return id as string | undefined;
   });
   const bookingID = computed(() => {
     const id = route.params.bookingID;
-    return id as string | undefined;c
-  })
+    return id as string | undefined;
+  });
 
   function tenantPath(path: string) {
     if (!tenantID.value) return path;
@@ -26,19 +29,6 @@ export const useTenantRoute = () => {
   function tenantTo(to: string | Record<string, any>) {
     const currentQuery = route.query;
 
-    if (!tenantID.value) {
-      if (typeof to === "string") {
-        return { path: to, query: currentQuery };
-      }
-      return {
-        ...to,
-        query: {
-          ...currentQuery,
-          ...(to.query || {}),
-        },
-      };
-    }
-
     if (typeof to === "string") {
       return {
         path: tenantPath(to),
@@ -46,17 +36,21 @@ export const useTenantRoute = () => {
       };
     }
 
-    const clone = {
-      ...to,
-      params: {
-        ...to.params,
-        tenantSlug: tenantID.value,
-      },
-      query: {
-        ...currentQuery,
-        ...(to.query || {}),
-      },
-    };
+    const clone = { ...to };
+
+    if (
+      tenantID.value &&
+      clone.name &&
+      !String(clone.name).startsWith("tenant-")
+    ) {
+      clone.name = `tenant-${clone.name}`;
+      clone.params = {
+        ...clone.params,
+        tenantID: tenantID.value,
+      };
+    }
+
+    clone.query = { ...currentQuery, ...(to.query || {}) };
 
     return clone;
   }
@@ -64,10 +58,10 @@ export const useTenantRoute = () => {
   function isActivePath(path: string) {
     let targetPath = tenantPath(path);
 
-    if(itemID.value){
-        targetPath += `/${itemID.value}`;
-    }else if(bookingID.value){
-        targetPath += `/${bookingID.value}`;
+    if (itemID.value) {
+      targetPath += `/${itemID.value}`;
+    } else if (bookingID.value) {
+      targetPath += `/${bookingID.value}`;
     }
     return route.path === targetPath;
   }

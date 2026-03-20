@@ -7,7 +7,6 @@ import NavigationBar from "../../components/navigation/NavigationBar.vue";
 definePageMeta({
   layout: "catalog",
   middleware: ["catalog-auth"],
-  name: "catalog-slug",
 });
 
 const route = useRoute();

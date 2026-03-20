@@ -5,11 +5,6 @@ export default defineEventHandler(async (event) => {
   const bookingId = getRouterParam(event, "bookingId");
   const processId = getRouterParam(event, "processId");
 
-  console.log("Received request to open mobile key for booking:", {
-    tenantID,
-    bookingId,
-    processId,
-  });
 
   const { data, error } = await serverFetch(
     event,
@@ -26,8 +21,6 @@ export default defineEventHandler(async (event) => {
       data: error.message,
     });
   }
-
-  console.log("Mobile key opened successfully:", data);
 
   return data;
 });

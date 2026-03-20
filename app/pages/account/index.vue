@@ -3,7 +3,6 @@
 </template>
 <script setup>
 definePageMeta({
-  name: "user",
   layout: "panel",
   navigation: "user",
   requiresAuth: true,

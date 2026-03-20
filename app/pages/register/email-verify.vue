@@ -6,10 +6,6 @@ import { useAuth } from "~/composables/auth/useAuth.js";
 import AlreadyVerifiedEmailCard from "~/components/auth/email-verification/AlreadyVerifiedEmailCard.vue";
 import EmailVerificationActionCard from "~/components/auth/email-verification/EmailVerificationActionCard.vue";
 
-definePageMeta({
-  name: "email-verify",
-});
-
 const { verifyEmail } = useAuth();
 
 const router = useRouter();

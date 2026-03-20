@@ -11,7 +11,6 @@ import KeyDetailsSection from "~/components/mobileKey/KeyDetailsSection.vue";
 import BackButton from "~/components/BackButton.vue";
 
 definePageMeta({
-  name: "tenant-keys-process-id",
   layout: "panel",
   navigation: "user",
   requiresAuth: true,

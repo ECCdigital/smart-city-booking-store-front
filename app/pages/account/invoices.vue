@@ -14,7 +14,6 @@
 </template>
 <script setup>
 definePageMeta({
-  name: "invoices",
   layout: "panel",
   navigation: "user",
   requiresAuth: true,

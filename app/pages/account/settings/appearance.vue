@@ -14,7 +14,6 @@ import AppearanceSection from "~/components/user/settings/AppearanceSection.vue"
 import PageHeader from "~/components/PageHeader.vue";
 
 definePageMeta({
-  name: "appearance",
   layout: "panel",
   navigation: "settings",
   requiresAuth: true,
