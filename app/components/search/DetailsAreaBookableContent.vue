@@ -133,7 +133,7 @@
         </div>
 
         <!-- Related Bookables -->
-        <div id="relatedBookables" v-if="item.relatedBookables.length">
+        <div v-if="item.relatedBookables && item.relatedBookables.length" id="relatedBookables">
           <h3 class="text-xl font-bold">Könnte Sie auch interessieren:</h3>
         </div>
         <BookableRelatedItems :related-bookables="item.relatedBookables" />

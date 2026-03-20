@@ -8,7 +8,7 @@
       />
     </div>
 
-    <div class="flex justify-center mt-2 mb-10">
+    <div v-if="usePagination" class="flex justify-center mt-2 mb-10">
       <UPagination
         v-model:page="currentPage"
         :items-per-page="itemsPerPage"
@@ -38,26 +38,29 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  usePagination: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const allBookings = computed(() =>
-  [...props.bookings]
-    .map((b) => ({
-      ...b,
-      displayBookingDate: new Date(b.timeCreated).toLocaleDateString("de-DE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      statusLabel: b.isRejected
-        ? "Storniert"
-        : b.isCommitted
+  [...props.bookings].map((b) => ({
+    ...b,
+    displayBookingDate: new Date(b.timeCreated).toLocaleDateString("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    statusLabel: b.isRejected
+      ? "Storniert"
+      : b.isCommitted
         ? "Bestätigt"
         : "Ausstehend",
-      payedLabel: b.isPayed ? "bezahlt" : "nicht bezahlt",
-    }))
+    payedLabel: b.isPayed ? "bezahlt" : "nicht bezahlt",
+  })),
 );
 
 const paginatedBookings = computed(() => {
@@ -71,7 +74,7 @@ const bundleLoaded = ref(false);
 
 if (
   allBookings.value.some((booking) =>
-    booking.bookableItems.some((item) => item._bookableUsed.type === "ticket")
+    booking.bookableItems.some((item) => item._bookableUsed.type === "ticket"),
   )
 ) {
   loadBundle({ include: ["events"] }).then(() => {

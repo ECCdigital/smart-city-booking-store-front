@@ -7,13 +7,19 @@ export const navigationPresets = {
       disabled: false,
     },
     {
+      value: "/account/keys",
+      label: "Schlüssel",
+      icon: "i-lucide-key-round",
+      disabled: false,
+    },
+    {
       value: "/account/invoices",
       label: "Rechnungen",
       icon: "i-lucide-wallet-cards",
       disabled: true,
     },
     {
-      value: "/user/favorites",
+      value: "/account/favorites",
       label: "Favoriten",
       icon: "i-lucide-book-heart",
       disabled: true,
@@ -21,13 +27,13 @@ export const navigationPresets = {
   ],
   settings: [
     {
-      value: "/user/settings",
+      value: "/account/settings",
       label: "Persönliche Daten",
       icon: "i-lucide-user-round-pen",
       disabled: false,
     },
     {
-      value: "/user/settings/appearance",
+      value: "/account/settings/appearance",
       label: "Darstellung",
       icon: "i-lucide-paintbrush",
       disabled: false,

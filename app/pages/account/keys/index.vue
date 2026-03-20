@@ -1,0 +1,30 @@
+<template>
+  <div class="w-full">
+    <PageHeader
+      title="Ihre Schlüssel"
+      class="mb-3 md:mb-0"
+    />
+    <KeySection :bookings="filteredBookings" />
+  </div>
+</template>
+<script setup>
+import KeySection from "~/components/mobileKey/KeySection.vue";
+import { useBookingStore } from "~~/stores/bookings.js";
+
+definePageMeta({
+  name: "keys",
+  layout: "panel",
+  navigation: "user",
+  requiresAuth: true,
+});
+
+const bookingsStore = useBookingStore();
+await bookingsStore.fetchBookings();
+
+const bookings = computed(() => bookingsStore.getBookings);
+const filteredBookings = ref(
+  bookings.value.sort((a, b) => b.timeCreated - a.timeCreated),
+);
+</script>
+
+<style scoped></style>

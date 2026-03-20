@@ -1,3 +1,4 @@
+
 <template>
   <div class="w-full">
     <div class="md:flex justify-between items-center w-full mb-4">
@@ -6,6 +7,13 @@
         :bookings="bookings"
         @update:bookings="setFilteredBookings"
       />
+    </div>
+
+    <div v-if="activeBookingsWithLocking?.length">
+      <h2 class="text-xl font-bold">Aktuelle Buchungen mit Schließberechtigung</h2>
+      <BookingSection  :bookings="activeBookingsWithLocking" :use-pagination="activeBookingsWithLocking.length > 10"/>
+
+      <h2 class=" mt-5 text-xl font-bold">Alle Buchungen</h2>
     </div>
 
     <BookingsSkeleton v-if="pending" :skeleton-count="9" />
@@ -36,6 +44,18 @@ const { pending } = useAsyncData("bookings", () =>
 
 const bookings = computed(() => bookingsStore.getBookings);
 const filteredBookings = ref(bookings.value.sort((a, b) => b.timeCreated - a.timeCreated));
+
+const activeBookingsWithLocking = computed(() => {
+  const withLockerInfo = filteredBookings.value.filter(booking => booking.lockerInfo.length > 0 && booking.lockerInfo.some(info => info.lockerSystem === "ifbs"));
+
+  const currentTime = new Date().getTime();
+  const twoHoursMs = 2 * 60 * 60 * 1000;
+
+
+  return withLockerInfo.filter(
+      (b) => b.timeBegin -twoHoursMs < currentTime && b.timeEnd + twoHoursMs > currentTime && b.isRejected === false,
+  );
+})
 
 function setFilteredBookings(bookings) {
   filteredBookings.value = bookings.map(b => ({ ...b }));

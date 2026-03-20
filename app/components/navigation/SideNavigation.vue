@@ -1,22 +1,22 @@
 <template>
   <div
-      class="md:basis-1/6 border border-gray-200 rounded m-2 md:m-0 md:p-2 md:space-y-1 flex md:block md:h-64"
+    class="md:basis-1/6 border border-gray-200 rounded mb-5 md:mb-0 m-2 md:m-0 md:p-2 md:space-y-1 flex md:block md:h-64"
   >
     <div
-        v-for="(item, i) in items"
-        :key="i"
-        class="basis-1/2 md:basis-full flex w-full"
+      v-for="(item, i) in items"
+      :key="i"
+      class="basis-1/2 md:basis-full flex w-full"
     >
       <UTooltip text="Coming soon..." :disabled="!item.disabled">
         <NuxtLink
-            class="grid sm:flex rounded p-2 w-full justify-center md:justify-start items-center text-center md:text-left"
-            :class="getLinkClasses(item)"
-            :to="item.disabled ? '' : tenantTo(item.value)"
+          class="grid sm:flex rounded p-2 w-full justify-center md:justify-start items-center text-center md:text-left"
+          :class="getLinkClasses(item)"
+          :to="item.disabled ? '' : tenantTo(item.value)"
         >
           <div class="flex justify-center">
             <UIcon :name="item.icon" class="sm:mr-3 mt-1" />
           </div>
-          <div>{{ item.label }}</div>
+          <div class="text-sm md:text-md mt-1 md:mt-0">{{ item.label }}</div>
         </NuxtLink>
       </UTooltip>
     </div>
@@ -34,11 +34,10 @@ defineProps({
 const { tenantTo, isActivePath } = useTenantRoute();
 
 const inactiveLinkStyle =
-    "bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 hover:dark:bg-gray-800";
+  "bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 hover:dark:bg-gray-800";
 const disabledLinkStyle =
-    "cursor-not-allowed opacity-75 bg-gray-100 dark:bg-gray-900";
-const activeLinkStyle =
-    "bg-primary/20 hover:bg-primary/40 font-semibold";
+  "cursor-not-allowed opacity-75 bg-gray-100 dark:bg-gray-900";
+const activeLinkStyle = "bg-primary/20 hover:bg-primary/40 font-semibold";
 
 function getLinkClasses(item) {
   if (item.disabled) return disabledLinkStyle;
