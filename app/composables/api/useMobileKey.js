@@ -3,7 +3,7 @@ export function useMobileKey() {
     const api = useApiClient();
 
     const { data, error } = await api.post(
-      `/api/bookings/${tenantID}/${bookingId}/mobile-key/${processId}/open`,
+      `/api/bookings/${tenantID}/${bookingId}/mobile-key/${processId}/open`
     );
 
     if (error) {
@@ -18,15 +18,13 @@ export function useMobileKey() {
     tenantID,
     processId,
     bookingId,
-    openBoxId,
+    openProcessId
   ) => {
     const api = useApiClient();
 
-    console.log(`Checking mobile key status for tenant ${tenantID}, booking ${bookingId}, process ${processId}, box ${openBoxId}`);
-
     const { data, error } = await api.get(
       `/api/bookings/${tenantID}/${bookingId}/mobile-key/${processId}/status`,
-      { query: { openBoxId: openBoxId } },
+      { query: { openProcessId } }
     );
 
     if (error) {

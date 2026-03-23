@@ -111,7 +111,7 @@ const showOpenDialog = ref(false);
 const isLoading = ref(false);
 const openingStatus = ref(null);
 const currentProcessId = ref(null);
-const currentBoxId = ref(null);
+const currentOpenProcessId = ref(null);
 
 const { openMobileKey, checkMobileKeyStatus } = useMobileKey();
 
@@ -120,7 +120,7 @@ const { loadBundle } = useCatalogBundle();
 const bookableStore = useBookableStore();
 await loadBundle({ include: ["bookables"] });
 const bookableIds = computed(() =>
-  props.lockerInfo.map((locker) => locker.bookableId),
+  props.lockerInfo.map((locker) => locker.bookableId)
 );
 const bookables = ref([]);
 
@@ -161,16 +161,14 @@ async function onOpenMobileKey(processId) {
     const result = await openMobileKey(
       props.tenantId,
       processId,
-      props.bookingId,
+      props.bookingId
     );
 
-    console.log("Open mobile key result:", result);
-
-    currentBoxId.value = result.providerResponse.OpenBox_ID;
+    currentOpenProcessId.value = result.data.openProcessId;
 
     await onCheckBoxStatus();
 
-    emit("keyOpened", result.providerResponse.OpenBox_ID);
+    emit("keyOpened", result.data.openProcessId);
   } catch (e) {
     console.error("Error opening mobile key", e);
     isLoading.value = false;
@@ -180,18 +178,11 @@ async function onOpenMobileKey(processId) {
 async function onCheckBoxStatus() {
   isLoading.value = true;
 
-  console.log("Checking mobile key status with params:", {
-    tenantId: props.tenantId,
-    processId: currentProcessId.value,
-    bookingId: props.bookingId,
-    boxId: currentBoxId.value,
-  });
-
   const status = await checkMobileKeyStatus(
     props.tenantId,
     currentProcessId.value,
     props.bookingId,
-    currentBoxId.value,
+    currentOpenProcessId.value
   );
 
   isLoading.value = false;

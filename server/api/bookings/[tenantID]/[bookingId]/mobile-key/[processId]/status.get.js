@@ -4,17 +4,16 @@ export default defineEventHandler(async (event) => {
   const tenantID = getRouterParam(event, "tenantID");
   const bookingId = getRouterParam(event, "bookingId");
   const processId = getRouterParam(event, "processId");
-  const { openBoxId } = getQuery(event);
+  const { openProcessId } = getQuery(event);
 
   const { data, error } = await serverFetch(
     event,
-    `/api/${tenantID}/bookings/${bookingId}/access/${processId}/open-status`,
+    `/api/${tenantID}/access/${processId}/open-status`,
     {
       method: "GET",
-      query: { openBoxId },
+      query: { openProcessId, bookingId },
     }
   );
-
 
   if (error) {
     throw createError({

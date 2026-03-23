@@ -8,9 +8,10 @@ export default defineEventHandler(async (event) => {
 
   const { data, error } = await serverFetch(
     event,
-    `/api/${tenantID}/bookings/${bookingId}/access/${processId}/open`,
+    `/api/${tenantID}/access/${processId}/open`,
     {
       method: "POST",
+      query: { bookingId },
     },
   );
 
