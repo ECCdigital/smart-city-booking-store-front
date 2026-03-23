@@ -54,7 +54,7 @@
         <div class="flex md:basis-2/3">
           <div class="basis-1/2">
             <p>Zahlungsmethode</p>
-            <p class="font-bold text-primary">{{ paymentMethode }}</p>
+            <p class="font-bold text-primary">{{ paymentMethod }}</p>
           </div>
           <div>
             <p>Status</p>
@@ -137,24 +137,18 @@ const bookingPrice = computed(() => {
   return "0,00 €";
 });
 
-const paymentMethode = computed(() => {
+const paymentMethod = computed(() => {
   if (!props.booking.isPayed) {
     switch (props.booking.paymentProvider) {
-      case "giroCockpit": {
-        return "Online-Zahlung";
-      }
-      case "pmPayment": {
-        return "Online-Zahlung";
-      }
       case "invoice": {
         return "Rechnung";
       }
       default: {
-        return "Unbekannt";
+        return "–";
       }
     }
   } else {
-    switch (props.booking.paymentMethode) {
+    switch (props.booking.paymentMethod) {
       case "CASH":
         return "Bar";
       case "TRANSFER":
