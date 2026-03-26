@@ -39,17 +39,14 @@
         @keyup.enter="onSearch"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
-      <InputText
-        v-model="_location"
-        icon="i-lucide-map-pin"
-        placeholder="Ort"
-        clearable
-        class="rounded-md"
-        :ui="{
+      <AddressLookup
+          v-model="_location"
+          class="rounded-md "
+          :ui="{
           base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
         }"
-        @keyup.enter="onSearch"
+          @keyup.enter="onSearch"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <InputTimePeriod
@@ -65,6 +62,7 @@
       />
     </div>
   </div>
+
   <!--Card for smaller screens -->
   <UCard
     class="bg-white dark:bg-gray-700 mx-5 -mt-15 p-0 shadow-lg md:hidden"
@@ -104,15 +102,13 @@
       }"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
-    <InputText
-      v-model="_location"
-      icon="i-lucide-map-pin"
-      placeholder="Ort"
-      clearable
-      :ui="{
-        base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
+    <AddressLookup
+        v-model="_location"
+        class="rounded-md "
+        :ui="{
+          base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
         leadingIcon: 'text-gray-400 dark:text-gray-200',
-      }"
+        }"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputTimePeriod
@@ -132,6 +128,7 @@
 import InputText from "~/components/inputs/InputText.vue";
 import InputTimePeriod from "~/components/inputs/InputTimePeriod.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import AddressLookup from "~/components/inputs/AddressLookup.vue";
 
 const isInitialized = defineModel("isInitailized", {
   type: Boolean,

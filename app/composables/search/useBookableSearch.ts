@@ -270,22 +270,29 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     timeEnd,
   }: {
     term?: string;
-    location?: string;
+    location?: string | object;
     timeStart?: number | null;
     timeEnd?: number | null;
   } = {}) {
     query.term = term || "";
-    query.location = location || "";
+
+    if(typeof location === "object") {
+        query.location = location.display_address || "";
+    } else {
+        query.location = location || "";
+    }
     query.start = timeStart || null;
     query.end = timeEnd || null;
   }
 
   async function runSearch(criteria: {
     term: string;
-    location: string;
+    location: string | object;
     timeStart: number | null;
     timeEnd: number | null;
   }) {
+      console.log("Running search with criteria:", criteria);
+
     setSearchQueryParams(criteria);
 
     let itemsWithStatus = setItemStatus(() => toValue(sourceItems));
@@ -358,32 +365,55 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
   }
 
-  function searchForLocation(searchLocation: string, items: any[]) {
+  function searchForLocation(searchLocation: string | object, items: any[]) {
     if (!searchLocation) return items;
 
-    if (!isEvent) {
-      const allEvents = items.filter((item) => item.item.category === "event");
-      const allBookables = items.filter(
-        (item) => item.item.category !== "event",
-      );
-
-      const foundEvents = new Fuse(allEvents, eventSearchLocationOptions)
-        .search(searchLocation)
-        .map((result) => result.item);
-
-      const foundBookables = new Fuse(
-        allBookables,
-        bookableSearchLocationOptions,
-      )
-        .search(searchLocation)
-        .map((result) => result.item);
-
-      return [...foundEvents, ...foundBookables];
+    if(typeof searchLocation === "string") {
+        return searchForLocationString(searchLocation, items);
     } else {
-      return new Fuse(items, eventSearchLocationOptions)
-        .search(searchLocation)
-        .map((result) => result.item);
+        const resultLocations =  searchForLocationString(searchLocation.display_address, items);
+        const temp = resultLocations.map((item) => {
+            return {
+                ...item,
+                distance: getDistanceToLocation(item.item.location, searchLocation)
+            }
+        })
+        console.log("+++", temp)
+        return temp
     }
+  }
+  function searchForLocationString(searchLocation: string , items: any[]){
+      if (!isEvent) {
+          const allEvents = items.filter((item) => item.item.category === "event");
+          const allBookables = items.filter(
+              (item) => item.item.category !== "event",
+          );
+
+          const foundEvents = new Fuse(allEvents, eventSearchLocationOptions)
+              .search(searchLocation)
+              .map((result) => result.item);
+
+          const foundBookables = new Fuse(
+              allBookables,
+              bookableSearchLocationOptions,
+          )
+              .search(searchLocation)
+              .map((result) => result.item);
+
+          return [...foundEvents, ...foundBookables];
+      } else {
+          return new Fuse(items, eventSearchLocationOptions)
+              .search(searchLocation)
+              .map((result) => result.item);
+      }
+  }
+  function getDistanceToLocation(searchLocation: any, itemLocation: any) {
+
+      console.log("Calculating distance between", searchLocation, "and", itemLocation);
+
+      if (!searchLocation || !itemLocation) return null;
+     //toDo - use geolocation library to calculate distance based on coordinates
+    return 55; //placeholder value
   }
 
   async function searchForTimePeriod(timePeriod: any, items: any[]) {
