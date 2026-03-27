@@ -1,38 +1,25 @@
 <template>
+  <div class="w-full group flex justify-between bg-white dark:bg-gray-700">
     <UInputMenu
       v-model="model"
       v-model:search-term="searchTerm"
       :items="displayItems"
-      type="search"
-      name="address"
-      autocomplete="address-line1"
+      name="no-autofill-address"
+      autocomplete="new-password"
       icon="i-lucide-map-pin"
       size="lg"
       variant="ghost"
       placeholder="Adresse"
-      class="w-full bg-white dark:bg-gray-700"
+      class="w-full bg-white dark:bg-gray-700 "
       :ui="{
-        placeholder: 'bg-green-100 text-gray-400 dark:text-pink-500',
-        leadingIcon: 'text-gray-400 dark:text-pink-500',
+        base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent rounded-none rounded-l-md',
+        leadingIcon: 'text-gray-400 dark:text-gray-200',
       }"
       label-key="display_address"
       trailing-icon="none"
       :loading="loading"
       @select="onSelect()"
     >
-      <template v-if="model" #trailing>
-        <UTooltip text="Eintrag löschen">
-          <UButton
-            color="neutral"
-            variant="link"
-            size="sm"
-            icon="i-lucide-circle-x"
-            aria-label="Clear input"
-            @click="onClear"
-          />
-        </UTooltip>
-      </template>
-
       <template #item="{ item }">
         <div v-if="item.isManualEntry" class="flex gap-2">
           <div class="content-center">
@@ -53,6 +40,25 @@
         </div>
       </template>
     </UInputMenu>
+    <div
+      v-if="model"
+      class="rounded-r content-center px-3 transition-colors bg-transparent group-focus-within:bg-gray-100 dark:group-focus-within:bg-gray-800"
+    >
+      <UTooltip text="Eintrag löschen">
+        <UButton
+          color="neutral"
+          variant="link"
+          size="sm"
+          icon="i-lucide-circle-x"
+          aria-label="Clear input"
+          class="
+
+        "
+          @click="onClear"
+        />
+      </UTooltip>
+    </div>
+  </div>
 </template>
 <script setup>
 const model = defineModel();
@@ -95,37 +101,39 @@ const displayItems = computed(() => {
   return [...suggestions.value, createManualEntry(searchTerm.value)];
 });
 
-watch(searchTerm, (newQuery) => {
-  if (
-    selectedAddress.value &&
-    newQuery === selectedAddress.value.display_address
-  ) {
-    return;
-  }
-
-  if (!newQuery || newQuery.length < 3) {
-    if (!selectedAddress.value) {
-      suggestions.value = [];
+watch(
+  searchTerm,
+  (newQuery) => {
+    if (
+      selectedAddress.value &&
+      newQuery === selectedAddress.value.display_address
+    ) {
+      return;
     }
-    return;
-  }
 
-  if (newQuery) {
-    const addresObj = parseIncomingValue(newQuery);
-
-    if (addresObj) {
-      selectedAddress.value = addresObj;
-      suggestions.value = [addresObj];
-      // originalDisplayAddress.value = addresObj.display_address;
+    if (!newQuery || newQuery.length < 3) {
+      if (!selectedAddress.value) {
+        suggestions.value = [];
+      }
+      return;
     }
-  }
 
-  clearTimeout(debounceTimer.value);
-  debounceTimer.value = setTimeout(() => {
-    searchAddress(newQuery);
-  }, 300);
-},
-    { immediate: true }
+    if (newQuery) {
+      const addresObj = parseIncomingValue(newQuery);
+
+      if (addresObj) {
+        selectedAddress.value = addresObj;
+        suggestions.value = [addresObj];
+        // originalDisplayAddress.value = addresObj.display_address;
+      }
+    }
+
+    clearTimeout(debounceTimer.value);
+    debounceTimer.value = setTimeout(() => {
+      searchAddress(newQuery);
+    }, 300);
+  },
+  { immediate: true },
 );
 
 /*
@@ -243,9 +251,6 @@ Performs the address search using Nominatim API, handling loading state and erro
 async function searchAddress(query) {
   loading.value = true;
 
-  console.log("Searching for address:", query);
-  console.log("Selected address before search:", selectedAddress.value);
-
   try {
     const params = new URLSearchParams({
       q: query,
@@ -254,7 +259,6 @@ async function searchAddress(query) {
       limit: "5",
       countrycodes: "de",
     });
-    console.log("A - params:", params);
 
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?${params}`,
@@ -264,26 +268,19 @@ async function searchAddress(query) {
         },
       },
     );
-    console.log("B - response:", response);
-
 
     const data = await response.json();
     suggestions.value = data.map((item) => transformToDbFormat(item));
-    console.log("C - suggestions", suggestions.value);
 
-    console.log("D - originalDisplayAddress", originalDisplayAddress.value)
-    if(originalDisplayAddress.value){
+    if (originalDisplayAddress.value) {
       const matchedSuggestion = suggestions.value.find(
-        (s) => s.display_address === originalDisplayAddress.value
+        (s) => s.display_address === originalDisplayAddress.value,
       );
-      console.log("E - matchedSuggestion", matchedSuggestion);
       if (matchedSuggestion) {
         onSelect(matchedSuggestion);
       }
     }
-
   } catch (error) {
-    console.error("Adress-Lookup fehlgeschlagen:", error);
     suggestions.value = [];
   } finally {
     loading.value = false;
@@ -307,7 +304,7 @@ function onSelect(item) {
       },
     };
 
-    //originalDisplayAddress.value = item.display_address;
+    originalDisplayAddress.value = item.display_address;
     model.value = locationData;
 
     return;
@@ -331,7 +328,7 @@ function onSelect(item) {
         meta: item.meta,
       };
 
-  //originalDisplayAddress.value = item.display_address;
+  originalDisplayAddress.value = item.display_address;
   model.value = locationData;
 }
 
@@ -342,7 +339,7 @@ function onClear() {
   model.value = null;
   suggestions.value = [];
   searchTerm.value = "";
-  //originalDisplayAddress.value = "";
+  originalDisplayAddress.value = "";
 }
 </script>
 <style scoped></style>
