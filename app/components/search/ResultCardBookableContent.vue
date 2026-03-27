@@ -9,7 +9,7 @@
 
       <!-- Adresse und Entfernung -->
       <div class="w-full my-5">
-        <BookableAdressInformation :bookable="bookable" />
+        <BookableAdressInformation :bookable="bookable" show-distance />
       </div>
       <USeparator
         color="neutral"

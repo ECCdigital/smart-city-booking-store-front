@@ -31,7 +31,7 @@
         icon="i-lucide-search"
         placeholder="Stichwort"
         clearable
-        class="rounded-md "
+        class="rounded-md"
         :ui="{
           base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
@@ -40,13 +40,14 @@
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <AddressLookup
-          v-model="_location"
-          class="rounded-md "
-          :ui="{
+        v-model="_location"
+        class="rounded-md"
+        :ui="{
           base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
         }"
-          @keyup.enter="onSearch"
+        @keyup.enter="onSearch"
+        @search="onSearch"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <InputTimePeriod
@@ -103,12 +104,13 @@
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <AddressLookup
-        v-model="_location"
-        class="rounded-md "
-        :ui="{
-          base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
+      v-model="_location"
+      class="rounded-md"
+      :ui="{
+        base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
         leadingIcon: 'text-gray-400 dark:text-gray-200',
-        }"
+      }"
+      @search="onSearch"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputTimePeriod
@@ -192,9 +194,30 @@ const types = ref([
 const hasMissingType = computed(
   () => isInitialized.value && !_searchType.value,
 );
+const hasSearchCiteria = computed(
+  () =>
+    !!_term.value ||
+    !!_location.value ||
+    (_timePeriod.value && _timePeriod.value.start && _timePeriod.value.end),
+);
 const emit = defineEmits(["search", "reset"]);
 
 const { contrastToPrimary } = useContrastColor();
+
+const hasInitionalLocationObject = ref(false);
+watch(_location, (newVal) => {
+  if (
+    !hasInitionalLocationObject.value &&
+    newVal &&
+    typeof newVal === "object" &&
+    newVal.coordinates &&
+    newVal.coordinates.points &&
+    newVal.coordinates.points.length > 0
+  ) {
+    hasInitionalLocationObject.value = true;
+    onSearch();
+  }
+});
 
 function setSearchTimePeriod(tp) {
   _timePeriod.value = tp;
@@ -219,12 +242,7 @@ function onSearch() {
     }
   }
 
-  const hasTime =
-    _timePeriod.value && _timePeriod.value.start && _timePeriod.value.end;
-
-  const hasCriteria = !!_term.value || !!_location.value || hasTime;
-
-  if (!hasCriteria) {
+  if (!hasSearchCiteria.value) {
     isInitialized.value = false;
     filterResetKey.value++;
     emit("reset");
@@ -232,6 +250,8 @@ function onSearch() {
   }
 
   isInitialized.value = true;
+
+  console.log("F - emit is coming", _location.value);
 
   emit("search", {
     searchType: _searchType.value,

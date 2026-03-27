@@ -35,6 +35,7 @@
     "eslint": "^9.33.0",
     "fuse.js": "^7.1.0",
     "h3": "^1.15.4",
+    "haversine-distance": "^1.2.4",
     "nuxi": "^3.28.0",
     "nuxt": "^4.2.1",
     "nuxt-csurf": "^1.6.5",

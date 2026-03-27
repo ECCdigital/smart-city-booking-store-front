@@ -9,9 +9,14 @@
         :location="query.location"
         :time-start="query.start"
         :time-end="query.end"
-        @search="runSearch"
+        @search="onSearch"
         @reset="resetResults"
       />
+    </div>
+    <div class="justify-center bg-red-100/40 text-center">
+      Location: {{ query.location }}
+      <br>
+      SearchParams: {{ temp }}
     </div>
 
     <div class="m-10 lg:m-5 sm:flex items-center">
@@ -102,6 +107,8 @@ const props = defineProps({
   },
 });
 
+const temp = ref(null);
+
 const {
   query,
   searchIsInitialized,
@@ -114,5 +121,10 @@ const {
   runSearch,
   resetResults,
 } = useBookableSearch({ isEvent: false, sourceItems: props.bookables });
+
+function onSearch(searchParams) {
+temp.value = searchParams;
+  runSearch(searchParams);
+}
 </script>
 <style scoped></style>

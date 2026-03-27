@@ -2,6 +2,7 @@ import Fuse from "fuse.js";
 import { useBookables } from "~/composables/api/useBookables";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState";
 import type { CatalogQueryState, SortMode } from "~/types/catalogParams";
+import haversine from "haversine-distance";
 
 interface UseBookableSearchOptions<TItem> {
   sourceItems: ComputedRef<TItem[]> | Ref<TItem[]>;
@@ -276,10 +277,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   } = {}) {
     query.term = term || "";
 
-    if(typeof location === "object") {
-        query.location = location.display_address || "";
+    if (typeof location === "object") {
+      query.location = location.display_address || "";
     } else {
-        query.location = location || "";
+      query.location = location || "";
     }
     query.start = timeStart || null;
     query.end = timeEnd || null;
@@ -291,7 +292,6 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     timeStart: number | null;
     timeEnd: number | null;
   }) {
-      console.log("Running search with criteria:", criteria);
 
     setSearchQueryParams(criteria);
 
@@ -313,6 +313,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       itemsWithStatus,
       bookableItems,
       { start: criteria.timeStart, end: criteria.timeEnd },
+    );
+    updatedItems.value = updateDistanceToLocation(
+      updatedItems.value,
+      criteria.location,
     );
 
     searchIsInitialized.value = true;
@@ -368,52 +372,52 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   function searchForLocation(searchLocation: string | object, items: any[]) {
     if (!searchLocation) return items;
 
-    if(typeof searchLocation === "string") {
-        return searchForLocationString(searchLocation, items);
+    if (typeof searchLocation === "string") {
+      return searchForLocationString(searchLocation, items);
     } else {
-        const resultLocations =  searchForLocationString(searchLocation.display_address, items);
-        const temp = resultLocations.map((item) => {
-            return {
-                ...item,
-                distance: getDistanceToLocation(item.item.location, searchLocation)
-            }
-        })
-        console.log("+++", temp)
-        return temp
+      return searchForLocationString(searchLocation.display_address, items);
     }
   }
-  function searchForLocationString(searchLocation: string , items: any[]){
-      if (!isEvent) {
-          const allEvents = items.filter((item) => item.item.category === "event");
-          const allBookables = items.filter(
-              (item) => item.item.category !== "event",
-          );
+  function searchForLocationString(searchLocation: string, items: any[]) {
+    if (!isEvent) {
+      const allEvents = items.filter((item) => item.item.category === "event");
+      const allBookables = items.filter(
+        (item) => item.item.category !== "event",
+      );
 
-          const foundEvents = new Fuse(allEvents, eventSearchLocationOptions)
-              .search(searchLocation)
-              .map((result) => result.item);
+      const foundEvents = new Fuse(allEvents, eventSearchLocationOptions)
+        .search(searchLocation)
+        .map((result) => result.item);
 
-          const foundBookables = new Fuse(
-              allBookables,
-              bookableSearchLocationOptions,
-          )
-              .search(searchLocation)
-              .map((result) => result.item);
+      const foundBookables = new Fuse(
+        allBookables,
+        bookableSearchLocationOptions,
+      )
+        .search(searchLocation)
+        .map((result) => result.item);
 
-          return [...foundEvents, ...foundBookables];
-      } else {
-          return new Fuse(items, eventSearchLocationOptions)
-              .search(searchLocation)
-              .map((result) => result.item);
-      }
+      return [...foundEvents, ...foundBookables];
+    } else {
+      return new Fuse(items, eventSearchLocationOptions)
+        .search(searchLocation)
+        .map((result) => result.item);
+    }
   }
   function getDistanceToLocation(searchLocation: any, itemLocation: any) {
+    if (
+      !searchLocation ||
+      !searchLocation.coordinates ||
+      !searchLocation.coordinates.points ||
+      !itemLocation ||
+      !itemLocation.coordinates ||
+      !itemLocation.coordinates.points
+    )
+      return null;
 
-      console.log("Calculating distance between", searchLocation, "and", itemLocation);
-
-      if (!searchLocation || !itemLocation) return null;
-     //toDo - use geolocation library to calculate distance based on coordinates
-    return 55; //placeholder value
+    return haversine(
+      searchLocation.coordinates.points,
+      itemLocation.coordinates.points,
+    );
   }
 
   async function searchForTimePeriod(timePeriod: any, items: any[]) {
@@ -517,6 +521,33 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         }
       }),
     );
+  }
+
+  function updateDistanceToLocation(items: any[], searchLocation: any) {
+    if (
+      !searchLocation ||
+      !searchLocation.coordinates ||
+      !searchLocation.coordinates.points ||
+      searchLocation.coordinates.points.length !== 2
+    )
+      return items;
+
+    return items.map((item) => {
+      if (
+        typeof item.item.location === "string" ||
+          !item.item.location.coordinates ||
+        !item.item.location.coordinates.points ||
+        item.item.location.coordinates.points[0] === null ||
+        item.item.location.coordinates.points[1] === null
+      ) {
+        return item;
+      }
+      item.item["distanceMeter"] = getDistanceToLocation(
+        item.item.location,
+        searchLocation,
+      );
+      return item;
+    });
   }
 
   function formateTimePeriod(timePeriod: {

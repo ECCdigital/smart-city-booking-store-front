@@ -11,7 +11,7 @@
       <p>{{ tenantName }}</p>
 
       <!-- Adresse und Entfernung -->
-      <BookableAdressInformation :bookable="bookable" class="w-full my-5" />
+      <BookableAdressInformation :bookable="bookable" show-distance class="w-full my-5" />
       <USeparator
         color="neutral"
         class="w-full"

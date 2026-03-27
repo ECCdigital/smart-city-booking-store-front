@@ -18,12 +18,13 @@
         />
       </div>
     </div>
-    <!--
-  <p v-if="location.length">
+
+  <p v-if="showDistance && location.length">
     <UIcon name="i-lucide-navigation" class="size-5" />
-    <span class="p-3">Distance coming soon </span>
+    <span v-if="distance" class="p-3">{{ distance }} km </span>
+    <span v-else class="italic p-3">Distanz nicht ermittelbar. </span>
   </p>
-  --></div>
+</div>
 </template>
 <script setup>
 const props = defineProps({
@@ -32,6 +33,10 @@ const props = defineProps({
     required: true,
   },
   enableCopyButton: {
+    type: Boolean,
+    default: false,
+  },
+  showDistance: {
     type: Boolean,
     default: false,
   },
@@ -48,6 +53,12 @@ const location = computed(() => {
   } else {
     return "";
   }
+});
+
+const distance = computed(() => {
+  return props.bookable.distanceMeter
+    ? (props.bookable.distanceMeter / 1000).toFixed(2).replace('.', ',')
+    : null;
 });
 
 const copyAddressToClipboard = async () => {
