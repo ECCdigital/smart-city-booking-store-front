@@ -14,7 +14,7 @@
     </div>
 
     <!-- Main Categories -->
-    <div class="pt-10 bg-neutral-50 dark:bg-gray-950">
+    <div class="pt-20 sm:pt-25 md:pt-10 bg-neutral-50 dark:bg-gray-950">
       <MainCategoryArea />
     </div>
 

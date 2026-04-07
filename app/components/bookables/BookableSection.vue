@@ -13,7 +13,7 @@
         @reset="resetResults"
       />
     </div>
-    <div class="justify-center bg-red-100/40 text-center">
+    <div class="justify-center md:bg-orange-200 lg:bg-red-200 xl:bg-pink-200 text-center">
       Location: {{ query.location }}
       <br>
       SearchParams: {{ temp }}

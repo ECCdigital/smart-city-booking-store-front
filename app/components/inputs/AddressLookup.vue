@@ -1,66 +1,54 @@
 <template>
-  <div class="w-full group flex justify-between bg-white dark:bg-gray-700">
-    <UInputMenu
-      v-model="model"
-      v-model:search-term="searchTerm"
-      :items="displayItems"
-      name="no-autofill-address"
-      autocomplete="new-password"
-      icon="i-lucide-map-pin"
-      size="lg"
-      variant="ghost"
-      placeholder="Adresse"
-      class="w-full bg-white dark:bg-gray-700 "
-      :ui="{
-        base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent rounded-none rounded-l-md',
-        leadingIcon: 'text-gray-400 dark:text-gray-200',
-      }"
-      label-key="display_address"
-      trailing-icon="none"
-      :loading="loading"
-      @select="onSelect()"
-    >
-      <template #item="{ item }">
-        <div v-if="item.isManualEntry" class="flex gap-2">
-          <div class="content-center">
-            <UIcon name="i-lucide-pencil" class="text-gray-500" />
+  <div class="w-full group content-center dark:bg-gray-700">
+    <div class="flex justify-between">
+      <UInputMenu
+        v-model="model"
+        v-model:search-term="searchTerm"
+        :items="displayItems"
+        name="no-autofill-address"
+        autocomplete="new-password"
+        icon="i-lucide-map-pin"
+        size="lg"
+        variant="ghost"
+        placeholder="Adresse"
+        class="w-full bg-white dark:bg-gray-700"
+        :ui="{
+          base: 'w-full pr-1 placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent rounded-none rounded-l-md',
+          leadingIcon: 'text-gray-400 dark:text-gray-200',
+          label: 'bg-purple-400',
+        }"
+        label-key="display_address"
+        trailing-icon="none"
+        :loading="loading"
+        @select="onSelect()"
+      >
+        <template #item="{ item }">
+          <div v-if="item.isManualEntry" class="flex gap-2">
+            <div class="content-center">
+              <UIcon name="i-lucide-pencil" class="text-gray-500" />
+            </div>
+            <div class="flex flex-col">
+              <span>{{ item.display_address }}</span>
+              <span
+                v-if="item.isManualEntry"
+                class="text-xs text-gray-500 italic"
+              >
+                Adresse ohne Koordinaten übernehmen
+              </span>
+            </div>
           </div>
-          <div class="flex flex-col">
-            <span>{{ item.display_address }}</span>
-            <span
-              v-if="item.isManualEntry"
-              class="text-xs text-gray-500 italic"
-            >
-              Adresse ohne Koordinaten übernehmen
-            </span>
+          <div v-else>
+            {{ item.display_address }}
           </div>
-        </div>
-        <div v-else>
-          {{ item.display_address }}
-        </div>
-      </template>
-    </UInputMenu>
-    <div
-      v-if="model"
-      class="rounded-r content-center px-3 transition-colors bg-transparent group-focus-within:bg-gray-100 dark:group-focus-within:bg-gray-800"
-    >
-      <UTooltip text="Eintrag löschen">
-        <UButton
-          color="neutral"
-          variant="link"
-          size="sm"
-          icon="i-lucide-circle-x"
-          aria-label="Clear input"
-          class="
-
-        "
-          @click="onClear"
-        />
-      </UTooltip>
+        </template>
+      </UInputMenu>
+      <ClearButton :show-clear-button="!!model" @clear="onClear" />
     </div>
   </div>
 </template>
 <script setup>
+import ClearButton from "~/components/inputs/ClearButton.vue";
+
 const model = defineModel();
 const suggestions = ref([]);
 const loading = ref(false);

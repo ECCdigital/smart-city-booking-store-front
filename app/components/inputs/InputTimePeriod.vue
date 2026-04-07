@@ -115,7 +115,7 @@
       size="sm"
       icon="i-lucide-circle-x"
       aria-label="Clear input"
-      class="mx-3"
+      class="xl:mr-3"
       @click="onDeleteTimePeriod"
     />
   </div>
