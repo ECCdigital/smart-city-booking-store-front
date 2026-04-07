@@ -1,6 +1,6 @@
 <template>
   <!-- Strip for md and larger screens -->
-  <div class="hidden md:block">
+  <div class="hidden lg:block">
     <div
       class="flex justify-between bg-white dark:bg-gray-700 z-100 rounded shadow-lg"
       :class="entryPageMode ? 'p-5 space-x-1 -mt-10' : 'p-2 -mt-5'"
@@ -66,8 +66,8 @@
 
   <!--Card for smaller screens -->
   <UCard
-    class="bg-white dark:bg-gray-700 mx-5 -mt-15 p-0 shadow-lg md:hidden"
-    :class="entryPageMode ? '-mt-20' : '-mt-15'"
+    class="bg-white dark:bg-gray-700 mx-5 -mt-15 p-0 shadow-lg lg:hidden"
+    :class="entryPageMode ? '-mt-20' : '-mt-10'"
     :ui="{ root: 'p-0', body: 'p-0' }"
     style="position: relative; width: 80vw"
   >

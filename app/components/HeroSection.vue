@@ -27,7 +27,7 @@ const subtitle = computed(
         : config.height
     "
       :fade-bottom="false"
-      class="px-10 py-10 md:py-15 justify-between z-0"
+      class="px-10 py-10 md:py-15 justify-between z-0 pb-50 md:pb-30 lg:pb-15"
       :class="{ 'hidden md:block': !config.showOnMobile }"
   >
     <div class="md:flex justify-between md:h-full">
@@ -39,7 +39,7 @@ const subtitle = computed(
             :src="`/api/theme/logo`"
             alt="logo"
             class="max-h-[5vh] dark:invert dark:hue-rotate-180"
-        />
+        >
       </div>
       <div class="grid content-center max-w-220px text-center md:text-left">
         <p class="text-primary font-bold" :class="config.titleClass">
@@ -58,7 +58,7 @@ const subtitle = computed(
             :src="`/api/theme/logo`"
             alt="logo"
             class="max-h-[7vh] hidden md:block dark:invert dark:hue-rotate-180"
-        />
+        >
       </div>
     </div>
   </HeroBackground>
