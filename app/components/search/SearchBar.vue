@@ -41,15 +41,17 @@
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <AddressLookup
         v-model="_location"
-        class="rounded-md"
+        class="rounded-md border border-amber-700"
         :ui="{
           base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
         }"
         @keyup.enter="onSearch"
-        @search="onSearch"
+        @change-distance="setDistance"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
+      <!--<DistanceSelection v-model="_distance" :show-selection="true" class="w-[30%]"/>
+      <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />-->
       <InputTimePeriod
         v-model:time-period="_timePeriod"
         @select-date="setSearchTimePeriod"
@@ -62,6 +64,9 @@
         @click="onSearch"
       />
     </div>
+  </div>
+  <div class="bg-orange-300">
+    _distance: {{_distance}}
   </div>
 
   <!--Card for smaller screens -->
@@ -105,12 +110,13 @@
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <AddressLookup
       v-model="_location"
+      :distance="_distance"
       class="rounded-md"
       :ui="{
         base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
         leadingIcon: 'text-gray-400 dark:text-gray-200',
       }"
-      @search="onSearch"
+      @change-distance="setDistance"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputTimePeriod
@@ -131,6 +137,7 @@ import InputText from "~/components/inputs/InputText.vue";
 import InputTimePeriod from "~/components/inputs/InputTimePeriod.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import AddressLookup from "~/components/inputs/AddressLookup.vue";
+import DistanceSelection from "~/components/inputs/DistanceSelection.vue";
 
 const isInitialized = defineModel("isInitailized", {
   type: Boolean,
@@ -159,6 +166,10 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  distance: {
+    type: Number,
+    default: null,
+  },
   timePeriod: {
     type: Object,
     default: null,
@@ -176,6 +187,7 @@ const props = defineProps({
 const _searchType = ref(props.searchType);
 const _term = ref(props.term);
 const _location = ref(props.location);
+const _distance = ref(props.distance || 20)
 const _timePeriod = ref({
   start: props.timeStart,
   end: props.timeEnd,
@@ -219,6 +231,10 @@ watch(_location, (newVal) => {
   }
 });
 
+function setDistance(dist) {
+  _distance.value = dist;
+}
+
 function setSearchTimePeriod(tp) {
   _timePeriod.value = tp;
 }
@@ -257,6 +273,7 @@ function onSearch() {
     searchType: _searchType.value,
     term: _term.value,
     location: _location.value,
+    distance: _distance.value,
     timeStart: _timePeriod.value ? _timePeriod.value.start : null,
     timeEnd: _timePeriod.value ? _timePeriod.value.end : null,
   });

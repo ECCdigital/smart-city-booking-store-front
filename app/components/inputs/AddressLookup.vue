@@ -15,7 +15,7 @@
         :ui="{
           base: 'w-full pr-1 placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent rounded-none rounded-l-md',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
-          label: 'bg-purple-400',
+          content: 'glass w-full',
         }"
         label-key="display_address"
         trailing-icon="none"
@@ -42,14 +42,31 @@
           </div>
         </template>
       </UInputMenu>
-      <ClearButton :show-clear-button="!!model" @clear="onClear" />
+      <div class="flex bg-cyan-200">
+        <DistanceSelection
+          v-if="hasCoordinates"
+          v-model="selectedDistance"
+          class="w-20"
+          @set-distance="updateDistance"
+        />
+        <ClearButton :show-clear-button="!!model" @clear="onClear" />
+      </div>
     </div>
   </div>
 </template>
 <script setup>
 import ClearButton from "~/components/inputs/ClearButton.vue";
+import DistanceSelection from "~/components/inputs/DistanceSelection.vue";
 
 const model = defineModel();
+const props = defineProps({
+  distance: {
+    type: Number,
+    default: 20,
+  },
+});
+const emit = defineEmits(["changeDistance"]);
+
 const suggestions = ref([]);
 const loading = ref(false);
 const searchTerm = ref("");
@@ -64,6 +81,16 @@ const selectedAddress = ref({
     fetched_at: null,
   },
 });
+const hasCoordinates = computed(() => {
+  //if(model.value.coordinates){return true}
+  return (
+    model.value.coordinates &&
+    model.value.coordinates.points &&
+    model.value.coordinates.points[0] !== 0 &&
+    model.value.coordinates.points[1] !== 0
+  );
+});
+const selectedDistance = ref(props.distance);
 const debounceTimer = ref(null);
 
 /*
@@ -269,6 +296,7 @@ async function searchAddress(query) {
       }
     }
   } catch (error) {
+    console.error("Adress-Lookup fehlgeschlagen:", error);
     suggestions.value = [];
   } finally {
     loading.value = false;
@@ -320,14 +348,28 @@ function onSelect(item) {
   model.value = locationData;
 }
 
+function updateDistance() {
+  console.log("try to update distance to", selectedDistance.value);
+  emit("changeDistance", selectedDistance.value);
+}
+
 /*
 Handles clearing the selection, resetting the model and search term to initial state
  */
 function onClear() {
-  model.value = null;
+  model.value = {
+    display_address: "",
+    coordinates: null,
+    address: null,
+    meta: {
+      source: null,
+      fetched_at: null,
+    },
+  };
   suggestions.value = [];
   searchTerm.value = "";
   originalDisplayAddress.value = "";
+  selectedDistance.value = 20;
 }
 </script>
 <style scoped></style>

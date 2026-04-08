@@ -289,10 +289,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   async function runSearch(criteria: {
     term: string;
     location: string | object;
+    distance: number | null;
     timeStart: number | null;
     timeEnd: number | null;
   }) {
-
     setSearchQueryParams(criteria);
 
     let itemsWithStatus = setItemStatus(() => toValue(sourceItems));
@@ -302,7 +302,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     let bookableItems = itemsWithStatus;
 
     bookableItems = searchForSearchTerm(criteria.term, bookableItems);
-    bookableItems = searchForLocation(criteria.location, bookableItems);
+    bookableItems = searchForLocation(criteria.location, bookableItems, criteria.distance);
 
     bookableItems = await searchForTimePeriod(
       { start: criteria.timeStart, end: criteria.timeEnd },
@@ -369,16 +369,57 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
   }
 
-  function searchForLocation(searchLocation: string | object, items: any[]) {
+  function searchForLocation(searchLocation: string | object, items: any[], distance: number | null) {
     if (!searchLocation) return items;
+
+    console.log("searching for location:", searchLocation);
 
     if (typeof searchLocation === "string") {
       return searchForLocationString(searchLocation, items);
     } else {
-      return searchForLocationString(searchLocation.display_address, items);
+      const results: object[] = [];
+
+      // search for items without coordinates
+      const itemWithoutCoordinates = items.filter(
+        (item) =>
+          item.item.location ||
+          !item.item.location.coordinates ||
+          !item.item.location.coordinates.points[0] ||
+          !item.item.location.coordinates.points[1],
+      );
+      console.log("items without coordinates:", itemWithoutCoordinates.length);
+
+      const searchString = searchLocation.display_address.split(",")[0] || "";
+      searchForLocationString(searchString, itemWithoutCoordinates).forEach(
+        (r) => results.push(r),
+      );
+
+      // search for items with coordinates
+      const itemsWithCoordinates = items.filter(
+        (item) =>
+          item.item.location &&
+          item.item.location.coordinates &&
+          item.item.location.coordinates.points[0] &&
+          item.item.location.coordinates.points[1],
+      );
+      console.log("items with coordinates:", itemsWithCoordinates.length);
+      console.log("items with coordinates:", itemsWithCoordinates);
+      itemsWithCoordinates.forEach((i) => {
+        //toDO - calculate distance to search location and add it to item
+        console.log(i.item.title);
+         const kmDistance = getDistanceToLocation(searchLocation, i.item.location)/1000;
+         console.log("distance to item:", kmDistance, "radius:", distance);
+            if(distance && kmDistance <= distance){ //toDo - make distance configurable
+                results.push(i);
+            }
+      });
+
+      console.log("results after location search:", results);
+      return results;
     }
   }
   function searchForLocationString(searchLocation: string, items: any[]) {
+    console.log("searching for location:", searchLocation);
     if (!isEvent) {
       const allEvents = items.filter((item) => item.item.category === "event");
       const allBookables = items.filter(
@@ -535,7 +576,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     return items.map((item) => {
       if (
         typeof item.item.location === "string" ||
-          !item.item.location.coordinates ||
+        !item.item.location.coordinates ||
         !item.item.location.coordinates.points ||
         item.item.location.coordinates.points[0] === null ||
         item.item.location.coordinates.points[1] === null

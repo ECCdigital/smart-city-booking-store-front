@@ -63,6 +63,9 @@ async function goToListview(searchParams) {
   if (searchParams.location) {
     route.query.loc = searchParams.location;
   }
+  if(searchParams.distance) {
+    route.query.dist = searchParams.distance;
+  }
   if (searchParams.timeStart) {
     route.query.start = searchParams.timeStart;
   }

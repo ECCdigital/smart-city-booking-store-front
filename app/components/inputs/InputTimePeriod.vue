@@ -108,16 +108,7 @@
       </template>
     </UModal>
 
-    <UButton
-      v-if="hasAnyValue"
-      color="neutral"
-      variant="link"
-      size="sm"
-      icon="i-lucide-circle-x"
-      aria-label="Clear input"
-      class="xl:mr-3"
-      @click="onDeleteTimePeriod"
-    />
+    <ClearButton :show-clear-button="hasAnyValue" @clear="onDeleteTimePeriod" />
   </div>
 </template>
 
@@ -125,6 +116,7 @@
 import DatePicker from "./DatePicker.vue";
 import TimePicker from "./TimePicker.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import ClearButton from "~/components/inputs/ClearButton.vue";
 
 /**
  * Public API:
