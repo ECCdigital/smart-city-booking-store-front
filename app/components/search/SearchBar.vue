@@ -67,9 +67,6 @@
       />
     </div>
   </div>
-  <div class="bg-orange-300">
-    _distance: {{_distance}}
-  </div>
 
   <!--Card for smaller screens -->
   <UCard
@@ -139,7 +136,6 @@ import InputText from "~/components/inputs/InputText.vue";
 import InputTimePeriod from "~/components/inputs/InputTimePeriod.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import AddressLookup from "~/components/inputs/AddressLookup.vue";
-import DistanceSelection from "~/components/inputs/DistanceSelection.vue";
 
 const isInitialized = defineModel("isInitailized", {
   type: Boolean,
