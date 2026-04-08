@@ -23,7 +23,7 @@
         @select="onSelect()"
       >
         <template #item="{ item }">
-          <div v-if="item.isManualEntry" class="flex gap-2">
+          <div v-if="item.isManualEntry" class="flex gap-2 hover:text-primary">
             <div class="content-center">
               <UIcon name="i-lucide-pencil" class="text-gray-500" />
             </div>
@@ -37,7 +37,7 @@
               </span>
             </div>
           </div>
-          <div v-else>
+          <div v-else class="hover:text-primary">
             {{ item.display_address }}
           </div>
         </template>
@@ -349,7 +349,6 @@ function onSelect(item) {
 }
 
 function updateDistance() {
-  console.log("try to update distance to", selectedDistance.value);
   emit("changeDistance", selectedDistance.value);
 }
 

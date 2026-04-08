@@ -269,8 +269,6 @@ function onSearch() {
 
   isInitialized.value = true;
 
-  console.log("F - emit is coming", _location.value);
-
   emit("search", {
     searchType: _searchType.value,
     term: _term.value,
@@ -280,5 +278,6 @@ function onSearch() {
     timeEnd: _timePeriod.value ? _timePeriod.value.end : null,
   });
 }
+
 </script>
 <style scoped></style>

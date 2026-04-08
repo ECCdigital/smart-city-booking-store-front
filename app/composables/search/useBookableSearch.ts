@@ -267,11 +267,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   function setSearchQueryParams({
     term,
     location,
+    distance,
     timeStart,
     timeEnd,
   }: {
     term?: string;
     location?: string | object;
+    distance?: number | null;
     timeStart?: number | null;
     timeEnd?: number | null;
   } = {}) {
@@ -282,6 +284,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     } else {
       query.location = location || "";
     }
+    query.distance = distance || null;
     query.start = timeStart || null;
     query.end = timeEnd || null;
   }
@@ -302,7 +305,11 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     let bookableItems = itemsWithStatus;
 
     bookableItems = searchForSearchTerm(criteria.term, bookableItems);
-    bookableItems = searchForLocation(criteria.location, bookableItems, criteria.distance);
+    bookableItems = searchForLocation(
+      criteria.location,
+      bookableItems,
+      criteria.distance,
+    );
 
     bookableItems = await searchForTimePeriod(
       { start: criteria.timeStart, end: criteria.timeEnd },
@@ -369,13 +376,22 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
   }
 
-  function searchForLocation(searchLocation: string | object, items: any[], distance: number | null) {
+  function searchForLocation(
+    searchLocation: string | object,
+    items: any[],
+    distance: number | null,
+  ) {
     if (!searchLocation) return items;
 
     console.log("searching for location:", searchLocation);
 
     if (typeof searchLocation === "string") {
       return searchForLocationString(searchLocation, items);
+    } else if (
+      !searchLocation.coordinates ||
+      !searchLocation.coordinates.points
+    ) {
+      return searchForLocationString(searchLocation.display_address, items);
     } else {
       const results: object[] = [];
 
@@ -407,11 +423,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       itemsWithCoordinates.forEach((i) => {
         //toDO - calculate distance to search location and add it to item
         console.log(i.item.title);
-         const kmDistance = getDistanceToLocation(searchLocation, i.item.location)/1000;
-         console.log("distance to item:", kmDistance, "radius:", distance);
-            if(distance && kmDistance <= distance){ //toDo - make distance configurable
-                results.push(i);
-            }
+        const kmDistance =
+          getDistanceToLocation(searchLocation, i.item.location) / 1000;
+        console.log("distance to item:", kmDistance, "radius:", distance);
+        if (distance && kmDistance <= distance) {
+          //toDo - make distance configurable
+          results.push(i);
+        }
       });
 
       console.log("results after location search:", results);
@@ -694,6 +712,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       await runSearch({
         term: query.term,
         location: query.location,
+        distance: query.distance,
         timeStart: query.start,
         timeEnd: query.end,
       });

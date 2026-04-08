@@ -60,9 +60,13 @@ async function goToListview(searchParams) {
   if (searchParams.term) {
     route.query.q = searchParams.term;
   }
-  if (searchParams.location) {
+
+  if (searchParams.location && typeof searchParams.location === "object") {
+    route.query.loc = searchParams.location.display_address
+  } else if(searchParams.location && typeof searchParams.location === "string") {
     route.query.loc = searchParams.location;
   }
+
   if(searchParams.distance) {
     route.query.dist = searchParams.distance;
   }

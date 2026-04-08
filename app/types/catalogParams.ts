@@ -3,6 +3,7 @@ export type SortMode = "relevance" | "priceAscending" | "priceDescending";
 export interface CatalogQueryState {
   term: string;
   location: string;
+  distance: number | null;
   start: number | null;
   end: number | null;
 
