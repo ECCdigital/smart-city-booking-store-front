@@ -33,7 +33,7 @@
                 v-if="item.isManualEntry"
                 class="text-xs text-gray-500 italic"
               >
-                Adresse ohne Koordinaten übernehmen
+                Adresse ohne Koordinaten und Umkreissuche nutzen
               </span>
             </div>
           </div>
@@ -42,7 +42,7 @@
           </div>
         </template>
       </UInputMenu>
-      <div class="flex bg-cyan-200">
+      <div class="flex">
         <DistanceSelection
           v-if="hasCoordinates"
           v-model="selectedDistance"

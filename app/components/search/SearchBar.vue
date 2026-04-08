@@ -14,7 +14,7 @@
         placeholder="Was suchen Sie?"
         size="lg"
         variant="ghost"
-        class="rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent"
+        class="basis-1/6 rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent"
         :ui="{
           placeholder: hasMissingType
             ? 'text-red-500 font-bold'
@@ -32,6 +32,7 @@
         placeholder="Stichwort"
         clearable
         class="rounded-md"
+        :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
         :ui="{
           base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
@@ -41,7 +42,8 @@
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <AddressLookup
         v-model="_location"
-        class="rounded-md border border-amber-700"
+        class="basis-1/4 rounded-md"
+        :class="entryPageMode ? 'basis-2/6' : 'basis-2/5'"
         :ui="{
           base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
@@ -50,16 +52,16 @@
         @change-distance="setDistance"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
-      <!--<DistanceSelection v-model="_distance" :show-selection="true" class="w-[30%]"/>
-      <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />-->
       <InputTimePeriod
         v-model:time-period="_timePeriod"
+        :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
         @select-date="setSearchTimePeriod"
         @remove-date="removeSearchTimePeriod"
       />
       <UButton
         label="Suchen"
         class="w-full justify-center"
+        :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
         :style="{ color: contrastToPrimary }"
         @click="onSearch"
       />
