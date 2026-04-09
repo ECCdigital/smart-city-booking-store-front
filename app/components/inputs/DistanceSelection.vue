@@ -15,7 +15,6 @@
       @change="setDistance"
     >
       <template #default>
-        <!--+ {{ distance }} km-->
         <span class="whitespace-nowrap">+ {{ distance }} km</span>
       </template>
       <template #item="{ item }"> + {{ item }} km</template>

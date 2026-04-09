@@ -43,7 +43,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     keys: ["item.description", "item.location.display_address"],
     includeScore: true,
     shouldSort: true,
-    threshold: 0.3,
+    threshold: 0.2,
   };
 
   const eventSearchTermOptions = {
@@ -69,7 +69,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     ],
     includeScore: true,
     shouldSort: true,
-    threshold: 0.3,
+    threshold: 0.2,
   };
 
   const filteredItems = computed(() => {
@@ -115,6 +115,16 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           );
         });
       }
+    }
+
+    const maxDistance = query.distance;
+    if (maxDistance !== null) {
+      filtered = filtered.filter((b) => {
+        if (!b.item.location || b.item.distanceMeter === undefined) {
+            return false;
+        }
+        return b.item.distanceMeter <= maxDistance * 1000; // convert km to meters
+      })
     }
 
     const priceRange = query.price;
@@ -183,7 +193,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     //exclude holiday price categories
     const pricesWithoutHolidays = bookable.item.priceCategories.filter(
-      (c) => c.holidays.length === 0,
+      (c) => c.holidays && c.holidays.length === 0,
     );
 
     const minPrice = Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
@@ -227,6 +237,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     query.regEv = criteria.regEv ?? query.regEv;
     query.cat = criteria.cat ?? query.cat;
     query.cities = criteria.cities ?? query.cities;
+    query.distance = criteria.distance ?? query.distance;
     query.price = criteria.price ?? query.price;
     query.start = criteria.start ?? query.start;
     query.end = criteria.end ?? query.end;
@@ -437,7 +448,6 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
   }
   function searchForLocationString(searchLocation: string, items: any[]) {
-    console.log("searching for location:", searchLocation);
     if (!isEvent) {
       const allEvents = items.filter((item) => item.item.category === "event");
       const allBookables = items.filter(

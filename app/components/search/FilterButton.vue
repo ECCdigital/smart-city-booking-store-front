@@ -28,6 +28,7 @@
           :include-non-suitable="includeNonSuitable"
           :categories="categories"
           :cities="cities"
+          :distance="distance"
           :price="price"
           :only-public-events="onlyPublicEvents"
           :only-registration-needed-events="onlyRegistrationNeededEvents"
@@ -64,6 +65,10 @@ const props = defineProps({
   cities: {
     type: Array,
     default: () => [],
+  },
+  distance: {
+    type: Number,
+    default: null,
   },
   price: {
     type: Array,

@@ -7,6 +7,7 @@
         search-type="events"
         :term="query.term"
         :location="query.location"
+        :distance="query.distance"
         :time-start="query.start"
         :time-end="query.end"
         @search="runSearch"
@@ -35,6 +36,7 @@
           :include-non-suitable="query.inclNoSuitable"
           :categories="query.cat"
           :cities="query.cities"
+          :distance="query.distance"
           :price="query.price"
           :only-public-events="query.pubEv"
           :only-registration-needed-events="query.regEv"
@@ -52,6 +54,7 @@
           v-model:is-initailized="searchIsInitialized"
           :include-non-suitable="query.inclNoSuitable"
           :cities="query.cities"
+          :distance="query.distance"
           :price="query.price"
           :categories="query.cat"
           is-event

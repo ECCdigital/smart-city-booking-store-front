@@ -7,15 +7,18 @@
         search-type="bookables"
         :term="query.term"
         :location="query.location"
+        :distance="query.distance"
         :time-start="query.start"
         :time-end="query.end"
         @search="onSearch"
         @reset="resetResults"
       />
     </div>
-    <div class="justify-center md:bg-orange-200 lg:bg-red-200 xl:bg-pink-200 text-center">
+    <div
+      class="text-xs justify-center md:bg-orange-200 lg:bg-red-200 xl:bg-pink-200 text-center"
+    >
       Location: {{ query.location }}
-      <br>
+      <br >
       SearchParams: {{ temp }}
     </div>
 
@@ -39,6 +42,7 @@
           :include-non-suitable="query.inclNoSuitable"
           :categories="query.cat"
           :cities="query.cities"
+          :distance="query.distance"
           :price="query.price"
           :only-public-events="query.pubEv"
           :only-registration-needed-events="query.regEv"
@@ -49,13 +53,17 @@
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
-      <div v-if="searchedResources.length > 0" class="lg:basis-1/4 hidden lg:block">
+      <div
+        v-if="searchedResources.length > 0"
+        class="lg:basis-1/4 hidden lg:block"
+      >
         <FilterArea
           :key="filterResetKey"
           v-model:is-initailized="searchIsInitialized"
           :include-non-suitable="query.inclNoSuitable"
           :categories="query.cat"
           :cities="query.cities"
+          :distance="query.distance"
           :price="query.price"
           :only-public-events="query.pubEv"
           :only-registration-needed-events="query.regEv"
@@ -64,7 +72,13 @@
         />
       </div>
 
-      <div :class="searchedResources.length > 0 ? 'basis-full lg:basis-3/4' : 'basis-full'">
+      <div
+        :class="
+          searchedResources.length > 0
+            ? 'basis-full lg:basis-3/4'
+            : 'basis-full'
+        "
+      >
         <div v-if="!sortedResources.length" class="text-center mt-10 lg:mt-25">
           <UIcon
             size="48"
@@ -123,7 +137,7 @@ const {
 } = useBookableSearch({ isEvent: false, sourceItems: props.bookables });
 
 function onSearch(searchParams) {
-temp.value = searchParams;
+  temp.value = searchParams;
   runSearch(searchParams);
 }
 </script>

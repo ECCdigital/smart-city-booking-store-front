@@ -54,7 +54,7 @@
     </div>
 
     <!-- Orte -->
-    <div v-if="possibleCities.length" class="my-7">
+    <div v-if="possibleCities && possibleCities.length" class="my-7">
       <p class="mb-3">Orte</p>
       <UCheckboxGroup
         v-model="_cities"
@@ -95,13 +95,47 @@
       </div>
     </div>
 
+    <!-- Distanz -->
+
+    <div v-if="distance" class="my-7">
+       <p class="mb-3">Distanz</p>
+      <p class="mb-3">0 km - {{ _distance }} km</p>
+
+      <div class="mx-2">
+       <div
+            v-if="distanceBars && distanceBars.length > 0 && distanceBars.some((p) => p > 0)"
+            class="flex items-end justify-between mx-2"
+            style="width: 100%; padding-right: 15px"
+        >
+          <div
+              v-for="(count, index) in distanceBars"
+              :key="index"
+              class="w-full bg-primary opacity-40 mr-1"
+              style="max-height: 50px"
+              :style="{
+              height: (count / Math.max(...distanceBars)) * 50 + 'px',
+            }"
+          />
+        </div>
+
+        <USlider
+          v-model="_distance"
+          :min="0"
+          :max="distanceRange[1]"
+          :step="dynamicDistanceStep"
+          @change="instantFilter"
+        />
+      </div>
+    </div>
+
+
     <!-- Preis -->
     <div class="my-7">
       <p class="mb-3">Preis</p>
       <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
       <div class="mx-2">
         <div
-          v-if="priceBars.some((p) => p > 0)"
+          v-if="priceBars.length > 0 && priceBars.some((p) => p > 0)"
           class="flex items-end justify-between mx-2"
           style="width: 100%; padding-right: 15px"
         >
@@ -125,27 +159,6 @@
         />
       </div>
     </div>
-    <!-- Distanz -->
-    <!--
-    <div v-if="searchIsInitialized" class="my-7">
-      <p class="mb-3">Distanz</p>
-      <p class="mb-3">
-        {{ _distanceRange[0] }} km - {{ _distanceRange[1] }} km
-      </p>
-      <USlider
-        v-model="_distanceRange"
-        :min="distanceRange[0]"
-        :max="distanceRange[1]"
-        :step="10"
-        :style="
-          colorMode === 'dark'
-            ? '--ui-primary: ' + lighterColor
-            : '--ui-primary: ' + darkerColor
-        "
-        @change="instantFilter"
-      />
-    </div>
-    -->
 
     <div v-if="useAsDialog" class="flex justify-between">
       <UButton
@@ -170,7 +183,7 @@
   </div>
 </template>
 <script setup>
-import {useRoute} from "#imports";
+import { useRoute } from "#imports";
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -198,6 +211,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  distance: {
+    type: Number,
+    default: null,
+  },
   price: {
     type: Array,
     default: () => [],
@@ -216,9 +233,17 @@ const emit = defineEmits(["filter"]);
 //Filter Variables
 const isActive = computed(() => {
   const route = useRoute();
-  const keysToCheck = ["inclNoSuitable", "pubEv", "regEv", "cities", "categories", "price"];
-  return route.query && keysToCheck.some(key => key in route.query);
-})
+  const keysToCheck = [
+    "inclNoSuitable",
+    "pubEv",
+    "regEv",
+    "cities",
+    "cat",
+      "dist",
+    "price",
+  ];
+  return route.query && keysToCheck.some((key) => key in route.query);
+});
 const _includeNonSuitable = ref(props.includeNonSuitable);
 const _cities = ref(props.cities);
 const _onlyPublicEvents = ref(props.onlyPublicEvents);
@@ -248,8 +273,83 @@ const possibleCategories = computed(() => {
   ];
 });
 
+//Distanz
+const _distance = ref(props.distance || 100);
+watch(
+  () => props.distance,
+  (newVal) => {
+    _distance.value = newVal;
+  },
+);
+
+const distanceRange = computed(() => {
+  if (!props.bookables || props.bookables.length === 0) {
+    return props.distance ? [0, props.distance] : [0, 100];
+  }
+
+  const distances = props.bookables
+    .filter((b) => !!b.item.distanceMeter)
+    .map((b) => b.item.distanceMeter);
+
+  const maxDistanceKm = Math.max(...distances) / 1000;
+
+  if(maxDistanceKm > props.distance){
+    return [0, Math.ceil(maxDistanceKm / 5) * 5];
+  } else {
+    return [0, props.distance];
+  }
+});
+
+const dynamicDistanceStep = computed(() => {
+  if (distanceRange.value[1] === 0) {
+    return 0;
+  }
+
+  let step = Math.ceil(distanceRange.value[1] / 20); // 20 steps max
+  step = Math.max(5, Math.ceil(step / 5) * 5);
+  return step;
+});
+
+const distanceBars = computed(() => {
+  if(!props.bookables || props.bookables.length === 0) {
+    return [];
+  }
+
+  //set number of bars depending on distance range
+  const barsCount =
+    Math.ceil(
+      (distanceRange.value[1]) / dynamicDistanceStep.value,
+    ) || 1;
+
+  const bars = new Array(barsCount).fill(0);
+  const range = distanceRange.value[1];
+
+  props.bookables.forEach((b) => {
+    if (!b.item.distanceMeter) {
+      return;
+    }
+    const distanceKm = b.item.distanceMeter / 1000;
+    if (distanceKm === 0) {
+      //put into first bar
+      bars[0]++;
+      return;
+    }
+    const index = Math.min(
+      Math.floor(((distanceKm ) / range) * barsCount),
+      barsCount - 1,
+    );
+    bars[index]++;
+  });
+
+  return bars
+})
+
 //Preis
 const possiblePriceRange = computed(() => {
+  if(!props.bookables || props.bookables.length === 0) {
+    return [0, 100];
+  }
+
   let validPrices = [];
   if (!props.isEvent) {
     validPrices = props.bookables.map((b) => getBookableMinPrice(b));
@@ -268,10 +368,9 @@ const possiblePriceRange = computed(() => {
   return [minPrice, maxPrice];
 });
 
-
 const dynamicPriceStep = computed(() => {
   const range = possiblePriceRange.value[1] - possiblePriceRange.value[0];
-  if(range === 0){
+  if (range === 0) {
     return possiblePriceRange.value[0];
   }
 
@@ -280,26 +379,29 @@ const dynamicPriceStep = computed(() => {
   return step;
 });
 const dynamicMaxPrice = computed(() => {
-  const remainder =
-    possiblePriceRange.value[1] % dynamicPriceStep.value;
+  const remainder = possiblePriceRange.value[1] % dynamicPriceStep.value;
   if (remainder === 0) {
     return possiblePriceRange.value[1];
   } else {
-    return (
-        possiblePriceRange.value[1] + (dynamicPriceStep.value - remainder)
-    );
+    return possiblePriceRange.value[1] + (dynamicPriceStep.value - remainder);
   }
-})
+});
 const dynamicMinPrice = computed(() => {
-  if(possiblePriceRange.value[0] === dynamicMaxPrice.value){
-    return 0
+  if (possiblePriceRange.value[0] === dynamicMaxPrice.value) {
+    return 0;
   }
   return possiblePriceRange.value[0];
 });
 const _price = ref(
-    props.price?.length === 2 ? props.price : [dynamicMinPrice.value, dynamicMaxPrice.value],
+  props.price?.length === 2
+    ? props.price
+    : [dynamicMinPrice.value, dynamicMaxPrice.value],
 );
 const priceBars = computed(() => {
+  if(!props.bookables || props.bookables.length === 0) {
+    return [];
+  }
+
   //set number of bars depending on price range
   const barsCount =
     Math.ceil(
@@ -319,7 +421,7 @@ const priceBars = computed(() => {
     }
     //sort price into bars
     if (minPrice !== null) {
-      if(minPrice === possiblePriceRange.value[0]){
+      if (minPrice === possiblePriceRange.value[0]) {
         //put into first bar
         bars[0]++;
         return;
@@ -375,6 +477,10 @@ function getEventMinPrice(event) {
 
 //Orte
 const possibleCities = computed(() => {
+  if(!props.bookables || props.bookables.length === 0) {
+    return [];
+  }
+
   const cityCount = {};
   props.bookables.forEach((b) => {
     let city = "";
@@ -442,10 +548,6 @@ function extractCityFromString(location) {
   return words.join(" ");
 }
 
-//Distanz
-const distanceRange = ref([0, 100]); //in km //toDo - implementieren!!!!!!!!!
-const _distanceRange = ref([distanceRange.value[0], distanceRange.value[1]]);
-
 function instantFilter() {
   if (!props.useAsDialog) {
     onFilter();
@@ -468,6 +570,7 @@ function onFilter() {
   filter.regEv = _onlyRegistrationNeededEvents.value;
   filter.cat = _categories.value;
   filter.cities = _cities.value;
+  filter.distance = _distance.value;
   filter.price = sameAsPossible ? [] : _price.value;
 
   emit("filter", filter);
@@ -480,7 +583,7 @@ function removeFilter() {
   _cities.value = [];
   _categories.value = [];
   _price.value = possiblePriceRange.value.slice();
-  _distanceRange.value = [distanceRange.value[0], distanceRange.value[1]];
+  _distance.value = distanceRange.value[1];
 
   const filter = {};
 
@@ -489,6 +592,7 @@ function removeFilter() {
   filter.regEv = _onlyRegistrationNeededEvents.value;
   filter.cat = _categories.value;
   filter.cities = _cities.value;
+  filter.distance = distanceRange.value[1]
 
   const sameAsPossible =
     _price.value?.length === 2 &&

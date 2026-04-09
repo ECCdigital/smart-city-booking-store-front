@@ -4,6 +4,7 @@
       <div class="flex justify-center">
         <SearchBar
           :location="query.location"
+          :distance="query.distance"
           :term="query.term"
           :time-end="query.end"
           :time-start="query.start"

@@ -42,6 +42,7 @@
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <AddressLookup
         v-model="_location"
+        :distance="_distance"
         class="basis-1/4 rounded-md"
         :class="entryPageMode ? 'basis-2/6' : 'basis-2/5'"
         :ui="{
@@ -185,7 +186,7 @@ const props = defineProps({
 const _searchType = ref(props.searchType);
 const _term = ref(props.term);
 const _location = ref(props.location);
-const _distance = ref(props.distance || 20)
+const _distance = ref(props.distance || 20);
 const _timePeriod = ref({
   start: props.timeStart,
   end: props.timeEnd,
@@ -217,6 +218,7 @@ const { contrastToPrimary } = useContrastColor();
 const hasInitionalLocationObject = ref(false);
 watch(_location, (newVal) => {
   if (
+    !props.entryPageMode &&
     !hasInitionalLocationObject.value &&
     newVal &&
     typeof newVal === "object" &&
@@ -274,6 +276,5 @@ function onSearch() {
     timeEnd: _timePeriod.value ? _timePeriod.value.end : null,
   });
 }
-
 </script>
 <style scoped></style>
