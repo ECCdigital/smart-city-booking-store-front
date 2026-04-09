@@ -1,10 +1,10 @@
 <template>
   <div
     v-if="props.item"
-    class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl max-h-72 h-72"
+    class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl"
     :class="[
       isNotSuitable ? 'opacity-70' : ' ',
-      isEvent ? 'max-h-100 h-100' : 'max-h-72 h-72',
+      isEvent ? 'max-h-100 h-100' : 'max-h-74 h-74',
     ]"
   >
     <div class="basis-1/4 flex items-center">
