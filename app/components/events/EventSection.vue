@@ -48,7 +48,10 @@
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
-      <div v-if="searchedEvents.length > 0" class="lg:basis-1/4 hidden lg:block">
+      <div
+        v-if="searchedEvents.length > 0"
+        class="lg:basis-1/4 hidden lg:block"
+      >
         <FilterArea
           :key="filterResetKey"
           v-model:is-initailized="searchIsInitialized"
@@ -65,7 +68,11 @@
         />
       </div>
 
-      <div :class="searchedEvents.length > 0 ? 'basis-full lg:basis-3/4' : 'basis-full'">
+      <div
+        :class="
+          searchedEvents.length > 0 ? 'basis-full lg:basis-3/4' : 'basis-full'
+        "
+      >
         <div v-if="!sortedEvents.length" class="text-center mt-10 lg:mt-25">
           <UIcon
             size="48"

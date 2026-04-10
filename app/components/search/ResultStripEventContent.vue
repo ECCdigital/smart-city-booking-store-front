@@ -13,7 +13,11 @@
       <!-- Zeitpunkt, Adresse und Entfernung -->
       <div class="w-full my-5">
         <EventTimeInformation :event="event" class="w-full text-sm" />
-        <EventAdressInformation :event="event" class="w-full text-sm" />
+        <EventAdressInformation
+          :event="event"
+          show-distance
+          class="w-full text-sm"
+        />
         <div class="my-5 line-clamp-3" v-html="htmlTeaserText" />
       </div>
       <USeparator
@@ -95,7 +99,7 @@ const props = defineProps({
   },
 });
 
-const {goToDetails} = useRedirection()
+const { goToDetails } = useRedirection();
 
 const hasLongTitle = computed(() => {
   return (props.event?.information.name?.length ?? 0) > 60;
@@ -109,7 +113,6 @@ const htmlTeaserText = computed(() => {
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.event.tenantId).name;
 });
-
 
 const { contrastToPrimary } = useContrastColor();
 </script>

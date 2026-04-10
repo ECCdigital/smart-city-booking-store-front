@@ -118,13 +118,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
 
     const maxDistance = query.distance;
-    if (maxDistance !== null) {
+    if (typeof query.location === "object" && maxDistance !== null) {
       filtered = filtered.filter((b) => {
         if (!b.item.location || b.item.distanceMeter === undefined) {
-            return false;
+          return false;
         }
         return b.item.distanceMeter <= maxDistance * 1000; // convert km to meters
-      })
+      });
     }
 
     const priceRange = query.price;
@@ -164,6 +164,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   const sortedItems = computed(() => {
+    console.log(
+      "G",
+      query.sortMode,
+      filteredItems.value.length,
+      filteredItems.value,
+    );
     return filteredItems.value.slice().sort((a, b) => {
       if (query.sortMode === "priceAscending") {
         return getPrice(a) - getPrice(b);
@@ -309,14 +315,19 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }) {
     setSearchQueryParams(criteria);
 
-    let itemsWithStatus = setItemStatus(() => toValue(sourceItems));
+    //enrich items with status and location coordinates for the following search steps
+    let enrichedItems: object[] = await enrichItems(
+      () => toValue(sourceItems),
+      criteria,
+    );
 
-    itemsWithStatus = await checkTickets(itemsWithStatus);
+    enrichedItems = await checkTickets(enrichedItems);
 
-    let bookableItems = itemsWithStatus;
+    let bookableItems: object[] = enrichedItems;
 
     bookableItems = searchForSearchTerm(criteria.term, bookableItems);
-    bookableItems = searchForLocation(
+
+    bookableItems = await searchForLocation(
       criteria.location,
       bookableItems,
       criteria.distance,
@@ -327,11 +338,11 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       bookableItems,
     );
 
-    updatedItems.value = await updateItemStatus(
-      itemsWithStatus,
-      bookableItems,
-      { start: criteria.timeStart, end: criteria.timeEnd },
-    );
+    updatedItems.value = await updateItemStatus(enrichedItems, bookableItems, {
+      start: criteria.timeStart,
+      end: criteria.timeEnd,
+    });
+
     updatedItems.value = updateDistanceToLocation(
       updatedItems.value,
       criteria.location,
@@ -347,8 +358,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     filterResetKey.value++;
   }
 
-  function setItemStatus(itemsToSearch: () => any[]) {
-    return toValue(itemsToSearch).map((item: any) => {
+  async function enrichItems(
+    itemsToSearch: () => any[],
+    searchCriteria: object,
+  ) {
+    //add status to items based on bookable and event criteria
+    let result: object[] = toValue(itemsToSearch).map((item: any) => {
       if (isEvent) {
         return { item, status: "isBookable" };
       }
@@ -360,9 +375,45 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       }
       return { item, status: "nonBookable" };
     });
+
+    //add location coordinates to items based on address for better location search and distance calculation
+    console.log("search criteria location:", searchCriteria.location);
+    console.log(typeof searchCriteria.location);
+    if (typeof searchCriteria.location === "object") {
+      result = await Promise.all(
+        result.map(async (item) => {
+          if (isEvent) {
+            let addressCoordinates: number[] = [];
+
+            const addressString = `${item.item.eventAddress.street || ""} ${item.item.eventAddress.houseNumber || ""}, ${item.item.eventAddress.zip || ""} ${item.item.eventAddress.city || ""}`;
+
+            if (addressString) {
+              addressCoordinates = await searchAddress(addressString);
+            }
+
+            item = {
+              ...item,
+              item: {
+                ...item.item,
+                location: {
+                  display_address: addressString,
+                  coordinates: addressCoordinates
+                    ? {
+                        points: addressCoordinates,
+                      }
+                    : null,
+                },
+              },
+            };
+            return item;
+          }
+        }),
+      );
+    }
+    return result;
   }
 
-  function searchForSearchTerm(searchTerm: string, items: any[]) {
+  function searchForSearchTerm(searchTerm: string, items: object[]) {
     if (!searchTerm) return items;
 
     if (!isEvent) {
@@ -387,14 +438,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
   }
 
-  function searchForLocation(
+  async function searchForLocation(
     searchLocation: string | object,
-    items: any[],
+    items: object[],
     distance: number | null,
   ) {
     if (!searchLocation) return items;
-
-    console.log("searching for location:", searchLocation);
 
     if (typeof searchLocation === "string") {
       return searchForLocationString(searchLocation, items);
@@ -406,44 +455,41 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     } else {
       const results: object[] = [];
 
-      // search for items without coordinates
-      const itemWithoutCoordinates = items.filter(
+      const itemsWithoutCoordinates: object[] = items.filter(
         (item) =>
           item.item.location ||
           !item.item.location.coordinates ||
           !item.item.location.coordinates.points[0] ||
           !item.item.location.coordinates.points[1],
       );
-      console.log("items without coordinates:", itemWithoutCoordinates.length);
 
-      const searchString = searchLocation.display_address.split(",")[0] || "";
-      searchForLocationString(searchString, itemWithoutCoordinates).forEach(
-        (r) => results.push(r),
-      );
-
-      // search for items with coordinates
-      const itemsWithCoordinates = items.filter(
+      const itemsWithCoordinates: object[] = items.filter(
         (item) =>
           item.item.location &&
           item.item.location.coordinates &&
           item.item.location.coordinates.points[0] &&
           item.item.location.coordinates.points[1],
       );
-      console.log("items with coordinates:", itemsWithCoordinates.length);
-      console.log("items with coordinates:", itemsWithCoordinates);
+
+      // search for items without coordinates
+      const searchString = searchLocation.display_address.split(",")[0] || "";
+      searchForLocationString(searchString, itemsWithoutCoordinates).forEach(
+        (r) => results.push(r),
+      );
+
+      // search for items with coordinates
       itemsWithCoordinates.forEach((i) => {
-        //toDO - calculate distance to search location and add it to item
-        console.log(i.item.title);
-        const kmDistance =
-          getDistanceToLocation(searchLocation, i.item.location) / 1000;
+        const mDistance = getDistanceToLocation(
+          searchLocation,
+          i.item.location,
+        );
+        const kmDistance = mDistance ? mDistance / 1000 : null;
         console.log("distance to item:", kmDistance, "radius:", distance);
-        if (distance && kmDistance <= distance) {
-          //toDo - make distance configurable
+        if (distance && kmDistance && kmDistance <= distance) {
           results.push(i);
         }
       });
 
-      console.log("results after location search:", results);
       return results;
     }
   }
@@ -487,6 +533,37 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       searchLocation.coordinates.points,
       itemLocation.coordinates.points,
     );
+  }
+
+  /*
+  Performs the address search using Nominatim API, handling loading state and errors gracefully
+   */
+  async function searchAddress(address: string) {
+    try {
+      const params = new URLSearchParams({
+        q: address,
+        format: "json",
+        addressdetails: "1",
+        limit: "1", //"5"
+        countrycodes: "de",
+      });
+
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?${params}`,
+        {
+          headers: {
+            "Accept-Language": "de",
+          },
+        },
+      );
+
+      const data = await response.json();
+      if (data && data.length > 0) {
+        return [parseFloat(data[0].lon), parseFloat(data[0].lat)];
+      }
+    } catch (error) {
+      console.error("Adress-Lookup fehlgeschlagen:", error);
+    }
   }
 
   async function searchForTimePeriod(timePeriod: any, items: any[]) {
@@ -542,8 +619,8 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   async function updateItemStatus(
-    itemsWithStatus: any[], //alle 58
-    bookableItems: any[], //8 aus Suche (bookable & nonBookable)
+    itemsWithStatus: any[],
+    bookableItems: any[],
     timePeriod: any,
   ) {
     return await Promise.all(
@@ -598,8 +675,9 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       !searchLocation.coordinates ||
       !searchLocation.coordinates.points ||
       searchLocation.coordinates.points.length !== 2
-    )
+    ) {
       return items;
+    }
 
     return items.map((item) => {
       if (
@@ -650,16 +728,23 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     return null;
   }
 
-  async function checkTickets(events: { item: any; status: string }[]) {
+  async function checkTickets(events: { item: object; status: string }[]) {
     return await Promise.all(
       events.map(async (event) => {
-        if (isEvent || event.item.category === "event") {
+        console.log("** K ** ", event);
+        if (
+          isEvent ||
+          (event.item.category === "event" &&
+            event.item.tickets &&
+            event.item.tickets.length > 0)
+        ) {
           const updatedTickets = await Promise.all(
             event.item.tickets.map(async (ticket: any) => {
-              const ticketPrice = await useBookables().getBookablePrice(
+              const ticketPrice =
+                "66,55"; /*await useBookables().getBookablePrice(
                 event.item.tenantId,
                 ticket.id,
-              );
+              );*/
               const ticketAvailability =
                 await useBookables().getBookableAvailability(
                   event.item.tenantId,

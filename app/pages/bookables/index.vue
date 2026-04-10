@@ -16,7 +16,7 @@ const bookableStore = useBookableStore();
 await loadBundle({ include: ["bookables"] });
 
 const allBookables = computed(() => {
-  return  bookableStore.getBookables
+  return bookableStore.getBookables;
 });
 </script>
 

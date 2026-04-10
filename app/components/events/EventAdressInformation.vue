@@ -10,16 +10,22 @@
       <div v-else class="italic p-3">Keine Adresse bekannt.</div>
 
       <div class="flex-1" />
-      <div v-if="hasAdress && enableCopyButton" class="grid place-content-center">
-        <UIcon name="i-lucide-copy" class="size-5 cursor-pointer" @click="copyAddressToClipboard"/>
+      <div
+        v-if="hasAdress && enableCopyButton"
+        class="grid place-content-center"
+      >
+        <UIcon
+          name="i-lucide-copy"
+          class="size-5 cursor-pointer"
+          @click="copyAddressToClipboard"
+        />
       </div>
     </div>
-    <!--
-    <p v-if="hasAdress">
+    <p v-if="showDistance && hasAdress">
       <UIcon name="i-lucide-navigation" class="size-5" />
-      <span class="p-3">Distance coming soon </span>
+      <span v-if="distance" class="p-3">{{ distance }} km </span>
+      <span v-else class="italic p-3">Distanz nicht ermittelbar. </span>
     </p>
-    -->
   </div>
 </template>
 <script setup>
@@ -29,6 +35,10 @@ const props = defineProps({
     required: true,
   },
   enableCopyButton: {
+    type: Boolean,
+    default: false,
+  },
+  showDistance: {
     type: Boolean,
     default: false,
   },
@@ -51,13 +61,19 @@ const displayAddress = () => {
   );
 };
 
+const distance = computed(() => {
+  return props.event.distanceMeter
+    ? (props.event.distanceMeter / 1000).toFixed(2).replace(".", ",")
+    : null;
+});
+
 const copyAddressToClipboard = async () => {
   if (hasAdress.value) {
     await navigator.clipboard.writeText(displayAddress());
     const notification = useNotification();
     notification.success(
-        "Die Adresse wurde in Ihre Zwischenablage kopiert.",
-        "Adresse erfolgreich kopiert!"
+      "Die Adresse wurde in Ihre Zwischenablage kopiert.",
+      "Adresse erfolgreich kopiert!",
     );
   }
 };

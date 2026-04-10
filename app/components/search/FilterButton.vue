@@ -2,12 +2,12 @@
   <UModal v-model:open="isOpen">
     <UChip :show="hasFilters" inset>
       <UButton
-          label="Filtern"
-          icon="i-lucide-funnel"
-          color="neutral"
-          variant="soft"
-          class="rounded-full py-2 px-3"
-          @click="() => (isOpen = true)"
+        label="Filtern"
+        icon="i-lucide-funnel"
+        color="neutral"
+        variant="soft"
+        class="rounded-full py-2 px-3"
+        @click="() => (isOpen = true)"
       />
     </UChip>
 
@@ -42,7 +42,7 @@
 </template>
 <script setup>
 import FilterArea from "./FilterArea.vue";
-import {useRoute} from "#imports";
+import { useRoute } from "#imports";
 
 const isInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -89,9 +89,16 @@ const isOpen = ref(false);
 
 const hasFilters = computed(() => {
   const route = useRoute();
-  const keysToCheck = ["inclNoSuitable", "pubEv", "regEv", "cities", "categories", "price"];
-  return route.query && keysToCheck.some(key => key in route.query);
-})
+  const keysToCheck = [
+    "inclNoSuitable",
+    "pubEv",
+    "regEv",
+    "cities",
+    "categories",
+    "price",
+  ];
+  return route.query && keysToCheck.some((key) => key in route.query);
+});
 
 function onFilter(criteria) {
   isOpen.value = false;
