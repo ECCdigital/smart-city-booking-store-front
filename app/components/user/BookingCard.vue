@@ -24,13 +24,24 @@
             Aktiv
           </div>
         </div>
-        <UButton
-          icon="i-lucide-ellipsis"
-          class="rounded-3xl"
-          variant="soft"
-          color="neutral"
-          @click="openDetails"
-        />
+        <UDropdownMenu
+          :items="actionOptions"
+          :content="{
+            align: 'end',
+          }"
+          :ui="{
+            content: 'w-48 ring-0 shadow-lg glass',
+            itemLeadingIcon: 'mt-1',
+            item: 'before:bg-transparent data-highlighted:before:bg-transparent',
+          }"
+        >
+          <UButton
+            icon="i-lucide-ellipsis"
+            class="rounded-3xl"
+            variant="soft"
+            color="neutral"
+          />
+        </UDropdownMenu>
       </div>
 
       <h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2">
@@ -91,6 +102,7 @@ import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 
 const props = defineProps({
   booking: {
@@ -137,6 +149,35 @@ const isActive = computed(() => {
   return false;
 });
 
+const { downloadBookingIcal } = useIcalDownload();
+const actionOptions = computed(() => {
+  const options = [
+    {
+      label: "Details anzeigen",
+      icon: "i-lucide-eye",
+      onSelect: openDetails,
+    },
+  ];
+
+  if(props.booking.lockerInfo.length > 0){
+    options.push({
+      label: "Schlüssel anzeigen",
+      icon: "i-lucide-lock",
+      onSelect: openMobileKey,
+    });
+  }
+
+  if (eventId.value || (props.booking.timeBegin && props.booking.timeEnd)) {
+    options.push({
+      label: "Termin herunterladen",
+      icon: "i-lucide-calendar-arrow-down",
+      onSelect: onDownloadIcal,
+    });
+  }
+
+  return options;
+});
+
 const bookingTitle = computed(() => {
   if (props.booking.bookableItems && props.booking.bookableItems.length > 0) {
     return props.booking.bookableItems
@@ -179,5 +220,12 @@ const bookingCardClasses =
 function openDetails() {
   const router = useRouter();
   router.push({ path: `/account/bookings/${props.booking.id}` });
+}
+function onDownloadIcal() {
+  downloadBookingIcal(props.booking.id, props.booking.tenantId);
+}
+function openMobileKey() {
+  console.log("open mobile key for booking", props.booking.id);
+  console.log("locker info", props.booking.lockerInfo);
 }
 </script>
