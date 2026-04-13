@@ -4,8 +4,11 @@ import { useBookableStore } from "~~/stores/bookable.js";
 import BookableSection from "~/components/bookables/BookableSection.vue";
 
 definePageMeta({
-  name: "catalog-bookables",
   layout: "catalog",
+  hero: {
+    height: "sm",
+    showOnMobile: true,
+  },
 });
 
 const { loadBundle } = useCatalogBundle();

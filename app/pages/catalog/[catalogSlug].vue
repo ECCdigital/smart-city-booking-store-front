@@ -2,12 +2,11 @@
 import { useCatalogStore } from "~~/stores/catalog.js";
 import { useBookableStore } from "~~/stores/bookable.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
-import NavigationBar from "../../components/NavigationBar.vue";
+import NavigationBar from "../../components/navigation/NavigationBar.vue";
 
 definePageMeta({
   layout: "catalog",
   middleware: ["catalog-auth"],
-  name: "catalog-slug",
 });
 
 const route = useRoute();

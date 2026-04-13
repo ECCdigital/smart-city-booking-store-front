@@ -1,6 +1,5 @@
 <script setup>
 import { useAuthStore } from "~~/stores/auth.js";
-import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const { tenantTo } = useTenantRoute();
@@ -45,18 +44,23 @@ const items = [
     {
       label: "Buchungen",
       icon: "i-lucide-book-marked",
-      onSelect: () => goTo("/user/bookings"),
+      onSelect: () => goTo("/account/bookings"),
+    },
+    {
+      label: "Schlüssel",
+      icon: "i-lucide-key-round",
+      onSelect: () => goTo("/account/keys"),
     },
     {
       label: "Rechnungen",
       icon: "i-lucide-wallet-cards",
-      onSelect: () => goTo("/user/invoices"),
+      onSelect: () => goTo("/account/invoices"),
       disabled: true,
     },
     {
       label: "Favoriten",
       icon: "i-lucide-book-heart",
-      onSelect: () => goTo("/user/favorites"),
+      onSelect: () => goTo("/account/favorites"),
       disabled: true,
     },
   ],
@@ -64,7 +68,7 @@ const items = [
     {
       label: t("navigation.settings"),
       icon: "i-lucide-settings",
-      onSelect: () => goTo("/user/settings")
+      onSelect: () => goTo("/account/settings")
     },
     {
       label: t("common.logout"),

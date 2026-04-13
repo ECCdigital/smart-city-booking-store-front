@@ -86,7 +86,13 @@ export const useAuthStore = defineStore("auth", {
     },
     async logout() {
       try {
-        await $fetch("/api/auth/logout", { method: "POST" });
+        const authType = useCookie("auth-type").value;
+
+        if (authType === "keycloak") {
+          await $fetch("/api/auth/sso/logout", { method: "POST" });
+        } else {
+          await $fetch("/api/auth/logout", { method: "POST" });
+        }
       } finally {
         this.invalidateAuth();
       }

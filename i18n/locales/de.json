@@ -38,12 +38,35 @@
     "noAccount": "Noch kein Konto?",
     "registerHere": "Hier registrieren",
     "logoutMessage": "Sie wurden erfolgreich abgemeldet.",
+    "or": "oder",
+    "ssoLoginOrg": "Ich melde mich mit meinem Dienstkonto an",
+    "sso": {
+      "confirmTitle": "SSO-Anmeldung",
+      "authenticatedAs": "Authentifiziert als",
+      "changeUser": "Benutzer wechseln",
+      "confirmError": "Die SSO-Sitzung ist abgelaufen. Bitte versuchen Sie es erneut.",
+      "tryAgain": "Erneut versuchen"
+    },
+    "ssoError": {
+      "title": "SSO-Fehler",
+      "failed": "Die SSO-Anmeldung ist fehlgeschlagen.",
+      "invalidState": "Ungültige Sitzung. Bitte versuchen Sie es erneut.",
+      "missingParams": "Fehlende Parameter. Bitte versuchen Sie es erneut.",
+      "generic": "Ein Fehler ist aufgetreten."
+    },
     "errors": {
       "invalidCredentials": "Ungültige Anmeldeinformationen. Bitte versuchen Sie es erneut.",
       "accountLocked": "Ihr Konto ist gesperrt. Bitte kontaktieren Sie den Support.",
       "accountInactive": "Ihr Konto ist inaktiv. Bitte überprüfen Sie Ihre E-Mails für Aktivierungsanweisungen.",
       "tooManyAttempts": "Zu viele fehlgeschlagene Anmeldeversuche. Bitte versuchen Sie es später erneut.",
       "unknownError": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+    }
+  },
+
+  "sso": {
+    "register": {
+      "title": "Konto erstellen",
+      "description": "Sie wurden erfolgreich authentifiziert, sind aber noch nicht in diesem System registriert. Möchten Sie Ihr Konto jetzt anlegen?"
     }
   },
 

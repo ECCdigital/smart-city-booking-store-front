@@ -11,15 +11,16 @@ export default defineNuxtConfig({
   pages: true,
 
   runtimeConfig: {
-    adminBaseUrl:  "",
-    apiBaseUrl:  "",
-    userBaseUrl:"",
+    adminBaseUrl: "",
+    apiBaseUrl: "",
+    userBaseUrl: "",
     cacheEnabled: false,
     // make values available on the client via `useRuntimeConfig().public`
     public: {
-      adminBaseUrl:  "",
-      apiBaseUrl:  "",
-      userBaseUrl:  "",
+      adminBaseUrl: "",
+      apiBaseUrl: "",
+      userBaseUrl: "",
+      silentSsoEnabled: false,
     },
   },
   routeRules: {
@@ -27,6 +28,7 @@ export default defineNuxtConfig({
   },
 
   modules: [
+    "~~/modules/tenant-routes",
     "@nuxt/eslint",
     "@nuxt/fonts",
     "@nuxt/icon",
@@ -58,6 +60,7 @@ export default defineNuxtConfig({
         file: "en.json",
       },
     ],
+    customRoutes: "page",
     defaultLocale: "de",
     strategy: "prefix_except_default",
     lazy: true,

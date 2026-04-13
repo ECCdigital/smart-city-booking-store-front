@@ -12,12 +12,13 @@ export function useCatalogBundle() {
   const eventStore = useEventStore();
   const tenantStore = useTenantStore();
   const config = useRuntimeConfig();
+  const { tenantID } = useTenant();
 
   const cacheEnabled = config.public.cacheEnabled;
   const adminBaseUrl = config.public.adminBaseUrl;
 
-  async function loadBundle({ tenantID, bookableID, eventID, include = [] }) {
-    const cacheKey = `catalog:${tenantID}:${
+  async function loadBundle({ bookableID, eventID, include = [] }) {
+    const cacheKey = `catalog:${tenantID.value}:${
       bookableID || eventID || include.sort().join(",")
     }`;
     const event = import.meta.server ? useRequestEvent() : null;
@@ -26,7 +27,7 @@ export function useCatalogBundle() {
       cacheKey,
       () =>
         fetchCatalogBundle({
-          tenantID,
+          tenantID: tenantID.value,
           bookableID,
           eventID,
           include: include.join(","),
@@ -39,12 +40,6 @@ export function useCatalogBundle() {
     );
 
     if (error.value) {
-      if (error.value.statusMessage === "catalog_disabled") {
-        if (import.meta.server && event) {
-          return await sendRedirect(event, adminBaseUrl, 302);
-        }
-        return navigateTo(adminBaseUrl, { external: true });
-      }
       if (error.value.statusMessage === "unauthorized") {
         if (import.meta.server && event) {
           return await sendRedirect(event, `/login`, 302);
@@ -80,8 +75,8 @@ export function useCatalogBundle() {
     return data.value;
   }
 
-  function clearBundleCache(tenantID, bookableID, eventID, include = []) {
-    const cacheKey = `catalog:${tenantID}:${
+  function clearBundleCache(bookableID, eventID, include = []) {
+    const cacheKey = `catalog:${tenantID.value}:${
       bookableID || eventID || include.sort().join(",")
     }`;
     clearNuxtData(cacheKey);

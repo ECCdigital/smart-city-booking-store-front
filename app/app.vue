@@ -1,3 +1,4 @@
+<!-- app.vue -->
 <template>
   <UApp :locale="locales[locale]" :toaster="toaster">
     <NuxtLayout>
@@ -14,28 +15,13 @@ const { locale } = useI18n();
 
 const lang = computed(() => locales[locale.value].code);
 const dir = computed(() => locales[locale.value].dir);
-const toaster = {
-  position: "bottom-right",
-};
+const toaster = { position: "bottom-right" };
 
 useHead({
-  htmlAttrs: {
-    lang,
-    dir,
-  },
-  link: [
-    {
-      rel: "stylesheet",
-      href: `/api/theme/css`,
-    },
-  ],
+  htmlAttrs: { lang, dir },
+  link: [{ rel: "stylesheet", href: `/api/theme/css` }],
 });
 
 const instanceStore = useInstanceStore();
-
-instanceStore.fetchInstance();
+await instanceStore.fetchInstance();
 </script>
-
-
-<style>
-</style>

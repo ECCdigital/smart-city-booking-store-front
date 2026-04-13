@@ -4,9 +4,12 @@ import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import DetailsArea from "~/components/search/DetailsArea.vue";
 
 definePageMeta({
-  layout: "bookable",
+  layout: "catalog",
   middleware: ["catalog-auth"],
-  name: "tenant-bookable-id",
+  hero: {
+    height: "sm",
+    showOnMobile: true,
+  },
 });
 
 const route = useRoute();

@@ -170,7 +170,7 @@
   </div>
 </template>
 <script setup>
-import {useRoute} from "#imports";
+import { useRoute } from "#imports";
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -213,12 +213,23 @@ const props = defineProps({
 });
 const emit = defineEmits(["filter"]);
 
+const suitableBookables = computed(() =>
+  props.bookables.filter((b) => b.status === "suitable"),
+);
+
 //Filter Variables
 const isActive = computed(() => {
   const route = useRoute();
-  const keysToCheck = ["inclNoSuitable", "pubEv", "regEv", "cities", "categories", "price"];
-  return route.query && keysToCheck.some(key => key in route.query);
-})
+  const keysToCheck = [
+    "inclNoSuitable",
+    "pubEv",
+    "regEv",
+    "cities",
+    "categories",
+    "price",
+  ];
+  return route.query && keysToCheck.some((key) => key in route.query);
+});
 const _includeNonSuitable = ref(props.includeNonSuitable);
 const _cities = ref(props.cities);
 const _onlyPublicEvents = ref(props.onlyPublicEvents);
@@ -252,9 +263,9 @@ const possibleCategories = computed(() => {
 const possiblePriceRange = computed(() => {
   let validPrices = [];
   if (!props.isEvent) {
-    validPrices = props.bookables.map((b) => getBookableMinPrice(b));
+    validPrices = suitableBookables.value.map((b) => getBookableMinPrice(b));
   } else {
-    validPrices = props.bookables.map((e) => getEventMinPrice(e));
+    validPrices = suitableBookables.value.map((e) => getEventMinPrice(e));
   }
   validPrices = validPrices.filter(
     (price) => price !== undefined && price !== null && !isNaN(price),
@@ -268,10 +279,9 @@ const possiblePriceRange = computed(() => {
   return [minPrice, maxPrice];
 });
 
-
 const dynamicPriceStep = computed(() => {
   const range = possiblePriceRange.value[1] - possiblePriceRange.value[0];
-  if(range === 0){
+  if (range === 0) {
     return possiblePriceRange.value[0];
   }
 
@@ -280,25 +290,29 @@ const dynamicPriceStep = computed(() => {
   return step;
 });
 const dynamicMaxPrice = computed(() => {
-  const remainder =
-    possiblePriceRange.value[1] % dynamicPriceStep.value;
+  const remainder = possiblePriceRange.value[1] % dynamicPriceStep.value;
   if (remainder === 0) {
     return possiblePriceRange.value[1];
   } else {
-    return (
-        possiblePriceRange.value[1] + (dynamicPriceStep.value - remainder)
-    );
+    return possiblePriceRange.value[1] + (dynamicPriceStep.value - remainder);
   }
-})
+});
 const dynamicMinPrice = computed(() => {
-  if(possiblePriceRange.value[0] === dynamicMaxPrice.value){
-    return 0
+  if (possiblePriceRange.value[0] === dynamicMaxPrice.value) {
+    return 0;
   }
   return possiblePriceRange.value[0];
 });
+
 const _price = ref(
-    props.price?.length === 2 ? props.price : [dynamicMinPrice.value, dynamicMaxPrice.value],
+  props.price.length === 2
+    ? props.price
+    : [dynamicMinPrice.value, dynamicMaxPrice.value],
 );
+watch(suitableBookables, () => {
+  _price.value = [dynamicMinPrice.value, dynamicMaxPrice.value];
+});
+
 const priceBars = computed(() => {
   //set number of bars depending on price range
   const barsCount =
@@ -310,7 +324,7 @@ const priceBars = computed(() => {
   const bars = new Array(barsCount).fill(0);
   const range = dynamicMaxPrice.value - possiblePriceRange.value[0];
 
-  props.bookables.forEach((b) => {
+  suitableBookables.value.forEach((b) => {
     let minPrice = null;
     if (!props.isEvent) {
       minPrice = getBookableMinPrice(b);
@@ -319,7 +333,7 @@ const priceBars = computed(() => {
     }
     //sort price into bars
     if (minPrice !== null) {
-      if(minPrice === possiblePriceRange.value[0]){
+      if (minPrice === possiblePriceRange.value[0]) {
         //put into first bar
         bars[0]++;
         return;
@@ -376,11 +390,11 @@ function getEventMinPrice(event) {
 //Orte
 const possibleCities = computed(() => {
   const cityCount = {};
-  props.bookables.forEach((b) => {
+  suitableBookables.value.forEach((b) => {
     let city = "";
-    if (props.isEvent && b.status === "suitable") {
+    if (props.isEvent) {
       city = extractCity(b.item.eventAddress.city); //toDo - adjust for new location object !!!
-    } else if (b.status === "suitable") {
+    } else {
       city = extractCity(b.item.location);
     }
 

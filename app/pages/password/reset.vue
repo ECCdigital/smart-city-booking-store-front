@@ -3,9 +3,6 @@ import { ref } from "vue";
 import ResetPasswordCard from "~/components/auth/ResetPasswordCard.vue";
 import { useAuth } from "~/composables/auth/useAuth";
 
-definePageMeta({
-  name: "reset-password",
-});
 
 const form = ref({
   password: "",

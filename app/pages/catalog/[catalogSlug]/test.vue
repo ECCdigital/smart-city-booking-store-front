@@ -3,7 +3,6 @@ import { useAuth } from "~/composables/auth/useAuth.js";
 
 definePageMeta({
   middleware: "auth",
-  name: "test",
 });
 
 const { user } = useAuth();

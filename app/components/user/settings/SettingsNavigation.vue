@@ -23,13 +23,13 @@ const { tenantTo, isActivePath } = useTenantRoute();
 
 const settingsNavigation = computed(() => [
   {
-    value: "/user/settings",
+    value: "/account/settings",
     label: "Persönliche Daten",
     icon: "i-lucide-user-round-pen",
     disabled: false,
   },
   {
-    value: "/user/settings/appearance",
+    value: "/account/settings/appearance",
     label: "Darstellung",
     icon: "i-lucide-paintbrush",
     disabled: false,

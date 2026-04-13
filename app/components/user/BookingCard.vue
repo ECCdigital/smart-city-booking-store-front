@@ -124,6 +124,9 @@ const { formatDate, formatPrice, formateDateToTimestamp } = useFormatting();
 
 const currentTime = ref(new Date().getTime());
 const isActive = computed(() => {
+  if(props.booking.isRejected) {
+    return false;
+  }
   if (props.booking.timeBegin && props.booking.timeEnd) {
     return (
       currentTime.value >= props.booking.timeBegin &&
@@ -216,7 +219,7 @@ const bookingCardClasses =
 
 function openDetails() {
   const router = useRouter();
-  router.push({ path: `/user/bookings/${props.booking.id}` });
+  router.push({ path: `/account/bookings/${props.booking.id}` });
 }
 function onDownloadIcal() {
   downloadBookingIcal(props.booking.id, props.booking.tenantId);

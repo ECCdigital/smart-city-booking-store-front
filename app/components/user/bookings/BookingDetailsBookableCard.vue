@@ -3,7 +3,7 @@
     <div class="md:flex justify-between text-gray-700 dark:text-gray-300">
       <p class="font-bold flex items-center justify-between md:justify-start">
         <span
-          :class="bookableTitle.length > 100 ? 'text-sm' : ''"
+          :class="bookableTitle?.length > 100 ? 'text-sm' : ''"
           >{{ bookableTitle }}</span
         >
         <UTooltip text="Zum Buchungsobjekt gehen" class="ml-2">
