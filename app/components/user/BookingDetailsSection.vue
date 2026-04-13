@@ -33,7 +33,7 @@
           <p v-else-if="eventIds.length > 0" class="font-medium">Veranstaltungszeit</p>
           <UTooltip text="Als Termin herunterladen">
             <UButton
-              icon="i-lucide-download"
+              icon="i-lucide-calendar-arrow-down"
               variant="soft"
               color="neutral"
               class="text-gray-700 dark:text-gray-300 cursor-pointer"
