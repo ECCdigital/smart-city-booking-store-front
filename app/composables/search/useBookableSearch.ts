@@ -731,7 +731,6 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   async function checkTickets(events: { item: object; status: string }[]) {
     return await Promise.all(
       events.map(async (event) => {
-        console.log("** K ** ", event);
         if (
           isEvent ||
           (event.item.category === "event" &&
@@ -741,10 +740,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           const updatedTickets = await Promise.all(
             event.item.tickets.map(async (ticket: any) => {
               const ticketPrice =
-                "66,55"; /*await useBookables().getBookablePrice(
+                await useBookables().getBookablePrice(
                 event.item.tenantId,
                 ticket.id,
-              );*/
+              );
               const ticketAvailability =
                 await useBookables().getBookableAvailability(
                   event.item.tenantId,
