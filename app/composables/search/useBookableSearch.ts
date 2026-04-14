@@ -164,7 +164,6 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   const sortedItems = computed(() => {
-    console.log("Sortiere Items mit Sortiermodus:", query.sortMode);
     return filteredItems.value.slice().sort((a, b) => {
       //sort by price
       if (query.sortMode === "priceAscending") {
@@ -176,13 +175,11 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
       //sort by alphabetic order of name/title
       if (query.sortMode === "alphabeticAscending") {
-        console.log("Sortierte alphabetisch aufsteigend");
         const nameA = isEvent ? a.item.information.name : a.item.title;
         const nameB = isEvent ? b.item.information.name : b.item.title;
         return nameA.localeCompare(nameB);
       }
       if (query.sortMode === "alphabeticDescending") {
-        console.log("Sortierte alphabetisch absteigend");
         const nameA = isEvent ? a.item.information.name : a.item.title;
         const nameB = isEvent ? b.item.information.name : b.item.title;
         return nameB.localeCompare(nameA);
@@ -192,19 +189,17 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       if (
         query.sortMode === "distanceAscending"
       ) {
-        console.log("Sortierte aufsteigende Distanz");
-
         const distanceA = a.item.distanceMeter ?? Infinity;
         const distanceB = b.item.distanceMeter ?? Infinity;
-        console.log("Entfernung A:", distanceA, "Entfernung B:", distanceB);
+
         return distanceA - distanceB;
       }
       if (
         query.sortMode === "distanceDescending"
       ) {
-        console.log("Sortierte absteigende Distanz");
         const distanceA = a.item.distanceMeter ?? -Infinity;
         const distanceB = b.item.distanceMeter ?? -Infinity;
+
         return distanceB - distanceA;
       }
       return 0;

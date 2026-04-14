@@ -117,7 +117,6 @@ const sortOptions = computed(() => {
 });
 
 function displaySortMode() {
-  console.log("Current sort mode:", _sortMode.value);
   return sortOptions.value.find((option) => option.value === _sortMode.value)
     .label;
 }
