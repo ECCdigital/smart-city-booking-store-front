@@ -379,10 +379,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     //add location coordinates to items based on address for better location search and distance calculation
     console.log("search criteria location:", searchCriteria.location);
     console.log(typeof searchCriteria.location);
-    if (typeof searchCriteria.location === "object") {
+    if (isEvent && typeof searchCriteria.location === "object") {
       result = await Promise.all(
         result.map(async (item) => {
-          if (isEvent) {
+          //if (isEvent) {
             let addressCoordinates: number[] = [];
 
             const addressString = `${item.item.eventAddress.street || ""} ${item.item.eventAddress.houseNumber || ""}, ${item.item.eventAddress.zip || ""} ${item.item.eventAddress.city || ""}`;
@@ -406,7 +406,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
               },
             };
             return item;
-          }
+          //}
         }),
       );
     }
