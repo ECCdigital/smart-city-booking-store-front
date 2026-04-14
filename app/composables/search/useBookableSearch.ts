@@ -757,10 +757,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     const result = await Promise.allSettled(
       events.map(async (event) => {
         if (
-          isEvent ||
-          (event.item.category === "event" &&
-            event.item.tickets &&
-            event.item.tickets.length > 0)
+          //isEvent ||
+          (event.item.category === "event" || event.item.type === "event") &&
+          event.item.tickets &&
+          event.item.tickets.length > 0
         ) {
           const updatedTickets = await Promise.all(
             event.item.tickets.map(async (ticket: any) => {

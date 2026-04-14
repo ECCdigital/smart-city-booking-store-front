@@ -21,7 +21,9 @@
         />
       </div>
     </div>
-    <p v-if="showDistance && hasAdress">
+    <div class="text-red-500 text-xs">
+      {{event}}</div>
+    <p v-if="showDistance && hasLocationParam && hasAdress">
       <UIcon name="i-lucide-navigation" class="size-5" />
       <span v-if="distance" class="p-3">{{ distance }} km </span>
       <span v-else class="italic p-3">Distanz nicht ermittelbar. </span>
@@ -29,6 +31,8 @@
   </div>
 </template>
 <script setup>
+import {useRoute} from "#imports";
+
 const props = defineProps({
   event: {
     type: Object,
@@ -43,6 +47,12 @@ const props = defineProps({
     default: false,
   },
 });
+
+const route = useRoute();
+const hasLocationParam = computed(() => {
+  return route.query.loc !== undefined;
+});
+
 const hasAdress = computed(() => {
   return !Object.values(props.event.eventAddress).every(
     (value) => value === null || value === undefined || value === "",

@@ -19,7 +19,7 @@
       </div>
     </div>
 
-  <p v-if="showDistance && location.length">
+    <p v-if="showDistance && hasLocationParam && location.length">
     <UIcon name="i-lucide-navigation" class="size-5" />
     <span v-if="distance" class="p-3">{{ distance }} km </span>
     <span v-else class="italic p-3">Distanz nicht ermittelbar. </span>
@@ -27,6 +27,8 @@
 </div>
 </template>
 <script setup>
+import {useRoute} from "#imports";
+
 const props = defineProps({
   bookable: {
     type: Object,
@@ -40,6 +42,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+});
+
+const route = useRoute();
+const hasLocationParam = computed(() => {
+  return route.query.loc !== undefined;
 });
 
 const location = computed(() => {
