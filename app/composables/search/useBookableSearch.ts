@@ -186,17 +186,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       }
 
       //sort by distance to location (only if location is set as search criteria)
-      if (
-        query.sortMode === "distanceAscending"
-      ) {
+      if (query.sortMode === "distanceAscending") {
         const distanceA = a.item.distanceMeter ?? Infinity;
         const distanceB = b.item.distanceMeter ?? Infinity;
 
         return distanceA - distanceB;
       }
-      if (
-        query.sortMode === "distanceDescending"
-      ) {
+      if (query.sortMode === "distanceDescending") {
         const distanceA = a.item.distanceMeter ?? -Infinity;
         const distanceB = b.item.distanceMeter ?? -Infinity;
 
@@ -402,8 +398,6 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     });
 
     //add location coordinates to items based on address for better location search and distance calculation
-    console.log("search criteria location:", searchCriteria.location);
-    console.log(typeof searchCriteria.location);
     if (isEvent && typeof searchCriteria.location === "object") {
       result = await Promise.all(
         result.map(async (item) => {
@@ -471,11 +465,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     if (!searchLocation) return items;
 
     if (typeof searchLocation === "string") {
+      items = removeDistanceToLocation(items);
       return searchForLocationString(searchLocation, items);
     } else if (
       !searchLocation.coordinates ||
       !searchLocation.coordinates.points
     ) {
+      items = removeDistanceToLocation(items);
       return searchForLocationString(searchLocation.display_address, items);
     } else {
       const results: object[] = [];
@@ -694,6 +690,15 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     );
   }
 
+  function removeDistanceToLocation(items: any[]) {
+    return items.map((item) => {
+      if (item.item.distanceMeter) {
+        item.item["distanceMeter"] = undefined;
+        return item;
+      }
+      return item;
+    });
+  }
   function updateDistanceToLocation(items: any[], searchLocation: any) {
     if (
       !searchLocation ||
