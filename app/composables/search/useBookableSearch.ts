@@ -164,18 +164,48 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   const sortedItems = computed(() => {
-    console.log(
-      "G",
-      query.sortMode,
-      filteredItems.value.length,
-      filteredItems.value,
-    );
+    console.log("Sortiere Items mit Sortiermodus:", query.sortMode);
     return filteredItems.value.slice().sort((a, b) => {
+      //sort by price
       if (query.sortMode === "priceAscending") {
         return getPrice(a) - getPrice(b);
       }
       if (query.sortMode === "priceDescending") {
         return getPrice(b) - getPrice(a);
+      }
+
+      //sort by alphabetic order of name/title
+      if (query.sortMode === "alphabeticAscending") {
+        console.log("Sortierte alphabetisch aufsteigend");
+        const nameA = isEvent ? a.item.information.name : a.item.title;
+        const nameB = isEvent ? b.item.information.name : b.item.title;
+        return nameA.localeCompare(nameB);
+      }
+      if (query.sortMode === "alphabeticDescending") {
+        console.log("Sortierte alphabetisch absteigend");
+        const nameA = isEvent ? a.item.information.name : a.item.title;
+        const nameB = isEvent ? b.item.information.name : b.item.title;
+        return nameB.localeCompare(nameA);
+      }
+
+      //sort by distance to location (only if location is set as search criteria)
+      if (
+        query.sortMode === "distanceAscending"
+      ) {
+        console.log("Sortierte aufsteigende Distanz");
+
+        const distanceA = a.item.distanceMeter ?? Infinity;
+        const distanceB = b.item.distanceMeter ?? Infinity;
+        console.log("Entfernung A:", distanceA, "Entfernung B:", distanceB);
+        return distanceA - distanceB;
+      }
+      if (
+        query.sortMode === "distanceDescending"
+      ) {
+        console.log("Sortierte absteigende Distanz");
+        const distanceA = a.item.distanceMeter ?? -Infinity;
+        const distanceB = b.item.distanceMeter ?? -Infinity;
+        return distanceB - distanceA;
       }
       return 0;
     });
@@ -383,29 +413,29 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       result = await Promise.all(
         result.map(async (item) => {
           //if (isEvent) {
-            let addressCoordinates: number[] = [];
+          let addressCoordinates: number[] = [];
 
-            const addressString = `${item.item.eventAddress.street || ""} ${item.item.eventAddress.houseNumber || ""}, ${item.item.eventAddress.zip || ""} ${item.item.eventAddress.city || ""}`;
+          const addressString = `${item.item.eventAddress.street || ""} ${item.item.eventAddress.houseNumber || ""}, ${item.item.eventAddress.zip || ""} ${item.item.eventAddress.city || ""}`;
 
-            if (addressString) {
-              addressCoordinates = await searchAddress(addressString);
-            }
+          if (addressString) {
+            addressCoordinates = await searchAddress(addressString);
+          }
 
-            item = {
-              ...item,
-              item: {
-                ...item.item,
-                location: {
-                  display_address: addressString,
-                  coordinates: addressCoordinates
-                    ? {
-                        points: addressCoordinates,
-                      }
-                    : null,
-                },
+          item = {
+            ...item,
+            item: {
+              ...item.item,
+              location: {
+                display_address: addressString,
+                coordinates: addressCoordinates
+                  ? {
+                      points: addressCoordinates,
+                    }
+                  : null,
               },
-            };
-            return item;
+            },
+          };
+          return item;
           //}
         }),
       );
@@ -484,7 +514,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           i.item.location,
         );
         const kmDistance = mDistance ? mDistance / 1000 : null;
-        console.log("distance to item:", kmDistance, "radius:", distance);
+
         if (distance && kmDistance && kmDistance <= distance) {
           results.push(i);
         }
@@ -729,7 +759,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   async function checkTickets(events: { item: object; status: string }[]) {
-    return await Promise.all(
+    const result = await Promise.allSettled(
       events.map(async (event) => {
         if (
           isEvent ||
@@ -739,8 +769,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         ) {
           const updatedTickets = await Promise.all(
             event.item.tickets.map(async (ticket: any) => {
-              const ticketPrice =
-                await useBookables().getBookablePrice(
+              const ticketPrice = await useBookables().getBookablePrice(
                 event.item.tenantId,
                 ticket.id,
               );
@@ -768,6 +797,8 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         }
       }),
     );
+
+    return result.filter((r) => r.status === "fulfilled").map((r) => r.value);
   }
 
   const hasUrlCriteria = computed(() => {

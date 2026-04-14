@@ -14,13 +14,6 @@
         @reset="resetResults"
       />
     </div>
-    <div
-      class="text-xs justify-center md:bg-orange-200 lg:bg-red-200 xl:bg-pink-200 text-center"
-    >
-      Location: {{ query.location }}
-      <br >
-      SearchParams: {{ temp }}
-    </div>
 
     <div class="m-10 lg:m-5 sm:flex items-center">
       <span

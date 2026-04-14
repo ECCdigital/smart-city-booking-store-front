@@ -43,7 +43,7 @@ export function useCatalogQueryState() {
         })()
       : [],
 
-    sortMode: (route.query.sort as any) || "relevance",
+    sortMode: (route.query.sort as any) || "alphabeticAscending",
   });
 
   const queryObject = computed(() => {
@@ -71,7 +71,7 @@ export function useCatalogQueryState() {
       q.price = `${state.price[0]},${state.price[1]}`;
     }
 
-    if (state.sortMode !== "relevance") {
+    if (state.sortMode !== "alphabeticAscending") {
       q.sort = state.sortMode;
     }
 
