@@ -72,6 +72,15 @@ export default defineNuxtConfig({
     },
   },
   security: {
+    rateLimiter: {
+      tokensPerInterval: 500,
+      interval: 300000,
+      headers: false,
+      driver: {
+        name: "lruCache",
+      },
+    },
+  security: {
     headers: {
       contentSecurityPolicy: {
         "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org"],
