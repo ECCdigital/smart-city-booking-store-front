@@ -80,7 +80,6 @@ export default defineNuxtConfig({
         name: "lruCache",
       },
     },
-  security: {
     headers: {
       contentSecurityPolicy: {
         "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org"],
