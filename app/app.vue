@@ -23,5 +23,10 @@ useHead({
 });
 
 const instanceStore = useInstanceStore();
-await instanceStore.fetchInstance();
+
+try {
+  await instanceStore.fetchInstance();
+} catch (error) {
+  console.error("[app.vue] fetchInstance failed:", error);
+}
 </script>
