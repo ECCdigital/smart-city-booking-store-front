@@ -29,7 +29,9 @@ const props = defineProps({
 });
 
 const route = useRoute();
-const hasLocationParam = computed(() => !!route.query.loc);
+const hasLocationParam = computed(
+  () => !!route.query.loc && !!route.query.dist,
+);
 
 const _sortMode = ref(props.sortMode);
 const sortOptions = computed(() => {
@@ -67,7 +69,7 @@ const sortOptions = computed(() => {
     {
       value: "alphabeticAscending",
       label: "Alphabetisch (aufsteigend)",
-      icon: "arrow-down-a-z",
+      icon: "i-lucide-arrow-up",
       class: computed(() =>
         _sortMode.value === "alphabeticAscending" ? "bg-primary/10" : "",
       ),
@@ -79,7 +81,7 @@ const sortOptions = computed(() => {
     {
       value: "alphabeticDescending",
       label: "Alphabetisch (absteigend)",
-      icon: "arrow-up-a-z",
+      icon: "i-lucide-arrow-down",
       class: computed(() =>
         _sortMode.value === "alphabeticDescending" ? "bg-primary/10" : "",
       ),

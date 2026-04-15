@@ -271,7 +271,10 @@ function onSearch() {
     searchType: _searchType.value,
     term: _term.value,
     location: _location.value,
-    distance: _distance.value,
+    distance:
+      typeof _location.value === "object" && _location.value.coordinates
+        ? _distance.value
+        : null,
     timeStart: _timePeriod.value ? _timePeriod.value.start : null,
     timeEnd: _timePeriod.value ? _timePeriod.value.end : null,
   });

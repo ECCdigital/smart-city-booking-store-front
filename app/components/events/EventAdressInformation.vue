@@ -21,8 +21,7 @@
         />
       </div>
     </div>
-    <div class="text-red-500 text-xs">
-      {{event}}</div>
+
     <p v-if="showDistance && hasLocationParam && hasAdress">
       <UIcon name="i-lucide-navigation" class="size-5" />
       <span v-if="distance" class="p-3">{{ distance }} km </span>
@@ -31,7 +30,7 @@
   </div>
 </template>
 <script setup>
-import {useRoute} from "#imports";
+import { useRoute } from "#imports";
 
 const props = defineProps({
   event: {

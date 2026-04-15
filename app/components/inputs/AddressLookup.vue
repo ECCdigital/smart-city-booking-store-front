@@ -49,7 +49,7 @@
           class="w-20"
           @set-distance="updateDistance"
         />
-        <ClearButton :show-clear-button="!!model" @clear="onClear" />
+        <ClearButton :show-clear-button="hasAddress" @clear="onClear" />
       </div>
     </div>
   </div>
@@ -81,8 +81,20 @@ const selectedAddress = ref({
     fetched_at: null,
   },
 });
+const hasAddress = computed(() => {
+  if (model.value && typeof model.value === "string") {
+    return true;
+  }
+  if (
+    model.value &&
+    typeof model.value === "object" &&
+    model.value.display_address
+  ) {
+    return true;
+  }
+  return false;
+});
 const hasCoordinates = computed(() => {
-  //if(model.value.coordinates){return true}
   return (
     model.value.coordinates &&
     model.value.coordinates.points &&

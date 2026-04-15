@@ -118,11 +118,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
 
     const maxDistance = query.distance;
-    if (typeof query.location === "object" && maxDistance !== null) {
+    if (query.location && maxDistance !== null) {
       filtered = filtered.filter((b) => {
         if (!b.item.location || b.item.distanceMeter === undefined) {
           return false;
         }
+
         return b.item.distanceMeter <= maxDistance * 1000; // convert km to meters
       });
     }
@@ -177,11 +178,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       if (query.sortMode === "alphabeticAscending") {
         const nameA = isEvent ? a.item.information.name : a.item.title;
         const nameB = isEvent ? b.item.information.name : b.item.title;
+
         return nameA.localeCompare(nameB);
       }
       if (query.sortMode === "alphabeticDescending") {
         const nameA = isEvent ? a.item.information.name : a.item.title;
         const nameB = isEvent ? b.item.information.name : b.item.title;
+
         return nameB.localeCompare(nameA);
       }
 
@@ -264,7 +267,9 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     query.regEv = criteria.regEv ?? query.regEv;
     query.cat = criteria.cat ?? query.cat;
     query.cities = criteria.cities ?? query.cities;
-    query.distance = criteria.distance ?? query.distance;
+    query.distance = query.location
+      ? (criteria.distance ?? query.distance)
+      : null;
     query.price = criteria.price ?? query.price;
     query.start = criteria.start ?? query.start;
     query.end = criteria.end ?? query.end;
@@ -316,12 +321,15 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     timeEnd?: number | null;
   } = {}) {
     query.term = term || "";
-
+    /* if(!location || !location.coordinates || !location.coordinates.points){
+          query.distance = null;
+      }*/
     if (typeof location === "object") {
       query.location = location.display_address || "";
     } else {
       query.location = location || "";
     }
+
     query.distance = distance || null;
     query.start = timeStart || null;
     query.end = timeEnd || null;
@@ -462,7 +470,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     items: object[],
     distance: number | null,
   ) {
-    if (!searchLocation) return items;
+    if (
+      !searchLocation ||
+      (typeof searchLocation === "object" && !searchLocation.display_address)
+    ) {
+      return items;
+    }
 
     if (typeof searchLocation === "string") {
       items = removeDistanceToLocation(items);
