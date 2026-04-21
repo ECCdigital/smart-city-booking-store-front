@@ -23,59 +23,49 @@ export const useAuthStore = defineStore("auth", {
       this.user = null;
       this.permission = null;
       this.tokenValid = false;
+      this.authChecked = true;
     },
     async validateAuth(force = false) {
-      if (!force && this.authChecked && this.tokenValid && this.user) {
-        return true;
+      if (!force && this.authChecked) {
+        return this.isLoggedIn;
       }
-
       try {
-        const { error, data } = await useFetch("/api/auth/me", {
-          method: "GET",
-          key: "auth-validation",
-          server: true,
-        });
+        const headers = import.meta.server
+            ? useRequestHeaders(["cookie"])
+            : undefined;
 
-        this.authChecked = true;
-        const fetchError = error?.value;
+        const data = await $fetch("/api/auth/me", { headers });
 
-        if (fetchError || data.value?.success === false) {
-          this.invalidateAuth();
-          return false;
-        }
-
-        this.user = data.value?.data?.user || null;
-        this.permission = data.value?.data?.permissions || null;
+        if (!data?.success) throw new Error("invalid");
+        this.user = data.data?.user || null;
+        this.permission = data.data?.permissions || null;
         this.tokenValid = true;
         return true;
-      } catch (error) {
-        console.error("validateAuth error:", error);
-        this.authChecked = true;
-        this.clearAuthPayload();
+      } catch {
+        this.user = null;
+        this.permission = null;
+        this.tokenValid = false;
         return false;
+      } finally {
+        this.authChecked = true;
       }
     },
     async login(credentials) {
       try {
-        const { error, data } = await useFetch("/api/auth/login", {
+        const data = await $fetch("/api/auth/login", {
           method: "POST",
-          server: true,
           body: credentials,
         });
 
-        const fetchError = error?.value;
-
-        if (fetchError || data.value?.success === false) {
+        if (!data?.success) {
           throw createError({
-            success: false,
-            statusCode: fetchError?.response?.status || 500,
-            statusMessage:
-              fetchError?.response?.data?.message || "Login failed",
+            statusCode: 401,
+            statusMessage: data?.message || "Login failed",
           });
         }
 
-        this.user = data.value?.data?.user || null;
-        this.permission = data.value?.data?.permissions || null;
+        this.user = data.data?.user || null;
+        this.permission = data.data?.permissions || null;
         this.tokenValid = true;
         this.authChecked = true;
         return true;
@@ -100,6 +90,9 @@ export const useAuthStore = defineStore("auth", {
     invalidateAuth() {
       this.clearAuthPayload();
       this.authChecked = false;
+      if (import.meta.client) {
+        localStorage.removeItem("auth-store");
+      }
     },
     async updateUser(user) {
       const { updateUser } = useUsers();
@@ -123,10 +116,5 @@ export const useAuthStore = defineStore("auth", {
         return false;
       }
     },
-  },
-  persist: {
-    key: "auth-store",
-    storage: import.meta.client ? localStorage : undefined,
-    paths: ["user", "permission", "tokenValid"],
   },
 });
