@@ -96,8 +96,7 @@
     </div>
 
     <!-- Distanz -->
-
-    <div v-if="distance" class="my-7">
+    <div v-if="distance != null" class="my-7">
       <p class="mb-3">Distanz</p>
       <p class="mb-3">0 km - {{ _distance }} km</p>
 
@@ -277,22 +276,26 @@ const possibleCategories = computed(() => {
 });
 
 //Distanz
-const _distance = ref(props.distance || 100);
+const _distance = ref(props.distance ?? 100);
 watch(
   () => props.distance,
   (newVal) => {
     _distance.value = newVal;
-  },
+  }
 );
 
 const distanceRange = computed(() => {
   if (!props.bookables || props.bookables.length === 0) {
-    return props.distance ? [0, props.distance] : [0, 100];
+    return props.distance != null ? [0, props.distance] : [0, 100];
   }
 
   const distances = props.bookables
-    .filter((b) => !!b.item.distanceMeter)
+    .filter((b) => b.item.distanceMeter != null)
     .map((b) => b.item.distanceMeter);
+
+  if (distances.length === 0) {
+    return props.distance != null ? [0, props.distance] : [0, 100];
+  }
 
   const maxDistanceKm = Math.max(...distances) / 1000;
 
@@ -326,7 +329,7 @@ const distanceBars = computed(() => {
   const range = distanceRange.value[1];
 
   props.bookables.forEach((b) => {
-    if (!b.item.distanceMeter) {
+    if (b.item.distanceMeter == null) {
       return;
     }
     const distanceKm = b.item.distanceMeter / 1000;
@@ -337,7 +340,7 @@ const distanceBars = computed(() => {
     }
     const index = Math.min(
       Math.floor((distanceKm / range) * barsCount),
-      barsCount - 1,
+      barsCount - 1
     );
     bars[index]++;
   });
@@ -358,7 +361,7 @@ const possiblePriceRange = computed(() => {
     validPrices = props.bookables.map((e) => getEventMinPrice(e));
   }
   validPrices = validPrices.filter(
-    (price) => price !== undefined && price !== null && !isNaN(price),
+    (price) => price !== undefined && price !== null && !isNaN(price)
   );
 
   //set endpoints rounded to 5
@@ -396,7 +399,7 @@ const dynamicMinPrice = computed(() => {
 const _price = ref(
   props.price?.length === 2
     ? props.price
-    : [dynamicMinPrice.value, dynamicMaxPrice.value],
+    : [dynamicMinPrice.value, dynamicMaxPrice.value]
 );
 const priceBars = computed(() => {
   if (!props.bookables || props.bookables.length === 0) {
@@ -407,7 +410,7 @@ const priceBars = computed(() => {
   const barsCount =
     Math.ceil(
       (dynamicMaxPrice.value - possiblePriceRange.value[0]) /
-        dynamicPriceStep.value,
+        dynamicPriceStep.value
     ) || 1;
 
   const bars = new Array(barsCount).fill(0);
@@ -429,9 +432,9 @@ const priceBars = computed(() => {
       }
       const index = Math.min(
         Math.floor(
-          ((minPrice - possiblePriceRange.value[0]) / range) * barsCount,
+          ((minPrice - possiblePriceRange.value[0]) / range) * barsCount
         ),
-        barsCount - 1,
+        barsCount - 1
       );
       bars[index]++;
     }
@@ -449,7 +452,7 @@ function getBookableMinPrice(bookable) {
   }
   //else return min price from price categories
   const minPrice = Math.min(
-    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || []),
+    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || [])
   );
   return bookable.item.priceValueAddedTax
     ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
@@ -457,7 +460,7 @@ function getBookableMinPrice(bookable) {
 }
 function getTicketMinPrice(ticket) {
   const minPrice = Math.min(
-    ...ticket.priceCategories.map((cat) => cat.priceEur),
+    ...ticket.priceCategories.map((cat) => cat.priceEur)
   );
   return ticket.priceValueAddedTax
     ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
@@ -469,7 +472,7 @@ function getEventMinPrice(event) {
   }
   if (event.item.tickets && event.item.tickets.length > 0) {
     return Math.min(
-      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket)),
+      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket))
     );
   } else {
     return 0;

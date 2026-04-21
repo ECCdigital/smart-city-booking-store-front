@@ -54,7 +54,7 @@ const hasLocationParam = computed(() => {
 
 const hasAdress = computed(() => {
   return !Object.values(props.event.eventAddress).every(
-    (value) => value === null || value === undefined || value === "",
+    (value) => value === null || value === undefined || value === ""
   );
 });
 
@@ -71,9 +71,11 @@ const displayAddress = () => {
 };
 
 const distance = computed(() => {
-  return props.event.distanceMeter
-    ? (props.event.distanceMeter / 1000).toFixed(2).replace(".", ",")
-    : null;
+  if (props.event.distanceMeter == null) return null;
+  return (props.event.distanceMeter / 1000)
+    .toFixed(2)
+    .replace(".", ",")
+    .replace(/,00$/, "");
 });
 
 const copyAddressToClipboard = async () => {
@@ -82,7 +84,7 @@ const copyAddressToClipboard = async () => {
     const notification = useNotification();
     notification.success(
       "Die Adresse wurde in Ihre Zwischenablage kopiert.",
-      "Adresse erfolgreich kopiert!",
+      "Adresse erfolgreich kopiert!"
     );
   }
 };

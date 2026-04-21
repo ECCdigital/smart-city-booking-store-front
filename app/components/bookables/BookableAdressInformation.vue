@@ -18,10 +18,9 @@
         />
       </div>
     </div>
-
     <p v-if="showDistance && hasLocationParam && location.length">
       <UIcon name="i-lucide-navigation" class="size-5" />
-      <span v-if="distance" class="p-3">{{ distance }} km </span>
+      <span v-if="distance != null" class="p-3">{{ distance }} km </span>
       <span v-else class="italic p-3">Distanz nicht ermittelbar. </span>
     </p>
   </div>
@@ -63,9 +62,11 @@ const location = computed(() => {
 });
 
 const distance = computed(() => {
-  return props.bookable.distanceMeter
-    ? (props.bookable.distanceMeter / 1000).toFixed(2).replace(".", ",")
-    : null;
+  if (props.bookable.distanceMeter == null) return null;
+  return (props.bookable.distanceMeter / 1000)
+      .toFixed(2)
+      .replace(".", ",")
+      .replace(/,00$/, "");
 });
 
 const copyAddressToClipboard = async () => {
