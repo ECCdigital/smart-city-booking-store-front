@@ -223,10 +223,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     //exclude holiday price categories
     const pricesWithoutHolidays = bookable.item.priceCategories.filter(
-      (c) => c.holidays && c.holidays.length === 0,
+      (c) =>
+        (c.external && c.uni !== "service-fee") ||
+        (c.holidays && c.holidays.length === 0),
     );
 
     const minPrice = Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
+
     return bookable.item.priceValueAddedTax
       ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
       : minPrice;
