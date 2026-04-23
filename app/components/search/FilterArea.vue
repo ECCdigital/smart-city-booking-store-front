@@ -290,7 +290,7 @@ const distanceRange = computed(() => {
   }
 
   const distances = props.bookables
-    .filter((b) => b.item.distanceMeter != null)
+    .filter((b) => b.status !== "nonSuitable" && b.item.distanceMeter != null)
     .map((b) => b.item.distanceMeter);
 
   if (distances.length === 0) {
@@ -329,7 +329,7 @@ const distanceBars = computed(() => {
   const range = distanceRange.value[1];
 
   props.bookables.forEach((b) => {
-    if (b.item.distanceMeter == null) {
+    if (b.item.distanceMeter == null || b.status === "nonSuitable") {
       return;
     }
     const distanceKm = b.item.distanceMeter / 1000;
