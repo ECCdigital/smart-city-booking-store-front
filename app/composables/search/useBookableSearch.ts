@@ -509,7 +509,8 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       );
 
       // search for items without coordinates
-      const searchString = searchLocation.display_address.split(",")[0] || "";
+      const searchString = searchLocation.display_address.split(",").slice(0, -1).join(',').trim() || "";
+
       searchForLocationString(searchString, itemsWithoutCoordinates).forEach(
         (r) => results.push(r),
       );
