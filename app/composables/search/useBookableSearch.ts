@@ -154,7 +154,22 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       });
     }
 
-    return filtered;
+    console.log("filtered items", filtered);
+    console.log("updated items", updatedItems.value);
+
+    //return filtered;
+      const temp = updatedItems.value.map((i) => {
+        if (filtered.some((f) => f.item.id === i.item.id)) {
+            return i;
+        } else {
+            return {
+                ...i,
+                status: i.status === "suitable" ? "nonSuitable" : i.status,
+            }
+        }
+      })
+      console.log("filtered items after map", temp);
+      return temp
   });
 
   function getPrice(item: any) {
@@ -173,7 +188,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   const sortedItems = computed(() => {
-    return filteredItems.value.slice().sort((a, b) => {
+      return filteredItems.value.slice().sort((a, b) => {
       //sort by price
       if (query.sortMode === "priceAscending") {
         return getPrice(a) - getPrice(b);
@@ -266,7 +281,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   const suitableCount = computed(
-    () => sortedItems.value.filter((l) => l.status !== "nonSuitable").length,
+    () => sortedItems.value.filter((l) => l.status === "suitable").length,
   );
 
   function setFilterQueryParams(criteria: Partial<CatalogQueryState>) {
