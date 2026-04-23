@@ -105,6 +105,13 @@ const hasCoordinates = computed(() => {
 const selectedDistance = ref(props.distance);
 const debounceTimer = ref(null);
 
+watch(
+  () => props.distance,
+  (newDistance) => {
+    selectedDistance.value = newDistance;
+  },
+);
+
 /*
 Checks if manual option should be shown
  */

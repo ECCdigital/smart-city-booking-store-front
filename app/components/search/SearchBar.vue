@@ -192,6 +192,15 @@ const _timePeriod = ref({
   end: props.timeEnd,
 });
 
+watch(
+    () => props.distance,
+    (newVal) => {
+      if (newVal !== _distance.value) {
+        _distance.value = newVal;
+      }
+    },
+)
+
 const types = ref([
   {
     label: "Buchungsobjekte",
