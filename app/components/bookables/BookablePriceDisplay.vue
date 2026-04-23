@@ -134,6 +134,8 @@ function displayPricePerUnit() {
       return " pro Stück " + includeTaxes;
     case "per-day":
       return " pro Tag " + includeTaxes;
+    case "hour":
+      return " pro Stunde " + includeTaxes;
     case "day":
       return " pro Tag " + includeTaxes;
     case "week":

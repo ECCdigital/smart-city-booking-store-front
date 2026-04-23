@@ -25,16 +25,41 @@
       <p class="font-medium">Ablehnungsgrund</p>
       <p>{{ booking.rejectionReason }}</p>
     </div>
-    <div v-if="bookingTimeSlot" class="mb-5">
-      <div class="">
-        <p class="font-medium">Buchungszeitraum</p>
-        <p>{{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}</p>
+
+    <div v-if="bookingTimeSlot || eventIds.length > 0" class="mb-5 flex">
+      <div class="basis-1/2">
+        <div class="flex space-x-1">
+          <p v-if="bookingTimeSlot" class="font-medium">Buchungszeitraum</p>
+          <p v-else-if="eventIds.length > 0" class="font-medium">Veranstaltungszeit</p>
+          <UTooltip text="Als Termin herunterladen">
+            <UButton
+              icon="i-lucide-calendar-arrow-down"
+              variant="soft"
+              color="neutral"
+              class="text-gray-700 dark:text-gray-300 cursor-pointer"
+              @click="downloadAppointment()"
+            />
+          </UTooltip>
+        </div>
+        <p v-if="bookingTimeSlot">{{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}</p>
+        <div v-if="eventIds.length > 0 && events.length > 0" class="space-y-0.5">
+          <div v-for="event in events" :key="event.id" class="rounded-md bg-gray-200 p-1">
+            <span>{{event.information.name}}</span>
+            <EventTimeInformation
+                :event="event"
+                :use-icon="false"
+                class="-mx-3"
+            />
+          </div>
+        </div>
+
+
       </div>
     </div>
 
     <!-- bookable information  -->
 
-    <div class="mb-5">
+    <div v-if="booking.bookableItems && booking.bookableItems.length > 0" class="mb-5">
       <p class="font-medium">Gebuchte Objekte</p>
       <BookingDetailsBookableCard
         v-for="(bookable, i) in booking.bookableItems"
@@ -96,12 +121,15 @@
   </div>
 </template>
 <script setup>
-import { useTenantStore } from "~~/stores/tenant.js";
+import {useTenantStore} from "~~/stores/tenant.js";
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
 import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
-import { useFormatting } from "~/composables/utils/useFormatting.js";
+import {useFormatting} from "~/composables/utils/useFormatting.js";
+import {useIcalDownload} from "~/composables/api/useIcalDownload.js";
+import {useEventStore} from "~~/stores/event.js";
+import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 
 const props = defineProps({
   booking: {
@@ -110,7 +138,11 @@ const props = defineProps({
   },
 });
 
+const eventStore = useEventStore();
+
 const { formatDate, formatPrice } = useFormatting();
+const { downloadBookingIcal } = useIcalDownload();
+
 
 const tenantsStore = useTenantStore();
 const tenantName = computed(() => {
@@ -120,6 +152,29 @@ const tenantName = computed(() => {
   }
   return "Unbekannt";
 });
+
+
+const eventIds = computed(() => {
+  return props.booking.bookableItems.filter((item) => item._bookableUsed.eventId).map((item) => item._bookableUsed.eventId);
+});
+
+const events = ref([]);
+watch(eventIds, async (newEventIds) => {
+  if (newEventIds.length === 0) {
+    events.value = [];
+    return;
+  }
+  const nonredundantEventIds = [...new Set(newEventIds)];
+  const fetchedEvents = [];
+  for (const eventId of nonredundantEventIds) {
+    const event = await eventStore.getEventById(eventId);
+    if (event) {
+      fetchedEvents.push(event);
+    }
+  }
+  events.value = fetchedEvents;
+}, { immediate: true });
+
 
 const bookingTimeSlot = computed(() => {
   if (props.booking.timeBegin && props.booking.timeEnd) {
@@ -204,6 +259,10 @@ const bookableTitles = computed(() => {
     id: item._bookableUsed.id,
   }));
 });
+
+async function downloadAppointment() {
+  await downloadBookingIcal(props.booking.id, props.booking.tenantId);
+}
 </script>
 
 <style scoped></style>

@@ -44,45 +44,41 @@ definePageMeta({
 });
 
 const { tenantTo } = useTenantRoute();
-
 const { loadBundle } = useCatalogBundle();
 const eventStore = useEventStore();
-await loadBundle({ include: ["bookables", "events"] });
 
-const allEvents = computed(() => {
-  return eventStore.getEvents;
-});
+const { pending, error } = useLazyAsyncData("catalog-bundle", () =>
+    loadBundle({ include: ["bookables", "events"] })
+);
 
+if (error.value) {
+  console.error("[index] loadBundle failed:", error.value);
+}
+
+const allEvents = computed(() => eventStore.getEvents);
 const { state: query } = useCatalogQueryState();
+
 async function goToListview(searchParams) {
   const router = useRouter();
-  const route = useRoute();
+  const query = {};
 
-  if (searchParams.term) {
-    route.query.q = searchParams.term;
-  }
-
+  if (searchParams.term) query.q = searchParams.term;
+  if (searchParams.distance) query.dist = searchParams.distance;
+  if (searchParams.timeStart) query.start = searchParams.timeStart;
+  if (searchParams.timeEnd) query.end = searchParams.timeEnd;
   if (searchParams.location && typeof searchParams.location === "object") {
-    route.query.loc = searchParams.location.display_address
-  } else if(searchParams.location && typeof searchParams.location === "string") {
-    route.query.loc = searchParams.location;
+    query.loc = searchParams.location.display_address;
+  } else if (searchParams.location && typeof searchParams.location === "string") {
+    query.loc = searchParams.location;
   }
 
-  if(searchParams.distance) {
-    route.query.dist = searchParams.distance;
-  }
-  if (searchParams.timeStart) {
-    route.query.start = searchParams.timeStart;
-  }
-  if (searchParams.timeEnd) {
-    route.query.end = searchParams.timeEnd;
-  }
+  const path =
+      searchParams.searchType === "events" ? "events" : "bookables";
 
-  if (searchParams.searchType === "bookables") {
-    await router.push(tenantTo(`bookables`));
-  } else if (searchParams.searchType === "events") {
-    await router.push(tenantTo(`events`));
-  }
+  await router.push({
+    path: tenantTo(path),
+    query,
+  });
 }
 </script>
 

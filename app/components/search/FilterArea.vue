@@ -232,6 +232,10 @@ const props = defineProps({
 });
 const emit = defineEmits(["filter"]);
 
+const suitableBookables = computed(() =>
+  props.bookables.filter((b) => b.status === "suitable"),
+);
+
 //Filter Variables
 const isActive = computed(() => {
   const route = useRoute();
@@ -356,9 +360,9 @@ const possiblePriceRange = computed(() => {
 
   let validPrices = [];
   if (!props.isEvent) {
-    validPrices = props.bookables.map((b) => getBookableMinPrice(b));
+    validPrices = suitableBookables.value.map((b) => getBookableMinPrice(b));
   } else {
-    validPrices = props.bookables.map((e) => getEventMinPrice(e));
+    validPrices = suitableBookables.value.map((e) => getEventMinPrice(e));
   }
   validPrices = validPrices.filter(
     (price) => price !== undefined && price !== null && !isNaN(price)
@@ -396,6 +400,7 @@ const dynamicMinPrice = computed(() => {
   }
   return possiblePriceRange.value[0];
 });
+
 const _price = ref(
   props.price?.length === 2
     ? props.price
@@ -409,6 +414,10 @@ watch(
     }
 );
 
+
+watch(suitableBookables, () => {
+  _price.value = [dynamicMinPrice.value, dynamicMaxPrice.value];
+});
 
 const priceBars = computed(() => {
   if (!props.bookables || props.bookables.length === 0) {
@@ -425,7 +434,7 @@ const priceBars = computed(() => {
   const bars = new Array(barsCount).fill(0);
   const range = dynamicMaxPrice.value - possiblePriceRange.value[0];
 
-  props.bookables.forEach((b) => {
+  suitableBookables.value.forEach((b) => {
     let minPrice = null;
     if (!props.isEvent) {
       minPrice = getBookableMinPrice(b);

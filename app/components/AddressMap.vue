@@ -17,7 +17,10 @@
   <div v-else-if="!fetchedCoordinates">
     <USkeleton class="h-[300px] w-full" />
   </div>
-  <div v-else class="h-[300px] w-full grid place-content-center text-sm italic text-gray-600 dark:text-gray-400 my-5">
+  <div
+    v-else
+    class="h-[300px] w-full grid place-content-center text-sm italic text-gray-600 dark:text-gray-400 my-5"
+  >
     <p>(Adresse konnte nicht gefunden werden.)</p>
   </div>
 </template>
@@ -52,7 +55,9 @@ const getCoordinates = async () => {
   } else if (props.addressString) {
     try {
       const response = await $fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(props.addressString)}&limit=1&accept-language=de`,
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          props.addressString
+        )}&limit=1&accept-language=de`
       );
 
       let coordinates = [];

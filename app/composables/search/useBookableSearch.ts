@@ -238,11 +238,14 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       return -1;
     }
 
+      //exclude external service fees
+      const pricesWithoutServiceFees = bookable.item.priceCategories.filter(
+          (c) => !c.external || (c.external && c.unit !== "service-fee"),
+      );
+
     //exclude holiday price categories
-    const pricesWithoutHolidays = bookable.item.priceCategories.filter(
-      (c) =>
-        (c.external && c.uni !== "service-fee") ||
-        (c.holidays && c.holidays.length === 0),
+    const pricesWithoutHolidays = pricesWithoutServiceFees.filter(
+      (c) => !c.holidays || c.holidays.length === 0,
     );
 
     const minPrice = Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));

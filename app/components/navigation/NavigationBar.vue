@@ -16,6 +16,12 @@
         <slot name="actions" />
         <AuthActions />
       </div>
+      <template #fallback>
+        <div class="flex items-center gap-2 px-4 opacity-50">
+          <USkeleton class="h-8 w-20" />
+          <USkeleton class="h-8 w-24" />
+        </div>
+      </template>
     </ClientOnly>
   </div>
 </template>

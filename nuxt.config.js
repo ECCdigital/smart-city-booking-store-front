@@ -11,15 +11,16 @@ export default defineNuxtConfig({
   pages: true,
 
   runtimeConfig: {
-    adminBaseUrl:  "",
-    apiBaseUrl:  "",
-    userBaseUrl:"",
+    adminBaseUrl: "",
+    apiBaseUrl: "",
+    userBaseUrl: "",
     cacheEnabled: false,
     // make values available on the client via `useRuntimeConfig().public`
     public: {
-      adminBaseUrl:  "",
-      apiBaseUrl:  "",
-      userBaseUrl:  "",
+      adminBaseUrl: "",
+      apiBaseUrl: "",
+      userBaseUrl: "",
+      silentSsoEnabled: false,
     },
   },
   routeRules: {
@@ -71,9 +72,17 @@ export default defineNuxtConfig({
     },
   },
   security: {
+    rateLimiter: {
+      tokensPerInterval: 500,
+      interval: 300000,
+      headers: false,
+      driver: {
+        name: "lruCache",
+      },
+    },
     headers: {
       contentSecurityPolicy: {
-        "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org"],
+        "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://www.orka-mv.de"],
       },
     },
   },
