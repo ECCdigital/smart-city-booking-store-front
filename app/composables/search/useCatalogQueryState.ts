@@ -15,6 +15,7 @@ export function useCatalogQueryState() {
   const state = reactive<CatalogQueryState>({
     term: decodeURIComponent((route.query.q as string) || ""),
     location: decodeURIComponent((route.query.loc as string) || ""),
+    distance: parseNumberOrNull(route.query.dist),
     start: parseNumberOrNull(route.query.start),
     end: parseNumberOrNull(route.query.end),
 
@@ -42,7 +43,7 @@ export function useCatalogQueryState() {
         })()
       : [],
 
-    sortMode: (route.query.sort as any) || "relevance",
+    sortMode: (route.query.sort as any) || "alphabeticAscending",
   });
 
   const queryObject = computed(() => {
@@ -50,6 +51,7 @@ export function useCatalogQueryState() {
 
     if (state.term) q.q = encodeURIComponent(state.term);
     if (state.location) q.loc = encodeURIComponent(state.location);
+    if (state.distance != null) q.dist = String(state.distance);
     if (state.start != null) q.start = String(state.start);
     if (state.end != null) q.end = String(state.end);
 
@@ -69,7 +71,7 @@ export function useCatalogQueryState() {
       q.price = `${state.price[0]},${state.price[1]}`;
     }
 
-    if (state.sortMode !== "relevance") {
+    if (state.sortMode !== "alphabeticAscending") {
       q.sort = state.sortMode;
     }
 

@@ -4,6 +4,7 @@
       <div class="flex justify-center">
         <SearchBar
           :location="query.location"
+          :distance="query.distance"
           :term="query.term"
           :time-end="query.end"
           :time-start="query.start"
@@ -14,7 +15,7 @@
     </div>
 
     <!-- Main Categories -->
-    <div class="pt-10 bg-neutral-50 dark:bg-gray-950">
+    <div class="pt-20 sm:pt-25 md:pt-10 bg-neutral-50 dark:bg-gray-950">
       <MainCategoryArea />
     </div>
 
@@ -62,9 +63,14 @@ async function goToListview(searchParams) {
   const query = {};
 
   if (searchParams.term) query.q = searchParams.term;
-  if (searchParams.location) query.loc = searchParams.location;
+  if (searchParams.distance) query.dist = searchParams.distance;
   if (searchParams.timeStart) query.start = searchParams.timeStart;
   if (searchParams.timeEnd) query.end = searchParams.timeEnd;
+  if (searchParams.location && typeof searchParams.location === "object") {
+    query.loc = searchParams.location.display_address;
+  } else if (searchParams.location && typeof searchParams.location === "string") {
+    query.loc = searchParams.location;
+  }
 
   const path =
       searchParams.searchType === "events" ? "events" : "bookables";

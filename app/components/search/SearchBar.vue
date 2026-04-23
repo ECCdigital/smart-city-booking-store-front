@@ -1,6 +1,6 @@
 <template>
   <!-- Strip for md and larger screens -->
-  <div class="hidden md:block">
+  <div class="hidden lg:block">
     <div
       class="flex justify-between bg-white dark:bg-gray-700 z-100 rounded shadow-lg"
       :class="entryPageMode ? 'p-5 space-x-1 -mt-10' : 'p-2 -mt-5'"
@@ -14,7 +14,7 @@
         placeholder="Was suchen Sie?"
         size="lg"
         variant="ghost"
-        class="rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent"
+        class="basis-1/6 rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent"
         :ui="{
           placeholder: hasMissingType
             ? 'text-red-500 font-bold'
@@ -31,7 +31,8 @@
         icon="i-lucide-search"
         placeholder="Stichwort"
         clearable
-        class="rounded-md "
+        class="rounded-md"
+        :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
         :ui="{
           base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
@@ -39,36 +40,39 @@
         @keyup.enter="onSearch"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
-      <InputText
+      <AddressLookup
         v-model="_location"
-        icon="i-lucide-map-pin"
-        placeholder="Ort"
-        clearable
-        class="rounded-md"
+        :distance="_distance"
+        class="basis-1/4 rounded-md"
+        :class="entryPageMode ? 'basis-2/6' : 'basis-2/5'"
         :ui="{
           base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
         }"
         @keyup.enter="onSearch"
+        @change-distance="setDistance"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
       <InputTimePeriod
         v-model:time-period="_timePeriod"
+        :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
         @select-date="setSearchTimePeriod"
         @remove-date="removeSearchTimePeriod"
       />
       <UButton
         label="Suchen"
         class="w-full justify-center"
+        :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
         :style="{ color: contrastToPrimary }"
         @click="onSearch"
       />
     </div>
   </div>
+
   <!--Card for smaller screens -->
   <UCard
-    class="bg-white dark:bg-gray-700 mx-5 -mt-15 p-0 shadow-lg md:hidden"
-    :class="entryPageMode ? '-mt-20' : '-mt-15'"
+    class="bg-white dark:bg-gray-700 mx-5 -mt-15 p-0 shadow-lg lg:hidden"
+    :class="entryPageMode ? '-mt-20' : '-mt-10'"
     :ui="{ root: 'p-0', body: 'p-0' }"
     style="position: relative; width: 80vw"
   >
@@ -104,15 +108,15 @@
       }"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
-    <InputText
+    <AddressLookup
       v-model="_location"
-      icon="i-lucide-map-pin"
-      placeholder="Ort"
-      clearable
+      :distance="_distance"
+      class="rounded-md"
       :ui="{
         base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
         leadingIcon: 'text-gray-400 dark:text-gray-200',
       }"
+      @change-distance="setDistance"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
     <InputTimePeriod
@@ -132,6 +136,7 @@
 import InputText from "~/components/inputs/InputText.vue";
 import InputTimePeriod from "~/components/inputs/InputTimePeriod.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import AddressLookup from "~/components/inputs/AddressLookup.vue";
 
 const isInitialized = defineModel("isInitailized", {
   type: Boolean,
@@ -160,6 +165,10 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  distance: {
+    type: Number,
+    default: null,
+  },
   timePeriod: {
     type: Object,
     default: null,
@@ -177,10 +186,20 @@ const props = defineProps({
 const _searchType = ref(props.searchType);
 const _term = ref(props.term);
 const _location = ref(props.location);
+const _distance = ref(props.distance || 20);
 const _timePeriod = ref({
   start: props.timeStart,
   end: props.timeEnd,
 });
+
+watch(
+    () => props.distance,
+    (newVal) => {
+      if (newVal !== _distance.value) {
+        _distance.value = newVal;
+      }
+    },
+)
 
 const types = ref([
   {
@@ -195,9 +214,35 @@ const types = ref([
 const hasMissingType = computed(
   () => isInitialized.value && !_searchType.value,
 );
+const hasSearchCiteria = computed(
+  () =>
+    !!_term.value ||
+    !!_location.value ||
+    (_timePeriod.value && _timePeriod.value.start && _timePeriod.value.end),
+);
 const emit = defineEmits(["search", "reset"]);
 
 const { contrastToPrimary } = useContrastColor();
+
+const hasInitionalLocationObject = ref(false);
+watch(_location, (newVal) => {
+  if (
+    !props.entryPageMode &&
+    !hasInitionalLocationObject.value &&
+    newVal &&
+    typeof newVal === "object" &&
+    newVal.coordinates &&
+    newVal.coordinates.points &&
+    newVal.coordinates.points.length > 0
+  ) {
+    hasInitionalLocationObject.value = true;
+    onSearch();
+  }
+});
+
+function setDistance(dist) {
+  _distance.value = dist;
+}
 
 function setSearchTimePeriod(tp) {
   _timePeriod.value = tp;
@@ -222,12 +267,7 @@ function onSearch() {
     }
   }
 
-  const hasTime =
-    _timePeriod.value && _timePeriod.value.start && _timePeriod.value.end;
-
-  const hasCriteria = !!_term.value || !!_location.value || hasTime;
-
-  if (!hasCriteria) {
+  if (!hasSearchCiteria.value) {
     isInitialized.value = false;
     filterResetKey.value++;
     emit("reset");
@@ -240,6 +280,10 @@ function onSearch() {
     searchType: _searchType.value,
     term: _term.value,
     location: _location.value,
+    distance:
+      typeof _location.value === "object" && _location.value.coordinates
+        ? _distance.value
+        : null,
     timeStart: _timePeriod.value ? _timePeriod.value.start : null,
     timeEnd: _timePeriod.value ? _timePeriod.value.end : null,
   });

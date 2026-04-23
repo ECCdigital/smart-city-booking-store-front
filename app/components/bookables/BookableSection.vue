@@ -7,9 +7,10 @@
         search-type="bookables"
         :term="query.term"
         :location="query.location"
+        :distance="query.distance"
         :time-start="query.start"
         :time-end="query.end"
-        @search="runSearch"
+        @search="onSearch"
         @reset="resetResults"
       />
     </div>
@@ -34,6 +35,7 @@
           :include-non-suitable="query.inclNoSuitable"
           :categories="query.cat"
           :cities="query.cities"
+          :distance="query.distance"
           :price="query.price"
           :only-public-events="query.pubEv"
           :only-registration-needed-events="query.regEv"
@@ -44,13 +46,17 @@
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
-      <div v-if="searchedResources.length > 0" class="lg:basis-1/4 hidden lg:block">
+      <div
+        v-if="searchedResources.length > 0"
+        class="lg:basis-1/4 hidden lg:block"
+      >
         <FilterArea
           :key="filterResetKey"
           v-model:is-initailized="searchIsInitialized"
           :include-non-suitable="query.inclNoSuitable"
           :categories="query.cat"
           :cities="query.cities"
+          :distance="query.distance"
           :price="query.price"
           :only-public-events="query.pubEv"
           :only-registration-needed-events="query.regEv"
@@ -59,7 +65,13 @@
         />
       </div>
 
-      <div :class="searchedResources.length > 0 ? 'basis-full lg:basis-3/4' : 'basis-full'">
+      <div
+        :class="
+          searchedResources.length > 0
+            ? 'basis-full lg:basis-3/4'
+            : 'basis-full'
+        "
+      >
         <div v-if="!sortedResources.length" class="text-center mt-10 lg:mt-25">
           <UIcon
             size="48"
@@ -102,6 +114,8 @@ const props = defineProps({
   },
 });
 
+const temp = ref(null);
+
 const {
   query,
   searchIsInitialized,
@@ -114,5 +128,10 @@ const {
   runSearch,
   resetResults,
 } = useBookableSearch({ isEvent: false, sourceItems: props.bookables });
+
+function onSearch(searchParams) {
+  temp.value = searchParams;
+  runSearch(searchParams);
+}
 </script>
 <style scoped></style>

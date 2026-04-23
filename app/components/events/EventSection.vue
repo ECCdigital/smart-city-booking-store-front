@@ -7,6 +7,7 @@
         search-type="events"
         :term="query.term"
         :location="query.location"
+        :distance="query.distance"
         :time-start="query.start"
         :time-end="query.end"
         @search="runSearch"
@@ -35,6 +36,7 @@
           :include-non-suitable="query.inclNoSuitable"
           :categories="query.cat"
           :cities="query.cities"
+          :distance="query.distance"
           :price="query.price"
           :only-public-events="query.pubEv"
           :only-registration-needed-events="query.regEv"
@@ -46,12 +48,16 @@
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
-      <div v-if="searchedEvents.length > 0" class="lg:basis-1/4 hidden lg:block">
+      <div
+        v-if="searchedEvents.length > 0"
+        class="lg:basis-1/4 hidden lg:block"
+      >
         <FilterArea
           :key="filterResetKey"
           v-model:is-initailized="searchIsInitialized"
           :include-non-suitable="query.inclNoSuitable"
           :cities="query.cities"
+          :distance="query.distance"
           :price="query.price"
           :categories="query.cat"
           is-event
@@ -62,7 +68,11 @@
         />
       </div>
 
-      <div :class="searchedEvents.length > 0 ? 'basis-full lg:basis-3/4' : 'basis-full'">
+      <div
+        :class="
+          searchedEvents.length > 0 ? 'basis-full lg:basis-3/4' : 'basis-full'
+        "
+      >
         <div v-if="!sortedEvents.length" class="text-center mt-10 lg:mt-25">
           <UIcon
             size="48"

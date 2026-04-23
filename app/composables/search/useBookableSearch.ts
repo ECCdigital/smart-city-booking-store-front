@@ -2,6 +2,7 @@ import Fuse from "fuse.js";
 import { useBookables } from "~/composables/api/useBookables";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState";
 import type { CatalogQueryState, SortMode } from "~/types/catalogParams";
+import haversine from "haversine-distance";
 
 interface UseBookableSearchOptions<TItem> {
   sourceItems: ComputedRef<TItem[]> | Ref<TItem[]>;
@@ -42,7 +43,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     keys: ["item.description", "item.location.display_address"],
     includeScore: true,
     shouldSort: true,
-    threshold: 0.3,
+    threshold: 0.2,
   };
 
   const eventSearchTermOptions = {
@@ -68,7 +69,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     ],
     includeScore: true,
     shouldSort: true,
-    threshold: 0.3,
+    threshold: 0.2,
   };
 
   const filteredItems = computed(() => {
@@ -116,6 +117,25 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       }
     }
 
+    const maxDistance = query.distance;
+    if (query.location && maxDistance !== null) {
+      filtered = filtered.filter((b) => {
+        if (!b.item.location || b.item.distanceMeter === undefined) {
+          return false;
+        } else if (b.status === "nonSuitable") {
+          return false;
+        }
+
+        if (b.item.distanceMeter <= maxDistance * 1000) {
+          b.status = "suitable";
+
+          return true;
+        }
+        b.status = "suitableButTooFar";
+        return false;
+      });
+    }
+
     const priceRange = query.price;
     if (Array.isArray(priceRange) && priceRange.length === 2) {
       const [minRaw, maxRaw] = priceRange;
@@ -134,7 +154,16 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       });
     }
 
-    return filtered;
+    return updatedItems.value.map((i) => {
+      if (filtered.some((f) => f.item.id === i.item.id)) {
+        return i;
+      } else {
+        return {
+          ...i,
+          status: i.status === "suitable" ? "nonSuitable" : i.status,
+        };
+      }
+    });
   });
 
   function getPrice(item: any) {
@@ -154,11 +183,40 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
   const sortedItems = computed(() => {
     return filteredItems.value.slice().sort((a, b) => {
+      //sort by price
       if (query.sortMode === "priceAscending") {
         return getPrice(a) - getPrice(b);
       }
       if (query.sortMode === "priceDescending") {
         return getPrice(b) - getPrice(a);
+      }
+
+      //sort by alphabetic order of name/title
+      if (query.sortMode === "alphabeticAscending") {
+        const nameA = isEvent ? a.item.information.name : a.item.title;
+        const nameB = isEvent ? b.item.information.name : b.item.title;
+
+        return nameA.localeCompare(nameB);
+      }
+      if (query.sortMode === "alphabeticDescending") {
+        const nameA = isEvent ? a.item.information.name : a.item.title;
+        const nameB = isEvent ? b.item.information.name : b.item.title;
+
+        return nameB.localeCompare(nameA);
+      }
+
+      //sort by distance to location (only if location is set as search criteria)
+      if (query.sortMode === "distanceAscending") {
+        const distanceA = a.item.distanceMeter ?? Infinity;
+        const distanceB = b.item.distanceMeter ?? Infinity;
+
+        return distanceA - distanceB;
+      }
+      if (query.sortMode === "distanceDescending") {
+        const distanceA = a.item.distanceMeter ?? -Infinity;
+        const distanceB = b.item.distanceMeter ?? -Infinity;
+
+        return distanceB - distanceA;
       }
       return 0;
     });
@@ -191,6 +249,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     );
 
     const minPrice = Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
+
     return bookable.item.priceValueAddedTax
       ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
       : minPrice;
@@ -219,7 +278,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   const suitableCount = computed(
-    () => sortedItems.value.filter((l) => l.status !== "nonSuitable").length,
+    () => sortedItems.value.filter((l) => l.status === "suitable").length,
   );
 
   function setFilterQueryParams(criteria: Partial<CatalogQueryState>) {
@@ -231,6 +290,9 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     query.regEv = criteria.regEv ?? query.regEv;
     query.cat = criteria.cat ?? query.cat;
     query.cities = criteria.cities ?? query.cities;
+    query.distance = query.location
+      ? (criteria.distance ?? query.distance)
+      : null;
     query.price = criteria.price ?? query.price;
     query.start = criteria.start ?? query.start;
     query.end = criteria.end ?? query.end;
@@ -271,46 +333,71 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   function setSearchQueryParams({
     term,
     location,
+    distance,
     timeStart,
     timeEnd,
   }: {
     term?: string;
-    location?: string;
+    location?: string | object;
+    distance?: number | null;
     timeStart?: number | null;
     timeEnd?: number | null;
   } = {}) {
     query.term = term || "";
-    query.location = location || "";
+    /* if(!location || !location.coordinates || !location.coordinates.points){
+          query.distance = null;
+      }*/
+    if (typeof location === "object") {
+      query.location = location.display_address || "";
+    } else {
+      query.location = location || "";
+    }
+
+    query.distance = distance || null;
     query.start = timeStart || null;
     query.end = timeEnd || null;
   }
 
   async function runSearch(criteria: {
     term: string;
-    location: string;
+    location: string | object;
+    distance: number | null;
     timeStart: number | null;
     timeEnd: number | null;
   }) {
     setSearchQueryParams(criteria);
 
-    let itemsWithStatus = setItemStatus(() => toValue(sourceItems));
+    //enrich items with status and location coordinates for the following search steps
+    let enrichedItems: object[] = await enrichItems(
+      () => toValue(sourceItems),
+      criteria,
+    );
 
-    itemsWithStatus = await checkTickets(itemsWithStatus);
+    enrichedItems = await checkTickets(enrichedItems);
 
-    let bookableItems = itemsWithStatus;
+    let bookableItems: object[] = enrichedItems;
 
     bookableItems = searchForSearchTerm(criteria.term, bookableItems);
-    bookableItems = searchForLocation(criteria.location, bookableItems);
 
     bookableItems = await searchForTimePeriod(
       { start: criteria.timeStart, end: criteria.timeEnd },
       bookableItems,
     );
 
-    updatedItems.value = await updateItemStatus(
-      itemsWithStatus,
+    bookableItems = await searchForLocation(
+      criteria.location,
       bookableItems,
-      { start: criteria.timeStart, end: criteria.timeEnd },
+      criteria.distance,
+    );
+
+    updatedItems.value = await updateItemStatus(enrichedItems, bookableItems, {
+      start: criteria.timeStart,
+      end: criteria.timeEnd,
+    });
+
+    updatedItems.value = updateDistanceToLocation(
+      updatedItems.value,
+      criteria.location,
     );
 
     searchIsInitialized.value = true;
@@ -323,8 +410,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     filterResetKey.value++;
   }
 
-  function setItemStatus(itemsToSearch: () => any[]) {
-    return toValue(itemsToSearch).map((item: any) => {
+  async function enrichItems(
+    itemsToSearch: () => any[],
+    searchCriteria: object,
+  ) {
+    //add status to items based on bookable and event criteria
+    let result: object[] = toValue(itemsToSearch).map((item: any) => {
       if (isEvent) {
         return { item, status: "isBookable" };
       }
@@ -336,9 +427,43 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       }
       return { item, status: "nonBookable" };
     });
+
+    //add location coordinates to items based on address for better location search and distance calculation
+    if (isEvent && typeof searchCriteria.location === "object") {
+      result = await Promise.all(
+        result.map(async (item) => {
+          //if (isEvent) {
+          let addressCoordinates: number[] = [];
+
+          const addressString = `${item.item.eventAddress.street || ""} ${item.item.eventAddress.houseNumber || ""}, ${item.item.eventAddress.zip || ""} ${item.item.eventAddress.city || ""}`;
+
+          if (addressString) {
+            addressCoordinates = await searchAddress(addressString);
+          }
+
+          item = {
+            ...item,
+            item: {
+              ...item.item,
+              location: {
+                display_address: addressString,
+                coordinates: addressCoordinates
+                  ? {
+                      points: addressCoordinates,
+                    }
+                  : null,
+              },
+            },
+          };
+          return item;
+          //}
+        }),
+      );
+    }
+    return result;
   }
 
-  function searchForSearchTerm(searchTerm: string, items: any[]) {
+  function searchForSearchTerm(searchTerm: string, items: object[]) {
     if (!searchTerm) return items;
 
     if (!isEvent) {
@@ -363,9 +488,80 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
   }
 
-  function searchForLocation(searchLocation: string, items: any[]) {
-    if (!searchLocation) return items;
+  async function searchForLocation(
+    searchLocation: string | object,
+    items: object[],
+    distance: number | null,
+  ) {
+    if (
+      !searchLocation ||
+      (typeof searchLocation === "object" && !searchLocation.display_address)
+    ) {
+      return items;
+    }
 
+    if (typeof searchLocation === "string") {
+      items = removeDistanceToLocation(items);
+      return searchForLocationString(searchLocation, items);
+    } else if (
+      !searchLocation.coordinates ||
+      !searchLocation.coordinates.points
+    ) {
+      items = removeDistanceToLocation(items);
+      return searchForLocationString(searchLocation.display_address, items);
+    } else {
+      const results: object[] = [];
+
+      const itemsWithoutCoordinates: object[] = items.filter(
+        (item) =>
+          !item.item.location ||
+          !item.item.location.coordinates ||
+          !item.item.location.coordinates.points[0] ||
+          !item.item.location.coordinates.points[1],
+      );
+
+      const itemsWithCoordinates: object[] = items.filter(
+        (item) =>
+          item.item.location &&
+          item.item.location.coordinates &&
+          item.item.location.coordinates.points[0] &&
+          item.item.location.coordinates.points[1],
+      );
+
+      // search for items without coordinates
+      const searchString =
+        searchLocation.display_address
+          .split(",")
+          .slice(0, -1)
+          .join(",")
+          .trim() || "";
+
+      searchForLocationString(searchString, itemsWithoutCoordinates).forEach(
+        (r) => results.push(r),
+      );
+
+      // search for items with coordinates
+      itemsWithCoordinates.forEach((i) => {
+        const mDistance = getDistanceToLocation(
+          searchLocation,
+          i.item.location,
+        );
+        const kmDistance =
+          mDistance === 0 ? 0 : mDistance ? mDistance / 1000 : null;
+
+        if (kmDistance === 0) {
+          results.push(i);
+        } else if (distance && kmDistance && kmDistance <= distance) {
+          results.push(i);
+        } else if (distance && kmDistance && kmDistance > distance) {
+          i.status = "suitableButTooFar";
+        }
+      });
+
+      return results;
+    }
+  }
+  function searchForLocationString(searchLocation: string, items: any[]) {
     if (!isEvent) {
       const allEvents = items.filter((item) => item.item.category === "event");
       const allBookables = items.filter(
@@ -388,6 +584,53 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       return new Fuse(items, eventSearchLocationOptions)
         .search(searchLocation)
         .map((result) => result.item);
+    }
+  }
+  function getDistanceToLocation(searchLocation: any, itemLocation: any) {
+    if (
+      !searchLocation ||
+      !searchLocation.coordinates ||
+      !searchLocation.coordinates.points ||
+      !itemLocation ||
+      !itemLocation.coordinates ||
+      !itemLocation.coordinates.points
+    )
+      return null;
+
+    return haversine(
+      searchLocation.coordinates.points,
+      itemLocation.coordinates.points,
+    );
+  }
+
+  /*
+  Performs the address search using Nominatim API, handling loading state and errors gracefully
+   */
+  async function searchAddress(address: string) {
+    try {
+      const params = new URLSearchParams({
+        q: address,
+        format: "json",
+        addressdetails: "1",
+        limit: "1", //"5"
+        countrycodes: "de",
+      });
+
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?${params}`,
+        {
+          headers: {
+            "Accept-Language": "de",
+          },
+        },
+      );
+
+      const data = await response.json();
+      if (data && data.length > 0) {
+        return [parseFloat(data[0].lon), parseFloat(data[0].lat)];
+      }
+    } catch (error) {
+      console.error("Adress-Lookup fehlgeschlagen:", error);
     }
   }
 
@@ -444,19 +687,22 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   async function updateItemStatus(
-    itemsWithStatus: any[], //alle 58
-    bookableItems: any[], //8 aus Suche (bookable & nonBookable)
+    itemsWithStatus: any[],
+    bookableItems: any[],
     timePeriod: any,
   ) {
-    return await Promise.all(
+    const temp = await Promise.all(
       itemsWithStatus.map(async (item) => {
-        const isSuitable = bookableItems.includes(item);
+        const isSuitable = bookableItems.some(
+          (b) => b.item.id === item.item.id,
+        );
+
         if (item.status === "isBookable") {
           let price = null;
           if (
             timePeriod &&
             timePeriod.start !== null &&
-            timePeriod.start !== null &&
+            timePeriod.end !== null &&
             !isEvent &&
             item.item.category !== "event" //toDo - und oder oder???
           ) {
@@ -483,6 +729,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
             status: isSuitable ? "suitable" : "nonSuitable",
             calculatedPrice: isSuitable ? price : null,
           };
+        } else if (item.status === "suitableButTooFar") {
+          return {
+            ...item,
+            status: isSuitable ? "suitable" : "suitableButTooFar",
+            calculatedPrice: null,
+          };
         } else {
           return {
             ...item,
@@ -492,6 +744,45 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         }
       }),
     );
+
+    return temp;
+  }
+
+  function removeDistanceToLocation(items: any[]) {
+    return items.map((item) => {
+      if (item.item.distanceMeter) {
+        item.item["distanceMeter"] = undefined;
+        return item;
+      }
+      return item;
+    });
+  }
+  function updateDistanceToLocation(items: any[], searchLocation: any) {
+    if (
+      !searchLocation ||
+      !searchLocation.coordinates ||
+      !searchLocation.coordinates.points ||
+      searchLocation.coordinates.points.length !== 2
+    ) {
+      return items;
+    }
+
+    return items.map((item) => {
+      if (
+        typeof item.item.location === "string" ||
+        !item.item.location.coordinates ||
+        !item.item.location.coordinates.points ||
+        item.item.location.coordinates.points[0] === null ||
+        item.item.location.coordinates.points[1] === null
+      ) {
+        return item;
+      }
+      item.item["distanceMeter"] = getDistanceToLocation(
+        item.item.location,
+        searchLocation,
+      );
+      return item;
+    });
   }
 
   function formateTimePeriod(timePeriod: {
@@ -525,10 +816,15 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     return null;
   }
 
-  async function checkTickets(events: { item: any; status: string }[]) {
-    return await Promise.all(
+  async function checkTickets(events: { item: object; status: string }[]) {
+    const result = await Promise.allSettled(
       events.map(async (event) => {
-        if (isEvent || event.item.category === "event") {
+        if (
+          //isEvent ||
+          (event.item.category === "event" || event.item.type === "event") &&
+          event.item.tickets &&
+          event.item.tickets.length > 0
+        ) {
           const updatedTickets = await Promise.all(
             event.item.tickets.map(async (ticket: any) => {
               const ticketPrice = await useBookables().getBookablePrice(
@@ -559,6 +855,8 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         }
       }),
     );
+
+    return result.filter((r) => r.status === "fulfilled").map((r) => r.value);
   }
 
   const hasUrlCriteria = computed(() => {
@@ -597,6 +895,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       await runSearch({
         term: query.term,
         location: query.location,
+        distance: query.distance,
         timeStart: query.start,
         timeEnd: query.end,
       });

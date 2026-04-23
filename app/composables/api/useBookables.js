@@ -40,8 +40,7 @@ export function useBookables() {
     );
 
     if (error) {
-      console.error("Error checking bookable price:", error);
-      throw error;
+      return null;
     }
 
     return data;

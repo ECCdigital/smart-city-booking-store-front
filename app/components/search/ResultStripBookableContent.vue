@@ -11,7 +11,11 @@
       <p>{{ tenantName }}</p>
 
       <!-- Adresse und Entfernung -->
-      <BookableAdressInformation :bookable="bookable" class="w-full my-5" />
+      <BookableAdressInformation
+        :bookable="bookable"
+        show-distance
+        class="w-full my-5"
+      />
       <USeparator
         color="neutral"
         class="w-full"
@@ -84,7 +88,7 @@ import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue"
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
-import {useRedirection} from "~/composables/utils/useRedirection.js";
+import { useRedirection } from "~/composables/utils/useRedirection.js";
 
 const props = defineProps({
   bookable: {
@@ -121,7 +125,7 @@ const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.bookable.tenantId).name;
 });
 
-const {goToDetails} = useRedirection()
+const { goToDetails } = useRedirection();
 
 const { contrastToPrimary } = useContrastColor();
 

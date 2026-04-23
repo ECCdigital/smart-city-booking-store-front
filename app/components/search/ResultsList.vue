@@ -60,11 +60,23 @@ const props = defineProps({
 });
 
 const suitableBookables = computed(() =>
-  props.bookables.filter((b) => b.status === "suitable" || b.status === "nonBookable"),
+  props.bookables.filter(
+    (b) => b.status === "suitable" || b.status === "nonBookable",
+  ),
 );
 
 const nonSuitableBookables = computed(() =>
-  props.bookables.filter((b) => b.status === "nonSuitable"),
+  props.bookables
+    .filter(
+      (b) => b.status === "nonSuitable" || b.status === "suitableButTooFar",
+    )
+    .sort((a, b) =>
+      a.status === "suitableButTooFar"
+        ? -1
+        : b.status === "suitableButTooFar"
+          ? 1
+          : 0,
+    ),
 );
 
 function checkIfNotBookable(bookable) {

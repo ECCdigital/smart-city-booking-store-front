@@ -18,14 +18,16 @@
         />
       </div>
     </div>
-    <!--
-  <p v-if="location.length">
-    <UIcon name="i-lucide-navigation" class="size-5" />
-    <span class="p-3">Distance coming soon </span>
-  </p>
-  --></div>
+    <p v-if="showDistance && hasLocationParam && location.length">
+      <UIcon name="i-lucide-navigation" class="size-5" />
+      <span v-if="distance != null" class="p-3">{{ distance }} km </span>
+      <span v-else class="italic p-3">Distanz nicht ermittelbar. </span>
+    </p>
+  </div>
 </template>
 <script setup>
+import { useRoute } from "#imports";
+
 const props = defineProps({
   bookable: {
     type: Object,
@@ -35,6 +37,15 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showDistance: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const route = useRoute();
+const hasLocationParam = computed(() => {
+  return route.query.loc !== undefined;
 });
 
 const location = computed(() => {
@@ -48,6 +59,14 @@ const location = computed(() => {
   } else {
     return "";
   }
+});
+
+const distance = computed(() => {
+  if (props.bookable.distanceMeter == null) return null;
+  return (props.bookable.distanceMeter / 1000)
+      .toFixed(2)
+      .replace(".", ",")
+      .replace(/,00$/, "");
 });
 
 const copyAddressToClipboard = async () => {
