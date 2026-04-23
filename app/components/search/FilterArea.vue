@@ -401,6 +401,15 @@ const _price = ref(
     ? props.price
     : [dynamicMinPrice.value, dynamicMaxPrice.value]
 );
+watch(
+    () => dynamicMaxPrice.value,
+    (newVal) => {
+     _price.value = [dynamicMinPrice.value, newVal];
+
+    }
+);
+
+
 const priceBars = computed(() => {
   if (!props.bookables || props.bookables.length === 0) {
     return [];
@@ -443,7 +452,7 @@ const priceBars = computed(() => {
 });
 
 function getBookableMinPrice(bookable) {
-  if (bookable.status !== "suitable") {
+  if (bookable.status === "nonSuitable") {
     return null;
   }
   //if search is initialized, return calculated price
@@ -467,7 +476,7 @@ function getTicketMinPrice(ticket) {
     : minPrice;
 }
 function getEventMinPrice(event) {
-  if (event.status !== "suitable") {
+  if (event.status === "nonSuitable") {
     return null;
   }
   if (event.item.tickets && event.item.tickets.length > 0) {
