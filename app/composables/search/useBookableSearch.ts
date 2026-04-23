@@ -122,9 +122,17 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       filtered = filtered.filter((b) => {
         if (!b.item.location || b.item.distanceMeter === undefined) {
           return false;
+        } else if (b.status === "nonSuitable") {
+          return false;
         }
 
-        return b.item.distanceMeter <= maxDistance * 1000; // convert km to meters
+        if (b.item.distanceMeter <= maxDistance * 1000) {
+          b.status = "suitable";
+
+          return true;
+        }
+        b.status = "suitableButTooFar";
+        return false;
       });
     }
 
@@ -359,15 +367,15 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     bookableItems = searchForSearchTerm(criteria.term, bookableItems);
 
+    bookableItems = await searchForTimePeriod(
+      { start: criteria.timeStart, end: criteria.timeEnd },
+      bookableItems,
+    );
+
     bookableItems = await searchForLocation(
       criteria.location,
       bookableItems,
       criteria.distance,
-    );
-
-    bookableItems = await searchForTimePeriod(
-      { start: criteria.timeStart, end: criteria.timeEnd },
-      bookableItems,
     );
 
     updatedItems.value = await updateItemStatus(enrichedItems, bookableItems, {
@@ -473,6 +481,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     items: object[],
     distance: number | null,
   ) {
+
     if (
       !searchLocation ||
       (typeof searchLocation === "object" && !searchLocation.display_address)
@@ -494,7 +503,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
       const itemsWithoutCoordinates: object[] = items.filter(
         (item) =>
-          item.item.location ||
+          !item.item.location ||
           !item.item.location.coordinates ||
           !item.item.location.coordinates.points[0] ||
           !item.item.location.coordinates.points[1],
@@ -521,10 +530,15 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           searchLocation,
           i.item.location,
         );
-        const kmDistance = mDistance ? mDistance / 1000 : null;
+        const kmDistance =
+          mDistance === 0 ? 0 : mDistance ? mDistance / 1000 : null;
 
-        if (distance && kmDistance && kmDistance <= distance) {
+        if (kmDistance === 0) {
           results.push(i);
+        } else if (distance && kmDistance && kmDistance <= distance) {
+          results.push(i);
+        } else if (distance && kmDistance && kmDistance > distance) {
+          i.status = "suitableButTooFar";
         }
       });
 
@@ -661,15 +675,18 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     bookableItems: any[],
     timePeriod: any,
   ) {
-    return await Promise.all(
+    const temp = await Promise.all(
       itemsWithStatus.map(async (item) => {
-        const isSuitable = bookableItems.includes(item);
+        const isSuitable = bookableItems.some(
+          (b) => b.item.id === item.item.id,
+        );
+
         if (item.status === "isBookable") {
           let price = null;
           if (
             timePeriod &&
             timePeriod.start !== null &&
-            timePeriod.start !== null &&
+            timePeriod.end !== null &&
             !isEvent &&
             item.item.category !== "event" //toDo - und oder oder???
           ) {
@@ -696,6 +713,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
             status: isSuitable ? "suitable" : "nonSuitable",
             calculatedPrice: isSuitable ? price : null,
           };
+        } else if (item.status === "suitableButTooFar") {
+          return {
+            ...item,
+            status: isSuitable ? "suitable" : "suitableButTooFar",
+            calculatedPrice: null,
+          };
         } else {
           return {
             ...item,
@@ -705,6 +728,8 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         }
       }),
     );
+
+    return temp;
   }
 
   function removeDistanceToLocation(items: any[]) {
