@@ -20,15 +20,7 @@
         <template v-if="dateRange[0]">
           <div class="flex justify-between w-full">
             <div class="text-black dark:text-white">
-              <span>{{ displayDate(dateRange[0]) }}</span>
-              <span v-if="dateRange[1] && !timeRange.start"> - </span>
-              <span v-if="timeRange.start">
-                , {{ displayTime(timeRange.start) }} -
-              </span>
-              <span v-if="dateRange[1]"> {{ displayDate(dateRange[1]) }},</span>
-              <span v-if="timeRange.end">
-                {{ displayTime(timeRange.end) }}</span
-              >
+              {{ formatDateTimeRange(dateRange, timeRange) }}
             </div>
           </div>
         </template>
@@ -242,17 +234,46 @@ watch(
 );
 
 // Anzeige-Helper
-function displayDate(date: Date | string | number | null) {
-  if (!date) return "";
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("de-DE");
+function formatDate(dateStr: string | number | Date) {
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
 }
-function displayTime(time: TimeHM) {
-  if (!time) return "";
-  const h = time.hours.toString().padStart(2, "0");
-  const m = time.minutes.toString().padStart(2, "0");
-  return `${h}:${m}`;
+
+function formatTime(timeObj: object) {
+  const hours = String(timeObj.hours).padStart(2, '0');
+  const minutes = String(timeObj.minutes).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
+function formatDateTimeRange(dates: string[] | number[]| Date[], timeRange: object) {
+  if (!dates || dates.length !== 2) return '';
+
+  const [start, end] = dates;
+
+  const d1 = new Date(start);
+  const d2 = new Date(end);
+
+  const sameDay =
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate();
+
+  const startDate = formatDate(start);
+  const endDate = formatDate(end);
+
+  const startTime = formatTime(timeRange.start);
+  const endTime = formatTime(timeRange.end);
+
+  if (sameDay) {
+    // dd.mm.yyyy hh:mm - hh:mm
+    return `${startDate} ${startTime} - ${endTime}`;
+  }
+
+  // dd.mm.yyyy hh:mm - dd.mm.yyyy hh:mm
+  return `${startDate} ${startTime} - ${endDate} ${endTime}`;
 }
 
 // UI Aktionen
