@@ -16,7 +16,6 @@
         icon="i-lucide-calendar-clock"
         class="w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-lg bg-white dark:bg-gray-700 hover:bg-transparent py-2 px-3"
         :ui="{ leadingIcon: 'text-[16px] dark:text-gray-200 mr-1' }"
-        @click="setDefaultStartDate()"
       >
         <template v-if="dateRange[0]">
           <div class="flex justify-between w-full">
@@ -115,7 +114,6 @@
 <script setup lang="ts">
 import DatePicker from "./DatePicker.vue";
 import TimePicker from "./TimePicker.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import ClearButton from "~/components/inputs/ClearButton.vue";
 
 /**
@@ -262,12 +260,6 @@ function closeTimePeriodInput() {
   isOpen.value = false;
   dateRange.value = [];
   timeRange.value = { start: null, end: null };
-}
-
-function setDefaultStartDate() {
-  if (!dateRange.value[0]) {
-    dateRange.value[0] = new Date();
-  }
 }
 
 function setDefaultEndTime() {

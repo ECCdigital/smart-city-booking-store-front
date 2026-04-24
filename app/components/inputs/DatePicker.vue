@@ -18,6 +18,7 @@
       :dark="isDark"
       @range-start="onStartRange"
     />
+    <div class="bg-red-300">{{model}}</div>
   </div>
 </template>
 
