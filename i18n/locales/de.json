@@ -10,7 +10,7 @@
     "name": "Name",
     "firstName": "Vorname",
     "lastName": "Nachname",
-    "company": "Firma",
+    "company": "Unternehmen",
     "login": "Anmelden",
     "logout": "Abmelden",
     "register": "Registrieren",
@@ -20,7 +20,9 @@
     "home": "Startseite",
     "settings": "Einstellungen",
     "profile": "Profil",
-    "back": "Zurück"
+    "back": "Zurück",
+    "backToLogin": "Zurück zur Anmeldung",
+    "retry": "Erneut versuchen"
   },
   "navigation": {
     "home": "Startseite",
@@ -124,6 +126,36 @@
     }
   },
 
+  "cardLinkVerification": {
+    "title": "Karte verknüpfen",
+    "description": "Bitte überprüfen Sie Ihre E-Mails und klicken Sie auf den Bestätigungslink, um Ihre Karte mit Ihrem Konto zu verknüpfen.",
+    "resendLink": "Bestätigungslink erneut senden",
+    "progress": {
+      "heading": "Kartenverknüpfung läuft...",
+      "description": "Bitte warten Sie einen Moment, während wir Ihre Karte verknüpfen."
+    },
+    "action": {
+      "heading": "Karte verknüpfen",
+      "description": "Klicken Sie auf die Schaltfläche unten, um Ihre Karte zu verknüpfen.",
+      "startVerification": "Karte verknüpfen",
+      "emailHint": "Die Karte wird mit diesem Konto verknüpft"
+    },
+    "success": {
+      "heading": "Karte erfolgreich verknüpft!",
+      "description": "Ihre Karte wurde erfolgreich mit Ihrem Konto verknüpft. Sie können sich jetzt mit Ihrer Karte anmelden.",
+      "toLogin": "Zur Anmeldung"
+    },
+    "error": {
+      "heading": "Kartenverknüpfung fehlgeschlagen",
+      "alreadyLinkedHeading": "Karte bereits verknüpft",
+      "default": "Es gab ein Problem bei der Verknüpfung Ihrer Karte.",
+      "alreadyVerified": "Diese Karte ist bereits mit diesem Konto verknüpft. Sie können sich mit Ihrer Karte anmelden.",
+      "invalidToken": "Ungültiger oder abgelaufener Bestätigungstoken. Bitte fordern Sie einen neuen Bestätigungslink an.",
+      "alreadyLinked": "Diese Karte ist bereits mit einem anderen Konto verknüpft. Bitte verwenden Sie eine andere Karte oder kontaktieren Sie den Support.",
+      "userNotFound": "Der Benutzer wurde nicht gefunden. Bitte registrieren Sie sich erneut."
+    }
+  },
+
   "forgotPassword": {
     "title": "Passwort zurücksetzen",
     "headline": "Passwort vergessen?",
@@ -218,5 +250,87 @@
 
   "filter": {
     "fittingResults": "passende Ergebnisse"
+  },
+
+  "cardLogin": {
+    "title": "Karten-Anmeldung",
+    "fallbackTitle": "Mit Karte anmelden",
+    "publicId": "Kartennummer",
+    "secret": "Secret",
+    "useDifferentMethod": "Andere Anmeldemethode wählen",
+    "notFound": {
+      "title": "Anmeldemethode nicht verfügbar",
+      "description": "Diese Karten-Anmeldemethode ist nicht verfügbar oder wurde deaktiviert."
+    },
+    "success": {
+      "title": "Erfolgreich angemeldet",
+      "description": "Sie werden weitergeleitet…"
+    },
+    "awaitingVerification": {
+      "title": "Account erstellt",
+      "message": "Bitte bestätigen Sie Ihre Email-Adresse.",
+      "description": "Wir haben Ihnen eine Bestätigungs-Email gesendet. Bitte klicken Sie den Link darin, um Ihren Account zu aktivieren."
+    },
+    "linkRequested": {
+      "title": "Bestätigung erforderlich",
+      "message": "Bestätigungs-Email wurde gesendet.",
+      "description": "Die Email-Adresse {email} ist bereits registriert. Wir haben Ihnen eine Bestätigungs-Email gesendet, um die Karte mit Ihrem Account zu verknüpfen."
+    },
+    "register": {
+      "infoTitle": "Noch kein Account",
+      "infoDescription": "Diese Karte ist noch keinem Account zugeordnet. Bitte vervollständigen Sie Ihre Daten.",
+      "submit": "Account erstellen"
+    },
+    "errors": {
+      "title": "Anmeldung fehlgeschlagen",
+      "notFound": "Karte nicht gefunden.",
+      "secretMismatch": "Ungültige(r/s) {label}.",
+      "expired": "Diese Karte ist abgelaufen.",
+      "emailNotVerified": "Bitte bestätigen Sie zuerst Ihre Email-Adresse.",
+      "cardAlreadyLinked": "Diese Karte ist bereits einem anderen Account zugeordnet.",
+      "accountAlreadyHasCard": "Dieser Account ist bereits mit einer Karte verknüpft.",
+      "forbidden": "Zugriff verweigert.",
+      "serviceUnavailable": "Der Karten-Service ist aktuell nicht erreichbar. Bitte später erneut versuchen.",
+      "generic": "Anmeldung fehlgeschlagen. Bitte erneut versuchen."
+    }
+  },
+
+  "cardLink": {
+    "success": {
+      "title": "Karte erfolgreich verknüpft",
+      "description": "Ihre Karte wurde erfolgreich mit Ihrem Account verknüpft.",
+      "hint": "Ab sofort können Sie sich direkt mit Ihrer Karte anmelden."
+    },
+    "failed": {
+      "errorCode": "Fehler-Code",
+      "expired": {
+        "title": "Link abgelaufen",
+        "description": "Dieser Bestätigungslink ist abgelaufen.",
+        "hint": "Bitte starten Sie den Verknüpfungsvorgang erneut."
+      },
+      "invalid": {
+        "title": "Link ungültig",
+        "description": "Dieser Bestätigungslink ist ungültig.",
+        "hint": "Bitte starten Sie den Verknüpfungsvorgang erneut."
+      },
+      "alreadyUsed": {
+        "title": "Link bereits verwendet",
+        "description": "Dieser Bestätigungslink wurde bereits eingelöst."
+      },
+      "cardTaken": {
+        "title": "Karte bereits verknüpft",
+        "description": "Diese Karte ist inzwischen einem anderen Account zugeordnet.",
+        "hint": "Falls Sie der rechtmäßige Besitzer sind, kontaktieren Sie bitte den Support."
+      },
+      "mismatch": {
+        "title": "Link stimmt nicht überein",
+        "description": "Der Link passt nicht zur angegebenen Email-Adresse."
+      },
+      "generic": {
+        "title": "Verknüpfung fehlgeschlagen",
+        "description": "Die Karte konnte nicht verknüpft werden.",
+        "hint": "Bitte erneut versuchen oder Support kontaktieren."
+      }
+    }
   }
 }

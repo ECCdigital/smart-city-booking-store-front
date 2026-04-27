@@ -25,6 +25,37 @@ export const useAuth = () => {
     });
   };
 
+  const verifyCardLink = async (token, id) => {
+    const response = await $fetch("/api/auth/card/verify-link", {
+      method: "POST",
+      body: { token, id },
+    });
+    return response;
+  };
+
+  const getCardAuthMethods = async () => {
+    const response = await $fetch("/api/auth/card-methods");
+    return response.data;
+  };
+
+  const cardSignup = async (
+    payload = {
+      appId,
+      publicId,
+      secret,
+      email,
+      firstName,
+      lastName,
+      company,
+    }
+  ) => {
+    const response = await $fetch("/api/auth/card/signup", {
+      method: "POST",
+      body: payload,
+    });
+    return response.data;
+  };
+
   return {
     user: readonly(computed(() => authStore.user)),
     permission: readonly(computed(() => authStore.permission)),
@@ -36,6 +67,10 @@ export const useAuth = () => {
     logout: authStore.logout,
     register,
     verifyEmail,
+    verifyCardLink,
     changePassword,
+    getCardAuthMethods,
+    cardSignup,
+    cardLogin: authStore.cardLogin,
   };
 };
