@@ -10,11 +10,11 @@
       <p class="my-4 font-bold">Ergebnisse filtern</p>
       <UTooltip v-if="!useAsDialog" text="Filter zurücksetzen">
         <UButton
-          v-if="!useAsDialog && isActive"
+          v-if="!useAsDialog && isFilterActive"
           icon="i-lucide-trash"
           variant="ghost"
           class="rounded-full py-2 px-3"
-          :class="isActive ? '' : ''"
+          :class="isFilterActive ? '' : ''"
           @click="removeFilter"
         />
       </UTooltip>
@@ -99,72 +99,51 @@
     <div v-if="distance != null" class="my-7">
       <p class="mb-3">Distanz</p>
       <p class="mb-3">0 km - {{ _distance }} km</p>
-
-      <div class="mx-2">
-        <div
-          v-if="
-            distanceBars &&
-            distanceBars.length > 0 &&
-            distanceBars.some((p) => p > 0)
-          "
-          class="flex items-end justify-between mx-2"
-          style="width: 100%; padding-right: 15px"
-        >
-          <div
-            v-for="(count, index) in distanceBars"
-            :key="index"
-            class="w-full bg-primary opacity-40 mr-1"
-            style="max-height: 50px"
-            :style="{
-              height: (count / Math.max(...distanceBars)) * 50 + 'px',
-            }"
-          />
-        </div>
-
-        <USlider
+      <FilterHistogramSlider
           v-model="_distance"
+          mode="single"
           :min="0"
           :max="distanceRange[1]"
           :step="dynamicDistanceStep"
+          :values="distanceValues"
           @change="instantFilter"
-        />
-      </div>
+      />
     </div>
 
-    <!-- Preis -->
+    <!-- Price-->
     <div class="my-7">
       <p class="mb-3">Preis</p>
       <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
-      <div class="mx-2">
-        <div
-          v-if="priceBars.length > 0 && priceBars.some((p) => p > 0)"
-          class="flex items-end justify-between mx-2"
-          style="width: 100%; padding-right: 15px"
-        >
-          <div
-            v-for="(count, index) in priceBars"
-            :key="index"
-            class="w-full bg-primary opacity-40 mr-1"
-            style="max-height: 50px"
-            :style="{
-              height: (count / Math.max(...priceBars)) * 50 + 'px',
-            }"
-          />
-        </div>
-
-        <USlider
+      <FilterHistogramSlider
           v-model="_price"
+          mode="range"
           :min="dynamicMinPrice"
           :max="dynamicMaxPrice"
           :step="dynamicPriceStep"
+          :values="priceValues"
           @change="instantFilter"
+      />
+    </div>
+    <!-- Custom Field Filter -->
+
+    <div v-if="customFieldFilters.length > 0" class="my-7">
+      <p class="mb-3">Weitere Filter</p>
+      <div class="space-y-4">
+        <CustomFieldFilter
+            v-for="cf in customFieldFilters"
+            :key="cf.definition.id"
+            v-model="_customFieldValues[cf.definition.id]"
+            :definition="cf.definition"
+            :filter-type="cf.filterType"
+            :meta="cf.meta"
+            @change="onCustomFieldChange"
         />
       </div>
     </div>
 
     <div v-if="useAsDialog" class="flex justify-between">
       <UButton
-        v-if="isActive"
+        v-if="isFilterActive"
         label="Filter entfernen"
         icon="i-lucide-trash"
         color="neutral"
@@ -185,7 +164,10 @@
   </div>
 </template>
 <script setup>
-import { useRoute } from "#imports";
+import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState";
+import { useCustomFieldFilters } from "~/composables/search/useCustomFieldFilters";
+import CustomFieldFilter from "~/components/search/CustomFieldFilter.vue";
+import FilterHistogramSlider from "~/components/search/FilterHistogramSlider.vue";
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -233,23 +215,11 @@ const props = defineProps({
 const emit = defineEmits(["filter"]);
 
 const suitableBookables = computed(() =>
-  props.bookables.filter((b) => b.status === "suitable"),
+  props.bookables.filter((b) => b.status === "suitable")
 );
 
 //Filter Variables
-const isActive = computed(() => {
-  const route = useRoute();
-  const keysToCheck = [
-    "inclNoSuitable",
-    "pubEv",
-    "regEv",
-    "cities",
-    "cat",
-    "dist",
-    "price",
-  ];
-  return route.query && keysToCheck.some((key) => key in route.query);
-});
+const { isFilterActive } = useCatalogQueryState();
 const _includeNonSuitable = ref(props.includeNonSuitable);
 const _cities = ref(props.cities);
 const _onlyPublicEvents = ref(props.onlyPublicEvents);
@@ -352,7 +322,15 @@ const distanceBars = computed(() => {
   return bars;
 });
 
-//Preis
+//Price
+const priceValues = computed(() => {
+  const fn = props.isEvent ? getEventMinPrice : getBookableMinPrice;
+  return suitableBookables.value
+      .map((b) => fn(b))
+      .filter((p) => p != null && !isNaN(p));
+});
+
+
 const possiblePriceRange = computed(() => {
   if (!props.bookables || props.bookables.length === 0) {
     return [0, 100];
@@ -407,13 +385,11 @@ const _price = ref(
     : [dynamicMinPrice.value, dynamicMaxPrice.value]
 );
 watch(
-    () => dynamicMaxPrice.value,
-    (newVal) => {
-     _price.value = [dynamicMinPrice.value, newVal];
-
-    }
+  () => dynamicMaxPrice.value,
+  (newVal) => {
+    _price.value = [dynamicMinPrice.value, newVal];
+  }
 );
-
 
 watch(suitableBookables, () => {
   _price.value = [dynamicMinPrice.value, dynamicMaxPrice.value];
@@ -497,7 +473,12 @@ function getEventMinPrice(event) {
   }
 }
 
-//Orte
+//Locations
+const distanceValues = computed(() => {
+  return props.bookables
+      .filter((b) => b.status !== "nonSuitable" && b.item.distanceMeter != null)
+      .map((b) => b.item.distanceMeter / 1000);
+});
 const possibleCities = computed(() => {
   if (!props.bookables || props.bookables.length === 0) {
     return [];
@@ -594,6 +575,7 @@ function onFilter() {
   filter.cities = _cities.value;
   filter.distance = _distance.value;
   filter.price = sameAsPossible ? [] : _price.value;
+  filter.customFields = _customFieldValues.value;
 
   emit("filter", filter);
 }
@@ -606,6 +588,7 @@ function removeFilter() {
   _categories.value = [];
   _price.value = possiblePriceRange.value.slice();
   _distance.value = distanceRange.value[1];
+  _customFieldValues.value = {};
 
   const filter = {};
 
@@ -623,7 +606,21 @@ function removeFilter() {
 
   filter.price = sameAsPossible ? [] : _price.value;
 
+  filter.customFields = {};
+
   emit("filter", filter);
+}
+
+// Custom Field Filter
+const bookablesRef = computed(() => props.bookables);
+const { aggregated: customFieldFilters } = useCustomFieldFilters(bookablesRef, {
+  position: "sidebar",
+});
+
+const _customFieldValues = ref({ ...(props.customFieldValues || {}) });
+
+function onCustomFieldChange() {
+  instantFilter();
 }
 </script>
 <style scoped></style>

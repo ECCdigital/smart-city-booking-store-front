@@ -3,6 +3,7 @@ import { useBookables } from "~/composables/api/useBookables";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState";
 import type { CatalogQueryState, SortMode } from "~/types/catalogParams";
 import haversine from "haversine-distance";
+import {getCustomFieldValue} from "~/composables/search/useCustomFieldFilters";
 
 interface UseBookableSearchOptions<TItem> {
   sourceItems: ComputedRef<TItem[]> | Ref<TItem[]>;
@@ -10,21 +11,25 @@ interface UseBookableSearchOptions<TItem> {
   getAvailability?: (
     item: TItem,
     start: number,
-    end: number,
+    end: number
   ) => Promise<{ isAvailable: boolean; remaining: number }>;
   getPriceForPeriod?: (
     item: TItem,
     start: number,
-    end: number,
+    end: number
   ) => Promise<{ userGrossPriceEur: number } | null>;
 }
 
 export function useBookableSearch<TItem extends { isBookable: boolean }>(
-  options: UseBookableSearchOptions<TItem>,
+  options: UseBookableSearchOptions<TItem>
 ) {
   const { sourceItems, isEvent } = options;
 
-  const { state: query } = useCatalogQueryState();
+  const {
+    state: query,
+    isFilterActive,
+    isSearchActive,
+  } = useCatalogQueryState();
   const searchIsInitialized = ref(false);
   const filterResetKey = ref(0);
 
@@ -84,8 +89,22 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     if (isEvent && query.regEv) {
       filtered = filtered.filter(
-        (e) => e.item.attendees.needsRegistration === true,
+        (e) => e.item.attendees.needsRegistration === true
       );
+    }
+
+    if (query.customFields && typeof query.customFields === "object") {
+      for (const [fieldId, value] of Object.entries(query.customFields)) {
+        if (isEmptyFilterValue(value)) continue;
+
+        const def = getCustomFieldDef(updatedItems.value, fieldId);
+        const type = def?.usageOptions?.catalogFilterType;
+
+        filtered = filtered.filter((b) => {
+          const itemValue = getCustomFieldValue(b.item, fieldId);
+          return matchesCustomField(itemValue, value, type);
+        });
+      }
     }
 
     if (!isEvent && Array.isArray(query.cat) && query.cat.length > 0) {
@@ -111,7 +130,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           return query.cities.some((city) =>
             b.item.location.display_address
               .toLowerCase()
-              .includes(city.toLowerCase()),
+              .includes(city.toLowerCase())
           );
         });
       }
@@ -232,20 +251,20 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     //all prices are free
     if (
       bookable.item.priceCategories.every(
-        (c) => c.priceEur === 0 || c.priceEur === null,
+        (c) => c.priceEur === 0 || c.priceEur === null
       )
     ) {
       return -1;
     }
 
-      //exclude external service fees
-      const pricesWithoutServiceFees = bookable.item.priceCategories.filter(
-          (c) => !c.external || (c.external && c.unit !== "service-fee"),
-      );
+    //exclude external service fees
+    const pricesWithoutServiceFees = bookable.item.priceCategories.filter(
+      (c) => !c.external || (c.external && c.unit !== "service-fee")
+    );
 
     //exclude holiday price categories
     const pricesWithoutHolidays = pricesWithoutServiceFees.filter(
-      (c) => !c.holidays || c.holidays.length === 0,
+      (c) => !c.holidays || c.holidays.length === 0
     );
 
     const minPrice = Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
@@ -261,7 +280,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
     if (event.item.tickets && event.item.tickets.length > 0) {
       return Math.min(
-        ...event.item.tickets.map((ticket: any) => getTicketMinPrice(ticket)),
+        ...event.item.tickets.map((ticket: any) => getTicketMinPrice(ticket))
       );
     } else {
       return 0;
@@ -270,7 +289,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
   function getTicketMinPrice(ticket: any) {
     const minPrice = Math.min(
-      ...ticket.priceCategories.map((cat: any) => cat.priceEur),
+      ...ticket.priceCategories.map((cat: any) => cat.priceEur)
     );
     return ticket.priceValueAddedTax
       ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
@@ -278,7 +297,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   const suitableCount = computed(
-    () => sortedItems.value.filter((l) => l.status === "suitable").length,
+    () => sortedItems.value.filter((l) => l.status === "suitable").length
   );
 
   function setFilterQueryParams(criteria: Partial<CatalogQueryState>) {
@@ -291,11 +310,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     query.cat = criteria.cat ?? query.cat;
     query.cities = criteria.cities ?? query.cities;
     query.distance = query.location
-      ? (criteria.distance ?? query.distance)
+      ? criteria.distance ?? query.distance
       : null;
     query.price = criteria.price ?? query.price;
     query.start = criteria.start ?? query.start;
     query.end = criteria.end ?? query.end;
+
+    query.customFields = criteria.customFields ?? query.customFields;
   }
 
   function setSortedQueryParams(sortMode: SortMode) {
@@ -370,7 +391,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     //enrich items with status and location coordinates for the following search steps
     let enrichedItems: object[] = await enrichItems(
       () => toValue(sourceItems),
-      criteria,
+      criteria
     );
 
     enrichedItems = await checkTickets(enrichedItems);
@@ -381,13 +402,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     bookableItems = await searchForTimePeriod(
       { start: criteria.timeStart, end: criteria.timeEnd },
-      bookableItems,
+      bookableItems
     );
 
     bookableItems = await searchForLocation(
       criteria.location,
       bookableItems,
-      criteria.distance,
+      criteria.distance
     );
 
     updatedItems.value = await updateItemStatus(enrichedItems, bookableItems, {
@@ -397,7 +418,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     updatedItems.value = updateDistanceToLocation(
       updatedItems.value,
-      criteria.location,
+      criteria.location
     );
 
     searchIsInitialized.value = true;
@@ -412,7 +433,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
   async function enrichItems(
     itemsToSearch: () => any[],
-    searchCriteria: object,
+    searchCriteria: object
   ) {
     //add status to items based on bookable and event criteria
     let result: object[] = toValue(itemsToSearch).map((item: any) => {
@@ -435,7 +456,11 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           //if (isEvent) {
           let addressCoordinates: number[] = [];
 
-          const addressString = `${item.item.eventAddress.street || ""} ${item.item.eventAddress.houseNumber || ""}, ${item.item.eventAddress.zip || ""} ${item.item.eventAddress.city || ""}`;
+          const addressString = `${item.item.eventAddress.street || ""} ${
+            item.item.eventAddress.houseNumber || ""
+          }, ${item.item.eventAddress.zip || ""} ${
+            item.item.eventAddress.city || ""
+          }`;
 
           if (addressString) {
             addressCoordinates = await searchAddress(addressString);
@@ -457,7 +482,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           };
           return item;
           //}
-        }),
+        })
       );
     }
     return result;
@@ -469,7 +494,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     if (!isEvent) {
       const allEvents = items.filter((item) => item.item.category === "event");
       const allBookables = items.filter(
-        (item) => item.item.category !== "event",
+        (item) => item.item.category !== "event"
       );
 
       const foundEvents = new Fuse(allEvents, eventSearchTermOptions)
@@ -491,7 +516,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   async function searchForLocation(
     searchLocation: string | object,
     items: object[],
-    distance: number | null,
+    distance: number | null
   ) {
     if (
       !searchLocation ||
@@ -517,7 +542,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           !item.item.location ||
           !item.item.location.coordinates ||
           !item.item.location.coordinates.points[0] ||
-          !item.item.location.coordinates.points[1],
+          !item.item.location.coordinates.points[1]
       );
 
       const itemsWithCoordinates: object[] = items.filter(
@@ -525,7 +550,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           item.item.location &&
           item.item.location.coordinates &&
           item.item.location.coordinates.points[0] &&
-          item.item.location.coordinates.points[1],
+          item.item.location.coordinates.points[1]
       );
 
       // search for items without coordinates
@@ -537,14 +562,14 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           .trim() || "";
 
       searchForLocationString(searchString, itemsWithoutCoordinates).forEach(
-        (r) => results.push(r),
+        (r) => results.push(r)
       );
 
       // search for items with coordinates
       itemsWithCoordinates.forEach((i) => {
         const mDistance = getDistanceToLocation(
           searchLocation,
-          i.item.location,
+          i.item.location
         );
         const kmDistance =
           mDistance === 0 ? 0 : mDistance ? mDistance / 1000 : null;
@@ -565,7 +590,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     if (!isEvent) {
       const allEvents = items.filter((item) => item.item.category === "event");
       const allBookables = items.filter(
-        (item) => item.item.category !== "event",
+        (item) => item.item.category !== "event"
       );
 
       const foundEvents = new Fuse(allEvents, eventSearchLocationOptions)
@@ -574,7 +599,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
       const foundBookables = new Fuse(
         allBookables,
-        bookableSearchLocationOptions,
+        bookableSearchLocationOptions
       )
         .search(searchLocation)
         .map((result) => result.item);
@@ -599,7 +624,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     return haversine(
       searchLocation.coordinates.points,
-      itemLocation.coordinates.points,
+      itemLocation.coordinates.points
     );
   }
 
@@ -622,7 +647,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           headers: {
             "Accept-Language": "de",
           },
-        },
+        }
       );
 
       const data = await response.json();
@@ -664,13 +689,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           ? await options.getAvailability(
               item,
               timePeriod.start!,
-              timePeriod.end!,
+              timePeriod.end!
             )
           : await useBookables().getBookableAvailability(
               item.item.tenantId,
               item.item.id,
               timePeriod.start!,
-              timePeriod.end!,
+              timePeriod.end!
             );
 
         return {
@@ -689,12 +714,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   async function updateItemStatus(
     itemsWithStatus: any[],
     bookableItems: any[],
-    timePeriod: any,
+    timePeriod: any
   ) {
     const temp = await Promise.all(
       itemsWithStatus.map(async (item) => {
         const isSuitable = bookableItems.some(
-          (b) => b.item.id === item.item.id,
+          (b) => b.item.id === item.item.id
         );
 
         if (item.status === "isBookable") {
@@ -711,13 +736,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
                 ? await options.getPriceForPeriod(
                     item.item,
                     timePeriod.start,
-                    timePeriod.end,
+                    timePeriod.end
                   )
                 : await useBookables().getBookablePrice(
                     item.item.tenantId,
                     item.item.id,
                     timePeriod.start,
-                    timePeriod.end,
+                    timePeriod.end
                   );
             } catch {
               price = null;
@@ -742,7 +767,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
             calculatedPrice: null,
           };
         }
-      }),
+      })
     );
 
     return temp;
@@ -779,7 +804,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       }
       item.item["distanceMeter"] = getDistanceToLocation(
         item.item.location,
-        searchLocation,
+        searchLocation
       );
       return item;
     });
@@ -798,17 +823,17 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       };
 
       newTimePeriod.start = new Date(
-        timePeriod.startDate + " " + timePeriod.startTime,
+        timePeriod.startDate + " " + timePeriod.startTime
       ).getTime();
 
       newTimePeriod.end = "";
       if (!timePeriod.endDate && timePeriod.endTime) {
         newTimePeriod.end = new Date(
-          timePeriod.startDate + " " + timePeriod.endTime,
+          timePeriod.startDate + " " + timePeriod.endTime
         ).getTime();
       } else {
         newTimePeriod.end = new Date(
-          timePeriod.endDate + " " + timePeriod.endTime,
+          timePeriod.endDate + " " + timePeriod.endTime
         ).getTime();
       }
       return newTimePeriod;
@@ -829,19 +854,19 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
             event.item.tickets.map(async (ticket: any) => {
               const ticketPrice = await useBookables().getBookablePrice(
                 event.item.tenantId,
-                ticket.id,
+                ticket.id
               );
               const ticketAvailability =
                 await useBookables().getBookableAvailability(
                   event.item.tenantId,
-                  ticket.id,
+                  ticket.id
                 );
               return {
                 ...ticket,
                 calculatedPrice: ticketPrice,
                 availability: ticketAvailability,
               };
-            }),
+            })
           );
           return {
             ...event,
@@ -853,23 +878,15 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         } else {
           return event;
         }
-      }),
+      })
     );
 
     return result.filter((r) => r.status === "fulfilled").map((r) => r.value);
   }
 
-  const hasUrlCriteria = computed(() => {
-    return (
-      !!query.term ||
-      !!query.location ||
-      !!query.start ||
-      !!query.end ||
-      (Array.isArray(query.cat) && query.cat.length > 0) ||
-      (Array.isArray(query.cities) && query.cities.length > 0) ||
-      (Array.isArray(query.price) && query.price.length === 2)
-    );
-  });
+  const hasUrlCriteria = computed(
+    () => isSearchActive.value || isFilterActive.value
+  );
 
   watch(
     () => toValue(sourceItems),
@@ -884,7 +901,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
       initializeResults();
     },
-    { immediate: true, deep: true },
+    { immediate: true, deep: true }
   );
 
   onMounted(async () => {
@@ -901,6 +918,57 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       });
     }
   });
+
+  function getCustomFieldDef(wrappers: any[], fieldId: string) {
+    for (const w of wrappers) {
+      const def = w?.item?.customFields?.find((f: any) => f.id === fieldId);
+      if (def) return def;
+    }
+    return null;
+  }
+
+  function isEmptyFilterValue(v: any) {
+    if (v == null) return true;
+    if (Array.isArray(v) && v.length === 0) return true;
+    if (v === false) return true; // inaktive checkbox
+    return false;
+  }
+
+  function matchesCustomField(
+    itemValue: any,
+    filterValue: any,
+    type: string | undefined
+  ) {
+    console.log("matchesCustomField", itemValue, filterValue, type);
+
+    if (itemValue === undefined || itemValue === null || itemValue === "") {
+      return false;
+    }
+
+    if (type === "select") {
+      if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
+      return filterValue.includes(itemValue);
+    }
+
+    if (type === "checkbox") {
+      if (filterValue !== true) return true;
+      return itemValue === true || itemValue === "true";
+    }
+
+    if (type === "slider") {
+      const n = Number(itemValue);
+      if (Number.isNaN(n)) return false;
+      return n <= Number(filterValue);
+    }
+
+    if (type === "range") {
+      const n = Number(itemValue);
+      if (Number.isNaN(n)) return false;
+      return n >= filterValue[0] && n <= filterValue[1];
+    }
+
+    return true;
+  }
 
   return {
     query,

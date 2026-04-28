@@ -15,4 +15,6 @@ export interface CatalogQueryState {
   price: number[];
 
   sortMode: SortMode;
+
+  customFields: Record<string, any>
 }
