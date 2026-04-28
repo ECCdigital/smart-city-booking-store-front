@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="props.item"
-    class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-xl"
+    class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-sm"
     :class="[
       isNotSuitable ? 'opacity-70' : ' ',
       isEvent ? 'max-h-100 h-100' : 'max-h-74 h-74',
@@ -19,7 +19,7 @@
           v-if="!isEvent && item?.imgUrl"
           :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
           alt=""
-          class="w-full h-full object-cover rounded-l-xl"
+          class="w-full h-full object-cover rounded-l-sm"
         >
         <img
           v-else-if="isEvent && item?.information?.teaserImage"
@@ -27,10 +27,10 @@
             item.information.teaserImage,
           )}`"
           alt=""
-          class="w-full h-full object-cover rounded-l-xl"
+          class="w-full h-full object-cover rounded-l-sm"
         >
         <ClientOnly v-else>
-          <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-xl" />
+          <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-sm" />
           <template #fallback>
             <div
               class="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"
