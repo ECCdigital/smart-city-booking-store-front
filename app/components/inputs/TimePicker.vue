@@ -1,10 +1,20 @@
 <template>
   <UTooltip text="Wählen Sie erst ein Startdatum." :disabled="!disabled">
     <div>
+      <div class="hidden lg:block">
+        <UInputTime
+            v-model="time"
+            icon="i-lucide-clock"
+            :hour-cycle="24"
+            variant="outline"
+            :disabled="props.disabled"
+        />
+      </div>
       <VueDatePicker
         v-model="model"
         time-picker
         format="HH:mm"
+        :text-input="{ maskFormat: 'hh:mm' }"
         cancel-text="Abbrechen"
         select-text="OK"
         teleport-center
@@ -16,12 +26,14 @@
           calendar: '!bg-transparent',
         }"
         :dark="isDark"
+        class="block lg:hidden"
       />
     </div>
   </UTooltip>
 </template>
 <script setup>
 import VueDatePicker from "@vuepic/vue-datepicker";
+import { Time } from "@internationalized/date";
 
 const model = defineModel();
 const props = defineProps({
@@ -31,8 +43,27 @@ const props = defineProps({
   },
 });
 
-const mode = useColorMode();
+const time = computed({
+  get() {
+    const val = model.value;
+    if (!val) return null;
 
+    return new Time(val.hours, val.minutes);
+  },
+  set(val) {
+    if (!val) {
+      model.value = null;
+      return;
+    }
+
+    model.value = {
+      hours: val.hour,
+      minutes: val.minute,
+    };
+  },
+});
+
+const mode = useColorMode();
 const isDark = computed(() => mode.value === "dark");
 </script>
 

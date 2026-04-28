@@ -47,17 +47,35 @@
           <DatePicker v-model="dateRange" class="date-picker-container" />
 
           <div class="py-3 w-full">
-            <p
-              class="px-1"
-              :class="missingValues.includes('startTime') ? 'text-red-500' : ''"
-            >
-              Startuhrzeit
-            </p>
-            <TimePicker
-              v-model="timeRange.start"
-              :text-input="{ format: 'HH:mm' }"
-              @update:model-value="setDefaultEndTime"
-            />
+            <div class="flex items-center space-x-2">
+              <p
+                class="px-1 font-semibold"
+                :class="
+                  missingValues.includes('startTime') ? 'text-red-500' : ''
+                "
+              >
+                Startuhrzeit
+              </p>
+            </div>
+            <div class="flex items-center space-x-2 justify-between lg:justify-start">
+              <UButton
+                label="Jetzt"
+                color="neutral"
+                variant="outline"
+                @click="
+                  () =>
+                    (timeRange.start = {
+                      hours: new Date().getHours(),
+                      minutes: new Date().getMinutes(),
+                    })
+                "
+              />
+              <TimePicker
+                v-model="timeRange.start"
+                @update:model-value="setDefaultEndTime"
+              />
+            </div>
+
             <p
               v-if="missingValues.includes('startTime')"
               class="text-red-500 text-sm"
@@ -67,18 +85,43 @@
           </div>
 
           <div class="py-3 w-full">
-            <p
-              class="px-1"
-              :class="missingValues.includes('endTime') ? 'text-red-500' : ''"
-            >
-              Enduhrzeit
-            </p>
-            <TimePicker
-              v-model="timeRange.end"
-              :text-input="{ format: 'HH:mm' }"
-              :disabled="!timeRange.start"
-              @update:model-value="removeValidation"
-            />
+            <div class="flex items-center space-x-2">
+              <p
+                class="px-1 font-semibold"
+                :class="missingValues.includes('endTime') ? 'text-red-500' : ''"
+              >
+                Enduhrzeit
+              </p>
+            </div>
+
+            <div class="flex items-center space-x-2 justify-between lg:justify-start">
+              <UButton
+                label="+0:30h"
+                color="neutral"
+                variant="outline"
+                :disabled="!timeRange.start"
+                @click="addToStartTime(30)"
+              />
+              <UButton
+                label="+1:00h"
+                color="neutral"
+                variant="outline"
+                :disabled="!timeRange.start"
+                @click="addToStartTime(60)"
+              />
+              <UButton
+                label="+2:00h"
+                color="neutral"
+                variant="outline"
+                :disabled="!timeRange.start"
+                @click="addToStartTime(120)"
+              />
+              <TimePicker
+                v-model="timeRange.end"
+                :disabled="!timeRange.start"
+                @update:model-value="removeValidation"
+              />
+            </div>
             <p
               v-if="missingValues.includes('endTime')"
               class="text-red-500 text-sm"
@@ -235,21 +278,30 @@ watch(
 
 // Anzeige-Helper
 function formatDate(dateStr: string | number | Date) {
+  if (!dateStr) {
+    return "";
+  }
   const date = new Date(dateStr);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
   return `${day}.${month}.${year}`;
 }
 
 function formatTime(timeObj: object) {
-  const hours = String(timeObj.hours).padStart(2, '0');
-  const minutes = String(timeObj.minutes).padStart(2, '0');
+  if (!timeObj) {
+    return "";
+  }
+  const hours = String(timeObj.hours).padStart(2, "0");
+  const minutes = String(timeObj.minutes).padStart(2, "0");
   return `${hours}:${minutes}`;
 }
 
-function formatDateTimeRange(dates: string[] | number[]| Date[], timeRange: object) {
-  if (!dates || dates.length !== 2) return '';
+function formatDateTimeRange(
+  dates: string[] | number[] | Date[],
+  timeRange: object,
+) {
+  if (!dates || dates.length !== 2) return "";
 
   const [start, end] = dates;
 
@@ -257,9 +309,9 @@ function formatDateTimeRange(dates: string[] | number[]| Date[], timeRange: obje
   const d2 = new Date(end);
 
   const sameDay =
-      d1.getFullYear() === d2.getFullYear() &&
-      d1.getMonth() === d2.getMonth() &&
-      d1.getDate() === d2.getDate();
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate();
 
   const startDate = formatDate(start);
   const endDate = formatDate(end);
@@ -289,6 +341,21 @@ function setDefaultEndTime() {
     const initialTime = JSON.parse(JSON.stringify(timeRange.value.start));
     initialTime.hours = initialTime.hours + 1;
     timeRange.value.end = initialTime;
+  }
+}
+function addToStartTime(addedMinutes: number) {
+  removeValidation();
+  if (timeRange.value.start) {
+    const newEndTime = JSON.parse(JSON.stringify(timeRange.value.start));
+    newEndTime.minutes += addedMinutes;
+
+    // Handle overflow of minutes > 59
+    if (newEndTime.minutes >= 60) {
+      newEndTime.hours += Math.floor(newEndTime.minutes / 60);
+      newEndTime.minutes = newEndTime.minutes % 60;
+    }
+
+    timeRange.value.end = newEndTime;
   }
 }
 
