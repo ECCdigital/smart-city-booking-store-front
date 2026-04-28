@@ -70,7 +70,7 @@ const emit = defineEmits(["update:modelValue", "change"]);
 function defaultFor(type, meta) {
   if (type === "select") return [];
   if (type === "checkbox") return false;
-  if (type === "slider" || type === "range") return meta.values;
+  if (type === "slider" || type === "range") return meta.defaultValue;
   return null;
 }
 

@@ -93,7 +93,8 @@ function buildMeta(def, values) {
                 min: 0,
                 max: 0,
                 step: 1,
-                values: type === "range" ? [0, 0] : 0,
+                values: [],
+                defaultValue: type === "range" ? [0, 0] : 0,
             };
         }
 
@@ -105,7 +106,8 @@ function buildMeta(def, values) {
             min,
             max,
             step,
-            values: type === "range" ? [min, max] : max,
+            values: numeric, // Rohdaten fürs Histogramm
+            defaultValue: type === "range" ? [min, max] : max,
         };
     }
 
