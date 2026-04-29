@@ -2,7 +2,7 @@
   <UTooltip text="Wählen Sie erst ein Startdatum." :disabled="!disabled">
     <div>
       <div
-        class="flex items-center bg-default border border-1.5 rounded-md px-1 border-gray-300"
+        class="flex items-center bg-default border border-1.5 rounded-md px-1 border-primary"
       >
         <UTooltip text="Uhrzeit auswählen">
           <UIcon

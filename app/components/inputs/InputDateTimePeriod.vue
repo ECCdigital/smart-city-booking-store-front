@@ -53,7 +53,7 @@
           </p>
 
           <div class="py-3 w-full">
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-2 mb-2">
               <p
                 class="px-1 font-semibold"
                 :class="
@@ -62,13 +62,11 @@
               >
                 Startuhrzeit
               </p>
-            </div>
-            <div class="flex items-center space-x-2">
               <UButton
-                label="Jetzt"
-                color="neutral"
-                variant="outline"
-                @click="
+                  label="Jetzt"
+                  color="neutral"
+                  variant="soft"
+                  @click="
                   () =>
                     (timeRange.start = {
                       hours: new Date().getHours(),
@@ -76,8 +74,10 @@
                     })
                 "
               />
+            </div>
+            <div class="flex items-center space-x-2">
               <InputTime
-                v-model="timeRange.start"
+                v-model="timeRange.start" class="w-full"
                 @update:model-value="setDefaultEndTime"
               />
             </div>
@@ -91,40 +91,43 @@
           </div>
 
           <div class="py-3 w-full">
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-2 mb-2">
               <p
                 class="px-1 font-semibold"
                 :class="missingValues.includes('endTime') ? 'text-red-500' : ''"
               >
                 Enduhrzeit
               </p>
+
+              <UButton
+                  label="0:30h"
+                  color="neutral"
+                  variant="soft"
+                  :disabled="!timeRange.start"
+                  @click="addToStartTime(30)"
+              />
+              <UButton
+                  label="1:00h"
+                  color="neutral"
+                  variant="soft"
+                  :disabled="!timeRange.start"
+                  @click="addToStartTime(60)"
+              />
+              <UButton
+                  label="2:00h"
+                  color="neutral"
+                  variant="soft"
+                  :disabled="!timeRange.start"
+                  @click="addToStartTime(120)"
+              />
             </div>
 
             <div class="flex items-center space-x-2">
-              <UButton
-                label="+0:30h"
-                color="neutral"
-                variant="outline"
-                :disabled="!timeRange.start"
-                @click="addToStartTime(30)"
-              />
-              <UButton
-                label="+1:00h"
-                color="neutral"
-                variant="outline"
-                :disabled="!timeRange.start"
-                @click="addToStartTime(60)"
-              />
-              <UButton
-                label="+2:00h"
-                color="neutral"
-                variant="outline"
-                :disabled="!timeRange.start"
-                @click="addToStartTime(120)"
-              />
+
               <InputTime
                 v-model="timeRange.end"
                 :disabled="!timeRange.start"
+                class="w-full"
                 @update:model-value="removeValidation"
               />
             </div>
