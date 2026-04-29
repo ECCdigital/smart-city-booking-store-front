@@ -45,6 +45,12 @@
           </div>
 
           <DatePicker v-model="dateRange" class="date-picker-container" />
+          <p
+              v-if="missingValues.includes('date')"
+              class="text-red-500 text-sm"
+          >
+            (Bitte wählen Sie einen Tag aus, an dem Sie buchen möchten.)
+          </p>
 
           <div class="py-3 w-full">
             <div class="flex items-center space-x-2">
@@ -57,7 +63,7 @@
                 Startuhrzeit
               </p>
             </div>
-            <div class="flex items-center space-x-2 justify-between lg:justify-start">
+            <div class="flex items-center space-x-2">
               <UButton
                 label="Jetzt"
                 color="neutral"
@@ -70,7 +76,7 @@
                     })
                 "
               />
-              <TimePicker
+              <InputTime
                 v-model="timeRange.start"
                 @update:model-value="setDefaultEndTime"
               />
@@ -94,7 +100,7 @@
               </p>
             </div>
 
-            <div class="flex items-center space-x-2 justify-between lg:justify-start">
+            <div class="flex items-center space-x-2">
               <UButton
                 label="+0:30h"
                 color="neutral"
@@ -116,7 +122,7 @@
                 :disabled="!timeRange.start"
                 @click="addToStartTime(120)"
               />
-              <TimePicker
+              <InputTime
                 v-model="timeRange.end"
                 :disabled="!timeRange.start"
                 @update:model-value="removeValidation"
@@ -148,7 +154,7 @@
 
 <script setup lang="ts">
 import DatePicker from "./DatePicker.vue";
-import TimePicker from "./TimePicker.vue";
+import InputTime from "./InputTime.vue";
 import ClearButton from "~/components/inputs/ClearButton.vue";
 
 /**
@@ -360,6 +366,9 @@ function addToStartTime(addedMinutes: number) {
 }
 
 function removeValidation() {
+  if (dateRange.value.length >0) {
+    missingValues.value = missingValues.value.filter((m) => m !== "date");
+  }
   if (timeRange.value.start) {
     missingValues.value = missingValues.value.filter((m) => m !== "startTime");
   }
@@ -370,6 +379,13 @@ function removeValidation() {
 
 // OK-Button -> validieren + emittieren als Timestamps
 function onSelectDate() {
+  removeValidation()
+  if(dateRange.value.length === 0) {
+    if (!missingValues.value.includes("date")) {
+      missingValues.value.push("date");
+    }
+    return;
+  }
   if (!timeRange.value.start || !timeRange.value.end) {
     if (!timeRange.value.start && !missingValues.value.includes("startTime")) {
       missingValues.value.push("startTime");
