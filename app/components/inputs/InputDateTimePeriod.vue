@@ -120,6 +120,13 @@
                   :disabled="!timeRange.start"
                   @click="addToStartTime(120)"
               />
+              <UButton
+                  label="4:00h"
+                  color="neutral"
+                  variant="soft"
+                  :disabled="!timeRange.start"
+                  @click="addToStartTime(240)"
+              />
             </div>
 
             <div class="flex items-center space-x-2">
