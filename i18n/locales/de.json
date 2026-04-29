@@ -20,7 +20,8 @@
     "home": "Startseite",
     "settings": "Einstellungen",
     "profile": "Profil",
-    "back": "Zurück"
+    "back": "Zurück",
+    "loading": "Lädt..."
   },
   "navigation": {
     "home": "Startseite",
@@ -218,5 +219,9 @@
 
   "filter": {
     "fittingResults": "passende Ergebnisse"
+  },
+
+  "checkout": {
+    "noBookable": "Keine passenden Ressourcen gefunden"
   }
 }
