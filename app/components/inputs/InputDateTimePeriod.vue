@@ -144,6 +144,12 @@
             >
               (Bitte geben Sie eine Uhrzeit für das Ende Ihrer Buchung an.)
             </p>
+            <p
+              v-if="invalidTimeslot"
+              class="text-red-500 text-sm"
+            >
+              (Die Endzeit muss nach der Startzeit liegen.)
+            </p>
           </div>
 
           <div class="flex justify-end">
@@ -198,6 +204,16 @@ const timeRange = ref<{ start: TimeHM; end: TimeHM }>({
 });
 const isOpen = ref(false);
 const missingValues = ref<string[]>([]);
+const invalidTimeslot = computed(() => {
+  if ((dateRange.value.length === 2 && dateRange.value[1] !== null ) || !timeRange.value.start || !timeRange.value.end) return false;
+
+  const startTotalMinutes =
+    timeRange.value.start.hours * 60 + timeRange.value.start.minutes;
+  const endTotalMinutes =
+    timeRange.value.end.hours * 60 + timeRange.value.end.minutes;
+
+  return endTotalMinutes <= startTotalMinutes;
+});
 
 // Hilfen
 const coalesceModel = computed<TimePeriod>(() => {
