@@ -2,7 +2,7 @@
   <div class="space-y-5">
     <!-- Calendar Card -->
     <div
-      class="rounded-sm border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900"
+      class="rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900"
     >
 
       <!-- Week navigation -->
@@ -67,7 +67,7 @@
         </span>
         <span class="flex items-center gap-1.5">
           <span
-            class="inline-block w-4 h-3 rounded-sm bg-primary/60 dark:bg-primary/50"
+            class="inline-block w-4 h-3 rounded-sm bg-primary/90 dark:bg-primary/10"
           />
           {{ $t("scheduleSelection.yourSelection") }}
         </span>
@@ -403,8 +403,8 @@ const calendarOptions = computed(() => ({
   headerToolbar: false,
   allDaySlot: false,
   nowIndicator: true,
-  slotMinTime: "08:00:00",
-  slotMaxTime: "20:00:00",
+  slotMinTime: "00:00:00",
+  slotMaxTime: "24:00:00",
   slotDuration: "01:00:00",
   slotLabelInterval: "02:00:00",
   slotLabelFormat: {
@@ -716,14 +716,14 @@ watch(
 
 /* ── User selection event ────────────────────────────────── */
 :deep(.fc-event.fc-user-selection) {
-  background-color: rgba(99, 102, 241, 0.6) !important;
-  border: none !important;
+  background-color: var(--color-primary, #6366f1) !important;
+  opacity: 0.9;
   border-radius: 3px !important;
   box-shadow: none !important;
 }
 
 :is(.dark) :deep(.fc-event.fc-user-selection) {
-  background-color: rgba(99, 102, 241, 0.5) !important;
+  background-color: var(--color-primary, #6366f1) !important;
 }
 
 :deep(.fc-user-selection .fc-event-main) {
