@@ -1,223 +1,344 @@
 <script setup>
 import { useCheckout } from "~/composables/api/useCheckout.js";
-import DetailsAreaImages from "~/components/search/DetailsAreaImages.vue";
+import { useTenants } from "~/composables/api/useTenants.js";
+import AdditionalBookablesSelector from "~/components/checkout/AdditionalBookablesSelector.vue";
 
 definePageMeta({
   layout: "checkout",
 });
 
-const bookableID = useRoute().params.bookableID;
-const tenantID = useRoute().query.tenantId;
-
-const leadBookable = ref(null);
-const loading = ref(true);
+const route = useRoute();
+const bookableID = route.params.bookableID;
+const tenantID = route.query.tenantId;
 
 const { fetchBookable } = useCheckout();
+const { fetchTenant } = useTenants();
 
-const selectedDurationHours = ref(2);
-const selectedExtras = ref([]);
+const isLoading = ref(true);
 
-const money = new Intl.NumberFormat("de-DE", {
-  style: "currency",
-  currency: "EUR",
-});
-
-const bookableTypeLabel = computed(() => {
-  switch (leadBookable.value?.type) {
-    case "room":
-      return "RAUMBUCHUNG";
-    case "event":
-      return "EVENTBUCHUNG";
-    default:
-      return "BUCHUNG";
-  }
-});
-
-const pricePerHour = computed(() => {
-  return leadBookable.value?.priceCategories?.[0]?.priceEur ?? 0;
-});
-
-const priceLabel = computed(() => {
-  return money.format(pricePerHour.value);
-});
-
-const priceUnitLabel = computed(() => {
-  return leadBookable.value?.priceType === "per-hour" ? "/ Stunde" : "";
-});
-
-const bookableNetTotal = computed(() => {
-  return pricePerHour.value * selectedDurationHours.value;
-});
-
-const extrasTotal = computed(() => {
-  return selectedExtras.value.reduce((sum, extra) => {
-    return sum + Number(extra?.amount ?? extra?.priceEur ?? 0);
-  }, 0);
-});
-
-const netTotal = computed(() => {
-  return bookableNetTotal.value + extrasTotal.value;
-});
-
-const vatRate = computed(() => {
-  return leadBookable.value?.priceValueAddedTax ?? 0;
-});
-
-const vatTotal = computed(() => {
-  return netTotal.value * (vatRate.value / 100);
-});
-
-const total = computed(() => {
-  return netTotal.value + vatTotal.value;
-});
-
-const visibleFeatureBadges = computed(() => {
-  const badges = [];
-
-  if (leadBookable.value?.flags?.length) {
-    badges.push(...leadBookable.value.flags);
-  }
-
-  const roomSize = leadBookable.value?.customFields?.find(
-    (field) => field.id === "room_size" && field.hasValue
-  );
-
-  if (roomSize?.value) {
-    badges.push(`bis ${roomSize.value} Personen`);
-  }
-
-  return badges;
-});
-
-onMounted(async () => {
-  if (bookableID && tenantID) {
+const { data, error } = await useAsyncData(
+  `checkout-${bookableID}-${tenantID}`,
+  async () => {
+    if (!bookableID || !tenantID) return null;
     try {
-      loading.value = true;
-      const bookable = await fetchBookable(bookableID, tenantID);
-      leadBookable.value = bookable;
-    } catch (error) {
-      console.error("Error fetching bookable:", error);
+      const [leadBookable, tenant] = await Promise.all([
+        fetchBookable(bookableID, tenantID),
+        fetchTenant(tenantID),
+      ]);
+
+      const additionalIds = leadBookable?.checkoutBookableIds || [];
+      const additionalBookables = await Promise.all(
+        additionalIds.map(async ({ bookableId, mandatory }) => ({
+          item: await fetchBookable(bookableId, tenantID),
+          mandatory,
+        }))
+      );
+
+      return { leadBookable, tenant, additionalBookables };
     } finally {
-      loading.value = false;
+      isLoading.value = false;
     }
+  },
+  { server: false, lazy: true }
+);
+
+if (error.value) {
+  console.error("Error loading checkout data:", error.value);
+}
+
+const leadBookable = computed(() => data.value?.leadBookable || null);
+const tenant = computed(() => data.value?.tenant || null);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const additionalBookables = computed(
+  () => data.value?.additionalBookables || []
+);
+
+const checkoutID = ref(null);
+const summary = ref({ items: [], taxAmount: 0, total: 0, errors: [] });
+const isValidating = ref(false);
+const validationErrors = ref({});
+
+const selectedTimePeriod = ref({ start: null, end: null });
+const selectedAdditionalBookables = ref([]);
+
+const { validateBookable } = useCheckout();
+
+let validationToken = 0;
+
+async function validateAll() {
+  const { start, end } = selectedTimePeriod.value;
+  if (!start || !end || end <= start) {
+    summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
+    validationErrors.value = {};
+    checkoutID.value = null;
+    return;
   }
+
+  const myToken = ++validationToken;
+  isValidating.value = true;
+  validationErrors.value = {};
+
+  try {
+    const targets = [
+      { id: bookableID, isLead: true },
+      ...selectedAdditionalBookables.value.map((id) => ({
+        id,
+        isLead: false,
+      })),
+    ];
+
+    const results = await Promise.all(
+      targets.map(({ id, isLead }) =>
+        validateBookable({ bookableID: id, tenantID, start, end })
+          .then((res) => ({ id, isLead, res }))
+          .catch((err) => ({ id, isLead, error: err }))
+      )
+    );
+
+    if (myToken !== validationToken) return;
+
+    const items = [];
+    let taxAmount = 0;
+    let total = 0;
+    let newCheckoutId = null;
+    const errors = [];
+    const errorMap = {};
+
+    for (const { id, isLead, res, error } of results) {
+      const label = isLead
+        ? leadBookable.value?.title
+        : additionalBookables.value.find((b) => b.item.id === id)?.item
+            .title || "Zusatzbuchung";
+
+      if (error) {
+        const reason = "checkout.unknown_error";
+        errorMap[id] = { reason, error, isLead };
+        errors.push({ id, isLead, label, reason, error });
+        continue;
+      }
+
+      if (!res?.success) {
+        const errorReason = res?.error?.reason || "checkout.unknown_error";
+        const errorDetails = res?.error?.params || {};
+        errorMap[id] = { reason: errorReason, params: errorDetails, isLead };
+        errors.push({
+          id,
+          isLead,
+          label,
+          reason: errorReason,
+          params: errorDetails,
+        });
+        continue;
+      }
+
+      const { userPriceEur, userGrossPriceEur } = res.data;
+      newCheckoutId = res.checkoutId;
+
+      items.push({ label, amountEur: userPriceEur });
+      taxAmount += userGrossPriceEur - userPriceEur;
+      total += userGrossPriceEur;
+    }
+
+    validationErrors.value = errorMap;
+    summary.value = { items, taxAmount, total, errors };
+    checkoutID.value = newCheckoutId;
+  } finally {
+    if (myToken === validationToken) isValidating.value = false;
+  }
+}
+
+let debounceTimer = null;
+function scheduleValidation() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(validateAll, 200);
+}
+
+watch([selectedTimePeriod, selectedAdditionalBookables], scheduleValidation, {
+  deep: true,
 });
+
+const isTimePeriodRelated = computed(
+  () => leadBookable.value?.isTimePeriodRelated === true
+);
+
+const bookableTimePeriods = computed(
+  () => leadBookable.value?.timePeriods || []
+);
+
+const hasValidTimePeriod = computed(
+  () =>
+    !!selectedTimePeriod.value?.start &&
+    !!selectedTimePeriod.value?.end &&
+    selectedTimePeriod.value.end > selectedTimePeriod.value.start
+);
+
+// --- Stepper ---------------------------------------------------------------
+const currentStep = ref(1);
+
+const steps = [
+  {
+    key: "period",
+    title: "Zeitraum & Extras",
+    nextLabel: "Weiter zu Daten",
+  },
+  {
+    key: "data",
+    title: "Daten eingeben",
+    nextLabel: "Weiter zur Bestätigung",
+  },
+  {
+    key: "confirm",
+    title: "Bestätigung",
+    nextLabel: "Buchung abschließen",
+  },
+];
+
+const hasValidationErrors = computed(
+  () => Object.keys(validationErrors.value).length > 0
+);
+const leadBookableError = computed(
+  () => validationErrors.value[bookableID] || null
+);
+
+const canGoNext = computed(() => {
+  if (currentStep.value !== 1) return true;
+  if (!isTimePeriodRelated.value) return true;
+  if (!hasValidTimePeriod.value) return false;
+  if (hasValidationErrors.value) return false;
+  if (isValidating.value) return false;
+  return true;
+});
+
+function handleFinish() {
+  console.log("Buchung abschließen", {
+    timePeriod: selectedTimePeriod.value,
+  });
+}
 </script>
 
 <template>
-  <div class="min-h-screen w-full bg-neutral-50 dark:bg-gray-950">
-    <div v-if="!leadBookable" class="flex justify-center py-20">
-      <div v-if="loading" class="text-center">
+  <div class="bg-neutral-50 dark:bg-gray-950 w-full min-h-screen">
+    <!-- Loading / Empty State -->
+    <div v-if="isLoading" class="flex items-center justify-center min-h-screen">
+      <div class="text-center">
         <UIcon
           size="48"
           name="i-lucide-loader-2"
-          class="mb-4 animate-spin text-gray-400"
+          class="text-gray-400 mb-4 animate-spin"
         />
         <p class="text-gray-500">{{ $t("common.loading") }}</p>
       </div>
+    </div>
 
-      <div v-else class="mt-10 text-center lg:mt-25">
+    <div
+      v-else-if="!leadBookable"
+      class="flex items-center justify-center min-h-screen"
+    >
+      <div class="text-center">
         <UIcon
           size="48"
           name="i-lucide-shopping-cart"
-          class="mb-4 text-gray-400"
+          class="text-gray-400 mb-4"
         />
         <p class="text-gray-500">{{ $t("checkout.noBookable") }}</p>
       </div>
     </div>
 
+    <!-- Main Layout -->
     <div
       v-else
-      class="mx-auto grid min-h-screen max-w-7xl grid-cols-1 lg:grid-cols-2"
+      class="flex flex-col lg:flex-row min-h-screen"
     >
-      <div
-        class="border-r border-gray-200 px-6 py-8 dark:border-gray-800 lg:px-12"
-      >
-        <div
-          class="mb-4 inline-flex rounded-md bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-600 dark:bg-blue-950/40 dark:text-blue-300"
-        >
-          {{ bookableTypeLabel }}
-        </div>
-
-        <p class="mb-2 text-lg font-semibold text-gray-500 dark:text-gray-400">
-          {{ leadBookable.tenantId }}
-        </p>
-
-        <h1
-          class="max-w-2xl text-4xl font-extrabold leading-tight text-gray-950 dark:text-white"
-        >
-          {{ leadBookable.title }}
-        </h1>
-
-        <div class="mt-4 flex items-end gap-2">
-          <span
-            class="text-5xl font-extrabold tracking-tight text-gray-950 dark:text-white"
-          >
-            {{ priceLabel }}
-          </span>
-          <span
-            class="mb-2 text-base font-semibold text-gray-500 dark:text-gray-400"
-          >
-            {{ priceUnitLabel }}
-          </span>
-        </div>
-
-        <DetailsAreaImages :item="leadBookable" class="mt-12" />
-
-        <div
-          v-if="visibleFeatureBadges.length"
-          class="mt-6 flex flex-wrap gap-3"
-        >
-          <div
-            v-for="badge in visibleFeatureBadges"
-            :key="badge"
-            class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200"
-          >
-            <UIcon name="i-lucide-check" class="text-blue-500" />
-            {{ badge }}
-          </div>
-        </div>
-
-        <div
-          class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900"
-        >
-          <div
-            class="space-y-3 text-sm font-medium text-gray-600 dark:text-gray-300"
-          >
-            <div class="flex justify-between gap-4">
-              <span>Raum ({{ selectedDurationHours }} Std.)</span>
-              <span>{{ money.format(bookableNetTotal) }}</span>
-            </div>
-
-            <div
-              v-for="extra in selectedExtras"
-              :key="extra.id"
-              class="flex justify-between gap-4"
-            >
-              <span>{{ extra.title }}</span>
-              <span>{{
-                money.format(Number(extra.amount ?? extra.priceEur ?? 0))
-              }}</span>
-            </div>
-
-            <div class="flex justify-between gap-4">
-              <span>MwSt. ({{ vatRate }}%)</span>
-              <span>{{ money.format(vatTotal) }}</span>
-            </div>
-          </div>
-
-          <div class="my-4 border-t border-gray-200 dark:border-gray-800" />
-
-          <div
-            class="flex justify-between gap-4 text-xl font-extrabold text-gray-950 dark:text-white"
-          >
-            <span>Gesamt</span>
-            <span class="text-blue-500">{{ money.format(total) }}</span>
-          </div>
-        </div>
+      <!-- LEFT: Bookable Overview + Prices -->
+      <div class="flex-2 p-4 md:p-6 lg:p-10 lg:shrink-0">
+        <CheckoutBookableSidebar
+          :lead-bookable="leadBookable"
+          :tenant="tenant"
+          :summary="summary"
+          :validation-errors="validationErrors"
+        />
       </div>
+      <!-- RIGHT: Checkout Flow -->
+      <main class="flex-3 min-w-0 bg-white dark:bg-gray-900 p-6 md:p-8 lg:p-10">
+        <AppStepper
+            v-model="currentStep"
+            :steps="steps"
+            :can-go-next="canGoNext"
+            @finish="handleFinish"
+          >
+            <template #step-objects>
+              <p class="text-gray-500 dark:text-gray-400">
+                Hier kommt die Objektauswahl rein.
+              </p>
+            </template>
 
-      <div class="px-6 py-8 lg:px-12"></div>
+            <template #step-period>
+              <div class="space-y-8">
+                <!-- Lead bookable error -->
+                <div
+                  v-if="leadBookableError"
+                  class="flex items-start gap-3 p-4 rounded-xl border-2 border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950"
+                >
+                  <UIcon
+                    name="i-lucide-alert-triangle"
+                    class="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"
+                    size="20"
+                  />
+                  <div class="flex-1">
+                    <p class="font-semibold text-red-800 dark:text-red-200">
+                      {{ leadBookable?.title }}
+                    </p>
+                    <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+                      {{ $t(leadBookableError.reason) }}
+                    </p>
+                    <p
+                      v-if="leadBookableError.params?.remaining !== undefined"
+                      class="text-xs text-red-600 dark:text-red-400 mt-1"
+                    >
+                      {{
+                        $t("checkout.errors.capacityInfo", {
+                          remaining: leadBookableError.params.remaining,
+                          total: leadBookableError.params.totalCapacity,
+                        })
+                      }}
+                    </p>
+                  </div>
+                </div>
+
+                <InputsInputTimePeriodSlots
+                  v-if="isTimePeriodRelated"
+                  v-model="selectedTimePeriod"
+                  :time-periods="bookableTimePeriods"
+                  :tenant-id="tenantID"
+                  :bookable-id="bookableID"
+                />
+
+                <p v-else class="text-gray-500 dark:text-gray-400">
+                  Hier kommen Datum, Uhrzeit &amp; Zusatzobjekte rein.
+                </p>
+
+                <AdditionalBookablesSelector
+                  v-if="additionalBookables.length > 0"
+                  v-model="selectedAdditionalBookables"
+                  :items="additionalBookables"
+                  :validation-errors="validationErrors"
+                />
+              </div>
+            </template>
+
+            <template #step-data>
+              <p class="text-gray-500 dark:text-gray-400">
+                Hier kommen die Kontaktdaten rein.
+              </p>
+            </template>
+
+            <template #step-confirm>
+              <p class="text-gray-500 dark:text-gray-400">
+                Hier kommt die finale Bestätigung rein.
+              </p>
+            </template>
+          </AppStepper>
+      </main>
     </div>
   </div>
 </template>

@@ -21,7 +21,11 @@
     "settings": "Einstellungen",
     "profile": "Profil",
     "back": "Zurück",
-    "loading": "Lädt..."
+    "loading": "Lädt...",
+    "freeOfCharge": "kostenlos",
+    "optional": "optional",
+    "mandatory": "Pflichtfeld",
+    "obligation": "Pflicht"
   },
   "navigation": {
     "home": "Startseite",
@@ -222,6 +226,57 @@
   },
 
   "checkout": {
-    "noBookable": "Keine passenden Ressourcen gefunden"
+    "noBookable": "Keine passenden Ressourcen gefunden",
+    "additionalObjects": "Zusatzobjekte",
+    "mandatoryObjects": "Pflichtobjekte",
+    "missing_parameters": "Es fehlen erforderliche Parameter für die Buchung.",
+    "unauthorized": "Sie sind nicht berechtigt, dieses Objekt zu buchen.",
+    "permission_denied": "Sie haben keine Berechtigung, dieses Objekt zu buchen.",
+    "bad_request": "Ungültige Anfrage. Bitte überprüfen Sie Ihre Eingaben.",
+    "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "bookable_not_found": "Das angeforderte Objekt wurde nicht gefunden.",
+    "bookable_not_bookable": "Dieses Objekt kann nicht gebucht werden.",
+    "bookable_unavailable": "Dieses Objekt ist im gewählten Zeitraum nicht verfügbar.",
+    "parent_unavailable": "Das übergeordnete Objekt ist im gewählten Zeitraum nicht verfügbar.",
+    "child_unavailable": "Eines der untergeordneten Objekte ist im gewählten Zeitraum nicht verfügbar.",
+    "outside_opening_hours": "Das Objekt kann außerhalb der Öffnungszeiten nicht gebucht werden.",
+    "duration_too_short": "Die Buchungsdauer ist zu kurz.",
+    "duration_too_long": "Die Buchungsdauer ist zu lang.",
+    "duration_invalid": "Die angegebene Buchungsdauer ist ungültig.",
+    "max_booking_date_exceeded": "Das maximale Buchungsdatum wurde überschritten.",
+    "time_required": "Für dieses Objekt muss eine Uhrzeit angegeben werden.",
+    "event_in_past": "Die Veranstaltung liegt in der Vergangenheit und kann nicht gebucht werden.",
+    "event_full": "Die Veranstaltung ist ausgebucht und kann nicht gebucht werden.",
+    "event_not_found": "Die Veranstaltung wurde nicht gefunden.",
+    "no_price_category": "Es wurde keine gültige Preiskategorie für dieses Objekt gefunden.",
+    "max_amount_exceeded": "Die maximale Anzahl für dieses Objekt wurde überschritten.",
+    "booking_attempts_missing": "Es fehlen erforderliche Informationen zu den Buchungsversuchen.",
+    "invalid_bookable_items": "Ungültige oder fehlende Informationen zu den buchbaren Objekten.",
+    "group_booking_disabled": "Serienbuchungen sind für dieses Objekt nicht erlaubt.",
+    "group_booking_role_required": "Für Serienbuchungen ist eine bestimmte Rolle erforderlich.",
+    "unknown_error": "Bei der Validierung ist ein unbekannter Fehler aufgetreten.",
+    "capacity_exceeded": "Die maximale Kapazität für dieses Objekt wurde erreicht.",
+    "time_conflict": "Für dieses Objekt besteht ein Zeitkonflikt mit einer anderen Buchung.",
+    "errors": {
+      "capacityInfo": "Verfügbar: {remaining} von {total}",
+      "unavailableHint": "Bitte wählen Sie einen anderen Zeitraum oder entfernen Sie das Objekt."
+    }
+  },
+
+  "stepper": {
+    "stepOf": "Schritt {current} von {total}",
+    "back": "Zurück",
+    "next": "Weiter",
+    "finish": "Abschließen"
+  },
+
+  "timePeriods": {
+    "selectDate": "Datum wählen",
+    "previousDays": "Frühere Tage anzeigen",
+    "laterDays": "Spätere Tage anzeigen",
+    "jumpToDate": "Zu Datum springen",
+    "selectTime": "Uhrzeit wählen",
+    "noTimePeriods": "Für den ausgewählten Tag sind keine Zeiten verfügbar",
+    "selected": "Ausgewählte Zeit"
   }
 }

@@ -691,7 +691,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
               timePeriod.start!,
               timePeriod.end!
             )
-          : await useBookables().getBookableAvailability(
+          : await useBookables().getBookableOccupancy(
               item.item.tenantId,
               item.item.id,
               timePeriod.start!,
@@ -857,7 +857,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
                 ticket.id
               );
               const ticketAvailability =
-                await useBookables().getBookableAvailability(
+                await useBookables().getBookableOccupancy(
                   event.item.tenantId,
                   ticket.id
                 );

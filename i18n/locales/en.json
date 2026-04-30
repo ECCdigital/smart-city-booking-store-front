@@ -1,3 +1,58 @@
 {
-  "welcome": "Welcome!"
+  "welcome": "Welcome!",
+  "common": {
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "repeatPassword": "Repeat Password",
+    "newPassword": "New Password",
+    "username": "Username",
+    "email": "Email",
+    "name": "Name",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "company": "Company",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "search": "Search",
+    "home": "Home",
+    "settings": "Settings",
+    "profile": "Profile",
+    "back": "Back",
+    "loading": "Loading...",
+    "freeOfCharge": "Free of charge",
+    "optional": "optional",
+    "mandatory": "Mandatory",
+    "obligation": "Required"
+  },
+  "checkout": {
+    "noBookable": "No matching resources found",
+    "additionalObjects": "Additional Objects",
+    "mandatoryObjects": "Mandatory Objects",
+    "bookable_unavailable": "This object is not available for the selected time period.",
+    "unknown_error": "An error occurred during validation.",
+    "capacity_exceeded": "The maximum capacity for this object has been reached.",
+    "time_conflict": "There is a time conflict with another booking for this object.",
+    "errors": {
+      "capacityInfo": "Available: {remaining} of {total}",
+      "unavailableHint": "Please choose a different time period or remove the object."
+    }
+  },
+  "stepper": {
+    "stepOf": "Step {current} of {total}",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish"
+  },
+  "timePeriods": {
+    "selectDate": "Select date",
+    "previousDays": "Show earlier days",
+    "laterDays": "Show later days",
+    "jumpToDate": "Jump to date",
+    "selectTime": "Select time",
+    "noTimePeriods": "No times available for the selected day",
+    "selected": "Selected time"
+  }
 }
