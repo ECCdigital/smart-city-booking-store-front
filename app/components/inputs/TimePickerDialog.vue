@@ -14,7 +14,6 @@
           <div class="flex justify-between items-center">
             <p class="text-lg font-bold mb-5">Uhrzeit auswählen</p>
             <div>
-              <UTooltip text="Schließen">
                 <UButton
                   color="neutral"
                   variant="ghost"
@@ -22,7 +21,7 @@
                   class="rounded-xl"
                   @click="closeDialog"
                 />
-              </UTooltip>
+              
             </div>
           </div>
           <div class="glass p-3 w-full">
