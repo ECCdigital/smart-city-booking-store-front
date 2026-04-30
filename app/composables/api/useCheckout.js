@@ -25,8 +25,6 @@ export function useCheckout() {
   }) => {
     const api = useApiClient();
 
-    console.log("validateBookable", bookableID, tenantID, amount, start, end, couponCode, bookWithPrice);
-
     const { data, error } = await api.post(
       `/api/checkout/${bookableID}/validate`,
       { amount, start, end, couponCode, bookWithPrice, tenantID }

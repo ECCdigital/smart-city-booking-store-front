@@ -1,8 +1,21 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const checkoutNavTab = useState("checkoutNavTab", () => "");
+
+const checkoutTabs = computed(() => {
+  if (!checkoutNavTab.value) return [];
+  return [
+    {
+      label: checkoutNavTab.value.label,
+      icon: "i-lucide-shopping-cart",
+      value: checkoutNavTab.value.url,
+    },
+  ];
+});
+</script>
 
 <template>
   <div class="bg-neutral-50 dark:bg-gray-950">
-    <NavigationBar />
+    <NavigationBar :tabs="checkoutTabs" />
     <div>
       <slot />
     </div>

@@ -1,0 +1,778 @@
+<template>
+  <div class="space-y-5">
+    <!-- Calendar Card -->
+    <div
+      class="rounded-sm border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900"
+    >
+
+      <!-- Week navigation -->
+      <div
+        class="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
+      >
+        <button
+          type="button"
+          :disabled="!canGoPrev"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          @click="navigatePrev"
+        >
+          &larr; {{ $t("scheduleSelection.previousWeek") }}
+        </button>
+
+        <span
+          class="font-semibold text-sm text-gray-800 dark:text-gray-200"
+        >
+          {{ dateRangeLabel }}
+        </span>
+
+        <button
+          type="button"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          @click="navigateNext"
+        >
+          {{ $t("scheduleSelection.nextWeek") }} &rarr;
+        </button>
+      </div>
+
+      <!-- FullCalendar -->
+      <ClientOnly>
+        <div class="fc-wrapper">
+          <FullCalendar ref="calendarRef" :options="calendarOptions" />
+        </div>
+        <template #fallback>
+          <div class="flex items-center justify-center py-20">
+            <UIcon
+              name="i-lucide-loader-2"
+              class="animate-spin text-gray-400"
+              size="24"
+            />
+          </div>
+        </template>
+      </ClientOnly>
+
+      <!-- Legend -->
+      <div
+        class="flex items-center gap-5 px-4 py-2.5 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400"
+      >
+        <span class="flex items-center gap-1.5">
+          <span
+            class="inline-block w-4 h-3 rounded-sm border border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/50"
+          />
+          {{ $t("scheduleSelection.free") }}
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span
+            class="inline-block w-4 h-3 rounded-sm occupied-legend"
+          />
+          {{ $t("scheduleSelection.occupied") }}
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span
+            class="inline-block w-4 h-3 rounded-sm bg-primary/60 dark:bg-primary/50"
+          />
+          {{ $t("scheduleSelection.yourSelection") }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Overlap warning -->
+    <div
+      v-if="overlapWarning"
+      class="flex items-start gap-2.5 p-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/50"
+    >
+      <UIcon
+        name="i-lucide-alert-triangle"
+        class="text-amber-500 flex-shrink-0 mt-0.5"
+        size="18"
+      />
+      <p class="text-sm text-amber-700 dark:text-amber-300">
+        {{ $t("scheduleSelection.overlapWarning") }}
+      </p>
+    </div>
+
+    <!-- DateTime inputs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label
+          class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+        >
+          {{ $t("scheduleSelection.startTimePoint") }}
+        </label>
+        <input
+          v-model="startDateTime"
+          type="datetime-local"
+          step="900"
+          :min="todayDateTimeMin"
+          class="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors"
+          @change="onManualInputChange"
+        >
+      </div>
+      <div>
+        <label
+          class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+        >
+          {{ $t("scheduleSelection.endTimePoint") }}
+        </label>
+        <input
+          v-model="endDateTime"
+          type="datetime-local"
+          step="900"
+          :min="startDateTime || todayDateTimeMin"
+          class="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors"
+          @change="onManualInputChange"
+        >
+      </div>
+    </div>
+
+    <!-- Hint -->
+    <p class="text-xs text-gray-400 dark:text-gray-500 italic">
+      {{ $t("scheduleSelection.dragHint") }}
+    </p>
+  </div>
+</template>
+
+<script setup>
+import FullCalendar from "@fullcalendar/vue3";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import deLocale from "@fullcalendar/core/locales/de";
+import { useBookables } from "~/composables/api/useBookables.js";
+
+const props = defineProps({
+  tenantId: { type: String, default: null },
+  bookableId: { type: String, default: null },
+  amount: { type: Number, default: 1 },
+  modelValue: {
+    type: Object,
+    default: () => ({ start: null, end: null }),
+  },
+});
+
+const emit = defineEmits(["update:modelValue", "change"]);
+const { getBookableAvailability } = useBookables();
+
+/* ── helpers ─────────────────────────────────────────────── */
+function pad2(n) {
+  return n.toString().padStart(2, "0");
+}
+
+function localISODate(date) {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+function parseLocalDate(iso) {
+  if (!iso) return null;
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function getMonday(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  const dow = d.getDay();
+  d.setDate(d.getDate() + (dow === 0 ? -6 : 1 - dow));
+  return d;
+}
+
+/* ── state ───────────────────────────────────────────────── */
+const today = (() => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+})();
+const todayISO = localISODate(today);
+const todayDateTimeMin = `${todayISO}T00:00`;
+
+const calendarRef = ref(null);
+const currentViewStart = ref(null);
+const currentViewEnd = ref(null);
+
+const startDateInput = ref("");
+const startTimeInput = ref("");
+const endDateInput = ref("");
+const endTimeInput = ref("");
+
+const availability = ref([]);
+const isLoadingAvailability = ref(false);
+
+/* ── FullCalendar API access ─────────────────────────────── */
+function getApi() {
+  return calendarRef.value?.getApi?.() ?? null;
+}
+
+/* ── navigation ──────────────────────────────────────────── */
+function navigatePrev() {
+  const api = getApi();
+  if (api) api.prev();
+}
+
+function navigateNext() {
+  const api = getApi();
+  if (api) api.next();
+}
+
+const canGoPrev = computed(() => {
+  if (!currentViewStart.value) return true;
+  const thisMonday = getMonday(today);
+  return currentViewStart.value.getTime() > thisMonday.getTime();
+});
+
+/* ── date range label ───────────────────────────────────── */
+const dateRangeLabel = computed(() => {
+  if (!currentViewStart.value || !currentViewEnd.value) return "";
+  const start = currentViewStart.value;
+  // FullCalendar end is exclusive – subtract a day for display
+  const end = new Date(currentViewEnd.value);
+  end.setDate(end.getDate() - 1);
+
+  const fmtDate = (d) => {
+    const day = pad2(d.getDate());
+    const month = d
+      .toLocaleDateString("de-DE", { month: "short" })
+      .replace(/\.$/, "");
+    return `${day}. ${month}`;
+  };
+
+  return `${fmtDate(start)} – ${fmtDate(end)} ${end.getFullYear()}`;
+});
+
+/* ── availability cache + fetch ──────────────────────────── */
+const availabilityCache = new Map();
+
+async function fetchAvailability(start, end) {
+  if (!props.tenantId || !props.bookableId) {
+    availability.value = [];
+    return;
+  }
+
+  const sMs = start.getTime();
+  const eMs = end.getTime();
+  const key = `${props.tenantId}|${props.bookableId}|${sMs}|${eMs}|${props.amount}`;
+
+  if (availabilityCache.has(key)) {
+    availability.value = availabilityCache.get(key);
+    return;
+  }
+
+  isLoadingAvailability.value = true;
+  try {
+    const data = await getBookableAvailability({
+      tenantID: props.tenantId,
+      bookableId: props.bookableId,
+      start: start.toISOString(),
+      end: end.toISOString(),
+      amount: props.amount,
+    });
+
+    // API may return array directly or { availability: [...] }
+    const raw = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.availability)
+        ? data.availability
+        : [];
+
+    availabilityCache.set(key, raw);
+    availability.value = raw;
+  } catch {
+    availability.value = [];
+  } finally {
+    isLoadingAvailability.value = false;
+  }
+}
+
+watch(
+  () => [props.tenantId, props.bookableId, props.amount],
+  () => {
+    availabilityCache.clear();
+    if (currentViewStart.value && currentViewEnd.value) {
+      fetchAvailability(currentViewStart.value, currentViewEnd.value);
+    }
+  },
+);
+
+/* ── calendar events (occupied + selection) ──────────────── */
+const calendarEvents = computed(() => {
+  const events = [];
+
+  // Occupied (background events)
+  for (const iv of availability.value) {
+    if (!iv.available) {
+      events.push({
+        start: new Date(iv.timeBegin),
+        end: new Date(iv.timeEnd),
+        display: "background",
+        classNames: ["fc-occupied"],
+      });
+    }
+  }
+
+  // User selection (regular event)
+  if (
+    startDateInput.value &&
+    startTimeInput.value &&
+    endDateInput.value &&
+    endTimeInput.value
+  ) {
+    const sd = parseLocalDate(startDateInput.value);
+    const ed = parseLocalDate(endDateInput.value);
+    if (sd && ed) {
+      const [sh, sm] = startTimeInput.value.split(":").map(Number);
+      const [eh, em] = endTimeInput.value.split(":").map(Number);
+      const start = new Date(
+        sd.getFullYear(),
+        sd.getMonth(),
+        sd.getDate(),
+        sh,
+        sm || 0,
+      );
+      const end = new Date(
+        ed.getFullYear(),
+        ed.getMonth(),
+        ed.getDate(),
+        eh,
+        em || 0,
+      );
+      if (end > start) {
+        events.push({
+          id: "user-selection",
+          title: "",
+          start,
+          end,
+          display: "auto",
+          classNames: ["fc-user-selection"],
+          editable: false,
+        });
+      }
+    }
+  }
+
+  return events;
+});
+
+/* ── day header renderer ─────────────────────────────────── */
+function renderDayHeader(arg) {
+  const d = arg.date;
+  const weekday = d
+    .toLocaleDateString("de-DE", { weekday: "short" })
+    .replace(/\.$/, "");
+  const day = d.getDate();
+  const isToday = localISODate(d) === todayISO;
+  const cls = isToday ? "fc-day-header--today" : "";
+
+  return {
+    html:
+      '<div class="fc-day-header-inner ' +
+      cls +
+      '">' +
+      '<div class="fc-day-header-weekday">' +
+      weekday +
+      "</div>" +
+      '<div class="fc-day-header-number">' +
+      day +
+      "</div>" +
+      "</div>",
+  };
+}
+
+/* ── calendar callbacks ──────────────────────────────────── */
+function handleCalendarSelect(info) {
+  startDateInput.value = localISODate(info.start);
+  startTimeInput.value = `${pad2(info.start.getHours())}:${pad2(info.start.getMinutes())}`;
+  endDateInput.value = localISODate(info.end);
+  endTimeInput.value = `${pad2(info.end.getHours())}:${pad2(info.end.getMinutes())}`;
+  emitValue();
+
+  // Clear FullCalendar's built-in highlight – our event takes over
+  nextTick(() => {
+    const api = getApi();
+    if (api) api.unselect();
+  });
+}
+
+function handleDatesSet(info) {
+  currentViewStart.value = info.start;
+  currentViewEnd.value = info.end;
+  fetchAvailability(info.start, info.end);
+}
+
+/* ── calendar options ────────────────────────────────────── */
+const calendarOptions = computed(() => ({
+  plugins: [timeGridPlugin, interactionPlugin],
+  initialView: "timeGridWeek",
+  locale: deLocale,
+  firstDay: 1,
+  headerToolbar: false,
+  allDaySlot: false,
+  nowIndicator: true,
+  slotMinTime: "08:00:00",
+  slotMaxTime: "20:00:00",
+  slotDuration: "01:00:00",
+  slotLabelInterval: "02:00:00",
+  slotLabelFormat: {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  },
+  dayHeaderContent: renderDayHeader,
+  height: "auto",
+  selectable: true,
+  selectMirror: true,
+  unselectAuto: true,
+  selectOverlap: true,
+  snapDuration: "00:15:00",
+  events: calendarEvents.value,
+  select: handleCalendarSelect,
+  datesSet: handleDatesSet,
+  validRange: { start: localISODate(getMonday(today)) },
+}));
+
+/* ── datetime-local computed (two-way) ───────────────────── */
+const startDateTime = computed({
+  get() {
+    if (!startDateInput.value || !startTimeInput.value) return "";
+    return `${startDateInput.value}T${startTimeInput.value}`;
+  },
+  set(val) {
+    if (!val) {
+      startDateInput.value = "";
+      startTimeInput.value = "";
+    } else {
+      const [d, t] = val.split("T");
+      startDateInput.value = d;
+      startTimeInput.value = t;
+    }
+  },
+});
+
+const endDateTime = computed({
+  get() {
+    if (!endDateInput.value || !endTimeInput.value) return "";
+    return `${endDateInput.value}T${endTimeInput.value}`;
+  },
+  set(val) {
+    if (!val) {
+      endDateInput.value = "";
+      endTimeInput.value = "";
+    } else {
+      const [d, t] = val.split("T");
+      endDateInput.value = d;
+      endTimeInput.value = t;
+    }
+  },
+});
+
+/* ── manual input change ─────────────────────────────────── */
+function onManualInputChange() {
+  emitValue();
+
+  // Navigate calendar to the start date if it is outside the current view
+  if (startDateInput.value) {
+    const api = getApi();
+    if (api) {
+      const sd = parseLocalDate(startDateInput.value);
+      if (
+        sd &&
+        currentViewStart.value &&
+        currentViewEnd.value &&
+        (sd < currentViewStart.value || sd >= currentViewEnd.value)
+      ) {
+        api.gotoDate(sd);
+      }
+    }
+  }
+}
+
+/* ── overlap warning ─────────────────────────────────────── */
+const overlapWarning = computed(() => {
+  if (
+    !startDateInput.value ||
+    !startTimeInput.value ||
+    !endDateInput.value ||
+    !endTimeInput.value
+  ) {
+    return false;
+  }
+
+  const sd = parseLocalDate(startDateInput.value);
+  const ed = parseLocalDate(endDateInput.value);
+  if (!sd || !ed) return false;
+
+  const [sh, sm] = startTimeInput.value.split(":").map(Number);
+  const [eh, em] = endTimeInput.value.split(":").map(Number);
+
+  const startMs = new Date(
+    sd.getFullYear(),
+    sd.getMonth(),
+    sd.getDate(),
+    sh,
+    sm || 0,
+  ).getTime();
+  const endMs = new Date(
+    ed.getFullYear(),
+    ed.getMonth(),
+    ed.getDate(),
+    eh,
+    em || 0,
+  ).getTime();
+
+  if (endMs <= startMs) return false;
+
+  for (const iv of availability.value) {
+    if (iv.timeBegin < endMs && iv.timeEnd > startMs && !iv.available) {
+      return true;
+    }
+  }
+  return false;
+});
+
+/* ── emit value ──────────────────────────────────────────── */
+let lastEmittedKey = "";
+
+function emitValue() {
+  let payload = { start: null, end: null };
+
+  if (
+    startDateInput.value &&
+    startTimeInput.value &&
+    endDateInput.value &&
+    endTimeInput.value
+  ) {
+    const sd = parseLocalDate(startDateInput.value);
+    const ed = parseLocalDate(endDateInput.value);
+    if (sd && ed) {
+      const [sh, sm] = startTimeInput.value.split(":").map(Number);
+      const [eh, em] = endTimeInput.value.split(":").map(Number);
+      const start = new Date(
+        sd.getFullYear(),
+        sd.getMonth(),
+        sd.getDate(),
+        sh,
+        sm || 0,
+      );
+      const end = new Date(
+        ed.getFullYear(),
+        ed.getMonth(),
+        ed.getDate(),
+        eh,
+        em || 0,
+      );
+      if (end.getTime() > start.getTime()) {
+        payload = { start: start.getTime(), end: end.getTime() };
+      }
+    }
+  }
+
+  const key = `${payload.start ?? ""}|${payload.end ?? ""}`;
+  if (key === lastEmittedKey) return;
+  lastEmittedKey = key;
+
+  emit("update:modelValue", payload);
+  emit("change", payload);
+}
+
+/* ── watch external modelValue ───────────────────────────── */
+watch(
+  () => props.modelValue,
+  (v) => {
+    if (!v || (!v.start && !v.end)) return;
+
+    if (v.start) {
+      const d = new Date(v.start);
+      startDateInput.value = localISODate(d);
+      startTimeInput.value = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+    }
+    if (v.end) {
+      const d = new Date(v.end);
+      endDateInput.value = localISODate(d);
+      endTimeInput.value = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+    }
+
+    lastEmittedKey = `${v.start ?? ""}|${v.end ?? ""}`;
+  },
+  { immediate: true, deep: true },
+);
+</script>
+
+<style scoped>
+/* ════════════════════════════════════════════════════════════
+   FullCalendar theme overrides
+   ════════════════════════════════════════════════════════════ */
+
+/* ── General ─────────────────────────────────────────────── */
+:deep(.fc) {
+  --fc-border-color: #e5e7eb;
+  --fc-today-bg-color: rgba(99, 102, 241, 0.03);
+  --fc-neutral-bg-color: transparent;
+  --fc-page-bg-color: transparent;
+  --fc-event-bg-color: transparent;
+  --fc-event-border-color: transparent;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+:is(.dark) :deep(.fc) {
+  --fc-border-color: #374151;
+  --fc-today-bg-color: rgba(99, 102, 241, 0.05);
+  color: #e5e7eb;
+}
+
+/* Remove outer scrollgrid border (we have our own card border) */
+:deep(.fc .fc-scrollgrid) {
+  border: none;
+}
+
+:deep(.fc .fc-scrollgrid-section > td),
+:deep(.fc .fc-scrollgrid-section > th) {
+  border: none;
+}
+
+/* ── Column headers ──────────────────────────────────────── */
+:deep(.fc-col-header-cell) {
+  vertical-align: middle;
+  padding: 0;
+}
+
+:deep(.fc-col-header-cell-cushion) {
+  padding: 0;
+  text-decoration: none !important;
+}
+
+:deep(.fc-day-header-inner) {
+  text-align: center;
+  padding: 10px 0;
+}
+
+:deep(.fc-day-header-weekday) {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+}
+
+:deep(.fc-day-header-number) {
+  margin-top: 2px;
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #1f2937;
+}
+
+:is(.dark) :deep(.fc-day-header-weekday) {
+  color: #9ca3af;
+}
+
+:is(.dark) :deep(.fc-day-header-number) {
+  color: #e5e7eb;
+}
+
+/* Today column header */
+:deep(.fc-day-header--today .fc-day-header-weekday),
+:deep(.fc-day-header--today .fc-day-header-number) {
+  color: var(--color-primary, #6366f1);
+}
+
+/* ── Slot labels (time axis) ─────────────────────────────── */
+:deep(.fc-timegrid-slot-label-cushion) {
+  font-size: 11px;
+  font-weight: 500;
+  color: #9ca3af;
+}
+
+:is(.dark) :deep(.fc-timegrid-slot-label-cushion) {
+  color: #6b7280;
+}
+
+/* Minor (non-labelled) slot separator */
+:deep(.fc-timegrid-slot-minor) {
+  border-top-style: dashed;
+  border-color: #f3f4f6;
+}
+
+:is(.dark) :deep(.fc-timegrid-slot-minor) {
+  border-color: #1f2937;
+}
+
+/* ── Occupied background events (pink hatched) ───────────── */
+:deep(.fc-bg-event.fc-occupied) {
+  background: repeating-linear-gradient(
+    -45deg,
+    #fca5a5,
+    #fca5a5 3px,
+    #fee2e2 3px,
+    #fee2e2 7px
+  ) !important;
+  opacity: 1 !important;
+}
+
+:is(.dark) :deep(.fc-bg-event.fc-occupied) {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(248, 113, 113, 0.25),
+    rgba(248, 113, 113, 0.25) 3px,
+    rgba(248, 113, 113, 0.08) 3px,
+    rgba(248, 113, 113, 0.08) 7px
+  ) !important;
+}
+
+/* ── User selection event ────────────────────────────────── */
+:deep(.fc-event.fc-user-selection) {
+  background-color: rgba(99, 102, 241, 0.6) !important;
+  border: none !important;
+  border-radius: 3px !important;
+  box-shadow: none !important;
+}
+
+:is(.dark) :deep(.fc-event.fc-user-selection) {
+  background-color: rgba(99, 102, 241, 0.5) !important;
+}
+
+:deep(.fc-user-selection .fc-event-main) {
+  padding: 0 !important;
+}
+
+:deep(.fc-user-selection .fc-event-time),
+:deep(.fc-user-selection .fc-event-title) {
+  display: none !important;
+}
+
+/* ── Selection highlight (while dragging) ────────────────── */
+:deep(.fc-highlight) {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+:is(.dark) :deep(.fc-highlight) {
+  background-color: rgba(99, 102, 241, 0.2) !important;
+}
+
+/* ── Now-indicator line ──────────────────────────────────── */
+:deep(.fc-timegrid-now-indicator-line) {
+  border-color: #ef4444;
+}
+
+:deep(.fc-timegrid-now-indicator-arrow) {
+  border-color: #ef4444;
+}
+
+/* ════════════════════════════════════════════════════════════
+   Legend stripe (matches occupied pattern)
+   ════════════════════════════════════════════════════════════ */
+.occupied-legend {
+  background: repeating-linear-gradient(
+    -45deg,
+    #fca5a5,
+    #fca5a5 2px,
+    #fee2e2 2px,
+    #fee2e2 5px
+  );
+}
+
+:is(.dark) .occupied-legend {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(248, 113, 113, 0.25),
+    rgba(248, 113, 113, 0.25) 2px,
+    rgba(248, 113, 113, 0.08) 2px,
+    rgba(248, 113, 113, 0.08) 5px
+  );
+}
+</style>

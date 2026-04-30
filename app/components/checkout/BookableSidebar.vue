@@ -26,21 +26,17 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  /**
+   * Wenn true, wird anstelle der Preisübersicht ein Hinweis angezeigt,
+   * dass zuerst ein Zeitraum ausgewählt werden muss.
+   */
+  needsTimePeriodSelection: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // --- Anzeige-Helfer --------------------------------------------------------
-
-const TYPE_LABELS = {
-  room: "Raumbuchung",
-  resource: "Ressourcen-Buchung",
-  ticket: "Ticketbuchung",
-  event: "Eventbuchung",
-};
-
-const typeLabel = computed(() => {
-  const type = props.leadBookable?.type;
-  return (TYPE_LABELS[type] || type || "").toUpperCase();
-});
 
 const subtitle = computed(() => props.tenant?.name || "");
 
@@ -77,14 +73,8 @@ function formatEur(value) {
 <template>
   <aside class="w-full lg:w-[440px] xl:w-[480px] lg:flex-shrink-0">
     <div class="lg:sticky lg:top-8 space-y-6">
-      <!-- Header: Type / Subtitle / Title -->
+      <!-- Header: Subtitle / Title -->
       <div>
-        <p
-          class="text-sm md:text-base font-semibold tracking-wider text-primary dark:text-primary mb-3"
-        >
-          {{ typeLabel }}
-        </p>
-
         <p
           v-if="subtitle"
           class="text-sm md:text-base text-gray-500 dark:text-gray-400 mb-1"
@@ -130,9 +120,31 @@ function formatEur(value) {
         </span>
       </div>
 
+      <!-- Info: selection time period -->
+      <div
+        v-if="needsTimePeriodSelection"
+        class="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950 p-5"
+      >
+        <div class="flex items-start gap-3">
+          <UIcon
+            name="i-lucide-calendar-clock"
+            class="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5"
+            size="20"
+          />
+          <div class="flex-1">
+            <p class="font-semibold text-blue-800 dark:text-blue-200">
+              {{ $t('checkout.selectTimePeriodTitle') }}
+            </p>
+            <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">
+              {{ $t('checkout.selectTimePeriodHint') }}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Price Summary Card -->
       <div
-        v-if="computedSummary"
+        v-else-if="computedSummary"
         class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 space-y-3"
       >
         <!-- Error Items -->

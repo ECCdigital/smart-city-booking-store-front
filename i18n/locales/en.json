@@ -35,6 +35,8 @@
     "unknown_error": "An error occurred during validation.",
     "capacity_exceeded": "The maximum capacity for this object has been reached.",
     "time_conflict": "There is a time conflict with another booking for this object.",
+    "selectTimePeriodTitle": "Select a time period",
+    "selectTimePeriodHint": "Please select a time period first to see the price summary.",
     "errors": {
       "capacityInfo": "Available: {remaining} of {total}",
       "unavailableHint": "Please choose a different time period or remove the object."
@@ -54,5 +56,19 @@
     "selectTime": "Select time",
     "noTimePeriods": "No times available for the selected day",
     "selected": "Selected time"
+  },
+
+  "scheduleSelection": {
+    "availability": "Availability",
+    "weekOverview": "Week overview",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "free": "Available",
+    "occupied": "Occupied",
+    "yourSelection": "Your selection",
+    "startTimePoint": "Start time",
+    "endTimePoint": "End time",
+    "dragHint": "Click or drag on the calendar to select a time range. Alternatively, enter the times manually below.",
+    "overlapWarning": "The selected time range overlaps with already occupied times. The booking may not be possible."
   }
 }

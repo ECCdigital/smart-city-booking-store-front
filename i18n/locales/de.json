@@ -257,6 +257,8 @@
     "unknown_error": "Bei der Validierung ist ein unbekannter Fehler aufgetreten.",
     "capacity_exceeded": "Die maximale Kapazität für dieses Objekt wurde erreicht.",
     "time_conflict": "Für dieses Objekt besteht ein Zeitkonflikt mit einer anderen Buchung.",
+    "selectTimePeriodTitle": "Zeitraum auswählen",
+    "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
     "errors": {
       "capacityInfo": "Verfügbar: {remaining} von {total}",
       "unavailableHint": "Bitte wählen Sie einen anderen Zeitraum oder entfernen Sie das Objekt."
@@ -278,5 +280,19 @@
     "selectTime": "Uhrzeit wählen",
     "noTimePeriods": "Für den ausgewählten Tag sind keine Zeiten verfügbar",
     "selected": "Ausgewählte Zeit"
+  },
+
+  "scheduleSelection": {
+    "availability": "Verfügbarkeit",
+    "weekOverview": "Wochenübersicht",
+    "previousWeek": "Vorherige Woche",
+    "nextWeek": "Nächste Woche",
+    "free": "Verfügbar",
+    "occupied": "Belegt",
+    "yourSelection": "Ihre Auswahl",
+    "startTimePoint": "Startzeitpunkt",
+    "endTimePoint": "Endzeitpunkt",
+    "dragHint": "Klicken oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen. Alternativ können Sie die Zeiten unten manuell eingeben.",
+    "overlapWarning": "Der gewählte Zeitraum überschneidet sich mit bereits belegten Zeiten. Die Buchung kann unter Umständen nicht durchgeführt werden."
   }
 }

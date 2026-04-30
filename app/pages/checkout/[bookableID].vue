@@ -2,6 +2,8 @@
 import { useCheckout } from "~/composables/api/useCheckout.js";
 import { useTenants } from "~/composables/api/useTenants.js";
 import AdditionalBookablesSelector from "~/components/checkout/AdditionalBookablesSelector.vue";
+import InputTimePeriodSlots from "~/components/inputs/InputTimePeriodSlots.vue";
+import InputFreeTimeSelection from "~/components/inputs/InputFreeTimeSelection.vue";
 
 definePageMeta({
   layout: "checkout",
@@ -48,6 +50,37 @@ if (error.value) {
 
 const leadBookable = computed(() => data.value?.leadBookable || null);
 const tenant = computed(() => data.value?.tenant || null);
+
+// --- Type-Label für die NavigationBar bereitstellen ------------------------
+const TYPE_LABELS = {
+  room: "Raumbuchung",
+  resource: "Ressourcen-Buchung",
+  ticket: "Ticketbuchung",
+  event: "Eventbuchung",
+};
+
+const checkoutNavTab = useState("checkoutNavTab", () => {});
+
+watch(
+  leadBookable,
+  (b) => {
+    const type = b?.type;
+    checkoutNavTab.value = TYPE_LABELS[type] || type || "";
+
+    const route = useRoute();
+    const bookableID = route.params.bookableID;
+    const tenantID = route.query.tenantId;
+
+    const label = TYPE_LABELS[type] || type || "";
+    const url = `/checkout/${bookableID}?tenantId=${tenantID}`;
+    checkoutNavTab.value = { label, url };
+  },
+  { immediate: true }
+);
+
+onUnmounted(() => {
+  checkoutNavTab.value = "";
+});
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const additionalBookables = computed(
   () => data.value?.additionalBookables || []
@@ -107,8 +140,8 @@ async function validateAll() {
     for (const { id, isLead, res, error } of results) {
       const label = isLead
         ? leadBookable.value?.title
-        : additionalBookables.value.find((b) => b.item.id === id)?.item
-            .title || "Zusatzbuchung";
+        : additionalBookables.value.find((b) => b.item.id === id)?.item.title ||
+          "Zusatzbuchung";
 
       if (error) {
         const reason = "checkout.unknown_error";
@@ -157,6 +190,10 @@ watch([selectedTimePeriod, selectedAdditionalBookables], scheduleValidation, {
   deep: true,
 });
 
+const isScheduleRelated = computed(
+  () => leadBookable.value?.isScheduleRelated === true
+);
+
 const isTimePeriodRelated = computed(
   () => leadBookable.value?.isTimePeriodRelated === true
 );
@@ -171,6 +208,18 @@ const hasValidTimePeriod = computed(
     !!selectedTimePeriod.value?.end &&
     selectedTimePeriod.value.end > selectedTimePeriod.value.start
 );
+
+const needsTimePeriodSelection = computed(() => {
+  const b = leadBookable.value;
+  if (!b) return false;
+  const requiresPeriod =
+    b.isScheduleRelated === true ||
+    b.isTimePeriodRelated === true ||
+    b.isLongRange === true;
+  const noPeriodSelected =
+    !selectedTimePeriod.value?.start || !selectedTimePeriod.value?.end;
+  return requiresPeriod && noPeriodSelected;
+});
 
 // --- Stepper ---------------------------------------------------------------
 const currentStep = ref(1);
@@ -202,7 +251,7 @@ const leadBookableError = computed(
 
 const canGoNext = computed(() => {
   if (currentStep.value !== 1) return true;
-  if (!isTimePeriodRelated.value) return true;
+  if (!isTimePeriodRelated.value && !isScheduleRelated.value) return true;
   if (!hasValidTimePeriod.value) return false;
   if (hasValidationErrors.value) return false;
   if (isValidating.value) return false;
@@ -245,10 +294,7 @@ function handleFinish() {
     </div>
 
     <!-- Main Layout -->
-    <div
-      v-else
-      class="flex flex-col lg:flex-row min-h-screen"
-    >
+    <div v-else class="flex flex-col lg:flex-row min-h-screen">
       <!-- LEFT: Bookable Overview + Prices -->
       <div class="flex-2 p-4 md:p-6 lg:p-10 lg:shrink-0">
         <CheckoutBookableSidebar
@@ -256,88 +302,96 @@ function handleFinish() {
           :tenant="tenant"
           :summary="summary"
           :validation-errors="validationErrors"
+          :needs-time-period-selection="needsTimePeriodSelection"
         />
       </div>
       <!-- RIGHT: Checkout Flow -->
       <main class="flex-3 min-w-0 bg-white dark:bg-gray-900 p-6 md:p-8 lg:p-10">
         <AppStepper
-            v-model="currentStep"
-            :steps="steps"
-            :can-go-next="canGoNext"
-            @finish="handleFinish"
-          >
-            <template #step-objects>
-              <p class="text-gray-500 dark:text-gray-400">
-                Hier kommt die Objektauswahl rein.
-              </p>
-            </template>
+          v-model="currentStep"
+          :steps="steps"
+          :can-go-next="canGoNext"
+          @finish="handleFinish"
+        >
+          <template #step-objects>
+            <p class="text-gray-500 dark:text-gray-400">
+              Hier kommt die Objektauswahl rein.
+            </p>
+          </template>
 
-            <template #step-period>
-              <div class="space-y-8">
-                <!-- Lead bookable error -->
-                <div
-                  v-if="leadBookableError"
-                  class="flex items-start gap-3 p-4 rounded-xl border-2 border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950"
-                >
-                  <UIcon
-                    name="i-lucide-alert-triangle"
-                    class="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"
-                    size="20"
-                  />
-                  <div class="flex-1">
-                    <p class="font-semibold text-red-800 dark:text-red-200">
-                      {{ leadBookable?.title }}
-                    </p>
-                    <p class="text-sm text-red-700 dark:text-red-300 mt-1">
-                      {{ $t(leadBookableError.reason) }}
-                    </p>
-                    <p
-                      v-if="leadBookableError.params?.remaining !== undefined"
-                      class="text-xs text-red-600 dark:text-red-400 mt-1"
-                    >
-                      {{
-                        $t("checkout.errors.capacityInfo", {
-                          remaining: leadBookableError.params.remaining,
-                          total: leadBookableError.params.totalCapacity,
-                        })
-                      }}
-                    </p>
-                  </div>
+          <template #step-period>
+            <div class="space-y-8">
+              <!-- Lead bookable error -->
+              <div
+                v-if="leadBookableError"
+                class="flex items-start gap-3 p-4 rounded-xl border-2 border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950"
+              >
+                <UIcon
+                  name="i-lucide-alert-triangle"
+                  class="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"
+                  size="20"
+                />
+                <div class="flex-1">
+                  <p class="font-semibold text-red-800 dark:text-red-200">
+                    {{ leadBookable?.title }}
+                  </p>
+                  <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+                    {{ $t(leadBookableError.reason) }}
+                  </p>
+                  <p
+                    v-if="leadBookableError.params?.remaining !== undefined"
+                    class="text-xs text-red-600 dark:text-red-400 mt-1"
+                  >
+                    {{
+                      $t("checkout.errors.capacityInfo", {
+                        remaining: leadBookableError.params.remaining,
+                        total: leadBookableError.params.totalCapacity,
+                      })
+                    }}
+                  </p>
                 </div>
-
-                <InputsInputTimePeriodSlots
-                  v-if="isTimePeriodRelated"
-                  v-model="selectedTimePeriod"
-                  :time-periods="bookableTimePeriods"
-                  :tenant-id="tenantID"
-                  :bookable-id="bookableID"
-                />
-
-                <p v-else class="text-gray-500 dark:text-gray-400">
-                  Hier kommen Datum, Uhrzeit &amp; Zusatzobjekte rein.
-                </p>
-
-                <AdditionalBookablesSelector
-                  v-if="additionalBookables.length > 0"
-                  v-model="selectedAdditionalBookables"
-                  :items="additionalBookables"
-                  :validation-errors="validationErrors"
-                />
               </div>
-            </template>
 
-            <template #step-data>
-              <p class="text-gray-500 dark:text-gray-400">
-                Hier kommen die Kontaktdaten rein.
-              </p>
-            </template>
+              <InputFreeTimeSelection
+                v-if="isScheduleRelated"
+                v-model="selectedTimePeriod"
+                :tenant-id="tenantID"
+                :bookable-id="bookableID"
+              />
 
-            <template #step-confirm>
-              <p class="text-gray-500 dark:text-gray-400">
-                Hier kommt die finale Bestätigung rein.
+              <InputTimePeriodSlots
+                v-else-if="isTimePeriodRelated"
+                v-model="selectedTimePeriod"
+                :time-periods="bookableTimePeriods"
+                :tenant-id="tenantID"
+                :bookable-id="bookableID"
+              />
+
+              <p v-else class="text-gray-500 dark:text-gray-400">
+                Hier kommen Datum, Uhrzeit &amp; Zusatzobjekte rein.
               </p>
-            </template>
-          </AppStepper>
+
+              <AdditionalBookablesSelector
+                v-if="additionalBookables.length > 0"
+                v-model="selectedAdditionalBookables"
+                :items="additionalBookables"
+                :validation-errors="validationErrors"
+              />
+            </div>
+          </template>
+
+          <template #step-data>
+            <p class="text-gray-500 dark:text-gray-400">
+              Hier kommen die Kontaktdaten rein.
+            </p>
+          </template>
+
+          <template #step-confirm>
+            <p class="text-gray-500 dark:text-gray-400">
+              Hier kommt die finale Bestätigung rein.
+            </p>
+          </template>
+        </AppStepper>
       </main>
     </div>
   </div>
