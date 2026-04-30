@@ -7,7 +7,7 @@
         <UTooltip text="Uhrzeit auswählen">
           <UIcon
             name="i-lucide-clock"
-            class="text-gray-400 mx-0.5 hover:cursor-pointer"
+            class="text-gray-400 mx-0.5 cursor-pointer"
             @click="() => (openTimePickerDialog = true)"
           />
         </UTooltip>
@@ -17,16 +17,18 @@
           variant="ghost"
           :disabled="props.disabled"
         />
-      </div>
-
-      <div class="">
-        <TimePickerDialog
-          :open-dialog="openTimePickerDialog"
-          :time="model"
-          @update-time="setTime"
-          @close-dialog="() => (openTimePickerDialog = false)"
+        <div
+          class="click-area cursor-pointer"
+          @click="() => (openTimePickerDialog = true)"
         />
       </div>
+
+      <TimePickerDialog
+        :open-dialog="openTimePickerDialog"
+        :time="model"
+        @update-time="setTime"
+        @close-dialog="() => (openTimePickerDialog = false)"
+      />
     </div>
   </UTooltip>
 </template>
@@ -72,4 +74,10 @@ function setTime({ hours, minutes }) {
 }
 </script>
 
-<style></style>
+<style>
+.click-area {
+  width: 100%;
+  min-height: 20px;
+  background: transparent;
+}
+</style>

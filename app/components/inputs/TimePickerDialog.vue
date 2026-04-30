@@ -21,7 +21,7 @@
                   class="rounded-xl"
                   @click="closeDialog"
                 />
-              
+
             </div>
           </div>
           <div class="glass p-3 w-full">
