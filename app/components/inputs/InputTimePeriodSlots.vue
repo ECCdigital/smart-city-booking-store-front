@@ -4,7 +4,7 @@
     <section>
       <div class="flex items-center gap-2 mb-4">
         <h3
-          class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-2"
+          class="text-xs font-bold text-gray-400 dark:text-gray-500  tracking-widest flex items-center gap-2"
         >
           <UIcon name="i-lucide-calendar-days" class="text-base" />
           {{ $t("timePeriods.selectDate") }}
@@ -16,43 +16,7 @@
         </h3>
 
         <!-- jump-to-date picker -->
-        <div ref="dateJumperRef" class="relative">
-          <button
-            type="button"
-            class="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white transition-colors"
-            :aria-label="$t('timePeriods.jumpToDate')"
-            :title="$t('timePeriods.jumpToDate')"
-            @click.stop="showDateJumper = !showDateJumper"
-          >
-            <UIcon name="i-lucide-calendar-search" class="text-sm" />
-          </button>
-
-          <Transition
-            enter-active-class="transition duration-150 ease-out"
-            enter-from-class="opacity-0 scale-95"
-            enter-to-class="opacity-100 scale-100"
-            leave-active-class="transition duration-100 ease-in"
-            leave-from-class="opacity-100 scale-100"
-            leave-to-class="opacity-0 scale-95"
-          >
-            <div
-              v-if="showDateJumper"
-              class="absolute left-0 top-full mt-2 z-50 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl"
-              @click.stop
-            >
-              <VueDatePicker
-                :min-date="new Date()"
-                locale="de"
-                month-name-format="long"
-                inline
-                auto-apply
-                :enable-time-picker="false"
-                :dark="isDark"
-                @update:model-value="onJumpDateSelected"
-              />
-            </div>
-          </Transition>
-        </div>
+        <DateJumper @select="onJumpDateSelected" />
       </div>
 
       <div class="flex items-center gap-2">
@@ -86,7 +50,7 @@
             @click="selectDay(day)"
           >
             <span
-              class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
+              class="text-[10px] font-semibold  tracking-wider text-gray-500 dark:text-gray-400"
             >
               {{ day.weekdayLabel }}
             </span>
@@ -123,7 +87,7 @@
     <!-- timetable -->
     <section>
       <h3
-        class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2"
+        class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-widest mb-4 flex items-center gap-2"
       >
         <UIcon name="i-lucide-clock" class="text-base" />
         {{ $t("timePeriods.selectTime") }}
@@ -171,12 +135,9 @@
 </template>
 
 <script setup>
-import VueDatePicker from "@vuepic/vue-datepicker";
-import "@vuepic/vue-datepicker/dist/main.css";
 import { useBookables } from "~/composables/api/useBookables.js";
+import DateJumper from "~/components/inputs/DateJumper.vue";
 
-const colorMode = useColorMode();
-const isDark = computed(() => colorMode.value === "dark");
 
 const props = defineProps({
   timePeriods: {
@@ -258,30 +219,6 @@ function navigateDays(delta) {
 }
 
 /* ── jump-to-date picker ────────────────────────────── */
-const showDateJumper = ref(false);
-const dateJumperRef = ref(null);
-
-function onClickOutsideDateJumper(event) {
-  if (!dateJumperRef.value) return;
-  if (dateJumperRef.value.contains(event.target)) return;
-  if (event.target.closest(".dp__overlay, .dp__menu")) return;
-  showDateJumper.value = false;
-}
-
-watch(showDateJumper, (open) => {
-  if (open) {
-    nextTick(() =>
-      document.addEventListener("pointerdown", onClickOutsideDateJumper)
-    );
-  } else {
-    document.removeEventListener("pointerdown", onClickOutsideDateJumper);
-  }
-});
-
-onUnmounted(() => {
-  document.removeEventListener("pointerdown", onClickOutsideDateJumper);
-});
-
 function onJumpDateSelected(date) {
   if (!date) return;
 
@@ -297,7 +234,6 @@ function onJumpDateSelected(date) {
   startHour.value = null;
   endHour.value = null;
   emitValue();
-  showDateJumper.value = false;
 }
 
 const windowRange = computed(() => {
@@ -687,21 +623,4 @@ watch(
 );
 </script>
 
-<style scoped>
-:deep(.dp__theme_light) {
-  --dp-primary-color: var(--color-primary);
-  --dp-primary-text-color: #fff;
-  --dp-background-color: #fff;
-}
-
-:deep(.dp__theme_dark) {
-  --dp-primary-color: var(--color-primary);
-  --dp-primary-text-color: #fff;
-  --dp-background-color: #111827;
-}
-
-/* Ensure month/year overlay covers the calendar completely */
-:deep(.dp__overlay) {
-  background: var(--dp-background-color) !important;
-}
-</style>
+<style scoped></style>

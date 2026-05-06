@@ -58,6 +58,25 @@
     "selected": "Selected time"
   },
 
+  "weekSelection": {
+    "subtitle": "Select a calendar week",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "available": "Available",
+    "occupied": "Occupied",
+    "past": "Past"
+  },
+
+  "monthSelection": {
+    "subtitle": "Select a month",
+    "previousYear": "Previous year",
+    "nextYear": "Next year",
+    "available": "Available",
+    "occupied": "Occupied",
+    "past": "Past",
+    "selected": "Selected month"
+  },
+
   "scheduleSelection": {
     "availability": "Availability",
     "weekOverview": "Week overview",

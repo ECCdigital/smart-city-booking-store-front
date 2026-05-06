@@ -82,7 +82,7 @@ function getErrorForItem(itemId) {
   <div v-if="items.length > 0">
     <div class="flex items-center gap-2 mb-4">
       <UIcon name="i-lucide-plus" class="text-primary" size="18" />
-      <h3 class="text-sm font-bold tracking-wide uppercase text-gray-500 dark:text-gray-400">
+      <h3 class="text-sm font-bold tracking-wide text-gray-500 dark:text-gray-400">
         {{ $t("checkout.additionalObjects") }}
         <span class="font-normal">({{ $t('common.optional') }})</span>
       </h3>
@@ -93,7 +93,7 @@ function getErrorForItem(itemId) {
         <button
           type="button"
           :disabled="isMandatory(entry)"
-          class="w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-150 text-left cursor-pointer disabled:cursor-default"
+          class="w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-150 text-left cursor-pointer disabled:cursor-default overflow-hidden"
           :class="[
             getErrorForItem(entry.item.id)
               ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950'
@@ -103,7 +103,7 @@ function getErrorForItem(itemId) {
           ]"
           @click="!isMandatory(entry) && toggleSelection(entry.item.id)"
         >
-        <div class="flex-shrink-0">
+        <div class="shrink-0">
           <div
             class="w-5 h-5 rounded flex items-center justify-center border-2 transition-colors"
             :class="
@@ -148,35 +148,29 @@ function getErrorForItem(itemId) {
         </div>
 
         <!-- Content -->
-        <div class="flex-1 min-w-0">
+        <div class="flex-1 min-w-0 overflow-hidden">
           <div class="flex items-center gap-2">
             <span class="font-semibold text-gray-900 dark:text-white truncate">
               {{ entry.item.title }}
             </span>
             <span
               v-if="isMandatory(entry)"
-              class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary/10 text-primary"
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary/10 text-primary flex-shrink-0"
             >
               {{ $t("common.obligation") }}
             </span>
           </div>
-          <p
-            v-if="!getErrorForItem(entry.item.id) && entry.item.description"
-            class="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5"
-          >
-            {{ entry.item.description }}
-          </p>
           <!-- Inline Error -->
           <div
             v-if="getErrorForItem(entry.item.id)"
-            class="flex items-center gap-1.5 mt-1"
+            class="flex items-start gap-1.5 mt-1"
           >
             <UIcon
               name="i-lucide-alert-circle"
-              class="text-red-600 dark:text-red-400 flex-shrink-0"
+              class="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"
               size="14"
             />
-            <span class="text-sm text-red-700 dark:text-red-300">
+            <span class="text-sm text-red-700 dark:text-red-300 break-words">
               {{ $t(getErrorForItem(entry.item.id).reason || 'checkout.bookable_unavailable') }}
             </span>
           </div>

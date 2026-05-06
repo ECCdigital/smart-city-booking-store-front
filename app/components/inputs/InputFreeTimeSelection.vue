@@ -1,38 +1,73 @@
 <template>
   <div class="space-y-5">
     <!-- Calendar Card -->
+
+    <!-- DateTime inputs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label
+          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+        >
+          {{ $t("scheduleSelection.startTimePoint") }}
+        </label>
+        <input
+          v-model="startDateTime"
+          type="datetime-local"
+          step="900"
+          :min="todayDateTimeMin"
+          class="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors"
+          @change="onManualInputChange"
+        />
+      </div>
+      <div>
+        <label
+          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+        >
+          {{ $t("scheduleSelection.endTimePoint") }}
+        </label>
+        <input
+          v-model="endDateTime"
+          type="datetime-local"
+          step="900"
+          :min="startDateTime || todayDateTimeMin"
+          class="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors"
+          @change="onManualInputChange"
+        />
+      </div>
+    </div>
+
+    <!-- Week navigation (outside overflow-hidden so DateJumper dropdown is not clipped) -->
     <div
-      class="rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900"
+      class="flex items-center justify-between px-3 py-1.5 rounded-t-md border border-b-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
     >
-
-      <!-- Week navigation -->
-      <div
-        class="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
+      <button
+        type="button"
+        :disabled="!canGoPrev"
+        class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        @click="navigatePrev"
       >
-        <button
-          type="button"
-          :disabled="!canGoPrev"
-          class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          @click="navigatePrev"
-        >
-          &larr; {{ $t("scheduleSelection.previousWeek") }}
-        </button>
+        &larr; {{ $t("scheduleSelection.previousWeek") }}
+      </button>
 
-        <span
-          class="font-semibold text-sm text-gray-800 dark:text-gray-200"
-        >
+      <div class="flex items-center gap-2">
+        <span class="font-semibold text-sm text-gray-800 dark:text-gray-200">
           {{ dateRangeLabel }}
         </span>
-
-        <button
-          type="button"
-          class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          @click="navigateNext"
-        >
-          {{ $t("scheduleSelection.nextWeek") }} &rarr;
-        </button>
+        <DateJumper @select="onJumpDate" />
       </div>
 
+      <button
+        type="button"
+        class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        @click="navigateNext"
+      >
+        {{ $t("scheduleSelection.nextWeek") }} &rarr;
+      </button>
+    </div>
+
+    <div
+      class="rounded-b-md border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900"
+    >
       <!-- FullCalendar -->
       <ClientOnly>
         <div class="fc-wrapper">
@@ -51,7 +86,7 @@
 
       <!-- Legend -->
       <div
-        class="flex items-center gap-5 px-4 py-2.5 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400"
+        class="flex items-center gap-4 px-3 py-1.5 border-t border-gray-200 dark:border-gray-700 text-[11px] text-gray-600 dark:text-gray-400"
       >
         <span class="flex items-center gap-1.5">
           <span
@@ -60,9 +95,7 @@
           {{ $t("scheduleSelection.free") }}
         </span>
         <span class="flex items-center gap-1.5">
-          <span
-            class="inline-block w-4 h-3 rounded-sm occupied-legend"
-          />
+          <span class="inline-block w-4 h-3 rounded-sm occupied-legend" />
           {{ $t("scheduleSelection.occupied") }}
         </span>
         <span class="flex items-center gap-1.5">
@@ -89,40 +122,6 @@
       </p>
     </div>
 
-    <!-- DateTime inputs -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <label
-          class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
-        >
-          {{ $t("scheduleSelection.startTimePoint") }}
-        </label>
-        <input
-          v-model="startDateTime"
-          type="datetime-local"
-          step="900"
-          :min="todayDateTimeMin"
-          class="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors"
-          @change="onManualInputChange"
-        >
-      </div>
-      <div>
-        <label
-          class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
-        >
-          {{ $t("scheduleSelection.endTimePoint") }}
-        </label>
-        <input
-          v-model="endDateTime"
-          type="datetime-local"
-          step="900"
-          :min="startDateTime || todayDateTimeMin"
-          class="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors"
-          @change="onManualInputChange"
-        >
-      </div>
-    </div>
-
     <!-- Hint -->
     <p class="text-xs text-gray-400 dark:text-gray-500 italic">
       {{ $t("scheduleSelection.dragHint") }}
@@ -136,6 +135,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import deLocale from "@fullcalendar/core/locales/de";
 import { useBookables } from "~/composables/api/useBookables.js";
+import DateJumper from "~/components/inputs/DateJumper.vue";
 
 const props = defineProps({
   tenantId: { type: String, default: null },
@@ -156,7 +156,9 @@ function pad2(n) {
 }
 
 function localISODate(date) {
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
+    date.getDate()
+  )}`;
 }
 
 function parseLocalDate(iso) {
@@ -216,6 +218,15 @@ const canGoPrev = computed(() => {
   return currentViewStart.value.getTime() > thisMonday.getTime();
 });
 
+function onJumpDate(date) {
+  if (!date) return;
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  if (d < getMonday(today)) return;
+  const api = getApi();
+  if (api) api.gotoDate(d);
+}
+
 /* ── date range label ───────────────────────────────────── */
 const dateRangeLabel = computed(() => {
   if (!currentViewStart.value || !currentViewEnd.value) return "";
@@ -267,8 +278,8 @@ async function fetchAvailability(start, end) {
     const raw = Array.isArray(data)
       ? data
       : Array.isArray(data?.availability)
-        ? data.availability
-        : [];
+      ? data.availability
+      : [];
 
     availabilityCache.set(key, raw);
     availability.value = raw;
@@ -286,7 +297,7 @@ watch(
     if (currentViewStart.value && currentViewEnd.value) {
       fetchAvailability(currentViewStart.value, currentViewEnd.value);
     }
-  },
+  }
 );
 
 /* ── calendar events (occupied + selection) ──────────────── */
@@ -322,14 +333,14 @@ const calendarEvents = computed(() => {
         sd.getMonth(),
         sd.getDate(),
         sh,
-        sm || 0,
+        sm || 0
       );
       const end = new Date(
         ed.getFullYear(),
         ed.getMonth(),
         ed.getDate(),
         eh,
-        em || 0,
+        em || 0
       );
       if (end > start) {
         events.push({
@@ -376,9 +387,13 @@ function renderDayHeader(arg) {
 /* ── calendar callbacks ──────────────────────────────────── */
 function handleCalendarSelect(info) {
   startDateInput.value = localISODate(info.start);
-  startTimeInput.value = `${pad2(info.start.getHours())}:${pad2(info.start.getMinutes())}`;
+  startTimeInput.value = `${pad2(info.start.getHours())}:${pad2(
+    info.start.getMinutes()
+  )}`;
   endDateInput.value = localISODate(info.end);
-  endTimeInput.value = `${pad2(info.end.getHours())}:${pad2(info.end.getMinutes())}`;
+  endTimeInput.value = `${pad2(info.end.getHours())}:${pad2(
+    info.end.getMinutes()
+  )}`;
   emitValue();
 
   // Clear FullCalendar's built-in highlight – our event takes over
@@ -460,6 +475,29 @@ const endDateTime = computed({
   },
 });
 
+watch(
+  () => startDateTime.value,
+  (newStart) => {
+    if (!newStart) return;
+
+    const start = new Date(newStart);
+    if (isNaN(start.getTime())) return;
+
+    const end = endDateTime.value ? new Date(endDateTime.value) : null;
+
+    if (end && end > start) return;
+
+    start.setHours(start.getHours() + 1);
+
+    const pad = (n) => String(n).padStart(2, "0");
+    endDateTime.value = `${start.getFullYear()}-${pad(
+      start.getMonth() + 1
+    )}-${pad(start.getDate())}T${pad(start.getHours())}:${pad(
+      start.getMinutes()
+    )}`;
+  }
+);
+
 /* ── manual input change ─────────────────────────────────── */
 function onManualInputChange() {
   emitValue();
@@ -504,14 +542,14 @@ const overlapWarning = computed(() => {
     sd.getMonth(),
     sd.getDate(),
     sh,
-    sm || 0,
+    sm || 0
   ).getTime();
   const endMs = new Date(
     ed.getFullYear(),
     ed.getMonth(),
     ed.getDate(),
     eh,
-    em || 0,
+    em || 0
   ).getTime();
 
   if (endMs <= startMs) return false;
@@ -546,14 +584,14 @@ function emitValue() {
         sd.getMonth(),
         sd.getDate(),
         sh,
-        sm || 0,
+        sm || 0
       );
       const end = new Date(
         ed.getFullYear(),
         ed.getMonth(),
         ed.getDate(),
         eh,
-        em || 0,
+        em || 0
       );
       if (end.getTime() > start.getTime()) {
         payload = { start: start.getTime(), end: end.getTime() };
@@ -588,7 +626,7 @@ watch(
 
     lastEmittedKey = `${v.start ?? ""}|${v.end ?? ""}`;
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 );
 </script>
 
@@ -606,7 +644,12 @@ watch(
   --fc-event-bg-color: transparent;
   --fc-event-border-color: transparent;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
+}
+
+/* ── Compact slot rows ──────────────────────────────────── */
+:deep(.fc-timegrid-slot) {
+  height: 1.6em;
 }
 
 :is(.dark) :deep(.fc) {
@@ -638,20 +681,19 @@ watch(
 
 :deep(.fc-day-header-inner) {
   text-align: center;
-  padding: 10px 0;
+  padding: 5px 0;
 }
 
 :deep(.fc-day-header-weekday) {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #6b7280;
 }
 
 :deep(.fc-day-header-number) {
-  margin-top: 2px;
-  font-size: 1.125rem;
+  margin-top: 1px;
+  font-size: 0.95rem;
   font-weight: 800;
   line-height: 1;
   color: #1f2937;
@@ -673,9 +715,10 @@ watch(
 
 /* ── Slot labels (time axis) ─────────────────────────────── */
 :deep(.fc-timegrid-slot-label-cushion) {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   color: #9ca3af;
+  padding: 0 4px;
 }
 
 :is(.dark) :deep(.fc-timegrid-slot-label-cushion) {

@@ -4,6 +4,13 @@ import { useTenants } from "~/composables/api/useTenants.js";
 import AdditionalBookablesSelector from "~/components/checkout/AdditionalBookablesSelector.vue";
 import InputTimePeriodSlots from "~/components/inputs/InputTimePeriodSlots.vue";
 import InputFreeTimeSelection from "~/components/inputs/InputFreeTimeSelection.vue";
+import InputWeekSelection from "~/components/inputs/InputWeekSelection.vue";
+import InputMonthSelection from "~/components/inputs/InputMonthSelection.vue";
+import PriceSummaryBar from "~/components/checkout/PriceSummaryBar.vue";
+import { Splitpanes, Pane } from 'splitpanes'
+import 'splitpanes/dist/splitpanes.css'
+
+
 
 definePageMeta({
   layout: "checkout",
@@ -94,6 +101,43 @@ const validationErrors = ref({});
 const selectedTimePeriod = ref({ start: null, end: null });
 const selectedAdditionalBookables = ref([]);
 
+// --- Mengen pro Bookable ----------------------------------------------------
+const amounts = ref({});
+
+watch(
+  leadBookable,
+  (b) => {
+    if (b?.id && !amounts.value[b.id]) {
+      amounts.value[b.id] = 1;
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  selectedAdditionalBookables,
+  (ids) => {
+    for (const id of ids) {
+      if (!amounts.value[id]) {
+        amounts.value[id] = 1;
+      }
+    }
+  },
+  { deep: true }
+);
+
+function handleAmountUpdate({ id, amount }) {
+  if (amount <= 0 && id !== bookableID) {
+    // Abwählen: aus der Additional-Selektion und den Mengen entfernen
+    selectedAdditionalBookables.value = selectedAdditionalBookables.value.filter(
+      (bid) => bid !== id
+    );
+    delete amounts.value[id];
+  } else {
+    amounts.value[id] = amount;
+  }
+}
+
 const { validateBookable } = useCheckout();
 
 let validationToken = 0;
@@ -122,7 +166,13 @@ async function validateAll() {
 
     const results = await Promise.all(
       targets.map(({ id, isLead }) =>
-        validateBookable({ bookableID: id, tenantID, start, end })
+        validateBookable({
+          bookableID: id,
+          tenantID,
+          amount: amounts.value[id] || 1,
+          start,
+          end,
+        })
           .then((res) => ({ id, isLead, res }))
           .catch((err) => ({ id, isLead, error: err }))
       )
@@ -167,7 +217,7 @@ async function validateAll() {
       const { userPriceEur, userGrossPriceEur } = res.data;
       newCheckoutId = res.checkoutId;
 
-      items.push({ label, amountEur: userPriceEur });
+      items.push({ id, label, amountEur: userPriceEur });
       taxAmount += userGrossPriceEur - userPriceEur;
       total += userGrossPriceEur;
     }
@@ -186,7 +236,7 @@ function scheduleValidation() {
   debounceTimer = setTimeout(validateAll, 200);
 }
 
-watch([selectedTimePeriod, selectedAdditionalBookables], scheduleValidation, {
+watch([selectedTimePeriod, selectedAdditionalBookables, amounts], scheduleValidation, {
   deep: true,
 });
 
@@ -197,6 +247,56 @@ const isScheduleRelated = computed(
 const isTimePeriodRelated = computed(
   () => leadBookable.value?.isTimePeriodRelated === true
 );
+
+const isLongRangeWeek = computed(() => {
+  const b = leadBookable.value;
+  return (
+    b?.isLongRange === true && b?.longRangeOptions?.type === "week"
+  );
+});
+
+const isLongRangeMonth = computed(() => {
+  const b = leadBookable.value;
+  return (
+    b?.isLongRange === true && b?.longRangeOptions?.type === "month"
+  );
+});
+
+const longRangeMonthPrice = computed(() => {
+  const categories = leadBookable.value?.priceCategories || [];
+  if (categories.length === 0) return null;
+
+  const internal = categories.filter(
+    (c) => !c.external || (c.external && c.unit !== "service-fee"),
+  );
+  const withoutHolidays = internal.filter(
+    (c) => !c.holidays || c.holidays.length === 0,
+  );
+  const prices = withoutHolidays
+    .map((c) => c.priceEur)
+    .filter((p) => p !== null && p !== undefined);
+
+  if (prices.length === 0) return null;
+  return Math.min(...prices);
+});
+
+const longRangeWeekPrice = computed(() => {
+  const categories = leadBookable.value?.priceCategories || [];
+  if (categories.length === 0) return null;
+
+  const internal = categories.filter(
+    (c) => !c.external || (c.external && c.unit !== "service-fee")
+  );
+  const withoutHolidays = internal.filter(
+    (c) => !c.holidays || c.holidays.length === 0
+  );
+  const prices = withoutHolidays
+    .map((c) => c.priceEur)
+    .filter((p) => p !== null && p !== undefined);
+
+  if (prices.length === 0) return null;
+  return Math.min(...prices);
+});
 
 const bookableTimePeriods = computed(
   () => leadBookable.value?.timePeriods || []
@@ -251,7 +351,13 @@ const leadBookableError = computed(
 
 const canGoNext = computed(() => {
   if (currentStep.value !== 1) return true;
-  if (!isTimePeriodRelated.value && !isScheduleRelated.value) return true;
+  if (
+    !isTimePeriodRelated.value &&
+    !isScheduleRelated.value &&
+    !isLongRangeWeek.value &&
+    !isLongRangeMonth.value
+  )
+    return true;
   if (!hasValidTimePeriod.value) return false;
   if (hasValidationErrors.value) return false;
   if (isValidating.value) return false;
@@ -296,14 +402,27 @@ function handleFinish() {
     <!-- Main Layout -->
     <div v-else class="flex flex-col lg:flex-row min-h-screen">
       <!-- LEFT: Bookable Overview + Prices -->
-      <div class="flex-2 p-4 md:p-6 lg:p-10 lg:shrink-0">
+      <div class="flex-1 p-4 md:p-6 lg:p-10 lg:shrink-0 flex flex-col">
         <CheckoutBookableSidebar
           :lead-bookable="leadBookable"
           :tenant="tenant"
-          :summary="summary"
-          :validation-errors="validationErrors"
-          :needs-time-period-selection="needsTimePeriodSelection"
         />
+
+        <!-- Spacer -->
+        <div class="flex-1" />
+
+        <!-- Price Summary  -->
+        <div class="sticky bottom-4 md:bottom-6 mt-6 z-10">
+          <PriceSummaryBar
+            :summary="summary"
+            :selected-time-period="selectedTimePeriod"
+            :needs-time-period-selection="needsTimePeriodSelection"
+            :is-validating="isValidating"
+            :amounts="amounts"
+            :lead-bookable-id="bookableID"
+            @update:amount="handleAmountUpdate"
+          />
+        </div>
       </div>
       <!-- RIGHT: Checkout Flow -->
       <main class="flex-3 min-w-0 bg-white dark:bg-gray-900 p-6 md:p-8 lg:p-10">
@@ -352,31 +471,57 @@ function handleFinish() {
                 </div>
               </div>
 
-              <InputFreeTimeSelection
-                v-if="isScheduleRelated"
-                v-model="selectedTimePeriod"
-                :tenant-id="tenantID"
-                :bookable-id="bookableID"
-              />
+              <Splitpanes class="checkout-splitpanes">
+                <Pane :size="65" :min-size="35">
+                  <div class="pr-0 lg:pr-4">
+                    <InputFreeTimeSelection
+                      v-if="isScheduleRelated"
+                      v-model="selectedTimePeriod"
+                      :tenant-id="tenantID"
+                      :bookable-id="bookableID"
+                    />
 
-              <InputTimePeriodSlots
-                v-else-if="isTimePeriodRelated"
-                v-model="selectedTimePeriod"
-                :time-periods="bookableTimePeriods"
-                :tenant-id="tenantID"
-                :bookable-id="bookableID"
-              />
+                    <InputTimePeriodSlots
+                      v-else-if="isTimePeriodRelated"
+                      v-model="selectedTimePeriod"
+                      :time-periods="bookableTimePeriods"
+                      :tenant-id="tenantID"
+                      :bookable-id="bookableID"
+                    />
 
-              <p v-else class="text-gray-500 dark:text-gray-400">
-                Hier kommen Datum, Uhrzeit &amp; Zusatzobjekte rein.
-              </p>
+                    <InputWeekSelection
+                      v-else-if="isLongRangeWeek"
+                      v-model="selectedTimePeriod"
+                      :tenant-id="tenantID"
+                      :bookable-id="bookableID"
+                      :price-eur="longRangeWeekPrice"
+                    />
 
-              <AdditionalBookablesSelector
-                v-if="additionalBookables.length > 0"
-                v-model="selectedAdditionalBookables"
-                :items="additionalBookables"
-                :validation-errors="validationErrors"
-              />
+                    <InputMonthSelection
+                      v-else-if="isLongRangeMonth"
+                      v-model="selectedTimePeriod"
+                      :tenant-id="tenantID"
+                      :bookable-id="bookableID"
+                      :price-eur="longRangeMonthPrice"
+                    />
+
+                    <p v-else class="text-gray-500 dark:text-gray-400">
+                      Hier kommen Datum, Uhrzeit &amp; Zusatzobjekte rein.
+                    </p>
+                  </div>
+                </Pane>
+
+                <Pane v-if="additionalBookables.length > 0" :size="35" :min-size="20" class="overflow-hidden">
+                  <div class="pl-0 lg:pl-4">
+                    <AdditionalBookablesSelector
+                      v-if="additionalBookables.length > 0"
+                      v-model="selectedAdditionalBookables"
+                      :items="additionalBookables"
+                      :validation-errors="validationErrors"
+                    />
+                  </div>
+                </Pane>
+              </Splitpanes>
             </div>
           </template>
 
@@ -397,4 +542,64 @@ function handleFinish() {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+/* ── Splitpanes: Splitter Styling ── */
+.checkout-splitpanes :deep(.splitpanes__splitter) {
+  width: 9px;
+  border: none;
+  background-color: transparent;
+  position: relative;
+  cursor: col-resize;
+  transition: background-color 0.2s ease;
+}
+
+/* Visible drag indicator line */
+.checkout-splitpanes :deep(.splitpanes__splitter::before) {
+  content: '';
+  position: absolute;
+  top: 0%;
+  bottom: 0%;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background-color: #d1d5db;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease, width 0.2s ease;
+}
+
+.checkout-splitpanes :deep(.splitpanes__splitter:hover::before) {
+  background-color: var(--color-primary-500, #6366f1);
+  width: 3px;
+}
+
+/* Dark mode splitter */
+:root.dark .checkout-splitpanes :deep(.splitpanes__splitter::before) {
+  background-color: #4b5563;
+}
+
+:root.dark .checkout-splitpanes :deep(.splitpanes__splitter:hover::before) {
+  background-color: var(--color-primary-400, #818cf8);
+}
+
+/* ── Responsive: stack vertically on small screens ── */
+@media (max-width: 1023px) {
+  .checkout-splitpanes {
+    flex-direction: column !important;
+  }
+
+  .checkout-splitpanes :deep(.splitpanes__splitter) {
+    display: none !important;
+  }
+
+  .checkout-splitpanes :deep(.splitpanes__pane) {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    padding-top: 1rem;
+  }
+
+  .checkout-splitpanes :deep(.splitpanes__pane:first-child) {
+    padding-top: 0;
+  }
+}
+</style>

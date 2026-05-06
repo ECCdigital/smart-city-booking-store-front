@@ -282,6 +282,26 @@
     "selected": "Ausgewählte Zeit"
   },
 
+  "weekSelection": {
+    "subtitle": "Wählen Sie eine Kalenderwoche",
+    "previousMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat",
+    "available": "Verfügbar",
+    "occupied": "Belegt",
+    "past": "Vergangen",
+    "selected": "Ausgewählte Woche"
+  },
+
+  "monthSelection": {
+    "subtitle": "Wählen Sie einen Monat",
+    "previousYear": "Vorheriges Jahr",
+    "nextYear": "Nächstes Jahr",
+    "available": "Verfügbar",
+    "occupied": "Belegt",
+    "past": "Vergangen",
+    "selected": "Ausgewählter Monat"
+  },
+
   "scheduleSelection": {
     "availability": "Verfügbarkeit",
     "weekOverview": "Wochenübersicht",
@@ -292,7 +312,7 @@
     "yourSelection": "Ihre Auswahl",
     "startTimePoint": "Startzeitpunkt",
     "endTimePoint": "Endzeitpunkt",
-    "dragHint": "Klicken oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen. Alternativ können Sie die Zeiten unten manuell eingeben.",
+    "dragHint": "Klicken oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen. Alternativ können Sie die Zeiten oben manuell eingeben.",
     "overlapWarning": "Der gewählte Zeitraum überschneidet sich mit bereits belegten Zeiten. Die Buchung kann unter Umständen nicht durchgeführt werden."
   }
 }
