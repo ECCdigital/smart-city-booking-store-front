@@ -26,9 +26,10 @@
           </div>
         </div>
         <div class="flex items-center gap-1">
-          <LockerEmergencyInfoCompact
+          <EmergencyHelpModal
             :tenant-id="booking.tenantId"
             :locker-info="booking.lockerInfo"
+            :booking-id="booking.id"
           />
           <UButton
             icon="i-lucide-key-round"
@@ -97,8 +98,8 @@
 </template>
 <script setup>
 import OpenIfbsKeyButton from "~/components/mobileKey/OpenIfbsKeyButton.vue";
-import LockerEmergencyInfoCompact from "~/components/mobileKey/LockerEmergencyInfoCompact.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+import EmergencyHelpModal from "~/components/mobileKey/EmergencyHelpModal.vue";
 
 const props = defineProps({
   booking: {

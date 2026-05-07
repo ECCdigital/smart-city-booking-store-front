@@ -40,17 +40,18 @@
       />
     </div>
 
-    <LockerEmergencyInfo
+    <EmergencyHelpAccordion
       v-if="hasIfbsLockerInfo"
       :tenant-id="booking.tenantId"
       :locker-info="booking.lockerInfo"
+      :booking-id="booking.id"
     />
   </div>
 </template>
 <script setup>
 import {useFormatting} from "~/composables/utils/useFormatting.js";
 import KeyDetailsBookableCard from "~/components/mobileKey/KeyDetailsBookableCard.vue";
-import LockerEmergencyInfo from "~/components/mobileKey/LockerEmergencyInfo.vue";
+import EmergencyHelpAccordion from "~/components/mobileKey/EmergencyHelpAccordion.vue";
 
 const props = defineProps({
   booking: {
