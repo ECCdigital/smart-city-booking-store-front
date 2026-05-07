@@ -11,6 +11,12 @@
       />
     </div>
     <PageHeader title="Buchungsdetails" class="my-5" />
+    <LockerEmergencyInfo
+        v-if="hasIfbsLockerInfo"
+        :tenant-id="booking.tenantId"
+        :locker-info="booking.lockerInfo"
+        class="mb-5"
+    />
     <BookingDetailsSection v-if="booking" :booking="booking" />
   </div>
 </template>
@@ -19,6 +25,7 @@ import { useBookingStore } from "~~/stores/bookings.js";
 import BookingDetailsSection from "~/components/user/BookingDetailsSection.vue";
 import BackButton from "~/components/BackButton.vue";
 import OpenIfbsKeyButton from "~/components/mobileKey/OpenIfbsKeyButton.vue";
+import LockerEmergencyInfo from "~/components/mobileKey/LockerEmergencyInfo.vue";
 
 definePageMeta({
   layout: "panel",

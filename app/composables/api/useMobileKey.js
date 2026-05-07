@@ -35,5 +35,18 @@ export function useMobileKey() {
     return data;
   };
 
-  return { openMobileKey, checkMobileKeyStatus };
+  const customerService = async (tenantID, bookingID, providerID) => {
+    const api = useApiClient();
+
+    const { data, error } = await api.get(`/api/bookings/${tenantID}/${bookingID}/mobile-key/customer-service/${providerID}`);
+
+    if (error) {
+      console.error("Error fetching customer service info:", error);
+      throw error;
+    }
+
+    return data;
+  }
+
+  return { openMobileKey, checkMobileKeyStatus, customerService };
 }

@@ -25,13 +25,19 @@
             Aktiv
           </div>
         </div>
-        <UButton
-          icon="i-lucide-key-round"
-          class="rounded-3xl"
-          variant="soft"
-          color="neutral"
-          @click="openDetails"
-        />
+        <div class="flex items-center gap-1">
+          <LockerEmergencyInfoCompact
+            :tenant-id="booking.tenantId"
+            :locker-info="booking.lockerInfo"
+          />
+          <UButton
+            icon="i-lucide-key-round"
+            class="rounded-3xl cursor-pointer"
+            variant="soft"
+            color="neutral"
+            @click="openDetails"
+          />
+        </div>
       </div>
 
       <h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2 mt-2">
@@ -91,6 +97,7 @@
 </template>
 <script setup>
 import OpenIfbsKeyButton from "~/components/mobileKey/OpenIfbsKeyButton.vue";
+import LockerEmergencyInfoCompact from "~/components/mobileKey/LockerEmergencyInfoCompact.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
