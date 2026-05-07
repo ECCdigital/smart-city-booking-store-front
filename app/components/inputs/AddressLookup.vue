@@ -18,7 +18,7 @@
           content: 'glass w-full',
         }"
         label-key="display_address"
-        trailing-icon="none"
+        :trailing-icon="''"
         :loading="loading"
         @select="onSelect()"
       >
