@@ -96,6 +96,8 @@ const hasAddress = computed(() => {
 });
 const hasCoordinates = computed(() => {
   return (
+    model.value &&
+    typeof model.value === "object" &&
     model.value.coordinates &&
     model.value.coordinates.points &&
     model.value.coordinates.points[0] !== 0 &&
