@@ -183,7 +183,7 @@ const props = defineProps({
   },
 });
 
-const _searchType = ref(props.searchType);
+const _searchType = ref(props.searchType || "bookables");
 const _term = ref(props.term);
 const _location = ref(props.location);
 const _distance = ref(props.distance || 20);
