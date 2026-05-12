@@ -6,7 +6,7 @@
         v-for="(b, i) in suitableBookables"
         :key="i"
         :item="b.item"
-        :is-not-bookable="checkIfNotBookable(b)"
+        :is-not-bookable="!b.isBookable"
         :calculated-price="b.calculatedPrice"
         :entry-page-mode="entryPageMode"
         class="m-2"
@@ -61,27 +61,23 @@ const props = defineProps({
 
 const suitableBookables = computed(() =>
   props.bookables.filter(
-    (b) => b.status === "suitable" || b.status === "nonBookable",
+    (b) => b.matchStatus === "match",
   ),
 );
 
 const nonSuitableBookables = computed(() =>
   props.bookables
     .filter(
-      (b) => b.status === "nonSuitable" || b.status === "suitableButTooFar",
+      (b) => b.matchStatus === "no-match" || b.matchStatus === "too-far",
     )
     .sort((a, b) =>
-      a.status === "suitableButTooFar"
+        a.matchStatus === "too-far"
         ? -1
-        : b.status === "suitableButTooFar"
+        : b.matchStatus === "too-far"
           ? 1
           : 0,
     ),
 );
-
-function checkIfNotBookable(bookable) {
-  return bookable.status === "nonBookable";
-}
 </script>
 
 <style scoped></style>

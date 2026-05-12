@@ -3,7 +3,7 @@ import { useBookables } from "~/composables/api/useBookables";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState";
 import type { CatalogQueryState, SortMode } from "~/types/catalogParams";
 import haversine from "haversine-distance";
-import {getCustomFieldValue} from "~/composables/search/useCustomFieldFilters";
+import { getCustomFieldValue } from "~/composables/search/useCustomFieldFilters";
 
 interface UseBookableSearchOptions<TItem> {
   sourceItems: ComputedRef<TItem[]> | Ref<TItem[]>;
@@ -11,17 +11,17 @@ interface UseBookableSearchOptions<TItem> {
   getAvailability?: (
     item: TItem,
     start: number,
-    end: number
+    end: number,
   ) => Promise<{ isAvailable: boolean; remaining: number }>;
   getPriceForPeriod?: (
     item: TItem,
     start: number,
-    end: number
+    end: number,
   ) => Promise<{ userGrossPriceEur: number } | null>;
 }
 
 export function useBookableSearch<TItem extends { isBookable: boolean }>(
-  options: UseBookableSearchOptions<TItem>
+  options: UseBookableSearchOptions<TItem>,
 ) {
   const { sourceItems, isEvent } = options;
 
@@ -36,6 +36,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   const updatedItems = ref<any[]>([]);
 
   const isMounted = ref(false);
+
+  const MatchStatus = Object.freeze({
+    MATCH: "match",
+    NO_MATCH: "no-match",
+    TOO_FAR: "too-far",
+  });
 
   const bookableSearchTermOptions = {
     keys: ["item.title", "item.description", "item.flags", "item.tags"],
@@ -81,7 +87,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     let filtered = updatedItems.value;
 
     if (!query.inclNoSuitable) {
-      filtered = filtered.filter((b) => b.status !== "nonSuitable");
+      filtered = filtered.filter((b) => b.matchStatus !== MatchStatus.NO_MATCH);
     }
     if (isEvent && query.pubEv) {
       filtered = filtered.filter((e) => e.item.attendees.publicEvent === true);
@@ -89,7 +95,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     if (isEvent && query.regEv) {
       filtered = filtered.filter(
-        (e) => e.item.attendees.needsRegistration === true
+        (e) => e.item.attendees.needsRegistration === true,
       );
     }
 
@@ -130,7 +136,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           return query.cities.some((city) =>
             b.item.location.display_address
               .toLowerCase()
-              .includes(city.toLowerCase())
+              .includes(city.toLowerCase()),
           );
         });
       }
@@ -141,16 +147,16 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       filtered = filtered.filter((b) => {
         if (!b.item.location || b.item.distanceMeter === undefined) {
           return false;
-        } else if (b.status === "nonSuitable") {
+        } else if (b.matchStatus === MatchStatus.NO_MATCH) {
           return false;
         }
 
         if (b.item.distanceMeter <= maxDistance * 1000) {
-          b.status = "suitable";
+          b.matchStatus = MatchStatus.MATCH;
 
           return true;
         }
-        b.status = "suitableButTooFar";
+        b.matchStatus = MatchStatus.TOO_FAR;
         return false;
       });
     }
@@ -179,7 +185,8 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       } else {
         return {
           ...i,
-          status: i.status === "suitable" ? "nonSuitable" : i.status,
+          isBookable: i.isBookable,
+          matchStatus: MatchStatus.NO_MATCH, //toDo - Was ist mit TOO_FAR??
         };
       }
     });
@@ -242,7 +249,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   });
 
   function getBookableMinPrice(bookable: any) {
-    if (bookable.status !== "suitable") return null;
+    if (bookable.matchStatus !== MatchStatus.MATCH) return null;
     //got calculated price from search
     if (searchIsInitialized.value && bookable.calculatedPrice) {
       return bookable.calculatedPrice.userGrossPriceEur;
@@ -251,7 +258,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     //all prices are free
     if (
       bookable.item.priceCategories.every(
-        (c) => c.priceEur === 0 || c.priceEur === null
+        (c) => c.priceEur === 0 || c.priceEur === null,
       )
     ) {
       return -1;
@@ -259,12 +266,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     //exclude external service fees
     const pricesWithoutServiceFees = bookable.item.priceCategories.filter(
-      (c) => !c.external || (c.external && c.unit !== "service-fee")
+      (c) => !c.external || (c.external && c.unit !== "service-fee"),
     );
 
     //exclude holiday price categories
     const pricesWithoutHolidays = pricesWithoutServiceFees.filter(
-      (c) => !c.holidays || c.holidays.length === 0
+      (c) => !c.holidays || c.holidays.length === 0,
     );
 
     const minPrice = Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
@@ -275,12 +282,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   function getEventMinPrice(event: any) {
-    if (event.status !== "suitable") {
+    if (event.matchStatus !== MatchStatus.MATCH) {
       return null;
     }
     if (event.item.tickets && event.item.tickets.length > 0) {
       return Math.min(
-        ...event.item.tickets.map((ticket: any) => getTicketMinPrice(ticket))
+        ...event.item.tickets.map((ticket: any) => getTicketMinPrice(ticket)),
       );
     } else {
       return 0;
@@ -289,7 +296,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
   function getTicketMinPrice(ticket: any) {
     const minPrice = Math.min(
-      ...ticket.priceCategories.map((cat: any) => cat.priceEur)
+      ...ticket.priceCategories.map((cat: any) => cat.priceEur),
     );
     return ticket.priceValueAddedTax
       ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
@@ -297,7 +304,9 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   const suitableCount = computed(
-    () => sortedItems.value.filter((l) => l.status === "suitable").length
+    () =>
+      sortedItems.value.filter((l) => l.matchStatus === MatchStatus.MATCH)
+        .length,
   );
 
   function setFilterQueryParams(criteria: Partial<CatalogQueryState>) {
@@ -310,7 +319,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     query.cat = criteria.cat ?? query.cat;
     query.cities = criteria.cities ?? query.cities;
     query.distance = query.location
-      ? criteria.distance ?? query.distance
+      ? (criteria.distance ?? query.distance)
       : null;
     query.price = criteria.price ?? query.price;
     query.start = criteria.start ?? query.start;
@@ -337,16 +346,27 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         }
         return {
           item,
-          status: isBookable ? "suitable" : "nonBookable",
+          isBookable: isBookable,
+          matchStatus: MatchStatus.MATCH,
           calculatedPrice: null,
         };
       });
     } else {
       updatedItems.value = toValue(sourceItems).map((item: any) => {
         if (item.attendees.publicEvent === true) {
-          return { item: item, status: "suitable", calculatedPrice: null };
+          return {
+            item: item,
+            isBookable: true,
+            matchStatus: MatchStatus.MATCH,
+            calculatedPrice: null,
+          };
         }
-        return { item: item, status: "nonBookable", calculatedPrice: null };
+        return {
+          item: item,
+          isBookable: false,
+          matchStatus: MatchStatus.MATCH,
+          calculatedPrice: null,
+        };
       });
     }
   }
@@ -365,9 +385,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     timeEnd?: number | null;
   } = {}) {
     query.term = term || "";
-    /* if(!location || !location.coordinates || !location.coordinates.points){
-          query.distance = null;
-      }*/
+
     if (typeof location === "object") {
       query.location = location.display_address || "";
     } else {
@@ -391,7 +409,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     //enrich items with status and location coordinates for the following search steps
     let enrichedItems: object[] = await enrichItems(
       () => toValue(sourceItems),
-      criteria
+      criteria,
     );
 
     enrichedItems = await checkTickets(enrichedItems);
@@ -402,13 +420,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     bookableItems = await searchForTimePeriod(
       { start: criteria.timeStart, end: criteria.timeEnd },
-      bookableItems
+      bookableItems,
     );
 
     bookableItems = await searchForLocation(
       criteria.location,
       bookableItems,
-      criteria.distance
+      criteria.distance,
     );
 
     updatedItems.value = await updateItemStatus(enrichedItems, bookableItems, {
@@ -418,7 +436,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     updatedItems.value = updateDistanceToLocation(
       updatedItems.value,
-      criteria.location
+      criteria.location,
     );
 
     searchIsInitialized.value = true;
@@ -433,20 +451,20 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
   async function enrichItems(
     itemsToSearch: () => any[],
-    searchCriteria: object
+    searchCriteria: object,
   ) {
     //add status to items based on bookable and event criteria
     let result: object[] = toValue(itemsToSearch).map((item: any) => {
       if (isEvent) {
-        return { item, status: "isBookable" };
+        return { item, isBookable: true, matchStatus: MatchStatus.MATCH };
       }
       if (
         item.category === "event" ||
         (item.category !== "event" && item.isBookable)
       ) {
-        return { item, status: "isBookable" };
+        return { item, isBookable: true, matchStatus: MatchStatus.MATCH };
       }
-      return { item, status: "nonBookable" };
+      return { item, isBookable: false, matchStatus: MatchStatus.MATCH };
     });
 
     //add location coordinates to items based on address for better location search and distance calculation
@@ -482,7 +500,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           };
           return item;
           //}
-        })
+        }),
       );
     }
     return result;
@@ -494,7 +512,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     if (!isEvent) {
       const allEvents = items.filter((item) => item.item.category === "event");
       const allBookables = items.filter(
-        (item) => item.item.category !== "event"
+        (item) => item.item.category !== "event",
       );
 
       const foundEvents = new Fuse(allEvents, eventSearchTermOptions)
@@ -516,7 +534,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   async function searchForLocation(
     searchLocation: string | object,
     items: object[],
-    distance: number | null
+    distance: number | null,
   ) {
     if (
       !searchLocation ||
@@ -542,7 +560,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           !item.item.location ||
           !item.item.location.coordinates ||
           !item.item.location.coordinates.points[0] ||
-          !item.item.location.coordinates.points[1]
+          !item.item.location.coordinates.points[1],
       );
 
       const itemsWithCoordinates: object[] = items.filter(
@@ -550,7 +568,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           item.item.location &&
           item.item.location.coordinates &&
           item.item.location.coordinates.points[0] &&
-          item.item.location.coordinates.points[1]
+          item.item.location.coordinates.points[1],
       );
 
       // search for items without coordinates
@@ -562,14 +580,14 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           .trim() || "";
 
       searchForLocationString(searchString, itemsWithoutCoordinates).forEach(
-        (r) => results.push(r)
+        (r) => results.push(r),
       );
 
       // search for items with coordinates
       itemsWithCoordinates.forEach((i) => {
         const mDistance = getDistanceToLocation(
           searchLocation,
-          i.item.location
+          i.item.location,
         );
         const kmDistance =
           mDistance === 0 ? 0 : mDistance ? mDistance / 1000 : null;
@@ -579,7 +597,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         } else if (distance && kmDistance && kmDistance <= distance) {
           results.push(i);
         } else if (distance && kmDistance && kmDistance > distance) {
-          i.status = "suitableButTooFar";
+          i.matchStatus = MatchStatus.TOO_FAR;
         }
       });
 
@@ -590,7 +608,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     if (!isEvent) {
       const allEvents = items.filter((item) => item.item.category === "event");
       const allBookables = items.filter(
-        (item) => item.item.category !== "event"
+        (item) => item.item.category !== "event",
       );
 
       const foundEvents = new Fuse(allEvents, eventSearchLocationOptions)
@@ -599,7 +617,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
       const foundBookables = new Fuse(
         allBookables,
-        bookableSearchLocationOptions
+        bookableSearchLocationOptions,
       )
         .search(searchLocation)
         .map((result) => result.item);
@@ -624,7 +642,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     return haversine(
       searchLocation.coordinates.points,
-      itemLocation.coordinates.points
+      itemLocation.coordinates.points,
     );
   }
 
@@ -647,7 +665,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           headers: {
             "Accept-Language": "de",
           },
-        }
+        },
       );
 
       const data = await response.json();
@@ -689,13 +707,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
           ? await options.getAvailability(
               item,
               timePeriod.start!,
-              timePeriod.end!
+              timePeriod.end!,
             )
           : await useBookables().getBookableAvailability(
               item.item.tenantId,
               item.item.id,
               timePeriod.start!,
-              timePeriod.end!
+              timePeriod.end!,
             );
 
         return {
@@ -714,17 +732,25 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   async function updateItemStatus(
     itemsWithStatus: any[],
     bookableItems: any[],
-    timePeriod: any
+    timePeriod: any,
   ) {
     const temp = await Promise.all(
       itemsWithStatus.map(async (item) => {
         const isSuitable = bookableItems.some(
-          (b) => b.item.id === item.item.id
+          (b) => b.item.id === item.item.id,
         );
 
-        if (item.status === "isBookable") {
+        if (item.matchStatus === MatchStatus.TOO_FAR) {
+          return {
+            ...item,
+            isBookable: item.isBookable,
+            matchStatus: isSuitable ? MatchStatus.MATCH : MatchStatus.TOO_FAR,
+            calculatedPrice: null,
+          };
+        } else {
           let price = null;
           if (
+            item.isBookable &&
             timePeriod &&
             timePeriod.start !== null &&
             timePeriod.end !== null &&
@@ -736,13 +762,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
                 ? await options.getPriceForPeriod(
                     item.item,
                     timePeriod.start,
-                    timePeriod.end
+                    timePeriod.end,
                   )
                 : await useBookables().getBookablePrice(
                     item.item.tenantId,
                     item.item.id,
                     timePeriod.start,
-                    timePeriod.end
+                    timePeriod.end,
                   );
             } catch {
               price = null;
@@ -751,23 +777,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
           return {
             ...item,
-            status: isSuitable ? "suitable" : "nonSuitable",
+            isBookable: item.isBookable,
+            matchStatus: isSuitable ? MatchStatus.MATCH : MatchStatus.NO_MATCH,
             calculatedPrice: isSuitable ? price : null,
           };
-        } else if (item.status === "suitableButTooFar") {
-          return {
-            ...item,
-            status: isSuitable ? "suitable" : "suitableButTooFar",
-            calculatedPrice: null,
-          };
-        } else {
-          return {
-            ...item,
-            status: isSuitable ? "nonBookable" : "nonSuitable",
-            calculatedPrice: null,
-          };
         }
-      })
+      }),
     );
 
     return temp;
@@ -804,7 +819,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       }
       item.item["distanceMeter"] = getDistanceToLocation(
         item.item.location,
-        searchLocation
+        searchLocation,
       );
       return item;
     });
@@ -823,17 +838,17 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       };
 
       newTimePeriod.start = new Date(
-        timePeriod.startDate + " " + timePeriod.startTime
+        timePeriod.startDate + " " + timePeriod.startTime,
       ).getTime();
 
       newTimePeriod.end = "";
       if (!timePeriod.endDate && timePeriod.endTime) {
         newTimePeriod.end = new Date(
-          timePeriod.startDate + " " + timePeriod.endTime
+          timePeriod.startDate + " " + timePeriod.endTime,
         ).getTime();
       } else {
         newTimePeriod.end = new Date(
-          timePeriod.endDate + " " + timePeriod.endTime
+          timePeriod.endDate + " " + timePeriod.endTime,
         ).getTime();
       }
       return newTimePeriod;
@@ -841,11 +856,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     return null;
   }
 
-  async function checkTickets(events: { item: object; status: string }[]) {
+  async function checkTickets(events: object[]) {
     const result = await Promise.allSettled(
       events.map(async (event) => {
         if (
-          //isEvent ||
           (event.item.category === "event" || event.item.type === "event") &&
           event.item.tickets &&
           event.item.tickets.length > 0
@@ -854,19 +868,19 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
             event.item.tickets.map(async (ticket: any) => {
               const ticketPrice = await useBookables().getBookablePrice(
                 event.item.tenantId,
-                ticket.id
+                ticket.id,
               );
               const ticketAvailability =
                 await useBookables().getBookableAvailability(
                   event.item.tenantId,
-                  ticket.id
+                  ticket.id,
                 );
               return {
                 ...ticket,
                 calculatedPrice: ticketPrice,
                 availability: ticketAvailability,
               };
-            })
+            }),
           );
           return {
             ...event,
@@ -878,14 +892,13 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         } else {
           return event;
         }
-      })
+      }),
     );
-
-    return result.filter((r) => r.status === "fulfilled").map((r) => r.value);
+    return result.map((r) => r.value);
   }
 
   const hasUrlCriteria = computed(
-    () => isSearchActive.value || isFilterActive.value
+    () => isSearchActive.value || isFilterActive.value,
   );
 
   watch(
@@ -896,12 +909,12 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         return;
       }
 
-      const hasStatus = updatedItems.value.some((b) => b?.status);
+      const hasStatus = updatedItems.value.some((b) => b?.matchStatus);
       if (hasStatus) return;
 
       initializeResults();
     },
-    { immediate: true, deep: true }
+    { immediate: true, deep: true },
   );
 
   onMounted(async () => {
@@ -937,10 +950,8 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   function matchesCustomField(
     itemValue: any,
     filterValue: any,
-    type: string | undefined
+    type: string | undefined,
   ) {
-    console.log("matchesCustomField", itemValue, filterValue, type);
-
     if (itemValue === undefined || itemValue === null || itemValue === "") {
       return false;
     }

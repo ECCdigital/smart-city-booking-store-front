@@ -215,7 +215,7 @@ const props = defineProps({
 const emit = defineEmits(["filter"]);
 
 const suitableBookables = computed(() =>
-  props.bookables.filter((b) => b.status === "suitable")
+  props.bookables.filter((b) => b.matchStatus === "match")
 );
 
 //Filter Variables
@@ -264,7 +264,7 @@ const distanceRange = computed(() => {
   }
 
   const distances = props.bookables
-    .filter((b) => b.status !== "nonSuitable" && b.item.distanceMeter != null)
+    .filter((b) => b.matchStatus !== "no-match" && b.item.distanceMeter != null)
     .map((b) => b.item.distanceMeter);
 
   if (distances.length === 0) {
@@ -290,37 +290,6 @@ const dynamicDistanceStep = computed(() => {
   return step;
 });
 
-const distanceBars = computed(() => {
-  if (!props.bookables || props.bookables.length === 0) {
-    return [];
-  }
-
-  //set number of bars depending on distance range
-  const barsCount =
-    Math.ceil(distanceRange.value[1] / dynamicDistanceStep.value) || 1;
-
-  const bars = new Array(barsCount).fill(0);
-  const range = distanceRange.value[1];
-
-  props.bookables.forEach((b) => {
-    if (b.item.distanceMeter == null || b.status === "nonSuitable") {
-      return;
-    }
-    const distanceKm = b.item.distanceMeter / 1000;
-    if (distanceKm === 0) {
-      //put into first bar
-      bars[0]++;
-      return;
-    }
-    const index = Math.min(
-      Math.floor((distanceKm / range) * barsCount),
-      barsCount - 1
-    );
-    bars[index]++;
-  });
-
-  return bars;
-});
 
 //Price
 const priceValues = computed(() => {
@@ -395,49 +364,9 @@ watch(suitableBookables, () => {
   _price.value = [dynamicMinPrice.value, dynamicMaxPrice.value];
 });
 
-const priceBars = computed(() => {
-  if (!props.bookables || props.bookables.length === 0) {
-    return [];
-  }
-
-  //set number of bars depending on price range
-  const barsCount =
-    Math.ceil(
-      (dynamicMaxPrice.value - possiblePriceRange.value[0]) /
-        dynamicPriceStep.value
-    ) || 1;
-
-  const bars = new Array(barsCount).fill(0);
-  const range = dynamicMaxPrice.value - possiblePriceRange.value[0];
-
-  suitableBookables.value.forEach((b) => {
-    let minPrice = null;
-    if (!props.isEvent) {
-      minPrice = getBookableMinPrice(b);
-    } else {
-      minPrice = getEventMinPrice(b);
-    }
-    //sort price into bars
-    if (minPrice !== null) {
-      if (minPrice === possiblePriceRange.value[0]) {
-        //put into first bar
-        bars[0]++;
-        return;
-      }
-      const index = Math.min(
-        Math.floor(
-          ((minPrice - possiblePriceRange.value[0]) / range) * barsCount
-        ),
-        barsCount - 1
-      );
-      bars[index]++;
-    }
-  });
-  return bars;
-});
 
 function getBookableMinPrice(bookable) {
-  if (bookable.status === "nonSuitable") {
+  if (bookable.matchStatus === "no-match") {
     return null;
   }
   //if search is initialized, return calculated price
@@ -461,7 +390,7 @@ function getTicketMinPrice(ticket) {
     : minPrice;
 }
 function getEventMinPrice(event) {
-  if (event.status === "nonSuitable") {
+  if (event.matchStatus === "no-match") {
     return null;
   }
   if (event.item.tickets && event.item.tickets.length > 0) {
@@ -476,7 +405,7 @@ function getEventMinPrice(event) {
 //Locations
 const distanceValues = computed(() => {
   return props.bookables
-      .filter((b) => b.status !== "nonSuitable" && b.item.distanceMeter != null)
+      .filter((b) => b.matchStatus !== "no-match" && b.item.distanceMeter != null)
       .map((b) => b.item.distanceMeter / 1000);
 });
 const possibleCities = computed(() => {
@@ -487,9 +416,9 @@ const possibleCities = computed(() => {
   const cityCount = {};
   props.bookables.forEach((b) => {
     let city = "";
-    if (props.isEvent && b.status === "suitable") {
+    if (props.isEvent && b.matchStatus === "match") {
       city = extractCity(b.item.eventAddress.city); //toDo - adjust for new location object !!!
-    } else if (b.status === "suitable") {
+    } else if (b.matchStatus === "match") {
       city = extractCity(b.item.location);
     }
 
