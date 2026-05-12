@@ -47,7 +47,8 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     keys: ["item.title", "item.description", "item.flags", "item.tags"],
     includeScore: true,
     shouldSort: true,
-    threshold: 0.3,
+      distance: 150,
+    threshold: 0.25,
   };
 
   const bookableSearchLocationOptions = {
