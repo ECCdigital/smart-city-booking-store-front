@@ -104,6 +104,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         if (isEmptyFilterValue(value)) continue;
 
         const def = getCustomFieldDef(updatedItems.value, fieldId);
+        if(!def) continue;
         const type = def?.usageOptions?.catalogFilterType;
 
         filtered = filtered.filter((b) => {
