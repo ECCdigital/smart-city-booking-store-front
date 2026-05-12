@@ -63,16 +63,19 @@ export function useCatalogQueryState() {
   const route = useRoute();
   const router = useRouter();
 
-  const state = useState<CatalogQueryState>("catalog-query-state", () => {
+
+  const extractCustomFields = () => {
     const initialCustomFields: Record<string, any> = {};
     for (const [key, value] of Object.entries(route.query)) {
       if (!key.startsWith(CF_PREFIX) || typeof value !== "string") continue;
       const fieldId = key.slice(CF_PREFIX.length);
       initialCustomFields[fieldId] = parseCustomFieldValue(value);
     }
+  return initialCustomFields
+  };
 
-    return {
-      term: decodeURIComponent((route.query.q as string) || ""),
+  const state = reactive<CatalogQueryState>({
+       term: decodeURIComponent((route.query.q as string) || ""),
       location: decodeURIComponent((route.query.loc as string) || ""),
       distance: parseNumberOrNull(route.query.dist),
       start: parseNumberOrNull(route.query.start),
@@ -105,9 +108,8 @@ export function useCatalogQueryState() {
 
       sortMode: (route.query.sort as any) || "alphabeticAscending",
 
-      customFields: initialCustomFields,
-    };
-  });
+      customFields: extractCustomFields(),
+  })
 
   const initialCustomFields: Record<string, any> = {};
   for (const [key, value] of Object.entries(route.query)) {
@@ -118,7 +120,7 @@ export function useCatalogQueryState() {
 
   const queryObject = computed(() => {
     const q: Record<string, string> = {};
-    const s = state.value;
+    const s = state;
 
     if (s.term) q.q = encodeURIComponent(s.term);
     if (s.location) q.loc = encodeURIComponent(s.location);
@@ -167,7 +169,7 @@ export function useCatalogQueryState() {
   );
 
   const isFilterActive = computed(() => {
-    const s = state.value;
+    const s = state;
     if (s.inclNoSuitable === false) return true;
     if (s.pubEv) return true;
     if (s.regEv) return true;
@@ -186,12 +188,12 @@ export function useCatalogQueryState() {
 
 
   const isSearchActive = computed(() => {
-    const s = state.value;
+    const s = state;
     return !!s.term || !!s.location || s.start != null || s.end != null;
   });
 
   return {
-    state: state.value,
+    state: state,
     queryObject,
     isFilterActive,
     isSearchActive,
