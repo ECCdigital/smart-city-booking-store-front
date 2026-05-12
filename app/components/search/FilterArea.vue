@@ -211,6 +211,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  customFields: {
+    type: Object,
+    default: () => ({}),
+  },
 });
 const emit = defineEmits(["filter"]);
 
@@ -546,7 +550,7 @@ const { aggregated: customFieldFilters } = useCustomFieldFilters(bookablesRef, {
   position: "sidebar",
 });
 
-const _customFieldValues = ref({ ...(props.customFieldValues || {}) });
+const _customFieldValues = ref({ ...(props.customFields || {}) });
 
 function onCustomFieldChange() {
   instantFilter();
