@@ -187,7 +187,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         return {
           ...i,
           isBookable: i.isBookable,
-          matchStatus: MatchStatus.NO_MATCH, //toDo - Was ist mit TOO_FAR??
+          matchStatus: i.matchStatus === MatchStatus.TOO_FAR ? MatchStatus.TOO_FAR : MatchStatus.NO_MATCH,
         };
       }
     });
