@@ -25,8 +25,22 @@ export function useTenants() {
     return data;
   }
 
+  const fetchTenantPaymentProviders = async (tenantID) => {
+    const api = useApiClient();
+
+    const { data, error } = await api.get(`/api/tenants/${tenantID}/payment-providers`);
+
+    if (error) {
+      console.error("Error fetching tenant payment apps:", error);
+      throw error;
+    }
+
+    return data;
+  }
+
   return {
     fetchTenants,
     fetchTenant,
+    fetchTenantPaymentProviders,
   };
 }

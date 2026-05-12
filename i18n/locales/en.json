@@ -25,7 +25,11 @@
     "freeOfCharge": "Free of charge",
     "optional": "optional",
     "mandatory": "Mandatory",
-    "obligation": "Required"
+    "obligation": "Required",
+    "phone": "Phone",
+    "address": "Street and number",
+    "zipCode": "Postal code",
+    "city": "City"
   },
   "checkout": {
     "noBookable": "No matching resources found",
@@ -37,9 +41,129 @@
     "time_conflict": "There is a time conflict with another booking for this object.",
     "selectTimePeriodTitle": "Select a time period",
     "selectTimePeriodHint": "Please select a time period first to see the price summary.",
+    "data": {
+      "contactSectionTitle": "Contact details",
+      "addressLookupLabel": "Find address",
+      "addressLookupPlaceholder": "Enter an address (e.g. Main Street 1, Berlin)",
+      "addressLookupHint": "Select a result to auto-fill street, postal code, and city.",
+      "commentLabel": "Comment on your booking",
+      "commentPlaceholder": "Optional: notes or requests for the provider …",
+      "commentRequiredHint": "This field is required for this booking.",
+      "documentsTitle": "Information and documents",
+      "openDocument": "Open document",
+      "attachmentConfirm": "I have read \"{title}\" and accept its contents.",
+      "requiredAttachmentsHint": "{count} attachment(s) must be confirmed.",
+      "requiredConfirmationBadge": "Confirmation required",
+      "guestTitle": "Continue as guest or sign in",
+      "guestDescription": "You can complete this booking as a guest or sign in to use your saved details.",
+      "loginAction": "Sign in now",
+      "loggedInTitle": "You are signed in",
+      "loggedInDescription": "You can sign out and continue this booking as a guest instead.",
+      "logoutGuestAction": "Sign out and continue as guest",
+      "customFieldsSectionTitle": "Additional details",
+      "customFieldSelectPlaceholder": "Please select"
+    },
+    "attachmentTypes": {
+      "agreement": "User agreement",
+      "privacy-agreement": "Privacy policy",
+      "user-manual": "Operating instructions",
+      "security-information": "Safety information",
+      "product-information": "Product information"
+    },
     "errors": {
       "capacityInfo": "Available: {remaining} of {total}",
       "unavailableHint": "Please choose a different time period or remove the object."
+    },
+    "payment": {
+      "description": "Please choose how you would like to pay.",
+      "lead": "Choose how you want to pay. Online providers collect payment during checkout; with invoice you complete the booking without paying online right away.",
+      "kindOnline": "Online payment",
+      "kindInvoice": "Invoice",
+      "fallbackOnlineDescription": "Pay during checkout using an online payment service.",
+      "fallbackInvoiceDescription": "You will receive an invoice and pay later according to the provider’s terms.",
+      "providers": {
+        "giroCockpit": {
+          "title": "GiroCockpit",
+          "description": "Secure online payment via GiroCockpit, with familiar bank and payment options in the payment flow."
+        },
+        "pmPayment": {
+          "title": "Pay online",
+          "description": "Card and other online payment methods in a secure payment window."
+        },
+        "ePayBL": {
+          "title": "ePayBL",
+          "description": "Online payment using the ePayBL service."
+        },
+        "invoice": {
+          "title": "Pay by invoice",
+          "description": "No immediate online payment: you book now and receive an invoice from the provider."
+        }
+      }
+    },
+    "coupon": {
+      "summaryLine": "Voucher ({code})",
+      "errors": {
+        "not_found": "This voucher code was not found.",
+        "expired": "This voucher has expired.",
+        "already_used": "This voucher has already been used.",
+        "invalid": "This voucher code is invalid.",
+        "generic": "The voucher could not be redeemed."
+      }
+    },
+    "review": {
+      "periodTitle": "Time period",
+      "periodMissing": "No time period selected.",
+      "priceTitle": "Price summary",
+      "priceUpdating": "Updating prices…",
+      "priceUnavailable": "No valid price for the current selection.",
+      "taxLabel": "incl. VAT",
+      "totalLabel": "Total",
+      "totalFree": "Free",
+      "paymentTitle": "Payment method",
+      "paymentMethodLabel": "Method",
+      "couponTitle": "Voucher",
+      "discountCodeTitle": "Discount code",
+      "overviewCardTitle": "Overview",
+      "couponFieldLabel": "Voucher code",
+      "couponPlaceholder": "Enter code",
+      "couponApply": "Redeem",
+      "couponRemove": "Remove",
+      "couponAppliedHint": "The voucher is applied; prices above reflect the discount.",
+      "couponActiveSummary": "Code “{code}” active · {amount}",
+      "couponRequired": "Please enter a voucher code.",
+      "couponInvalid": "This voucher code is invalid or can no longer be redeemed.",
+      "couponDiscountFixed": "Discount: {value}",
+      "couponDiscountPercent": "{value} % discount",
+      "stepKicker": "Step {current} of {total} — {context}",
+      "heroBefore": "One last ",
+      "heroHighlight": "look,",
+      "heroAfter": " before we get started.",
+      "heroLead": "Please review your details carefully. By confirming, you complete your booking.",
+      "sectionPeriod": "Time period",
+      "sectionContact": "Contact",
+      "sectionPayment": "Payment",
+      "dateLabel": "Date",
+      "bookingLabel": "Booking",
+      "addonsLabel": "Add-ons",
+      "fullNameLabel": "Name",
+      "lineQtyPrice": "{qty} × {price}",
+      "edit": "Edit",
+      "commitBooking": "Confirm booking",
+      "backToPayment": "Back to payment",
+      "backToData": "Back to your details",
+      "termsHint": "By completing this booking you accept our terms and conditions.",
+      "boolYes": "Yes",
+      "boolNo": "No"
+    },
+    "steps": {
+      "periodTitle": "Period & extras",
+      "dataTitle": "Your details",
+      "paymentTitle": "Payment",
+      "confirmTitle": "Summary",
+      "nextToData": "Continue to details",
+      "nextToPayment": "Continue to payment",
+      "nextToConfirm": "Continue to summary",
+      "finishBooking": "Complete booking"
     }
   },
   "stepper": {
@@ -53,9 +177,15 @@
     "previousDays": "Show earlier days",
     "laterDays": "Show later days",
     "jumpToDate": "Jump to date",
+    "jumpToNextFree": "Jump to next free day",
     "selectTime": "Select time",
     "noTimePeriods": "No times available for the selected day",
-    "selected": "Selected time"
+    "selected": "Selected time",
+    "fullyBooked": "Fully booked",
+    "closedDay": "Not bookable",
+    "legendAvailable": "Available",
+    "legendFullyBooked": "Fully booked",
+    "legendClosed": "Not bookable"
   },
 
   "weekSelection": {

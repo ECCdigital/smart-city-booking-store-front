@@ -3,19 +3,16 @@ import DetailsAreaImages from "~/components/search/DetailsAreaImages.vue";
 import HtmlContent from "~/components/HtmlContent.vue";
 
 const props = defineProps({
-  /** Das Lead-Bookable (Hauptobjekt der Buchung). */
   leadBookable: {
     type: Object,
     required: true,
   },
-  /** Optionaler Tenant – wird als Untertitel angezeigt. */
   tenant: {
     type: Object,
     default: null,
   },
 });
 
-// --- Anzeige-Helfer --------------------------------------------------------
 
 const subtitle = computed(() => props.tenant?.name || "");
 
@@ -45,7 +42,7 @@ const subtitle = computed(() => props.tenant?.name || "");
         <DetailsAreaImages :item="leadBookable" :is-event="false" />
       </div>
 
-      <!-- Description (HTML, kollabierbar) -->
+      <!-- Description -->
       <HtmlContent
         v-if="leadBookable.description"
         :html="leadBookable.description"

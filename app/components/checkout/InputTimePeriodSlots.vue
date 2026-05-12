@@ -1,6 +1,5 @@
 <template>
   <div class="space-y-8">
-    <!-- date selector -->
     <section>
       <div class="flex items-center gap-2 mb-4">
         <h3
@@ -15,8 +14,24 @@
           />
         </h3>
 
-        <!-- jump-to-date picker -->
         <DateJumper @select="onJumpDateSelected" />
+
+        <button
+          type="button"
+          :disabled="isSearchingNextFreeDay"
+          class="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          :aria-label="$t('timePeriods.jumpToNextFree')"
+          :title="$t('timePeriods.jumpToNextFree')"
+          @click="jumpToNextFreeDay"
+        >
+          <UIcon
+            :name="isSearchingNextFreeDay
+              ? 'i-lucide-loader-2'
+              : 'i-lucide-fast-forward'"
+            class="text-sm"
+            :class="isSearchingNextFreeDay ? 'animate-spin' : ''"
+          />
+        </button>
       </div>
 
       <div class="flex items-center gap-2">
@@ -39,36 +54,35 @@
             type="button"
             :disabled="!day.hasAvailability"
             class="flex flex-col items-center justify-center py-3 px-2 border rounded-xl transition-all focus:outline-none relative"
-            :class="[
-              isSelectedDay(day)
-                ? 'border-primary dark:border-primary bg-primary/10  ring-1 ring-primary dark:ring-primary'
-                : 'border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary',
-              !day.hasAvailability
-                ? 'opacity-40 cursor-not-allowed'
-                : 'cursor-pointer',
-            ]"
+            :class="getDayClass(day)"
+            :title="getDayTitle(day)"
             @click="selectDay(day)"
           >
             <span
-              class="text-[10px] font-semibold  tracking-wider text-gray-500 dark:text-gray-400"
+              class="text-[10px] font-semibold tracking-wider"
+              :class="getDayWeekdayClass(day)"
             >
               {{ day.weekdayLabel }}
             </span>
             <span
               class="text-2xl font-extrabold leading-none my-1 tabular-nums"
-              :class="[
-                isSelectedDay(day)
-                  ? 'text-primary dark:text-primary'
-                  : 'text-gray-900 dark:text-white',
-                day.hasMatchingPeriod && !day.hasAvailability
-                  ? 'line-through'
-                  : '',
-              ]"
+              :class="getDayNumberClass(day)"
             >
               {{ day.dayNumber }}
             </span>
-            <span class="text-[11px] text-gray-500 dark:text-gray-400">
+            <span
+              class="text-[11px]"
+              :class="getDayWeekdayClass(day)"
+            >
               {{ day.monthLabel }}
+            </span>
+
+            <span
+              v-if="day.hasMatchingPeriod && !day.hasAvailability"
+              class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-100 dark:bg-red-900/40 text-red-500 dark:text-red-400 flex items-center justify-center"
+              :aria-label="$t('timePeriods.fullyBooked')"
+            >
+              <UIcon name="i-lucide-x" class="text-[10px]" />
             </span>
           </button>
         </div>
@@ -81,6 +95,27 @@
         >
           <UIcon name="i-lucide-chevron-right" />
         </button>
+      </div>
+
+      <div
+        class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-[11px] text-gray-500 dark:text-gray-400"
+      >
+        <span class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-primary inline-block" />
+          {{ $t("timePeriods.legendAvailable") }}
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span
+            class="w-2.5 h-2.5 rounded-full bg-red-400 dark:bg-red-500 inline-block"
+          />
+          {{ $t("timePeriods.legendFullyBooked") }}
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span
+            class="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600 inline-block"
+          />
+          {{ $t("timePeriods.legendClosed") }}
+        </span>
       </div>
     </section>
 
@@ -169,6 +204,7 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue", "change"]);
 
 const { getBookableAvailability } = useBookables();
+const { t } = useI18n();
 
 const WEEKDAY_LABELS = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
 const MONTH_LABELS = [
@@ -218,7 +254,6 @@ function navigateDays(delta) {
   dayOffset.value = Math.max(0, next);
 }
 
-/* ── jump-to-date picker ────────────────────────────── */
 function onJumpDateSelected(date) {
   if (!date) return;
 
@@ -236,6 +271,92 @@ function onJumpDateSelected(date) {
   emitValue();
 }
 
+const isSearchingNextFreeDay = ref(false);
+const MAX_NEXT_FREE_LOOKAHEAD_DAYS = 365;
+
+async function fetchAvailabilityBlock(blockBase) {
+  const blockEnd = new Date(blockBase);
+  blockEnd.setDate(blockEnd.getDate() + props.numDays);
+  blockEnd.setMilliseconds(blockEnd.getMilliseconds() - 1);
+
+  const cacheKey = buildCacheKey(
+    props.tenantId,
+    props.bookableId,
+    blockBase.getTime(),
+    blockEnd.getTime(),
+    props.amount
+  );
+
+  if (availabilityCache.has(cacheKey)) {
+    return availabilityCache.get(cacheKey);
+  }
+
+  try {
+    const res = await getBookableAvailability({
+      tenantID: props.tenantId,
+      bookableId: props.bookableId,
+      start: blockBase.toISOString(),
+      end: blockEnd.toISOString(),
+      amount: props.amount,
+    });
+    const data = Array.isArray(res?.availability) ? res.availability : [];
+    availabilityCache.set(cacheKey, data);
+    return data;
+  } catch {
+    return [];
+  }
+}
+
+async function jumpToNextFreeDay() {
+  if (isSearchingNextFreeDay.value) return;
+  if (!props.tenantId || !props.bookableId) return;
+
+  isSearchingNextFreeDay.value = true;
+  try {
+    const today = startOfToday();
+
+    let startOffset = dayOffset.value;
+    if (selectedDayIso.value) {
+      const [y, m, d] = selectedDayIso.value.split("-").map(Number);
+      const sel = new Date(y, m - 1, d);
+      const diff = Math.round((sel - today) / 86_400_000);
+      startOffset = Math.max(diff + 1, 0);
+    }
+
+    for (
+      let blockStart = startOffset;
+      blockStart < startOffset + MAX_NEXT_FREE_LOOKAHEAD_DAYS;
+      blockStart += props.numDays
+    ) {
+      const blockBase = new Date(today);
+      blockBase.setDate(today.getDate() + blockStart);
+
+      const availData = await fetchAvailabilityBlock(blockBase);
+
+      for (let i = 0; i < props.numDays; i++) {
+        const d = new Date(blockBase);
+        d.setDate(blockBase.getDate() + i);
+        const weekday = d.getDay();
+        const matchingPeriods = (props.timePeriods || []).filter(
+          (p) => Array.isArray(p.weekdays) && p.weekdays.includes(weekday)
+        );
+        if (!matchingPeriods.length) continue;
+
+        if (dayHasAnyFreeSlot(d, matchingPeriods, availData)) {
+          dayOffset.value = blockStart;
+          selectedDayIso.value = localISODate(d);
+          startHour.value = null;
+          endHour.value = null;
+          emitValue();
+          return;
+        }
+      }
+    }
+  } finally {
+    isSearchingNextFreeDay.value = false;
+  }
+}
+
 const windowRange = computed(() => {
   const start = startOfToday();
   start.setDate(start.getDate() + dayOffset.value);
@@ -250,7 +371,6 @@ const windowRange = computed(() => {
 const availability = ref([]);
 const isLoadingAvailability = ref(false);
 
-/** Cache: key → availability array. Cleared when tenantId, bookableId or amount change. */
 const availabilityCache = new Map();
 
 function buildCacheKey(tenantId, bookableId, startMs, endMs, amount) {
@@ -445,12 +565,12 @@ function slotTimestamps(date, hour) {
   return { startMs: start.getTime(), endMs: end.getTime() };
 }
 
-function isHourSlotAvailable(date, hour) {
-  if (!availability.value.length) return true;
+function isHourSlotAvailable(date, hour, availData = availability.value) {
+  if (!availData.length) return true;
 
   const { startMs, endMs } = slotTimestamps(date, hour);
 
-  for (const interval of availability.value) {
+  for (const interval of availData) {
     if (interval.timeBegin < endMs && interval.timeEnd > startMs) {
       if (!interval.available) return false;
     }
@@ -458,8 +578,8 @@ function isHourSlotAvailable(date, hour) {
   return true;
 }
 
-function dayHasAnyFreeSlot(date, matchingPeriods) {
-  if (!availability.value.length) return true;
+function dayHasAnyFreeSlot(date, matchingPeriods, availData = availability.value) {
+  if (!availData.length) return true;
 
   for (const p of matchingPeriods) {
     const ps = timeToHours(p.startTime);
@@ -470,11 +590,53 @@ function dayHasAnyFreeSlot(date, matchingPeriods) {
 
     for (let h = startH; h < endH; h++) {
       if (h >= ps && h + 1 <= pe) {
-        if (isHourSlotAvailable(date, h)) return true;
+        if (isHourSlotAvailable(date, h, availData)) return true;
       }
     }
   }
   return false;
+}
+
+function getDayClass(day) {
+  if (isSelectedDay(day)) {
+    return "border-primary dark:border-primary bg-primary/10 ring-1 ring-primary dark:ring-primary cursor-pointer";
+  }
+  if (!day.hasAvailability) {
+    if (day.hasMatchingPeriod) {
+      return "border-dashed border-red-200 dark:border-red-900/50 bg-red-50/40 dark:bg-red-950/20 cursor-not-allowed";
+    }
+    return "border-dashed border-gray-200 dark:border-gray-800 opacity-50 cursor-not-allowed";
+  }
+  return "border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary cursor-pointer";
+}
+
+function getDayNumberClass(day) {
+  if (isSelectedDay(day)) {
+    return "text-primary dark:text-primary";
+  }
+  if (!day.hasAvailability) {
+    if (day.hasMatchingPeriod) {
+      return "text-red-400 dark:text-red-500 line-through decoration-2";
+    }
+    return "text-gray-400 dark:text-gray-500";
+  }
+  return "text-gray-900 dark:text-white";
+}
+
+function getDayWeekdayClass(day) {
+  if (isSelectedDay(day)) {
+    return "text-primary/80 dark:text-primary/80";
+  }
+  if (!day.hasAvailability) {
+    return "text-gray-400 dark:text-gray-500";
+  }
+  return "text-gray-500 dark:text-gray-400";
+}
+
+function getDayTitle(day) {
+  if (day.hasAvailability) return "";
+  if (day.hasMatchingPeriod) return t("timePeriods.fullyBooked");
+  return t("timePeriods.closedDay");
 }
 
 const startHour = ref(null);

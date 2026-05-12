@@ -134,7 +134,7 @@
 </template>
 <script setup>
 import InputText from "~/components/inputs/InputText.vue";
-import InputTimePeriod from "~/components/inputs/InputTimePeriod.vue";
+import InputTimePeriod from "../checkout/InputTimePeriod.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import AddressLookup from "~/components/inputs/AddressLookup.vue";
 

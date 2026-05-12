@@ -25,7 +25,11 @@
     "freeOfCharge": "kostenlos",
     "optional": "optional",
     "mandatory": "Pflichtfeld",
-    "obligation": "Pflicht"
+    "obligation": "Pflicht",
+    "phone": "Telefon",
+    "address": "Straße und Hausnummer",
+    "zipCode": "PLZ",
+    "city": "Stadt"
   },
   "navigation": {
     "home": "Startseite",
@@ -259,9 +263,129 @@
     "time_conflict": "Für dieses Objekt besteht ein Zeitkonflikt mit einer anderen Buchung.",
     "selectTimePeriodTitle": "Zeitraum auswählen",
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
+    "data": {
+      "contactSectionTitle": "Kontaktdaten",
+      "addressLookupLabel": "Adresse suchen",
+      "addressLookupPlaceholder": "Adresse eingeben (z. B. Musterstraße 1, Berlin)",
+      "addressLookupHint": "Wählen Sie einen Treffer aus, um Straße, PLZ und Stadt automatisch zu übernehmen.",
+      "commentLabel": "Kommentar zur Buchung",
+      "commentPlaceholder": "Optional: Anmerkungen oder Wünsche an den Anbieter …",
+      "commentRequiredHint": "Dieses Feld ist für diese Buchung verpflichtend.",
+      "documentsTitle": "Hinweise und Dokumente",
+      "openDocument": "Dokument öffnen",
+      "attachmentConfirm": "Ich habe „{title}“ zur Kenntnis genommen und akzeptiere die Inhalte.",
+      "requiredAttachmentsHint": "{count} Anhang/Anhänge müssen bestätigt werden.",
+      "requiredConfirmationBadge": "Bestätigung erforderlich",
+      "guestTitle": "Als Gast fortfahren oder anmelden",
+      "guestDescription": "Sie können diese Buchung als Gast abschließen oder sich anmelden, um Ihre gespeicherten Daten zu übernehmen.",
+      "loginAction": "Jetzt einloggen",
+      "loggedInTitle": "Sie sind eingeloggt",
+      "loggedInDescription": "Sie können sich ausloggen und diese Buchung stattdessen als Gast abschließen.",
+      "logoutGuestAction": "Ausloggen und als Gast fortfahren",
+      "customFieldsSectionTitle": "Zusätzliche Angaben",
+      "customFieldSelectPlaceholder": "Bitte auswählen"
+    },
+    "attachmentTypes": {
+      "agreement": "Nutzervereinbarung",
+      "privacy-agreement": "Datenschutzerklärung",
+      "user-manual": "Betriebsanleitung",
+      "security-information": "Sicherheitshinweise",
+      "product-information": "Produktinformationen"
+    },
     "errors": {
       "capacityInfo": "Verfügbar: {remaining} von {total}",
       "unavailableHint": "Bitte wählen Sie einen anderen Zeitraum oder entfernen Sie das Objekt."
+    },
+    "payment": {
+      "description": "Bitte wählen Sie aus, wie Sie bezahlen möchten.",
+      "lead": "Wählen Sie Ihre bevorzugte Zahlungsart. Online-Anbieter führen die Zahlung direkt im Buchungsvorgang aus; bei Rechnung buchen Sie ohne sofortige Online-Zahlung.",
+      "kindOnline": "Online-Zahlung",
+      "kindInvoice": "Rechnung",
+      "fallbackOnlineDescription": "Direkte Zahlung während der Buchung über einen Online-Bezahldienst.",
+      "fallbackInvoiceDescription": "Sie erhalten eine Rechnung und begleichen den Betrag später gemäß den Angaben des Anbieters.",
+      "providers": {
+        "giroCockpit": {
+          "title": "GiroCockpit",
+          "description": "Sichere Online-Zahlung über GiroCockpit – geeignet für gängige Bank- und Zahlungswege im Zahlungsdialog."
+        },
+        "pmPayment": {
+          "title": "Online bezahlen",
+          "description": "Kartenzahlung und weitere Online-Zahlungsmethoden im sicheren Zahlungsfenster."
+        },
+        "ePayBL": {
+          "title": "ePayBL",
+          "description": "Online-Zahlung über das ePayBL-Verfahren."
+        },
+        "invoice": {
+          "title": "Auf Rechnung",
+          "description": "Keine sofortige Online-Zahlung: Sie buchen jetzt und erhalten eine Rechnung vom Anbieter."
+        }
+      }
+    },
+    "coupon": {
+      "summaryLine": "Gutschein ({code})",
+      "errors": {
+        "not_found": "Dieser Gutscheincode wurde nicht gefunden.",
+        "expired": "Dieser Gutschein ist abgelaufen.",
+        "already_used": "Dieser Gutschein wurde bereits verwendet.",
+        "invalid": "Dieser Gutscheincode ist ungültig.",
+        "generic": "Der Gutschein konnte nicht eingelöst werden."
+      }
+    },
+    "review": {
+      "periodTitle": "Zeitraum",
+      "periodMissing": "Kein Zeitraum ausgewählt.",
+      "priceTitle": "Preisübersicht",
+      "priceUpdating": "Preise werden aktualisiert …",
+      "priceUnavailable": "Keine gültige Preisberechnung für die aktuelle Auswahl.",
+      "taxLabel": "inkl. MwSt.",
+      "totalLabel": "Gesamt",
+      "totalFree": "Kostenlos",
+      "paymentTitle": "Zahlungsart",
+      "paymentMethodLabel": "Methode",
+      "couponTitle": "Gutschein",
+      "discountCodeTitle": "Rabattcode",
+      "overviewCardTitle": "Übersicht",
+      "couponFieldLabel": "Gutscheincode",
+      "couponPlaceholder": "Code eingeben",
+      "couponApply": "Einlösen",
+      "couponRemove": "Entfernen",
+      "couponAppliedHint": "Der Gutschein ist eingelöst; die Preise oben sind entsprechend angepasst.",
+      "couponActiveSummary": "Code „{code}“ aktiv · {amount}",
+      "couponRequired": "Bitte geben Sie einen Gutscheincode ein.",
+      "couponInvalid": "Dieser Gutscheincode ist ungültig oder nicht mehr einlösbar.",
+      "couponDiscountFixed": "Rabatt: {value}",
+      "couponDiscountPercent": "{value} % Rabatt",
+      "stepKicker": "Schritt {current} von {total} — {context}",
+      "heroBefore": "Ein letzter ",
+      "heroHighlight": "Blick,",
+      "heroAfter": " bevor es losgeht.",
+      "heroLead": "Bitte prüfen Sie Ihre Angaben sorgfältig. Mit der Bestätigung schließen Sie Ihre Buchung verbindlich ab.",
+      "sectionPeriod": "Zeitraum",
+      "sectionContact": "Kontakt",
+      "sectionPayment": "Zahlung",
+      "dateLabel": "Datum",
+      "bookingLabel": "Buchung",
+      "addonsLabel": "Zusatzobjekte",
+      "fullNameLabel": "Name",
+      "lineQtyPrice": "{qty} × {price}",
+      "edit": "Bearbeiten",
+      "commitBooking": "Verbindlich buchen",
+      "backToPayment": "Zurück zur Zahlung",
+      "backToData": "Zurück zu den Daten",
+      "termsHint": "Mit der Buchung akzeptieren Sie unsere Geschäftsbedingungen.",
+      "boolYes": "Ja",
+      "boolNo": "Nein"
+    },
+    "steps": {
+      "periodTitle": "Zeitraum & Extras",
+      "dataTitle": "Daten eingeben",
+      "paymentTitle": "Zahlung",
+      "confirmTitle": "Zusammenfassung",
+      "nextToData": "Weiter zu Daten",
+      "nextToPayment": "Weiter zur Zahlung",
+      "nextToConfirm": "Weiter zur Zusammenfassung",
+      "finishBooking": "Buchung abschließen"
     }
   },
 
@@ -277,9 +401,15 @@
     "previousDays": "Frühere Tage anzeigen",
     "laterDays": "Spätere Tage anzeigen",
     "jumpToDate": "Zu Datum springen",
+    "jumpToNextFree": "Zum nächsten freien Tag springen",
     "selectTime": "Uhrzeit wählen",
     "noTimePeriods": "Für den ausgewählten Tag sind keine Zeiten verfügbar",
-    "selected": "Ausgewählte Zeit"
+    "selected": "Ausgewählte Zeit",
+    "fullyBooked": "Ausgebucht",
+    "closedDay": "Nicht buchbar",
+    "legendAvailable": "Verfügbar",
+    "legendFullyBooked": "Ausgebucht",
+    "legendClosed": "Nicht buchbar"
   },
 
   "weekSelection": {

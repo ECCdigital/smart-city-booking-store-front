@@ -1,51 +1,37 @@
 <script setup>
-/**
- * Price Summary Bar – wird im linken Sidebar-Bereich angezeigt,
- * vom Parent per `sticky bottom-*` am unteren Rand fixiert.
- *
- * Zeigt:
- * - den ausgewählten Zeitraum (wenn vorhanden)
- * - Line-Items mit +/- Mengen-Controls
- * - Fehler-Items (ebenfalls mit +/- Controls, damit man die Menge wieder senken kann)
- * - MwSt., Gesamtpreis
- */
-
 const props = defineProps({
-  /** Pre-calculated summary: { items: [{ id, label, amountEur }], taxAmount, total, errors } */
   summary: {
     type: Object,
     default: null,
   },
-  /** Ausgewählter Zeitraum: { start, end } */
   selectedTimePeriod: {
     type: Object,
     default: () => ({ start: null, end: null }),
   },
-  /** Wenn true, wird ein Hinweis anstelle der Preisübersicht angezeigt. */
   needsTimePeriodSelection: {
     type: Boolean,
     default: false,
   },
-  /** Ob gerade eine Validierung läuft. */
   isValidating: {
     type: Boolean,
     default: false,
   },
-  /** Mengen pro Bookable: { [bookableId]: number } */
   amounts: {
     type: Object,
     default: () => ({}),
   },
-  /** ID des Lead-Bookables – darf nicht auf 0 gesetzt werden. */
   leadBookableId: {
     type: String,
     default: null,
+  },
+  mandatoryIds: {
+    type: Array,
+    default: () => [],
   },
 });
 
 const emit = defineEmits(["update:amount"]);
 
-// --- Formatierung -----------------------------------------------------------
 
 function formatEur(value) {
   if (value === null || value === undefined) return "–";
@@ -92,11 +78,11 @@ const formattedTimePeriod = computed(() => {
   return `${formatDate(start)}, ${formatTime(start)} – ${formatDate(end)}, ${formatTime(end)}`;
 });
 
-// --- Quantity Controls ------------------------------------------------------
 
-/** Lead-Bookable: min 1, alle anderen: min 0 (= abwählen). */
 function minAmount(id) {
-  return id === props.leadBookableId ? 1 : 0;
+  if (id === props.leadBookableId) return 1;
+  if (props.mandatoryIds.includes(id)) return 1;
+  return 0;
 }
 
 function increment(id) {
@@ -119,7 +105,12 @@ function handleDirectInput(id, event) {
   emit("update:amount", { id, amount: clamped });
 }
 
-// --- Sichtbarkeit -----------------------------------------------------------
+/** Netto-Zeilenpreis oder Brutto-Gutscheinrabatt (priceDisplayEur) */
+function displayPriceCell(item) {
+  if (item.priceDisplayEur != null) return item.priceDisplayEur;
+  if (item.amountEur > 0) return item.amountEur;
+  return null;
+}
 
 const hasContent = computed(() => {
   return (
@@ -148,7 +139,6 @@ const hasContent = computed(() => {
         />
       </div>
 
-      <!-- Zeitraum-Anzeige -->
       <div
         v-if="formattedTimePeriod"
         class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300"
@@ -161,7 +151,6 @@ const hasContent = computed(() => {
         <span>{{ formattedTimePeriod }}</span>
       </div>
 
-      <!-- Hinweis: Zeitraum auswählen -->
       <div
         v-if="needsTimePeriodSelection"
         class="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400"
@@ -174,9 +163,7 @@ const hasContent = computed(() => {
         <span>{{ $t("checkout.selectTimePeriodTitle") }}</span>
       </div>
 
-      <!-- Items + Errors -->
       <template v-else-if="summary">
-        <!-- Fehler-Items (MIT Mengen-Controls, damit man zurück-decrementieren kann) -->
         <div
           v-for="err in summary.errors"
           :key="`err-${err.id}`"
@@ -188,7 +175,6 @@ const hasContent = computed(() => {
             size="16"
           />
 
-          <!-- Label + Fehlergrund -->
           <div class="flex-1 min-w-0">
             <span
               :title="err.label"
@@ -201,7 +187,6 @@ const hasContent = computed(() => {
             </span>
           </div>
 
-          <!-- Anzahl +/- auch bei Fehlern -->
           <div class="flex items-center gap-0.5 flex-shrink-0">
             <button
               class="w-5 h-5 flex items-center justify-center rounded text-red-400 dark:text-red-500 hover:text-red-600 dark:hover:text-red-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
@@ -226,17 +211,17 @@ const hasContent = computed(() => {
           </div>
         </div>
 
-        <!-- Valide Line-Items mit Mengen-Controls -->
         <div
           v-for="item in summary.items"
           :key="item.id"
           class="flex items-center gap-3 text-sm md:text-base text-gray-700 dark:text-gray-200"
         >
-          <!-- Label -->
           <span :title="item.label" class="truncate flex-1 min-w-0">{{ item.label }}</span>
 
-          <!-- Anzahl +/- -->
-          <div class="flex items-center gap-0.5 flex-shrink-0">
+          <div
+            v-if="!item.skipQuantity"
+            class="flex items-center gap-0.5 flex-shrink-0"
+          >
             <button
               class="w-5 h-5 flex items-center justify-center rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
               :disabled="(amounts[item.id] || 1) <= minAmount(item.id)"
@@ -258,13 +243,15 @@ const hasContent = computed(() => {
               <UIcon name="i-lucide-plus" size="12" />
             </button>
           </div>
+          <div v-else class="w-[5.25rem] flex-shrink-0" aria-hidden="true" />
 
           <!-- Preis -->
           <span
-            v-if="item.amountEur > 0"
+            v-if="displayPriceCell(item) != null"
             class="tabular-nums whitespace-nowrap text-right min-w-[80px]"
+            :class="item.skipQuantity ? 'text-emerald-600 dark:text-emerald-400' : ''"
           >
-            {{ formatEur(item.amountEur) }}
+            {{ formatEur(displayPriceCell(item)) }}
           </span>
           <span v-else class="text-gray-400 text-right min-w-[80px]">–</span>
         </div>
@@ -280,7 +267,6 @@ const hasContent = computed(() => {
           </span>
         </div>
 
-        <!-- Gesamt -->
         <div
           class="border-t border-gray-200 dark:border-gray-700 pt-3 flex items-center justify-between"
         >
@@ -314,7 +300,6 @@ const hasContent = computed(() => {
   transform: translateY(20px);
 }
 
-/* Native number-input spinner ausblenden */
 .amount-input::-webkit-outer-spin-button,
 .amount-input::-webkit-inner-spin-button {
   -webkit-appearance: none;

@@ -113,10 +113,10 @@
 </template>
 
 <script setup lang="ts">
-import DatePicker from "./DatePicker.vue";
-import TimePicker from "./TimePicker.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
-import ClearButton from "~/components/inputs/ClearButton.vue";
+import DatePicker from "../inputs/DatePicker.vue";
+import TimePicker from "../inputs/TimePicker.vue";
+import { useContrastColor } from "../../composables/utils/useContrastColor.js";
+import ClearButton from "../inputs/ClearButton.vue";
 
 /**
  * Public API:

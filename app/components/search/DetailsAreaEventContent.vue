@@ -152,7 +152,7 @@ import EventInfoDisplay from "~/components/events/EventInfoDisplay.vue";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import EventTicketStrip from "~/components/events/EventTicketStrip.vue";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
-import InputTimePeriod from "~/components/inputs/InputTimePeriod.vue";
+import InputTimePeriod from "../checkout/InputTimePeriod.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";

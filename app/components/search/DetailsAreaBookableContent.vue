@@ -170,7 +170,7 @@
 <script setup>
 import { useTenantStore } from "~~/stores/tenant.js";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
-import InputTimePeriod from "~/components/inputs/InputTimePeriod.vue";
+import InputTimePeriod from "../checkout/InputTimePeriod.vue";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";

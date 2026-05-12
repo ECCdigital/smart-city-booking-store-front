@@ -4,7 +4,6 @@
       {{ $t("weekSelection.subtitle") }}
     </p>
 
-    <!-- Month Navigation -->
     <div class="flex items-center justify-between">
       <button
         type="button"

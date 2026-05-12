@@ -4,7 +4,6 @@
       {{ $t("monthSelection.subtitle") }}
     </p>
 
-    <!-- Year Navigation -->
     <div class="flex items-center justify-between">
       <button
         type="button"
@@ -122,8 +121,8 @@
 </template>
 
 <script setup>
-import { useBookables } from "~/composables/api/useBookables.js";
-import DateJumper from "~/components/inputs/DateJumper.vue";
+import { useBookables } from "../../composables/api/useBookables.js";
+import DateJumper from "../inputs/DateJumper.vue";
 
 const props = defineProps({
   tenantId: { type: String, default: null },

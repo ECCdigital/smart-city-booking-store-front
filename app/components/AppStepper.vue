@@ -79,6 +79,16 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  /** Titelzeile (H2 + „Schritt x von y“) ausblenden – z. B. wenn der Step eigenen Hero-Text mitbringt. */
+  hideStepHeading: {
+    type: Boolean,
+    default: false,
+  },
+  /** Sticky Fußleiste mit Zurück/Weiter ausblenden – z. B. bei eingebetteter Navigation im Step. */
+  hideFooter: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["update:modelValue", "next", "back", "finish"]);
@@ -159,7 +169,10 @@ function isSegmentActive(index /* 0-basiert */) {
     </div>
 
     <!-- Header -->
-    <div class="flex items-baseline justify-between gap-4 mb-8">
+    <div
+        v-if="!hideStepHeading"
+        class="flex items-baseline justify-between gap-4 mb-8"
+    >
       <h2
           class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white truncate"
       >
@@ -190,6 +203,7 @@ function isSegmentActive(index /* 0-basiert */) {
 
     <!-- Footer / Navigation -->
     <div
+        v-if="!hideFooter"
         class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-6 flex items-center justify-between gap-4 z-10"
     >
       <UButton
