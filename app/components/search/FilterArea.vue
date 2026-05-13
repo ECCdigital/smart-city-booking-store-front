@@ -100,13 +100,13 @@
       <p class="mb-3">Distanz</p>
       <p class="mb-3">0 km - {{ _distance }} km</p>
       <FilterHistogramSlider
-          v-model="_distance"
-          mode="single"
-          :min="0"
-          :max="distanceRange[1]"
-          :step="dynamicDistanceStep"
-          :values="distanceValues"
-          @change="instantFilter"
+        v-model="_distance"
+        mode="single"
+        :min="0"
+        :max="distanceRange[1]"
+        :step="dynamicDistanceStep"
+        :values="distanceValues"
+        @change="instantFilter"
       />
     </div>
 
@@ -114,29 +114,30 @@
     <div class="my-7">
       <p class="mb-3">Preis</p>
       <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
+
       <FilterHistogramSlider
-          v-model="_price"
-          mode="range"
-          :min="dynamicMinPrice"
-          :max="dynamicMaxPrice"
-          :step="dynamicPriceStep"
-          :values="priceValues"
-          @change="instantFilter"
+        v-model="_price"
+        mode="range"
+        :min="dynamicMinPrice"
+        :max="dynamicMaxPrice"
+        :step="dynamicPriceStep"
+        :values="priceValues"
+        @change="instantFilter"
       />
     </div>
-    <!-- Custom Field Filter -->
 
+    <!-- Custom Field Filter -->
     <div v-if="customFieldFilters.length > 0" class="my-7">
       <p class="mb-3">Weitere Filter</p>
       <div class="space-y-4">
         <CustomFieldFilter
-            v-for="cf in customFieldFilters"
-            :key="cf.definition.id"
-            v-model="_customFieldValues[cf.definition.id]"
-            :definition="cf.definition"
-            :filter-type="cf.filterType"
-            :meta="cf.meta"
-            @change="onCustomFieldChange"
+          v-for="cf in customFieldFilters"
+          :key="cf.definition.id"
+          v-model="_customFieldValues[cf.definition.id]"
+          :definition="cf.definition"
+          :filter-type="cf.filterType"
+          :meta="cf.meta"
+          @change="onCustomFieldChange"
         />
       </div>
     </div>
@@ -259,7 +260,7 @@ watch(
   () => props.distance,
   (newVal) => {
     _distance.value = newVal;
-  }
+  },
 );
 
 const distanceRange = computed(() => {
@@ -294,29 +295,27 @@ const dynamicDistanceStep = computed(() => {
   return step;
 });
 
-
 //Price
 const priceValues = computed(() => {
   const fn = props.isEvent ? getEventMinPrice : getBookableMinPrice;
   return suitableBookables.value
-      .map((b) => fn(b))
-      .filter((p) => p != null && !isNaN(p));
+    .map((b) => fn(b))
+    .filter((p) => p != null && !isNaN(p));
 });
-
 
 const possiblePriceRange = computed(() => {
   if (!props.bookables || props.bookables.length === 0) {
     return [0, 100];
   }
 
-  let validPrices = [];
+  let validPrices;
   if (!props.isEvent) {
     validPrices = suitableBookables.value.map((b) => getBookableMinPrice(b));
   } else {
     validPrices = suitableBookables.value.map((e) => getEventMinPrice(e));
   }
   validPrices = validPrices.filter(
-    (price) => price !== undefined && price !== null && !isNaN(price)
+    (price) => price !== undefined && price !== null && !isNaN(price),
   );
 
   //set endpoints rounded to 5
@@ -324,6 +323,7 @@ const possiblePriceRange = computed(() => {
     validPrices.length > 0 ? Math.floor(Math.min(...validPrices) / 5) * 5 : 0;
   const maxPrice =
     validPrices.length > 0 ? Math.ceil(Math.max(...validPrices) / 5) * 5 : 100;
+
   return [minPrice, maxPrice];
 });
 
@@ -355,19 +355,18 @@ const dynamicMinPrice = computed(() => {
 const _price = ref(
   props.price?.length === 2
     ? props.price
-    : [dynamicMinPrice.value, dynamicMaxPrice.value]
+    : [dynamicMinPrice.value, dynamicMaxPrice.value],
 );
 watch(
   () => dynamicMaxPrice.value,
   (newVal) => {
     _price.value = [dynamicMinPrice.value, newVal];
-  }
+  },
 );
 
 watch(suitableBookables, () => {
   _price.value = [dynamicMinPrice.value, dynamicMaxPrice.value];
 });
-
 
 function getBookableMinPrice(bookable) {
   if (bookable.matchStatus === "no-match") {
@@ -381,13 +380,14 @@ function getBookableMinPrice(bookable) {
   const minPrice = Math.min(
     ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || [])
   );
+
   return bookable.item.priceValueAddedTax
     ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
     : minPrice;
 }
 function getTicketMinPrice(ticket) {
   const minPrice = Math.min(
-    ...ticket.priceCategories.map((cat) => cat.priceEur)
+    ...ticket.priceCategories.map((cat) => cat.priceEur),
   );
   return ticket.priceValueAddedTax
     ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
@@ -399,7 +399,7 @@ function getEventMinPrice(event) {
   }
   if (event.item.tickets && event.item.tickets.length > 0) {
     return Math.min(
-      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket))
+      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket)),
     );
   } else {
     return 0;
@@ -409,8 +409,8 @@ function getEventMinPrice(event) {
 //Locations
 const distanceValues = computed(() => {
   return props.bookables
-      .filter((b) => b.matchStatus !== "no-match" && b.item.distanceMeter != null)
-      .map((b) => b.item.distanceMeter / 1000);
+    .filter((b) => b.matchStatus !== "no-match" && b.item.distanceMeter != null)
+    .map((b) => b.item.distanceMeter / 1000);
 });
 const possibleCities = computed(() => {
   if (!props.bookables || props.bookables.length === 0) {
