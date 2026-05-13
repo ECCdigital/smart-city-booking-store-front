@@ -11,6 +11,7 @@
   </div>
 </template>
 <script setup>
+import { useExportBookings } from "~/composables/export/useExportBookings.js";
 
 const props = defineProps({
   bookings: {
@@ -19,8 +20,10 @@ const props = defineProps({
   },
 });
 
+const { bookingsToExcel } = useExportBookings();
 function exportBookings() {
   console.log("Exporting bookings:", props.bookings);
+  bookingsToExcel(props.bookings);
 }
 </script>
 
