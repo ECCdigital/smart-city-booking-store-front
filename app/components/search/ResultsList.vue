@@ -60,22 +60,14 @@ const props = defineProps({
 });
 
 const suitableBookables = computed(() =>
-  props.bookables.filter(
-    (b) => b.matchStatus === "match",
-  ),
+  props.bookables.filter((b) => b.matchStatus === "match"),
 );
 
 const nonSuitableBookables = computed(() =>
   props.bookables
-    .filter(
-      (b) => b.matchStatus === "no-match" || b.matchStatus === "too-far",
-    )
+    .filter((b) => b.matchStatus === "no-match" || b.matchStatus === "too-far")
     .sort((a, b) =>
-        a.matchStatus === "too-far"
-        ? -1
-        : b.matchStatus === "too-far"
-          ? 1
-          : 0,
+      a.matchStatus === "too-far" ? -1 : b.matchStatus === "too-far" ? 1 : 0,
     ),
 );
 </script>

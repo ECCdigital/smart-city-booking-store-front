@@ -1,9 +1,9 @@
 <template>
   <div>
     <div
-        v-for="(priceCategory, i) in relevantPriceCategories"
-        :key="i"
-        class="p-3 flex content-center w-full"
+      v-for="(priceCategory, i) in relevantPriceCategories"
+      :key="i"
+      class="p-3 flex content-center w-full"
     >
       <!-- External category -->
       <template v-if="isExternalCategory(priceCategory)">
@@ -22,21 +22,18 @@
       <template v-else>
         <div v-if="hasPriceConditions(priceCategory)" class="basis-2/5">
           <div
-              v-if="priceCategory.interval.end || priceCategory.interval.start"
-              class="content-center text-right"
+            v-if="priceCategory.interval.end || priceCategory.interval.start"
+            class="content-center text-right"
           >
             {{
               getInterval(
-                  priceCategory.interval.start,
-                  priceCategory.interval.end,
-                  item.priceType,
+                priceCategory.interval.start,
+                priceCategory.interval.end,
+                item.priceType,
               )
             }}
           </div>
-          <div
-              v-else-if="priceCategory.weekdays.length > 0"
-              class="text-right"
-          >
+          <div v-else-if="priceCategory.weekdays.length > 0" class="text-right">
             <p v-for="(day, idx) in priceCategory.weekdays" :key="idx">
               {{ getWeekdayName(day) }}
             </p>
@@ -53,8 +50,8 @@
         <div v-if="hasPriceConditions(priceCategory)" class="basis-1/5" />
 
         <div
-            class="content-center"
-            :class="
+          class="content-center"
+          :class="
             hasPriceConditions(priceCategory)
               ? 'basis-2/5 '
               : 'text-center w-full'
@@ -98,18 +95,18 @@ const relevantPriceCategories = computed(() => {
     return [];
   }
   return props.item.priceCategories.filter(
-      (category) =>
-          isExternalCategory(category) || category.holidays.length === 0,
+    (category) =>
+      isExternalCategory(category) || category.holidays.length === 0,
   );
 });
 
 const forFreeHint = computed(() => {
   const internal = props.item.priceCategories.filter(
-      (c) => !isExternalCategory(c),
+    (c) => !isExternalCategory(c),
   );
   if (
-      internal.length === 1 &&
-      (internal[0].priceEur === 0 || !internal[0].priceEur)
+    internal.length === 1 &&
+    (internal[0].priceEur === 0 || !internal[0].priceEur)
   ) {
     return "Das Objekt ist kostenlos.";
   }
@@ -118,18 +115,18 @@ const forFreeHint = computed(() => {
 
 const fixedPriceHint = computed(() => {
   const unit =
-      props.item.priceType === "per-hour" || props.item.priceType === "per-day"
-          ? "Dauer"
-          : "Menge";
+    props.item.priceType === "per-hour" || props.item.priceType === "per-day"
+      ? "Dauer"
+      : "Menge";
   return "Dieser Preis gilt unabhängig von der gebuchten " + unit + ".";
 });
 
 const holidayHint = computed(() => {
   if (
-      props.item.priceCategories.some(
-          (category) =>
-              !isExternalCategory(category) && category.holidays.length > 0,
-      )
+    props.item.priceCategories.some(
+      (category) =>
+        !isExternalCategory(category) && category.holidays.length > 0,
+    )
   ) {
     return "(An Feiertagen können abweichende Preise gelten.)";
   }
@@ -140,10 +137,10 @@ function hasPriceConditions(priceCategory) {
   if (props.isEventWithMultipleCategories) {
     return true;
   } else if (
-      priceCategory.weekdays.length > 0 ||
-      priceCategory.interval.start ||
-      priceCategory.interval.end ||
-      priceCategory.fixedPrice
+    priceCategory.weekdays.length > 0 ||
+    priceCategory.interval.start ||
+    priceCategory.interval.end ||
+    priceCategory.fixedPrice
   ) {
     return true;
   }
