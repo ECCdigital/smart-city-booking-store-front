@@ -73,7 +73,6 @@ import EventAdressInformation from "~/components/events/EventAdressInformation.v
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import { useTenantStore } from "~~/stores/tenant.js";
 import EventBookingButton from "~/components/events/EventBookingButton.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
 
 const props = defineProps({
@@ -113,7 +112,5 @@ const htmlTeaserText = computed(() => {
 const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.event.tenantId).name;
 });
-
-const { contrastToPrimary } = useContrastColor();
 </script>
 <style scoped></style>
