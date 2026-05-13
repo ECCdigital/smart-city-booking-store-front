@@ -108,7 +108,23 @@ function handleDirectInput(id, event) {
 /** Netto-Zeilenpreis oder Brutto-Gutscheinrabatt (priceDisplayEur) */
 function displayPriceCell(item) {
   if (item.priceDisplayEur != null) return item.priceDisplayEur;
-  if (item.amountEur > 0) return item.amountEur;
+  if (item.amountEur != null) return item.amountEur;
+  return null;
+}
+
+function displayOriginalPriceCell(item) {
+  if (item.originalAmountEur != null) return item.originalAmountEur;
+  return null;
+}
+
+function hasOriginalPriceCell(item) {
+  const original = displayOriginalPriceCell(item);
+  const current = displayPriceCell(item);
+  return original != null && current != null && original > current;
+}
+
+function priceCellClass(item) {
+  if (item.skipQuantity) return "text-emerald-600 dark:text-emerald-400";
   return null;
 }
 
@@ -201,7 +217,7 @@ const hasContent = computed(() => {
               :min="minAmount(err.id)"
               class="amount-input w-8 h-6 text-center tabular-nums text-sm font-medium text-red-800 dark:text-red-200 bg-transparent border-b border-red-300 dark:border-red-700 focus:border-red-500 focus:outline-none"
               @change="handleDirectInput(err.id, $event)"
-            />
+            >
             <button
               class="w-5 h-5 flex items-center justify-center rounded text-red-400 dark:text-red-500 hover:text-red-600 dark:hover:text-red-300 transition-colors"
               @click="increment(err.id)"
@@ -235,7 +251,7 @@ const hasContent = computed(() => {
               :min="minAmount(item.id)"
               class="amount-input w-8 h-6 text-center tabular-nums text-sm font-medium text-gray-900 dark:text-white bg-transparent border-b border-gray-200 dark:border-gray-700 focus:border-primary focus:outline-none"
               @change="handleDirectInput(item.id, $event)"
-            />
+            >
             <button
               class="w-5 h-5 flex items-center justify-center rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               @click="increment(item.id)"
@@ -246,13 +262,20 @@ const hasContent = computed(() => {
           <div v-else class="w-[5.25rem] flex-shrink-0" aria-hidden="true" />
 
           <!-- Preis -->
-          <span
+          <div
             v-if="displayPriceCell(item) != null"
             class="tabular-nums whitespace-nowrap text-right min-w-[80px]"
-            :class="item.skipQuantity ? 'text-emerald-600 dark:text-emerald-400' : ''"
           >
-            {{ formatEur(displayPriceCell(item)) }}
-          </span>
+            <span
+              v-if="hasOriginalPriceCell(item)"
+              class="block text-xs text-gray-400 line-through"
+            >
+              {{ formatEur(displayOriginalPriceCell(item)) }}
+            </span>
+            <span :class="priceCellClass(item)">
+              {{ formatEur(displayPriceCell(item)) }}
+            </span>
+          </div>
           <span v-else class="text-gray-400 text-right min-w-[80px]">–</span>
         </div>
 

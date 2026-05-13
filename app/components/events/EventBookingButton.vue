@@ -112,6 +112,7 @@ function goToTicketOptions() {
       tenantId: props.event.tickets[0].tenantId,
       start: route.query.start,
       end: route.query.end,
+      url: props.event.tickets[0].checkoutUrl,
     });
   } else {
     openTicketOptions.value = true;

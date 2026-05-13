@@ -289,6 +289,7 @@ function goToCheckout(checkoutData) {
       tenantId: props.item.tenantId,
       start: route.query.start,
       end: route.query.end,
+      url: props.item.checkoutUrl,
     });
   }
 }

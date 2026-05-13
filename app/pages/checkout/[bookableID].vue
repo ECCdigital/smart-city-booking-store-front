@@ -12,6 +12,7 @@ import CheckoutCustomFields from "~/components/checkout/CheckoutCustomFields.vue
 import CheckoutPaymentStep from "~/components/checkout/CheckoutPaymentStep.vue";
 import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
 import { useAuthStore } from "~~/stores/auth.js";
+import { useNotification } from "~/composables/useNotification.js";
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 
@@ -129,7 +130,7 @@ const router = useRouter();
 const bookableID = route.params.bookableID;
 const tenantID = route.query.tenantId;
 
-const { fetchBookable } = useCheckout();
+const { fetchBookable, fetchCheckoutPermissions } = useCheckout();
 const { fetchTenant, fetchTenantPaymentProviders } = useTenants();
 
 const isLoading = ref(true);
@@ -138,11 +139,13 @@ const { data, error } = await useAsyncData(
   `checkout-${bookableID}-${tenantID}`,
   async () => {
     if (!bookableID || !tenantID) return null;
+
     try {
-      const [leadBookable, tenant, paymentProviders] = await Promise.all([
+      const [leadBookable, tenant, paymentProviders, permissions] = await Promise.all([
         fetchBookable(bookableID, tenantID),
         fetchTenant(tenantID),
         fetchTenantPaymentProviders(tenantID),
+        fetchCheckoutPermissions(tenantID, bookableID),
       ]);
 
       const additionalIds = leadBookable?.checkoutBookableIds || [];
@@ -158,6 +161,7 @@ const { data, error } = await useAsyncData(
         tenant,
         additionalBookables,
         paymentProviders: Array.isArray(paymentProviders) ? paymentProviders : [],
+        permissionCheck: permissions ?? null,
       };
     } finally {
       isLoading.value = false;
@@ -176,10 +180,31 @@ const paymentProviders = computed(() => {
   const list = data.value?.paymentProviders;
   return Array.isArray(list) ? list : [];
 });
-const needsPaymentSelectionStep = computed(
-  () => paymentProviders.value.length > 1
+const permissionCheck = computed(() => data.value?.permissionCheck || null);
+const hasBlockingPermissionError = computed(() => {
+  const result = permissionCheck.value;
+  return result?.success === false && result?.error?.checkType === "permissions";
+});
+const isResolvingPermissionGuard = computed(
+  () => !isLoading.value && hasBlockingPermissionError.value && !authStore.authChecked
 );
-
+const showPermissionGuard = computed(
+  () => hasBlockingPermissionError.value && authStore.authChecked
+);
+const permissionGuardMessage = computed(() => {
+  if (!showPermissionGuard.value) return "";
+  return messageForStructuredCheckoutError(permissionCheck.value?.error);
+});
+const permissionGuardTitle = computed(() =>
+  isLoggedIn.value
+    ? t("checkout.permissionGuard.loggedInTitle")
+    : t("checkout.permissionGuard.loggedOutTitle")
+);
+const permissionGuardDescription = computed(() =>
+  isLoggedIn.value
+    ? t("checkout.permissionGuard.loggedInDescription")
+    : t("checkout.permissionGuard.loggedOutDescription")
+);
 const couponsEnabled = computed(() => {
   const b = leadBookable.value;
   return b?.enableCoupons === true || b?.enableCoupons === "true" || b?.enableCoupons === 1;
@@ -225,6 +250,7 @@ const mandatoryBookableIds = computed(() =>
 );
 
 const checkoutID = ref(null);
+const checkoutSubmitting = ref(false);
 const summary = ref({ items: [], taxAmount: 0, total: 0, errors: [] });
 const isValidating = ref(false);
 const validationErrors = ref({});
@@ -256,7 +282,8 @@ watch(
   { deep: true }
 );
 
-const { t } = useI18n();
+const { t, te } = useI18n();
+const { error: notifyError } = useNotification();
 const authStore = useAuthStore();
 const isLoggedIn = computed(() => authStore.isLoggedIn);
 const isLoggingOut = ref(false);
@@ -360,8 +387,23 @@ const customFieldValues = ref({});
 const restoredCustomFieldValues = ref({});
 const selectedPaymentProviderId = ref(null);
 const appliedCouponCode = ref(null);
-/** Payload von redeemCoupon (id, description, discount, type) – für validate nur am Lead-Bookable */
 const appliedCouponDetails = ref(null);
+const bookWithPricePreference = ref(null);
+const freeBookingEligibility = ref({});
+
+const hasResolvedFreeCheckout = computed(() => {
+  const total = Number(summary.value?.total ?? 0);
+  return (
+    summary.value?.items?.length > 0 &&
+    Object.keys(validationErrors.value).length === 0 &&
+    !isValidating.value &&
+    total <= 0.005
+  );
+});
+
+const needsPaymentSelectionStep = computed(
+  () => paymentProviders.value.length > 1 && !hasResolvedFreeCheckout.value
+);
 
 function applyUserToContactForm(user, force = false) {
   if (!user) return;
@@ -519,6 +561,7 @@ onMounted(() => {
   applyUserToContactForm(authStore.user, true);
   hasRestoredCheckoutState.value = true;
   authStore.validateAuth();
+  scheduleValidation();
 });
 
 watch(
@@ -543,6 +586,19 @@ async function continueAsGuest() {
   }
 }
 
+async function signOutAndLogin() {
+  if (isLoggingOut.value) return;
+  isLoggingOut.value = true;
+  try {
+    if (isLoggedIn.value) {
+      await authStore.logout();
+    }
+  } finally {
+    isLoggingOut.value = false;
+  }
+  await navigateTo(loginUrl.value);
+}
+
 function handleAmountUpdate({ id, amount }) {
   const isMandatory = mandatoryBookableIds.value.includes(id);
   const minAllowed = id === bookableID || isMandatory ? 1 : 0;
@@ -559,7 +615,7 @@ function handleAmountUpdate({ id, amount }) {
   }
 }
 
-const { validateBookable } = useCheckout();
+const { validateBookable, completeCheckout } = useCheckout();
 
 const couponForValidation = computed(() => {
   if (!couponsEnabled.value) return null;
@@ -569,12 +625,29 @@ const couponForValidation = computed(() => {
   return s || null;
 });
 
+const hasFreeBookingOption = computed(() =>
+  Object.values(freeBookingEligibility.value).some((value) => value === true)
+);
+
+const isBookingWithPrice = computed(() => {
+  if (!hasFreeBookingOption.value) return true;
+  if (typeof bookWithPricePreference.value === "boolean") {
+    return bookWithPricePreference.value;
+  }
+  return false;
+});
+
+const selectedBookWithPrice = computed({
+  get: () => isBookingWithPrice.value,
+  set: (value) => {
+    bookWithPricePreference.value = value === true;
+  },
+});
+
 let validationToken = 0;
 
 const COUPON_SUMMARY_ROW_ID = "__coupon__";
 
-// Gutschein-Rabatt wird im Frontend als Bruttowert auf die Gesamt-Bruttosumme
-// angewendet. "fixed" = EUR brutto, "percent"|"percentage" = Prozentsatz auf die Bruttosumme.
 function computeCouponGrossDiscount(details, baseGross) {
   if (!details || !(baseGross > 0)) return 0;
   const discount = Number(details.discount);
@@ -589,12 +662,33 @@ function computeCouponGrossDiscount(details, baseGross) {
   return 0;
 }
 
+function toFiniteAmount(value) {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function toNullableAmount(value) {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount : null;
+}
+
 async function validateAll() {
-  const { start, end } = selectedTimePeriod.value;
-  if (!start || !end || end <= start) {
+  if (!leadBookable.value || !tenantID || !bookableID) {
     summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
     validationErrors.value = {};
     checkoutID.value = null;
+    freeBookingEligibility.value = {};
+    return;
+  }
+
+  const start = normalizePeriodTimestamp(selectedTimePeriod.value?.start);
+  const end = normalizePeriodTimestamp(selectedTimePeriod.value?.end);
+
+  if (requiresTimeSelection.value && (start == null || end == null || end <= start)) {
+    summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
+    validationErrors.value = {};
+    checkoutID.value = null;
+    freeBookingEligibility.value = {};
     return;
   }
 
@@ -617,13 +711,18 @@ async function validateAll() {
           bookableID: id,
           tenantID,
           amount: amounts.value[id] || 1,
-          start,
-          end,
+          start: requiresTimeSelection.value ? start : undefined,
+          end: requiresTimeSelection.value ? end : undefined,
+          couponCode: couponForValidation.value,
+          couponId: appliedCouponDetails.value?.id ?? null,
+          bookWithPrice: isBookingWithPrice.value,
         })
           .then((res) => ({ id, isLead, res }))
           .catch((err) => ({ id, isLead, error: err }))
       )
     );
+
+    console.log("results", JSON.stringify(results));
 
     if (myToken !== validationToken) return;
 
@@ -633,6 +732,7 @@ async function validateAll() {
     let newCheckoutId = null;
     const errors = [];
     const errorMap = {};
+    const eligibilityMap = {};
 
     for (let i = 0; i < targets.length; i++) {
       const { id, isLead } = targets[i];
@@ -664,16 +764,39 @@ async function validateAll() {
         continue;
       }
 
-      const { userPriceEur, userGrossPriceEur } = row.res.data;
+      const validationData =
+        row.res?.data && typeof row.res.data === "object" ? row.res.data : {};
+      const freeBookingAllowed = validationData.freeBookingAllowed === true;
+      const freeBookingActive = freeBookingAllowed && !isBookingWithPrice.value;
+      const userPriceEur = toFiniteAmount(validationData.userPriceEur);
+      const userGrossPriceEur = toFiniteAmount(validationData.userGrossPriceEur);
+      const regularPriceEur =
+        toNullableAmount(validationData.regularPriceEur) ??
+        toNullableAmount(validationData.userPriceEur);
+
+      eligibilityMap[id] = freeBookingAllowed;
 
       if (isLead || newCheckoutId == null) {
         newCheckoutId = row.res.checkoutId;
       }
 
-      items.push({ id, label, amountEur: userPriceEur });
-      taxAmount += userGrossPriceEur - userPriceEur;
-      total += userGrossPriceEur;
+      const lineNetAmount = freeBookingActive ? 0 : userPriceEur;
+      const lineGrossAmount = freeBookingActive ? 0 : userGrossPriceEur;
+
+      items.push({
+        id,
+        label,
+        amountEur: lineNetAmount,
+        priceDisplayEur: freeBookingActive ? 0 : null,
+        originalAmountEur: freeBookingActive ? regularPriceEur : null,
+        freeBookingAllowed,
+        freeBookingActive,
+      });
+      taxAmount += lineGrossAmount - lineNetAmount;
+      total += lineGrossAmount;
     }
+
+    freeBookingEligibility.value = eligibilityMap;
 
     if (
       couponForValidation.value &&
@@ -719,7 +842,14 @@ function scheduleValidation() {
 }
 
 watch(
-  [selectedTimePeriod, selectedAdditionalBookables, amounts, appliedCouponCode, appliedCouponDetails],
+  [
+    selectedTimePeriod,
+    selectedAdditionalBookables,
+    amounts,
+    appliedCouponCode,
+    appliedCouponDetails,
+    isBookingWithPrice,
+  ],
   scheduleValidation,
   {
     deep: true,
@@ -795,36 +925,33 @@ const hasValidTimePeriod = computed(
     selectedTimePeriod.value.end > selectedTimePeriod.value.start
 );
 
+const requiresTimeSelection = computed(
+  () =>
+    isScheduleRelated.value ||
+    isTimePeriodRelated.value ||
+    isLongRangeWeek.value ||
+    isLongRangeMonth.value
+);
+
+const hasAdditionalBookables = computed(
+  () => additionalBookables.value.length > 0
+);
+
+const needsStandaloneObjectsStep = computed(
+  () => !requiresTimeSelection.value && hasAdditionalBookables.value
+);
+
+const showAdditionalBookablesInPeriodStep = computed(
+  () => requiresTimeSelection.value && hasAdditionalBookables.value
+);
+
 const needsTimePeriodSelection = computed(() => {
-  const b = leadBookable.value;
-  if (!b) return false;
-  const requiresPeriod =
-    b.isScheduleRelated === true ||
-    b.isTimePeriodRelated === true ||
-    b.isLongRange === true;
   const noPeriodSelected =
     !selectedTimePeriod.value?.start || !selectedTimePeriod.value?.end;
-  return requiresPeriod && noPeriodSelected;
+  return requiresTimeSelection.value && noPeriodSelected;
 });
 
 const MIN_STEP = 1;
-const maxStep = computed(() => (needsPaymentSelectionStep.value ? 4 : 3));
-const hasRestoredCheckoutState = ref(false);
-
-function normalizeStep(value) {
-  const parsed = Number.parseInt(String(value ?? ""), 10);
-  if (!Number.isFinite(parsed)) return null;
-  return Math.min(maxStep.value, Math.max(MIN_STEP, parsed));
-}
-
-const currentStep = ref(normalizeStep(route.query.step) ?? 1);
-
-watch(maxStep, (max) => {
-  if (currentStep.value > max) {
-    currentStep.value = max;
-  }
-});
-
 function normalizePeriodTimestamp(value) {
   if (value == null) return null;
   if (typeof value === "number") {
@@ -839,6 +966,8 @@ function normalizePeriodTimestamp(value) {
   const parsed = Date.parse(str);
   return Number.isNaN(parsed) ? null : parsed;
 }
+
+const hasRestoredCheckoutState = ref(false);
 
 function withSyncedStepAndPeriod(querySource, stepValue) {
   const nextQuery = { ...querySource, step: String(stepValue) };
@@ -868,6 +997,7 @@ function persistCheckoutState() {
     selectedPaymentProviderId: selectedPaymentProviderId.value,
     appliedCouponCode: appliedCouponCode.value,
     appliedCouponDetails: appliedCouponDetails.value,
+    bookWithPricePreference: bookWithPricePreference.value,
   };
   sessionStorage.setItem(checkoutStateStorageKey.value, JSON.stringify(payload));
 }
@@ -925,6 +1055,9 @@ function restoreCheckoutState() {
       if (parsed.appliedCouponDetails && typeof parsed.appliedCouponDetails === "object") {
         appliedCouponDetails.value = parsed.appliedCouponDetails;
       }
+      if (typeof parsed.bookWithPricePreference === "boolean") {
+        bookWithPricePreference.value = parsed.bookWithPricePreference;
+      }
     }
   } catch (err) {
     console.warn("Failed to restore checkout state", err);
@@ -933,20 +1066,30 @@ function restoreCheckoutState() {
 
 const steps = computed(() => {
   const withPayment = needsPaymentSelectionStep.value;
-  const out = [
-    {
+  const out = [];
+
+  if (requiresTimeSelection.value) {
+    out.push({
       key: "period",
       title: t("checkout.steps.periodTitle"),
       nextLabel: t("checkout.steps.nextToData"),
-    },
-    {
-      key: "data",
-      title: t("checkout.steps.dataTitle"),
-      nextLabel: withPayment
-        ? t("checkout.steps.nextToPayment")
-        : t("checkout.steps.nextToConfirm"),
-    },
-  ];
+    });
+  } else if (needsStandaloneObjectsStep.value) {
+    out.push({
+      key: "objects",
+      title: t("checkout.additionalObjects"),
+      nextLabel: t("checkout.steps.nextToData"),
+    });
+  }
+
+  out.push({
+    key: "data",
+    title: t("checkout.steps.dataTitle"),
+    nextLabel: withPayment
+      ? t("checkout.steps.nextToPayment")
+      : t("checkout.steps.nextToConfirm"),
+  });
+
   if (withPayment) {
     out.push({
       key: "payment",
@@ -954,12 +1097,30 @@ const steps = computed(() => {
       nextLabel: t("checkout.steps.nextToConfirm"),
     });
   }
+
   out.push({
     key: "confirm",
     title: t("checkout.steps.confirmTitle"),
     nextLabel: t("checkout.steps.finishBooking"),
   });
+
   return out;
+});
+
+const maxStep = computed(() => steps.value.length);
+
+function normalizeStep(value) {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+  if (!Number.isFinite(parsed)) return null;
+  return Math.min(maxStep.value, Math.max(MIN_STEP, parsed));
+}
+
+const currentStep = ref(1);
+
+watch(maxStep, (max) => {
+  if (currentStep.value > max) {
+    currentStep.value = max;
+  }
 });
 
 const hasValidationErrors = computed(
@@ -985,14 +1146,12 @@ const currentStepKey = computed(() => {
 const canGoNext = computed(() => {
   const key = currentStepKey.value;
   if (key === "period") {
-    if (
-      !isTimePeriodRelated.value &&
-      !isScheduleRelated.value &&
-      !isLongRangeWeek.value &&
-      !isLongRangeMonth.value
-    )
-      return true;
     if (!hasValidTimePeriod.value) return false;
+    if (hasValidationErrors.value) return false;
+    if (isValidating.value) return false;
+    return true;
+  }
+  if (key === "objects") {
     if (hasValidationErrors.value) return false;
     if (isValidating.value) return false;
     return true;
@@ -1011,8 +1170,8 @@ const canGoNext = computed(() => {
 });
 
 watch(
-  () => route.query.step,
-  (step) => {
+  [() => route.query.step, maxStep],
+  ([step]) => {
     const nextStep = normalizeStep(step);
     if (nextStep != null && nextStep !== currentStep.value) {
       currentStep.value = nextStep;
@@ -1047,6 +1206,7 @@ watch(
     selectedPaymentProviderId,
     appliedCouponCode,
     appliedCouponDetails,
+    bookWithPricePreference,
     () => ({ ...contactForm }),
   ],
   () => {
@@ -1068,36 +1228,244 @@ watch(
   { deep: true }
 );
 
-function handleFinish() {
-  console.log("Buchung abschließen", {
-    timePeriod: selectedTimePeriod.value,
-    contact: { ...contactForm },
-    comment: customerComment.value,
-    attachmentAccepted: { ...attachmentAccepted.value },
-    customFieldValues: { ...customFieldValues.value },
-    checkoutId: checkoutID.value,
-    paymentProviderId: selectedPaymentProviderId.value,
-    couponCode: couponForValidation.value,
-    couponId: appliedCouponDetails.value?.id ?? null,
-    couponDetails: appliedCouponDetails.value,
+function buildCheckoutPayload() {
+  const bookableItems = [
+    { bookableId: bookableID, amount: amounts.value[bookableID] || 1 },
+    ...selectedAdditionalBookables.value.map((id) => ({
+      bookableId: id,
+      amount: amounts.value[id] || 1,
+    })),
+  ];
+
+  const payload = {
+    tenantID,
+    checkoutId: checkoutID.value || undefined,
+    bookableItems,
+    bookWithPrice: isBookingWithPrice.value,
+    name: `${contactForm.firstName} ${contactForm.lastName}`.trim(),
+    mail: String(contactForm.email || "").trim(),
+  };
+
+  if (contactForm.phone?.trim()) payload.phone = contactForm.phone.trim();
+  if (contactForm.company?.trim()) payload.company = contactForm.company.trim();
+  if (contactForm.address?.trim()) payload.street = contactForm.address.trim();
+  if (contactForm.zipCode?.trim()) payload.zipCode = contactForm.zipCode.trim();
+  if (contactForm.city?.trim()) payload.location = contactForm.city.trim();
+  if (customerComment.value?.trim()) payload.comment = customerComment.value.trim();
+
+  const start = normalizePeriodTimestamp(selectedTimePeriod.value?.start);
+  const end = normalizePeriodTimestamp(selectedTimePeriod.value?.end);
+  if (start != null && end != null && end > start) {
+    payload.timeBegin = start;
+    payload.timeEnd = end;
+  }
+
+  const code = couponForValidation.value;
+  if (code) payload.couponCode = code;
+
+  const total = summary.value?.total ?? 0;
+  if (total > 0.005 && selectedPaymentProviderId.value) {
+    payload.paymentProvider = String(selectedPaymentProviderId.value);
+  }
+
+  return payload;
+}
+
+function isExternalPaymentLinkProvider(provider) {
+  if (provider == null) return false;
+  const s = String(provider).trim();
+  if (!s) return false;
+  const lower = s.toLowerCase();
+  if (lower === "pmpayment") return true;
+  if (lower === "girocockpit") return true;
+  if (lower === "epaybl" || lower.includes("epaybl")) return true;
+  return false;
+}
+
+function firstPaymentContinueUrl(payment) {
+  if (!payment?.data) return null;
+  const d = payment.data;
+  if (!Array.isArray(d)) return null;
+  const row = d.find((x) => {
+    if (!x || typeof x !== "object") return false;
+    const u = x.url ?? x.paymentUrl ?? x.payment_link;
+    return typeof u === "string" && u.trim().length > 0;
   });
+  if (!row) return null;
+  const u = row.url ?? row.paymentUrl ?? row.payment_link;
+  const trimmed = String(u).trim();
+  if (!trimmed) return null;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") return trimmed;
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function messageForStructuredCheckoutError(apiError) {
+  if (!apiError || typeof apiError !== "object") {
+    return t("checkout.unknown_error");
+  }
+  const reason = apiError.reason;
+  const params =
+    apiError.params && typeof apiError.params === "object"
+      ? apiError.params
+      : {};
+  let core = null;
+  if (typeof reason === "string" && reason) {
+    if (te(reason)) {
+      core = t(reason, params);
+    } else {
+      const tail = reason.startsWith("checkout.")
+        ? reason.slice("checkout.".length)
+        : reason;
+      const nestedKey = `checkout.${tail}`;
+      if (te(nestedKey)) {
+        core = t(nestedKey, params);
+      }
+    }
+  }
+  if (!core) {
+    const msg = apiError.message;
+    if (typeof msg === "string" && msg.trim()) return msg.trim();
+    return t("checkout.unknown_error");
+  }
+  const title =
+    params.title != null && String(params.title).trim() !== ""
+      ? String(params.title).trim()
+      : null;
+  return title ? `${title}: ${core}` : core;
+}
+
+function messageForStructuredCheckoutErrorNotify(apiError) {
+  const main = messageForStructuredCheckoutError(apiError);
+  const params =
+    apiError?.params && typeof apiError.params === "object"
+      ? apiError.params
+      : {};
+  const parts = [main];
+  if (
+    params.remaining !== undefined &&
+    params.totalCapacity !== undefined
+  ) {
+    parts.push(
+      t("checkout.errors.capacityInfo", {
+        remaining: params.remaining,
+        total: params.totalCapacity,
+      })
+    );
+  }
+  const checkType = apiError?.checkType ?? params.checkType;
+  if (checkType === "availability") {
+    parts.push(t("checkout.errors.unavailableHint"));
+  }
+  return parts.join("\n");
+}
+
+function messageForCheckoutApiError(errPayload) {
+  if (!errPayload || typeof errPayload !== "object") {
+    return t("checkout.unknown_error");
+  }
+  if (errPayload.success === false && errPayload.error) {
+    return messageForStructuredCheckoutErrorNotify(errPayload.error);
+  }
+  const code = errPayload.code;
+  if (typeof code === "string") {
+    if (te(code)) return t(code);
+    const tail = code.startsWith("checkout.") ? code.slice("checkout.".length) : code;
+    const nestedKey = `checkout.${tail}`;
+    if (te(nestedKey)) return t(nestedKey);
+  }
+  const msg = errPayload.message || errPayload.error;
+  if (typeof msg === "string" && msg.trim()) return msg.trim();
+  return t("checkout.unknown_error");
+}
+
+async function handleFinish() {
+  if (!canGoNext.value || checkoutSubmitting.value) return;
+
+  checkoutSubmitting.value = true;
+  try {
+    const payload = buildCheckoutPayload();
+    const { data, error } = await completeCheckout(payload);
+
+    if (error) {
+      const body = error.data;
+      const apiErr =
+        body && typeof body === "object" && !Array.isArray(body) ? body : null;
+      notifyError(messageForCheckoutApiError(apiErr || {}));
+      return;
+    }
+
+    if (data?.success === false && data?.error) {
+      notifyError(messageForStructuredCheckoutErrorNotify(data.error));
+      return;
+    }
+
+    if (!data?.success || !data?.data?.booking) {
+      notifyError(t("checkout.unknown_error"));
+      return;
+    }
+
+    const { booking, payment } = data.data;
+
+    const goPayment =
+      booking?.isCommitted === true &&
+      payment &&
+      typeof payment === "object" &&
+      isExternalPaymentLinkProvider(payment.provider);
+
+    const paymentUrl = goPayment ? firstPaymentContinueUrl(payment) : null;
+
+    if (paymentUrl && typeof window !== "undefined") {
+      sessionStorage.removeItem(checkoutStateStorageKey.value);
+      window.location.href = paymentUrl;
+      return;
+    }
+
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem(checkoutStateStorageKey.value);
+    }
+
+    const statusQuery = {
+      tenantId: String(tenantID ?? ""),
+      bookableId: String(bookableID ?? ""),
+      bookingId: String(booking?.id ?? ""),
+    };
+    if (booking?.isCommitted === false) {
+      statusQuery.pending = "1";
+    }
+    await router.push({ path: "/checkout/status", query: statusQuery });
+  } catch (e) {
+    console.error(e);
+    notifyError(t("checkout.unknown_error"));
+  } finally {
+    checkoutSubmitting.value = false;
+  }
 }
 
 function onReviewBack() {
-  if (needsPaymentSelectionStep.value) {
-    currentStep.value = 3;
-  } else {
-    currentStep.value = 2;
-  }
+  currentStep.value = Math.max(MIN_STEP, steps.value.length - 1);
+}
+
+function stepNumberByKey(key) {
+  const idx = steps.value.findIndex((step) => step.key === key);
+  return idx === -1 ? null : idx + 1;
 }
 
 function onReviewEdit(section) {
   if (section === "period") {
-    currentStep.value = 1;
+    currentStep.value =
+      stepNumberByKey("period") ??
+      stepNumberByKey("objects") ??
+      stepNumberByKey("data") ??
+      MIN_STEP;
   } else if (section === "data") {
-    currentStep.value = 2;
+    currentStep.value = stepNumberByKey("data") ?? MIN_STEP;
   } else if (section === "payment") {
-    currentStep.value = 3;
+    currentStep.value = stepNumberByKey("payment") ?? MIN_STEP;
   }
 }
 </script>
@@ -1105,7 +1473,10 @@ function onReviewEdit(section) {
 <template>
   <div class="bg-neutral-50 dark:bg-gray-950 w-full min-h-screen">
     <!-- Loading / Empty State -->
-    <div v-if="isLoading" class="flex items-center justify-center min-h-screen">
+    <div
+      v-if="isLoading || isResolvingPermissionGuard"
+      class="flex items-center justify-center min-h-screen"
+    >
       <div class="text-center">
         <UIcon
           size="48"
@@ -1130,6 +1501,64 @@ function onReviewEdit(section) {
       </div>
     </div>
 
+    <div
+      v-else-if="showPermissionGuard"
+      class="flex items-center justify-center min-h-screen p-6"
+    >
+      <div class="w-full max-w-2xl">
+        <UCard class="rounded-2xl border border-red-200 dark:border-red-800">
+          <div class="flex flex-col gap-5">
+            <div class="flex items-start gap-3">
+              <UIcon
+                size="24"
+                name="i-lucide-shield-alert"
+                class="text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0"
+              />
+              <div>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ permissionGuardTitle }}
+                </p>
+                <p
+                  v-if="leadBookable?.title"
+                  class="text-sm text-gray-500 dark:text-gray-400 mt-1"
+                >
+                  {{ leadBookable.title }}
+                </p>
+              </div>
+            </div>
+
+            <p class="text-sm text-red-700 dark:text-red-300">
+              {{ permissionGuardMessage }}
+            </p>
+
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              {{ permissionGuardDescription }}
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+              <UButton
+                v-if="isLoggedIn"
+                color="primary"
+                icon="i-lucide-user-round-cog"
+                :loading="isLoggingOut"
+                @click="signOutAndLogin"
+              >
+                {{ $t("checkout.permissionGuard.switchAccountAction") }}
+              </UButton>
+              <UButton
+                v-else
+                color="primary"
+                icon="i-lucide-log-in"
+                :to="loginUrl"
+              >
+                {{ $t("checkout.permissionGuard.loginAction") }}
+              </UButton>
+            </div>
+          </div>
+        </UCard>
+      </div>
+    </div>
+
     <!-- Main Layout -->
     <div v-else class="flex flex-col lg:flex-row min-h-screen">
       <!-- LEFT: Bookable Overview + Prices -->
@@ -1144,7 +1573,8 @@ function onReviewEdit(section) {
 
         <!-- Price Summary  -->
         <div class="sticky bottom-4 md:bottom-6 mt-6 z-10">
-          <PriceSummaryBar v-if="currentStepKey !== 'confirm'"
+          <PriceSummaryBar
+            v-if="currentStepKey !== 'confirm'"
             :summary="summary"
             :selected-time-period="selectedTimePeriod"
             :needs-time-period-selection="needsTimePeriodSelection"
@@ -1166,9 +1596,13 @@ function onReviewEdit(section) {
           @finish="handleFinish"
         >
           <template #step-objects>
-            <p class="text-gray-500 dark:text-gray-400">
-              Hier kommt die Objektauswahl rein.
-            </p>
+            <div class="max-w-3xl">
+              <AdditionalBookablesSelector
+                v-model="selectedAdditionalBookables"
+                :items="additionalBookables"
+                :validation-errors="validationErrors"
+              />
+            </div>
           </template>
 
           <template #step-period>
@@ -1244,10 +1678,14 @@ function onReviewEdit(section) {
                   </div>
                 </Pane>
 
-                <Pane v-if="additionalBookables.length > 0" :size="35" :min-size="20" class="overflow-hidden">
+                <Pane
+                  v-if="showAdditionalBookablesInPeriodStep"
+                  :size="35"
+                  :min-size="20"
+                  class="overflow-hidden"
+                >
                   <div class="pl-0 lg:pl-4">
                     <AdditionalBookablesSelector
-                      v-if="additionalBookables.length > 0"
                       v-model="selectedAdditionalBookables"
                       :items="additionalBookables"
                       :validation-errors="validationErrors"
@@ -1350,6 +1788,7 @@ function onReviewEdit(section) {
             <CheckoutReviewStep
               v-model:applied-coupon="appliedCouponCode"
               v-model:applied-coupon-details="appliedCouponDetails"
+              v-model:book-with-price="selectedBookWithPrice"
               :summary="summary"
               :selected-time-period="selectedTimePeriod"
               :contact="contactForm"
@@ -1362,12 +1801,23 @@ function onReviewEdit(section) {
               :amounts="amounts"
               :lead-bookable-id="bookableID"
               :enable-coupons="couponsEnabled"
+              :has-free-booking-option="hasFreeBookingOption"
               :tenant-id="tenantID"
               :custom-field-rows="reviewCustomFieldRows"
               :is-validating="isValidating"
+              :show-period-summary="requiresTimeSelection"
+              :selection-section-title="
+                requiresTimeSelection
+                  ? $t('checkout.review.sectionPeriod')
+                  : $t('checkout.review.bookingLabel')
+              "
+              :show-selection-edit="
+                steps.some((step) => step.key === 'period' || step.key === 'objects')
+              "
               :step-current="currentStep"
               :step-total="steps.length"
-              :can-submit="canGoNext"
+              :can-submit="canGoNext && !checkoutSubmitting"
+              :is-submitting="checkoutSubmitting"
               :has-payment-step="needsPaymentSelectionStep"
               @finish="handleFinish"
               @back="onReviewBack"

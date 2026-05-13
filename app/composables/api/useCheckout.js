@@ -58,11 +58,7 @@ export function useCheckout() {
     return data;
   };
 
-  /**
-   * Prüft einen Gutschein beim Mandanten.
-   * Erwartete Antwort (HTTP 200): { success: true, data: { id, description, discount, type: "fixed"|"percent"|"percentage" } }
-   * oder { success: false, error: { reason, checkType, params } }.
-   */
+
   const redeemCoupon = async ({ tenantID, couponCode }) => {
     const api = useApiClient();
     const { data, error } = await api.post(`/api/checkout/coupon`, {
@@ -76,5 +72,21 @@ export function useCheckout() {
     return data;
   };
 
-  return { fetchBookable, validateBookable, redeemCoupon };
+
+  const completeCheckout = async (payload) => {
+    const api = useApiClient();
+    return api.post(`/api/checkout/complete`, payload);
+  };
+
+  const fetchCheckoutPermissions = async (tenantID, bookableID) => {
+    const api = useApiClient();
+    const { data, error } = await api.get(`/api/checkout/${bookableID}/permissions/?tenantID=${tenantID}`);
+    if (error) {
+      console.error("Error fetching checkout permissions:", error);
+      throw error;
+    }
+    return data;
+  }
+
+  return { fetchBookable, validateBookable, redeemCoupon, completeCheckout, fetchCheckoutPermissions };
 }

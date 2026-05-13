@@ -3,7 +3,10 @@ import type { NitroFetchOptions, NitroFetchRequest } from "nitropack";
 
 type Result<T> =
   | { data: T; error: null }
-  | { data: null; error: { statusCode: number; statusMessage: string } };
+  | {
+      data: null;
+      error: { statusCode: number; statusMessage: string; data?: unknown };
+    };
 
 type RequestOptions = Omit<NitroFetchOptions<NitroFetchRequest>, "method">;
 type RequestBody = BodyInit | Record<string, unknown> | null;
@@ -30,6 +33,7 @@ export function useApiClient() {
         error: {
           statusCode: error.statusCode ?? 500,
           statusMessage: error.statusMessage ?? "Unknown error",
+          data: error.data,
         },
       };
     }

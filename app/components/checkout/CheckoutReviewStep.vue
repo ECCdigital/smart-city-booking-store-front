@@ -52,6 +52,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  hasFreeBookingOption: {
+    type: Boolean,
+    default: false,
+  },
   tenantId: {
     type: String,
     default: null,
@@ -64,6 +68,18 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showPeriodSummary: {
+    type: Boolean,
+    default: true,
+  },
+  selectionSectionTitle: {
+    type: String,
+    default: null,
+  },
+  showSelectionEdit: {
+    type: Boolean,
+    default: true,
+  },
   stepCurrent: {
     type: Number,
     default: 1,
@@ -75,6 +91,10 @@ const props = defineProps({
   canSubmit: {
     type: Boolean,
     default: true,
+  },
+  isSubmitting: {
+    type: Boolean,
+    default: false,
   },
   hasPaymentStep: {
     type: Boolean,
@@ -92,6 +112,11 @@ const appliedCoupon = defineModel("appliedCoupon", {
 const appliedCouponDetails = defineModel("appliedCouponDetails", {
   type: Object,
   default: null,
+});
+
+const bookWithPrice = defineModel("bookWithPrice", {
+  type: Boolean,
+  default: true,
 });
 
 const { t, te, locale } = useI18n();
@@ -349,8 +374,19 @@ function amountForItem(id) {
 
 function displayPriceForSummaryRow(row) {
   if (row.priceDisplayEur != null) return row.priceDisplayEur;
-  if (row.amountEur > 0) return row.amountEur;
+  if (row.amountEur != null) return row.amountEur;
   return null;
+}
+
+function displayOriginalPriceForSummaryRow(row) {
+  if (row.originalAmountEur != null) return row.originalAmountEur;
+  return null;
+}
+
+function hasOriginalPriceForSummaryRow(row) {
+  const original = displayOriginalPriceForSummaryRow(row);
+  const current = displayPriceForSummaryRow(row);
+  return original != null && current != null && original > current;
 }
 
 function bookingLineSubtitle(row) {
@@ -363,24 +399,6 @@ function bookingLineSubtitle(row) {
     price: formatEur(unit),
   });
 }
-
-const couponDiscountAmount = computed(() => {
-  const rows = props.summary?.items || [];
-  const row = rows.find((r) => r.id === COUPON_ROW_ID);
-  if (!row) return null;
-  const v = displayPriceForSummaryRow(row);
-  if (v == null || v >= 0) return null;
-  return v;
-});
-
-const couponStatusLine = computed(() => {
-  const code = appliedCoupon.value;
-  if (!code || couponDiscountAmount.value == null) return null;
-  return t("checkout.review.couponActiveSummary", {
-    code: String(code).trim(),
-    amount: formatEur(couponDiscountAmount.value),
-  });
-});
 
 async function applyCoupon() {
   couponError.value = "";
@@ -433,7 +451,7 @@ function removeCoupon() {
 }
 
 function onFinish() {
-  if (!props.canSubmit) return;
+  if (!props.canSubmit || props.isSubmitting) return;
   emit("finish");
 }
 
@@ -456,9 +474,10 @@ function onEdit(section) {
         >
           <div class="flex items-start justify-between gap-4 mb-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-              {{ $t("checkout.review.sectionPeriod") }}
+              {{ selectionSectionTitle || $t("checkout.review.sectionPeriod") }}
             </h3>
             <UButton
+              v-if="showSelectionEdit"
               variant="link"
               color="primary"
               size="sm"
@@ -471,6 +490,7 @@ function onEdit(section) {
 
           <dl class="space-y-6">
             <div
+              v-if="showPeriodSummary"
               class="grid grid-cols-1 sm:grid-cols-[minmax(7rem,auto)_1fr] gap-x-8 gap-y-1"
             >
               <dt class="text-sm text-gray-500 dark:text-gray-400">
@@ -638,6 +658,29 @@ function onEdit(section) {
       </div>
 
       <aside class="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-6 space-y-6">
+        <UCard
+          v-if="hasFreeBookingOption"
+          variant="soft"
+          class="rounded-lg border border-emerald-200 dark:border-emerald-900"
+        >
+          <div class="space-y-3">
+            <p class="text-sm font-medium text-gray-900 dark:text-white">
+              {{ $t("checkout.review.freeBookingTitle") }}
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              {{
+                bookWithPrice
+                  ? $t("checkout.review.freeBookingPaidDescription")
+                  : $t("checkout.review.freeBookingAppliedDescription")
+              }}
+            </p>
+            <USwitch
+              v-model="bookWithPrice"
+              :label="$t('checkout.review.bookWithPriceToggle')"
+            />
+          </div>
+        </UCard>
+
         <UCard v-if="enableCoupons" variant="soft" class="rounded-lg">
           <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
             {{ $t("checkout.review.discountCodeTitle") }}
@@ -738,19 +781,26 @@ function onEdit(section) {
               >
                 {{ row.label }}
               </span>
-              <span
-                class="tabular-nums font-medium shrink-0"
-                :class="
-                  row.skipQuantity
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-gray-900 dark:text-white'
-                "
-              >
-                <template v-if="displayPriceForSummaryRow(row) != null">{{
-                  formatEur(displayPriceForSummaryRow(row))
-                }}</template>
-                <template v-else>–</template>
-              </span>
+              <div class="tabular-nums font-medium shrink-0 text-right min-w-[80px]">
+                <span
+                  v-if="hasOriginalPriceForSummaryRow(row)"
+                  class="block text-xs text-gray-400 line-through"
+                >
+                  {{ formatEur(displayOriginalPriceForSummaryRow(row)) }}
+                </span>
+                <span
+                  :class="
+                    row.skipQuantity
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-gray-900 dark:text-white'
+                  "
+                >
+                  <template v-if="displayPriceForSummaryRow(row) != null">{{
+                    formatEur(displayPriceForSummaryRow(row))
+                  }}</template>
+                  <template v-else>–</template>
+                </span>
+              </div>
             </li>
             <li
               v-if="summary.taxAmount > 0"
@@ -791,6 +841,7 @@ function onEdit(section) {
               size="lg"
               trailing-icon="i-lucide-check"
               :disabled="!canSubmit"
+              :loading="isSubmitting"
               @click="onFinish"
             >
               {{ $t("checkout.review.commitBooking") }}

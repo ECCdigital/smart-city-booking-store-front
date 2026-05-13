@@ -1,36 +1,5 @@
 <script setup>
-/**
- * AppStepper
- * ----------
- * Generischer, mit beliebigem Inhalt füllbarer Stepper.
- *
- * Beispiel:
- *   const step = ref(1);
- *   const steps = [
- *     { key: "objects", title: "Objekte wählen", nextLabel: "Weiter zu Zeitraum" },
- *     { key: "period",  title: "Zeitraum & Extras", nextLabel: "Weiter zu Daten" },
- *     { key: "data",    title: "Daten eingeben",   nextLabel: "Weiter zur Bestätigung" },
- *     { key: "confirm", title: "Bestätigung",      nextLabel: "Buchung abschließen" },
- *   ];
- *
- *   <AppStepper v-model="step" :steps="steps" @finish="submit">
- *     <template #step-objects>...</template>
- *     <template #step-period>...</template>
- *     <template #step-data>...</template>
- *     <template #step-confirm>...</template>
- *   </AppStepper>
- *
- * Slots:
- *   - Pro Step ein Named-Slot: `step-<key>` (falls `step.key` gesetzt)
- *     oder `step-<index>` (1-basiert) als Fallback.
- *   - Slot-Props: `{ step, index, isFirst, isLast }`.
- */
-
 const props = defineProps({
-  /**
-   * Liste der Steps. Jeder Eintrag:
-   * { key?: string, title: string, nextLabel?: string }
-   */
   steps: {
     type: Array,
     required: true,
@@ -39,52 +8,42 @@ const props = defineProps({
         value.length > 0 &&
         value.every((s) => s && typeof s.title === "string"),
   },
-  /** Aktueller Step (1-basiert) – v-model. */
   modelValue: {
     type: Number,
     default: 1,
   },
-  /** Loading-State für den Weiter/Abschließen-Button. */
   loading: {
     type: Boolean,
     default: false,
   },
-  /** Wenn false, ist der Weiter-Button deaktiviert (z.B. für Validierung). */
   canGoNext: {
     type: Boolean,
     default: true,
   },
-  /** Wenn false, ist der Zurück-Button deaktiviert. */
   canGoBack: {
     type: Boolean,
     default: true,
   },
-  /** Optionaler Override für das Label des Weiter-Buttons (Fallback je Step / i18n). */
   nextLabel: {
     type: String,
     default: null,
   },
-  /** Optionaler Override für das Label des Zurück-Buttons. */
   backLabel: {
     type: String,
     default: null,
   },
-  /** Optionaler Override für das Label des letzten Steps (Abschließen). */
   finishLabel: {
     type: String,
     default: null,
   },
-  /** Zurück-Button im ersten Step ausblenden. */
   hideBackOnFirst: {
     type: Boolean,
     default: true,
   },
-  /** Titelzeile (H2 + „Schritt x von y“) ausblenden – z. B. wenn der Step eigenen Hero-Text mitbringt. */
   hideStepHeading: {
     type: Boolean,
     default: false,
   },
-  /** Sticky Fußleiste mit Zurück/Weiter ausblenden – z. B. bei eingebetteter Navigation im Step. */
   hideFooter: {
     type: Boolean,
     default: false,
@@ -95,12 +54,10 @@ const emit = defineEmits(["update:modelValue", "next", "back", "finish"]);
 
 const { t } = useI18n();
 
-// --- Berechnete Werte ------------------------------------------------------
 
 const totalSteps = computed(() => props.steps.length);
 
 const currentIndex = computed(() => {
-  // Auf gültigen Bereich begrenzen.
   const idx = Number(props.modelValue) || 1;
   return Math.max(1, Math.min(idx, totalSteps.value));
 });
@@ -129,7 +86,6 @@ const backButtonLabel = computed(
     () => props.backLabel ?? t("stepper.back"),
 );
 
-// --- Handler ---------------------------------------------------------------
 
 function goNext() {
   if (!props.canGoNext || props.loading) return;
@@ -147,7 +103,7 @@ function goBack() {
   emit("update:modelValue", currentIndex.value - 1);
 }
 
-function isSegmentActive(index /* 0-basiert */) {
+function isSegmentActive(index) {
   return index < currentIndex.value;
 }
 </script>

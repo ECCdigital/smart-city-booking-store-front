@@ -5,7 +5,6 @@ export default defineEventHandler(async (event) => {
     const tenantID = getRouterParam(event, "tenantID");
 
 
-    console.log(`Fetching payment providers for tenant ${tenantID}`);
 
     const { data, error } = await serverFetch(event, `/api/tenants/${tenantID}/payment-apps`, {
         method: "GET",
