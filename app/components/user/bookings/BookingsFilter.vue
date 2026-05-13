@@ -1,5 +1,6 @@
 <template>
-  <UDropdownMenu
+  <div class="flex space-x-1">
+    <UDropdownMenu
     arrow
     :items="sortItems()"
     :ui="{
@@ -14,7 +15,6 @@
       size="md"
       variant="outline"
       color="neutral"
-      class="mt-2 md:mt-0 ml-1"
     />
   </UDropdownMenu>
   <UDropdownMenu
@@ -29,16 +29,17 @@
       content: 'w-48',
     }"
   >
-    <UChip :show="hasFiltersApplied" inset class="mt-2 md:mt-0">
+    <UChip :show="hasFiltersApplied" inset class="">
       <UButton
         icon="i-lucide-list-filter"
         size="md"
         variant="outline"
         color="neutral"
-        class="md:mt-0 ml-1 h-full"
+        class="h-full"
       />
     </UChip>
   </UDropdownMenu>
+  </div>
 </template>
 <script setup>
 const emit = defineEmits(["setFilter"]);

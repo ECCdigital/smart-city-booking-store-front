@@ -2,10 +2,15 @@
   <div class="w-full">
     <div class="md:flex justify-between items-center w-full mb-4">
       <PageHeader title="Ihre Buchungen" class="mb-3 md:mb-0" />
-      <BookingSearchFilterArea
-        :bookings="bookings"
-        @update:bookings="setFilteredBookings"
-      />
+      <div
+        class="w-full md:w-[60%] xl:w-[50%] md:flex md:space-x-1 space-y-2 md:space-y-0"
+      >
+        <BookingsExportButton v-if="bookings.length > 0" :bookings="bookings" />
+        <BookingSearchFilterArea
+          :bookings="bookings"
+          @update:bookings="setFilteredBookings"
+        />
+      </div>
     </div>
 
     <div v-if="activeBookingsWithLocking?.length">
@@ -34,6 +39,7 @@ import { useBookingStore } from "~~/stores/bookings.js";
 import BookingsSkeleton from "~/components/user/bookings/BookingsSkeleton.vue";
 import BookingEmptyState from "~/components/user/bookings/BookingEmptyState.vue";
 import BookingSearchFilterArea from "~/components/user/bookings/BookingSearchFilterArea.vue";
+import BookingsExportButton from "~/components/user/bookings/BookingsExportButton.vue";
 
 definePageMeta({
   layout: "panel",
@@ -50,7 +56,7 @@ const { pending } = useAsyncData("bookings", async () => {
 const bookings = computed(() => bookingsStore.getBookings);
 
 const sortedBookings = computed(() =>
-  [...bookings.value].sort((a, b) => b.timeCreated - a.timeCreated)
+  [...bookings.value].sort((a, b) => b.timeCreated - a.timeCreated),
 );
 
 const filteredBookings = ref(null);
@@ -60,7 +66,7 @@ watch(
   (val) => {
     filteredBookings.value = val;
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 function setFilteredBookings(newBookings) {
@@ -71,7 +77,7 @@ const activeBookingsWithLocking = computed(() => {
   const withLockerInfo = filteredBookings.value.filter(
     (booking) =>
       booking.lockerInfo.length > 0 &&
-      booking.lockerInfo.some((info) => info.lockerSystem === "ifbs")
+      booking.lockerInfo.some((info) => info.lockerSystem === "ifbs"),
   );
 
   const currentTime = new Date().getTime();
@@ -81,7 +87,7 @@ const activeBookingsWithLocking = computed(() => {
     (b) =>
       b.timeBegin - twoHoursMs < currentTime &&
       b.timeEnd + twoHoursMs > currentTime &&
-      b.isRejected === false
+      b.isRejected === false,
   );
 });
 </script>

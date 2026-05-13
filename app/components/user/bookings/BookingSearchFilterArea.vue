@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full md:w-[40%] flex">
+  <div class="w-full flex space-x-1">
     <UInput
       v-model="searchQuery"
       icon="i-lucide-search"
