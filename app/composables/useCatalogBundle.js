@@ -15,7 +15,6 @@ export function useCatalogBundle() {
   const { tenantID } = useTenant();
 
   const cacheEnabled = config.public.cacheEnabled;
-  const adminBaseUrl = config.public.adminBaseUrl;
 
   async function loadBundle({ bookableID, eventID, include = [] }) {
     const cacheKey = `catalog:${tenantID.value}:${
@@ -36,7 +35,7 @@ export function useCatalogBundle() {
         server: true,
         getCachedData: cacheEnabled ? undefined : () => undefined,
         dedupe: cacheEnabled ? "defer" : "cancel",
-      },
+      }
     );
 
     if (error.value) {
