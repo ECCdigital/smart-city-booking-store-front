@@ -47,7 +47,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     keys: ["item.title", "item.description", "item.flags", "item.tags"],
     includeScore: true,
     shouldSort: true,
-      distance: 150,
+    distance: 150,
     threshold: 0.25,
   };
 
@@ -105,7 +105,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         if (isEmptyFilterValue(value)) continue;
 
         const def = getCustomFieldDef(updatedItems.value, fieldId);
-        if(!def) continue;
+        if (!def) continue;
         const type = def?.usageOptions?.catalogFilterType;
 
         filtered = filtered.filter((b) => {
@@ -147,8 +147,11 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     const maxDistance = query.distance;
     if (query.location && maxDistance !== null) {
       filtered = filtered.filter((b) => {
-        if (!b.item.location || b.item.distanceMeter === undefined) {
-          return false;
+        if (
+          b.matchStatus === MatchStatus.MATCH &&
+          (!b.item.location || b.item.distanceMeter === undefined)
+        ) {
+          return true;
         } else if (b.matchStatus === MatchStatus.NO_MATCH) {
           return false;
         }
@@ -188,7 +191,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
         return {
           ...i,
           isBookable: i.isBookable,
-          matchStatus: i.matchStatus === MatchStatus.TOO_FAR ? MatchStatus.TOO_FAR : MatchStatus.NO_MATCH,
+          matchStatus:
+            i.matchStatus === MatchStatus.TOO_FAR
+              ? MatchStatus.TOO_FAR
+              : MatchStatus.NO_MATCH,
         };
       }
     });
