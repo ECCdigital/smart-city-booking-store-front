@@ -76,7 +76,7 @@ async function goToListview(searchParams) {
       searchParams.searchType === "events" ? "events" : "bookables";
 
   await router.push({
-    path: tenantTo(path),
+    ...tenantTo(path),
     query,
   });
 }
