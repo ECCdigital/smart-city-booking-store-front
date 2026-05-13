@@ -338,6 +338,9 @@ const dynamicPriceStep = computed(() => {
   return step;
 });
 const dynamicMaxPrice = computed(() => {
+  if (possiblePriceRange.value[1] === 0) {
+    return 0;
+  }
   const remainder = possiblePriceRange.value[1] % dynamicPriceStep.value;
   if (remainder === 0) {
     return possiblePriceRange.value[1];
@@ -376,9 +379,13 @@ function getBookableMinPrice(bookable) {
   if (searchIsInitialized.value && bookable.calculatedPrice) {
     return bookable.calculatedPrice.userGrossPriceEur;
   }
-  //else return min price from price categories
+
+  //else return min price from price categories but exclude holiday price categories
+  const pricesWithoutHolidays = bookable.item?.priceCategories?.filter(
+    (c) => !c.holidays || c.holidays.length === 0,
+  );
   const minPrice = Math.min(
-    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || [])
+    ...(pricesWithoutHolidays.map((cat) => cat.priceEur) || []),
   );
 
   return bookable.item.priceValueAddedTax
