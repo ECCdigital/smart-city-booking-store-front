@@ -312,6 +312,17 @@ onUnmounted(() => {
   }
 });
 
+function statusDetailParts(statusKey) {
+  const slug = String(statusKey || "").replace(/^status\./, "");
+  const titleKey = `checkout.status.detail.${slug}.title`;
+  const bodyKey = `checkout.status.detail.${slug}.body`;
+
+  return {
+    title: te(titleKey) ? t(titleKey) : t(statusKey),
+    body: te(bodyKey) ? t(bodyKey) : "",
+  };
+}
+
 function statusPresentation(statusKey) {
   switch (statusKey) {
     case "status.rejected":
@@ -387,10 +398,14 @@ function rowForBooking(booking) {
     }
   }
 
+  const detail = statusDetailParts(statusKey);
+
   return {
     id: String(booking.bookingId ?? booking.id ?? ""),
     statusKey,
     label: t(statusKey),
+    detailTitle: detail.title,
+    detailBody: detail.body,
     presentation: statusPresentation(statusKey),
     success,
     errorMessage,
@@ -414,6 +429,22 @@ function rowForBooking(booking) {
 const bookingRows = computed(() =>
   bookingsFromApi.value.map((booking) => rowForBooking(booking))
 );
+
+const isSingleBookingView = computed(() => bookingRows.value.length === 1);
+
+const singleBookingRow = computed(() =>
+  isSingleBookingView.value ? bookingRows.value[0] : null
+);
+
+const showPaymentDetails = computed(() => {
+  const row = singleBookingRow.value;
+  if (!row) return false;
+  return (
+    row.priceEur != null &&
+    row.priceEur > 0 &&
+    (row.isCommitted || row.isPayed || row.paymentLabel)
+  );
+});
 
 const summaryStats = computed(() => [
   {
@@ -613,6 +644,133 @@ async function handleManualRefresh() {
               </p>
             </div>
 
+            <div v-else-if="isSingleBookingView && singleBookingRow">
+              <article class="rounded-md bg-gray-50 p-6 dark:bg-gray-900/60 md:p-8">
+                <div class="flex flex-col gap-6 sm:flex-row sm:items-start">
+
+
+                  <div class="min-w-0 flex-1">
+                    <span
+                      class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium"
+                      :class="singleBookingRow.presentation.badge"
+                    >
+                      <UIcon
+                        :name="singleBookingRow.presentation.icon"
+                        class="h-3.5 w-3.5"
+                      />
+                      {{ singleBookingRow.label }}
+                    </span>
+
+                    <h2
+                      class="mt-4 text-xl font-semibold text-gray-900 dark:text-white md:text-2xl"
+                    >
+                      {{ singleBookingRow.detailTitle }}
+                    </h2>
+
+                    <p
+                      v-if="singleBookingRow.detailBody"
+                      class="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-300"
+                    >
+                      {{ singleBookingRow.detailBody }}
+                    </p>
+
+                    <p
+                      v-if="!singleBookingRow.success && singleBookingRow.errorMessage"
+                      class="mt-3 text-sm leading-6 text-red-600 dark:text-red-400"
+                    >
+                      {{ singleBookingRow.errorMessage }}
+                    </p>
+
+                    <p
+                      v-if="singleBookingRow.id"
+                      class="mt-5 text-sm text-gray-500 dark:text-gray-400"
+                    >
+                      {{ $t("checkout.status.singleBookingReference") }}:
+                      <span
+                        class="font-mono font-semibold text-gray-700 dark:text-gray-200"
+                      >
+                        #{{ singleBookingRow.id }}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <dl
+                  v-if="showPaymentDetails"
+                  class="mt-8 grid gap-x-8 gap-y-4 border-t border-gray-200/80 pt-6 dark:border-gray-800 sm:grid-cols-3"
+                >
+                  <div class="space-y-1">
+                    <dt
+                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                    >
+                      {{ $t("checkout.status.paymentProviderLabel") }}
+                    </dt>
+                    <dd
+                      class="mt-1 text-sm font-semibold text-gray-900 dark:text-white"
+                    >
+                      {{ singleBookingRow.paymentLabel || "—" }}
+                    </dd>
+                  </div>
+
+                  <div class="space-y-1">
+                    <dt
+                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                    >
+                      {{ $t("checkout.status.paymentStateLabel") }}
+                    </dt>
+                    <dd class="mt-1">
+                      <span
+                        class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium"
+                        :class="singleBookingRow.paymentStateClass"
+                      >
+                        {{ singleBookingRow.paymentStateLabel }}
+                      </span>
+                    </dd>
+                  </div>
+
+                  <div class="space-y-1">
+                    <dt
+                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                    >
+                      {{ $t("checkout.status.amountLabel") }}
+                    </dt>
+                    <dd
+                      class="mt-1 text-sm font-semibold text-gray-900 dark:text-white"
+                    >
+                      {{
+                        singleBookingRow.priceEur != null &&
+                        singleBookingRow.priceEur > 0
+                          ? formatMoneyEur(singleBookingRow.priceEur)
+                          : "—"
+                      }}
+                    </dd>
+                  </div>
+                </dl>
+
+                <div
+                  v-if="singleBookingRow.shouldPoll"
+                  class="mt-6 rounded-xl bg-primary-50/70 px-4 py-3 text-sm text-primary-900 dark:bg-primary-950/20 dark:text-primary-100"
+                >
+                  <div class="flex items-start gap-2">
+                    <UIcon
+                      name="i-lucide-refresh-cw"
+                      :class="[
+                        'mt-0.5 h-4 w-4 shrink-0',
+                        isAutoPolling ? 'animate-spin' : '',
+                      ]"
+                    />
+                    <p class="leading-6">
+                      {{
+                        isAutoPolling
+                          ? $t("checkout.status.invoicePollingHintActive")
+                          : $t("checkout.status.invoicePollingHintIdle")
+                      }}
+                    </p>
+                  </div>
+                </div>
+              </article>
+            </div>
+
             <div v-else class="divide-y divide-gray-100 dark:divide-gray-800">
               <article
                 v-for="row in bookingRows"
@@ -730,7 +888,7 @@ async function handleManualRefresh() {
 
         <aside class="lg:sticky lg:top-6">
           <div class="rounded-lg bg-gray-50 px-5 py-6 dark:bg-gray-900/60">
-            <div>
+            <div v-if="!isSingleBookingView">
               <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
                 {{ $t("checkout.review.overviewCardTitle") }}
               </p>
@@ -760,8 +918,20 @@ async function handleManualRefresh() {
               </p>
             </div>
 
+            <p
+              v-else
+              class="text-xs leading-5 text-gray-500 dark:text-gray-400"
+            >
+              {{ $t("checkout.status.lastUpdatedLabel") }}:
+              {{ lastUpdatedAt ? formatDateTime(lastUpdatedAt) : "—" }}
+            </p>
+
             <div
-              class="mt-6 border-t border-gray-200 pt-6 dark:border-gray-800"
+              :class="
+                isSingleBookingView
+                  ? ''
+                  : 'mt-6 border-t border-gray-200 pt-6 dark:border-gray-800'
+              "
             >
               <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
                 {{ $t("checkout.status.actionsTitle") }}

@@ -444,7 +444,30 @@
       "invoicePollingHintActive": "Diese Buchung wird automatisch im Hintergrund aktualisiert, bis eine Zahlungsbestätigung eingeht oder das Zeitfenster endet.",
       "invoicePollingHintIdle": "Für diese Buchung ist aktuell keine automatische Prüfung mehr aktiv. Sie können den Status jederzeit manuell aktualisieren.",
       "actionsTitle": "Aktionen",
-      "manualRefreshAction": "Status aktualisieren"
+      "manualRefreshAction": "Status aktualisieren",
+      "singleBookingReference": "Buchungsnummer",
+      "detail": {
+        "awaiting_approval": {
+          "title": "Anfrage eingegangen",
+          "body": "Wir haben Ihre Buchungsanfrage erhalten. Ein:e Koordinator:in wird Ihre Anfrage so schnell wie möglich bearbeiten. Sie erhalten eine E-Mail, sobald es Neuigkeiten gibt."
+        },
+        "payment_expected": {
+          "title": "Zahlung ausstehend",
+          "body": "Ihre Buchung wurde freigegeben. Bitte schließen Sie die Zahlung ab, um die Buchung abzuschließen. Nach erfolgreicher Zahlung erhalten Sie eine Bestätigung per E-Mail."
+        },
+        "paid_completed": {
+          "title": "Buchung abgeschlossen",
+          "body": "Ihre Zahlung ist eingegangen und die Buchung ist abgeschlossen. Sie erhalten in Kürze eine Bestätigung per E-Mail."
+        },
+        "rejected": {
+          "title": "Anfrage nicht angenommen",
+          "body": "Ihre Buchungsanfrage konnte leider nicht angenommen werden. Bei Fragen wenden Sie sich bitte an den Anbieter."
+        },
+        "confirmed_without_payment": {
+          "title": "Buchung bestätigt",
+          "body": "Ihre Buchung wurde bestätigt. Für diese Buchung ist keine Zahlung erforderlich. Sie erhalten eine Bestätigung per E-Mail."
+        }
+      }
     }
   },
 

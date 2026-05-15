@@ -222,7 +222,30 @@
       "invoicePollingHintActive": "This booking is refreshed in the background until payment is confirmed or the time window ends.",
       "invoicePollingHintIdle": "Automatic checking is no longer active for this booking. You can refresh the status manually at any time.",
       "actionsTitle": "Actions",
-      "manualRefreshAction": "Refresh status"
+      "manualRefreshAction": "Refresh status",
+      "singleBookingReference": "Booking reference",
+      "detail": {
+        "awaiting_approval": {
+          "title": "Request received",
+          "body": "We have received your booking request. A coordinator will review it as soon as possible. You will receive an email when there is an update."
+        },
+        "payment_expected": {
+          "title": "Payment pending",
+          "body": "Your booking has been approved. Please complete payment to finalise the booking. After successful payment you will receive a confirmation by email."
+        },
+        "paid_completed": {
+          "title": "Booking complete",
+          "body": "Your payment has been received and the booking is complete. You will receive a confirmation by email shortly."
+        },
+        "rejected": {
+          "title": "Request not accepted",
+          "body": "Unfortunately your booking request could not be accepted. If you have questions, please contact the provider."
+        },
+        "confirmed_without_payment": {
+          "title": "Booking confirmed",
+          "body": "Your booking has been confirmed. No payment is required for this booking. You will receive a confirmation by email."
+        }
+      }
     }
   },
   "stepper": {
