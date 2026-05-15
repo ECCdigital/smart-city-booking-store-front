@@ -10,13 +10,13 @@
         >
           {{ $t("scheduleSelection.startTimePoint") }}
         </label>
-        <input
-          v-model="startDateTime"
-          type="datetime-local"
-          step="900"
-          :min="todayDateTimeMin"
-          class="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors"
-          @change="onManualInputChange"
+        <InputTime
+          v-model="startTime"
+          v-model:date="startInputDate"
+          show-date
+          class="w-full"
+          @update:model-value="onStartTimeChange"
+          @update:date="onStartTimeChange"
         />
       </div>
       <div>
@@ -25,17 +25,20 @@
         >
           {{ $t("scheduleSelection.endTimePoint") }}
         </label>
-        <input
-          v-model="endDateTime"
-          type="datetime-local"
-          step="900"
-          :min="startDateTime || todayDateTimeMin"
-          class="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-colors"
-          @change="onManualInputChange"
+        <InputTime
+          v-model="endTime"
+          v-model:date="endInputDate"
+          show-date
+          :disabled="!startTime"
+          class="w-full"
+          @update:model-value="onManualInputChange"
+          @update:date="onManualInputChange"
         />
       </div>
     </div>
 
+    <!-- Week nav + calendar: one card (avoids space-y-5 gap between header and grid) -->
+    <div>
     <!-- Week navigation (outside overflow-hidden so DateJumper dropdown is not clipped) -->
     <div
       class="flex items-center justify-between px-3 py-1.5 rounded-t-md border border-b-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
@@ -106,6 +109,7 @@
         </span>
       </div>
     </div>
+    </div>
 
     <!-- Overlap warning -->
     <div
@@ -136,6 +140,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import deLocale from "@fullcalendar/core/locales/de";
 import { useBookables } from "~/composables/api/useBookables.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
+import InputTime from "~/components/inputs/InputTime.vue";
 
 const props = defineProps({
   tenantId: { type: String, default: null },
@@ -182,7 +187,6 @@ const today = (() => {
   return d;
 })();
 const todayISO = localISODate(today);
-const todayDateTimeMin = `${todayISO}T00:00`;
 
 const calendarRef = ref(null);
 const currentViewStart = ref(null);
@@ -440,63 +444,73 @@ const calendarOptions = computed(() => ({
   validRange: { start: localISODate(getMonday(today)) },
 }));
 
-/* ── datetime-local computed (two-way) ───────────────────── */
-const startDateTime = computed({
-  get() {
-    if (!startDateInput.value || !startTimeInput.value) return "";
-    return `${startDateInput.value}T${startTimeInput.value}`;
-  },
+function timeFromString(str) {
+  if (!str) return null;
+  const [h, m] = str.split(":").map(Number);
+  return { hours: h, minutes: m || 0 };
+}
+
+function timeToString({ hours, minutes }) {
+  return `${pad2(hours)}:${pad2(minutes)}`;
+}
+
+/* ── InputTime bindings ──────────────────────────────────── */
+const startTime = computed({
+  get: () => timeFromString(startTimeInput.value),
   set(val) {
-    if (!val) {
-      startDateInput.value = "";
-      startTimeInput.value = "";
-    } else {
-      const [d, t] = val.split("T");
-      startDateInput.value = d;
-      startTimeInput.value = t;
-    }
+    startTimeInput.value = val ? timeToString(val) : "";
   },
 });
 
-const endDateTime = computed({
-  get() {
-    if (!endDateInput.value || !endTimeInput.value) return "";
-    return `${endDateInput.value}T${endTimeInput.value}`;
-  },
+const endTime = computed({
+  get: () => timeFromString(endTimeInput.value),
   set(val) {
-    if (!val) {
-      endDateInput.value = "";
-      endTimeInput.value = "";
-    } else {
-      const [d, t] = val.split("T");
-      endDateInput.value = d;
-      endTimeInput.value = t;
-    }
+    endTimeInput.value = val ? timeToString(val) : "";
   },
 });
 
-watch(
-  () => startDateTime.value,
-  (newStart) => {
-    if (!newStart) return;
+const startInputDate = computed({
+  get: () => parseLocalDate(startDateInput.value),
+  set(d) {
+    startDateInput.value = d ? localISODate(d) : "";
+  },
+});
 
-    const start = new Date(newStart);
-    if (isNaN(start.getTime())) return;
+const endInputDate = computed({
+  get: () => parseLocalDate(endDateInput.value),
+  set(d) {
+    endDateInput.value = d ? localISODate(d) : "";
+  },
+});
 
-    const end = endDateTime.value ? new Date(endDateTime.value) : null;
+function applyDefaultEndFromStart() {
+  if (!startDateInput.value || !startTimeInput.value) return;
 
-    if (end && end > start) return;
+  const sd = parseLocalDate(startDateInput.value);
+  if (!sd) return;
 
-    start.setHours(start.getHours() + 1);
+  const [sh, sm] = startTimeInput.value.split(":").map(Number);
+  const start = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate(), sh, sm || 0);
 
-    const pad = (n) => String(n).padStart(2, "0");
-    endDateTime.value = `${start.getFullYear()}-${pad(
-      start.getMonth() + 1
-    )}-${pad(start.getDate())}T${pad(start.getHours())}:${pad(
-      start.getMinutes()
-    )}`;
+  if (endDateInput.value && endTimeInput.value) {
+    const ed = parseLocalDate(endDateInput.value);
+    if (ed) {
+      const [eh, em] = endTimeInput.value.split(":").map(Number);
+      const end = new Date(ed.getFullYear(), ed.getMonth(), ed.getDate(), eh, em || 0);
+      if (end > start) return;
+    }
   }
-);
+
+  const end = new Date(start);
+  end.setHours(end.getHours() + 1);
+  endDateInput.value = localISODate(end);
+  endTimeInput.value = `${pad2(end.getHours())}:${pad2(end.getMinutes())}`;
+}
+
+function onStartTimeChange() {
+  applyDefaultEndFromStart();
+  onManualInputChange();
+}
 
 /* ── manual input change ─────────────────────────────────── */
 function onManualInputChange() {
