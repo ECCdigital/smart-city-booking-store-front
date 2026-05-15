@@ -1,8 +1,12 @@
 <template>
   <UTooltip text="Wählen Sie erst ein Startdatum." :disabled="!disabled">
-    <div>
+    <TimePickerDialog
+      v-model:open="openTimePickerDialog"
+      :time="model"
+      @update-time="setTime"
+    >
       <div
-        class="flex items-center bg-default border border-1.5 rounded-md px-1 border-primary"
+        class="flex items-center bg-default border border-1.5 rounded-md px-1 pt-1 border-primary"
         :class="{ 'flex-wrap gap-1': props.showDate }"
       >
         <template v-if="props.showDate">
@@ -21,32 +25,29 @@
           />
         </template>
 
-        <UTooltip text="Uhrzeit auswählen">
-          <UIcon
-            name="i-lucide-clock"
-            class="text-gray-400 mx-0.5 cursor-pointer shrink-0"
-            @click="() => (openTimePickerDialog = true)"
+        <div class="relative flex items-center flex-1 min-w-0">
+          <UTooltip text="Uhrzeit auswählen">
+            <UIcon
+              name="i-lucide-clock"
+              class="text-gray-400 mx-0.5 cursor-pointer shrink-0"
+              :class="{ 'pointer-events-none opacity-50': props.disabled }"
+              @click="openPicker"
+            />
+          </UTooltip>
+          <UInputTime
+            v-model="time"
+            :hour-cycle="24"
+            variant="ghost"
+            :disabled="props.disabled"
           />
-        </UTooltip>
-        <UInputTime
-          v-model="time"
-          :hour-cycle="24"
-          variant="ghost"
-          :disabled="props.disabled"
-        />
-        <div
-          class="click-area cursor-pointer"
-          @click="() => (openTimePickerDialog = true)"
-        />
+          <div
+            class="click-area cursor-pointer"
+            :class="{ 'pointer-events-none': props.disabled }"
+            @click="openPicker"
+          />
+        </div>
       </div>
-
-      <TimePickerDialog
-        :open-dialog="openTimePickerDialog"
-        :time="model"
-        @update-time="setTime"
-        @close-dialog="() => (openTimePickerDialog = false)"
-      />
-    </div>
+    </TimePickerDialog>
   </UTooltip>
 </template>
 <script setup lang="ts">
@@ -79,6 +80,11 @@ const props = defineProps({
 
 const openTimePickerDialog = ref(false);
 const minCalendarDate = today(getLocalTimeZone());
+
+function openPicker() {
+  if (props.disabled) return;
+  openTimePickerDialog.value = true;
+}
 
 function jsDateToCalendarDate(value: unknown) {
   if (!value) return null;
@@ -130,7 +136,8 @@ function setTime({ hours, minutes }) {
 
 <style>
 .click-area {
-  width: 100%;
+  position: absolute;
+  inset: 0;
   background: transparent;
 }
 </style>
