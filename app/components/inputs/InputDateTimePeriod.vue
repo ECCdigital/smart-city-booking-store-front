@@ -77,7 +77,10 @@
             </div>
             <div class="flex items-center space-x-2">
               <InputTime
-                v-model="timeRange.start" class="w-full"
+                v-model="timeRange.start"
+                v-model:date="startInputDate"
+                show-date
+                class="w-full"
                 @update:model-value="setDefaultEndTime"
               />
             </div>
@@ -133,9 +136,11 @@
 
               <InputTime
                 v-model="timeRange.end"
+                v-model:date="endInputDate"
+                show-date
                 :disabled="!timeRange.start"
                 class="w-full"
-                @update:model-value="removeValidation"
+                @update:model-value="onEndTimeManualChange"
               />
             </div>
             <p
@@ -204,6 +209,8 @@ const timeRange = ref<{ start: TimeHM; end: TimeHM }>({
 });
 const isOpen = ref(false);
 const missingValues = ref<string[]>([]);
+const endTimeAutoSet = ref(false);
+const isUpdatingEndAutomatically = ref(false);
 const invalidTimeslot = computed(() => {
   if ((dateRange.value.length === 2 && dateRange.value[1] !== null ) || !timeRange.value.start || !timeRange.value.end) return false;
 
@@ -232,13 +239,51 @@ const hasAnyValue = computed(
     !!timeRange.value.end,
 );
 
+function normalizeDate(value: unknown): Date | null {
+  if (!value) return null;
+  const d = value instanceof Date ? value : new Date(value as string | number);
+  if (Number.isNaN(d.getTime())) return null;
+  const result = new Date(d);
+  result.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
+  result.setHours(0, 0, 0, 0);
+  return result;
+}
+
+const startInputDate = computed({
+  get: () => normalizeDate(dateRange.value[0]),
+  set: (d: Date | null) => {
+    const normalized = normalizeDate(d);
+    if (!normalized) return;
+    const next = [...dateRange.value];
+    next[0] = normalized;
+    dateRange.value = next;
+    removeValidation();
+  },
+});
+
+const endInputDate = computed({
+  get: () => normalizeDate(dateRange.value[1] ?? dateRange.value[0]),
+  set: (d: Date | null) => {
+    const normalized = normalizeDate(d);
+    if (!normalized) return;
+    const next = [...dateRange.value];
+    if (!next[0]) next[0] = normalized;
+    next[1] = normalized;
+    dateRange.value = next;
+    removeValidation();
+  },
+});
+
 // Mapping eingehender Timestamps -> interne Picker-Modelle
 function syncInFromModel(v: TimePeriod) {
   if (!v || (!v.start && !v.end)) {
     dateRange.value = [];
     timeRange.value = { start: null, end: null };
+    endTimeAutoSet.value = false;
     return;
   }
+
+  endTimeAutoSet.value = false;
 
   // Bestimme Startdate/Enddate und Time aus Timestamps
   const startDate = v.start ? new Date(v.start) : null;
@@ -246,8 +291,10 @@ function syncInFromModel(v: TimePeriod) {
 
   // Date range
   const newRange: Date[] = [];
-  if (startDate) newRange.push(new Date(startDate));
-  if (endDate) newRange.push(new Date(endDate));
+  const normalizedStart = normalizeDate(startDate);
+  const normalizedEnd = normalizeDate(endDate);
+  if (normalizedStart) newRange.push(normalizedStart);
+  if (normalizedEnd) newRange.push(normalizedEnd);
   dateRange.value = newRange;
 
   // Time range
@@ -365,30 +412,81 @@ function closeTimePeriodInput() {
   isOpen.value = false;
   dateRange.value = [];
   timeRange.value = { start: null, end: null };
+  endTimeAutoSet.value = false;
+}
+
+type TimeParts = { hours: number; minutes: number };
+
+function addToTime(time: TimeParts, addedMinutes: number): TimeParts {
+  const totalMinutes = time.hours * 60 + time.minutes + addedMinutes;
+  return {
+    hours: Math.floor(totalMinutes / 60) % 24,
+    minutes: totalMinutes % 60,
+  };
+}
+
+function applyEndFromStartPlusMinutes(
+  addedMinutes: number,
+  { autoSet = false }: { autoSet?: boolean } = {},
+) {
+  removeValidation();
+  const startTime = timeRange.value.start;
+  if (!startTime) return;
+
+  const startDate = normalizeDate(dateRange.value[0]);
+
+  if (!startDate) {
+    timeRange.value.end = addToTime(startTime, addedMinutes);
+    if (!autoSet) endTimeAutoSet.value = false;
+    return;
+  }
+
+  const endDateTime = new Date(startDate);
+  endDateTime.setHours(startTime.hours, startTime.minutes, 0, 0);
+  endDateTime.setMinutes(endDateTime.getMinutes() + addedMinutes);
+
+  const next = [...dateRange.value];
+  if (!next[0]) next[0] = startDate;
+  next[1] = normalizeDate(endDateTime)!;
+  dateRange.value = next;
+
+  if (autoSet) {
+    isUpdatingEndAutomatically.value = true;
+    endTimeAutoSet.value = true;
+  } else {
+    endTimeAutoSet.value = false;
+  }
+
+  timeRange.value.end = {
+    hours: endDateTime.getHours(),
+    minutes: endDateTime.getMinutes(),
+  };
+
+  if (autoSet) {
+    nextTick(() => {
+      isUpdatingEndAutomatically.value = false;
+    });
+  }
 }
 
 function setDefaultEndTime() {
-  removeValidation();
-  if (!timeRange.value.end && timeRange.value.start) {
-    const initialTime = JSON.parse(JSON.stringify(timeRange.value.start));
-    initialTime.hours = initialTime.hours + 1;
-    timeRange.value.end = initialTime;
+  if (!timeRange.value.start) return;
+
+  if (!timeRange.value.end || endTimeAutoSet.value) {
+    applyEndFromStartPlusMinutes(60, { autoSet: true });
+  } else {
+    removeValidation();
   }
 }
-function addToStartTime(addedMinutes: number) {
+
+function onEndTimeManualChange() {
   removeValidation();
-  if (timeRange.value.start) {
-    const newEndTime = JSON.parse(JSON.stringify(timeRange.value.start));
-    newEndTime.minutes += addedMinutes;
+  if (isUpdatingEndAutomatically.value) return;
+  endTimeAutoSet.value = false;
+}
 
-    // Handle overflow of minutes > 59
-    if (newEndTime.minutes >= 60) {
-      newEndTime.hours += Math.floor(newEndTime.minutes / 60);
-      newEndTime.minutes = newEndTime.minutes % 60;
-    }
-
-    timeRange.value.end = newEndTime;
-  }
+function addToStartTime(addedMinutes: number) {
+  applyEndFromStartPlusMinutes(addedMinutes);
 }
 
 function removeValidation() {
@@ -438,6 +536,7 @@ function onDeleteTimePeriod() {
   dateRange.value = [];
   timeRange.value = { start: null, end: null };
   missingValues.value = [];
+  endTimeAutoSet.value = false;
 
   const cleared: TimePeriod = { start: null, end: null };
   emit("update:timePeriod", cleared);

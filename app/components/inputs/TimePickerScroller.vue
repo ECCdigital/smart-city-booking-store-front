@@ -135,7 +135,4 @@ onMounted(() => {
   transition: font-size 0.3s;
 }
 
-.time-picker__item:hover {
-  font-size: 1.7em;
-}
 </style>
