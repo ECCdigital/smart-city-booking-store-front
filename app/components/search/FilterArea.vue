@@ -100,13 +100,13 @@
       <p class="mb-3">Distanz</p>
       <p class="mb-3">0 km - {{ _distance }} km</p>
       <FilterHistogramSlider
-          v-model="_distance"
-          mode="single"
-          :min="0"
-          :max="distanceRange[1]"
-          :step="dynamicDistanceStep"
-          :values="distanceValues"
-          @change="instantFilter"
+        v-model="_distance"
+        mode="single"
+        :min="0"
+        :max="distanceRange[1]"
+        :step="dynamicDistanceStep"
+        :values="distanceValues"
+        @change="instantFilter"
       />
     </div>
 
@@ -114,29 +114,30 @@
     <div class="my-7">
       <p class="mb-3">Preis</p>
       <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
+
       <FilterHistogramSlider
-          v-model="_price"
-          mode="range"
-          :min="dynamicMinPrice"
-          :max="dynamicMaxPrice"
-          :step="dynamicPriceStep"
-          :values="priceValues"
-          @change="instantFilter"
+        v-model="_price"
+        mode="range"
+        :min="dynamicMinPrice"
+        :max="dynamicMaxPrice"
+        :step="dynamicPriceStep"
+        :values="priceValues"
+        @change="instantFilter"
       />
     </div>
-    <!-- Custom Field Filter -->
 
+    <!-- Custom Field Filter -->
     <div v-if="customFieldFilters.length > 0" class="my-7">
       <p class="mb-3">Weitere Filter</p>
       <div class="space-y-4">
         <CustomFieldFilter
-            v-for="cf in customFieldFilters"
-            :key="cf.definition.id"
-            v-model="_customFieldValues[cf.definition.id]"
-            :definition="cf.definition"
-            :filter-type="cf.filterType"
-            :meta="cf.meta"
-            @change="onCustomFieldChange"
+          v-for="cf in customFieldFilters"
+          :key="cf.definition.id"
+          v-model="_customFieldValues[cf.definition.id]"
+          :definition="cf.definition"
+          :filter-type="cf.filterType"
+          :meta="cf.meta"
+          @change="onCustomFieldChange"
         />
       </div>
     </div>
@@ -211,11 +212,15 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  customFields: {
+    type: Object,
+    default: () => ({}),
+  },
 });
 const emit = defineEmits(["filter"]);
 
 const suitableBookables = computed(() =>
-  props.bookables.filter((b) => b.status === "suitable")
+  props.bookables.filter((b) => b.matchStatus === "match")
 );
 
 //Filter Variables
@@ -255,7 +260,7 @@ watch(
   () => props.distance,
   (newVal) => {
     _distance.value = newVal;
-  }
+  },
 );
 
 const distanceRange = computed(() => {
@@ -264,7 +269,7 @@ const distanceRange = computed(() => {
   }
 
   const distances = props.bookables
-    .filter((b) => b.status !== "nonSuitable" && b.item.distanceMeter != null)
+    .filter((b) => b.matchStatus !== "no-match" && b.item.distanceMeter != null)
     .map((b) => b.item.distanceMeter);
 
   if (distances.length === 0) {
@@ -290,60 +295,27 @@ const dynamicDistanceStep = computed(() => {
   return step;
 });
 
-const distanceBars = computed(() => {
-  if (!props.bookables || props.bookables.length === 0) {
-    return [];
-  }
-
-  //set number of bars depending on distance range
-  const barsCount =
-    Math.ceil(distanceRange.value[1] / dynamicDistanceStep.value) || 1;
-
-  const bars = new Array(barsCount).fill(0);
-  const range = distanceRange.value[1];
-
-  props.bookables.forEach((b) => {
-    if (b.item.distanceMeter == null || b.status === "nonSuitable") {
-      return;
-    }
-    const distanceKm = b.item.distanceMeter / 1000;
-    if (distanceKm === 0) {
-      //put into first bar
-      bars[0]++;
-      return;
-    }
-    const index = Math.min(
-      Math.floor((distanceKm / range) * barsCount),
-      barsCount - 1
-    );
-    bars[index]++;
-  });
-
-  return bars;
-});
-
 //Price
 const priceValues = computed(() => {
   const fn = props.isEvent ? getEventMinPrice : getBookableMinPrice;
   return suitableBookables.value
-      .map((b) => fn(b))
-      .filter((p) => p != null && !isNaN(p));
+    .map((b) => fn(b))
+    .filter((p) => p != null && !isNaN(p));
 });
-
 
 const possiblePriceRange = computed(() => {
   if (!props.bookables || props.bookables.length === 0) {
     return [0, 100];
   }
 
-  let validPrices = [];
+  let validPrices;
   if (!props.isEvent) {
     validPrices = suitableBookables.value.map((b) => getBookableMinPrice(b));
   } else {
     validPrices = suitableBookables.value.map((e) => getEventMinPrice(e));
   }
   validPrices = validPrices.filter(
-    (price) => price !== undefined && price !== null && !isNaN(price)
+    (price) => price !== undefined && price !== null && !isNaN(price),
   );
 
   //set endpoints rounded to 5
@@ -351,6 +323,7 @@ const possiblePriceRange = computed(() => {
     validPrices.length > 0 ? Math.floor(Math.min(...validPrices) / 5) * 5 : 0;
   const maxPrice =
     validPrices.length > 0 ? Math.ceil(Math.max(...validPrices) / 5) * 5 : 100;
+
   return [minPrice, maxPrice];
 });
 
@@ -365,6 +338,9 @@ const dynamicPriceStep = computed(() => {
   return step;
 });
 const dynamicMaxPrice = computed(() => {
+  if (possiblePriceRange.value[1] === 0) {
+    return 0;
+  }
   const remainder = possiblePriceRange.value[1] % dynamicPriceStep.value;
   if (remainder === 0) {
     return possiblePriceRange.value[1];
@@ -382,91 +358,55 @@ const dynamicMinPrice = computed(() => {
 const _price = ref(
   props.price?.length === 2
     ? props.price
-    : [dynamicMinPrice.value, dynamicMaxPrice.value]
+    : [dynamicMinPrice.value, dynamicMaxPrice.value],
 );
 watch(
   () => dynamicMaxPrice.value,
   (newVal) => {
     _price.value = [dynamicMinPrice.value, newVal];
-  }
+  },
 );
 
 watch(suitableBookables, () => {
   _price.value = [dynamicMinPrice.value, dynamicMaxPrice.value];
 });
 
-const priceBars = computed(() => {
-  if (!props.bookables || props.bookables.length === 0) {
-    return [];
-  }
-
-  //set number of bars depending on price range
-  const barsCount =
-    Math.ceil(
-      (dynamicMaxPrice.value - possiblePriceRange.value[0]) /
-        dynamicPriceStep.value
-    ) || 1;
-
-  const bars = new Array(barsCount).fill(0);
-  const range = dynamicMaxPrice.value - possiblePriceRange.value[0];
-
-  suitableBookables.value.forEach((b) => {
-    let minPrice = null;
-    if (!props.isEvent) {
-      minPrice = getBookableMinPrice(b);
-    } else {
-      minPrice = getEventMinPrice(b);
-    }
-    //sort price into bars
-    if (minPrice !== null) {
-      if (minPrice === possiblePriceRange.value[0]) {
-        //put into first bar
-        bars[0]++;
-        return;
-      }
-      const index = Math.min(
-        Math.floor(
-          ((minPrice - possiblePriceRange.value[0]) / range) * barsCount
-        ),
-        barsCount - 1
-      );
-      bars[index]++;
-    }
-  });
-  return bars;
-});
-
 function getBookableMinPrice(bookable) {
-  if (bookable.status === "nonSuitable") {
+  if (bookable.matchStatus === "no-match") {
     return null;
   }
   //if search is initialized, return calculated price
   if (searchIsInitialized.value && bookable.calculatedPrice) {
     return bookable.calculatedPrice.userGrossPriceEur;
   }
-  //else return min price from price categories
-  const minPrice = Math.min(
-    ...(bookable.item?.priceCategories?.map((cat) => cat.priceEur) || [])
+
+  //else return min price from price categories but exclude holiday price categories
+  const pricesWithoutHolidays = bookable.item?.priceCategories?.filter(
+    (c) => !c.holidays || c.holidays.length === 0,
   );
+  const minPrice = Math.min(
+    ...(pricesWithoutHolidays.map((cat) => cat.priceEur) || []),
+  );
+
   return bookable.item.priceValueAddedTax
     ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
     : minPrice;
 }
 function getTicketMinPrice(ticket) {
   const minPrice = Math.min(
-    ...ticket.priceCategories.map((cat) => cat.priceEur)
+    ...ticket.priceCategories.map((cat) => cat.priceEur),
   );
   return ticket.priceValueAddedTax
     ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
     : minPrice;
 }
 function getEventMinPrice(event) {
-  if (event.status === "nonSuitable") {
+  if (event.matchStatus === "no-match") {
     return null;
   }
   if (event.item.tickets && event.item.tickets.length > 0) {
     return Math.min(
-      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket))
+      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket)),
     );
   } else {
     return 0;
@@ -476,8 +416,8 @@ function getEventMinPrice(event) {
 //Locations
 const distanceValues = computed(() => {
   return props.bookables
-      .filter((b) => b.status !== "nonSuitable" && b.item.distanceMeter != null)
-      .map((b) => b.item.distanceMeter / 1000);
+    .filter((b) => b.matchStatus !== "no-match" && b.item.distanceMeter != null)
+    .map((b) => b.item.distanceMeter / 1000);
 });
 const possibleCities = computed(() => {
   if (!props.bookables || props.bookables.length === 0) {
@@ -487,9 +427,9 @@ const possibleCities = computed(() => {
   const cityCount = {};
   props.bookables.forEach((b) => {
     let city = "";
-    if (props.isEvent && b.status === "suitable") {
+    if (props.isEvent && b.matchStatus === "match") {
       city = extractCity(b.item.eventAddress.city); //toDo - adjust for new location object !!!
-    } else if (b.status === "suitable") {
+    } else if (b.matchStatus === "match") {
       city = extractCity(b.item.location);
     }
 
@@ -617,7 +557,7 @@ const { aggregated: customFieldFilters } = useCustomFieldFilters(bookablesRef, {
   position: "sidebar",
 });
 
-const _customFieldValues = ref({ ...(props.customFieldValues || {}) });
+const _customFieldValues = ref({ ...(props.customFields || {}) });
 
 function onCustomFieldChange() {
   instantFilter();

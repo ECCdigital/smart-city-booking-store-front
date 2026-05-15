@@ -39,6 +39,7 @@
           :price="query.price"
           :only-public-events="query.pubEv"
           :only-registration-needed-events="query.regEv"
+          :custom-fields="query.customFields"
           class="lg:hidden"
           @filter="setFilterQueryParams"
         />
@@ -60,6 +61,7 @@
           :price="query.price"
           :only-public-events="query.pubEv"
           :only-registration-needed-events="query.regEv"
+          :custom-fields="query.customFields"
           :bookables="searchedResources"
           @filter="setFilterQueryParams"
         />
@@ -114,8 +116,6 @@ const props = defineProps({
   },
 });
 
-const temp = ref(null);
-
 const {
   query,
   searchIsInitialized,
@@ -130,7 +130,6 @@ const {
 } = useBookableSearch({ isEvent: false, sourceItems: props.bookables });
 
 function onSearch(searchParams) {
-  temp.value = searchParams;
   runSearch(searchParams);
 }
 </script>
