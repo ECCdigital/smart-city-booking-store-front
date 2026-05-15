@@ -53,7 +53,7 @@
         @change-distance="setDistance"
       />
       <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
-      <InputTimePeriod
+      <InputDateTimePeriod
         v-model:time-period="_timePeriod"
         :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
         @select-date="setSearchTimePeriod"
@@ -119,7 +119,7 @@
       @change-distance="setDistance"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
-    <InputTimePeriod
+    <InputDateTimePeriod
       :time-period="_timePeriod"
       @select-date="setSearchTimePeriod"
       @remove-date="removeSearchTimePeriod"
@@ -134,7 +134,7 @@
 </template>
 <script setup>
 import InputText from "~/components/inputs/InputText.vue";
-import InputTimePeriod from "~/components/inputs/InputTimePeriod.vue";
+import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import AddressLookup from "~/components/inputs/AddressLookup.vue";
 

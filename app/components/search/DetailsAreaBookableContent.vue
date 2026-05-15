@@ -90,7 +90,7 @@
             variant="ghost"
             class="p-2 text-info w-full"
           />
-          <InputTimePeriod
+          <InputDateTimePeriod
             :time-period="timePeriod"
             class="border dark:border-gray-600 rounded-lg mt-2 mb-5 w-full"
             @select-date="setSearchTimePeriod"
@@ -158,7 +158,7 @@
 <script setup>
 import { useTenantStore } from "~~/stores/tenant.js";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
-import InputTimePeriod from "~/components/inputs/InputTimePeriod.vue";
+import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
