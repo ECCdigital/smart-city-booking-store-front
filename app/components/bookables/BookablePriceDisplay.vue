@@ -13,7 +13,7 @@
       <span>
         {{ displayPrice(calculatedPrice.userGrossPriceEur) }}
       </span>
-      <br >
+      <br />
       <span class="text-xs font-normal text-gray-600 dark:text-gray-300">
         {{ displayPricePerUnit() }}
       </span>
@@ -74,7 +74,7 @@ function getMinPrice() {
   const pricesWithoutHolidays = pricesWithoutServiceFees.filter(
     (c) => !c.holidays || c.holidays.length === 0,
   );
-  
+
   return Math.min(...pricesWithoutHolidays.map((c) => c.priceEur));
 }
 function displayMinDefaultPrice() {
@@ -111,7 +111,7 @@ function displayPricePerUnit() {
   if (minPrice === null || minPrice === 0) {
     return "";
   }
-  
+
   let priceType = props.bookable.priceType;
   if (
     props.bookable.priceCategories &&

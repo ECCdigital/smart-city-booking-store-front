@@ -32,6 +32,7 @@
           :price="price"
           :only-public-events="onlyPublicEvents"
           :only-registration-needed-events="onlyRegistrationNeededEvents"
+          :custom-fields="customFields"
           use-as-dialog
           :is-event="isEvent"
           @filter="onFilter"
@@ -81,6 +82,10 @@ const props = defineProps({
   onlyRegistrationNeededEvents: {
     type: Boolean,
     default: false,
+  },
+  customFields: {
+    type: Object,
+    default: () => ({}),
   },
 });
 

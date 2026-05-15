@@ -77,7 +77,7 @@
               variant="ghost"
               class="p-2 text-info w-full"
             />
-            <InputTimePeriod
+            <InputDateTimePeriod
               :time-period="timePeriod"
               class="border border-gray-400 dark:border-gray-600 rounded-lg mt-2 mb-5 w-full"
               @select-date="setSearchTimePeriod"
@@ -152,7 +152,7 @@ import EventInfoDisplay from "~/components/events/EventInfoDisplay.vue";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import EventTicketStrip from "~/components/events/EventTicketStrip.vue";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
-import InputTimePeriod from "../checkout/InputTimePeriod.vue";
+import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
