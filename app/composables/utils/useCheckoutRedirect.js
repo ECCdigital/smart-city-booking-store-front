@@ -6,6 +6,7 @@ export function useCheckoutRedirect() {
    * @param {string|null} start - Optional start date for the booking.
    * @param {string|null} end - Optional end date for the booking.
    * @param {string} amount - The quantity of the item to be booked (default is "1").
+   * @param {string|null} url - Optional URL to redirect to after checkout (default is "/checkout").
    */
   function redirectToCheckout({
     id,
@@ -13,21 +14,8 @@ export function useCheckoutRedirect() {
     start = null,
     end = null,
     amount = "1",
+    url = null,
   }) {
-    const config = useRuntimeConfig();
-    const baseFromConfig =
-      (config && config.public && config.public.adminBaseUrl) ||
-      config.adminBaseUrl ||
-      "";
-
-    if (!baseFromConfig) {
-      console.warn(
-        "adminBaseUrl not set in runtime config; falling back to relative /checkout path"
-      );
-    }
-
-    const base = baseFromConfig.replace(/\/$/, "") || ""; // remove trailing slash if present
-
     const options = { id: id, tenant: tenantId, amount: amount };
 
     if (start) {
@@ -39,9 +27,11 @@ export function useCheckoutRedirect() {
 
     const params = new URLSearchParams(options);
 
-    const url = base
-      ? `${base}/checkout?${params.toString()}`
-      : `/checkout?${params.toString()}`;
+    if (url) {
+      params.set("url", url);
+    } else {
+      params.set("url", "/checkout");
+    }
 
     if (typeof window !== "undefined") {
       const newWindow = window.open(url, "_blank");

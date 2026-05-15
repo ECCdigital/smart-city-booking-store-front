@@ -43,9 +43,20 @@ export function useBookings() {
     return data;
   };
 
+  const getStatus = async (tenantID, bookingId) => {
+    const api = useApiClient();
+    const { data, error } = await api.get(`/api/bookings/${tenantID}/${bookingId}/status`);
+    if (error) {
+      console.error("Error fetching booking status:", error);
+      throw error;
+    }
+    return data;
+  }
+
   return {
     fetchBookings,
     getBookingReceipt,
     getBookingInvoice,
+    getStatus,
   };
 }

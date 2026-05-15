@@ -132,6 +132,18 @@
           </div>
         </div>
 
+        <!-- Zusatzbuchungsobjekte -->
+        <div v-if="additionalBookables.length > 0" class="mt-6 mb-6">
+          <USeparator
+            class="w-full mb-6"
+            :ui="{ border: 'border-gray-300' }"
+          />
+          <AdditionalBookablesSelector
+            v-model="selectedAdditionalBookables"
+            :items="additionalBookables"
+          />
+        </div>
+
         <!-- Related Bookables -->
         <div v-if="item.relatedBookables && item.relatedBookables.length" id="relatedBookables">
           <h3 class="text-xl font-bold">Könnte Sie auch interessieren:</h3>
@@ -168,6 +180,8 @@ import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import AddressInformationArea from "~/components/AddressInformationArea.vue";
 import PriceInformationArea from "~/components/PriceInformationArea.vue";
 import BookableRelatedItems from "~/components/bookables/BookableRelatedItems.vue";
+import AdditionalBookablesSelector from "~/components/checkout/AdditionalBookablesSelector.vue";
+import { useCheckout } from "~/composables/api/useCheckout.js";
 
 const props = defineProps({
   item: {
@@ -182,6 +196,36 @@ const {
   runSearch,
   resetResults,
 } = useBookableSearch({ isEvent: false, sourceItems: [props.item] });
+
+// --- Zusatzbuchungsobjekte --------------------------------------------------
+const additionalBookables = ref([]);
+const selectedAdditionalBookables = ref([]);
+const isLoadingAdditional = ref(false);
+
+async function loadAdditionalBookables() {
+  const ids = props.item?.checkoutBookableIds || [];
+  if (ids.length === 0) return;
+
+  isLoadingAdditional.value = true;
+  try {
+    const { fetchBookable } = useCheckout();
+    const results = await Promise.all(
+      ids.map(async ({ bookableId, mandatory }) => ({
+        item: await fetchBookable(bookableId, props.item.tenantId),
+        mandatory,
+      }))
+    );
+    additionalBookables.value = results.filter((r) => r.item != null);
+  } catch (e) {
+    console.error("Error loading additional bookables:", e);
+  } finally {
+    isLoadingAdditional.value = false;
+  }
+}
+
+onMounted(() => {
+  loadAdditionalBookables();
+});
 
 const { sanitizeHtml } = useSanitizeHtml();
 const htmlDescription = computed(() => {
@@ -245,6 +289,7 @@ function goToCheckout(checkoutData) {
       tenantId: props.item.tenantId,
       start: route.query.start,
       end: route.query.end,
+      url: props.item.checkoutUrl,
     });
   }
 }

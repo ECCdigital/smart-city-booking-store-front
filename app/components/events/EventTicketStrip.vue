@@ -61,6 +61,7 @@ function goToCheckout() {
     tenantId: props.ticket.tenantId,
     start: route.query.start,
     end: route.query.end,
+    url: props.ticket.checkoutUrl,
   });
 }
 </script>

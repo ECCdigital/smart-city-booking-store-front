@@ -4,7 +4,10 @@ import type { NitroFetchOptions, NitroFetchRequest } from "nitropack";
 
 type Result<T> =
   | { data: T; error: null }
-  | { data: null; error: { status: number; message: string } };
+  | {
+      data: null;
+      error: { status: number; message: string; data?: unknown };
+    };
 
 export async function serverFetch<T>(
   event: H3Event,
@@ -31,6 +34,7 @@ export async function serverFetch<T>(
       error: {
         status: error.statusCode ?? 500,
         message: error.statusMessage ?? "Unknown error",
+        data: error.data,
       },
     };
   }
