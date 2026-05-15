@@ -44,7 +44,7 @@
 </template>
 <script setup>
 import { useBookings } from "~/composables/api/useBookings.js";
-import {useFormatting} from "~/composables/utils/useFormatting.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   attachment: {
@@ -69,7 +69,7 @@ const props = defineProps({
   },
 });
 
-const { formatDate } = useFormatting()
+const { formatDate } = useFormatting();
 
 const attachmentType = computed(() => {
   switch (props.attachment.type) {
@@ -103,19 +103,20 @@ async function downloadAttachment() {
   if (!props.isPaymentDocument) {
     return;
   }
+  console.log("Downloading attachment", props.attachment);
   if (props.bookingId && props.tenantId) {
     let blob = null;
     if (props.attachment.type === "receipt") {
       blob = await useBookings().getBookingReceipt(
         props.tenantId,
         props.bookingId,
-        props.attachment.title,
+        props.attachment.name
       );
     } else if (props.attachment.type === "invoice") {
       blob = await useBookings().getBookingInvoice(
         props.tenantId,
         props.bookingId,
-        props.attachment.title,
+        props.attachment.name
       );
     }
 
@@ -125,14 +126,17 @@ async function downloadAttachment() {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", props.attachment.title);
+    link.setAttribute(
+      "download",
+      props.attachment.title ? props.attachment.title : props.attachment.name
+    );
     document.body.appendChild(link);
     link.click();
   } else {
     const notification = useNotification();
     notification.error(
       "Das Dokument konnte nicht heruntergeladen werden.",
-      "Download fehlgeschlagen",
+      "Download fehlgeschlagen"
     );
   }
 }
