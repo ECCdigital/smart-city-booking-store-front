@@ -18,7 +18,7 @@
     </div>
 
     <USlider
-        v-model="localValue"
+        v-model="modelValue"
         :min="min"
         :max="max"
         :step="step"
@@ -28,11 +28,11 @@
 </template>
 
 <script setup>
+const modelValue = defineModel({
+  type: [Number, Array],
+  required: true,
+});
 const props = defineProps({
-  modelValue: {
-    type: [Number, Array],
-    required: true,
-  },
   // Raw numeric values from your dataset (e.g. prices, distances)
   values: {
     type: Array,
@@ -54,16 +54,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:modelValue", "change"]);
-
-const localValue = ref(props.modelValue);
-
-watch(
-    () => props.modelValue,
-    (v) => {
-      localValue.value = v;
-    },
-);
+const emit = defineEmits(["change"]);
 
 const effectiveBarCount = computed(() => {
   if (props.barCount) return props.barCount;
@@ -117,7 +108,6 @@ function isBarActive(index) {
 }
 
 function onChange() {
-  emit("update:modelValue", localValue.value);
   emit("change");
 }
 </script>
