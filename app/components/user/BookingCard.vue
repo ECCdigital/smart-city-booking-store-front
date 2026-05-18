@@ -225,7 +225,7 @@ function onDownloadIcal() {
   downloadBookingIcal(props.booking.id, props.booking.tenantId);
 }
 function openMobileKey() {
-  console.log("open mobile key for booking", props.booking.id);
-  console.log("locker info", props.booking.lockerInfo);
+  const router = useRouter();
+  router.push({ path: `/account/keys/${props.booking.id}` });
 }
 </script>

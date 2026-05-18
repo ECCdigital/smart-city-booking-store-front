@@ -28,7 +28,7 @@
         <p>{{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}</p>
       </div>
     </div>
-    <div class="mb-25">
+    <div class="mb-5">
       <p class="font-medium mb-2">Objekte mit Zugriff auf Schließanlagen</p>
       <KeyDetailsBookableCard
         v-for="(info, i) in booking.lockerInfo"
@@ -39,11 +39,19 @@
         :is-active="isActive"
       />
     </div>
+
+    <EmergencyHelpAccordion
+      v-if="hasIfbsLockerInfo"
+      :tenant-id="booking.tenantId"
+      :locker-info="booking.lockerInfo"
+      :booking-id="booking.id"
+    />
   </div>
 </template>
 <script setup>
 import {useFormatting} from "~/composables/utils/useFormatting.js";
 import KeyDetailsBookableCard from "~/components/mobileKey/KeyDetailsBookableCard.vue";
+import EmergencyHelpAccordion from "~/components/mobileKey/EmergencyHelpAccordion.vue";
 
 const props = defineProps({
   booking: {
@@ -71,6 +79,11 @@ const isActive = computed(() => {
   }
 
   return false;
+});
+
+const hasIfbsLockerInfo = computed(() => {
+  if (!props.booking?.lockerInfo) return false;
+  return props.booking.lockerInfo.some((info) => info.lockerSystem === "ifbs");
 });
 
 function getBookableForKey(id) {

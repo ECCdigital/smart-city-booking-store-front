@@ -83,7 +83,9 @@ export default defineNuxtConfig({
     headers: {
       contentSecurityPolicy: {
         "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://www.orka-mv.de"],
+        "script-src": ["'self'", "https:", "'unsafe-inline'"],
       },
     },
+    nonce: true,
   },
 });

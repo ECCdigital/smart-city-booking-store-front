@@ -4,7 +4,6 @@
 
     <div class="my-5 flex w-full items-center justify-between">
       <BackButton />
-
       <UDropdownMenu :items="dropdownItems">
         <UButton
             icon="i-lucide-ellipsis-vertical"

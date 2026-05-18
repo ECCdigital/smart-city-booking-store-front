@@ -93,7 +93,8 @@ const allLockerBookings = computed(() => {
       booking.isRejected === false &&
       booking.lockerInfo &&
       Array.isArray(booking.lockerInfo) &&
-      booking.lockerInfo.some((info) => info.lockerSystem === "ifbs")
+      booking.lockerInfo.some((info) => info.lockerSystem === "ifbs") &&
+      booking.lockerInfo.some((info) => info.isConfirmed)
     );
   });
 });

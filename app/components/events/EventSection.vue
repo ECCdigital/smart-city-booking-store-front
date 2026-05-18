@@ -40,6 +40,7 @@
           :price="query.price"
           :only-public-events="query.pubEv"
           :only-registration-needed-events="query.regEv"
+          :custom-fields="query.customFields"
           class="lg:hidden"
           is-event
           @filter="setFilterQueryParams"
@@ -63,6 +64,7 @@
           is-event
           :only-public-events="query.pubEv"
           :only-registration-needed-events="query.regEv"
+          :custom-fields="query.customFields"
           :bookables="searchedEvents"
           @filter="setFilterQueryParams"
         />

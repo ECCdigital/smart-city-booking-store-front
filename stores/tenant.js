@@ -31,7 +31,7 @@ export const useTenantStore = defineStore("tenant", {
   },
   persist: {
     key: "tenant-store",
-    storage: import.meta.client ? localStorage : undefined,
+    storage: import.meta.client ?  localStorage : undefined,
     paths: ["currentTenantID"],
   },
 });
