@@ -101,10 +101,10 @@ function isBarActive(index) {
   const barEnd = props.min + ((index + 1) / effectiveBarCount.value) * range;
 
   if (props.mode === "range") {
-    const [lo, hi] = localValue.value;
-    return barEnd >= lo && barStart <= hi;
+    const [lo, hi] = modelValue.value;
+    return barEnd > lo && barStart < hi;
   }
-  return barEnd <= localValue.value;
+  return barEnd < modelValue.value;
 }
 
 function onChange() {
