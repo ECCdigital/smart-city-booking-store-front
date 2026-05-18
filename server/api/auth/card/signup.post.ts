@@ -44,11 +44,11 @@ export default defineEventHandler(async (event) => {
         };
     } catch (error: any) {
         throw createError({
-            statusCode: error.response?.status || 500,
+            statusCode: error.status || 500,
             statusMessage:
-                error.response?.data?.message || "Card registration failed",
+                error.data?.message || "Card registration failed",
             data: {
-                reason: error.response?.data?.reason,
+                reason: error.data?.reason,
             },
         });
     }

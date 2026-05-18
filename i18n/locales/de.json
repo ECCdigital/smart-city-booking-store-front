@@ -22,7 +22,7 @@
     "profile": "Profil",
     "back": "Zurück",
     "backToLogin": "Zurück zur Anmeldung",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
     "loading": "Lädt..."
   },
   "navigation": {
@@ -320,7 +320,7 @@
       },
       "cardTaken": {
         "title": "Karte bereits verknüpft",
-        "description": "Diese Karte ist inzwischen einem anderen Account zugeordnet.",
+        "description": "Diese Karte ist inzwischen einem anderen Konto zugeordnet.",
         "hint": "Falls Sie der rechtmäßige Besitzer sind, kontaktieren Sie bitte den Support."
       },
       "mismatch": {
@@ -333,6 +333,7 @@
         "hint": "Bitte erneut versuchen oder Support kontaktieren."
       }
     }
+  },
   "checkout": {
     "noBookable": "Keine passenden Ressourcen gefunden"
   }
