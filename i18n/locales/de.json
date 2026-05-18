@@ -162,14 +162,24 @@
     "headline": "Passwort vergessen?",
     "description": "Geben Sie Ihre E-Mail-Adresse ein, um einen Link zum Zurücksetzen Ihres Passworts zu erhalten.",
     "submit": "Link senden",
-    "remembered": "Passwort erinnert?"
+    "remembered": "Passwort erinnert?",
+    "success": {
+      "heading": "E-Mail versendet",
+      "description": "Falls ein Konto mit dieser E-Mail-Adresse existiert, haben wir Ihnen einen Link zum Zurücksetzen Ihres Passworts gesendet.",
+      "spamHint": "Bitte prüfen Sie auch Ihren Spam-Ordner, falls Sie keine E-Mail erhalten."
+    }
   },
 
   "resetPassword": {
-    "title": "Setzen Sie Ihr Passwort zurück",
+    "title": "Neues Passwort festlegen",
+    "headline": "Neues Passwort festlegen",
     "description": "Geben Sie Ihr neues Passwort ein.",
     "submit": "Passwort zurücksetzen",
-    "backToLogin": "Zurück zur"
+    "backToLogin": "Zurück zur",
+    "passwordMismatch": {
+      "title": "Passwörter stimmen nicht überein",
+      "message": "Bitte stellen Sie sicher, dass beide Passwortfelder identisch sind."
+    }
   },
 
   "errors": {
@@ -210,6 +220,22 @@
     "registerErrorEmailExists": {
       "title": "Registrierungsfehler",
       "message": "Die E-Mail-Adresse ist bereits registriert."
+    },
+    "forgotPasswordError": {
+      "title": "Anfrage fehlgeschlagen",
+      "message": "Die Anfrage zum Zurücksetzen des Passworts konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
+    },
+    "resetPasswordSuccess": {
+      "title": "Passwort geändert",
+      "message": "Ihr Passwort wurde erfolgreich zurückgesetzt. Sie können sich jetzt anmelden."
+    },
+    "resetPasswordError": {
+      "title": "Zurücksetzen fehlgeschlagen",
+      "message": "Das Passwort konnte nicht zurückgesetzt werden. Bitte versuchen Sie es erneut."
+    },
+    "resetPasswordInvalidToken": {
+      "title": "Link ungültig",
+      "message": "Der Link ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen Link an."
     }
   },
   "locations": {

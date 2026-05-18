@@ -25,6 +25,20 @@ export const useAuth = () => {
     });
   };
 
+  const forgotPassword = async (email, resetUrl) => {
+    return await $fetch("/api/auth/forgot-password", {
+      method: "POST",
+      body: { email, resetUrl },
+    });
+  };
+
+  const resetPassword = async ({ token, password, id }) => {
+    return await $fetch("/api/auth/reset-password", {
+      method: "POST",
+      body: { token, password, id },
+    });
+  };
+
   const verifyCardLink = async (token, id) => {
     const response = await $fetch("/api/auth/card/verify-link", {
       method: "POST",
@@ -72,5 +86,7 @@ export const useAuth = () => {
     getCardAuthMethods,
     cardSignup,
     cardLogin: authStore.cardLogin,
+    forgotPassword,
+    resetPassword,
   };
 };
