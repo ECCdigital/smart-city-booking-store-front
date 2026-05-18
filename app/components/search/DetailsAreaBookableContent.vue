@@ -63,6 +63,9 @@
             </template>
           </UModal>
         </div>
+
+        <DetailsAreaCustomFields :custom-fields="item.customFields" class="mt-7"/>
+
         <USeparator
           class="w-full my-5 md:my-10"
           :ui="{ border: 'border-gray-300' }"
@@ -168,6 +171,7 @@ import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import AddressInformationArea from "~/components/AddressInformationArea.vue";
 import PriceInformationArea from "~/components/PriceInformationArea.vue";
 import BookableRelatedItems from "~/components/bookables/BookableRelatedItems.vue";
+import DetailsAreaCustomFields from "~/components/search/DetailsAreaCustomFields.vue";
 
 const props = defineProps({
   item: {
