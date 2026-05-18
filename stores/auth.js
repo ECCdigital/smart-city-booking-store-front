@@ -31,8 +31,8 @@ export const useAuthStore = defineStore("auth", {
       }
       try {
         const headers = import.meta.server
-            ? useRequestHeaders(["cookie"])
-            : undefined;
+          ? useRequestHeaders(["cookie"])
+          : undefined;
 
         const data = await $fetch("/api/auth/me", { headers });
 
@@ -50,29 +50,42 @@ export const useAuthStore = defineStore("auth", {
         this.authChecked = true;
       }
     },
+    _applyAuthPayload(data) {
+      this.user = data?.user || null;
+      this.permission = data?.permissions || null;
+      this.tokenValid = true;
+      this.authChecked = true;
+    },
+
     async login(credentials) {
-      try {
-        const data = await $fetch("/api/auth/login", {
-          method: "POST",
-          body: credentials,
+      const data = await $fetch("/api/auth/login", {
+        method: "POST",
+        body: credentials,
+      });
+      if (!data?.success)
+        throw createError({ statusCode: 401, statusMessage: "Login failed" });
+      this._applyAuthPayload(data.data);
+      return true;
+    },
+    async cardLogin(payload) {
+      const data = await $fetch("/api/auth/card/signin", {
+        method: "POST",
+        body: payload,
+      });
+      if (!data?.success)
+        throw createError({
+          statusCode: 401,
+          statusMessage: "Card login failed",
         });
-
-        if (!data?.success) {
-          throw createError({
-            statusCode: 401,
-            statusMessage: data?.message || "Login failed",
-          });
-        }
-
-        this.user = data.data?.user || null;
-        this.permission = data.data?.permissions || null;
-        this.tokenValid = true;
-        this.authChecked = true;
-        return true;
-      } catch (error) {
-        console.error("Login error:", error);
-        throw error;
+      if (data.data?.requiresRegistration) {
+        return {
+          requiresRegistration: true,
+          prefill: data.data.prefill,
+          cardInfo: data.data.cardInfo,
+        };
       }
+      this._applyAuthPayload(data.data);
+      return { requiresRegistration: false };
     },
     async logout() {
       try {
