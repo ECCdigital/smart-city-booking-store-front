@@ -127,11 +127,11 @@
     </div>
 
     <!-- Custom Field Filter -->
-    <div v-if="customFieldFilters.length > 0" class="my-7">
+    <div v-if="sortedCustomFieldFilters.length > 0" class="my-7">
       <p class="mb-3">Weitere Filter</p>
       <div class="space-y-4">
         <CustomFieldFilter
-          v-for="cf in customFieldFilters"
+          v-for="cf in sortedCustomFieldFilters"
           :key="cf.definition.id"
           v-model="_customFieldValues[cf.definition.id]"
           :definition="cf.definition"
@@ -556,6 +556,13 @@ const bookablesRef = computed(() => props.bookables);
 const { aggregated: customFieldFilters } = useCustomFieldFilters(bookablesRef, {
   position: "sidebar",
 });
+const sortedCustomFieldFilters = computed(() =>
+    customFieldFilters.value.slice().sort((a, b) => {
+      if (a.filterType === "checkbox" && b.filterType !== "checkbox") return -1;
+      if (a.filterType !== "checkbox" && b.filterType === "checkbox") return 1;
+      return 0;
+    })
+);
 
 const _customFieldValues = ref({ ...(props.customFields || {}) });
 
