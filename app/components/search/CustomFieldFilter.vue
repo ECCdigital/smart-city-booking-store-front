@@ -28,12 +28,12 @@
       </UCheckboxGroup>
 
       <div v-else-if="filterType === 'slider'">
-        <p class="mb-3 mx-2">{{ meta.min }} – {{ localValue }}</p>
+        <p class="mb-3 mx-2">{{ getSliderOption(meta.min) }} – {{ getSliderOption(localValue) }}</p>
         <FilterHistogramSlider
             v-model="localValue"
             mode="single"
-            :min="meta.min"
-            :max="meta.max"
+            :min="definition.inputType === 'select' ? 1 : meta.min"
+            :max="definition.inputType === 'select' ? definition.options.length : meta.max"
             :step="meta.step || 1"
             :values="meta.values || []"
             @change="emitChange"
@@ -41,12 +41,12 @@
       </div>
 
       <div v-else-if="filterType === 'range'">
-        <p class="mb-3 mx-2">{{ localValue[0] }} – {{ localValue[1] }}</p>
+        <p class="mb-3 mx-2">{{ getSliderOption(localValue[0]) }} – {{ getSliderOption(localValue[1]) }}</p>
         <FilterHistogramSlider
             v-model="localValue"
             mode="range"
-            :min="meta.min"
-            :max="meta.max"
+            :min="definition.inputType === 'select' ? 1 : meta.min"
+            :max="definition.inputType === 'select' ? definition.options.length : meta.max"
             :step="meta.step || 1"
             :values="meta.values || []"
             @change="emitChange"
@@ -70,7 +70,12 @@ const emit = defineEmits(["update:modelValue", "change"]);
 function defaultFor(type, meta) {
   if (type === "select") return [];
   if (type === "checkbox") return false;
-  if (type === "slider" || type === "range") return meta.values;
+  if (type === "slider" || type === "range") {
+    if(props.definition.inputType === "select"){
+      return [1, props.definition.options.length]
+    }
+    return meta.values;
+  }
   return null;
 }
 
@@ -84,6 +89,14 @@ watch(
       if (v !== undefined && v !== null) localValue.value = v;
     },
 );
+
+function getSliderOption(numericValue){
+  if(props.definition.inputType === "select"){
+    const index = numericValue - 1; // Assuming slider values start at 1 for the first option
+    return props.definition.options[index]?.caption || numericValue
+  }
+  return numericValue
+}
 
 function emitChange() {
   emit("update:modelValue", localValue.value);
