@@ -3,8 +3,8 @@ import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 
 const defaultTheme = {
-  primary: "#3b82f6",
-  secondary: "#10b981",
+  primary: "#FF8B00",
+  secondary: "#1D9ECC",
 };
 
 export default createConditionalCachedHandler(

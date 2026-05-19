@@ -181,9 +181,25 @@ const paymentProviders = computed(() => {
   return Array.isArray(list) ? list : [];
 });
 const permissionCheck = computed(() => data.value?.permissionCheck || null);
+
+function isLoginRequiredPermissionError(result) {
+  if (result?.success !== false || result?.error?.checkType !== "permissions") {
+    return false;
+  }
+  const reason = result?.error?.reason;
+  return reason === "checkout.login_required" || reason === "login_required";
+}
+
+const requiresLoginForCheckout = computed(() =>
+  isLoginRequiredPermissionError(permissionCheck.value)
+);
+
 const hasBlockingPermissionError = computed(() => {
   const result = permissionCheck.value;
-  return result?.success === false && result?.error?.checkType === "permissions";
+  if (result?.success !== false || result?.error?.checkType !== "permissions") {
+    return false;
+  }
+  return !isLoginRequiredPermissionError(result);
 });
 const isResolvingPermissionGuard = computed(
   () => !isLoading.value && hasBlockingPermissionError.value && !authStore.authChecked
@@ -208,6 +224,11 @@ const permissionGuardDescription = computed(() =>
 const couponsEnabled = computed(() => {
   const b = leadBookable.value;
   return b?.enableCoupons === true || b?.enableCoupons === "true" || b?.enableCoupons === 1;
+});
+
+const requiresManualApproval = computed(() => {
+  const v = leadBookable.value?.autoCommitBooking;
+  return v === false || v === "false" || v === 0 || v === "0";
 });
 
 const TYPE_LABELS = {
@@ -514,6 +535,9 @@ function isValidContactEmail(v) {
 }
 
 const isDataStepComplete = computed(() => {
+  if (requiresLoginForCheckout.value && !isLoggedIn.value) {
+    return false;
+  }
   for (const key of mergedRequiredContactFields.value) {
     const v = contactForm[key];
     if (key === "email") {
@@ -577,7 +601,7 @@ watch(
 );
 
 async function continueAsGuest() {
-  if (!isLoggedIn.value || isLoggingOut.value) return;
+  if (requiresLoginForCheckout.value || !isLoggedIn.value || isLoggingOut.value) return;
   isLoggingOut.value = true;
   try {
     await authStore.logout();
@@ -1228,6 +1252,22 @@ watch(
   { deep: true }
 );
 
+function buildCustomFieldValuesPayload() {
+  const fields = checkoutVisibleCustomFields.value;
+  if (!fields.length) return null;
+
+  const raw = customFieldValues.value || {};
+  return fields
+    .filter((field) => field?.id != null)
+    .map((field) => ({
+      fieldId: field.id,
+      value:
+        field.inputType === "boolean"
+          ? raw[field.id] === true
+          : raw[field.id] ?? null,
+    }));
+}
+
 function buildCheckoutPayload() {
   const bookableItems = [
     { bookableId: bookableID, amount: amounts.value[bookableID] || 1 },
@@ -1266,6 +1306,11 @@ function buildCheckoutPayload() {
   const total = summary.value?.total ?? 0;
   if (total > 0.005 && selectedPaymentProviderId.value) {
     payload.paymentProvider = String(selectedPaymentProviderId.value);
+  }
+
+  const customFields = buildCustomFieldValuesPayload();
+  if (customFields?.length) {
+    payload.customFieldValues = customFields;
   }
 
   return payload;
@@ -1389,6 +1434,7 @@ async function handleFinish() {
   checkoutSubmitting.value = true;
   try {
     const payload = buildCheckoutPayload();
+
     const { data, error } = await completeCheckout(payload);
 
     if (error) {
@@ -1588,6 +1634,16 @@ function onReviewEdit(section) {
       </div>
       <!-- RIGHT: Checkout Flow -->
       <main class="flex-3 min-w-0 bg-white dark:bg-gray-900 p-6 md:p-8 lg:p-10">
+        <UAlert
+          v-if="requiresManualApproval"
+          class="mb-6"
+          icon="i-lucide-clock"
+          color="info"
+          variant="soft"
+          :title="$t('checkout.manualApproval.bannerTitle')"
+          :description="$t('checkout.manualApproval.bannerDescription')"
+        />
+
         <AppStepper
           v-model="currentStep"
           :steps="steps"
@@ -1699,36 +1755,49 @@ function onReviewEdit(section) {
           <template #step-data>
             <UCard
               variant="subtle"
-              class="rounded-xl mb-6 border border-primary-200 dark:border-primary-800"
+              class="rounded-xl mb-6 border"
+              :class="
+                requiresLoginForCheckout && !isLoggedIn
+                  ? 'border-amber-300 dark:border-amber-700'
+                  : 'border-primary-200 dark:border-primary-800'
+              "
             >
               <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p class="font-medium text-gray-900 dark:text-white">
                     {{
-                      isLoggedIn
-                        ? $t("checkout.data.loggedInTitle")
-                        : $t("checkout.data.guestTitle")
+                      requiresLoginForCheckout
+                        ? isLoggedIn
+                          ? $t("checkout.data.loggedInTitle")
+                          : $t("checkout.data.loginRequiredTitle")
+                        : isLoggedIn
+                          ? $t("checkout.data.loggedInTitle")
+                          : $t("checkout.data.guestTitle")
                     }}
                   </p>
                   <p class="text-sm text-gray-600 dark:text-gray-300">
                     {{
-                      isLoggedIn
-                        ? $t("checkout.data.loggedInDescription")
-                        : $t("checkout.data.guestDescription")
+                      requiresLoginForCheckout
+                        ? isLoggedIn
+                          ? $t("checkout.data.loggedInDescription")
+                          : $t("checkout.data.loginRequiredDescription")
+                        : isLoggedIn
+                          ? $t("checkout.data.loggedInDescription")
+                          : $t("checkout.data.guestDescription")
                     }}
                   </p>
                 </div>
                 <UButton
                   v-if="!isLoggedIn"
                   color="primary"
-                  variant="soft"
+                  :variant="requiresLoginForCheckout ? 'solid' : 'soft'"
                   icon="i-lucide-log-in"
                   :to="loginUrl"
                 >
                   {{ $t("checkout.data.loginAction") }}
                 </UButton>
                 <UButton
-                  v-else
+                  v-else-if="!requiresLoginForCheckout"
                   color="neutral"
                   variant="soft"
                   icon="i-lucide-log-out"
@@ -1819,6 +1888,7 @@ function onReviewEdit(section) {
               :can-submit="canGoNext && !checkoutSubmitting"
               :is-submitting="checkoutSubmitting"
               :has-payment-step="needsPaymentSelectionStep"
+              :requires-manual-approval="requiresManualApproval"
               @finish="handleFinish"
               @back="onReviewBack"
               @edit="onReviewEdit"

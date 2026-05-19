@@ -37,9 +37,25 @@
       </div>
     </div>
 
-    <!-- Week nav + calendar: one card (avoids space-y-5 gap between header and grid) -->
-    <div>
-    <!-- Week navigation (outside overflow-hidden so DateJumper dropdown is not clipped) -->
+    <button
+      type="button"
+      class="sm:hidden inline-flex items-center justify-center gap-2 w-full px-3 py-2.5 text-sm font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+      :aria-expanded="calendarVisibleOnMobile"
+      @click="toggleCalendarOnMobile"
+    >
+      <UIcon
+        :name="calendarVisibleOnMobile ? 'i-lucide-calendar-x' : 'i-lucide-calendar-days'"
+        class="flex-shrink-0"
+        size="18"
+      />
+      {{
+        calendarVisibleOnMobile
+          ? $t("scheduleSelection.hideOccupancy")
+          : $t("scheduleSelection.showOccupancy")
+      }}
+    </button>
+
+    <div v-if="showCalendarPanel">
     <div
       class="flex items-center justify-between px-3 py-1.5 rounded-t-md border border-b-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
     >
@@ -127,7 +143,10 @@
     </div>
 
     <!-- Hint -->
-    <p class="text-xs text-gray-400 dark:text-gray-500 italic">
+    <p
+      v-if="showCalendarPanel"
+      class="text-xs text-gray-400 dark:text-gray-500 italic"
+    >
       {{ $t("scheduleSelection.dragHint") }}
     </p>
   </div>
@@ -138,6 +157,7 @@ import FullCalendar from "@fullcalendar/vue3";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import deLocale from "@fullcalendar/core/locales/de";
+import { useMediaQuery } from "@vueuse/core";
 import { useBookables } from "~/composables/api/useBookables.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
 import InputTime from "~/components/inputs/InputTime.vue";
@@ -189,6 +209,11 @@ const today = (() => {
 const todayISO = localISODate(today);
 
 const calendarRef = ref(null);
+const calendarVisibleOnMobile = ref(false);
+const isSmUp = useMediaQuery("(min-width: 640px)");
+const showCalendarPanel = computed(
+  () => isSmUp.value || calendarVisibleOnMobile.value
+);
 const currentViewStart = ref(null);
 const currentViewEnd = ref(null);
 
@@ -203,6 +228,30 @@ const isLoadingAvailability = ref(false);
 /* ── FullCalendar API access ─────────────────────────────── */
 function getApi() {
   return calendarRef.value?.getApi?.() ?? null;
+}
+
+function toggleCalendarOnMobile() {
+  calendarVisibleOnMobile.value = !calendarVisibleOnMobile.value;
+}
+
+watch(showCalendarPanel, (visible) => {
+  if (!visible) return;
+  nextTick(() => {
+    getApi()?.updateSize();
+  });
+});
+
+function ensureAvailabilityForInputs() {
+  if (showCalendarPanel.value) return;
+  if (!props.tenantId || !props.bookableId || !startDateInput.value) return;
+
+  const sd = parseLocalDate(startDateInput.value);
+  if (!sd) return;
+
+  const start = getMonday(sd);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 7);
+  fetchAvailability(start, end);
 }
 
 /* ── navigation ──────────────────────────────────────────── */
@@ -515,6 +564,7 @@ function onStartTimeChange() {
 /* ── manual input change ─────────────────────────────────── */
 function onManualInputChange() {
   emitValue();
+  ensureAvailabilityForInputs();
 
   // Navigate calendar to the start date if it is outside the current view
   if (startDateInput.value) {

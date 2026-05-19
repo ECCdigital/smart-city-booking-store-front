@@ -6,14 +6,16 @@
       @update-time="setTime"
     >
       <div
-        class="flex items-center bg-default border border-1.5 rounded-md px-1 pt-1 border-primary"
+        class="flex items-center bg-default border border-1.5 rounded-md px-1 pt-1 pb-1 border-primary"
         :class="{ 'flex-wrap gap-1': props.showDate }"
       >
         <template v-if="props.showDate">
           <UTooltip text="Datum auswählen">
             <UIcon
               name="i-lucide-calendar"
-              class="text-gray-400 mx-0.5 shrink-0"
+              class="text-gray-400 mx-0.5 shrink-0 cursor-pointer"
+              :class="{ 'pointer-events-none opacity-50': props.disabled }"
+              @click="openDatePicker"
             />
           </UTooltip>
           <UInputDate
@@ -49,6 +51,45 @@
       </div>
     </TimePickerDialog>
   </UTooltip>
+
+  <UModal
+    v-if="props.showDate"
+    v-model:open="openDatePickerDialog"
+    title="Datum auswählen"
+    :overlay="false"
+    description="Wählen Sie das gewünschte Datum aus."
+    :ui="{
+      content: 'bg-transparent divide-y-0 flex flex-col focus:outline-none',
+    }"
+  >
+    <template #content>
+      <UCard variant="soft" class="w-90vw glass max-h-screen overflow-y-auto">
+        <div class="flex justify-between items-center">
+          <p class="text-lg font-bold my-5">Datum auswählen</p>
+          <UTooltip text="Schließen">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-x"
+              class="rounded-xl"
+              @click="closeDatePicker"
+            />
+          </UTooltip>
+        </div>
+
+        <DatePicker v-model="pendingDate" :range="false" />
+
+        <div class="flex justify-end mt-3">
+          <UButton
+            label="OK"
+            variant="ghost"
+            class="dark:text-light text-dark"
+            @click="confirmDateSelection"
+          />
+        </div>
+      </UCard>
+    </template>
+  </UModal>
 </template>
 <script setup lang="ts">
 import {
@@ -58,6 +99,7 @@ import {
   today,
   toCalendarDate,
 } from "@internationalized/date";
+import DatePicker from "~/components/inputs/DatePicker.vue";
 import TimePickerDialog from "~/components/inputs/TimePickerDialog.vue";
 
 const model = defineModel();
@@ -79,11 +121,32 @@ const props = defineProps({
 });
 
 const openTimePickerDialog = ref(false);
+const openDatePickerDialog = ref(false);
+const pendingDate = ref<Date | null>(null);
 const minCalendarDate = today(getLocalTimeZone());
 
 function openPicker() {
   if (props.disabled) return;
   openTimePickerDialog.value = true;
+}
+
+function openDatePicker() {
+  if (props.disabled) return;
+  pendingDate.value = dateModel.value ? new Date(dateModel.value) : null;
+  openDatePickerDialog.value = true;
+}
+
+function closeDatePicker() {
+  openDatePickerDialog.value = false;
+}
+
+function confirmDateSelection() {
+  if (pendingDate.value) {
+    const d = new Date(pendingDate.value);
+    d.setHours(0, 0, 0, 0);
+    dateModel.value = d;
+  }
+  closeDatePicker();
 }
 
 function jsDateToCalendarDate(value: unknown) {

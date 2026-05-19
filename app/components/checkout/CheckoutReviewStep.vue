@@ -100,6 +100,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  requiresManualApproval: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["finish", "back", "edit"]);
@@ -462,6 +466,12 @@ function onBack() {
 function onEdit(section) {
   emit("edit", section);
 }
+
+const submitButtonLabel = computed(() =>
+  props.requiresManualApproval
+    ? t("checkout.review.sendBookingRequest")
+    : t("checkout.review.commitBooking")
+);
 
 </script>
 
@@ -835,6 +845,12 @@ function onEdit(section) {
           </p>
 
           <div class="mt-6 space-y-3">
+            <p
+              v-if="requiresManualApproval"
+              class="text-sm text-gray-600 dark:text-gray-300"
+            >
+              {{ $t("checkout.manualApproval.submitHint") }}
+            </p>
             <UButton
               color="primary"
               block
@@ -844,7 +860,7 @@ function onEdit(section) {
               :loading="isSubmitting"
               @click="onFinish"
             >
-              {{ $t("checkout.review.commitBooking") }}
+              {{ submitButtonLabel }}
             </UButton>
             <div class="text-center">
               <UButton

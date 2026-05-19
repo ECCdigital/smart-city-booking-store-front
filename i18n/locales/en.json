@@ -35,6 +35,7 @@
     "noBookable": "No matching resources found",
     "additionalObjects": "Additional Objects",
     "mandatoryObjects": "Mandatory Objects",
+    "login_required": "Sign-in is required for this booking.",
     "bookable_unavailable": "This object is not available for the selected time period.",
     "unknown_error": "An error occurred during validation.",
     "payment_failed": "Payment could not be started. Please try again or choose another payment method.",
@@ -60,6 +61,8 @@
       "requiredConfirmationBadge": "Confirmation required",
       "guestTitle": "Continue as guest or sign in",
       "guestDescription": "You can complete this booking as a guest or sign in to use your saved details.",
+      "loginRequiredTitle": "Sign-in required",
+      "loginRequiredDescription": "You must be signed in to complete this booking. Please sign in to continue.",
       "loginAction": "Sign in now",
       "loggedInTitle": "You are signed in",
       "loggedInDescription": "You can sign out and continue this booking as a guest instead.",
@@ -165,6 +168,7 @@
       "lineQtyPrice": "{qty} × {price}",
       "edit": "Edit",
       "commitBooking": "Confirm booking",
+      "sendBookingRequest": "Send booking request",
       "backToPayment": "Back to payment",
       "backToData": "Back to your details",
       "termsHint": "By completing this booking you accept our terms and conditions.",
@@ -173,6 +177,11 @@
       "submitSuccessTitle": "Booking",
       "submitSuccessDone": "Your booking has been created (reference: {id}). You will receive a confirmation by email.",
       "submitSuccessManualApproval": "Your request has been submitted. The provider will review the booking; you will receive further information by email."
+    },
+    "manualApproval": {
+      "bannerTitle": "Manual approval required",
+      "bannerDescription": "For this bookable, the provider reviews your request before the booking is confirmed. You will receive a response by email.",
+      "submitHint": "By submitting, you send a non-binding booking request. The booking becomes binding only after the provider approves it."
     },
     "steps": {
       "periodTitle": "Period & extras",
@@ -313,6 +322,8 @@
     "yourSelection": "Your selection",
     "startTimePoint": "Start time",
     "endTimePoint": "End time",
+    "showOccupancy": "Show occupancy",
+    "hideOccupancy": "Hide occupancy",
     "dragHint": "Click or drag on the calendar to select a time range. Alternatively, enter the times manually below.",
     "overlapWarning": "The selected time range overlaps with already occupied times. The booking may not be possible."
   }

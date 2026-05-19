@@ -236,6 +236,7 @@
     "missing_parameters": "Es fehlen erforderliche Parameter für die Buchung.",
     "unauthorized": "Sie sind nicht berechtigt, dieses Objekt zu buchen.",
     "permission_denied": "Sie haben keine Berechtigung, dieses Objekt zu buchen.",
+    "login_required": "Für diese Buchung ist eine Anmeldung erforderlich.",
     "bad_request": "Ungültige Anfrage. Bitte überprüfen Sie Ihre Eingaben.",
     "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
     "bookable_not_found": "Das angeforderte Objekt wurde nicht gefunden.",
@@ -282,6 +283,8 @@
       "requiredConfirmationBadge": "Bestätigung erforderlich",
       "guestTitle": "Als Gast fortfahren oder anmelden",
       "guestDescription": "Sie können diese Buchung als Gast abschließen oder sich anmelden, um Ihre gespeicherten Daten zu übernehmen.",
+      "loginRequiredTitle": "Anmeldung erforderlich",
+      "loginRequiredDescription": "Für diese Buchung müssen Sie angemeldet sein. Bitte loggen Sie sich ein, um fortzufahren.",
       "loginAction": "Jetzt einloggen",
       "loggedInTitle": "Sie sind eingeloggt",
       "loggedInDescription": "Sie können sich ausloggen und diese Buchung stattdessen als Gast abschließen.",
@@ -387,6 +390,7 @@
       "lineQtyPrice": "{qty} × {price}",
       "edit": "Bearbeiten",
       "commitBooking": "Verbindlich buchen",
+      "sendBookingRequest": "Buchungsanfrage senden",
       "backToPayment": "Zurück zur Zahlung",
       "backToData": "Zurück zu den Daten",
       "termsHint": "Mit der Buchung akzeptieren Sie unsere Geschäftsbedingungen.",
@@ -395,6 +399,11 @@
       "submitSuccessTitle": "Buchung",
       "submitSuccessDone": "Ihre Buchung wurde angelegt (Referenz: {id}). Sie erhalten eine Bestätigung per E-Mail.",
       "submitSuccessManualApproval": "Ihre Anfrage wurde übermittelt. Der Anbieter prüft die Buchung; Sie erhalten weitere Informationen per E-Mail."
+    },
+    "manualApproval": {
+      "bannerTitle": "Manuelle Freigabe erforderlich",
+      "bannerDescription": "Für dieses Buchungsobjekt prüft der Anbieter Ihre Anfrage, bevor die Buchung bestätigt wird. Sie erhalten eine Rückmeldung per E-Mail.",
+      "submitHint": "Mit dem Absenden senden Sie eine unverbindliche Buchungsanfrage. Die Buchung wird erst nach Freigabe durch den Anbieter verbindlich."
     },
     "steps": {
       "periodTitle": "Zeitraum & Extras",
@@ -538,6 +547,8 @@
     "yourSelection": "Ihre Auswahl",
     "startTimePoint": "Startzeitpunkt",
     "endTimePoint": "Endzeitpunkt",
+    "showOccupancy": "Belegung anzeigen",
+    "hideOccupancy": "Belegung ausblenden",
     "dragHint": "Klicken oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen. Alternativ können Sie die Zeiten oben manuell eingeben.",
     "overlapWarning": "Der gewählte Zeitraum überschneidet sich mit bereits belegten Zeiten. Die Buchung kann unter Umständen nicht durchgeführt werden."
   }
