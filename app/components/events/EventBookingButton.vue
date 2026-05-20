@@ -100,7 +100,9 @@ const openTicketOptions = ref(false);
 function goToTicketOptions() {
   //external booking url
   if (props.event.externalBookingUrl) {
-    window.open(props.event.externalBookingUrl, "_blank");
+    const url = props.event.externalBookingUrl;
+    const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    window.open(normalizedUrl, "_blank", "noopener,noreferrer");
     return;
   }
 
