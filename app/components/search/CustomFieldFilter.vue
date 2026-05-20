@@ -1,20 +1,20 @@
 <template>
   <div class="my-3">
     <UCheckbox
-        v-if="filterType === 'checkbox'"
-        v-model="localValue"
-        :label="definition.caption"
-        @change="emitChange"
+      v-if="filterType === 'checkbox'"
+      v-model="localValue"
+      :label="definition.caption"
+      @change="emitChange"
     />
 
     <template v-else>
       <p class="mb-3">{{ definition.caption }}</p>
       <UCheckboxGroup
-          v-if="filterType === 'select'"
-          v-model="localValue"
-          :items="meta.options"
-          :ui="{ label: 'text-base' }"
-          @change="emitChange"
+        v-if="filterType === 'select'"
+        v-model="localValue"
+        :items="meta.options"
+        :ui="{ label: 'text-base' }"
+        @change="emitChange"
       >
         <template #label="{ item }">
           <div class="flex">
@@ -27,30 +27,35 @@
       </UCheckboxGroup>
 
       <div v-else-if="filterType === 'slider'">
-        <p class="mb-3 mx-2">{{ getSliderOption(meta.min) }} – {{ getSliderOption(localValue) }}</p>
+        <p class="mb-3 mx-2">
+          {{ getSliderOption(meta.min) }} – {{ getSliderOption(localValue) }}
+        </p>
         <FilterHistogramSlider
-            v-model="localValue"
-            mode="single"
-            :min="meta.min"
-            :max="meta.max"
-            :step="meta.step || 1"
-            :values="meta.bars || []"
-            :use-text="definition.inputType === 'select'"
-            @change="emitChange"
+          v-model="localValue"
+          mode="single"
+          :min="meta.min"
+          :max="meta.max"
+          :step="meta.step || 1"
+          :values="meta.bars || []"
+          :use-text="definition.inputType === 'select'"
+          @change="emitChange"
         />
       </div>
 
       <div v-else-if="filterType === 'range'">
-        <p class="mb-3 mx-2">{{ getSliderOption(localValue[0]) }} – {{ getSliderOption(localValue[1]) }}</p>
+        <p class="mb-3 mx-2">
+          {{ getSliderOption(localValue[0]) }} –
+          {{ getSliderOption(localValue[1]) }}
+        </p>
         <FilterHistogramSlider
-            v-model="localValue"
-            mode="range"
-            :min="meta.min"
-            :max="meta.max"
-            :step="meta.step || 1"
-            :values="meta.bars || []"
-            :use-text="definition.inputType === 'select'"
-            @change="emitChange"
+          v-model="localValue"
+          mode="range"
+          :min="meta.min"
+          :max="meta.max"
+          :step="meta.step || 1"
+          :values="meta.bars || []"
+          :use-text="definition.inputType === 'select'"
+          @change="emitChange"
         />
       </div>
     </template>
@@ -78,22 +83,22 @@ function defaultFor(type, meta) {
 }
 
 const localValue = ref(
-    props.modelValue ?? defaultFor(props.filterType, props.meta),
+  props.modelValue ?? defaultFor(props.filterType, props.meta),
 );
 
 watch(
-    () => props.modelValue,
-    (v) => {
-      if (v !== undefined && v !== null) localValue.value = v;
-    },
+  () => props.modelValue,
+  (v) => {
+    localValue.value = v ?? defaultFor(props.filterType, props.meta);
+  },
 );
 
-function getSliderOption(numericValue){
-  if(props.definition.inputType === "select"){
+function getSliderOption(numericValue) {
+  if (props.definition.inputType === "select") {
     const index = numericValue - 1; // Assuming slider values start at 1 for the first option
-    return props.definition.options[index]?.caption || numericValue
+    return props.definition.options[index]?.caption || numericValue;
   }
-  return numericValue
+  return numericValue;
 }
 
 function emitChange() {
