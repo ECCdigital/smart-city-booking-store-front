@@ -60,14 +60,12 @@ function collectFieldValues(wrappers, fieldId) {
 
 function buildMeta(def, values) {
   const filterType = def.usageOptions.catalogFilterType;
-  console.log(def.caption, def);
 
   if (filterType === "select") {
     const counts = values.reduce((acc, v) => {
       acc[v] = (acc[v] || 0) + 1;
       return acc;
     }, {});
-    console.log("Counts for field", def.name, counts);
 
     let options;
 

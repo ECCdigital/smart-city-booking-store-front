@@ -91,7 +91,6 @@ const bars = computed(() => {
   const count = effectiveBarCount.value;
   const buckets = new Array(count).fill(0);
   const range = props.max - props.min;
-  console.log("range", range, "count", count, "values", props.values);
 
   if (range <= 0 || !props.values?.length) return buckets;
 
