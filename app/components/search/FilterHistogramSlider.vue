@@ -1,28 +1,46 @@
 <template>
   <div class="mx-2">
-    <div
-        v-if="hasBars"
-        class="flex items-end justify-between mx-2"
-        style="width: 100%; padding-right: 15px"
-    >
+    <div v-if="hasBars && useText" class="mx-2">
       <div
+        class="relative ml-2"
+        style="width: 100%; height: 50px; padding-right: 15px"
+      >
+        <div
           v-for="(count, index) in bars"
           :key="index"
-          class="w-full bg-primary opacity-40 mr-1 transition-opacity"
+          class="absolute bottom-0 w-2 bg-primary opacity-40 transition-opacity -translate-x-1/2"
           :class="{ 'opacity-80': isBarActive(index) }"
           style="max-height: 50px"
           :style="{
+            left: `calc(${(index / (bars.length - 1)) * 100}% - 6px)`,
+            height: `${(count / maxBar) * 50}px`,
+          }"
+        />
+      </div>
+    </div>
+    <div
+      v-else-if="hasBars && !useText"
+      class="flex items-end justify-between mx-2"
+      style="width: 100%; padding-right: 15px"
+    >
+      <div
+        v-for="(count, index) in bars"
+        :key="index"
+        class="w-full bg-primary opacity-40 mr-1 transition-opacity"
+        :class="{ 'opacity-80': isBarActive(index) }"
+        style="max-height: 50px"
+        :style="{
           height: (count / maxBar) * 50 + 'px',
         }"
       />
     </div>
 
     <USlider
-        v-model="modelValue"
-        :min="min"
-        :max="max"
-        :step="step"
-        @change="onChange"
+      v-model="modelValue"
+      :min="min"
+      :max="max"
+      :step="step"
+      @change="onChange"
     />
   </div>
 </template>
@@ -52,14 +70,20 @@ const props = defineProps({
     type: Number,
     default: null,
   },
+  useText: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["change"]);
 
 const effectiveBarCount = computed(() => {
   if (props.barCount) return props.barCount;
+
   const span = props.max - props.min;
   if (span <= 0 || props.step <= 0) return 1;
+  if (props.useText) return span + 1;
   return Math.max(1, Math.ceil(span / props.step));
 });
 
@@ -67,11 +91,12 @@ const bars = computed(() => {
   const count = effectiveBarCount.value;
   const buckets = new Array(count).fill(0);
   const range = props.max - props.min;
+  console.log("range", range, "count", count, "values", props.values);
 
   if (range <= 0 || !props.values?.length) return buckets;
 
   for (const raw of props.values) {
-    if (raw == null || isNaN(raw)) continue;
+    if (raw === null || isNaN(raw)) continue;
 
     if (raw <= props.min) {
       buckets[0]++;
@@ -79,8 +104,8 @@ const bars = computed(() => {
     }
 
     const idx = Math.min(
-        Math.floor(((raw - props.min) / range) * count),
-        count - 1,
+      Math.floor(((raw - props.min) / range) * count),
+      count - 1,
     );
     buckets[idx]++;
   }
@@ -90,7 +115,7 @@ const bars = computed(() => {
 
 const maxBar = computed(() => Math.max(...bars.value, 1));
 const hasBars = computed(
-    () => bars.value.length > 0 && bars.value.some((b) => b > 0),
+  () => bars.value.length > 0 && bars.value.some((b) => b > 0),
 );
 
 function isBarActive(index) {
@@ -102,9 +127,9 @@ function isBarActive(index) {
 
   if (props.mode === "range") {
     const [lo, hi] = modelValue.value;
-    return barEnd > lo && barStart < hi;
+    return barEnd >= lo && barStart <= hi;
   }
-  return barEnd < modelValue.value;
+  return barEnd <= modelValue.value;
 }
 
 function onChange() {

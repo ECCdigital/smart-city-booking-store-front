@@ -9,7 +9,6 @@
 
     <template v-else>
       <p class="mb-3">{{ definition.caption }}</p>
-
       <UCheckboxGroup
           v-if="filterType === 'select'"
           v-model="localValue"
@@ -32,10 +31,11 @@
         <FilterHistogramSlider
             v-model="localValue"
             mode="single"
-            :min="definition.inputType === 'select' ? 1 : meta.min"
-            :max="definition.inputType === 'select' ? definition.options.length : meta.max"
+            :min="meta.min"
+            :max="meta.max"
             :step="meta.step || 1"
-            :values="meta.values || []"
+            :values="meta.bars || []"
+            :use-text="definition.inputType === 'select'"
             @change="emitChange"
         />
       </div>
@@ -45,10 +45,11 @@
         <FilterHistogramSlider
             v-model="localValue"
             mode="range"
-            :min="definition.inputType === 'select' ? 1 : meta.min"
-            :max="definition.inputType === 'select' ? definition.options.length : meta.max"
+            :min="meta.min"
+            :max="meta.max"
             :step="meta.step || 1"
-            :values="meta.values || []"
+            :values="meta.bars || []"
+            :use-text="definition.inputType === 'select'"
             @change="emitChange"
         />
       </div>
@@ -71,9 +72,6 @@ function defaultFor(type, meta) {
   if (type === "select") return [];
   if (type === "checkbox") return false;
   if (type === "slider" || type === "range") {
-    if(props.definition.inputType === "select"){
-      return [1, props.definition.options.length]
-    }
     return meta.values;
   }
   return null;

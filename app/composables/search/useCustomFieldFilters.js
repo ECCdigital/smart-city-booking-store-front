@@ -8,129 +8,156 @@ import { computed } from "vue";
  * @param {Object} options
  * @param {'sidebar'|'navigation'|'searchbar'} options.position
  */
-export function useCustomFieldFilters(bookables, { position = "sidebar" } = {}) {
-    const definitions = computed(() => {
-        const map = new Map();
+export function useCustomFieldFilters(
+  bookables,
+  { position = "sidebar" } = {},
+) {
+  const definitions = computed(() => {
+    const map = new Map();
 
-        for (const wrapper of bookables.value || []) {
-            const fields = wrapper?.item?.customFields || [];
+    for (const wrapper of bookables.value || []) {
+      const fields = wrapper?.item?.customFields || [];
 
-            for (const field of fields) {
-                const usage = field?.usageOptions;
-                if (!usage) continue;
-                if (usage.context !== "catalog") continue;
-                if (!usage.catalogFilterType) continue;
-                if (usage.catalogFilterPosition !== position) continue;
+      for (const field of fields) {
+        const usage = field?.usageOptions;
+        if (!usage) continue;
+        if (usage.context !== "catalog") continue;
+        if (!usage.catalogFilterType) continue;
+        if (usage.catalogFilterPosition !== position) continue;
 
-                if (!map.has(field.id)) {
-                    map.set(field.id, field);
-                }
-            }
+        if (!map.has(field.id)) {
+          map.set(field.id, field);
         }
+      }
+    }
 
-        return Array.from(map.values());
+    return Array.from(map.values());
+  });
+
+  const aggregated = computed(() => {
+    return definitions.value.map((def) => {
+      const values = collectFieldValues(bookables.value, def.id);
+      return {
+        definition: def,
+        filterType: def.usageOptions.catalogFilterType,
+        meta: buildMeta(def, values),
+      };
     });
+  });
 
-    const aggregated = computed(() => {
-        return definitions.value.map((def) => {
-            const values = collectFieldValues(bookables.value, def.id);
-            return {
-                definition: def,
-                filterType: def.usageOptions.catalogFilterType,
-                meta: buildMeta(def, values),
-            };
-        });
-    });
-
-    return { definitions, aggregated };
+  return { definitions, aggregated };
 }
 
 function collectFieldValues(wrappers, fieldId) {
-    const values = [];
-    for (const w of wrappers || []) {
-        const v = getCustomFieldValue(w?.item, fieldId);
-        if (v === undefined || v === null || v === "") continue;
-        values.push(v);
-    }
-    return values;
+  const values = [];
+  for (const w of wrappers || []) {
+    const v = getCustomFieldValue(w?.item, fieldId);
+    if (v === undefined || v === null || v === "") continue;
+    values.push(v);
+  }
+  return values;
 }
 
 function buildMeta(def, values) {
-    const type = def.usageOptions.catalogFilterType;
+  const filterType = def.usageOptions.catalogFilterType;
+  console.log(def.caption, def);
 
-    if (type === "select") {
-        const counts = values.reduce((acc, v) => {
-            acc[v] = (acc[v] || 0) + 1;
-            return acc;
-        }, {});
+  if (filterType === "select") {
+    const counts = values.reduce((acc, v) => {
+      acc[v] = (acc[v] || 0) + 1;
+      return acc;
+    }, {});
+    console.log("Counts for field", def.name, counts);
 
-        let options;
+    let options;
 
-        if (def.inputType === "string" || def.inputType === "text" || def.inputType === "numeric" || def.inputType === "boolean") {
-            options = Object.entries(counts)
-                .map(([value, count]) => ({
-                    value,
-                    label: value,
-                    count,
-                }))
-                .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
-        } else {
-            options = (def.options || []).map((opt) => ({
-                value: opt.value,
-                label: opt.caption,
-                count: counts[opt.value] || 0,
-            }));
-        }
-
-        return { options };
+    if (
+      def.inputType === "string" ||
+      def.inputType === "text" ||
+      def.inputType === "numeric" ||
+      def.inputType === "boolean"
+    ) {
+      options = Object.entries(counts)
+        .map(([value, count]) => ({
+          value,
+          label: value,
+          count,
+        }))
+        .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+    } else {
+      options = (def.options || []).map((opt) => ({
+        value: opt.value,
+        label: opt.caption,
+        count: counts[opt.value] || 0,
+      }));
     }
 
-    if (type === "slider" || type === "range") {
-        const numeric = values.map(Number).filter((n) => !Number.isNaN(n));
+    return { options };
+  }
 
-        if (numeric.length === 0) {
-            return {
-                min: 0,
-                max: 0,
-                step: 1,
-                values: type === "range" ? [0, 0] : 0,
-            };
-        }
+  if (filterType === "slider" || filterType === "range") {
+    if (def.inputType === "select") {
+      const mappedValues = values.map((v) => {
+        const index = def.options?.findIndex((opt) => opt.value === v);
+        return index !== -1 ? index+1 : null;
+      });
 
-        const min = Math.floor(Math.min(...numeric));
-        const max = Math.ceil(Math.max(...numeric));
-        const step = computeStep(min, max);
-
-        return {
-            min,
-            max,
-            step,
-            values: type === "range" ? [min, max] : max,
-        };
+      return {
+        min: 1,
+        max: def.options.length || 1,
+        step: 1,
+        values: filterType === "range" ? [1, def.options.length || 1] : def.options.length,
+        bars: mappedValues,
+      };
     }
 
-    if (type === "checkbox") {
-        const trueCount = values.filter((v) => v === true || v === "true").length;
-        return { trueCount };
+    const numeric = values.map(Number).filter((n) => !Number.isNaN(n));
+
+    if (numeric.length === 0) {
+      return {
+        min: 0,
+        max: 0,
+        step: 1,
+        values: filterType === "range" ? [0, 0] : 0,
+        bars: values,
+      };
     }
 
-    return {};
+    const min = Math.floor(Math.min(...numeric));
+    const max = Math.ceil(Math.max(...numeric));
+    const step = computeStep(min, max);
+
+    return {
+      min,
+      max,
+      step,
+      values: filterType === "range" ? [min, max] : max,
+      bars: values,
+    };
+  }
+
+  if (filterType === "checkbox") {
+    const trueCount = values.filter((v) => v === true || v === "true").length;
+    return { trueCount };
+  }
+
+  return {};
 }
 
 function computeStep(min, max) {
-    const range = max - min;
-    if (range <= 0) return 1;
+  const range = max - min;
+  if (range <= 0) return 1;
 
-    let step = Math.ceil(range / 20);
+  let step = Math.ceil(range / 20);
 
-    if (range >= 20) {
-        step = Math.max(5, Math.ceil(step / 5) * 5);
-    }
+  if (range >= 20) {
+    step = Math.max(5, Math.ceil(step / 5) * 5);
+  }
 
-    return step;
+  return step;
 }
 
 export function getCustomFieldValue(item, fieldId) {
-    const entry = item?.customFieldValues?.find((v) => v.fieldId === fieldId);
-    return entry?.value;
+  const entry = item?.customFieldValues?.find((v) => v.fieldId === fieldId);
+  return entry?.value;
 }
