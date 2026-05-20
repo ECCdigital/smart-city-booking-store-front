@@ -220,7 +220,7 @@ const props = defineProps({
 const emit = defineEmits(["filter"]);
 
 const suitableBookables = computed(() =>
-  props.bookables.filter((b) => b.matchStatus === "match")
+  props.bookables.filter((b) => b.matchStatus === "match"),
 );
 
 //Filter Variables
@@ -557,11 +557,11 @@ const { aggregated: customFieldFilters } = useCustomFieldFilters(bookablesRef, {
   position: "sidebar",
 });
 const sortedCustomFieldFilters = computed(() =>
-    customFieldFilters.value.slice().sort((a, b) => {
-      if (a.filterType === "checkbox" && b.filterType !== "checkbox") return -1;
-      if (a.filterType !== "checkbox" && b.filterType === "checkbox") return 1;
-      return 0;
-    })
+  customFieldFilters.value.slice().sort((a, b) => {
+    if (a.filterType === "checkbox" && b.filterType !== "checkbox") return -1;
+    if (a.filterType !== "checkbox" && b.filterType === "checkbox") return 1;
+    return 0;
+  }),
 );
 
 const _customFieldValues = ref({ ...(props.customFields || {}) });
