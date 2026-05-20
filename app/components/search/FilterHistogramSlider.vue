@@ -118,6 +118,15 @@ const hasBars = computed(
 );
 
 function isBarActive(index) {
+  if(props.useText && props.mode === "range"){
+    const [lo, hi] = modelValue.value;
+    return index+1 >= lo && index+1 <= hi;
+  }
+  if(props.useText && props.mode !== "range"){
+    return index+1 <= modelValue.value;
+  }
+
+
   const range = props.max - props.min;
   if (range <= 0) return false;
 
@@ -128,6 +137,7 @@ function isBarActive(index) {
     const [lo, hi] = modelValue.value;
     return barEnd >= lo && barStart <= hi;
   }
+
   return barEnd <= modelValue.value;
 }
 
