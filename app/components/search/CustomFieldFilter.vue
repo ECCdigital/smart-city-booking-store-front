@@ -9,22 +9,13 @@
 
     <template v-else>
       <p class="mb-3">{{ definition.caption }}</p>
-      <UCheckboxGroup
-        v-if="filterType === 'select'"
-        v-model="localValue"
-        :items="meta.options"
-        :ui="{ label: 'text-base' }"
-        @change="emitChange"
-      >
-        <template #label="{ item }">
-          <div class="flex">
-            {{ item.label }}
-            <span class="text-gray-500 ml-2 text-sm content-center">
-              ({{ item.count }})
-            </span>
-          </div>
-        </template>
-      </UCheckboxGroup>
+      <FilterCheckboxGroup
+          v-if="filterType === 'select'"
+          v-model="localValue"
+          :items="meta.options"
+          use-more-button
+          @change="emitChange"
+      />
 
       <div v-else-if="filterType === 'slider'">
         <p class="mb-3 mx-2">
@@ -64,6 +55,7 @@
 
 <script setup>
 import FilterHistogramSlider from "~/components/search/FilterHistogramSlider.vue";
+import FilterCheckboxGroup from "~/components/search/FilterCheckboxGroup.vue";
 
 const props = defineProps({
   definition: { type: Object, required: true },
@@ -85,6 +77,7 @@ function defaultFor(type, meta) {
 const localValue = ref(
   props.modelValue ?? defaultFor(props.filterType, props.meta),
 );
+const numberOfVisibleOptions = ref(5)
 
 watch(
   () => props.modelValue,
