@@ -102,9 +102,12 @@ const bars = computed(() => {
       continue;
     }
 
-    const idx = Math.min(
-      Math.floor(((raw - props.min) / range) * count),
-      count - 1,
+    const idx = Math.max(
+        0,
+        Math.min(
+            Math.floor((raw - props.min - 1) / props.step),
+            count - 1
+        )
     );
     buckets[idx]++;
   }
