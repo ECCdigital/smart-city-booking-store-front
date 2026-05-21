@@ -101,23 +101,18 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
 
     if (query.customFields && typeof query.customFields === "object") {
-      console.log("*A*", Object.entries(query.customFields));
       for (const [fieldId, filterValue] of Object.entries(query.customFields)) {
         if (isEmptyFilterValue(filterValue)) continue;
 
         const def = getCustomFieldDef(updatedItems.value, fieldId);
-        console.log("*B*", def);
         if (!def) continue;
 
         const filterType = def?.usageOptions?.catalogFilterType;
-        console.log("*C*", fieldId, filterValue, filterType);
 
         filtered = filtered.filter((b) => {
           const itemValue = getCustomFieldValue(b.item, fieldId);
-          console.log("*D*", itemValue);
           return matchesCustomField(itemValue, filterValue, filterType, def);
         });
-        console.log("G", filtered);
       }
     }
 
@@ -973,6 +968,9 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
     if (filterType === "select") {
       if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
+      if (filterDef.inputType === "numeric") {
+        return filterValue.some((v) => Number(v) === itemValue);
+      }
       return filterValue.includes(itemValue);
     }
 
