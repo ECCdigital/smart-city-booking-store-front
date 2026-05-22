@@ -52,17 +52,9 @@ function serializeCustomFieldValue(value: any): string | null {
   return null;
 }
 
-function isFilterValueSet(v: unknown): boolean {
-  if (v === null || v === undefined || v === "") return false;
-  if (v === false) return false;
-  if (Array.isArray(v) && v.length === 0) return false;
-  return true;
-}
-
 export function useCatalogQueryState() {
   const route = useRoute();
   const router = useRouter();
-
 
   const extractCustomFields = () => {
     const initialCustomFields: Record<string, any> = {};
@@ -71,45 +63,45 @@ export function useCatalogQueryState() {
       const fieldId = key.slice(CF_PREFIX.length);
       initialCustomFields[fieldId] = parseCustomFieldValue(value);
     }
-  return initialCustomFields
+    return initialCustomFields;
   };
 
   const state = reactive<CatalogQueryState>({
-       term: decodeURIComponent((route.query.q as string) || ""),
-      location: decodeURIComponent((route.query.loc as string) || ""),
-      distance: parseNumberOrNull(route.query.dist),
-      start: parseNumberOrNull(route.query.start),
-      end: parseNumberOrNull(route.query.end),
+    term: decodeURIComponent((route.query.q as string) || ""),
+    location: decodeURIComponent((route.query.loc as string) || ""),
+    distance: parseNumberOrNull(route.query.dist),
+    start: parseNumberOrNull(route.query.start),
+    end: parseNumberOrNull(route.query.end),
 
-      inclNoSuitable: route.query.inclNoSuitable !== "false",
-      pubEv: route.query.pubEv === "true",
-      regEv: route.query.regEv === "true",
+    inclNoSuitable: route.query.inclNoSuitable !== "false",
+    pubEv: route.query.pubEv === "true",
+    regEv: route.query.regEv === "true",
 
-      cat: route.query.cat
-          ? (route.query.cat as string)
-              .split(",")
-              .map((c) => decodeURIComponent(c.toLowerCase()))
-          : [],
+    cat: route.query.cat
+      ? (route.query.cat as string)
+          .split(",")
+          .map((c) => decodeURIComponent(c.toLowerCase()))
+      : [],
 
-      cities: route.query.cities
-          ? (route.query.cities as string)
-              .split(",")
-              .map((c) => decodeURIComponent(c.toLowerCase()))
-          : [],
+    cities: route.query.cities
+      ? (route.query.cities as string)
+          .split(",")
+          .map((c) => decodeURIComponent(c.toLowerCase()))
+      : [],
 
-      price: route.query.price
-          ? (() => {
-            const [min, max] = (route.query.price as string)
-                .split(",")
-                .map((p) => Number(p));
-            return [min, max] as [number, number];
-          })()
-          : [],
+    price: route.query.price
+      ? (() => {
+          const [min, max] = (route.query.price as string)
+            .split(",")
+            .map((p) => Number(p));
+          return [min, max] as [number, number];
+        })()
+      : [],
 
-      sortMode: (route.query.sort as any) || "alphabeticAscending",
+    sortMode: (route.query.sort as any) || "alphabeticAscending",
 
-      customFields: extractCustomFields(),
-  })
+    customFields: extractCustomFields(),
+  });
 
   const initialCustomFields: Record<string, any> = {};
   for (const [key, value] of Object.entries(route.query)) {
@@ -161,15 +153,16 @@ export function useCatalogQueryState() {
   });
 
   watch(
-      queryObject,
-      (q) => {
-        router.replace({ query: q });
-      },
-      { deep: true },
+    queryObject,
+    (q) => {
+      router.replace({ query: q });
+    },
+    { deep: true },
   );
 
   const isFilterActive = computed(() => {
     const s = state;
+
     if (s.inclNoSuitable === false) return true;
     if (s.pubEv) return true;
     if (s.regEv) return true;
@@ -177,15 +170,10 @@ export function useCatalogQueryState() {
     if (s.cities.length > 0) return true;
     if (s.distance != null) return true;
     if (s.price.length === 2) return true;
+    if (s.customFields !== null) return true;
 
-    if (s.customFields) {
-      for (const v of Object.values(s.customFields)) {
-        if (isFilterValueSet(v)) return true;
-      }
-    }
     return false;
   });
-
 
   const isSearchActive = computed(() => {
     const s = state;

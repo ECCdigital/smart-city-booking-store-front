@@ -101,16 +101,17 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
 
     if (query.customFields && typeof query.customFields === "object") {
-      for (const [fieldId, value] of Object.entries(query.customFields)) {
-        if (isEmptyFilterValue(value)) continue;
+      for (const [fieldId, filterValue] of Object.entries(query.customFields)) {
+        if (isEmptyFilterValue(filterValue)) continue;
 
         const def = getCustomFieldDef(updatedItems.value, fieldId);
         if (!def) continue;
-        const type = def?.usageOptions?.catalogFilterType;
+
+        const filterType = def?.usageOptions?.catalogFilterType;
 
         filtered = filtered.filter((b) => {
           const itemValue = getCustomFieldValue(b.item, fieldId);
-          return matchesCustomField(itemValue, value, type);
+          return matchesCustomField(itemValue, filterValue, filterType, def);
         });
       }
     }
@@ -958,31 +959,50 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   function matchesCustomField(
     itemValue: any,
     filterValue: any,
-    type: string | undefined,
+    filterType: string | undefined,
+    filterDef: object = { inputType: "" },
   ) {
     if (itemValue === undefined || itemValue === null || itemValue === "") {
       return false;
     }
 
-    if (type === "select") {
+    if (filterType === "select") {
       if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
+      if (filterDef.inputType === "numeric") {
+        return filterValue.some((v) => Number(v) === itemValue);
+      }
       return filterValue.includes(itemValue);
     }
 
-    if (type === "checkbox") {
+    if (filterType === "checkbox") {
       if (filterValue !== true) return true;
       return itemValue === true || itemValue === "true";
     }
 
-    if (type === "slider") {
-      const n = Number(itemValue);
+    if (filterType === "slider") {
+      let n;
+      if (filterDef && filterDef.inputType === "select") {
+        const temp =
+          filterDef.options?.findIndex((o: any) => o.value === itemValue) + 1;
+        n = temp;
+      } else {
+        n = Number(itemValue);
+      }
+
       if (Number.isNaN(n)) return false;
       return n <= Number(filterValue);
     }
 
-    if (type === "range") {
-      const n = Number(itemValue);
+    if (filterType === "range") {
+      let n;
+      if (filterDef && filterDef.inputType === "select") {
+        n = filterDef.options?.findIndex((o: any) => o.value === itemValue) + 1;
+      } else {
+        n = Number(itemValue);
+      }
+
       if (Number.isNaN(n)) return false;
+
       return n >= filterValue[0] && n <= filterValue[1];
     }
 
