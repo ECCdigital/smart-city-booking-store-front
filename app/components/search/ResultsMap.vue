@@ -1,11 +1,6 @@
 <template>
   <div style="height: 80vh; width: 70vw">
-    <LMap
-      :zoom="zoom"
-      :use-global-leaflet="false"
-      :center="currentCenter"
-
-    >
+    <LMap :zoom="zoom" :use-global-leaflet="false" :center="currentCenter">
       <LTileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
@@ -19,25 +14,26 @@
           :lat-lng="getCoordinatesForBookable(bookable.item)"
           @click="openBookableDetails(bookable)"
         >
-          <LTooltip class="bg-transparent">
-            <ResultCard
+          <LTooltip :options="{ className: 'clean-tooltip' }">
+            <div class="overflow-hidden rounded-2xl shadow-2xl">
+              <ResultCard
                 :item="bookable.item"
                 :is-not-bookable="!bookable.isBookable"
                 :calculated-price="bookable.calculatedPrice"
                 entry-page-mode
-                class="bg-neutral-50 w-[300px]"
-            />
+                map-mode
+                class="w-[300px] break-normal"
+              />
+            </div>
           </LTooltip>
         </LMarker>
       </div>
-
-
     </LMap>
   </div>
 </template>
 <script setup>
 import ResultCard from "~/components/search/ResultCard.vue";
-import {useRedirection} from "~/composables/utils/useRedirection.js";
+import { useRedirection } from "~/composables/utils/useRedirection.js";
 
 const props = defineProps({
   bookables: {
@@ -48,9 +44,9 @@ const props = defineProps({
 const { goToDetailsNewTab } = useRedirection();
 
 const currentCenter = computed(() => {
-  const latitude = null
-  const longitude = null
-  const error = null
+  const latitude = null;
+  const longitude = null;
+  const error = null;
 
   /*if (!navigator.geolocation) {
     error = 'Geolocation wird vom Browser nicht unterstützt.'
@@ -72,11 +68,11 @@ const currentCenter = computed(() => {
       }
   )*/
 
-  if(latitude && longitude) {
-    return [latitude, longitude]
+  if (latitude && longitude) {
+    return [latitude, longitude];
   }
-  return [53.500, 10.000]
-})
+  return [53.5, 10.0];
+});
 const zoom = ref(8); //toDo - passenden Zoom-Level wählen
 
 function hasCoordinates(bookable) {
@@ -106,4 +102,12 @@ function openBookableDetails(bookable) {
 }
 </script>
 
-<style scoped></style>
+<style>
+.leaflet-tooltip.clean-tooltip {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  color: #000; /* oder was du willst */
+}
+</style>

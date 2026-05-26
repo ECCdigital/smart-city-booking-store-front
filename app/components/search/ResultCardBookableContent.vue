@@ -1,15 +1,18 @@
 <template>
-  <div id="body" class="flex flex-wrap content-between h-full p-2">
-    <div class="w-full">
+  <div id="body" class="flex flex-wrap content-between h-full p-2 text-gray-800 dark:text-gray-100">
+    <div class="w-full max-w-full min-w-0  overflow-hidden break-all">
+    <!--<div :class="mapMode ? 'w-full max-w-full bg-blue-500 break-words overflow-hidden':'w-full'">-->
       <!-- Title -->
-      <p class="font-bold" :class="hasLongTitle ? 'text-base line-clamp-3' : 'text-lg'">
-        {{ bookable.title }}
+      <p
+          class="font-bold whitespace-normal break-words"
+          :class="hasLongTitle ? 'text-base line-clamp-3' : 'text-lg'"
+      >{{ bookable.title }}
       </p>
       <p>{{ tenantName }}</p>
 
       <!-- Adresse und Entfernung -->
       <div class="w-full my-5">
-        <BookableAdressInformation :bookable="bookable" show-distance />
+        <BookableAdressInformation :bookable="bookable" show-distance class="whitespace-normal break-before-auto"/>
       </div>
       <USeparator
         color="neutral"
@@ -18,7 +21,7 @@
       />
 
       <!-- Eigenschaften -->
-      <div class="w-full my-5">
+      <div class="w-full my-5 whitespace-normal break-words">
         <BookableFlagDisplay v-if="bookable.flags" :flags="bookable.flags" />
       </div>
     </div>

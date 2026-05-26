@@ -1,5 +1,5 @@
 <template>
-  <div class="text-right">
+  <div class="text-right text-gray-800 dark:text-gray-100">
     <!-- special price for user -->
     <p
       v-if="
@@ -13,7 +13,7 @@
       <span>
         {{ displayPrice(calculatedPrice.userGrossPriceEur) }}
       </span>
-      <br />
+      <br >
       <span class="text-xs font-normal text-gray-600 dark:text-gray-300">
         {{ displayPricePerUnit() }}
       </span>
