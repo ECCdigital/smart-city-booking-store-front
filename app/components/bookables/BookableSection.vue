@@ -23,6 +23,27 @@
       >
       <div class="" style="flex: 1" />
       <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
+        <UDropdownMenu :items="viewOptions">
+          <UButton
+            :label="currentViewLabel"
+            icon="i-lucide-chevron-down"
+            color="neutral"
+            variant="soft"
+            class="rounded-full py-2 px-3"
+            :content="{
+              align: 'start',
+              side: 'bottom',
+              sideOffset: 8,
+            }"
+            :ui="{
+              itemLeadingIcon: 'mt-1',
+              itemTrailingIcon: 'mt-1 mr-1',
+              item: 'hover:bg-primary/10 bg-pink-500',
+              content: 'w-48 bg-red-300',
+            }"
+          />
+        </UDropdownMenu>
+
         <SortButton
           v-if="searchedResources.length > 0"
           :sort-mode="query.sortMode"
@@ -83,14 +104,14 @@
           <p class="text-gray-500">{{ $t("resources.noResources") }}</p>
         </div>
         <ResultsList
-          v-if="sortedResources.length > 0"
+          v-if="currentView === 'list' && sortedResources.length > 0"
           :bookables="sortedResources"
           include-non-bookable
           include-non-suitable
           class="hidden md:block"
         />
         <ResultsGrid
-          v-if="sortedResources.length > 0"
+          v-if="currentView === 'list' && sortedResources.length > 0"
           :bookables="sortedResources"
           include-non-bookable
           include-non-suitable
@@ -108,12 +129,37 @@ import ResultsList from "~/components/search/ResultsList.vue";
 import SearchBar from "~/components/search/SearchBar.vue";
 import SortButton from "~/components/search/SortButton.vue";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
+import ResultsMap from "~/components/search/ResultsMap.vue";
 
 const props = defineProps({
   bookables: {
     type: Array,
     required: true,
   },
+});
+
+const currentView = ref("list");
+const viewOptions = [
+  {
+    value: "list",
+    label: "Listenansicht",
+    icon: "i-lucide-list",
+    onSelect() {
+      currentView.value = "list";
+    },
+  },
+  {
+    value: "map",
+    label: "Kartenansicht",
+    icon: "i-lucide-map-pin",
+    onSelect() {
+      currentView.value = "map";
+    },
+  },
+];
+const currentViewLabel = computed(() => {
+  const option = viewOptions.find((opt) => opt.value === currentView.value);
+  return option ? option.label : "";
 });
 
 const {
