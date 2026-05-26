@@ -15,5 +15,17 @@ export function useRedirection() {
     }
   }
 
-  return { goToDetails };
+  function goToDetailsNewTab(id, type) {
+    const url =
+      type === "event"
+        ? tenantTo(`/events/${id}`)
+        : ["room", "resource", "ticket", "event-location"].includes(type)
+          ? tenantTo(`/bookables/${id}`)
+          : null;
+    if (url) {
+      window.open(url.path, "_blank");
+    }
+  }
+
+  return { goToDetails, goToDetailsNewTab };
 }

@@ -117,6 +117,11 @@
           include-non-suitable
           class="md:hidden"
         />
+
+        <ResultsMap
+          v-if="currentView === 'map' && sortedResources.length > 0"
+          :bookables="sortedResources"
+        />
       </div>
     </div>
   </div>
