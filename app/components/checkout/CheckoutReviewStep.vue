@@ -104,6 +104,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  groupBookingAttempts: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const emit = defineEmits(["finish", "back", "edit"]);
@@ -508,7 +512,33 @@ const submitButtonLabel = computed(() =>
               </dt>
               <dd class="text-sm text-gray-900 dark:text-white">
                 <template
-                  v-if="selectedTimePeriod?.start && selectedTimePeriod?.end"
+                  v-if="groupBookingAttempts && groupBookingAttempts.length > 0"
+                >
+                  <div class="font-semibold">
+                    {{
+                      $t("groupBooking.review.heading", {
+                        count: groupBookingAttempts.length,
+                      })
+                    }}
+                  </div>
+                  <ul class="mt-2 space-y-1 max-h-60 overflow-y-auto pr-1">
+                    <li
+                      v-for="attempt in groupBookingAttempts"
+                      :key="attempt.start"
+                      class="text-gray-700 dark:text-gray-300"
+                    >
+                      <span class="font-medium">
+                        {{ formatDateLong(attempt.start) }}
+                      </span>
+                      <span class="text-gray-500 dark:text-gray-400">
+                        · {{ formatTime(attempt.start) }} –
+                        {{ formatTime(attempt.end) }}
+                      </span>
+                    </li>
+                  </ul>
+                </template>
+                <template
+                  v-else-if="selectedTimePeriod?.start && selectedTimePeriod?.end"
                 >
                   <div class="font-semibold">
                     {{ formatDateLong(selectedTimePeriod.start) }}

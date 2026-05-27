@@ -259,6 +259,7 @@
     "invalid_bookable_items": "Ungültige oder fehlende Informationen zu den buchbaren Objekten.",
     "group_booking_disabled": "Serienbuchungen sind für dieses Objekt nicht erlaubt.",
     "group_booking_role_required": "Für Serienbuchungen ist eine bestimmte Rolle erforderlich.",
+    "group_booking_partial_failure": "Mindestens ein Termin der Serie ist nicht verfügbar. Bitte passen Sie Zeitraum oder Rhythmus an.",
     "unknown_error": "Bei der Validierung ist ein unbekannter Fehler aufgetreten.",
     "payment_failed": "Die Zahlung konnte nicht gestartet werden. Bitte versuchen Sie es erneut oder wählen Sie eine andere Zahlungsart.",
     "payment_provider_unavailable": "Die gewählte Zahlungsart ist derzeit nicht verfügbar.",
@@ -537,6 +538,13 @@
     "booking_not_found": "Diese Buchung wurde nicht gefunden."
   },
 
+  "inputDate": {
+    "openPicker": "Datum auswählen",
+    "clear": "Datum zurücksetzen",
+    "dialogTitle": "Datum auswählen",
+    "dialogDescription": "Wählen Sie das gewünschte Datum aus."
+  },
+
   "scheduleSelection": {
     "availability": "Verfügbarkeit",
     "weekOverview": "Wochenübersicht",
@@ -551,5 +559,62 @@
     "hideOccupancy": "Belegung ausblenden",
     "dragHint": "Klicken oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen. Alternativ können Sie die Zeiten oben manuell eingeben.",
     "overlapWarning": "Der gewählte Zeitraum überschneidet sich mit bereits belegten Zeiten. Die Buchung kann unter Umständen nicht durchgeführt werden."
+  },
+
+  "groupBooking": {
+    "toggleTitle": "Serienbuchung",
+    "toggleDescription": "Erstellen Sie mehrere Buchungen in einem festen Rhythmus mit einer einzigen Buchungsanfrage.",
+    "toggleLabel": "Serienbuchung aktivieren",
+    "fields": {
+      "firstStart": "Erster Startzeitpunkt",
+      "firstEnd": "Erster Endzeitpunkt",
+      "frequency": "Rhythmus",
+      "intervalWeeks": "Alle … Wochen",
+      "intervalMonths": "Alle … Monate",
+      "until": "Wiederholen bis",
+      "untilPlaceholder": "Datum auswählen",
+      "untilDialogTitle": "Enddatum der Serie",
+      "untilDialogDescription": "Wählen Sie das Datum, bis zu dem die Serie wiederholt werden soll.",
+      "clearUntil": "Enddatum zurücksetzen",
+      "weekdays": "Wochentage",
+      "weekday": "Wochentag",
+      "monthlyByDay": "Am Tag des Monats",
+      "monthlyByWeekday": "Am Wochentag",
+      "dayOfMonth": "Tag im Monat",
+      "ordinal": "Position im Monat"
+    },
+    "frequency": {
+      "weekly": "Wöchentlich",
+      "monthly": "Monatlich"
+    },
+    "ordinals": {
+      "first": "Erster",
+      "second": "Zweiter",
+      "third": "Dritter",
+      "fourth": "Vierter",
+      "last": "Letzter"
+    },
+    "actions": {
+      "generate": "Serie erzeugen",
+      "regenerate": "Serie neu erzeugen",
+      "clear": "Serie zurücksetzen",
+      "hint": "Bitte erfassen Sie Start, Ende und Rhythmus, dann klicken Sie auf „Serie erzeugen“."
+    },
+    "preview": {
+      "title": "Generierte Termine",
+      "counts": "{total} Termine · {invalid} ungültig · {validated} geprüft",
+      "empty": "Noch keine Serie erzeugt. Bitte konfigurieren Sie die Wiederholung und klicken Sie auf „Serie erzeugen“.",
+      "stale": "Die Einstellungen wurden seit der letzten Erzeugung geändert. Bitte erzeugen Sie die Serie neu.",
+      "pending": "ungeprüft",
+      "valid": "gültig",
+      "invalid": "ungültig",
+      "remove": "Termin entfernen"
+    },
+    "review": {
+      "heading": "Serienbuchung · {count} Termine"
+    },
+    "summary": {
+      "line": "{title} – Serie mit {count} Terminen"
+    }
   }
 }

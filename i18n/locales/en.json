@@ -38,6 +38,9 @@
     "login_required": "Sign-in is required for this booking.",
     "bookable_unavailable": "This object is not available for the selected time period.",
     "unknown_error": "An error occurred during validation.",
+    "group_booking_disabled": "Recurring bookings are not allowed for this object.",
+    "group_booking_role_required": "Recurring bookings require a specific role.",
+    "group_booking_partial_failure": "At least one occurrence in the series is unavailable. Please adjust the time or recurrence settings.",
     "payment_failed": "Payment could not be started. Please try again or choose another payment method.",
     "payment_provider_unavailable": "The selected payment method is not available right now.",
     "locker_unavailable": "The booking could not be completed (locker reservation). Please check the time slot or your selection.",
@@ -312,6 +315,13 @@
     "booking_not_found": "This booking was not found."
   },
 
+  "inputDate": {
+    "openPicker": "Select date",
+    "clear": "Clear date",
+    "dialogTitle": "Select date",
+    "dialogDescription": "Choose the desired date."
+  },
+
   "scheduleSelection": {
     "availability": "Availability",
     "weekOverview": "Week overview",
@@ -326,5 +336,62 @@
     "hideOccupancy": "Hide occupancy",
     "dragHint": "Click or drag on the calendar to select a time range. Alternatively, enter the times manually below.",
     "overlapWarning": "The selected time range overlaps with already occupied times. The booking may not be possible."
+  },
+
+  "groupBooking": {
+    "toggleTitle": "Recurring booking",
+    "toggleDescription": "Create multiple bookings on a fixed schedule with a single booking request.",
+    "toggleLabel": "Enable recurring booking",
+    "fields": {
+      "firstStart": "First start",
+      "firstEnd": "First end",
+      "frequency": "Frequency",
+      "intervalWeeks": "Every … week(s)",
+      "intervalMonths": "Every … month(s)",
+      "until": "Repeat until",
+      "untilPlaceholder": "Select date",
+      "untilDialogTitle": "Series end date",
+      "untilDialogDescription": "Choose the date up to which the series should be repeated.",
+      "clearUntil": "Clear end date",
+      "weekdays": "Weekdays",
+      "weekday": "Weekday",
+      "monthlyByDay": "On day of month",
+      "monthlyByWeekday": "On weekday of month",
+      "dayOfMonth": "Day of month",
+      "ordinal": "Position in month"
+    },
+    "frequency": {
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "ordinals": {
+      "first": "First",
+      "second": "Second",
+      "third": "Third",
+      "fourth": "Fourth",
+      "last": "Last"
+    },
+    "actions": {
+      "generate": "Generate series",
+      "regenerate": "Regenerate series",
+      "clear": "Clear series",
+      "hint": "Please configure start, end and recurrence settings, then click \"Generate series\"."
+    },
+    "preview": {
+      "title": "Generated occurrences",
+      "counts": "{total} occurrences · {invalid} invalid · {validated} validated",
+      "empty": "No series generated yet. Configure the recurrence and click \"Generate series\".",
+      "stale": "Settings changed since the last generation. Please regenerate the series.",
+      "pending": "pending",
+      "valid": "valid",
+      "invalid": "invalid",
+      "remove": "Remove occurrence"
+    },
+    "review": {
+      "heading": "Recurring booking · {count} occurrences"
+    },
+    "summary": {
+      "line": "{title} – series with {count} occurrences"
+    }
   }
 }

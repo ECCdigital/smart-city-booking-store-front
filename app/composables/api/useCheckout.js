@@ -78,6 +78,11 @@ export function useCheckout() {
     return api.post(`/api/checkout/complete`, payload);
   };
 
+  const completeGroupCheckout = async (payload) => {
+    const api = useApiClient();
+    return api.post(`/api/checkout/group-complete`, payload);
+  };
+
   const fetchCheckoutPermissions = async (tenantID, bookableID) => {
     const api = useApiClient();
     const { data, error } = await api.get(`/api/checkout/${bookableID}/permissions/?tenantID=${tenantID}`);
@@ -88,5 +93,5 @@ export function useCheckout() {
     return data;
   }
 
-  return { fetchBookable, validateBookable, redeemCoupon, completeCheckout, fetchCheckoutPermissions };
+  return { fetchBookable, validateBookable, redeemCoupon, completeCheckout, completeGroupCheckout, fetchCheckoutPermissions };
 }
