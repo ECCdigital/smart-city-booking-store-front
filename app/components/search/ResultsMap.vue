@@ -1,5 +1,5 @@
 <template>
-  <div style="height: 80vh; width: 70vw">
+  <div class="w-full md:w-[70vw] h-[80vh] z-10">
     <LMap :zoom="zoom" :use-global-leaflet="false" :center="currentCenter">
       <LTileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -14,14 +14,16 @@
           :lat-lng="getCoordinatesForBookable(bookable.item)"
           @click="openBookableDetails(bookable)"
         >
-          <LTooltip :options="{ className: 'clean-tooltip' }">
+          <LTooltip
+            class="hidden md:block"
+            :options="{ className: 'clean-tooltip' }"
+          >
             <div class="overflow-hidden rounded-2xl shadow-2xl">
               <ResultCard
                 :item="bookable.item"
                 :is-not-bookable="!bookable.isBookable"
                 :calculated-price="bookable.calculatedPrice"
                 entry-page-mode
-                map-mode
                 class="w-[300px] break-normal"
               />
             </div>
@@ -29,6 +31,27 @@
         </LMarker>
       </div>
     </LMap>
+    <!-- Mobile Detail Popup -->
+    <Transition name="fade-up">
+      <div
+          v-if="showDetailPopup && currentBookable"
+          class="fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
+          @click="closeBookableDetails"
+      >
+        <div
+            class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+            @click.stop="openBookableDetails(currentBookable,true)"
+        >
+          <ResultCard
+              :item="currentBookable.item"
+              :is-not-bookable="!currentBookable.isBookable"
+              :calculated-price="currentBookable.calculatedPrice"
+              entry-page-mode
+              map-detail-mode
+          />
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 <script setup>
@@ -43,37 +66,11 @@ const props = defineProps({
 });
 const { goToDetailsNewTab } = useRedirection();
 
-const currentCenter = computed(() => {
-  const latitude = null;
-  const longitude = null;
-  const error = null;
-
-  /*if (!navigator.geolocation) {
-    error = 'Geolocation wird vom Browser nicht unterstützt.'
-    return
-  }
-
-  navigator.geolocation.getCurrentPosition(
-      (position) => {
-        latitude = position.coords.latitude
-        longitude = position.coords.longitude
-      },
-      (err) => {
-        error = err.message
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
-  )*/
-
-  if (latitude && longitude) {
-    return [latitude, longitude];
-  }
-  return [53.5, 10.0];
-});
+const currentCenter = ref([53.5, 10.0])
 const zoom = ref(8); //toDo - passenden Zoom-Level wählen
+
+const showDetailPopup = ref(false);
+const currentBookable = ref(null);
 
 function hasCoordinates(bookable) {
   return (
@@ -97,17 +94,33 @@ function getCoordinatesForBookable(bookable) {
   return [];
 }
 
-function openBookableDetails(bookable) {
-  goToDetailsNewTab(bookable.item.id, bookable.item.type);
+function openBookableDetails(bookable,handleCardClickOnMobile=false) {
+  if(!bookable) return;
+
+  if (window.matchMedia("(min-width: 768px)").matches || handleCardClickOnMobile) {
+    goToDetailsNewTab(bookable.item.id, bookable.item.type);
+  } else{
+    showDetailPopup.value = true;
+    currentCenter.value = getCoordinatesForBookable(bookable.item);
+    currentBookable.value = bookable;
+
+    document.querySelector('.leaflet-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
+
+function closeBookableDetails() {
+  showDetailPopup.value = false;
+  currentBookable.value = null;
+}
+
 </script>
 
 <style>
 .leaflet-tooltip.clean-tooltip {
   background: transparent;
   border: none;
-  box-shadow: none;
+  box-shadow: 5px;
   padding: 0;
-  color: #000; /* oder was du willst */
+  color: #000;
 }
 </style>

@@ -2,9 +2,9 @@
   <div
     class="shadow-lg bg-white dark:bg-gray-700 rounded-xl"
     :class="isNotSuitable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer'"
-    @click="goToDetails(item?.id, item?.type)"
+    @click="onGoToDetails"
   >
-    <div id="header" class="flex flex-col h-36">
+    <div id="header" class="flex flex-col" :class="mapDetailMode? 'h-30' : 'h-36'">
       <div class="flex h-9/10 relative">
         <BookableTypeBadge
           :type="item?.type"
@@ -38,6 +38,7 @@
       :is-not-bookable="isNotBookable"
       :is-not-suitable="isNotSuitable"
       :entry-page-mode="entryPageMode"
+      :map-detail-mode="mapDetailMode"
     />
     <ResultCardEventContent
       v-if="isEvent"
@@ -86,12 +87,22 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  mapDetailMode: {
+    type: Boolean,
+    default: false,
+  },
 });
 const isEvent = computed(() => {
   return props.item.type === "event";
 });
 
 const openEventTicketOptions = ref(false);
+
+function onGoToDetails() {
+  if(!mapDetailMode.value){
+    goToDetails(item.value?.id, item.value?.type)
+  }
+}
 </script>
 
 <style scoped></style>
