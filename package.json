@@ -2,7 +2,7 @@
   "name": "biletado-catalog",
   "type": "module",
   "private": true,
-  "version": "1.0.0-rc.3",
+  "version": "1.0.0-rc.4",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
