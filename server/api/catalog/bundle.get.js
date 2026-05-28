@@ -8,7 +8,39 @@ const errorMapping = {
 
 export default createConditionalCachedHandler(
   async (event) => {
-    const { slug, bookableId, eventId, include } = getQuery(event);
+    const {
+      slug,
+      bookableId,
+      eventId,
+      include,
+      base,
+      catalogType,
+      catalogTenantId,
+      tenantIds,
+    } = getQuery(event);
+    const tenantsFromQuery = tenantIds
+      ? String(tenantIds)
+          .split(",")
+          .filter(Boolean)
+          .map((id) => ({ id }))
+      : [];
+    const canSkipBase =
+      base === "false" &&
+      catalogType &&
+      (catalogTenantId || tenantsFromQuery.length > 0);
+
+    if (canSkipBase) {
+      return await loadBundleData(event, {
+        catalog: {
+          type: String(catalogType),
+          tenantId: catalogTenantId ? String(catalogTenantId) : null,
+        },
+        tenants: tenantsFromQuery,
+        bookableId,
+        eventId,
+        include,
+      });
+    }
 
     const bundlePromise = serverFetch(event, `/api/catalog/bundle`, {
       method: "GET",
@@ -65,6 +97,7 @@ export default createConditionalCachedHandler(
       const token = getCookie(event, "access-token");
       const scope = token ? "auth" : "anon";
       const { slug, bookableId, eventId, include } = getQuery(event);
+      const { base, catalogType, catalogTenantId, tenantIds } = getQuery(event);
       const inc = include
         ? String(include).split(",").map((s) => s.trim()).sort().join(",")
         : "";
@@ -75,6 +108,10 @@ export default createConditionalCachedHandler(
         bookableId ?? "-",
         eventId ?? "-",
         inc,
+        base === "false" ? "items" : "base",
+        catalogType ?? "-",
+        catalogTenantId ?? "-",
+        tenantIds ?? "-",
       ].join("::");
     },
   }

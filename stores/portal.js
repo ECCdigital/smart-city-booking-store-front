@@ -6,11 +6,13 @@ export const usePortalStore = defineStore("portal", {
     mode: null,
     branding: null,
     portalUrl: null,
+    loadedFor: null,
   }),
   getters: {
     isOffersMode: (state) => state.mode === "offers",
     isPersonalMode: (state) => state.mode === "personal",
     logoUrl: (state) => state.branding?.logoUrl ?? null,
+    faviconUrl: (state) => state.branding?.faviconUrl ?? null,
     themeColors: (state) => state.branding?.theme?.colors ?? null,
   },
   actions: {

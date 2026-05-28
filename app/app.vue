@@ -18,6 +18,9 @@ const toaster = { position: "bottom-right" };
 
 useHead({
   htmlAttrs: { lang, dir },
-  link: [{ rel: "stylesheet", href: `/api/theme/css` }],
+  link: [
+    { rel: "stylesheet", href: `/api/theme/css` },
+    { rel: "icon", href: `/api/theme/favicon`, key: "favicon" },
+  ],
 });
 </script>

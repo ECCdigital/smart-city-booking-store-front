@@ -4,6 +4,8 @@ export const useBookableStore = defineStore("bookable", {
   state: () => ({
     initialized: false,
     bookables: [],
+    loadedFor: null,
+    loadedDetailsFor: {},
   }),
   getters: {
     getBookables: (state) => state.bookables,

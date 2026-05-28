@@ -4,6 +4,8 @@ export const useEventStore = defineStore("event", {
   state: () => ({
     initialized: false,
     events: [],
+    loadedFor: null,
+    loadedDetailsFor: {},
   }),
   getters: {
     getEvents: (state) => state.events,

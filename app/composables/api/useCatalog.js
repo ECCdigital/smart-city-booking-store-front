@@ -24,6 +24,10 @@ export function useCatalog() {
     bookableID = null,
     eventID = null,
     include = null,
+    base = true,
+    catalogType = null,
+    catalogTenantID = null,
+    tenantIDs = [],
   } = {}) => {
     const api = useApiClient();
     const url = tenantID
@@ -36,6 +40,10 @@ export function useCatalog() {
         bookableId: bookableID || undefined,
         eventId: eventID || undefined,
         include: include || undefined,
+        base: base === false ? "false" : undefined,
+        catalogType: catalogType || undefined,
+        catalogTenantId: catalogTenantID || undefined,
+        tenantIds: tenantIDs.length ? tenantIDs.join(",") : undefined,
       },
     });
     if (error) {

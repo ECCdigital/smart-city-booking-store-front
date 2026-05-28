@@ -5,7 +5,17 @@ import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache
 export default createConditionalCachedHandler(
   async (event) => {
     const tenantID = getRouterParam(event, "tenantID");
-    const { slug, bookableId, eventId, include } = getQuery(event);
+    const { slug, bookableId, eventId, include, base } = getQuery(event);
+
+    if (base === "false") {
+      return await loadBundleData(event, {
+        catalog: { type: "single", tenantId: tenantID },
+        tenants: [{ id: tenantID }],
+        bookableId,
+        eventId,
+        include,
+      });
+    }
 
     const bundlePromise = serverFetch(event, `/api/catalog/bundle`, {
       method: "GET",
@@ -67,7 +77,7 @@ export default createConditionalCachedHandler(
       const token = getCookie(event, "access-token");
       const scope = token ? "auth" : "anon";
       const tenantID = getRouterParam(event, "tenantID") ?? "-";
-      const { slug, bookableId, eventId, include } = getQuery(event);
+      const { slug, bookableId, eventId, include, base } = getQuery(event);
       const inc = include
         ? String(include).split(",").map((s) => s.trim()).sort().join(",")
         : "";
@@ -79,6 +89,7 @@ export default createConditionalCachedHandler(
         bookableId ?? "-",
         eventId ?? "-",
         inc,
+        base === "false" ? "items" : "base",
       ].join("::");
     },
   }

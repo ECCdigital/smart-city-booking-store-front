@@ -4,6 +4,7 @@ export const useTenantStore = defineStore("tenant", {
   state: () => ({
     initialized: false,
     tenants: [],
+    loadedFor: null,
     currentTenantID: null,
   }),
   getters: {
