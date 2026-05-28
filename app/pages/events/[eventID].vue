@@ -20,12 +20,13 @@ const eventID = computed(() => route.params.eventID);
 
 const { loadBundle } = useCatalogBundle();
 
-const event = computed(() => {
-  return eventStore.getEventById(eventID.value);
-});
+const event = computed(() => eventStore.getEventById(eventID.value));
 
 if (!event.value) {
-  await loadBundle({ slug: catalogSlug.value, eventID: eventID.value });
+  await loadBundle({
+    slug: catalogSlug.value || null,
+    eventID: eventID.value,
+  });
 }
 </script>
 

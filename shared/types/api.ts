@@ -13,6 +13,7 @@ export interface Theme {
 export interface Branding {
   theme?: Theme;
   logoUrl?: string;
+  faviconUrl?: string;
 }
 
 export interface PortalModeResponse {
@@ -25,6 +26,7 @@ export interface ThemeBundle {
   theme?: Theme;
   visibility?: "public" | "private" | "unlisted";
   logoUrl?: string;
+  faviconUrl?: string;
   hero?: {
     title?: string;
     subtitle?: string;

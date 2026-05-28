@@ -1,175 +1,118 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
+import { loadBundleData } from "~~/server/api/utils/loadBundleData.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 
 const errorMapping = {
-  401: {
-    statusCode: 401,
-    statusMessage: "unauthorized",
-  },
+  401: { statusCode: 401, statusMessage: "unauthorized" },
 };
 
 export default createConditionalCachedHandler(
   async (event) => {
-    const { bookableId, eventId, include } = getQuery(event);
+    const {
+      slug,
+      bookableId,
+      eventId,
+      include,
+      base,
+      catalogType,
+      catalogTenantId,
+      tenantIds,
+    } = getQuery(event);
+    const tenantsFromQuery = tenantIds
+      ? String(tenantIds)
+          .split(",")
+          .filter(Boolean)
+          .map((id) => ({ id }))
+      : [];
+    const canSkipBase =
+      base === "false" &&
+      catalogType &&
+      (catalogTenantId || tenantsFromQuery.length > 0);
 
-    const { data, error } = await serverFetch(event, `/api/catalog/bundle`, {
-      method: "GET",
-    });
-
-    if (error) {
-      const mappedError = errorMapping[error.status] || {
-        statusCode: error.status || 500,
-        statusMessage: error.message || "Error fetching catalog bundle",
-      };
-
-      throw createError({
-        statusCode: mappedError.statusCode,
-        statusMessage: mappedError.statusMessage,
+    if (canSkipBase) {
+      return await loadBundleData(event, {
+        catalog: {
+          type: String(catalogType),
+          tenantId: catalogTenantId ? String(catalogTenantId) : null,
+        },
+        tenants: tenantsFromQuery,
+        bookableId,
+        eventId,
+        include,
       });
     }
 
+    const bundlePromise = serverFetch(event, `/api/catalog/bundle`, {
+      method: "GET",
+      query: slug ? { slug } : undefined,
+    });
+
+    const slugCatalogPromise = slug
+      ? serverFetch(event, `/api/catalog/${slug}`, { method: "GET" })
+      : Promise.resolve(null);
+
+    const [{ data, error }, slugRes] = await Promise.all([
+      bundlePromise,
+      slugCatalogPromise,
+    ]);
+
+    if (error) {
+      const mapped = errorMapping[error.status] || {
+        statusCode: error.status || 500,
+        statusMessage: error.message || "Error fetching catalog bundle",
+      };
+      throw createError(mapped);
+    }
+
+    const slugCatalog =
+      slugRes && !slugRes.error ? slugRes.data?.catalog ?? slugRes.data : null;
+
     const result = {
       offersEnabled: data.offersEnabled,
-      branding: data.branding,
-      portalUrl: data.portalUrl,
-      catalog: data.catalog,
+      branding: slugRes?.data?.branding ?? data.branding,
+      portalUrl: slugRes?.data?.portalUrl ?? data.portalUrl,
+      catalog: slugCatalog ?? data.catalog,
       tenants: data.tenants ?? [],
     };
 
-    if (!data.offersEnabled) {
+    if (!result.offersEnabled) {
       return result;
     }
 
-    if (result.catalog?.type === "instance") {
-      for (const tenant of result.tenants) {
-        try {
-          if (bookableId) {
-            const { data, error } = await serverFetch(
-              event,
-              `/json/${tenant.id}/bookables/${bookableId}`,
-              { method: "GET" }
-            );
-            if (!error) {
-              result.bookable = data;
-              return result;
-            }
-          }
+    const items = await loadBundleData(event, {
+      catalog: result.catalog,
+      tenants: result.tenants,
+      bookableId,
+      eventId,
+      include,
+    });
 
-          if (eventId) {
-            const { data, error } = await serverFetch(
-              event,
-              `/json/${tenant.id}/events/${eventId}`,
-              { method: "GET" }
-            );
-            if (!error) {
-              result.event = data;
-              return result;
-            }
-          }
-        } catch {
-          // Ignore not found errors
-        }
-      }
-
-      if (include?.includes("bookables")) {
-        result.bookables = [];
-        for (const tenant of result.tenants) {
-          const { data, error } = await serverFetch(
-            event,
-            `/json/${tenant.id}/bookables/`,
-            { method: "GET" }
-          );
-          if (!error) {
-            result.bookables.push(...data);
-          }
-        }
-      }
-
-      if (include?.includes("events")) {
-        result.events = [];
-        for (const tenant of result.tenants) {
-          const { data, error } = await serverFetch(
-            event,
-            `/json/${tenant.id}/events/`,
-            { method: "GET" }
-          );
-          if (!error) {
-            result.events.push(...data);
-          }
-        }
-      }
-    }
-
-    if (result.catalog?.type === "single") {
-      const tenantId = result.catalog?.tenantId;
-      if (!tenantId) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: "Catalog or tenant not found",
-        });
-      }
-
-      if (bookableId) {
-        const { data, error } = await serverFetch(
-          event,
-          `/json/${tenantId}/bookables/${bookableId}`,
-          { method: "GET" }
-        );
-        if (!data?.bookable || error) {
-          throw createError({
-            statusCode: 404,
-            statusMessage: "Bookable not found",
-          });
-        }
-        result.bookable = data.bookable;
-        return result;
-      }
-
-      if (eventId) {
-        const { data, error } = await serverFetch(
-          event,
-          `/json/${tenantId}/events/${eventId}`,
-          { method: "GET" }
-        );
-        if (!data?.event || error) {
-          throw createError({
-            statusCode: 404,
-            statusMessage: "Event not found",
-          });
-        }
-        result.event = data.event;
-        return result;
-      }
-
-      if (include?.includes("bookables")) {
-        const { data, error } = await serverFetch(
-          event,
-          `/json/${tenantId}/bookables/`,
-          {
-            method: "GET",
-          }
-        );
-        if (!error) {
-          result.bookables = data.bookables;
-        }
-      }
-
-      if (include?.includes("events")) {
-        const { data, error } = await serverFetch(
-          event,
-          `/json/${tenantId}/events/`,
-          {
-            method: "GET",
-          }
-        );
-
-        if (!error) {
-          result.events = data;
-        }
-      }
-    }
-
-    return result;
+    return { ...result, ...items };
   },
-  { maxAge: 300, swr: true }
+  {
+    maxAge: 300,
+    swr: true,
+    authScoped: true,
+    getKey: (event) => {
+      const token = getCookie(event, "access-token");
+      const scope = token ? "auth" : "anon";
+      const { slug, bookableId, eventId, include } = getQuery(event);
+      const { base, catalogType, catalogTenantId, tenantIds } = getQuery(event);
+      const inc = include
+        ? String(include).split(",").map((s) => s.trim()).sort().join(",")
+        : "";
+      return [
+        "catalog-bundle",
+        scope,
+        slug ?? "root",
+        bookableId ?? "-",
+        eventId ?? "-",
+        inc,
+        base === "false" ? "items" : "base",
+        catalogType ?? "-",
+        catalogTenantId ?? "-",
+        tenantIds ?? "-",
+      ].join("::");
+    },
+  }
 );

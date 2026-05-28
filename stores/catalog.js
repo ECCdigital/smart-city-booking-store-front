@@ -3,6 +3,7 @@ import { useCatalog } from "~/composables/api/useCatalog.js";
 export const useCatalogStore = defineStore("catalog", {
   state: () => ({
     catalog: null,
+    loadedFor: null,
     loading: false,
     error: null,
   }),

@@ -1,5 +1,4 @@
-import { logger } from "~~/server/api/utils/logger.js";
-import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
+import { getThemeBundle } from "~~/server/api/utils/themeBundle.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 
 const defaultTheme = {
@@ -9,25 +8,13 @@ const defaultTheme = {
 
 export default createConditionalCachedHandler(
   async (event) => {
-    const log = logger.child({ caller: "server/api/theme/css.get" });
-
-    let theme = defaultTheme;
-
-    const { data, error } = await serverFetch(event, `/api/catalog/themes`, {
-      method: "GET",
-    });
-
-    if (error) {
-      log.error(`Error fetching theme: ${error.message}`);
-    } else if (data?.theme?.colors?.primary && data?.theme?.colors?.secondary) {
-      theme = data.theme.colors;
-    } else {
-      log.warn(
-        `Theme response missing primary or secondary colors, using default theme.`
-      );
-    }
+    const bundle = await getThemeBundle(event);
+    const colors = bundle?.theme?.colors;
+    const theme =
+      colors?.primary && colors?.secondary ? colors : defaultTheme;
 
     setHeader(event, "Content-Type", "text/css");
+    setHeader(event, "Cache-Control", "public, max-age=300, s-maxage=300");
     return `
       :root {
         --ui-primary: ${theme.primary};
@@ -39,5 +26,5 @@ export default createConditionalCachedHandler(
       }
     `;
   },
-  { maxAge: 300 }
+  { maxAge: 300, authScoped: false }
 );

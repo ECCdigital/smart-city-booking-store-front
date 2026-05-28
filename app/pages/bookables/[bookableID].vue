@@ -20,12 +20,13 @@ const bookableID = computed(() => route.params.bookableID);
 
 const { loadBundle } = useCatalogBundle();
 
-const bookable = computed(() => {
-  return bookableStore.getBookableById(bookableID.value);
-});
+const bookable = computed(() => bookableStore.getBookableById(bookableID.value));
 
 if (!bookable.value) {
-  await loadBundle({ slug: catalogSlug.value, bookableID: bookableID.value });
+  await loadBundle({
+    slug: catalogSlug.value || null,
+    bookableID: bookableID.value,
+  });
 }
 </script>
 

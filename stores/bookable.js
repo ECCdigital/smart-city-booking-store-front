@@ -4,6 +4,8 @@ export const useBookableStore = defineStore("bookable", {
   state: () => ({
     initialized: false,
     bookables: [],
+    loadedFor: null,
+    loadedDetailsFor: {},
   }),
   getters: {
     getBookables: (state) => state.bookables,
@@ -19,10 +21,12 @@ export const useBookableStore = defineStore("bookable", {
     getTickets: (state) => state.bookables.filter((b) => b.type === "ticket"),
   },
   actions: {
-    async fetchBookables(tenantID) {
+    async fetchBookables(tenantID, { force = false } = {}) {
+      if (this.initialized && !force) return this.bookables;
       const { fetchBookables } = useBookables();
       try {
         this.bookables = await fetchBookables(tenantID);
+        this.initialized = true;
         return this.bookables;
       } catch (error) {
         console.error("Error fetching bookables:", error);

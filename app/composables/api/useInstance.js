@@ -1,18 +1,15 @@
 export function useInstance() {
   const fetchInstance = async () => {
+    const api = useApiClient();
 
-    const { error, data } = await useFetch("/api/instance", {
-      method: "GET",
-      server: true,
-      credentials: "include",
-    });
+    const { data, error } = await api.get("/api/instance");
 
-    if (error.value) {
-      console.error("Error fetching instance:", error.value);
-      throw new Error("Failed to fetch instance");
+    if (error) {
+      console.error("Error fetching instance:", error);
+      throw error;
     }
 
-    return data.value;
+    return data;
   };
 
   return {

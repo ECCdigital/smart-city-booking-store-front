@@ -11,10 +11,13 @@ definePageMeta({
   },
 });
 
+const route = useRoute();
 const { loadBundle } = useCatalogBundle();
-
 const eventStore = useEventStore();
-await loadBundle({ include: ["events"] });
+
+const catalogSlug = computed(() => route.params.catalogSlug || null);
+
+await loadBundle({ slug: catalogSlug.value, include: ["events"] });
 
 const allEvents = computed(() => {
   return eventStore.getEvents;

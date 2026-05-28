@@ -6,43 +6,44 @@ import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache
 
 export default createConditionalCachedHandler(
   async (event) => {
-    const log = logger.child({ caller: "server/api/theme/logo.get" });
+    const log = logger.child({ caller: "server/api/theme/favicon.get" });
 
     const bundle = await getThemeBundle(event);
-    const logoUrl = bundle?.logoUrl ?? null;
+    const faviconUrl = bundle?.faviconUrl ?? null;
 
-    if (logoUrl) {
+    if (faviconUrl) {
       try {
-        const response = await fetch(logoUrl);
+        const response = await fetch(faviconUrl);
         if (!response.ok) {
           throw new Error(`Failed to fetch: ${response.status}`);
         }
 
         const buffer = Buffer.from(await response.arrayBuffer());
-        const contentType = response.headers.get("content-type") ?? "image/png";
+        const contentType =
+          response.headers.get("content-type") ?? "image/x-icon";
 
         setHeader(event, "Content-Type", contentType);
         setHeader(event, "Cache-Control", "public, max-age=300, s-maxage=300");
         return buffer;
       } catch (error) {
-        log.warn(`Could not load remote logo: ${error}`);
+        log.warn(`Could not load remote favicon: ${error}`);
       }
     }
 
     const candidates = [
-      join(process.cwd(), "public", "app-logo.png"),
-      join(process.cwd(), ".output", "public", "app-logo.png"),
+      join(process.cwd(), "public", "favicon.ico"),
+      join(process.cwd(), ".output", "public", "favicon.ico"),
     ];
 
-    const defaultLogoPath = candidates.find((p) => existsSync(p));
+    const defaultFaviconPath = candidates.find((p) => existsSync(p));
 
-    if (!defaultLogoPath) {
-      throw createError({ statusCode: 404, statusMessage: "Logo not found" });
+    if (!defaultFaviconPath) {
+      throw createError({ statusCode: 404, statusMessage: "Favicon not found" });
     }
 
-    setHeader(event, "Content-Type", "image/png");
+    setHeader(event, "Content-Type", "image/x-icon");
     setHeader(event, "Cache-Control", "public, max-age=300, s-maxage=300");
-    return sendStream(event, createReadStream(defaultLogoPath));
+    return sendStream(event, createReadStream(defaultFaviconPath));
   },
   { maxAge: 300, authScoped: false }
 );
