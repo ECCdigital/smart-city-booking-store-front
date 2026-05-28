@@ -9,7 +9,6 @@
 
 <script setup>
 import * as locales from "@nuxt/ui/locale";
-import { useInstanceStore } from "~~/stores/instance.js";
 
 const { locale } = useI18n();
 
@@ -21,12 +20,4 @@ useHead({
   htmlAttrs: { lang, dir },
   link: [{ rel: "stylesheet", href: `/api/theme/css` }],
 });
-
-const instanceStore = useInstanceStore();
-
-try {
-  await instanceStore.fetchInstance();
-} catch (error) {
-  console.error("[app.vue] fetchInstance failed:", error);
-}
 </script>

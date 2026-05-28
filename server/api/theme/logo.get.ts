@@ -1,26 +1,15 @@
 import { createReadStream, existsSync } from "node:fs";
 import { join } from "node:path";
-import { serverFetch } from "~~/server/api/utils/serverFetch.js";
 import { logger } from "~~/server/api/utils/logger.js";
+import { getThemeBundle } from "~~/server/api/utils/themeBundle";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
-import type { ThemeBundle } from "~~/shared/types/api.js";
 
 export default createConditionalCachedHandler(
   async (event) => {
     const log = logger.child({ caller: "server/api/theme/logo.get" });
 
-    let logoUrl: string | null = null;
-
-    const { data, error } = await serverFetch<ThemeBundle>(
-      event,
-      `/api/catalog/themes`,
-      {
-        method: "GET",
-      }
-    );
-    if (!error) {
-      logoUrl = data?.logoUrl ?? null;
-    }
+    const bundle = await getThemeBundle(event);
+    const logoUrl = bundle?.logoUrl ?? null;
 
     if (logoUrl) {
       try {
@@ -33,7 +22,7 @@ export default createConditionalCachedHandler(
         const contentType = response.headers.get("content-type") ?? "image/png";
 
         setHeader(event, "Content-Type", contentType);
-        setHeader(event, "Cache-Control", "public, max-age=300");
+        setHeader(event, "Cache-Control", "public, max-age=300, s-maxage=300");
         return buffer;
       } catch (error) {
         log.warn(`Could not load remote logo: ${error}`);
@@ -52,8 +41,8 @@ export default createConditionalCachedHandler(
     }
 
     setHeader(event, "Content-Type", "image/png");
-    setHeader(event, "Cache-Control", "public, max-age=300");
+    setHeader(event, "Cache-Control", "public, max-age=300, s-maxage=300");
     return sendStream(event, createReadStream(defaultLogoPath));
   },
-  { maxAge: 300 }
+  { maxAge: 300, authScoped: false }
 );

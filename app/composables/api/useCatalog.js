@@ -19,6 +19,7 @@ export function useCatalog() {
   };
 
   const fetchCatalogBundle = async ({
+    slug = null,
     tenantID = null,
     bookableID = null,
     eventID = null,
@@ -31,9 +32,10 @@ export function useCatalog() {
 
     const { data, error } = await api.get(url, {
       params: {
-        bookableId: bookableID,
-        eventId: eventID,
-        include,
+        slug: slug || undefined,
+        bookableId: bookableID || undefined,
+        eventId: eventID || undefined,
+        include: include || undefined,
       },
     });
     if (error) {

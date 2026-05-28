@@ -6,6 +6,20 @@ import { usePortalStore } from "~~/stores/portal.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
 import { sendRedirect } from "h3";
 
+function buildBundleKey({ slug, tenantID, bookableID, eventID, include }) {
+  const sortedInclude = Array.isArray(include)
+    ? [...include].sort().join(",")
+    : include ?? "";
+  return [
+    "catalog-bundle",
+    slug ?? "root",
+    tenantID ?? "all",
+    bookableID ?? "-",
+    eventID ?? "-",
+    sortedInclude,
+  ].join(":");
+}
+
 export function useCatalogBundle() {
   const { fetchCatalogBundle } = useCatalog();
   const catalogStore = useCatalogStore();
@@ -13,32 +27,51 @@ export function useCatalogBundle() {
   const eventStore = useEventStore();
   const tenantStore = useTenantStore();
   const portalStore = usePortalStore();
-  const config = useRuntimeConfig();
   const { tenantID } = useTenant();
 
-  const cacheEnabled = config.public.cacheEnabled;
+  async function loadBundle({
+    slug = null,
+    bookableID = null,
+    eventID = null,
+    include = [],
+  } = {}) {
 
-  async function loadBundle({ bookableID, eventID, include = [] } = {}) {
-    const cacheKey = `catalog:${tenantID.value}:${
-      bookableID || eventID || include.sort().join(",")
-    }`;
+    console.log("Loading bundle with slug:", slug);
+    console.log("Tenant ID:", tenantID.value);
+    console.log("Bookable ID:", bookableID);
+    console.log("Event ID:", eventID);
+    console.log("Include:", include);
+
+    const cacheKey = buildBundleKey({
+      slug,
+      tenantID: tenantID.value,
+      bookableID,
+      eventID,
+      include,
+    });
+
     const event = import.meta.server ? useRequestEvent() : null;
+    const includeList = Array.isArray(include) ? include : [include];
 
     const { data, error } = await useAsyncData(
       cacheKey,
       () =>
         fetchCatalogBundle({
+          slug,
           tenantID: tenantID.value,
           bookableID,
           eventID,
-          include: include.join(","),
+          include: includeList.filter(Boolean).join(","),
         }),
       {
         server: true,
-        getCachedData: cacheEnabled ? undefined : () => undefined,
-        dedupe: cacheEnabled ? "defer" : "cancel",
+        dedupe: "defer",
+        getCachedData: (key, nuxtApp) =>
+          nuxtApp.payload.data[key] ?? nuxtApp.static.data[key],
       }
     );
+
+    console.log("Bundle data:", data.value);
 
     if (error.value) {
       if (error.value.statusMessage === "unauthorized") {
@@ -75,8 +108,8 @@ export function useCatalogBundle() {
       bookableStore.addOrUpdate(data.value.bookable);
     }
     if (data.value?.events) {
-      const eventsWithType = data.value.events.map((event) => ({
-        ...event,
+      const eventsWithType = data.value.events.map((evt) => ({
+        ...evt,
         type: "event",
       }));
       eventStore.$patch({ events: eventsWithType });
@@ -91,10 +124,19 @@ export function useCatalogBundle() {
     return data.value;
   }
 
-  function clearBundleCache(bookableID, eventID, include = []) {
-    const cacheKey = `catalog:${tenantID.value}:${
-      bookableID || eventID || include.sort().join(",")
-    }`;
+  function clearBundleCache({
+    slug = null,
+    bookableID = null,
+    eventID = null,
+    include = [],
+  } = {}) {
+    const cacheKey = buildBundleKey({
+      slug,
+      tenantID: tenantID.value,
+      bookableID,
+      eventID,
+      include,
+    });
     clearNuxtData(cacheKey);
   }
 

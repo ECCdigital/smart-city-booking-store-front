@@ -3,14 +3,14 @@ import { computed } from "vue";
 import { useTenantStore } from "~~/stores/tenant.js";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import { useTenant } from "~/composables/useTenant";
 
 const { isGreaterThanMd } = useBreakpointCheck();
 
 const t = useI18n().t;
 
 const route = useRoute();
-
-const tenantID = useState("tenantID");
+const { tenantID } = useTenant();
 
 const tenantStore = useTenantStore();
 

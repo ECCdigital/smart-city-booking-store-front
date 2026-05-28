@@ -11,9 +11,13 @@ definePageMeta({
   },
 });
 
+const route = useRoute();
 const { loadBundle } = useCatalogBundle();
 const bookableStore = useBookableStore();
-await loadBundle({ include: ["bookables"] });
+
+const catalogSlug = computed(() => route.params.catalogSlug || null);
+
+await loadBundle({ slug: catalogSlug.value, include: ["bookables"] });
 
 const allBookables = computed(() => {
   return bookableStore.getBookables;

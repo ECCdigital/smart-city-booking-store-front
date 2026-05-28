@@ -43,12 +43,15 @@ definePageMeta({
   },
 });
 
+const route = useRoute();
 const { tenantTo } = useTenantRoute();
 const { loadBundle } = useCatalogBundle();
 const eventStore = useEventStore();
 
-const { pending, error } = useLazyAsyncData("catalog-bundle", () =>
-    loadBundle({ include: ["bookables", "events"] })
+const catalogSlug = computed(() => route.params.catalogSlug || null);
+
+const { error } = useLazyAsyncData("catalog-bundle-home", () =>
+    loadBundle({ slug: catalogSlug.value, include: ["events"] })
 );
 
 if (error.value) {

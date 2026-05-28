@@ -15,7 +15,8 @@ export const useTenantStore = defineStore("tenant", {
     },
   },
   actions: {
-    async fetchTenants() {
+    async fetchTenants({ force = false } = {}) {
+      if (this.initialized && !force) return this.tenants;
       const { fetchTenants } = useTenants();
       try {
         this.tenants = await fetchTenants();
@@ -24,6 +25,7 @@ export const useTenantStore = defineStore("tenant", {
       } finally {
         this.initialized = true;
       }
+      return this.tenants;
     },
     setCurrentTenantID(tenantID) {
       this.currentTenantID = tenantID;

@@ -1,5 +1,5 @@
-import { serverFetch } from "~~/server/api/utils/serverFetch.js";
-import type { ThemeBundle } from "~~/shared/types/api.js";
+import { getThemeBundle } from "~~/server/api/utils/themeBundle";
+import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 
 const DEFAULT_HERO = {
   title: "Marktplatz",
@@ -8,22 +8,13 @@ const DEFAULT_HERO = {
 
 export default createConditionalCachedHandler(
   async (event) => {
-    const { data, error } = await serverFetch<ThemeBundle>(
-      event,
-      `/api/catalog/themes`,
-      {
-        method: "GET",
-      }
-    );
-
-    if (error) {
-      return DEFAULT_HERO;
-    }
+    const bundle = await getThemeBundle(event);
+    if (!bundle) return DEFAULT_HERO;
 
     return {
-      title: data?.hero?.title || DEFAULT_HERO.title,
-      subtitle: data?.hero?.subtitle || DEFAULT_HERO.subtitle,
+      title: bundle.hero?.title || DEFAULT_HERO.title,
+      subtitle: bundle.hero?.subtitle || DEFAULT_HERO.subtitle,
     };
   },
-  { maxAge: 300 }
+  { maxAge: 300, authScoped: false }
 );

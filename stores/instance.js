@@ -1,4 +1,3 @@
-// stores/instance.js
 import { useInstance } from "~/composables/api/useInstance.js";
 
 export const useInstanceStore = defineStore("instance", {
