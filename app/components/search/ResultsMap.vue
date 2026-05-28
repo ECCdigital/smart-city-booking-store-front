@@ -26,6 +26,13 @@
           <LMarker
             v-if="hasCoordinates(bookable.item)"
             :lat-lng="getCoordinatesForBookable(bookable.item)"
+            :z-index-offset="
+              bookable.item.id === currentBookable?.item.id
+                ? 1000
+                : bookable.matchStatus === 'match'
+                  ? 500
+                  : 0
+            "
             @click="openBookableDetails(bookable)"
           >
             <LIcon :icon-anchor="[20, 40]">
