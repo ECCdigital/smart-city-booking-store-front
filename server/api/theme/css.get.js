@@ -9,7 +9,7 @@ const defaultTheme = {
 
 export default createConditionalCachedHandler(
   async (event) => {
-    const log = logger.child({ caller: "server/api/theme/[..slug].get" });
+    const log = logger.child({ caller: "server/api/theme/css.get" });
 
     let theme = defaultTheme;
 
@@ -17,14 +17,14 @@ export default createConditionalCachedHandler(
       method: "GET",
     });
 
-    if (!error) {
-      if (data.theme?.colors?.primary && data.theme?.colors?.secondary) {
-        theme = data.theme.colors;
-      } else {
-        log.warn(
-          `Theme does not have primary or secondary colors, using default theme.`
-        );
-      }
+    if (error) {
+      log.error(`Error fetching theme: ${error.message}`);
+    } else if (data?.theme?.colors?.primary && data?.theme?.colors?.secondary) {
+      theme = data.theme.colors;
+    } else {
+      log.warn(
+        `Theme response missing primary or secondary colors, using default theme.`
+      );
     }
 
     setHeader(event, "Content-Type", "text/css");

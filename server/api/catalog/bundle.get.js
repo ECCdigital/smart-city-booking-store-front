@@ -2,10 +2,6 @@ import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 
 const errorMapping = {
-  503: {
-    statusCode: 400,
-    statusMessage: "catalog_disabled",
-  },
   401: {
     statusCode: 401,
     statusMessage: "unauthorized",
@@ -22,8 +18,8 @@ export default createConditionalCachedHandler(
 
     if (error) {
       const mappedError = errorMapping[error.status] || {
-        status: error.status || 500,
-        message: error.message || "Error fetching catalog bundle",
+        statusCode: error.status || 500,
+        statusMessage: error.message || "Error fetching catalog bundle",
       };
 
       throw createError({
@@ -32,9 +28,19 @@ export default createConditionalCachedHandler(
       });
     }
 
-    const result = { catalog: data.catalog, tenants: data.tenants };
+    const result = {
+      offersEnabled: data.offersEnabled,
+      branding: data.branding,
+      portalUrl: data.portalUrl,
+      catalog: data.catalog,
+      tenants: data.tenants ?? [],
+    };
 
-    if (result.catalog.type === "instance") {
+    if (!data.offersEnabled) {
+      return result;
+    }
+
+    if (result.catalog?.type === "instance") {
       for (const tenant of result.tenants) {
         try {
           if (bookableId) {
@@ -60,7 +66,7 @@ export default createConditionalCachedHandler(
               return result;
             }
           }
-        } catch (error) {
+        } catch {
           // Ignore not found errors
         }
       }
@@ -94,7 +100,7 @@ export default createConditionalCachedHandler(
       }
     }
 
-    if (result.catalog.type === "single") {
+    if (result.catalog?.type === "single") {
       const tenantId = result.catalog?.tenantId;
       if (!tenantId) {
         throw createError({
@@ -109,7 +115,7 @@ export default createConditionalCachedHandler(
           `/json/${tenantId}/bookables/${bookableId}`,
           { method: "GET" }
         );
-        if (!data.bookable || error) {
+        if (!data?.bookable || error) {
           throw createError({
             statusCode: 404,
             statusMessage: "Bookable not found",
@@ -125,7 +131,7 @@ export default createConditionalCachedHandler(
           `/json/${tenantId}/events/${eventId}`,
           { method: "GET" }
         );
-        if (!result.event || error) {
+        if (!data?.event || error) {
           throw createError({
             statusCode: 404,
             statusMessage: "Event not found",

@@ -1,6 +1,7 @@
 <script setup>
 import { useCatalogStore } from "~~/stores/catalog.js";
 import { useBookableStore } from "~~/stores/bookable.js";
+import { usePortalStore } from "~~/stores/portal.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
 import NavigationBar from "../../components/navigation/NavigationBar.vue";
 
@@ -20,8 +21,8 @@ const catalogSlug = computed(() => {
 });
 
 const catalogStore = useCatalogStore();
-
 const bookableStore = useBookableStore();
+const portalStore = usePortalStore();
 
 const { data, error } = await useAsyncData(
   `catalog:${catalogSlug.value}`,
@@ -31,6 +32,18 @@ const { data, error } = await useAsyncData(
 
 if (error.value) {
   handleError({ statusCode: 404 }, t("errors.noCatalog"));
+}
+
+if (data.value?.branding) {
+  portalStore.$patch({
+    branding: data.value.branding,
+    portalUrl: data.value.portalUrl ?? null,
+  });
+}
+
+if (data.value?.offersEnabled === false) {
+  portalStore.$patch({ mode: "personal" });
+  await navigateTo("/account");
 }
 
 if (data.value?.catalog) {

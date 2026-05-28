@@ -18,7 +18,17 @@ export default createConditionalCachedHandler(
       });
     }
 
-    const result = { catalog: data.catalog, tenants: data.tenants };
+    const result = {
+      offersEnabled: data.offersEnabled,
+      branding: data.branding,
+      portalUrl: data.portalUrl,
+      catalog: data.catalog,
+      tenants: data.tenants ?? [],
+    };
+
+    if (!data.offersEnabled) {
+      return result;
+    }
 
     const tenantExists = result.tenants.some(
       (tenant) => tenant.id === tenantID

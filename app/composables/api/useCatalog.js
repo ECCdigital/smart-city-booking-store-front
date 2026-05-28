@@ -1,7 +1,16 @@
 export function useCatalog() {
-  const fetchCatalog = async (tenantID = null) => {
+  const fetchPortalMode = async () => {
     const api = useApiClient();
-    const url = tenantID ? `/api/catalog/${tenantID}` : `/api/catalog/`;
+
+    const { data, error } = await api.get(`/api/catalog/mode`);
+    if (error) throw error;
+
+    return data;
+  };
+
+  const fetchCatalog = async (slug = null) => {
+    const api = useApiClient();
+    const url = slug ? `/api/catalog/${slug}` : `/api/catalog/`;
 
     const { data, error } = await api.get(url);
     if (error) throw error;
@@ -14,7 +23,7 @@ export function useCatalog() {
     bookableID = null,
     eventID = null,
     include = null,
-  }) => {
+  } = {}) => {
     const api = useApiClient();
     const url = tenantID
       ? `/api/catalog/${tenantID}/bundle`
@@ -28,7 +37,7 @@ export function useCatalog() {
       },
     });
     if (error) {
-      console.error("Error fetching catalog bundle2:", error);
+      console.error("Error fetching catalog bundle:", error);
       throw error;
     }
 
@@ -36,6 +45,7 @@ export function useCatalog() {
   };
 
   return {
+    fetchPortalMode,
     fetchCatalog,
     fetchCatalogBundle,
   };

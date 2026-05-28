@@ -1,13 +1,13 @@
-import { useInstanceStore } from "~~/stores/instance.js";
+import { usePortalStore } from "~~/stores/portal.js";
 
-export default defineNuxtRouteMiddleware(async (to) => {
-    const instanceStore = useInstanceStore();
+export default defineNuxtRouteMiddleware(async () => {
+    const portalStore = usePortalStore();
 
-    if (!instanceStore.instance) {
-        await instanceStore.fetchInstance();
+    if (!portalStore.initialized) {
+        await portalStore.initialize();
     }
 
-    if (!instanceStore.catalogEnabled) {
+    if (portalStore.isPersonalMode) {
         return navigateTo("/account");
     }
 });

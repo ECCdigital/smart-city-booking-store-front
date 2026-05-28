@@ -2,6 +2,7 @@ import { useCatalogStore } from "~~/stores/catalog.js";
 import { useBookableStore } from "~~/stores/bookable.js";
 import { useEventStore } from "~~/stores/event.js";
 import { useTenantStore } from "~~/stores/tenant.js";
+import { usePortalStore } from "~~/stores/portal.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
 import { sendRedirect } from "h3";
 
@@ -11,12 +12,13 @@ export function useCatalogBundle() {
   const bookableStore = useBookableStore();
   const eventStore = useEventStore();
   const tenantStore = useTenantStore();
+  const portalStore = usePortalStore();
   const config = useRuntimeConfig();
   const { tenantID } = useTenant();
 
   const cacheEnabled = config.public.cacheEnabled;
 
-  async function loadBundle({ bookableID, eventID, include = [] }) {
+  async function loadBundle({ bookableID, eventID, include = [] } = {}) {
     const cacheKey = `catalog:${tenantID.value}:${
       bookableID || eventID || include.sort().join(",")
     }`;
@@ -46,6 +48,21 @@ export function useCatalogBundle() {
         return navigateTo(`/login`);
       }
       throw error.value;
+    }
+
+    if (data.value?.branding) {
+      portalStore.$patch({
+        branding: data.value.branding,
+        portalUrl: data.value.portalUrl ?? null,
+      });
+    }
+
+    if (data.value?.offersEnabled === false) {
+      portalStore.$patch({ mode: "personal" });
+      if (import.meta.server && event) {
+        return await sendRedirect(event, `/account`, 302);
+      }
+      return navigateTo(`/account`);
     }
 
     if (data.value?.catalog) {
