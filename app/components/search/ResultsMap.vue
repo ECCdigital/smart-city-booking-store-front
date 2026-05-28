@@ -1,21 +1,46 @@
 <template>
-  <div class="w-full md:w-[70vw] h-[80vh] z-10">
-    <LMap :zoom="zoom" :use-global-leaflet="false" :center="currentCenter">
+  <div v-if="!fetchedCoordinates">
+    <USkeleton class="w-full lg:w-[70vw] h-[80vh] m-2 rounded" />
+  </div>
+  <div v-else class="w-full lg:w-[70vw] h-[80vh] z-10 m-2 rounded overflow-hidden">
+    {{ decodeURIComponent(route.query.loc) }} - {{ route.query.loc }}
+    <br >
+    {{ searchIsInitialized }}*** {{ query.location }}
+    <br >
+    {{ currentCenter }} - {{ zoom }}
+    <br>
+    fetchedCoordinates = {{fetchedCoordinates}}
+
+    <LMap
+      :key="currentCenter.join(',')"
+      :zoom="zoom"
+      :use-global-leaflet="false"
+      :center="currentCenter"
+    >
       <LTileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
-        layer-type="base"
+        layer-type="overlay"
         name="Light  OpenStreetMap"
       />
 
-      <div v-for="bookable in bookables" :key="bookable">
+      <div v-for="bookable in bookables" :key="bookable.item.id">
         <LMarker
           v-if="hasCoordinates(bookable.item)"
           :lat-lng="getCoordinatesForBookable(bookable.item)"
           @click="openBookableDetails(bookable)"
         >
           <LIcon :icon-anchor="[20, 40]">
-            <UIcon :name="iconMapPin" :class="bookable.item.id === currentBookable?.item.id ? 'activeIconPin size-11' : 'size-10'"/>
+            <UIcon
+              :name="iconMapPin"
+              :class="
+                bookable.item.id === currentBookable?.item.id
+                  ? 'activeIconPin size-11'
+                  : bookable.matchStatus === 'match'
+                    ? 'matchingIconPin size-10'
+                    : 'nonMatchingIconPin size-10'
+              "
+            />
           </LIcon>
 
           <LTooltip
@@ -35,7 +60,7 @@
         </LMarker>
       </div>
     </LMap>
-    
+
     <!-- Mobile Detail Popup -->
     <Transition name="fade-up">
       <div
@@ -62,6 +87,7 @@
 <script setup>
 import ResultCard from "~/components/search/ResultCard.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
+import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 
 const props = defineProps({
   bookables: {
@@ -70,9 +96,40 @@ const props = defineProps({
   },
 });
 const { goToDetailsNewTab } = useRedirection();
+const route = useRoute();
 
+const { query, searchIsInitialized, searchAddress } = useBookableSearch({
+  isEvent: false,
+  sourceItems: props.bookables,
+});
+
+const fetchedCoordinates = ref(false);
 const currentCenter = ref([53.5, 10.0]);
-const zoom = ref(8); //toDo - passenden Zoom-Level wählen
+const zoom = computed(() => {
+  /*
+  if (props.bookables.length === 0) return 8; // Default-Zoom, wenn keine Bookables vorhanden sind
+
+  // Berechne die durchschnittlichen Koordinaten
+  const latitudes = props.bookables
+    .filter((b) => hasCoordinates(b.item))
+    .map((b) => getCoordinatesForBookable(b.item)[0]);
+  const longitudes = props.bookables
+    .filter((b) => hasCoordinates(b.item))
+    .map((b) => getCoordinatesForBookable(b.item)[1]);
+
+  if (latitudes.length === 0 || longitudes.length === 0) return 8; // Fallback-Zoom, wenn keine gültigen Koordinaten vorhanden sind
+
+  const avgLat =
+    latitudes.reduce((sum, lat) => sum + lat, 0) / latitudes.length;
+  const avgLng =
+    longitudes.reduce((sum, lng) => sum + lng, 0) / longitudes.length;
+
+  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+  currentCenter.value = [avgLat, avgLng];
+  return 12; // Angepasster Zoom-Level für die Mitte der Bookables
+  */
+  return 8;
+});
 
 const iconMapPin = () =>
   h(
@@ -92,6 +149,7 @@ const iconMapPin = () =>
       }),
     ],
   );
+
 
 const showDetailPopup = ref(false);
 const currentBookable = ref(null);
@@ -117,6 +175,75 @@ function getCoordinatesForBookable(bookable) {
   }
   return [];
 }
+
+/*async function getCenterCoordinates(addressString){
+  console.log("Want to calculate center based on query.location: ", addressString)
+  if(addressString){
+    const searchCoordinates = await searchAddress(addressString)
+    console.log("Calculated search coordinates: ", searchCoordinates)
+    return [searchCoordinates[1], searchCoordinates[0]]
+  }
+  return [53.5, 10.0]
+}*/
+async function getCenterCoordinates(addressString) {
+  if (!addressString) {
+    return [53.5, 10.0];
+  }
+
+  fetchedCoordinates.value = true;
+
+  try {
+    const searchCoordinates = await searchAddress(addressString);
+
+    if (Array.isArray(searchCoordinates) && searchCoordinates.length >= 2) {
+      return [Number(searchCoordinates[1]), Number(searchCoordinates[0])];
+    }
+  } catch (e) {
+    console.error(e);
+  } finally {
+    fetchedCoordinates.value = true;
+  }
+
+  return [53.5, 10.0];
+}
+
+/*onMounted(async () => {
+  if(query.location){
+    currentCenter.value = await getCenterCoordinates(decodeURIComponent(route.query.loc))
+  }
+})*/
+
+/*watch(() => route.query.loc, async (newQuery) => {
+  console.log("Route query changed: ", newQuery)
+  if(newQuery){
+    //currentCenter.value = await getCenterCoordinates(decodeURIComponent(newQuery))
+    console.log(await getCenterCoordinates(decodeURIComponent(newQuery)))
+  }
+})*/
+watch(
+  () => route.query.loc,
+  async (newLoc) => {
+    if (!newLoc){
+      fetchedCoordinates.value = true;
+      return;
+    }
+
+    try {
+      const center = await getCenterCoordinates(decodeURIComponent(newLoc));
+
+      if (
+        Array.isArray(center) &&
+        center.length === 2 &&
+        center.every((n) => typeof n === "number")
+      ) {
+        currentCenter.value = center;
+      }
+    } catch (err) {
+      console.error("Failed to update center:", err);
+    }
+  },
+  { immediate: true },
+);
 
 function openBookableDetails(bookable, handleCardClickOnMobile = false) {
   if (!bookable) return;
@@ -159,5 +286,16 @@ function closeBookableDetails() {
 
 .activeIconPin {
   color: var(--color-secondary);
+  z-index: 999;
+}
+
+.matchingIconPin {
+  z-index: 500;
+}
+
+.nonMatchingIconPin {
+  color: #cccdcf;
+  opacity: 0.7;
+  z-index: 50;
 }
 </style>
