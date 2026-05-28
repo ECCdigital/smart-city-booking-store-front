@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
   const { data, error } = await serverFetch(
     event,
-    `/api/v2/${encodeURIComponent(tenantID)}/group-checkout?simulate=${simulate ? "true" : "false"}`,
+    `/api/v2/${encodeURIComponent(tenantID)}/checkout/group?simulate=${simulate ? "true" : "false"}`,
     {
       method: "POST",
       body: checkoutBody,

@@ -132,7 +132,7 @@ const bookableID = route.params.bookableID;
 const tenantID = route.query.tenantId;
 
 const { fetchBookable, fetchCheckoutPermissions } = useCheckout();
-const { fetchTenant, fetchTenantPaymentProviders } = useTenants();
+const { fetchTenant, fetchTenantPaymentProviders, fetchTenantUserRoles } = useTenants();
 
 const isLoading = ref(true);
 
@@ -647,6 +647,105 @@ const groupBookingEnabled = computed(() => {
   return b?.groupBooking?.enabled === true;
 });
 
+function normalizeRoleIdentifier(value) {
+  if (value == null) return null;
+  if (typeof value === "string" || typeof value === "number") {
+    const s = String(value).trim();
+    return s || null;
+  }
+  if (typeof value === "object") {
+    const candidates = [value.id, value.roleId, value.name, value.code, value.slug];
+    for (const c of candidates) {
+      if (c != null) {
+        const s = String(c).trim();
+        if (s) return s;
+      }
+    }
+  }
+  return null;
+}
+
+const groupBookingPermittedRoles = computed(() => {
+  const raw = leadBookable.value?.groupBooking?.permittedRoles;
+  if (!Array.isArray(raw)) return [];
+  const ids = raw.map(normalizeRoleIdentifier).filter(Boolean);
+  return [...new Set(ids)];
+});
+
+const groupBookingHasRoleRestriction = computed(
+  () => groupBookingPermittedRoles.value.length > 0
+);
+
+const userTenantRoles = ref([]);
+const isLoadingUserTenantRoles = ref(false);
+const hasResolvedUserTenantRoles = ref(false);
+
+const userTenantRoleIds = computed(() => {
+  const ids = userTenantRoles.value
+    .map(normalizeRoleIdentifier)
+    .filter(Boolean);
+  return [...new Set(ids)];
+});
+
+async function loadUserTenantRoles() {
+  if (!tenantID || !isLoggedIn.value) {
+    userTenantRoles.value = [];
+    hasResolvedUserTenantRoles.value = true;
+    return;
+  }
+  isLoadingUserTenantRoles.value = true;
+  try {
+    const roles = await fetchTenantUserRoles(tenantID, { publicRoles: true });
+    userTenantRoles.value = Array.isArray(roles) ? roles : [];
+  } catch (err) {
+    console.warn("Failed to load user roles for tenant", err);
+    userTenantRoles.value = [];
+  } finally {
+    isLoadingUserTenantRoles.value = false;
+    hasResolvedUserTenantRoles.value = true;
+  }
+}
+
+const canCreateGroupBooking = computed(() => {
+  if (!groupBookingEnabled.value) return false;
+  if (!groupBookingHasRoleRestriction.value) return true;
+  if (!isLoggedIn.value) return false;
+  const permitted = new Set(groupBookingPermittedRoles.value);
+  return userTenantRoleIds.value.some((id) => permitted.has(id));
+});
+
+const isCheckingGroupBookingPermission = computed(() => {
+  if (!groupBookingHasRoleRestriction.value) return false;
+  if (!isLoggedIn.value) return false;
+  return isLoadingUserTenantRoles.value || !hasResolvedUserTenantRoles.value;
+});
+
+const groupBookingPermissionReason = computed(() => {
+  if (!groupBookingHasRoleRestriction.value) return null;
+  if (!isLoggedIn.value) return "loginRequired";
+  if (isCheckingGroupBookingPermission.value) return "loading";
+  if (!canCreateGroupBooking.value) return "missingRole";
+  return null;
+});
+
+watch(
+  [groupBookingHasRoleRestriction, isLoggedIn, () => tenantID],
+  ([hasRestriction, loggedIn]) => {
+    if (!hasRestriction) {
+      userTenantRoles.value = [];
+      hasResolvedUserTenantRoles.value = true;
+      return;
+    }
+    if (loggedIn) {
+      loadUserTenantRoles();
+    } else {
+      userTenantRoles.value = [];
+      hasResolvedUserTenantRoles.value = true;
+    }
+  },
+  { immediate: true }
+);
+
 const useGroupBooking = ref(false);
 const groupBookingRule = ref({
   seedStart: null,
@@ -673,8 +772,25 @@ watch(groupBookingEnabled, (enabled) => {
   }
 });
 
-watch(useGroupBooking, () => {
+watch(canCreateGroupBooking, (allowed) => {
+  if (!allowed && useGroupBooking.value) {
+    useGroupBooking.value = false;
+  }
+});
+
+watch(useGroupBooking, (enabled) => {
   groupBookingAttemptStatuses.value = {};
+  if (!enabled) return;
+
+  const start = normalizePeriodTimestamp(selectedTimePeriod.value?.start);
+  const end = normalizePeriodTimestamp(selectedTimePeriod.value?.end);
+  if (start == null || end == null || end <= start) return;
+
+  groupBookingRule.value = {
+    ...groupBookingRule.value,
+    seedStart: start,
+    seedEnd: end,
+  };
 });
 
 watch(
@@ -800,8 +916,6 @@ async function validateAll() {
           .catch((err) => ({ id, isLead, error: err }))
       )
     );
-
-    console.log("results", JSON.stringify(results));
 
     if (myToken !== validationToken) return;
 
@@ -933,65 +1047,106 @@ async function validateGroupBookingAttempts() {
   }
 
   try {
-    const leadAmount = amounts.value[bookableID] || 1;
+    const targets = [
+      {
+        id: bookableID,
+        isLead: true,
+        amount: amounts.value[bookableID] || 1,
+        title: leadBookable.value?.title || t("checkout.review.bookingLabel"),
+      },
+      ...selectedAdditionalBookables.value.map((id) => ({
+        id,
+        isLead: false,
+        amount: amounts.value[id] || 1,
+        title:
+          additionalBookables.value.find((entry) => entry.item.id === id)?.item
+            .title || t("checkout.additionalObjects"),
+      })),
+    ];
+
+    const requests = [];
+    for (const attempt of attempts) {
+      for (const target of targets) {
+        requests.push({ attempt, target });
+      }
+    }
 
     const results = await Promise.all(
-      attempts.map((attempt) =>
+      requests.map(({ attempt, target }) =>
         validateBookable({
-          bookableID,
+          bookableID: target.id,
           tenantID,
-          amount: leadAmount,
+          amount: target.amount,
           start: attempt.start,
           end: attempt.end,
           couponCode: couponForValidation.value,
           couponId: appliedCouponDetails.value?.id ?? null,
           bookWithPrice: isBookingWithPrice.value,
         })
-          .then((res) => ({ attempt, res }))
-          .catch((err) => ({ attempt, error: err }))
+          .then((res) => ({ attempt, target, res }))
+          .catch((err) => ({ attempt, target, error: err }))
       )
     );
 
     if (myToken !== validationToken) return;
 
-    const statuses = {};
-    const items = [];
-    let taxAmount = 0;
-    let total = 0;
-    const errors = [];
+    const perAttempt = new Map();
+    for (const attempt of attempts) {
+      perAttempt.set(attempt.start, {
+        valid: true,
+        net: 0,
+        gross: 0,
+        firstError: null,
+      });
+    }
+
+    const perBookable = new Map();
+    for (const target of targets) {
+      perBookable.set(target.id, {
+        target,
+        netTotal: 0,
+        grossTotal: 0,
+        freeBookingAllowedAll: true,
+        failedAttempts: 0,
+      });
+    }
+
     let firstCheckoutId = null;
 
     for (const row of results) {
-      const startKey = row.attempt.start;
+      const attemptAcc = perAttempt.get(row.attempt.start);
+      const bookableAcc = perBookable.get(row.target.id);
+      if (!attemptAcc || !bookableAcc) continue;
+
       if (row.error) {
-        statuses[startKey] = {
-          valid: false,
-          reason: "checkout.unknown_error",
-          error: row.error,
-        };
-        errors.push({
-          id: `${bookableID}@${startKey}`,
-          isLead: true,
-          label: leadBookable.value?.title,
-          reason: "checkout.unknown_error",
-          attemptStart: row.attempt.start,
-        });
+        attemptAcc.valid = false;
+        if (!attemptAcc.firstError) {
+          attemptAcc.firstError = {
+            reason: "checkout.unknown_error",
+            target: row.target,
+          };
+        }
+        bookableAcc.failedAttempts += 1;
+        bookableAcc.freeBookingAllowedAll = false;
         continue;
       }
+
       if (!row.res?.success) {
         const reason = row.res?.error?.reason || "checkout.unknown_error";
         const params = row.res?.error?.params || {};
-        statuses[startKey] = { valid: false, reason, params };
-        errors.push({
-          id: `${bookableID}@${startKey}`,
-          isLead: true,
-          label: leadBookable.value?.title,
-          reason,
-          params,
-          attemptStart: row.attempt.start,
-        });
+        attemptAcc.valid = false;
+        if (!attemptAcc.firstError) {
+          attemptAcc.firstError = { reason, params, target: row.target };
+        }
+        bookableAcc.failedAttempts += 1;
+        bookableAcc.freeBookingAllowedAll = false;
         continue;
       }
+
+      if (firstCheckoutId == null && row.res.checkoutId) {
+        firstCheckoutId = row.res.checkoutId;
+      }
+
       const validationData =
         row.res?.data && typeof row.res.data === "object" ? row.res.data : {};
       const freeBookingAllowed = validationData.freeBookingAllowed === true;
@@ -999,39 +1154,80 @@ async function validateGroupBookingAttempts() {
       const userPriceEur = toFiniteAmount(validationData.userPriceEur);
       const userGrossPriceEur = toFiniteAmount(validationData.userGrossPriceEur);
 
+      const lineNet = freeBookingActive ? 0 : userPriceEur;
+      const lineGross = freeBookingActive ? 0 : userGrossPriceEur;
+
+      attemptAcc.net += lineNet;
+      attemptAcc.gross += lineGross;
+
+      bookableAcc.netTotal += lineNet;
+      bookableAcc.grossTotal += lineGross;
+      if (!freeBookingAllowed) bookableAcc.freeBookingAllowedAll = false;
+    }
+
+    const statuses = {};
+    const errors = [];
+    let total = 0;
+    let taxAmount = 0;
+
+    for (const attempt of attempts) {
+      const startKey = attempt.start;
+      const acc = perAttempt.get(startKey);
+      if (!acc) continue;
+      if (!acc.valid) {
+        const reason = acc.firstError?.reason || "checkout.unknown_error";
+        const params = acc.firstError?.params;
+        statuses[startKey] = { valid: false, reason, params };
+        const failedTarget = acc.firstError?.target;
+        errors.push({
+          id: `${failedTarget?.id || bookableID}@${startKey}`,
+          isLead: failedTarget?.isLead ?? true,
+          label:
+            failedTarget?.title ||
+            leadBookable.value?.title ||
+            t("checkout.review.bookingLabel"),
+          reason,
+          params,
+          attemptStart: attempt.start,
+        });
+        continue;
+      }
       statuses[startKey] = {
         valid: true,
-        data: validationData,
-        freeBookingAllowed,
-        freeBookingActive,
-        userPriceEur,
-        userGrossPriceEur,
+        userPriceEur: acc.net,
+        userGrossPriceEur: acc.gross,
       };
-
-      if (firstCheckoutId == null && row.res.checkoutId) {
-        firstCheckoutId = row.res.checkoutId;
-      }
-
-      const lineNetAmount = freeBookingActive ? 0 : userPriceEur;
-      const lineGrossAmount = freeBookingActive ? 0 : userGrossPriceEur;
-      taxAmount += lineGrossAmount - lineNetAmount;
-      total += lineGrossAmount;
+      total += acc.gross;
+      taxAmount += Math.max(0, acc.gross - acc.net);
     }
 
     groupBookingAttemptStatuses.value = statuses;
 
-    const labelBase =
-      leadBookable.value?.title || t("checkout.review.bookingLabel");
-    items.push({
-      id: bookableID,
-      label: t("groupBooking.summary.line", {
-        title: labelBase,
-        count: attempts.length,
-      }),
-      amountEur: total - taxAmount,
-      priceDisplayEur: null,
-      skipQuantity: true,
-    });
+    const eligibilityMap = {};
+    for (const [id, acc] of perBookable.entries()) {
+      eligibilityMap[id] = acc.freeBookingAllowedAll;
+    }
+    freeBookingEligibility.value = eligibilityMap;
+
+    const attemptCount = attempts.length;
+    const items = [];
+
+    if (errors.length === 0) {
+      for (const target of targets) {
+        const acc = perBookable.get(target.id);
+        if (!acc) continue;
+        items.push({
+          id: target.id,
+          label: t("groupBooking.summary.line", {
+            title: target.title,
+            count: attemptCount,
+          }),
+          amountEur: acc.netTotal,
+          priceDisplayEur: null,
+          skipQuantity: true,
+        });
+      }
+    }
 
     if (
       couponForValidation.value &&
@@ -1067,10 +1263,20 @@ async function validateGroupBookingAttempts() {
         isLead: true,
         params: { invalidCount: errors.length, totalCount: attempts.length },
       };
+      for (const target of targets) {
+        if (target.isLead) continue;
+        const acc = perBookable.get(target.id);
+        if (acc && acc.failedAttempts === attempts.length) {
+          errorMap[target.id] = {
+            reason: "checkout.bookable_unavailable",
+            isLead: false,
+          };
+        }
+      }
     }
     validationErrors.value = errorMap;
     summary.value = {
-      items: errors.length === 0 ? items : [],
+      items,
       taxAmount,
       total,
       errors,
@@ -1201,10 +1407,7 @@ const needsStandaloneObjectsStep = computed(
 );
 
 const showAdditionalBookablesInPeriodStep = computed(
-  () =>
-    !isGroupBookingActive.value &&
-    requiresTimeSelection.value &&
-    hasAdditionalBookables.value
+  () => requiresTimeSelection.value && hasAdditionalBookables.value
 );
 
 const needsTimePeriodSelection = computed(() => {
@@ -1590,6 +1793,10 @@ function buildGroupCheckoutPayload() {
 
   const bookableItems = [
     { bookableId: bookableID, amount: amounts.value[bookableID] || 1 },
+    ...selectedAdditionalBookables.value.map((id) => ({
+      bookableId: id,
+      amount: amounts.value[id] || 1,
+    })),
   ];
 
   const payload = {
@@ -1771,11 +1978,14 @@ async function handleFinish() {
       return;
     }
 
-    const bookings = Array.isArray(data?.data?.bookings)
-      ? data.data.bookings
+    console.log("Checkout successful", JSON.stringify(data, null, 2));
+
+    const bookings = Array.isArray(data?.data?.groupBooking?.bookings)
+      ? data.data.groupBooking.bookings
       : [];
     const booking = data?.data?.booking || bookings[0] || null;
     const payment = data?.data?.payment || null;
+    const bookingIds = data?.data?.groupBooking?.bookingIds || (booking ? [booking.id] : []) || [];
 
     if (!booking) {
       notifyError(t("checkout.unknown_error"));
@@ -1803,7 +2013,7 @@ async function handleFinish() {
     const statusQuery = {
       tenantId: String(tenantID ?? ""),
       bookableId: String(bookableID ?? ""),
-      bookingId: String(booking?.id ?? ""),
+      bookingId: bookingIds,
     };
     if (booking?.isCommitted === false) {
       statusQuery.pending = "1";
@@ -2021,12 +2231,26 @@ function onReviewEdit(section) {
 
               <div
                 v-if="groupBookingEnabled && isScheduleRelated"
-                class="flex flex-col gap-3 p-4 rounded-xl border border-primary-200 dark:border-primary-800 bg-primary-50/50 dark:bg-primary-950/30 sm:flex-row sm:items-center sm:justify-between"
+                class="flex flex-col gap-3 p-4 rounded-xl border sm:flex-row sm:items-center sm:justify-between"
+                :class="
+                  canCreateGroupBooking
+                    ? 'border-primary-200 dark:border-primary-800 bg-primary-50/50 dark:bg-primary-950/30'
+                    : 'border-amber-200 dark:border-amber-800 bg-amber-50/60 dark:bg-amber-950/30'
+                "
               >
                 <div class="flex items-start gap-3">
                   <UIcon
-                    name="i-lucide-repeat"
-                    class="text-primary-600 dark:text-primary-400 mt-0.5"
+                    :name="
+                      canCreateGroupBooking
+                        ? 'i-lucide-repeat'
+                        : 'i-lucide-lock'
+                    "
+                    class="mt-0.5"
+                    :class="
+                      canCreateGroupBooking
+                        ? 'text-primary-600 dark:text-primary-400'
+                        : 'text-amber-600 dark:text-amber-400'
+                    "
                     size="20"
                   />
                   <div>
@@ -2036,30 +2260,68 @@ function onReviewEdit(section) {
                     <p class="text-sm text-gray-600 dark:text-gray-300">
                       {{ $t("groupBooking.toggleDescription") }}
                     </p>
+                    <p
+                      v-if="
+                        groupBookingPermissionReason === 'loginRequired'
+                      "
+                      class="text-xs mt-1.5 text-amber-700 dark:text-amber-300"
+                    >
+                      {{ $t("groupBooking.permission.loginRequired") }}
+                      <NuxtLink
+                        :to="loginUrl"
+                        class="underline font-medium hover:no-underline"
+                      >
+                        {{ $t("groupBooking.permission.loginCta") }}
+                      </NuxtLink>
+                    </p>
+                    <p
+                      v-else-if="
+                        groupBookingPermissionReason === 'missingRole'
+                      "
+                      class="text-xs mt-1.5 text-amber-700 dark:text-amber-300"
+                    >
+                      {{ $t("groupBooking.permission.missingRole") }}
+                    </p>
+                    <p
+                      v-else-if="
+                        groupBookingPermissionReason === 'loading'
+                      "
+                      class="text-xs mt-1.5 text-gray-500 dark:text-gray-400 inline-flex items-center gap-1.5"
+                    >
+                      <UIcon
+                        name="i-lucide-loader-2"
+                        class="animate-spin"
+                        size="14"
+                      />
+                      {{ $t("groupBooking.permission.checking") }}
+                    </p>
                   </div>
                 </div>
                 <USwitch
                   v-model="useGroupBooking"
                   :label="$t('groupBooking.toggleLabel')"
+                  :disabled="
+                    !canCreateGroupBooking ||
+                    isCheckingGroupBookingPermission
+                  "
                 />
               </div>
 
-              <div v-if="isGroupBookingActive">
-                <InputRecurringTimeSelection
-                  v-model="groupBookingRule"
-                  :tenant-id="tenantID"
-                  :bookable-id="bookableID"
-                  :attempt-statuses="groupBookingAttemptStatuses"
-                  :is-validating="isValidating"
-                  @update:attempts="groupBookingAttempts = $event"
-                />
-              </div>
-
-              <Splitpanes v-else class="checkout-splitpanes">
+              <Splitpanes class="checkout-splitpanes">
                 <Pane :size="65" :min-size="35">
                   <div class="pr-0 lg:pr-4">
+                    <InputRecurringTimeSelection
+                      v-if="isGroupBookingActive"
+                      v-model="groupBookingRule"
+                      :tenant-id="tenantID"
+                      :bookable-id="bookableID"
+                      :attempt-statuses="groupBookingAttemptStatuses"
+                      :is-validating="isValidating"
+                      @update:attempts="groupBookingAttempts = $event"
+                    />
+
                     <InputFreeTimeSelection
-                      v-if="isScheduleRelated"
+                      v-else-if="isScheduleRelated"
                       v-model="selectedTimePeriod"
                       :tenant-id="tenantID"
                       :bookable-id="bookableID"
@@ -2123,7 +2385,9 @@ function onReviewEdit(section) {
                   : 'border-primary-200 dark:border-primary-800'
               "
             >
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div
+                class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+              >
                 <div>
                   <p class="font-medium text-gray-900 dark:text-white">
                     {{
@@ -2132,8 +2396,8 @@ function onReviewEdit(section) {
                           ? $t("checkout.data.loggedInTitle")
                           : $t("checkout.data.loginRequiredTitle")
                         : isLoggedIn
-                          ? $t("checkout.data.loggedInTitle")
-                          : $t("checkout.data.guestTitle")
+                        ? $t("checkout.data.loggedInTitle")
+                        : $t("checkout.data.guestTitle")
                     }}
                   </p>
                   <p class="text-sm text-gray-600 dark:text-gray-300">
@@ -2143,8 +2407,8 @@ function onReviewEdit(section) {
                           ? $t("checkout.data.loggedInDescription")
                           : $t("checkout.data.loginRequiredDescription")
                         : isLoggedIn
-                          ? $t("checkout.data.loggedInDescription")
-                          : $t("checkout.data.guestDescription")
+                        ? $t("checkout.data.loggedInDescription")
+                        : $t("checkout.data.guestDescription")
                     }}
                   </p>
                 </div>
@@ -2242,7 +2506,9 @@ function onReviewEdit(section) {
                   : $t('checkout.review.bookingLabel')
               "
               :show-selection-edit="
-                steps.some((step) => step.key === 'period' || step.key === 'objects')
+                steps.some(
+                  (step) => step.key === 'period' || step.key === 'objects'
+                )
               "
               :step-current="currentStep"
               :step-total="steps.length"
@@ -2250,7 +2516,9 @@ function onReviewEdit(section) {
               :is-submitting="checkoutSubmitting"
               :has-payment-step="needsPaymentSelectionStep"
               :requires-manual-approval="requiresManualApproval"
-              :group-booking-attempts="isGroupBookingActive ? groupBookingAttempts : []"
+              :group-booking-attempts="
+                isGroupBookingActive ? groupBookingAttempts : []
+              "
               @finish="handleFinish"
               @back="onReviewBack"
               @edit="onReviewEdit"
@@ -2275,7 +2543,7 @@ function onReviewEdit(section) {
 
 /* Visible drag indicator line */
 .checkout-splitpanes :deep(.splitpanes__splitter::before) {
-  content: '';
+  content: "";
   position: absolute;
   top: 0%;
   bottom: 0%;

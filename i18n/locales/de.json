@@ -259,7 +259,7 @@
     "invalid_bookable_items": "Ungültige oder fehlende Informationen zu den buchbaren Objekten.",
     "group_booking_disabled": "Serienbuchungen sind für dieses Objekt nicht erlaubt.",
     "group_booking_role_required": "Für Serienbuchungen ist eine bestimmte Rolle erforderlich.",
-    "group_booking_partial_failure": "Mindestens ein Termin der Serie ist nicht verfügbar. Bitte passen Sie Zeitraum oder Rhythmus an.",
+    "group_booking_partial_failure": "Mindestens ein Termin der Serie ist nicht verfügbar. Bitte passen Sie Zeitraum oder Intervall an.",
     "unknown_error": "Bei der Validierung ist ein unbekannter Fehler aufgetreten.",
     "payment_failed": "Die Zahlung konnte nicht gestartet werden. Bitte versuchen Sie es erneut oder wählen Sie eine andere Zahlungsart.",
     "payment_provider_unavailable": "Die gewählte Zahlungsart ist derzeit nicht verfügbar.",
@@ -563,12 +563,12 @@
 
   "groupBooking": {
     "toggleTitle": "Serienbuchung",
-    "toggleDescription": "Erstellen Sie mehrere Buchungen in einem festen Rhythmus mit einer einzigen Buchungsanfrage.",
+    "toggleDescription": "Erstellen Sie mehrere Buchungen in einem festen Intervall mit einer einzigen Buchungsanfrage.",
     "toggleLabel": "Serienbuchung aktivieren",
     "fields": {
       "firstStart": "Erster Startzeitpunkt",
       "firstEnd": "Erster Endzeitpunkt",
-      "frequency": "Rhythmus",
+      "frequency": "Intervall",
       "intervalWeeks": "Alle … Wochen",
       "intervalMonths": "Alle … Monate",
       "until": "Wiederholen bis",
@@ -598,7 +598,7 @@
       "generate": "Serie erzeugen",
       "regenerate": "Serie neu erzeugen",
       "clear": "Serie zurücksetzen",
-      "hint": "Bitte erfassen Sie Start, Ende und Rhythmus, dann klicken Sie auf „Serie erzeugen“."
+      "hint": "Bitte erfassen Sie Start, Ende und Intervall, dann klicken Sie auf „Serie erzeugen“."
     },
     "preview": {
       "title": "Generierte Termine",
@@ -615,6 +615,12 @@
     },
     "summary": {
       "line": "{title} – Serie mit {count} Terminen"
+    },
+    "permission": {
+      "loginRequired": "Für Serienbuchungen ist eine Anmeldung erforderlich.",
+      "loginCta": "Jetzt anmelden",
+      "missingRole": "Ihr Konto ist nicht berechtigt, Serienbuchungen für dieses Objekt zu erstellen.",
+      "checking": "Berechtigung wird geprüft …"
     }
   }
 }

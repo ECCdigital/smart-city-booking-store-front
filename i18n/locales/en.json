@@ -392,6 +392,12 @@
     },
     "summary": {
       "line": "{title} – series with {count} occurrences"
+    },
+    "permission": {
+      "loginRequired": "Recurring bookings require you to be signed in.",
+      "loginCta": "Sign in now",
+      "missingRole": "Your account is not allowed to create recurring bookings for this item.",
+      "checking": "Checking permission…"
     }
   }
 }

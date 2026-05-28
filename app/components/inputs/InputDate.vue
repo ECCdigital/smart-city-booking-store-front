@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex items-center bg-default border border-1.5 rounded-md px-1 pt-1 pb-1 border-primary gap-1"
+    class="flex items-center bg-default border border-1.5 rounded-md px-1 border-accented focus-within:ring-1 focus-within:border-primary focus-within:ring-primary gap-1"
     :class="{ 'opacity-60': props.disabled }"
   >
     <UTooltip :text="$t('inputDate.openPicker')">
