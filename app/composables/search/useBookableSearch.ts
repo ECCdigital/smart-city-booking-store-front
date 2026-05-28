@@ -1021,6 +1021,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     setSortedQueryParams,
     runSearch,
     resetResults,
+    searchAddress,
     isMounted,
   };
 }

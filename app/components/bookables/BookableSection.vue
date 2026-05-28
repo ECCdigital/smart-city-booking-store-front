@@ -22,27 +22,32 @@
         >{{ suitableCount }} {{ $t("filter.fittingResults") }}</span
       >
       <div class="" style="flex: 1" />
-      <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
+      <div class="grid md:flex space-x-2 space-y-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
+        <div class="flex mb-2 md:my-0">
+          <ResultViewButton v-model="currentView"/>
+
+          <FilterButton
+              v-if="searchedResources.length > 0"
+              v-model:is-initailized="searchIsInitialized"
+              :bookables="searchedResources"
+              :include-non-suitable="query.inclNoSuitable"
+              :categories="query.cat"
+              :cities="query.cities"
+              :distance="query.distance"
+              :price="query.price"
+              :only-public-events="query.pubEv"
+              :only-registration-needed-events="query.regEv"
+              :custom-fields="query.customFields"
+              class="lg:hidden"
+              @filter="setFilterQueryParams"
+          />
+        </div>
         <SortButton
           v-if="searchedResources.length > 0"
           :sort-mode="query.sortMode"
           @sort="setSortedQueryParams"
         />
-        <FilterButton
-          v-if="searchedResources.length > 0"
-          v-model:is-initailized="searchIsInitialized"
-          :bookables="searchedResources"
-          :include-non-suitable="query.inclNoSuitable"
-          :categories="query.cat"
-          :cities="query.cities"
-          :distance="query.distance"
-          :price="query.price"
-          :only-public-events="query.pubEv"
-          :only-registration-needed-events="query.regEv"
-          :custom-fields="query.customFields"
-          class="lg:hidden"
-          @filter="setFilterQueryParams"
-        />
+
       </div>
     </div>
 
@@ -83,18 +88,23 @@
           <p class="text-gray-500">{{ $t("resources.noResources") }}</p>
         </div>
         <ResultsList
-          v-if="sortedResources.length > 0"
+          v-if="currentView === 'list' && sortedResources.length > 0"
           :bookables="sortedResources"
           include-non-bookable
           include-non-suitable
           class="hidden md:block"
         />
         <ResultsGrid
-          v-if="sortedResources.length > 0"
+          v-if="currentView === 'list' && sortedResources.length > 0"
           :bookables="sortedResources"
           include-non-bookable
           include-non-suitable
           class="md:hidden"
+        />
+
+        <ResultsMap
+          v-if="currentView === 'map' && sortedResources.length > 0"
+          :bookables="sortedResources"
         />
       </div>
     </div>
@@ -108,6 +118,8 @@ import ResultsList from "~/components/search/ResultsList.vue";
 import SearchBar from "~/components/search/SearchBar.vue";
 import SortButton from "~/components/search/SortButton.vue";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
+import ResultsMap from "~/components/search/ResultsMap.vue";
+import ResultViewButton from "~/components/search/ResultViewButton.vue";
 
 const props = defineProps({
   bookables: {
@@ -115,6 +127,8 @@ const props = defineProps({
     required: true,
   },
 });
+
+const currentView = ref("list");
 
 const {
   query,
