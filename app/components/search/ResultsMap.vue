@@ -298,6 +298,10 @@ watch(
   color: #000;
 }
 
+.leaflet-tooltip.clean-tooltip::before {
+  display: none;
+}
+
 .leaflet-div-icon {
   background: transparent;
   border: transparent;
