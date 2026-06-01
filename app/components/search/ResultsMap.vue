@@ -292,6 +292,7 @@ watch(
 .leaflet-tooltip.clean-tooltip {
   background: transparent;
   border: none;
+  border-radius: 50px;
   box-shadow: 5px;
   padding: 0;
   color: #000;
