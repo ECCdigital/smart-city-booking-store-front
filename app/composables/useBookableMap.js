@@ -1,3 +1,5 @@
+import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
+
 export function useBookableMap() {
   const iconMapPin = () =>
     h(

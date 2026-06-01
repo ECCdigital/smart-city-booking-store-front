@@ -26,6 +26,8 @@ const view = defineModel({
   required: true,
 });
 
+const emit = defineEmits(["setView"]);
+
 const viewOptions = [
   {
     value: "list",
@@ -33,6 +35,8 @@ const viewOptions = [
     icon: "i-lucide-list",
     onSelect() {
       view.value = "list";
+      console.log("set view to list");
+      emit("setView", "list");
     },
   },
   {
@@ -41,6 +45,8 @@ const viewOptions = [
     icon: "i-lucide-map-pin",
     onSelect() {
       view.value = "map";
+      console.log("set view to map");
+      emit("setView", "map");
     },
   },
 ];
