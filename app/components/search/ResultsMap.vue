@@ -102,6 +102,8 @@ const props = defineProps({
     required: true,
   },
 });
+
+const {iconMapPin} = useBookableMap()
 const { goToDetailsNewTab } = useRedirection();
 const { searchAddress } = useBookableSearch({
   isEvent: false,
@@ -143,25 +145,6 @@ const bounds = computed(() => {
 const hasBounds = computed(() => {
   return Array.isArray(bounds.value) && bounds.value.length === 2;
 });
-
-const iconMapPin = () =>
-  h(
-    "svg",
-    {
-      viewBox: "0 0 24 24",
-      class: "text-primary",
-    },
-    [
-      h("path", {
-        fill: "currentColor",
-        stroke: "#5e5e5d",
-        "stroke-linecap": "round",
-        "stroke-linejoin": "round",
-        "stroke-width": 0.7,
-        d: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
-      }),
-    ],
-  );
 
 const showCurrentBookable = ref(false);
 const currentBookable = ref(null);
