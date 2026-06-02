@@ -2,92 +2,103 @@
   <div v-if="!fetchedCoordinates && !hasBounds">
     <USkeleton class="w-full lg:w-[70vw] h-[80vh] m-2 rounded" />
   </div>
-  <div
-    v-else
-    class="w-full lg:w-[70vw] h-[80vh] z-10 m-2 rounded overflow-hidden"
-  >
-    <ClientOnly>
-      <LMap
-        ref="mapRef"
-        class="h-full w-full"
-        :use-global-leaflet="false"
-        :center="[51.2, 9.4]"
-        :zoom="8"
-        @ready="onMapReady"
-      >
-        <LTileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
-          layer-type="overlay"
-          name="Light  OpenStreetMap"
-        />
-
-        <div v-for="bookable in bookables" :key="bookable.item.id">
-          <LMarker
-            v-if="hasCoordinates(bookable.item)"
-            :lat-lng="getCoordinatesForBookable(bookable.item)"
-            :z-index-offset="
-              bookable.item.id === currentBookable?.item.id
-                ? 1000
-                : bookable.matchStatus === 'match'
-                  ? 500
-                  : 0
-            "
-            @click="openBookableDetails(bookable)"
-          >
-            <LIcon :icon-anchor="[20, 40]">
-              <UIcon
-                :name="iconMapPin"
-                :class="
-                  bookable.item.id === currentBookable?.item.id
-                    ? 'activeIconPin size-11'
-                    : bookable.matchStatus === 'match'
-                      ? 'matchingIconPin size-10'
-                      : 'nonMatchingIconPin size-10'
-                "
-              />
-            </LIcon>
-
-            <LTooltip
-              class="hidden md:block"
-              :options="{ className: 'clean-tooltip' }"
-            >
-              <div class="overflow-hidden rounded-2xl shadow-2xl">
-                <ResultCard
-                  :item="bookable.item"
-                  :is-not-bookable="!bookable.isBookable"
-                  :calculated-price="bookable.calculatedPrice"
-                  entry-page-mode
-                  class="w-[300px] break-normal"
-                />
-              </div>
-            </LTooltip>
-          </LMarker>
-        </div>
-      </LMap>
-    </ClientOnly>
-
-    <!-- Mobile Detail Popup -->
-    <Transition name="fade-up">
-      <div
-        v-if="showCurrentBookable && currentBookable"
-        class="fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
-        @click="closeBookableDetails"
-      >
-        <div
-          class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
-          @click.stop="openBookableDetails(currentBookable, true)"
+  <div v-else class="flex">
+    <div
+      class="w-full lg:w-[70vw] h-[80vh] z-10 m-2 mr-0.5 rounded overflow-hidden"
+    >
+      <ClientOnly>
+        <LMap
+          ref="mapRef"
+          class="h-full w-full"
+          :use-global-leaflet="false"
+          :center="[51.2, 9.4]"
+          :zoom="8"
+          @ready="onMapReady"
         >
-          <ResultCard
-            :item="currentBookable.item"
-            :is-not-bookable="!currentBookable.isBookable"
-            :calculated-price="currentBookable.calculatedPrice"
-            entry-page-mode
-            map-detail-mode
+          <LTileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
+            layer-type="overlay"
+            name="Light  OpenStreetMap"
           />
+
+          <div v-for="bookable in bookables" :key="bookable.item.id">
+            <LMarker
+              v-if="hasCoordinates(bookable.item)"
+              :lat-lng="getCoordinatesForBookable(bookable.item)"
+              :z-index-offset="
+                bookable.item.id === currentBookable?.item.id
+                  ? 1000
+                  : bookable.matchStatus === 'match'
+                    ? 500
+                    : 0
+              "
+              @click="openBookableDetails(bookable)"
+            >
+              <LIcon :icon-anchor="[20, 40]">
+                <UIcon
+                  :name="iconMapPin"
+                  :class="
+                    bookable.item.id === currentBookable?.item.id
+                      ? 'activeIconPin size-11'
+                      : bookable.matchStatus === 'match'
+                        ? 'matchingIconPin size-10'
+                        : 'nonMatchingIconPin size-10'
+                  "
+                />
+              </LIcon>
+
+              <LTooltip
+                class="hidden md:block"
+                :options="{ className: 'clean-tooltip' }"
+              >
+                <div class="overflow-hidden rounded-2xl shadow-2xl">
+                  <ResultCard
+                    :item="bookable.item"
+                    :is-not-bookable="!bookable.isBookable"
+                    :calculated-price="bookable.calculatedPrice"
+                    entry-page-mode
+                    class="w-[300px] break-normal"
+                  />
+                </div>
+              </LTooltip>
+            </LMarker>
+          </div>
+        </LMap>
+      </ClientOnly>
+
+      <!-- Mobile Detail Popup -->
+      <Transition name="fade-up">
+        <div
+          v-if="showCurrentBookable && currentBookable"
+          class="fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
+          @click="closeBookableDetails"
+        >
+          <div
+            class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+            @click.stop="openBookableDetails(currentBookable, true)"
+          >
+            <ResultCard
+              :item="currentBookable.item"
+              :is-not-bookable="!currentBookable.isBookable"
+              :calculated-price="currentBookable.calculatedPrice"
+              entry-page-mode
+              map-detail-mode
+            />
+          </div>
         </div>
+      </Transition>
+    </div>
+
+    <!-- List of visible bookables -->
+    <div
+      class="bg-auto w-[25%] h-[80vh] z-20 m-2 overflow-auto p-2 space-y-1 border border-gray-200 rounded"
+    >
+      Alle Bookables: {{bookables.length}} - Visible: {{visibleBookables.length}}
+      <div v-for="bookable in visibleBookables" :key="bookable.item.id">
+        <ResultStrip :item="bookable.item" :is-not-suitable="bookable.matchStatus !== 'match'" map-mode />
       </div>
-    </Transition>
+    </div>
   </div>
 </template>
 <script setup>
@@ -95,6 +106,7 @@ import ResultCard from "~/components/search/ResultCard.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 import { nextTick } from "vue";
+import ResultStrip from "~/components/search/ResultStrip.vue";
 
 const props = defineProps({
   bookables: {
@@ -103,7 +115,7 @@ const props = defineProps({
   },
 });
 
-const {iconMapPin} = useBookableMap()
+const { iconMapPin } = useBookableMap();
 const { goToDetailsNewTab } = useRedirection();
 const { searchAddress } = useBookableSearch({
   isEvent: false,
@@ -148,6 +160,23 @@ const hasBounds = computed(() => {
 
 const showCurrentBookable = ref(false);
 const currentBookable = ref(null);
+
+const visibleBookables = computed(() => {
+  if (!bounds.value) return props.bookables;
+
+  return props.bookables.filter((b) => {
+    if (!hasCoordinates(b.item)) return false;
+
+    const [lat, lng] = getCoordinatesForBookable(b.item);
+
+    return (
+      lat >= bounds.value[0][0] &&
+      lat <= bounds.value[1][0] &&
+      lng >= bounds.value[0][1] &&
+      lng <= bounds.value[1][1]
+    );
+  });
+});
 
 function hasCoordinates(bookable) {
   return (
