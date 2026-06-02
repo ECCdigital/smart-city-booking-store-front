@@ -94,11 +94,25 @@
 
     <!-- List of visible bookables -->
     <div
-      class="bg-auto w-[25%] h-[80vh] z-20 m-2 overflow-auto p-2 space-y-1 border border-gray-200 rounded"
+      class="bg-auto w-[25%] h-[80vh] z-20 m-2 overflow-auto p-2 border border-gray-200 rounded"
     >
-      <div v-for="bookable in visibleBookables" :key="bookable.item.id">
-        <ResultStrip :item="bookable.item" :is-not-suitable="bookable.matchStatus !== 'match'" map-mode />
-      </div>
+      <TransitionGroup name="list" tag="div" class="space-y-1 ">
+        <div
+          v-for="bookable in visibleBookables"
+          :key="bookable.item.id"
+          @mouseenter="currentBookable = bookable"
+          @mouseleave="currentBookable = null"
+        >
+          <ResultStrip
+            :item="bookable.item"
+            :is-not-suitable="bookable.matchStatus !== 'match'"
+            map-mode
+          />
+        </div>
+        <div v-if="visibleBookables.length === 0">
+          <p class="text-center text-gray-500 mt-10">Keine Ergebnisse in diesem Bereich.</p>
+        </div>
+      </TransitionGroup>
     </div>
   </div>
 </template>
@@ -178,7 +192,6 @@ const visibleBookables = computed(() => {
       lng >= currentBounds.value[0][1] &&
       lng <= currentBounds.value[1][1]
     );
-
   });
 });
 
@@ -336,6 +349,7 @@ watch(
 </script>
 
 <style>
+/*map icons*/
 .leaflet-tooltip.clean-tooltip {
   background: transparent;
   border: none;
@@ -367,5 +381,22 @@ watch(
   color: #cccdcf;
   opacity: 0.7;
   z-index: 50;
+}
+
+/*list transition*/
+.list-move, /* apply transition to moving elements */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.list-leave-active {
+  position: absolute;
 }
 </style>
