@@ -14,6 +14,8 @@
           :center="[51.2, 9.4]"
           :zoom="8"
           @ready="onMapReady"
+          @moveend="updateMapBounds"
+          @zoomend="updateMapBounds"
         >
           <LTileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -94,7 +96,6 @@
     <div
       class="bg-auto w-[25%] h-[80vh] z-20 m-2 overflow-auto p-2 space-y-1 border border-gray-200 rounded"
     >
-      Alle Bookables: {{bookables.length}} - Visible: {{visibleBookables.length}}
       <div v-for="bookable in visibleBookables" :key="bookable.item.id">
         <ResultStrip :item="bookable.item" :is-not-suitable="bookable.matchStatus !== 'match'" map-mode />
       </div>
@@ -130,7 +131,7 @@ const fetchedCoordinates = ref(false);
 
 const currentCenter = ref([53.5, 10.0]);
 
-const bounds = computed(() => {
+const initialBounds = computed(() => {
   const coords = props.bookables
     .filter((b) => hasCoordinates(b.item))
     .map((b) => getCoordinatesForBookable(b.item));
@@ -154,15 +155,17 @@ const bounds = computed(() => {
     [Math.max(...lats), Math.max(...lngs)],
   ];
 });
+const currentBounds = ref(initialBounds.value);
+
 const hasBounds = computed(() => {
-  return Array.isArray(bounds.value) && bounds.value.length === 2;
+  return Array.isArray(initialBounds.value) && initialBounds.value.length === 2;
 });
 
 const showCurrentBookable = ref(false);
 const currentBookable = ref(null);
 
 const visibleBookables = computed(() => {
-  if (!bounds.value) return props.bookables;
+  if (!currentBounds.value) return props.bookables;
 
   return props.bookables.filter((b) => {
     if (!hasCoordinates(b.item)) return false;
@@ -170,11 +173,12 @@ const visibleBookables = computed(() => {
     const [lat, lng] = getCoordinatesForBookable(b.item);
 
     return (
-      lat >= bounds.value[0][0] &&
-      lat <= bounds.value[1][0] &&
-      lng >= bounds.value[0][1] &&
-      lng <= bounds.value[1][1]
+      lat >= currentBounds.value[0][0] &&
+      lat <= currentBounds.value[1][0] &&
+      lng >= currentBounds.value[0][1] &&
+      lng <= currentBounds.value[1][1]
     );
+
   });
 });
 
@@ -222,6 +226,20 @@ async function getCenterCoordinates(addressString) {
   return [53.5, 10.0];
 }
 
+function updateMapBounds() {
+  console.log("*** updateMapBounds called ***");
+  const map = mapRef.value?.leafletObject;
+
+  if (!map) return;
+
+  const mapBounds = map.getBounds();
+
+  currentBounds.value = [
+    [mapBounds.getSouth(), mapBounds.getWest()],
+    [mapBounds.getNorth(), mapBounds.getEast()],
+  ];
+}
+
 function openBookableDetails(bookable, handleCardClickOnMobile = false) {
   if (!bookable) return;
 
@@ -251,7 +269,7 @@ function onMapReady() {
 
 // watch for bookables or bounds change and fit map to show all results if no location search
 watch(
-  [mapReady, () => bounds.value, () => props.bookables.length],
+  [mapReady, () => initialBounds.value, () => props.bookables.length],
   async ([ready, newBounds, count]) => {
     if (!ready) return;
     if (!newBounds) return;
@@ -304,7 +322,7 @@ watch(
     // show all results if no location search
     if (bounds.value) {
       setTimeout(() => {
-        map.fitBounds(bounds.value, {
+        map.fitBounds(initialBounds.value, {
           padding: [20, 20],
           animate: false,
         });
