@@ -33,7 +33,7 @@ const tempCategories = [
   },
   {
     value: "resource",
-    title: "Geräte & Fahrzeuge",
+    title: "Geräte & Weiteres",
     description: "Technik, Fahrzeuge & mehr mieten",
     icon: "i-lucide-wrench",
     to: "/bookables",
