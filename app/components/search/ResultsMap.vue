@@ -104,6 +104,7 @@
           @mouseleave="currentBookable = null"
         >
           <ResultStrip
+              class="cursor-pointer"
             :item="bookable.item"
             :is-not-suitable="bookable.matchStatus !== 'match'"
             map-mode
