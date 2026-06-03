@@ -35,7 +35,6 @@ const viewOptions = [
     icon: "i-lucide-list",
     onSelect() {
       view.value = "list";
-      console.log("set view to list");
       emit("setView", "list");
     },
   },
@@ -45,7 +44,6 @@ const viewOptions = [
     icon: "i-lucide-map-pin",
     onSelect() {
       view.value = "map";
-      console.log("set view to map");
       emit("setView", "map");
     },
   },
@@ -55,6 +53,14 @@ const currentViewLabel = computed(() => {
   const option = viewOptions.find((opt) => opt.value === view.value);
   return option ? option.label : "";
 });
+
+onMounted(() => {
+  if(!viewOptions.some(opt => opt.value === view.value)) {
+    console.log("Invalid view detected, defaulting to 'list'. Current value:", view.value);
+    view.value = 'list';
+    emit("setView", "list");
+  }
+})
 </script>
 
 
