@@ -110,7 +110,7 @@
         >
           <span class="flex items-center gap-1.5">
             <span
-              class="inline-block w-4 h-3 rounded-sm border border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/50"
+              class="inline-block w-4 h-3 rounded-sm border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-950/50"
             />
             {{ $t("scheduleSelection.free") }}
           </span>
