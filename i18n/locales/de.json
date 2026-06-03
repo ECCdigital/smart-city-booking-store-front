@@ -407,7 +407,7 @@
       "submitHint": "Mit dem Absenden senden Sie eine unverbindliche Buchungsanfrage. Die Buchung wird erst nach Freigabe durch den Anbieter verbindlich."
     },
     "steps": {
-      "periodTitle": "Zeitraum & Extras",
+      "periodTitle": "Zeitraum & Extras auswählen",
       "dataTitle": "Daten eingeben",
       "paymentTitle": "Zahlung",
       "confirmTitle": "Zusammenfassung",
