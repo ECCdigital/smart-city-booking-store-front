@@ -107,6 +107,7 @@
             :item="bookable.item"
             :is-not-suitable="bookable.matchStatus !== 'match'"
             map-mode
+            @click="openBookableDetails(bookable, true)"
           />
         </div>
         <div v-if="visibleBookables.length === 0">
@@ -240,7 +241,6 @@ async function getCenterCoordinates(addressString) {
 }
 
 function updateMapBounds() {
-  console.log("*** updateMapBounds called ***");
   const map = mapRef.value?.leafletObject;
 
   if (!map) return;
