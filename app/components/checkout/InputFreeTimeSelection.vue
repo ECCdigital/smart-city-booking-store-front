@@ -397,9 +397,24 @@ const calendarEvents = computed(() => {
         em || 0,
       );
       if (end > start) {
-        events.push({
+        /*events.push({
           id: "user-selection",
           title: "",
+          start,
+          end,
+          display: "auto",
+          classNames: ["fc-user-selection"],
+          editable: false,
+        });
+         */
+        const label =
+          `${pad2(start.getHours())}:${pad2(start.getMinutes())}` +
+          ` - ` +
+          `${pad2(end.getHours())}:${pad2(end.getMinutes())}`;
+
+        events.push({
+          id: "user-selection",
+          title: label,
           start,
           end,
           display: "auto",
@@ -412,6 +427,20 @@ const calendarEvents = computed(() => {
 
   return events;
 });
+
+function renderEventContent(arg) {
+  if (arg.event.id !== "user-selection") {
+    return true;
+  }
+
+  return {
+    html: `
+      <div>
+        <div class="font-bold">Ihre Auswahl</div>${arg.event.title}
+      </div>
+    `,
+  };
+}
 
 /* ── day header renderer ─────────────────────────────────── */
 function renderDayHeader(arg) {
@@ -488,6 +517,7 @@ const calendarOptions = computed(() => ({
   unselectAuto: true,
   selectOverlap: true,
   snapDuration: "00:15:00",
+  eventContent: renderEventContent,
   events: calendarEvents.value,
   select: handleCalendarSelect,
   datesSet: handleDatesSet,
@@ -851,11 +881,6 @@ watch(
 
 :deep(.fc-user-selection .fc-event-main) {
   padding: 0 !important;
-}
-
-:deep(.fc-user-selection .fc-event-time),
-:deep(.fc-user-selection .fc-event-title) {
-  display: none !important;
 }
 
 /* ── Selection highlight (while dragging) ────────────────── */
