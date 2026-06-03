@@ -397,16 +397,6 @@ const calendarEvents = computed(() => {
         em || 0,
       );
       if (end > start) {
-        /*events.push({
-          id: "user-selection",
-          title: "",
-          start,
-          end,
-          display: "auto",
-          classNames: ["fc-user-selection"],
-          editable: false,
-        });
-         */
         const label =
           `${pad2(start.getHours())}:${pad2(start.getMinutes())}` +
           ` - ` +
@@ -422,6 +412,40 @@ const calendarEvents = computed(() => {
           editable: false,
         });
       }
+    }
+  }
+
+  //handle past times (if selection includes past, mark past part as occupied)
+  const now = new Date();
+
+  for (let d = new Date(currentViewStart.value || now);
+       d < (currentViewEnd.value || now);
+       d.setDate(d.getDate() + 1)) {
+
+    const dayStart = new Date(d);
+    dayStart.setHours(0, 0, 0, 0);
+
+    const dayEnd = new Date(d);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    // past day: whole day as occupied
+    if (dayEnd < now) {
+      events.push({
+        start: new Date(dayStart),
+        end: new Date(dayEnd),
+        display: "background",
+        classNames: ["fc-past-time"],
+      });
+    }
+
+    // current day: only past part as occupied
+    else if (localISODate(dayStart) === localISODate(now)) {
+      events.push({
+        start: new Date(dayStart),
+        end: now,
+        display: "background",
+        classNames: ["fc-past-time"],
+      });
     }
   }
 
@@ -513,6 +537,7 @@ const calendarOptions = computed(() => ({
   dayHeaderContent: renderDayHeader,
   height: "auto",
   selectable: true,
+  selectAllow: allowSelection,
   selectMirror: true,
   unselectAuto: true,
   selectOverlap: true,
@@ -602,6 +627,10 @@ function applyDefaultEndFromStart() {
 function onStartTimeChange() {
   applyDefaultEndFromStart();
   onManualInputChange();
+}
+
+function allowSelection(selectInfo) {
+  return selectInfo.start >= new Date();
 }
 
 /* ── manual input change ─────────────────────────────────── */
@@ -842,7 +871,13 @@ watch(
   border-color: #1f2937;
 }
 
-/* ── Occupied background events (pink hatched) ───────────── */
+/*  ── Past time background ───────────── */
+:deep(.fc-bg-event.fc-past-time) {
+  background: rgba(156, 163, 175, 0.15) !important;
+  opacity: 1 !important;
+}
+
+/* ── Occupied background events ───────────── */
 :deep(.fc-bg-event.fc-occupied) {
   background: repeating-linear-gradient(
     -45deg,
@@ -925,4 +960,5 @@ watch(
     );
   }
 }
+
 </style>
