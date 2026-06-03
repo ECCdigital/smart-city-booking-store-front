@@ -309,25 +309,27 @@ function onAddressSuggestionSelect(suggestion) {
       </div>
     </UCard>
 
-    <UFormField
-      :label="$t('checkout.data.commentLabel')"
-      :required="commentRequired"
-    >
-      <UTextarea
-        v-model="comment"
-        :rows="4"
-        autoresize
-        :placeholder="$t('checkout.data.commentPlaceholder')"
+    <UCard variant="soft" class="rounded-lg">
+      <UFormField
+        :label="$t('checkout.data.commentLabel')"
         :required="commentRequired"
-        class="w-full"
-      />
-      <p
-        v-if="commentRequired"
-        class="mt-1 text-xs text-red-600 dark:text-red-400"
       >
-        {{ $t("checkout.data.commentRequiredHint") }}
-      </p>
-    </UFormField>
+        <UTextarea
+          v-model="comment"
+          :rows="4"
+          autoresize
+          :placeholder="$t('checkout.data.commentPlaceholder')"
+          :required="commentRequired"
+          class="w-full"
+        />
+        <p
+          v-if="commentRequired"
+          class="mt-1 text-xs text-red-600 dark:text-red-400"
+        >
+          {{ $t("checkout.data.commentRequiredHint") }}
+        </p>
+      </UFormField>
+    </UCard>
 
     <UCard
       v-if="attachments.length > 0"
