@@ -1,7 +1,11 @@
 import Fuse from "fuse.js";
 import { useBookables } from "~/composables/api/useBookables";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState";
-import type { CatalogQueryState, SortMode } from "~/types/catalogParams";
+import type {
+  CatalogQueryState,
+  SortMode,
+  ViewMode,
+} from "~/types/catalogParams";
 import haversine from "haversine-distance";
 import { getCustomFieldValue } from "~/composables/search/useCustomFieldFilters";
 
@@ -339,6 +343,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
 
   function setSortedQueryParams(sortMode: SortMode) {
     query.sortMode = sortMode;
+  }
+
+  function setViewQueryParams(viewMode: ViewMode) {
+    query.viewMode = viewMode;
   }
 
   function initializeResults() {
@@ -1019,6 +1027,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     suitableCount,
     setFilterQueryParams,
     setSortedQueryParams,
+    setViewQueryParams,
     runSearch,
     resetResults,
     searchAddress,

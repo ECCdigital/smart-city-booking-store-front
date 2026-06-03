@@ -1,4 +1,11 @@
-export type SortMode = "relevance" | "priceAscending" | "priceDescending";
+export type SortMode =
+  | "alphabeticAscending"
+  | "alphabeticDescending"
+  | "priceAscending"
+  | "priceDescending"
+  | "distanceAscending"
+  | "distanceDescending";
+export type ViewMode = "list" | "map";
 
 export interface CatalogQueryState {
   term: string;
@@ -10,11 +17,12 @@ export interface CatalogQueryState {
   inclNoSuitable: boolean;
   pubEv: boolean;
   regEv: boolean;
-    cat: string[];
+  cat: string[];
   cities: string[];
   price: number[];
 
   sortMode: SortMode;
+  viewMode: ViewMode;
 
-  customFields: Record<string, any>
+  customFields: Record<string, any>;
 }

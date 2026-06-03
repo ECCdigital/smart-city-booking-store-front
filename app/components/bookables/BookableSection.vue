@@ -24,22 +24,25 @@
       <div class="" style="flex: 1" />
       <div class="grid md:flex space-x-2 space-y-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
         <div class="flex mb-2 md:my-0">
-          <ResultViewButton v-model="currentView"/>
+          <ResultViewButton
+            v-model="currentView"
+            @set-view="setViewQueryParams"
+          />
 
           <FilterButton
-              v-if="searchedResources.length > 0"
-              v-model:is-initailized="searchIsInitialized"
-              :bookables="searchedResources"
-              :include-non-suitable="query.inclNoSuitable"
-              :categories="query.cat"
-              :cities="query.cities"
-              :distance="query.distance"
-              :price="query.price"
-              :only-public-events="query.pubEv"
-              :only-registration-needed-events="query.regEv"
-              :custom-fields="query.customFields"
-              class="lg:hidden"
-              @filter="setFilterQueryParams"
+            v-if="searchedResources.length > 0"
+            v-model:is-initailized="searchIsInitialized"
+            :bookables="searchedResources"
+            :include-non-suitable="query.inclNoSuitable"
+            :categories="query.cat"
+            :cities="query.cities"
+            :distance="query.distance"
+            :price="query.price"
+            :only-public-events="query.pubEv"
+            :only-registration-needed-events="query.regEv"
+            :custom-fields="query.customFields"
+            :class="query.viewMode === 'map' ? 'ml-2 2xl:hidden': 'lg:hidden'"
+            @filter="setFilterQueryParams"
           />
         </div>
         <SortButton
@@ -47,14 +50,13 @@
           :sort-mode="query.sortMode"
           @sort="setSortedQueryParams"
         />
-
       </div>
     </div>
 
     <div class="flex flex-row lg:my-5 m-5">
       <div
         v-if="searchedResources.length > 0"
-        class="lg:basis-1/4 hidden lg:block"
+        :class="query.viewMode === 'map' ? 'hidden 2xl:block' : 'lg:basis-1/4 hidden lg:block'"
       >
         <FilterArea
           :key="filterResetKey"
@@ -74,9 +76,9 @@
 
       <div
         :class="
-          searchedResources.length > 0
-            ? 'basis-full lg:basis-3/4'
-            : 'basis-full'
+          searchedResources.length === 0
+            ? 'basis-full '
+            : query.viewMode === 'map' ? 'basis-full 2xl:basis-3/4' : 'basis-full lg:basis-3/4'
         "
       >
         <div v-if="!sortedResources.length" class="text-center mt-10 lg:mt-25">
@@ -128,8 +130,6 @@ const props = defineProps({
   },
 });
 
-const currentView = ref("list");
-
 const {
   query,
   searchIsInitialized,
@@ -139,9 +139,12 @@ const {
   suitableCount,
   setFilterQueryParams,
   setSortedQueryParams,
+  setViewQueryParams,
   runSearch,
   resetResults,
 } = useBookableSearch({ isEvent: false, sourceItems: props.bookables });
+
+const currentView = ref(query.viewMode);
 
 function onSearch(searchParams) {
   runSearch(searchParams);

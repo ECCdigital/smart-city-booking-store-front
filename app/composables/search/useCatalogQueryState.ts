@@ -98,9 +98,10 @@ export function useCatalogQueryState() {
         })()
       : [],
 
-    sortMode: (route.query.sort as any) || "alphabeticAscending",
-
     customFields: extractCustomFields(),
+
+    sortMode: (route.query.sort as string) || "alphabeticAscending",
+    viewMode: (route.query.view as string) || "list",
   });
 
   const initialCustomFields: Record<string, any> = {};
@@ -136,10 +137,6 @@ export function useCatalogQueryState() {
       q.price = `${s.price[0]},${s.price[1]}`;
     }
 
-    if (s.sortMode !== "alphabeticAscending") {
-      q.sort = s.sortMode;
-    }
-
     if (s.customFields) {
       for (const [fieldId, value] of Object.entries(s.customFields)) {
         const serialized = serializeCustomFieldValue(value);
@@ -147,6 +144,14 @@ export function useCatalogQueryState() {
           q[`${CF_PREFIX}${fieldId}`] = serialized;
         }
       }
+    }
+
+    if (s.sortMode !== "alphabeticAscending") {
+      q.sort = s.sortMode;
+    }
+
+    if (s.viewMode !== "list") {
+      q.view = s.viewMode;
     }
 
     return q;
