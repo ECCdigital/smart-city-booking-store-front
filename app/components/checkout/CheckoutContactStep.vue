@@ -31,8 +31,9 @@ const attachmentAccepted = defineModel("attachmentAccepted", {
 
 const { t, locale } = useI18n();
 const requiredAttachmentCount = computed(
-  () => props.attachments.filter((att) => att?.required === true).length
+  () => props.attachments.filter((att) => att?.required === true).length,
 );
+
 const selectedAddressSuggestion = ref(null);
 const addressLookupQuery = ref("");
 const addressSuggestions = ref([]);
@@ -78,7 +79,8 @@ function toAddressSuggestion(item) {
   const zipCode = address.postcode || "";
 
   return {
-    label: item.display_name || [street, zipCode, city].filter(Boolean).join(", "),
+    label:
+      item.display_name || [street, zipCode, city].filter(Boolean).join(", "),
     street,
     zipCode,
     city,
@@ -115,32 +117,31 @@ async function searchAddressSuggestions(query) {
       return;
     }
 
+    //toDo - weiter einschränken??!? Weniger Detailliert!
     const filtered = data.filter((item) => {
       const a = item.address || {};
       return (
-          a.road ||
-          a.house_number ||
-          a.city ||
-          a.town ||
-          a.village ||
-          a.hamlet ||
-          a.suburb ||
-          a.postcode ||
-          item.class === "place" ||
-          item.class === "highway" ||
-          item.class === "building"
+        a.road ||
+        a.house_number ||
+        a.city ||
+        a.town ||
+        a.village ||
+        a.hamlet ||
+        a.suburb ||
+        a.postcode ||
+        item.class === "place" ||
+        item.class === "highway" ||
+        item.class === "building"
       );
     });
 
-
     filtered.sort(
-        (a, b) => (Number(b.importance) || 0) - (Number(a.importance) || 0)
+      (a, b) => (Number(b.importance) || 0) - (Number(a.importance) || 0),
     );
 
     addressSuggestions.value = filtered
-        .slice(0, 8)
-        .map((item) => toAddressSuggestion(item));
-
+      .slice(0, 8)
+      .map((item) => toAddressSuggestion(item));
   } catch {
     addressSuggestions.value = [];
   } finally {
@@ -169,8 +170,7 @@ function resolveAddressSuggestion(suggestion) {
   if (suggestion == null) return null;
   if (typeof suggestion === "string") {
     return (
-      addressSuggestions.value.find((item) => item.label === suggestion) ||
-      null
+      addressSuggestions.value.find((item) => item.label === suggestion) || null
     );
   }
   return typeof suggestion === "object" ? suggestion : null;
@@ -180,11 +180,11 @@ function onAddressSuggestionSelect(suggestion) {
   const resolved = resolveAddressSuggestion(suggestion);
   if (!resolved) return;
 
-  Object.assign(contact.value, {
-    address: resolved.street || "",
-    zipCode: resolved.zipCode || "",
-    city: resolved.city || "",
-  });
+  selectedAddressSuggestion.value = resolved;
+
+  contact.value.address = resolved.street || "";
+  contact.value.zipCode = resolved.zipCode || "";
+  contact.value.city = resolved.city || "";
 }
 </script>
 
@@ -198,10 +198,7 @@ function onAddressSuggestionSelect(suggestion) {
       </template>
 
       <div class="grid gap-3 sm:grid-cols-2">
-        <UFormField
-          :label="$t('common.firstName')"
-          :required="true"
-        >
+        <UFormField :label="$t('common.firstName')" :required="true">
           <UInput
             v-model="contact.firstName"
             type="text"
@@ -210,10 +207,7 @@ function onAddressSuggestionSelect(suggestion) {
             class="w-full"
           />
         </UFormField>
-        <UFormField
-          :label="$t('common.lastName')"
-          :required="true"
-        >
+        <UFormField :label="$t('common.lastName')" :required="true">
           <UInput
             v-model="contact.lastName"
             type="text"
@@ -236,10 +230,7 @@ function onAddressSuggestionSelect(suggestion) {
             class="w-full"
           />
         </UFormField>
-        <UFormField
-          :label="$t('common.phone')"
-          :required="isRequired('phone')"
-        >
+        <UFormField :label="$t('common.phone')" :required="isRequired('phone')">
           <UInput
             v-model="contact.phone"
             type="tel"
@@ -262,36 +253,26 @@ function onAddressSuggestionSelect(suggestion) {
         </UFormField>
 
         <UFormField
-            class="sm:col-span-2"
-            :label="$t('checkout.data.addressLookupLabel')"
-        >
-          <UInputMenu
-              v-model="selectedAddressSuggestion"
-              v-model:search-term="addressLookupQuery"
-              :items="addressSuggestions"
-              :placeholder="$t('checkout.data.addressLookupPlaceholder')"
-              icon="i-lucide-search"
-              label-key="label"
-              class="w-full"
-              :loading="isAddressLookupLoading"
-              ignore-filter
-              @update:model-value="onAddressSuggestionSelect"
-          />
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {{ $t("checkout.data.addressLookupHint") }}
-          </p>
-        </UFormField>
-        <UFormField
           class="sm:col-span-2"
           :label="$t('common.address')"
           :required="isRequired('address')"
         >
-          <UInput
+          <UInputMenu
             v-model="contact.address"
-            type="text"
-            autocomplete="street-address"
+            v-model:search-term="addressLookupQuery"
+            :items="addressSuggestions"
             icon="i-lucide-map-pin"
+            label-key="label"
             class="w-full"
+            :loading="isAddressLookupLoading"
+            ignore-filter
+            @update:model-value="onAddressSuggestionSelect"
+            @blur="
+              () => {
+                if (!selectedAddressSuggestion || addressLookupQuery)
+                  contact.address = addressLookupQuery;
+              }
+            "
           />
         </UFormField>
         <UFormField
@@ -306,16 +287,23 @@ function onAddressSuggestionSelect(suggestion) {
             class="w-full"
           />
         </UFormField>
-        <UFormField
-          :label="$t('common.city')"
-          :required="isRequired('city')"
-        >
-          <UInput
+        <UFormField :label="$t('common.city')" :required="isRequired('city')">
+          <UInputMenu
             v-model="contact.city"
-            type="text"
-            autocomplete="address-level2"
+            v-model:search-term="addressLookupQuery"
+            :items="addressSuggestions"
             icon="i-lucide-building"
+            label-key="label"
             class="w-full"
+            :loading="isAddressLookupLoading"
+            ignore-filter
+            @update:model-value="onAddressSuggestionSelect"
+            @blur="
+              () => {
+                if (!selectedAddressSuggestion)
+                  contact.city = addressLookupQuery;
+              }
+            "
           />
         </UFormField>
       </div>
@@ -374,9 +362,13 @@ function onAddressSuggestionSelect(suggestion) {
           :key="att.id"
           class="rounded-md border border-gray-200 dark:border-gray-700 p-2 bg-white/60 dark:bg-gray-900/40"
         >
-          <div class="flex flex-col gap-0.5 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
+          <div
+            class="flex flex-col gap-0.5 sm:flex-row sm:items-start sm:justify-between sm:gap-2"
+          >
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium leading-tight text-gray-900 dark:text-white">
+              <p
+                class="text-sm font-medium leading-tight text-gray-900 dark:text-white"
+              >
                 {{ att.title }}
               </p>
               <p class="text-[11px] text-gray-500 dark:text-gray-400">
