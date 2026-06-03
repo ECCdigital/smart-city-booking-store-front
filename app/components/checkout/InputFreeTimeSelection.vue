@@ -41,7 +41,11 @@
       @click="toggleCalendarOnMobile"
     >
       <UIcon
-        :name="calendarVisibleOnMobile ? 'i-lucide-calendar-x' : 'i-lucide-calendar-days'"
+        :name="
+          calendarVisibleOnMobile
+            ? 'i-lucide-calendar-x'
+            : 'i-lucide-calendar-days'
+        "
         class="flex-shrink-0"
         size="18"
       />
@@ -53,75 +57,75 @@
     </button>
 
     <div v-if="showCalendarPanel">
-    <div
-      class="flex items-center justify-between px-3 py-1.5 rounded-t-md border border-b-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
-    >
-      <button
-        type="button"
-        :disabled="!canGoPrev"
-        class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        @click="navigatePrev"
-      >
-        &larr; {{ $t("scheduleSelection.previousWeek") }}
-      </button>
-
-      <div class="flex items-center gap-2">
-        <span class="font-semibold text-sm text-gray-800 dark:text-gray-200">
-          {{ dateRangeLabel }}
-        </span>
-        <DateJumper @select="onJumpDate" />
-      </div>
-
-      <button
-        type="button"
-        class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-        @click="navigateNext"
-      >
-        {{ $t("scheduleSelection.nextWeek") }} &rarr;
-      </button>
-    </div>
-
-    <div
-      class="rounded-b-md border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900"
-    >
-      <!-- FullCalendar -->
-      <ClientOnly>
-        <div class="fc-wrapper">
-          <FullCalendar ref="calendarRef" :options="calendarOptions" />
-        </div>
-        <template #fallback>
-          <div class="flex items-center justify-center py-20">
-            <UIcon
-              name="i-lucide-loader-2"
-              class="animate-spin text-gray-400"
-              size="24"
-            />
-          </div>
-        </template>
-      </ClientOnly>
-
-      <!-- Legend -->
       <div
-        class="flex items-center gap-4 px-3 py-1.5 border-t border-gray-200 dark:border-gray-700 text-[11px] text-gray-600 dark:text-gray-400"
+        class="flex items-center justify-between px-3 py-1.5 rounded-t-md border border-b-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
       >
-        <span class="flex items-center gap-1.5">
-          <span
-            class="inline-block w-4 h-3 rounded-sm border border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/50"
-          />
-          {{ $t("scheduleSelection.free") }}
-        </span>
-        <span class="flex items-center gap-1.5">
-          <span class="inline-block w-4 h-3 rounded-sm occupied-legend" />
-          {{ $t("scheduleSelection.occupied") }}
-        </span>
-        <span class="flex items-center gap-1.5">
-          <span
-            class="inline-block w-4 h-3 rounded-sm bg-primary/90 dark:bg-primary/10"
-          />
-          {{ $t("scheduleSelection.yourSelection") }}
-        </span>
+        <button
+          type="button"
+          :disabled="!canGoPrev"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          @click="navigatePrev"
+        >
+          &larr; {{ $t("scheduleSelection.previousWeek") }}
+        </button>
+
+        <div class="flex items-center gap-2">
+          <span class="font-semibold text-sm text-gray-800 dark:text-gray-200">
+            {{ dateRangeLabel }}
+          </span>
+          <DateJumper @select="onJumpDate" />
+        </div>
+
+        <button
+          type="button"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          @click="navigateNext"
+        >
+          {{ $t("scheduleSelection.nextWeek") }} &rarr;
+        </button>
       </div>
-    </div>
+
+      <div
+        class="rounded-b-md border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900"
+      >
+        <!-- FullCalendar -->
+        <ClientOnly>
+          <div class="fc-wrapper">
+            <FullCalendar ref="calendarRef" :options="calendarOptions" />
+          </div>
+          <template #fallback>
+            <div class="flex items-center justify-center py-20">
+              <UIcon
+                name="i-lucide-loader-2"
+                class="animate-spin text-gray-400"
+                size="24"
+              />
+            </div>
+          </template>
+        </ClientOnly>
+
+        <!-- Legend -->
+        <div
+          class="flex items-center gap-4 px-3 py-1.5 border-t border-gray-200 dark:border-gray-700 text-[11px] text-gray-600 dark:text-gray-400"
+        >
+          <span class="flex items-center gap-1.5">
+            <span
+              class="inline-block w-4 h-3 rounded-sm border border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/50"
+            />
+            {{ $t("scheduleSelection.free") }}
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="inline-block w-4 h-3 rounded-sm occupied-legend" />
+            {{ $t("scheduleSelection.occupied") }}
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span
+              class="inline-block w-4 h-3 rounded-sm bg-primary/90 dark:bg-primary/10"
+            />
+            {{ $t("scheduleSelection.yourSelection") }}
+          </span>
+        </div>
+      </div>
     </div>
 
     <!-- Overlap warning -->
@@ -179,7 +183,7 @@ function pad2(n) {
 
 function localISODate(date) {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
-    date.getDate()
+    date.getDate(),
   )}`;
 }
 
@@ -209,7 +213,7 @@ const calendarRef = ref(null);
 const calendarVisibleOnMobile = ref(false);
 const isSmUp = useMediaQuery("(min-width: 640px)");
 const showCalendarPanel = computed(
-  () => isSmUp.value || calendarVisibleOnMobile.value
+  () => isSmUp.value || calendarVisibleOnMobile.value,
 );
 const currentViewStart = ref(null);
 const currentViewEnd = ref(null);
@@ -328,8 +332,8 @@ async function fetchAvailability(start, end) {
     const raw = Array.isArray(data)
       ? data
       : Array.isArray(data?.availability)
-      ? data.availability
-      : [];
+        ? data.availability
+        : [];
 
     availabilityCache.set(key, raw);
     availability.value = raw;
@@ -347,7 +351,7 @@ watch(
     if (currentViewStart.value && currentViewEnd.value) {
       fetchAvailability(currentViewStart.value, currentViewEnd.value);
     }
-  }
+  },
 );
 
 /* ── calendar events (occupied + selection) ──────────────── */
@@ -383,14 +387,14 @@ const calendarEvents = computed(() => {
         sd.getMonth(),
         sd.getDate(),
         sh,
-        sm || 0
+        sm || 0,
       );
       const end = new Date(
         ed.getFullYear(),
         ed.getMonth(),
         ed.getDate(),
         eh,
-        em || 0
+        em || 0,
       );
       if (end > start) {
         events.push({
@@ -438,11 +442,11 @@ function renderDayHeader(arg) {
 function handleCalendarSelect(info) {
   startDateInput.value = localISODate(info.start);
   startTimeInput.value = `${pad2(info.start.getHours())}:${pad2(
-    info.start.getMinutes()
+    info.start.getMinutes(),
   )}`;
   endDateInput.value = localISODate(info.end);
   endTimeInput.value = `${pad2(info.end.getHours())}:${pad2(
-    info.end.getMinutes()
+    info.end.getMinutes(),
   )}`;
   emitValue();
 
@@ -536,13 +540,25 @@ function applyDefaultEndFromStart() {
   if (!sd) return;
 
   const [sh, sm] = startTimeInput.value.split(":").map(Number);
-  const start = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate(), sh, sm || 0);
+  const start = new Date(
+    sd.getFullYear(),
+    sd.getMonth(),
+    sd.getDate(),
+    sh,
+    sm || 0,
+  );
 
   if (endDateInput.value && endTimeInput.value) {
     const ed = parseLocalDate(endDateInput.value);
     if (ed) {
       const [eh, em] = endTimeInput.value.split(":").map(Number);
-      const end = new Date(ed.getFullYear(), ed.getMonth(), ed.getDate(), eh, em || 0);
+      const end = new Date(
+        ed.getFullYear(),
+        ed.getMonth(),
+        ed.getDate(),
+        eh,
+        em || 0,
+      );
       if (end > start) return;
     }
   }
@@ -603,14 +619,14 @@ const overlapWarning = computed(() => {
     sd.getMonth(),
     sd.getDate(),
     sh,
-    sm || 0
+    sm || 0,
   ).getTime();
   const endMs = new Date(
     ed.getFullYear(),
     ed.getMonth(),
     ed.getDate(),
     eh,
-    em || 0
+    em || 0,
   ).getTime();
 
   if (endMs <= startMs) return false;
@@ -645,14 +661,14 @@ function emitValue() {
         sd.getMonth(),
         sd.getDate(),
         sh,
-        sm || 0
+        sm || 0,
       );
       const end = new Date(
         ed.getFullYear(),
         ed.getMonth(),
         ed.getDate(),
         eh,
-        em || 0
+        em || 0,
       );
       if (end.getTime() > start.getTime()) {
         payload = { start: start.getTime(), end: end.getTime() };
@@ -687,7 +703,7 @@ watch(
 
     lastEmittedKey = `${v.start ?? ""}|${v.end ?? ""}`;
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 </script>
 
@@ -800,22 +816,25 @@ watch(
 :deep(.fc-bg-event.fc-occupied) {
   background: repeating-linear-gradient(
     -45deg,
-    #fca5a5,
-    #fca5a5 3px,
-    #fee2e2 3px,
-    #fee2e2 7px
+    #e5e7eb,
+    #e5e7eb 3px,
+    #f3f4f6 3px,
+    #f3f4f6 7px
   ) !important;
-  opacity: 1 !important;
+  opacity: 0.8 !important;
 }
 
-:is(.dark) :deep(.fc-bg-event.fc-occupied) {
-  background: repeating-linear-gradient(
-    -45deg,
-    rgba(248, 113, 113, 0.25),
-    rgba(248, 113, 113, 0.25) 3px,
-    rgba(248, 113, 113, 0.08) 3px,
-    rgba(248, 113, 113, 0.08) 7px
-  ) !important;
+@media (prefers-color-scheme: dark) {
+  :deep(.fc-bg-event.fc-occupied) {
+    background: repeating-linear-gradient(
+      -45deg,
+      #4b5563,
+      #4b5563 3px,
+      #374151 3px,
+      #374151 7px
+    ) !important;
+    opacity: 0.8 !important;
+  }
 }
 
 /* ── User selection event ────────────────────────────────── */
@@ -863,20 +882,22 @@ watch(
 .occupied-legend {
   background: repeating-linear-gradient(
     -45deg,
-    #fca5a5,
-    #fca5a5 2px,
-    #fee2e2 2px,
-    #fee2e2 5px
+    #e5e7eb,
+    #e5e7eb 3px,
+    #f3f4f6 3px,
+    #f3f4f6 7px
   );
 }
 
-:is(.dark) .occupied-legend {
-  background: repeating-linear-gradient(
-    -45deg,
-    rgba(248, 113, 113, 0.25),
-    rgba(248, 113, 113, 0.25) 2px,
-    rgba(248, 113, 113, 0.08) 2px,
-    rgba(248, 113, 113, 0.08) 5px
-  );
+@media (prefers-color-scheme: dark) {
+  .occupied-legend {
+    background: repeating-linear-gradient(
+      -45deg,
+      #4b5563,
+      #4b5563 3px,
+      #374151 3px,
+      #374151 7px
+    );
+  }
 }
 </style>
