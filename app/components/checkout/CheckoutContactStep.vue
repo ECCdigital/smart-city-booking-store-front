@@ -207,6 +207,7 @@ function onAddressSuggestionSelect(suggestion) {
             type="text"
             autocomplete="given-name"
             icon="i-lucide-user"
+            class="w-full"
           />
         </UFormField>
         <UFormField
@@ -218,6 +219,7 @@ function onAddressSuggestionSelect(suggestion) {
             type="text"
             autocomplete="family-name"
             icon="i-lucide-user"
+            class="w-full"
           />
         </UFormField>
         <UFormField
@@ -243,6 +245,7 @@ function onAddressSuggestionSelect(suggestion) {
             type="tel"
             autocomplete="tel"
             icon="i-lucide-phone"
+            class="w-full"
           />
         </UFormField>
         <UFormField
@@ -254,6 +257,7 @@ function onAddressSuggestionSelect(suggestion) {
             type="text"
             autocomplete="organization"
             icon="i-lucide-building-2"
+            class="w-full"
           />
         </UFormField>
 
@@ -287,6 +291,7 @@ function onAddressSuggestionSelect(suggestion) {
             type="text"
             autocomplete="street-address"
             icon="i-lucide-map-pin"
+            class="w-full"
           />
         </UFormField>
         <UFormField
@@ -298,6 +303,7 @@ function onAddressSuggestionSelect(suggestion) {
             type="text"
             autocomplete="postal-code"
             icon="i-lucide-mailbox"
+            class="w-full"
           />
         </UFormField>
         <UFormField
@@ -309,6 +315,7 @@ function onAddressSuggestionSelect(suggestion) {
             type="text"
             autocomplete="address-level2"
             icon="i-lucide-building"
+            class="w-full"
           />
         </UFormField>
       </div>
