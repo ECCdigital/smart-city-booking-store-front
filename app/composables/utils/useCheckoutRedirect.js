@@ -14,9 +14,8 @@ export function useCheckoutRedirect() {
     start = null,
     end = null,
     amount = "1",
-    url = null,
   }) {
-    const options = { id: id, tenant: tenantId, amount: amount };
+    const options = { tenantId: tenantId, amount: amount };
 
     if (start) {
       options.start = start;
@@ -27,14 +26,9 @@ export function useCheckoutRedirect() {
 
     const params = new URLSearchParams(options);
 
-    if (url) {
-      params.set("url", url);
-    } else {
-      params.set("url", "/checkout");
-    }
-
     if (typeof window !== "undefined") {
-      const newWindow = window.open(url, "_blank");
+      const checkoutUrl = `/checkout/${id}?${params.toString()}`;
+      const newWindow = window.open(checkoutUrl, "_blank");
       if (newWindow) {
         try {
           newWindow.opener = null; // enforce noopener
@@ -43,10 +37,13 @@ export function useCheckoutRedirect() {
           // ignore in case browser forbids
         }
       } else {
-        window.location.href = url;
+        window.location.href = checkoutUrl;
       }
     } else {
-      console.warn("Attempted to open checkout URL on server-side: ", url);
+      console.warn(
+        "Attempted to open checkout URL on server-side: ",
+        `/checkout?${params.toString()}`,
+      );
     }
   }
 
