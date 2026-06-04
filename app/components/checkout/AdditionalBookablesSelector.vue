@@ -95,7 +95,7 @@ function getErrorForItem(itemId) {
         <button
           type="button"
           :disabled="isMandatory(entry)"
-          class="w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-150 text-left cursor-pointer disabled:cursor-default overflow-hidden"
+          class="@container w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-150 text-left cursor-pointer disabled:cursor-default overflow-hidden"
           :class="[
             getErrorForItem(entry.item.id)
               ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950'
@@ -173,7 +173,7 @@ function getErrorForItem(itemId) {
           <!-- Price -->
           <div class="flex-shrink-0 text-right">
             <span
-              class="text-base font-semibold"
+                class="text-sm @md:text-base font-semibold"
               :class="
                 getErrorForItem(entry.item.id)
                   ? 'text-red-400 dark:text-red-500 line-through'
