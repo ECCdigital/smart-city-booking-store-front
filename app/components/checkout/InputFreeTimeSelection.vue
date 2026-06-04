@@ -517,7 +517,7 @@ function handleDatesSet(info) {
 }
 
 /* ── calendar options ────────────────────────────────────── */
-const calendarOptions = computed(() => ({
+const calendarOptions = reactive({
   plugins: [timeGridPlugin, interactionPlugin],
   initialView: "timeGridWeek",
   locale: deLocale,
@@ -547,7 +547,15 @@ const calendarOptions = computed(() => ({
   select: handleCalendarSelect,
   datesSet: handleDatesSet,
   validRange: { start: localISODate(getMonday(today)) },
-}));
+});
+
+watch(calendarEvents, (events) => {
+  const api = getApi();
+  if (!api) return;
+
+  api.removeAllEvents();
+  api.addEventSource(events);
+});
 
 function timeFromString(str) {
   if (!str) return null;
