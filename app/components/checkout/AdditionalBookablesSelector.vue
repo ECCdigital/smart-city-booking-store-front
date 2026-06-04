@@ -67,7 +67,6 @@ function formatPriceLabel(value) {
 }
 
 function getBookableIcon(bookable) {
-  console.log("Determining icon for bookable:", bookable.type);
   if (bookable.type === "room") return "i-lucide-door-open";
   if (bookable.type === "ticket") return "i-lucide-ticket";
   if (bookable.type === "event-location") return "i-lucide-map-pin";
@@ -152,15 +151,6 @@ function getErrorForItem(itemId) {
                   : 'text-gray-400 dark:text-gray-500'
               "
             />
-            <!--
-            :class="
-                getErrorForItem(entry.item.id)
-                  ? 'text-red-400 dark:text-red-500 line-through'
-                  : getMinPrice(entry.item) > 0
-                    ? 'text-primary'
-                    : 'text-gray-400 dark:text-gray-500'
-              "
-            -->
           </div>
 
           <!-- Content -->
