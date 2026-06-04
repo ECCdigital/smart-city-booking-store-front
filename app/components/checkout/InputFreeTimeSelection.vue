@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-5">
+  <div ref="wrapperRef" class="space-y-5">
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
         <label
@@ -177,6 +177,17 @@ const emit = defineEmits(["update:modelValue", "change"]);
 const { getBookableAvailability } = useBookables();
 
 /* ── helpers ─────────────────────────────────────────────── */
+const wrapperRef = ref(null);
+onMounted(() => {
+  const observer = new ResizeObserver(() => {
+    getApi()?.updateSize();
+  });
+
+  observer.observe(wrapperRef.value);
+
+  onUnmounted(() => observer.disconnect());
+});
+
 function pad2(n) {
   return n.toString().padStart(2, "0");
 }
