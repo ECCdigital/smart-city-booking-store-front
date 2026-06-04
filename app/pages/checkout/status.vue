@@ -45,11 +45,11 @@ let autoPollTimer = null;
 let autoPollClockTimer = null;
 
 const isValid = computed(
-  () => bookingId.value.length > 0 && tenantId.value.length > 0
+  () => bookingId.value.length > 0 && tenantId.value.length > 0,
 );
 
 const envelopeOk = computed(
-  () => !statusResponse.value || statusResponse.value.success !== false
+  () => !statusResponse.value || statusResponse.value.success !== false,
 );
 
 const bookingsFromApi = computed(() => {
@@ -141,19 +141,19 @@ function isAutoPollingCandidate(booking) {
 }
 
 const pendingAutoPollBookings = computed(() =>
-  bookingsFromApi.value.filter((booking) =>
-    isAutoPollingCandidate(booking)
-  )
+  bookingsFromApi.value.filter((booking) => isAutoPollingCandidate(booking)),
 );
 
 const hasPendingAutoPollBookings = computed(
-  () => pendingAutoPollBookings.value.length > 0
+  () => pendingAutoPollBookings.value.length > 0,
 );
 
 const hasPaidAutoPollBookings = computed(() =>
   bookingsFromApi.value.some((booking) => {
     const priceEur = Number(booking?.priceEur);
-    const paymentProvider = normalizePaymentProviderId(booking?.paymentProvider);
+    const paymentProvider = normalizePaymentProviderId(
+      booking?.paymentProvider,
+    );
 
     return (
       booking?.isCommitted === true &&
@@ -163,7 +163,7 @@ const hasPaidAutoPollBookings = computed(() =>
       priceEur > 0 &&
       paymentProvider !== "invoice"
     );
-  })
+  }),
 );
 
 const canAutoPoll = computed(
@@ -172,23 +172,23 @@ const canAutoPoll = computed(
     isValid.value &&
     envelopeOk.value &&
     hasPendingAutoPollBookings.value &&
-    !autoPollExpired.value
+    !autoPollExpired.value,
 );
 
 const isAutoPolling = computed(
-  () => canAutoPoll.value && autoPollStartedAt.value != null
+  () => canAutoPoll.value && autoPollStartedAt.value != null,
 );
 
 const autoPollRemainingMs = computed(() => {
   if (!autoPollStartedAt.value) return POLL_WINDOW_MS;
   return Math.max(
     POLL_WINDOW_MS - (autoPollTick.value - autoPollStartedAt.value),
-    0
+    0,
   );
 });
 
 const autoPollRemainingSeconds = computed(() =>
-  Math.max(0, Math.ceil(autoPollRemainingMs.value / 1000))
+  Math.max(0, Math.ceil(autoPollRemainingMs.value / 1000)),
 );
 
 const autoPollProgress = computed(() => {
@@ -198,7 +198,7 @@ const autoPollProgress = computed(() => {
 });
 
 const paymentConfirmedDuringPolling = computed(
-  () => paymentConfirmedByPolling.value
+  () => paymentConfirmedByPolling.value,
 );
 
 function scheduleAutoPollingIfNeeded() {
@@ -300,7 +300,7 @@ watch(
     hasLoadedOnce.value = false;
     await loadStatus();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 onUnmounted(() => {
@@ -427,13 +427,13 @@ function rowForBooking(booking) {
 }
 
 const bookingRows = computed(() =>
-  bookingsFromApi.value.map((booking) => rowForBooking(booking))
+  bookingsFromApi.value.map((booking) => rowForBooking(booking)),
 );
 
 const isSingleBookingView = computed(() => bookingRows.value.length === 1);
 
 const singleBookingRow = computed(() =>
-  isSingleBookingView.value ? bookingRows.value[0] : null
+  isSingleBookingView.value ? bookingRows.value[0] : null,
 );
 
 const showPaymentDetails = computed(() => {
@@ -547,6 +547,26 @@ async function handleManualRefresh() {
 
       <div class="mt-8 border-t border-gray-100 dark:border-gray-800" />
 
+      <div
+        v-if="singleBookingRow && singleBookingRow.isRejected === false"
+        class="mt-5 px-10 p-4 rounded-xl bg-primary/20"
+      >
+        <h2
+          class="mt-4 mb-2 text-xl font-semibold text-gray-900 dark:text-white md:text-2xl"
+        >
+          {{ $t("checkout.status.thankYouTitle") }}
+        </h2>
+
+        <div class="mt-1">
+          {{ $t("checkout.status.thankYouBody") }}
+          <span v-if="singleBookingRow && singleBookingRow.isInvoicePayment">{{
+            $t("checkout.status.invoiceMailHint")
+          }}</span>
+          <br >
+          {{ $t("checkout.status.closeWindowHint") }}
+        </div>
+      </div>
+
       <div class="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div class="space-y-5">
           <template v-if="!isValid">
@@ -645,10 +665,10 @@ async function handleManualRefresh() {
             </div>
 
             <div v-else-if="isSingleBookingView && singleBookingRow">
-              <article class="rounded-md bg-gray-50 p-6 dark:bg-gray-900/60 md:p-8">
+              <article
+                class="rounded-md bg-gray-50 p-6 dark:bg-gray-900/60 md:p-8"
+              >
                 <div class="flex flex-col gap-6 sm:flex-row sm:items-start">
-
-
                   <div class="min-w-0 flex-1">
                     <span
                       class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium"
@@ -673,9 +693,11 @@ async function handleManualRefresh() {
                     >
                       {{ singleBookingRow.detailBody }}
                     </p>
-
                     <p
-                      v-if="!singleBookingRow.success && singleBookingRow.errorMessage"
+                      v-if="
+                        !singleBookingRow.success &&
+                        singleBookingRow.errorMessage
+                      "
                       class="mt-3 text-sm leading-6 text-red-600 dark:text-red-400"
                     >
                       {{ singleBookingRow.errorMessage }}
@@ -933,28 +955,20 @@ async function handleManualRefresh() {
                   : 'mt-6 border-t border-gray-200 pt-6 dark:border-gray-800'
               "
             >
-              <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                {{ $t("checkout.status.actionsTitle") }}
-              </p>
-
               <div class="mt-4 space-y-3">
                 <UButton
-                  color="primary"
+                  color="neutral"
+                  variant="subtle"
                   block
                   :loading="statusPending || isRefreshing"
                   icon="i-lucide-refresh-cw"
+                  class="cursor-pointer"
                   @click="handleManualRefresh"
                 >
                   {{ $t("checkout.status.manualRefreshAction") }}
                 </UButton>
 
-                <UButton
-                  color="neutral"
-                  variant="soft"
-                  block
-                  to="/"
-                  icon="i-lucide-home"
-                >
+                <UButton color="primary" block to="/" icon="i-lucide-home">
                   {{ $t("common.home") }}
                 </UButton>
               </div>
