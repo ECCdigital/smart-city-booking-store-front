@@ -889,7 +889,6 @@ async function validateAll() {
 
   const myToken = ++validationToken;
   isValidating.value = true;
-  validationErrors.value = {};
 
   try {
     const targets = [
