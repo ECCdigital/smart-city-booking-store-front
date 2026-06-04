@@ -187,6 +187,13 @@ onMounted(() => {
 
   onUnmounted(() => observer.disconnect());
 });
+onMounted(() => {
+  if (props.modelValue?.start) {
+    nextTick(() => {
+      getApi()?.gotoDate(new Date(props.modelValue.start));
+    });
+  }
+});
 
 function pad2(n) {
   return n.toString().padStart(2, "0");
@@ -765,7 +772,7 @@ function emitValue() {
 /* ── watch external modelValue ───────────────────────────── */
 watch(
   () => props.modelValue,
-  (v) => {
+  async (v) => {
     if (!v || (!v.start && !v.end)) return;
 
     if (v.start) {
@@ -780,6 +787,12 @@ watch(
     }
 
     lastEmittedKey = `${v.start ?? ""}|${v.end ?? ""}`;
+
+    await nextTick();
+
+    if (v.start) {
+      getApi()?.gotoDate(new Date(v.start));
+    }
   },
   { immediate: true, deep: true },
 );
