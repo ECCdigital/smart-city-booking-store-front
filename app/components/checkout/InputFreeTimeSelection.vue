@@ -475,6 +475,20 @@ function renderEventContent(arg) {
     return true;
   }
 
+  //for short events, only show the time range
+  const durationMs = arg.event.end - arg.event.start;
+  const durationMinutes = durationMs / (1000 * 60);
+
+  if (durationMinutes < 60) {
+    return {
+      html: `
+        <div>
+          ${arg.event.title}
+        </div>
+      `,
+    };
+  }
+
   return {
     html: `
       <div>
