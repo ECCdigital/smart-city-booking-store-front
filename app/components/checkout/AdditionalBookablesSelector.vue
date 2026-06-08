@@ -102,6 +102,7 @@ function getErrorForItem(itemId) {
               : isSelected(entry.item.id)
                 ? 'border-primary bg-primary/5 dark:bg-primary/10'
                 : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600',
+            entry.item.isBookable ? '' : 'opacity-50 cursor-not-allowed',
           ]"
           @click="!isMandatory(entry) && toggleSelection(entry.item.id)"
         >
@@ -173,7 +174,7 @@ function getErrorForItem(itemId) {
           <!-- Price -->
           <div class="flex-shrink-0 text-right">
             <span
-                class="text-sm @md:text-base font-semibold"
+              class="text-sm @md:text-base font-semibold"
               :class="
                 getErrorForItem(entry.item.id)
                   ? 'text-red-400 dark:text-red-500 line-through'
