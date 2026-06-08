@@ -48,7 +48,7 @@ const pad2 = (n) => String(n).padStart(2, "0");
 const localISODate = (date) => {
   if (!date) return "";
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
-    date.getDate()
+    date.getDate(),
   )}`;
 };
 
@@ -127,7 +127,7 @@ function applyDefaultEndFromStart() {
     sd.getMonth(),
     sd.getDate(),
     sh,
-    sm || 0
+    sm || 0,
   );
 
   if (endDateInput.value && endTimeInput.value) {
@@ -139,7 +139,7 @@ function applyDefaultEndFromStart() {
         ed.getMonth(),
         ed.getDate(),
         eh,
-        em || 0
+        em || 0,
       );
       if (end > start) return;
     }
@@ -207,7 +207,7 @@ const seedStartMs = computed(() => {
     sd.getMonth(),
     sd.getDate(),
     h,
-    m || 0
+    m || 0,
   ).getTime();
 });
 
@@ -221,7 +221,7 @@ const seedEndMs = computed(() => {
     ed.getMonth(),
     ed.getDate(),
     h,
-    m || 0
+    m || 0,
   ).getTime();
 });
 
@@ -292,7 +292,7 @@ watch(
       monthlyWeekdayOrdinal.value = v.monthlyWeekdayOrdinal;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const committedAttempts = ref([]);
@@ -357,7 +357,7 @@ const canGenerate = computed(() => {
 const isStale = computed(
   () =>
     committedAttempts.value.length > 0 &&
-    committedSignature.value !== currentSignature.value
+    committedSignature.value !== currentSignature.value,
 );
 
 function generateNow() {
@@ -415,7 +415,7 @@ watch(
       resetAttempts();
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 function toggleWeekday(value) {
@@ -503,9 +503,12 @@ function getWeekDayCardClass(wd) {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="@container space-y-6">
     <!-- Start / End -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <p class="font-semibold text-gray-500 dark:text-gray-400">
+      {{ $t("groupBooking.fields.timeExplanation") }}
+    </p>
+    <div class="grid grid-cols-1 @lg:grid-cols-2 gap-4">
       <div>
         <label
           class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
@@ -538,124 +541,98 @@ function getWeekDayCardClass(wd) {
     </div>
 
     <!-- Rhythm / interval -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div>
-        <label
-          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
-        >
-          {{ $t("groupBooking.fields.frequency") }}
-        </label>
-        <USelect
-          v-model="frequency"
-          :items="[
-            { label: $t('groupBooking.frequency.weekly'), value: 'weekly' },
-            { label: $t('groupBooking.frequency.monthly'), value: 'monthly' },
-          ]"
-        />
-      </div>
-      <div>
-        <label
-          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
-        >
-          {{
-            frequency === "weekly"
-              ? $t("groupBooking.fields.intervalWeeks")
-              : $t("groupBooking.fields.intervalMonths")
-          }}
-        </label>
-        <UInput v-model.number="interval" type="number" :min="1" :max="52" />
-      </div>
-      <div>
-        <label
-          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
-        >
-          {{ $t("groupBooking.fields.until") }}
-        </label>
-        <InputDate
-          v-model="untilInputDate"
-          disable-past
-          :dialog-title="$t('groupBooking.fields.untilDialogTitle')"
-          :dialog-description="$t('groupBooking.fields.untilDialogDescription')"
-          class="w-full"
-        />
-      </div>
-    </div>
-
-    <!-- Weekly options -->
-    <div v-if="frequency === 'weekly'" class="space-y-2">
+    <p class="font-semibold text-gray-500 dark:text-gray-400 mt-10">
+      {{ $t("groupBooking.fields.rhythmExplanation") }}
+    </p>
+    <div class="space-x-1">
       <label
-        class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400"
+        class="text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
       >
-        {{ $t("groupBooking.fields.weekdays") }}
+        {{ $t("groupBooking.fields.each") }}
       </label>
-      <div class="flex flex-wrap gap-2">
-        <button
-          v-for="wd in WEEKDAY_ORDER"
-          :key="wd"
-          type="button"
-          :title="weekdayLongLabel(wd)"
-          :aria-label="weekdayLongLabel(wd)"
-          class="px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors"
-          :class="getWeekDayCardClass(wd)"
-          @click="toggleWeekday(wd)"
-        >
-          {{ weekdayShortLabel(wd) }}
-        </button>
-      </div>
+      <UInput v-model.number="interval" type="number" :min="1" :max="52" />
+      <USelect
+        v-model="frequency"
+        :items="[
+          { label: $t('groupBooking.frequency.weeks'), value: 'weekly' },
+          { label: $t('groupBooking.frequency.months'), value: 'monthly' },
+        ]"
+      />
+      <span
+        class="text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+      >
+        {{ $t("groupBooking.fields.repeat") }}
+      </span>
     </div>
 
-    <!-- Monthly options -->
-    <div v-else class="space-y-3">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
-        <label class="inline-flex items-center gap-2 text-sm">
-          <input
-            v-model="monthlyMode"
-            type="radio"
-            value="day-of-month"
-            class="accent-primary"
-          />
-          {{ $t("groupBooking.fields.monthlyByDay") }}
-        </label>
-        <label class="inline-flex items-center gap-2 text-sm">
-          <input
-            v-model="monthlyMode"
-            type="radio"
-            value="weekday-of-month"
-            class="accent-primary"
-          />
-          {{ $t("groupBooking.fields.monthlyByWeekday") }}
-        </label>
-      </div>
-
-      <div v-if="monthlyMode === 'day-of-month'" class="max-w-xs">
+    <div class="">
+      <!-- Weekly options -->
+      <div v-if="frequency === 'weekly'" class="space-y-2">
         <label
-          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400"
         >
-          {{ $t("groupBooking.fields.dayOfMonth") }}
+          {{ $t("groupBooking.fields.weekdays") }}
         </label>
-        <UInput
-          v-model.number="monthlyDayOfMonth"
-          type="number"
-          :min="1"
-          :max="31"
-        />
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="wd in WEEKDAY_ORDER"
+            :key="wd"
+            type="button"
+            :title="weekdayLongLabel(wd)"
+            :aria-label="weekdayLongLabel(wd)"
+            class="px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors"
+            :class="getWeekDayCardClass(wd)"
+            @click="toggleWeekday(wd)"
+          >
+            {{ weekdayShortLabel(wd) }}
+          </button>
+        </div>
       </div>
 
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
-        <div>
+      <!-- Monthly options -->
+      <div v-else class="space-y-3">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6 py-2">
+          <label class="inline-flex items-center gap-2 text-sm">
+            <input
+              v-model="monthlyMode"
+              type="radio"
+              value="day-of-month"
+              class="accent-primary"
+            >
+            {{ $t("groupBooking.fields.monthlyByDay") }}
+          </label>
+          <label class="inline-flex items-center gap-2 text-sm">
+            <input
+              v-model="monthlyMode"
+              type="radio"
+              value="weekday-of-month"
+              class="accent-primary"
+            >
+            {{ $t("groupBooking.fields.monthlyByWeekday") }}
+          </label>
+        </div>
+
+        <div v-if="monthlyMode === 'day-of-month'" class="max-w-xs space-x-1">
           <label
-            class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+            class="text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
           >
-            {{ $t("groupBooking.fields.ordinal") }}
+            {{ $t("groupBooking.fields.dayOfMonth") }}
+          </label>
+          <UInput
+            v-model.number="monthlyDayOfMonth"
+            type="number"
+            :min="1"
+            :max="31"
+          />
+        </div>
+
+        <div v-else class="max-w-lg space-x-1">
+          <label
+            class="text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+          >
+            {{ $t("groupBooking.fields.every") }}
           </label>
           <USelect v-model="monthlyWeekdayOrdinal" :items="ordinalOptions" />
-        </div>
-        <div>
-          <label
-            class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
-          >
-            {{ $t("groupBooking.fields.weekday") }}
-          </label>
           <USelect
             v-model="monthlyWeekday"
             :items="
@@ -665,13 +642,37 @@ function getWeekDayCardClass(wd) {
               }))
             "
           />
+          <span
+            class="text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+          >
+            {{ $t("groupBooking.fields.ofMonth") }}
+          </span>
         </div>
       </div>
+    </div>
+    <!-- until  -->
+
+    <p class="font-semibold text-gray-500 dark:text-gray-400 mt-10">
+      {{ $t("groupBooking.fields.untilExplanation") }}
+    </p>
+    <div class="w-[50%] mr-5">
+      <label
+        class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+      >
+        {{ $t("groupBooking.fields.until") }}
+      </label>
+      <InputDate
+        v-model="untilInputDate"
+        disable-past
+        :dialog-title="$t('groupBooking.fields.untilDialogTitle')"
+        :dialog-description="$t('groupBooking.fields.untilDialogDescription')"
+        class="w-full"
+      />
     </div>
 
     <!-- Generate trigger -->
     <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-10"
     >
       <div class="flex items-center gap-2">
         <UButton
@@ -754,8 +755,8 @@ function getWeekDayCardClass(wd) {
             statusFor(attempt.start)?.valid === false
               ? 'bg-red-50 dark:bg-red-950/40'
               : statusFor(attempt.start)?.valid === true
-              ? 'bg-green-50 dark:bg-green-950/30'
-              : ''
+                ? 'bg-green-50 dark:bg-green-950/30'
+                : ''
           "
         >
           <div class="min-w-0 flex-1">
@@ -778,8 +779,8 @@ function getWeekDayCardClass(wd) {
                 statusFor(attempt.start)?.valid === false
                   ? 'text-red-600 dark:text-red-300'
                   : statusFor(attempt.start)?.valid === true
-                  ? 'text-green-600 dark:text-green-300'
-                  : 'text-gray-400 dark:text-gray-500'
+                    ? 'text-green-600 dark:text-green-300'
+                    : 'text-gray-400 dark:text-gray-500'
               "
             >
               <template v-if="!statusFor(attempt.start)">
