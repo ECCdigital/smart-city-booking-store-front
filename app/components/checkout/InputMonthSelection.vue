@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="@container space-y-6">
     <p class="text-gray-500 dark:text-gray-400">
       {{ $t("monthSelection.subtitle") }}
     </p>
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Month Cards Grid -->
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 @3xl:grid-cols-3 gap-4">
       <button
         v-for="month in monthsWithAvailability"
         :key="month.startMs"
