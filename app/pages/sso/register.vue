@@ -1,5 +1,6 @@
 <script setup>
 import {useAuthStore} from "~~/stores/auth.js";
+import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
 
 definePageMeta({ layout: "default" });
 
@@ -8,11 +9,25 @@ const notification = useNotification();
 const loading = ref(false);
 const authStore = useAuthStore();
 
+const {
+  documents: legalDocuments,
+  accepted: legalAccepted,
+  allAccepted: legalAllAccepted,
+  buildPayload: buildLegalAcceptance,
+} = useLegalAcceptance();
+
 const handleRegister = async () => {
+  if (legalDocuments.value.length && !legalAllAccepted.value) {
+    notification.error(t("register.legal.required"));
+    return;
+  }
+
   loading.value = true;
   try {
+    const legalAcceptance = buildLegalAcceptance();
     const response = await $fetch("/api/auth/sso/register", {
       method: "POST",
+      ...(legalAcceptance ? { body: { legalAcceptance } } : {}),
     });
 
     if (response.success) {
@@ -55,6 +70,32 @@ const handleRegister = async () => {
           <p class="text-gray-600 dark:text-gray-400 text-sm">
             {{ t("sso.register.description") }}
           </p>
+        </div>
+
+        <div
+          v-if="legalDocuments.length"
+          class="flex flex-col gap-2 pb-2"
+        >
+          <UCheckbox
+            v-for="doc in legalDocuments"
+            :key="doc.key"
+            v-model="legalAccepted[doc.key]"
+            required
+          >
+            <template #label>
+              <span>
+                {{ t("register.legal.acceptPrefix") }}
+                <a
+                  :href="doc.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-primary-500 hover:underline"
+                >
+                  {{ t(`register.legal.${doc.key}`) }}
+                </a>
+              </span>
+            </template>
+          </UCheckbox>
         </div>
 
         <template #footer>

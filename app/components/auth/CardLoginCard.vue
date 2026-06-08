@@ -2,6 +2,7 @@
 import { ref, computed, reactive } from "vue";
 import { useAuth } from "~/composables/auth/useAuth";
 import { useAuthStore } from "~~/stores/auth.js";
+import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
 
 interface CardField {
   label?: string;
@@ -29,6 +30,13 @@ const { t } = useI18n();
 const notification = useNotification();
 const authStore = useAuthStore();
 const { cardSignup, cardLogin } = useAuth();
+
+const {
+  documents: legalDocuments,
+  accepted: legalAccepted,
+  allAccepted: legalAllAccepted,
+  buildPayload: buildLegalAcceptance,
+} = useLegalAcceptance();
 
 type Step = "credentials" | "register";
 type State =
@@ -98,11 +106,17 @@ const submitCredentials = async () => {
 const submitRegistration = async () => {
   if (!registration.email) return;
 
+  if (legalDocuments.value.length && !legalAllAccepted.value) {
+    notification.error(t("register.legal.required"));
+    return;
+  }
+
   loading.value = true;
   state.value = "";
   errorMessage.value = "";
 
   try {
+    const legalAcceptance = buildLegalAcceptance();
     const result = await cardSignup({
       appId: props.cardMethod.id,
       publicId: credentials.publicId,
@@ -111,6 +125,7 @@ const submitRegistration = async () => {
       firstName: registration.firstName,
       lastName: registration.lastName,
       company: registration.company,
+      ...(legalAcceptance ? { legalAcceptance } : {}),
     });
 
     if (result.status === "link_requested") {
@@ -348,6 +363,32 @@ const back = async () => {
             class="w-full"
         />
       </UFormField>
+
+      <div
+          v-if="legalDocuments.length"
+          class="flex flex-col gap-2 mt-2"
+      >
+        <UCheckbox
+            v-for="doc in legalDocuments"
+            :key="doc.key"
+            v-model="legalAccepted[doc.key]"
+            required
+        >
+          <template #label>
+            <span>
+              {{ $t("register.legal.acceptPrefix") }}
+              <a
+                  :href="doc.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-primary-500 hover:underline"
+              >
+                {{ $t(`register.legal.${doc.key}`) }}
+              </a>
+            </span>
+          </template>
+        </UCheckbox>
+      </div>
 
       <div class="flex justify-between mt-4">
         <UButton color="neutral" variant="outline" @click="back">

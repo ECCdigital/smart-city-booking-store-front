@@ -7,6 +7,9 @@ export default defineEventHandler(async (event) => {
     const pendingToken = getCookie(event, "kc-pending-token");
     const pendingRefresh = getCookie(event, "kc-pending-refresh");
 
+    const body = await readBody(event).catch(() => ({}));
+    const legalAcceptance = body?.legalAcceptance;
+
     if (!pendingToken) {
         throw createError({
             statusCode: 400,
@@ -18,7 +21,10 @@ export default defineEventHandler(async (event) => {
         // 1. Registrieren
         await $fetch(`${API_BASE_URL}/auth/sso/signup`, {
             method: "POST",
-            body: { token: pendingToken },
+            body: {
+                token: pendingToken,
+                ...(legalAcceptance ? { legalAcceptance } : {}),
+            },
         });
 
         // 2. Direkt einloggen

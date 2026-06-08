@@ -11,6 +11,7 @@ export default defineEventHandler(async (event) => {
         firstName,
         lastName,
         company,
+        legalAcceptance,
     } = body;
 
     if (!appId || !publicId || !secret || !email) {
@@ -35,6 +36,7 @@ export default defineEventHandler(async (event) => {
                 company: String(company || "").trim(),
                 verifyUrl: `${USER_BASE_URL}/register/email-verify`,
                 linkUrl: `${USER_BASE_URL}/card/link`,
+                ...(legalAcceptance ? { legalAcceptance } : {}),
             },
         });
 

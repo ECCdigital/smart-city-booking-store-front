@@ -78,6 +78,15 @@
     "title": "Erstellen Sie ein neues Konto",
     "haveAccount": "Haben Sie bereits ein Konto?",
     "loginHere": "Hier anmelden",
+    "errors": {
+      "passwordMismatch": "Die Passwörter stimmen nicht überein!"
+    },
+    "legal": {
+      "acceptPrefix": "Ich akzeptiere die",
+      "dataProtection": "Datenschutzerklärung",
+      "termsAndConditions": "AGB",
+      "required": "Bitte akzeptieren Sie die erforderlichen Dokumente, um fortzufahren."
+    },
     "passwordStrengthCheck": {
       "description": "Muss enthalten",
       "nonePassword": "Gib ein Passwort ein",
