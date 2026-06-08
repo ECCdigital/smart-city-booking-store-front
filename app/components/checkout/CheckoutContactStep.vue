@@ -30,6 +30,17 @@ const attachmentAccepted = defineModel("attachmentAccepted", {
 });
 
 const { t, locale } = useI18n();
+
+const emailChanged = ref(false);
+const isValidEmail = computed(() => {
+  const email = contact.value.email;
+  if (!email) {
+    return true;
+  }
+  if (typeof email !== "string") return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+});
+
 const requiredAttachmentCount = computed(
   () => props.attachments.filter((att) => att?.required === true).length,
 );
@@ -220,6 +231,9 @@ function onAddressSuggestionSelect(suggestion) {
           class="sm:col-span-2"
           :label="$t('common.email')"
           :required="true"
+          :error="
+            emailChanged && !isValidEmail ? $t('checkout.data.invalidEmailHint') : undefined
+          "
         >
           <UInput
             v-model="contact.email"
@@ -228,6 +242,7 @@ function onAddressSuggestionSelect(suggestion) {
             icon="i-lucide-mail"
             size="xl"
             class="w-full"
+            @blur="emailChanged = true"
           />
         </UFormField>
         <UFormField :label="$t('common.phone')" :required="isRequired('phone')">

@@ -291,7 +291,8 @@
       "loggedInDescription": "Sie können sich ausloggen und diese Buchung stattdessen als Gast abschließen.",
       "logoutGuestAction": "Ausloggen und als Gast fortfahren",
       "customFieldsSectionTitle": "Zusätzliche Angaben",
-      "customFieldSelectPlaceholder": "Bitte auswählen"
+      "customFieldSelectPlaceholder": "Bitte auswählen",
+      "invalidEmailHint": "Die eingegebene E-Mail-Adresse ist ungültig."
     },
     "permissionGuard": {
       "loggedOutTitle": "Anmeldung erforderlich",
