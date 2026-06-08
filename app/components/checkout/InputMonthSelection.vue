@@ -311,7 +311,12 @@ async function fetchAvailability() {
 }
 
 watch(
-  [() => props.tenantId, () => props.bookableId, () => props.amount, displayYear],
+  [
+    () => props.tenantId,
+    () => props.bookableId,
+    () => props.amount,
+    displayYear,
+  ],
   () => {
     fetchAvailability();
   },
@@ -348,9 +353,7 @@ function makeMonthKey(month) {
 }
 
 const selectionLabel = computed(() => {
-  const selected = monthsWithAvailability.value.find((m) =>
-    isSelectedMonth(m),
-  );
+  const selected = monthsWithAvailability.value.find((m) => isSelectedMonth(m));
   if (!selected) return null;
   return `${selected.label} ${selected.year}`;
 });
