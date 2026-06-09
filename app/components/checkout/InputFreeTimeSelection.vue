@@ -58,7 +58,7 @@
 
     <div v-if="showCalendarPanel">
       <div
-        class="flex items-center justify-between px-3 py-1.5 rounded-t-md border border-b-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
+        class="flex items-center justify-between px-1 sm:px-3 py-1.5 rounded-t-md border border-b-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
       >
         <button
           type="button"
@@ -66,7 +66,8 @@
           class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           @click="navigatePrev"
         >
-          &larr; {{ $t("scheduleSelection.previousWeek") }}
+          <UIcon name="i-lucide-chevron-left" size="14" />
+          <span class="hidden sm:block">{{ $t("scheduleSelection.previousWeek") }}</span>
         </button>
 
         <div class="flex items-center gap-2">
@@ -81,7 +82,8 @@
           class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           @click="navigateNext"
         >
-          {{ $t("scheduleSelection.nextWeek") }} &rarr;
+          <UIcon name="i-lucide-chevron-right" size="14" class="order-1 sm:order-2" />
+          <span class="hidden sm:block sm:order-1">{{ $t("scheduleSelection.nextWeek") }} </span>
         </button>
       </div>
 

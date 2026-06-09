@@ -8,10 +8,13 @@
       <button
         type="button"
         :disabled="!canGoPreviousYear"
-        class="max-w-25 sm:max-w-none px-1 sm:px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium"
+        class="flex items-center max-w-25 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium"
         @click="navigateYear(-1)"
       >
-        &larr; {{ $t("monthSelection.previousYear") }}
+        <UIcon name="i-lucide-chevron-left" size="14" />
+        <span class="hidden sm:block">
+          {{ $t("monthSelection.previousYear") }}
+        </span>
       </button>
 
       <h3 class="flex items-center gap-2">
@@ -23,12 +26,17 @@
 
       <button
         type="button"
-        class="max-w-25 sm:max-w-none px-1 sm:px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary transition-colors text-sm font-medium"
+        class="flex items-center max-w-25 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary transition-colors text-sm font-medium"
         @click="navigateYear(1)"
       >
-        <span class="sm:hidden">&rarr; <br ></span
-        >{{ $t("monthSelection.nextYear") }}
-        <span class="hidden sm:inline">&rarr;</span>
+        <UIcon
+          name="i-lucide-chevron-right"
+          size="14"
+          class="order-1 sm:order-2"
+        />
+        <span class="hidden sm:block sm:order-1">{{
+          $t("monthSelection.nextYear")
+        }}</span>
       </button>
     </div>
 
@@ -67,7 +75,9 @@
             </p>
           </div>
 
-          <div class="flex items-center justify-end sm:justify-around gap-1.5 order-1 sm:order-2">
+          <div
+            class="flex items-center justify-end sm:justify-around gap-1.5 order-1 sm:order-2"
+          >
             <span
               class="w-2.5 h-2.5 rounded-full shrink-0"
               :class="
