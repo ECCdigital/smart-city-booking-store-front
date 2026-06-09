@@ -26,7 +26,9 @@
         class="max-w-20 sm:max-w-none px-0 sm:px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary transition-colors text-sm font-medium"
         @click="navigateMonth(1)"
       >
-        <span class="sm:hidden">&rarr; <br></span>{{ $t("weekSelection.nextMonth") }} <span class="hidden sm:inline">&rarr;</span>
+        <span class="sm:hidden">&rarr; <br /></span
+        >{{ $t("weekSelection.nextMonth") }}
+        <span class="hidden sm:inline">&rarr;</span>
       </button>
     </div>
 
@@ -100,13 +102,13 @@
     </div>
 
     <p
-        v-if="selectionLabel"
-        class="text-sm text-gray-600 dark:text-gray-300 mt-4"
+      v-if="selectionLabel"
+      class="text-sm text-gray-600 dark:text-gray-300 mt-4"
     >
       {{ $t("weekSelection.selected") }}:
       <span class="font-semibold text-gray-900 dark:text-white">
-          {{ selectionLabel }}
-        </span>
+        {{ selectionLabel }}
+      </span>
     </p>
 
     <!-- Loading indicator -->
@@ -179,7 +181,7 @@ function pad2(n) {
 
 function getISOWeekNumber(date) {
   const d = new Date(
-    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
   );
   d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
@@ -214,7 +216,7 @@ const displayMonth = ref(now.getMonth());
 const displayYear = ref(now.getFullYear());
 
 const currentMonthLabel = computed(
-  () => `${MONTH_LABELS_FULL[displayMonth.value]} ${displayYear.value}`
+  () => `${MONTH_LABELS_FULL[displayMonth.value]} ${displayYear.value}`,
 );
 
 const canGoPreviousMonth = computed(() => {
@@ -321,7 +323,7 @@ watch(
   () => [props.tenantId, props.bookableId, props.amount],
   () => {
     availabilityCache.clear();
-  }
+  },
 );
 
 const visibleRange = computed(() => {
@@ -345,7 +347,7 @@ async function fetchAvailability() {
     props.bookableId,
     range.startMs,
     range.endMs,
-    props.amount
+    props.amount,
   );
 
   if (availabilityCache.has(cacheKey)) {
@@ -384,7 +386,7 @@ watch(
   () => {
     fetchAvailability();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 function isWeekAvailable(week) {
@@ -413,9 +415,7 @@ const weeksWithAvailability = computed(() => {
 const selectedWeekStartMs = ref(null);
 
 const selectionLabel = computed(() => {
-  const selected = weeksWithAvailability.value.find((w) =>
-    isSelectedWeek(w)
-  );
+  const selected = weeksWithAvailability.value.find((w) => isSelectedWeek(w));
   return selected ? selected.rangeLabel : null;
 });
 
@@ -457,7 +457,7 @@ watch(
       selectedWeekStartMs.value = monday.getTime();
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 </script>
 

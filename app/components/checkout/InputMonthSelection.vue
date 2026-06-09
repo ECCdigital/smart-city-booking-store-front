@@ -8,7 +8,7 @@
       <button
         type="button"
         :disabled="!canGoPreviousYear"
-        class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium"
+        class="max-w-25 sm:max-w-none px-1 sm:px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium"
         @click="navigateYear(-1)"
       >
         &larr; {{ $t("monthSelection.previousYear") }}
@@ -23,10 +23,12 @@
 
       <button
         type="button"
-        class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary transition-colors text-sm font-medium"
+        class="max-w-25 sm:max-w-none px-1 sm:px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary transition-colors text-sm font-medium"
         @click="navigateYear(1)"
       >
-        {{ $t("monthSelection.nextYear") }} &rarr;
+        <span class="sm:hidden">&rarr; <br ></span
+        >{{ $t("monthSelection.nextYear") }}
+        <span class="hidden sm:inline">&rarr;</span>
       </button>
     </div>
 
@@ -41,8 +43,8 @@
         :class="getMonthCardClass(month)"
         @click="selectMonth(month)"
       >
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
+        <div class="grid sm:flex items-start sm:justify-between gap-3">
+          <div class="min-w-0 order-2 sm:order-1">
             <span
               class="text-sm font-medium"
               :class="
@@ -65,7 +67,7 @@
             </p>
           </div>
 
-          <div class="flex items-center gap-1.5">
+          <div class="flex items-center justify-end sm:justify-around gap-1.5 order-1 sm:order-2">
             <span
               class="w-2.5 h-2.5 rounded-full shrink-0"
               :class="
