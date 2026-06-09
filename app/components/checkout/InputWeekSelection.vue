@@ -8,7 +8,7 @@
       <button
         type="button"
         :disabled="!canGoPreviousMonth"
-        class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium"
+        class="max-w-20 sm:max-w-none px-0 sm:px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium"
         @click="navigateMonth(-1)"
       >
         &larr; {{ $t("weekSelection.previousMonth") }}
@@ -23,10 +23,10 @@
 
       <button
         type="button"
-        class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary transition-colors text-sm font-medium"
+        class="max-w-20 sm:max-w-none px-0 sm:px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary transition-colors text-sm font-medium"
         @click="navigateMonth(1)"
       >
-        {{ $t("weekSelection.nextMonth") }} &rarr;
+        <span class="sm:hidden">&rarr; <br></span>{{ $t("weekSelection.nextMonth") }} <span class="hidden sm:inline">&rarr;</span>
       </button>
     </div>
 

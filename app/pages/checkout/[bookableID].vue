@@ -1666,6 +1666,12 @@ function normalizeStep(value) {
 
 const currentStep = ref(1);
 
+watch(currentStep, step => {
+  if (step === maxStep.value){
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+})
+
 watch(maxStep, (max) => {
   if (currentStep.value > max) {
     currentStep.value = max;
@@ -2426,7 +2432,7 @@ function onReviewEdit(section) {
                   v-if="showAdditionalBookablesInPeriodStep"
                   :size="35"
                   :min-size="20"
-                  class="overflow-hidden"
+                  class="overflow-hidden mt-5 sm:mt-0"
                 >
                   <div class="pl-0 lg:pl-4">
                     <AdditionalBookablesSelector

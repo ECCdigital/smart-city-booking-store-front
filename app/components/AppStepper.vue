@@ -135,7 +135,7 @@ function isSegmentActive(index) {
         {{ currentStep?.title }}
       </h2>
       <span
-          class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap"
+          class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:block"
       >
         {{
           t("stepper.stepOf", {

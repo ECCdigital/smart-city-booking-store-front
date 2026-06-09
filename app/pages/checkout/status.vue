@@ -723,7 +723,7 @@ async function handleManualRefresh() {
                 >
                   <div class="space-y-1">
                     <dt
-                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                      class="text-xs font-medium tracking-wide text-gray-500 dark:text-gray-400"
                     >
                       {{ $t("checkout.status.paymentProviderLabel") }}
                     </dt>
@@ -736,7 +736,7 @@ async function handleManualRefresh() {
 
                   <div class="space-y-1">
                     <dt
-                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                      class="text-xs font-medium tracking-wide text-gray-500 dark:text-gray-400"
                     >
                       {{ $t("checkout.status.paymentStateLabel") }}
                     </dt>
@@ -752,7 +752,7 @@ async function handleManualRefresh() {
 
                   <div class="space-y-1">
                     <dt
-                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                      class="text-xs font-medium tracking-wide text-gray-500 dark:text-gray-400"
                     >
                       {{ $t("checkout.status.amountLabel") }}
                     </dt>

@@ -20,7 +20,7 @@
     >
       <div
         v-if="showPicker"
-        class="absolute left-0 top-full mt-2 z-50 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl"
+        class="absolute left-1/2 sm:left-0 -translate-x-1/2 sm:translate-x-0 top-full mt-2 z-50 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl"
         @click.stop
       >
         <VueDatePicker

@@ -27,6 +27,7 @@
     "mandatory": "Pflichtfeld",
     "obligation": "Pflicht",
     "phone": "Telefon",
+    "completeAddress": "Adresse",
     "address": "Straße und Hausnummer",
     "zipCode": "PLZ",
     "city": "Stadt"
@@ -510,7 +511,7 @@
   },
 
   "weekSelection": {
-    "subtitle": "Wählen Sie eine Kalenderwoche",
+    "subtitle": "Wählen Sie eine Kalenderwoche.",
     "previousMonth": "Vorheriger Monat",
     "nextMonth": "Nächster Monat",
     "available": "Verfügbar",
