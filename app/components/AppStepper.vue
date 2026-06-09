@@ -176,9 +176,11 @@ function isSegmentActive(index) {
 
       <UButton
           color="primary"
+          :variant="canGoNext? 'solid' : 'soft'"
           trailing-icon="i-lucide-arrow-right"
           :loading="loading"
           :disabled="!canGoNext"
+          :class="!canGoNext ? 'text-gray-500' : ''"
           @click="goNext"
       >
         {{ nextButtonLabel }}
