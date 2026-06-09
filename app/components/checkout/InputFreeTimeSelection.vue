@@ -697,6 +697,24 @@ function onManualInputChange() {
   }
 }
 
+watch(showCalendarPanel, (visible) => {
+  if (!visible) return;
+  nextTick(() => {
+    const api = getApi();
+    if (!api) return;
+
+    const selectedDate = startDateInput.value
+        ? parseLocalDate(startDateInput.value)
+        : null;
+
+    if (selectedDate) {
+      api.gotoDate(selectedDate);
+    }
+
+    api.updateSize();
+  });
+});
+
 /* ── overlap warning ─────────────────────────────────────── */
 const overlapWarning = computed(() => {
   if (

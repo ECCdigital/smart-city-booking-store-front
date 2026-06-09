@@ -187,9 +187,10 @@ function getErrorForItem(itemId) {
             </span>
           </div>
         </button>
+        <!-- Error -->
         <div
           v-if="getErrorForItem(entry.item.id)"
-          class="flex justify-center items-center gap-1.5 mt-0.5"
+          class="flex justify-center items-center gap-1.5 mt-0.5 mx-4 sm:mx-2"
         >
           <UIcon
             name="i-lucide-alert-circle"
