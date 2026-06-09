@@ -79,9 +79,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     keys: [
       "item.information.description",
       "item.eventLocation.name",
-      "item.eventAddress.city",
-      "item.eventAddress.zip",
-      "item.eventAddress.street",
+      "item.location.display_address",
+      "item.location.address.city",
+      "item.location.address.post_code",
+      "item.location.address.street",
     ],
     includeScore: true,
     shouldSort: true,
@@ -125,28 +126,15 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
 
     if (Array.isArray(query.cities) && query.cities.length > 0) {
-      if (isEvent) {
-        //toDo - adjust for new address object
-        filtered = filtered.filter((b) => {
-          if (!b.item.eventAddress.city) {
-            return false;
-          }
-          return query.cities.some((city) => {
-            return b.item.eventAddress.city
-              .toLowerCase()
-              .includes(city.toLowerCase());
-          });
-        });
-      } else {
-        filtered = filtered.filter((b) => {
-          if (!b.item.location) return false;
-          return query.cities.some((city) =>
-            b.item.location.display_address
-              .toLowerCase()
-              .includes(city.toLowerCase()),
-          );
-        });
-      }
+      filtered = filtered.filter((b) => {
+        if (!b.item.location) return false;
+        const city =
+          b.item.location.address?.city || b.item.location.display_address;
+        if (!city) return false;
+        return query.cities.some((c) =>
+          city.toLowerCase().includes(c.toLowerCase()),
+        );
+      });
     }
 
     const maxDistance = query.distance;
@@ -484,39 +472,45 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       return { item, isBookable: false, matchStatus: MatchStatus.MATCH };
     });
 
-    //add location coordinates to items based on address for better location search and distance calculation
+    //add location coordinates to events without coordinates for better location search and distance calculation
     if (isEvent && typeof searchCriteria.location === "object") {
       result = await Promise.all(
         result.map(async (item) => {
-          //if (isEvent) {
+          const location = item.item.location;
+
+          const hasCoordinates =
+            location &&
+            location.coordinates &&
+            location.coordinates.points &&
+            location.coordinates.points[0] != null &&
+            location.coordinates.points[1] != null;
+
+          if (hasCoordinates) {
+            return item;
+          }
+
+          const addressString = location?.display_address || "";
+
           let addressCoordinates: number[] = [];
-
-          const addressString = `${item.item.eventAddress.street || ""} ${
-            item.item.eventAddress.houseNumber || ""
-          }, ${item.item.eventAddress.zip || ""} ${
-            item.item.eventAddress.city || ""
-          }`;
-
           if (addressString) {
             addressCoordinates = await searchAddress(addressString);
           }
 
-          item = {
+          return {
             ...item,
             item: {
               ...item.item,
               location: {
+                ...location,
                 display_address: addressString,
                 coordinates: addressCoordinates
                   ? {
                       points: addressCoordinates,
                     }
-                  : null,
+                  : location?.coordinates || null,
               },
             },
           };
-          return item;
-          //}
         }),
       );
     }

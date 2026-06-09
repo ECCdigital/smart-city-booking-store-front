@@ -35,25 +35,18 @@ const props = defineProps({
 });
 
 const hasCoordinates = computed(() => {
+  const points = props.item.location?.coordinates?.points;
   return (
-    !!props.item.location?.coordinates &&
-    !!props.item.location.coordinates.points[0] &&
-    !!props.item.location.coordinates.points[1]
+    Array.isArray(points) &&
+    points[0] != null &&
+    points[1] != null
   );
 });
 const hasAddressString = computed(() => {
-  if (props.isEvent) {
-    return !!props.item.eventAddress?.city;
-  }
   return !!props.item.location?.display_address;
 });
 const adressString = computed(() => {
-  if (props.isEvent) {
-    const address = props.item.eventAddress;
-    return `${address.street || ""} ${address.houseNumber || ""}, ${address.zip || ""} ${address.city || ""}`.trim();
-  } else {
-    return props.item.location?.display_address || "";
-  }
+  return props.item.location?.display_address || "";
 });
 </script>
 <style scoped></style>

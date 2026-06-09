@@ -396,9 +396,7 @@ const possibleCities = computed(() => {
   const cityCount = {};
   props.bookables.forEach((b) => {
     let city = "";
-    if (props.isEvent && b.matchStatus === "match") {
-      city = extractCity(b.item.eventAddress.city); //toDo - adjust for new location object !!!
-    } else if (b.matchStatus === "match") {
+    if (b.matchStatus === "match") {
       city = extractCity(b.item.location);
     }
 

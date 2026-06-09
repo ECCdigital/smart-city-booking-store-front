@@ -31,7 +31,7 @@
 <script setup>
 const props = defineProps({
   coordinates: {
-    type: Array,
+    type: Object,
     default: null,
   },
   addressString: {
@@ -53,7 +53,7 @@ onMounted(() => {
 });
 
 const getCoordinates = async () => {
-  if (props.coordinates) {
+  if (props.coordinates?.points) {
     addressCoordinates.value = [
       props.coordinates.points[1],
       props.coordinates.points[0],
