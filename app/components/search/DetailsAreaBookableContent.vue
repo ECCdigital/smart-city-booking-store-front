@@ -34,21 +34,12 @@
           :bookable="item"
           class="md:hidden mt-5"
         />
-        <BookableFlagDisplay :flags="item?.flags" is-detail-mode class="my-5" />
-
-        <!-- Custom Fields: Badges (über der Beschreibung) -->
-        <div v-if="badgeFields.length" class="my-5">
-          <UBadge
-            v-for="field in badgeFields"
-            :key="field.id"
-            size="md"
-            color="neutral"
-            variant="solid"
-            class="bg-gray-300 rounded-full text-sm mr-2 mb-2 text-black"
-          >
-            {{ customFieldBadgeLabel(field) }}
-          </UBadge>
-        </div>
+        <BookableFlagDisplay
+          :flags="item?.flags"
+          :badges="badgeFieldLabels"
+          is-detail-mode
+          class="my-5"
+        />
 
         <!-- Description -->
         <div>
@@ -186,14 +177,14 @@
           v-if="moreInfoFields.length"
           class="bg-gray-200 dark:bg-gray-700 rounded-md p-3"
         >
-          <h3 class="text-lg font-bold mb-2">Mehr Informationen</h3>
-          <dl class="space-y-1">
+          <h3 class="font-bold mr-1 content-center line-clamp-2">Weitere Informationen</h3>
+          <dl class="space-y-2">
             <div
               v-for="field in moreInfoFields"
               :key="field.id"
               class="flex justify-between gap-2"
             >
-              <dt class="font-semibold">{{ field.caption }}</dt>
+              <dt>{{ field.caption }}</dt>
               <dd class="text-right">
                 <template v-if="field.inputType === 'boolean'">Ja</template>
                 <template v-else>{{ customFieldValueText(field) }}</template>
@@ -262,6 +253,8 @@ function fieldsByPosition(position) {
 const badgeFields = computed(() => fieldsByPosition("badge"));
 const belowDescriptionFields = computed(() => fieldsByPosition("belowDescription"));
 const moreInfoFields = computed(() => fieldsByPosition("moreInfo"));
+
+const badgeFieldLabels = computed(() => badgeFields.value.map(customFieldBadgeLabel));
 
 function customFieldValueText(field) {
   if (field.inputType === "select") {
