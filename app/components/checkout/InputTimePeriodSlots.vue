@@ -34,7 +34,7 @@
         </button>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="@container flex items-center gap-2">
         <button
           type="button"
           :disabled="!canGoBack"
@@ -46,7 +46,7 @@
         </button>
 
         <div
-          class="flex-1 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2"
+          class="flex-1 grid grid-cols-4 @md:grid-cols-7 gap-2"
         >
           <button
             v-for="day in days"
