@@ -458,6 +458,7 @@
       "actionsTitle": "Aktionen",
       "manualRefreshAction": "Status aktualisieren",
       "singleBookingReference": "Buchungsnummer",
+      "bookableTitle": "Gebuchtes Objekt",
       "detail": {
         "awaiting_approval": {
           "title": "Anfrage eingegangen",

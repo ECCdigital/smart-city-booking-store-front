@@ -4,6 +4,8 @@ import {
   effectiveBookingStatusI18nKey,
   BOOKING_STATUS_REASONS,
 } from "~/utils/bookingStatus.js";
+import {useBookableStore} from "~~/stores/bookable.js";
+import {useCatalogBundle} from "~/composables/useCatalogBundle.js";
 
 definePageMeta({
   layout: "checkout",
@@ -22,10 +24,22 @@ const route = useRoute();
 const { t, te, locale } = useI18n();
 const checkoutNavTab = useState("checkoutNavTab", () => "");
 
+const bookableId = computed(() => String(route.query.bookableId || "").trim());
 const bookingId = computed(() => String(route.query.bookingId || "").trim());
 const tenantId = computed(() => String(route.query.tenantId || "").trim());
 
+
+
 const { getStatus } = useBookings();
+
+const bookable = computed(() => {
+  const id = bookableId.value;
+  return id ? useBookableStore().getBookableById(id) : null;
+});
+const { loadBundle } = useCatalogBundle();
+if (!bookable.value) {
+  await loadBundle({ bookableID: bookableId.value });
+}
 
 const statusResponse = ref(null);
 const statusPending = ref(false);
@@ -185,16 +199,6 @@ const autoPollRemainingMs = computed(() => {
     POLL_WINDOW_MS - (autoPollTick.value - autoPollStartedAt.value),
     0,
   );
-});
-
-const autoPollRemainingSeconds = computed(() =>
-  Math.max(0, Math.ceil(autoPollRemainingMs.value / 1000)),
-);
-
-const autoPollProgress = computed(() => {
-  if (!autoPollStartedAt.value) return 0;
-  const elapsed = POLL_WINDOW_MS - autoPollRemainingMs.value;
-  return Math.min(100, Math.max(0, (elapsed / POLL_WINDOW_MS) * 100));
 });
 
 const paymentConfirmedDuringPolling = computed(
@@ -712,6 +716,18 @@ async function handleManualRefresh() {
                         class="font-mono font-semibold text-gray-700 dark:text-gray-200"
                       >
                         #{{ singleBookingRow.id }}
+                      </span>
+                    </p>
+
+                    <p
+                        v-if="bookable && bookable.title"
+                        class="mt-5 text-sm text-gray-500 dark:text-gray-400"
+                    >
+                      {{ $t("checkout.status.bookableTitle") }}:
+                      <span
+                          class="font-mono font-semibold text-gray-700 dark:text-gray-200"
+                      >
+                        {{ bookable.title }}
                       </span>
                     </p>
                   </div>
