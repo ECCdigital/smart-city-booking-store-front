@@ -4,8 +4,8 @@ import {
   effectiveBookingStatusI18nKey,
   BOOKING_STATUS_REASONS,
 } from "~/utils/bookingStatus.js";
-import {useBookableStore} from "~~/stores/bookable.js";
-import {useCatalogBundle} from "~/composables/useCatalogBundle.js";
+import { useBookableStore } from "~~/stores/bookable.js";
+import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 
 definePageMeta({
   layout: "checkout",
@@ -27,8 +27,6 @@ const checkoutNavTab = useState("checkoutNavTab", () => "");
 const bookableId = computed(() => String(route.query.bookableId || "").trim());
 const bookingId = computed(() => String(route.query.bookingId || "").trim());
 const tenantId = computed(() => String(route.query.tenantId || "").trim());
-
-
 
 const { getStatus } = useBookings();
 
@@ -720,12 +718,12 @@ async function handleManualRefresh() {
                     </p>
 
                     <p
-                        v-if="bookable && bookable.title"
-                        class="mt-5 text-sm text-gray-500 dark:text-gray-400"
+                      v-if="bookable && bookable.title"
+                      class="mt-5 text-sm text-gray-500 dark:text-gray-400"
                     >
                       {{ $t("checkout.status.bookableTitle") }}:
                       <span
-                          class="font-mono font-semibold text-gray-700 dark:text-gray-200"
+                        class="font-mono font-semibold text-gray-700 dark:text-gray-200"
                       >
                         {{ bookable.title }}
                       </span>
@@ -811,15 +809,15 @@ async function handleManualRefresh() {
 
             <div v-else class="divide-y divide-gray-100 dark:divide-gray-800">
               <div
-                  v-if="bookable && bookable.title"
-                  class="grid pb-6 text-sm font-medium tracking-wide text-gray-500 dark:text-gray-400"
+                v-if="bookable && bookable.title"
+                class="grid pb-6 text-sm font-medium tracking-wide text-gray-500 dark:text-gray-400"
               >
                 {{ $t("checkout.status.bookableTitle") }}:
                 <div
-                    class="mt-1 text-md font-semibold text-gray-900 dark:text-white"
+                  class="mt-1 text-md font-semibold text-gray-900 dark:text-white"
                 >
-                        {{ bookable.title }}
-                      </div>
+                  {{ bookable.title }}
+                </div>
               </div>
               <article
                 v-for="row in bookingRows"
