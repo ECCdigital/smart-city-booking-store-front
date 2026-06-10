@@ -24,6 +24,9 @@ const comment = defineModel("comment", {
   default: "",
 });
 
+const isAddressMenuOpen = ref(false)
+const isCityMenuOpen = ref(false)
+
 const attachmentAccepted = defineModel("attachmentAccepted", {
   type: Object,
   default: () => ({}),
@@ -47,9 +50,11 @@ const requiredAttachmentCount = computed(
 
 const selectedAddressSuggestion = ref(null);
 const addressLookupQuery = ref("");
+const cityLookupQuery = ref("");
 const addressSuggestions = ref([]);
 const isAddressLookupLoading = ref(false);
 let addressLookupDebounce = null;
+let cityLookupDebounce = null;
 
 function isRequired(key) {
   return props.requiredFieldKeys.includes(key);
@@ -160,21 +165,33 @@ async function searchAddressSuggestions(query) {
   }
 }
 
-watch(addressLookupQuery, (query) => {
+watch([addressLookupQuery, cityLookupQuery], ([addressQuery, cityQuery]) => {
   clearTimeout(addressLookupDebounce);
+  clearTimeout(cityLookupDebounce);
 
-  if (!query || query.trim().length < 3) {
+  const query = (addressQuery || cityQuery || "").trim();
+
+  if (query.length < 3) {
     addressSuggestions.value = [];
     return;
   }
 
-  addressLookupDebounce = setTimeout(() => {
-    searchAddressSuggestions(query);
-  }, 300);
+  if (addressQuery?.trim()) {
+    addressLookupDebounce = setTimeout(() => {
+      searchAddressSuggestions(addressQuery);
+    }, 300);
+  }
+
+  if (cityQuery?.trim()) {
+    cityLookupDebounce = setTimeout(() => {
+      searchAddressSuggestions(cityQuery);
+    }, 300);
+  }
 });
 
 onBeforeUnmount(() => {
   clearTimeout(addressLookupDebounce);
+  clearTimeout(cityLookupDebounce);
 });
 
 function resolveAddressSuggestion(suggestion) {
@@ -188,14 +205,23 @@ function resolveAddressSuggestion(suggestion) {
 }
 
 function onAddressSuggestionSelect(suggestion) {
+  console.log("*S*", suggestion)
   const resolved = resolveAddressSuggestion(suggestion);
-  if (!resolved) return;
+  console.log("*A*", resolved)
+
+  if (!resolved) return ;
 
   selectedAddressSuggestion.value = resolved;
 
-  contact.value.address = resolved.street || "";
-  contact.value.zipCode = resolved.zipCode || "";
-  contact.value.city = resolved.city || "";
+  if(resolved.street){
+    contact.value.address = resolved.street || "";
+  }
+  if(resolved.zipCode){
+    contact.value.zipCode = resolved.zipCode || "";
+  }
+  if(resolved.city){
+    contact.value.city = resolved.city || "";
+  }
 }
 </script>
 
@@ -274,6 +300,7 @@ function onAddressSuggestionSelect(suggestion) {
         >
           <UInputMenu
             v-model="contact.address"
+            v-model:open="isAddressMenuOpen"
             v-model:search-term="addressLookupQuery"
             :items="addressSuggestions"
             icon="i-lucide-map-pin"
@@ -284,12 +311,19 @@ function onAddressSuggestionSelect(suggestion) {
             @update:model-value="onAddressSuggestionSelect"
             @blur="
               () => {
-                if (!selectedAddressSuggestion || addressLookupQuery)
+                isAddressMenuOpen = false
+                if (!selectedAddressSuggestion || addressLookupQuery){
                   contact.address = addressLookupQuery;
+                }
               }
             "
           />
         </UFormField>
+        <div class="bg-red-300 sm:col-span-2 text-sm">
+          selectedAddressSuggestion: {{selectedAddressSuggestion}}
+          <hr>
+          addressLookupQuery: {{addressLookupQuery}}
+        </div>
         <UFormField
           :label="$t('common.zipCode')"
           :required="isRequired('zipCode')"
@@ -305,7 +339,8 @@ function onAddressSuggestionSelect(suggestion) {
         <UFormField :label="$t('common.city')" :required="isRequired('city')">
           <UInputMenu
             v-model="contact.city"
-            v-model:search-term="addressLookupQuery"
+            v-model:open="isCityMenuOpen"
+            v-model:search-term="cityLookupQuery"
             :items="addressSuggestions"
             icon="i-lucide-building"
             label-key="label"
@@ -315,8 +350,9 @@ function onAddressSuggestionSelect(suggestion) {
             @update:model-value="onAddressSuggestionSelect"
             @blur="
               () => {
-                if (!selectedAddressSuggestion)
-                  contact.city = addressLookupQuery;
+                isCityMenuOpen = false
+                if (!selectedAddressSuggestion || cityLookupQuery)
+                  contact.city = cityLookupQuery;
               }
             "
           />
