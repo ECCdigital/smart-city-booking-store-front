@@ -13,9 +13,7 @@ const props = defineProps({
   },
 });
 
-
 const subtitle = computed(() => props.tenant?.name || "");
-
 </script>
 
 <template>
@@ -31,7 +29,12 @@ const subtitle = computed(() => props.tenant?.name || "");
         </p>
 
         <h1
-          class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white leading-tight"
+          class="font-extrabold text-gray-900 dark:text-white leading-tight line-clamp-3"
+          :class="
+            (leadBookable?.title?.length || 0) > 80
+              ? 'text-xl md:text-2xl'
+              : 'text-3xl md:text-4xl'
+          "
         >
           {{ leadBookable.title }}
         </h1>
@@ -67,7 +70,6 @@ const subtitle = computed(() => props.tenant?.name || "");
           {{ flag }}
         </span>
       </div>
-
     </div>
   </aside>
 </template>

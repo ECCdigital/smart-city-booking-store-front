@@ -831,7 +831,7 @@ const submitButtonLabel = computed(() =>
               class="flex justify-between gap-3"
             >
               <span
-                class="text-gray-600 dark:text-gray-400"
+                class="text-gray-600 dark:text-gray-400 line-clamp-3"
                 :class="
                   row.skipQuantity
                     ? 'text-emerald-800 dark:text-emerald-200'

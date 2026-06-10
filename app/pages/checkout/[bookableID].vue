@@ -2146,6 +2146,7 @@ function onReviewEdit(section) {
       </div>
     </div>
 
+    <!-- No Bookable -->
     <div
       v-else-if="!leadBookable"
       class="flex items-center justify-center min-h-screen"
@@ -2160,6 +2161,7 @@ function onReviewEdit(section) {
       </div>
     </div>
 
+    <!-- Permissions -->
     <div
       v-else-if="showPermissionGuard"
       class="flex items-center justify-center min-h-screen p-6"

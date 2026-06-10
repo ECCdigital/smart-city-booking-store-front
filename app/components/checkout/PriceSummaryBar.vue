@@ -232,7 +232,7 @@ const hasContent = computed(() => {
           :key="item.id"
           class="flex items-center gap-3 text-sm md:text-base text-gray-700 dark:text-gray-200"
         >
-          <span :title="item.label" class="truncate flex-1 min-w-0">{{ item.label }}</span>
+          <span :title="item.label" class="line-clamp-2 flex-1 min-w-0">{{ item.label }}</span>
 
           <div
             v-if="!item.skipQuantity"
