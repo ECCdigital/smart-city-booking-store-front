@@ -637,10 +637,14 @@ const submitButtonLabel = computed(() =>
               :key="row.key"
               class="grid grid-cols-1 sm:grid-cols-[minmax(9rem,auto)_1fr] gap-x-8 gap-y-1"
             >
-              <dt class="text-sm text-gray-500 dark:text-gray-400 mb-0.5 break-words">
+              <dt
+                class="text-sm text-gray-500 dark:text-gray-400 mb-0.5 break-words"
+              >
                 {{ row.label }}
               </dt>
-              <dd class="text-sm text-gray-900 dark:text-white break-words min-w-0 whitespace-pre-line">
+              <dd
+                class="text-sm text-gray-900 dark:text-white break-words min-w-0 whitespace-pre-line"
+              >
                 <div class="font-semibold">
                   {{ row.value }}
                 </div>
@@ -904,7 +908,7 @@ const submitButtonLabel = computed(() =>
             </p>
             <UButton
               color="primary"
-              :variant="canSubmit? 'solid' : 'soft'"
+              :variant="canSubmit ? 'solid' : 'soft'"
               block
               size="lg"
               :trailing-icon="canSubmit ? 'i-lucide-check' : 'i_lucide-x'"

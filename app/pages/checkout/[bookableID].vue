@@ -1666,11 +1666,11 @@ function normalizeStep(value) {
 
 const currentStep = ref(1);
 
-watch(currentStep, step => {
-  if (step === maxStep.value){
+watch(currentStep, (step) => {
+  if (step === maxStep.value) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
-})
+});
 
 watch(maxStep, (max) => {
   if (currentStep.value > max) {

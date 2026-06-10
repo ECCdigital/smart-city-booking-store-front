@@ -30,9 +30,9 @@
         @click="navigateMonth(1)"
       >
         <UIcon
-            name="i-lucide-chevron-right"
-            size="14"
-            class="order-1 sm:order-2"
+          name="i-lucide-chevron-right"
+          size="14"
+          class="order-1 sm:order-2"
         />
         <span class="hidden sm:block sm:order-1">
           {{ $t("weekSelection.nextMonth") }}

@@ -591,7 +591,9 @@ function getWeekDayCardClass(wd) {
 
       <!-- Monthly options -->
       <div v-else class="space-y-3">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6 py-2">
+        <div
+          class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6 py-2"
+        >
           <label class="inline-flex items-center gap-2 text-sm">
             <input
               v-model="monthlyMode"
