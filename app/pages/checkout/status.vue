@@ -810,6 +810,17 @@ async function handleManualRefresh() {
             </div>
 
             <div v-else class="divide-y divide-gray-100 dark:divide-gray-800">
+              <div
+                  v-if="bookable && bookable.title"
+                  class="grid pb-6 text-sm font-medium tracking-wide text-gray-500 dark:text-gray-400"
+              >
+                {{ $t("checkout.status.bookableTitle") }}:
+                <div
+                    class="mt-1 text-md font-semibold text-gray-900 dark:text-white"
+                >
+                        {{ bookable.title }}
+                      </div>
+              </div>
               <article
                 v-for="row in bookingRows"
                 :key="row.id || row.statusKey"
@@ -821,7 +832,7 @@ async function handleManualRefresh() {
                   <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                       <span
-                        class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                        class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 font-mono text-[11px] font-semibold tracking-wide text-gray-600 dark:bg-gray-800 dark:text-gray-300"
                       >
                         #{{ row.id || "—" }}
                       </span>
@@ -856,7 +867,7 @@ async function handleManualRefresh() {
                 <dl class="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-3">
                   <div class="space-y-1">
                     <dt
-                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                      class="text-xs font-medium tracking-wide text-gray-500 dark:text-gray-400"
                     >
                       {{ $t("checkout.status.paymentProviderLabel") }}
                     </dt>
@@ -869,7 +880,7 @@ async function handleManualRefresh() {
 
                   <div class="space-y-1">
                     <dt
-                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                      class="text-xs font-medium tracking-wide text-gray-500 dark:text-gray-400"
                     >
                       {{ $t("checkout.status.paymentStateLabel") }}
                     </dt>
