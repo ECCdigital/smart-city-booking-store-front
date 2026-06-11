@@ -13,13 +13,10 @@
       />
       <LMarker :lat-lng="addressCoordinates">
         <LIcon :icon-anchor="[20, 40]">
-          <UIcon :name="iconMapPin" class="size-10"/>
+          <UIcon :name="iconMapPin" class="size-10" />
         </LIcon>
       </LMarker>
     </LMap>
-  </div>
-  <div v-else-if="!fetchedCoordinates">
-    <USkeleton class="h-[300px] w-full" />
   </div>
   <div
     v-else
@@ -46,38 +43,16 @@ const props = defineProps({
 
 const { iconMapPin } = useBookableMap();
 
-const addressCoordinates = ref([]);
-const fetchedCoordinates = ref(false);
-onMounted(() => {
-  getCoordinates();
-});
-
-const getCoordinates = async () => {
-  if (props.coordinates?.points) {
-    addressCoordinates.value = [
-      props.coordinates.points[1],
-      props.coordinates.points[0],
-    ];
-  } else if (props.addressString) {
-    try {
-      const response = await $fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          props.addressString,
-        )}&limit=1&accept-language=de`,
-      );
-
-      let coordinates = [];
-      if (response[0] && response[0].lat && response[0].lon) {
-        const { lat, lon } = response[0];
-        coordinates = [parseFloat(lat), parseFloat(lon)];
-      }
-      addressCoordinates.value = coordinates;
-      fetchedCoordinates.value = true;
-    } catch (error) {
-      console.error("Suche fehlgeschlagen:", error);
-    }
+const addressCoordinates = computed(() => {
+  if (
+    props.coordinates &&
+    props.coordinates.points &&
+    props.coordinates.points.length === 2
+  ) {
+    return [props.coordinates.points[1], props.coordinates.points[0]];
   }
-};
+  return [];
+});
 </script>
 
 <style scoped>
