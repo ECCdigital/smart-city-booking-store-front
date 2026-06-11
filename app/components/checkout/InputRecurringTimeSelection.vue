@@ -503,7 +503,7 @@ function getWeekDayCardClass(wd) {
 </script>
 
 <template>
-  <div class="@container space-y-6">
+  <div class="@container space-y-6 pl-1">
     <!-- Start / End -->
     <p class="font-semibold text-gray-500 dark:text-gray-400">
       {{ $t("groupBooking.fields.timeExplanation") }}
@@ -543,6 +543,9 @@ function getWeekDayCardClass(wd) {
     <!-- Rhythm / interval -->
     <p class="font-semibold text-gray-500 dark:text-gray-400 mt-10">
       {{ $t("groupBooking.fields.rhythmExplanation") }}
+      <span class="text-xs font-normal">
+        {{ $t("groupBooking.fields.rhythmExample") }}
+      </span>
     </p>
     <div class="space-x-1">
       <label
