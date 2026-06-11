@@ -4,17 +4,20 @@ export const useEventStore = defineStore("event", {
   state: () => ({
     initialized: false,
     events: [],
+    loadedFor: null,
+    loadedDetailsFor: {},
   }),
   getters: {
     getEvents: (state) => state.events,
     getEventById: (state) => (id) => state.events.find((t) => t.id === id),
   },
   actions: {
-    async fetchEvents(tenantID) {
+    async fetchEvents(tenantID, { force = false } = {}) {
+      if (this.initialized && !force) return this.events;
       const { fetchEvents } = useEvents();
       try {
         this.events = await fetchEvents(tenantID);
-        console.log(this.events);
+        this.initialized = true;
         return this.events;
       } catch (error) {
         console.error("Error fetching events:", error);

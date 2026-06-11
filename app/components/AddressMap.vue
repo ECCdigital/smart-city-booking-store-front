@@ -11,7 +11,11 @@
         layer-type="base"
         name="Light  OpenStreetMap"
       />
-      <LMarker :lat-lng="addressCoordinates" />
+      <LMarker :lat-lng="addressCoordinates">
+        <LIcon :icon-anchor="[20, 40]">
+          <UIcon :name="iconMapPin" class="size-10"/>
+        </LIcon>
+      </LMarker>
     </LMap>
   </div>
   <div v-else-if="!fetchedCoordinates">
@@ -27,7 +31,7 @@
 <script setup>
 const props = defineProps({
   coordinates: {
-    type: Array,
+    type: Object,
     default: null,
   },
   addressString: {
@@ -40,6 +44,8 @@ const props = defineProps({
   },
 });
 
+const { iconMapPin } = useBookableMap();
+
 const addressCoordinates = ref([]);
 const fetchedCoordinates = ref(false);
 onMounted(() => {
@@ -47,7 +53,7 @@ onMounted(() => {
 });
 
 const getCoordinates = async () => {
-  if (props.coordinates) {
+  if (props.coordinates?.points) {
     addressCoordinates.value = [
       props.coordinates.points[1],
       props.coordinates.points[0],
@@ -56,8 +62,8 @@ const getCoordinates = async () => {
     try {
       const response = await $fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          props.addressString
-        )}&limit=1&accept-language=de`
+          props.addressString,
+        )}&limit=1&accept-language=de`,
       );
 
       let coordinates = [];
@@ -74,4 +80,9 @@ const getCoordinates = async () => {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.leaflet-div-icon {
+  background: transparent;
+  border: transparent;
+}
+</style>

@@ -1,6 +1,13 @@
 export default defineEventHandler(async (event) => {
-  const { email, password, passwordRepeat, firstname, lastname, company } =
-    await readBody(event);
+  const {
+    email,
+    password,
+    passwordRepeat,
+    firstname,
+    lastname,
+    company,
+    legalAcceptance,
+  } = await readBody(event);
   const { apiBaseUrl: API_BASE_URL, userBaseUrl: USER_BASE_URL } =
     useRuntimeConfig();
 
@@ -29,6 +36,7 @@ export default defineEventHandler(async (event) => {
         lastname: sanitizedLastname,
         company: sanitizedCompany,
         verifyUrl: `${USER_BASE_URL}/register/email-verify`,
+        ...(legalAcceptance ? { legalAcceptance } : {}),
       },
     });
 

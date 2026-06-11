@@ -14,32 +14,39 @@
       <BookableAdressInformation
         :bookable="bookable"
         show-distance
-        class="w-full my-5"
+        class="w-full"
+        :class="mapMode ? 'text-sm my-1' : 'my-5'"
       />
       <USeparator
+        v-if="!mapMode"
         color="neutral"
         class="w-full"
         :ui="{ border: 'border-gray-300' }"
       />
     </div>
 
-    <div class="flex justify-between h-full overflow-hidden">
+    <div
+      class="flex h-full"
+      :class="mapMode ? 'justify-start' : 'overflow-hidden justify-between'"
+    >
       <!-- Eigenschaften -->
-      <div class="basis-3/5 w-full my-2">
+      <div v-if="!mapMode" class="basis-3/5 w-full my-2">
         <BookableFlagDisplay :flags="bookable?.flags" class="line-clamp-3" />
       </div>
-      <div class="basis-2/5 w-full grid content-end">
+
+      <div class="w-full content-end" :class="mapMode ? '' : 'basis-2/5 grid '">
         <!-- Preis -->
         <BookablePriceDisplay
           v-if="!isNotBookable && !isNotSuitable"
           :bookable="bookable"
           :calculated-price="calculatedPrice"
-          class="grid place-content-end text-md font-bold"
+          :is-map-stripe="mapMode"
+          class="font-bold"
         />
 
         <!--Aktionen-->
         <div
-          v-if="!entryPageMode"
+          v-if="!entryPageMode && !mapMode"
           class="w-full mt-2 flex justify-end content-end gap-2"
         >
           <UButton
@@ -67,7 +74,10 @@
           </UTooltip>
         </div>
 
-        <div v-else class="w-full mt-2 flex justify-end content-end gap-2">
+        <div
+          v-else-if="!mapMode"
+          class="w-full mt-2 flex justify-end content-end gap-2"
+        >
           <UButton
             v-if="!isNotBookable"
             label="Details ansehen"
@@ -112,6 +122,10 @@ const props = defineProps({
     default: false,
   },
   entryPageMode: {
+    type: Boolean,
+    default: false,
+  },
+  mapMode: {
     type: Boolean,
     default: false,
   },

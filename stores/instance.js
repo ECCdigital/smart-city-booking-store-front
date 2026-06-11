@@ -1,4 +1,3 @@
-// stores/instance.js
 import { useInstance } from "~/composables/api/useInstance.js";
 
 export const useInstanceStore = defineStore("instance", {
@@ -7,7 +6,9 @@ export const useInstanceStore = defineStore("instance", {
     instance: null,
   }),
   getters: {
-    catalogEnabled: (state) => state.instance?.enableCatalog ?? false,
+    publicOffersEnabled: (state) =>
+        state.instance?.publicOffersEnabled ?? false,
+    portalUrl: (state) => state.instance?.portalUrl ?? null,
     ssoEnabled: (state) =>
         !!state.instance?.applications?.find(
             (app) => app.id === "keycloak" && app.active

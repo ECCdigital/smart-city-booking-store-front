@@ -10,6 +10,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const { fetchCatalog } = useCatalog();
     const catalogData = await fetchCatalog(to.params.catalogSlug);
 
+    if (catalogData?.offersEnabled === false) {
+      return navigateTo("/account");
+    }
+
     if (catalogData?.visibility === "private") {
       const authValid = await validateAuth();
 

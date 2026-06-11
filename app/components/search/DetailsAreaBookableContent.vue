@@ -34,7 +34,12 @@
           :bookable="item"
           class="md:hidden mt-5"
         />
-        <BookableFlagDisplay :flags="item?.flags" is-detail-mode class="my-5" />
+        <BookableFlagDisplay
+          :flags="item?.flags"
+          :badges="badgeFieldLabels"
+          is-detail-mode
+          class="my-5"
+        />
 
         <!-- Description -->
         <div>
@@ -42,6 +47,21 @@
             class="line-clamp-3 md:line-clamp-none"
             v-html="htmlDescription"
           />
+
+          <!-- Custom Fields: unterhalb der Beschreibung -->
+          <dl v-if="belowDescriptionFields.length" class="mt-4 space-y-1">
+            <div
+              v-for="field in belowDescriptionFields"
+              :key="field.id"
+              class="flex gap-2"
+            >
+              <dt class="font-semibold">{{ field.caption }}:</dt>
+              <dd>
+                <template v-if="field.inputType === 'boolean'">Ja</template>
+                <template v-else>{{ customFieldValueText(field) }}</template>
+              </dd>
+            </div>
+          </dl>
           <div class="flex justify-end md:hidden">
             <UButton
               label="Alles ansehen"
@@ -163,6 +183,27 @@
           :item="item"
           class="hidden md:block"
         />
+
+        <!-- Custom Fields: Mehr Informationen -->
+        <div
+          v-if="moreInfoFields.length"
+          class="bg-gray-200 dark:bg-gray-700 rounded-md p-3"
+        >
+          <h3 class="font-bold mr-1 content-center line-clamp-2">Weitere Informationen</h3>
+          <dl class="space-y-2">
+            <div
+              v-for="field in moreInfoFields"
+              :key="field.id"
+              class="flex justify-between gap-2"
+            >
+              <dt>{{ field.caption }}</dt>
+              <dd class="text-right">
+                <template v-if="field.inputType === 'boolean'">Ja</template>
+                <template v-else>{{ customFieldValueText(field) }}</template>
+              </dd>
+            </div>
+          </dl>
+        </div>
       </div>
     </div>
   </div>
@@ -232,6 +273,49 @@ const htmlDescription = computed(() => {
   return sanitizeHtml(props.item.description || "");
 });
 const showFullDescription = ref(false);
+
+const detailFields = computed(() => {
+  const fields = props.item?.customFields || [];
+  return fields.filter((field) => {
+    const position = field?.usageOptions?.detailDisplayPosition;
+    if (!position || position === "none") return false;
+    if (!field.hasValue) return false;
+    // boolean fields only make sense as a positive marker (e.g. "WLAN")
+    if (field.inputType === "boolean") {
+      return field.value === true || field.value === "true";
+    }
+    return field.value !== null && field.value !== undefined && field.value !== "";
+  });
+});
+
+function fieldsByPosition(position) {
+  return detailFields.value.filter(
+    (field) => field.usageOptions.detailDisplayPosition === position,
+  );
+}
+
+const badgeFields = computed(() => fieldsByPosition("badge"));
+const belowDescriptionFields = computed(() => fieldsByPosition("belowDescription"));
+const moreInfoFields = computed(() => fieldsByPosition("moreInfo"));
+
+const badgeFieldLabels = computed(() => badgeFields.value.map(customFieldBadgeLabel));
+
+function customFieldValueText(field) {
+  if (field.inputType === "select") {
+    const option = (field.options || []).find(
+      (opt) => String(opt.value) === String(field.value),
+    );
+    return option?.caption ?? field.value;
+  }
+  return field.value;
+}
+
+function customFieldBadgeLabel(field) {
+  if (field.inputType === "boolean") {
+    return field.caption;
+  }
+  return `${field.caption}: ${customFieldValueText(field)}`;
+}
 
 const timePeriod = ref({
   start: query.start,

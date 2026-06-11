@@ -3,7 +3,6 @@ import { ref } from "vue";
 import ResetPasswordCard from "~/components/auth/ResetPasswordCard.vue";
 import { useAuth } from "~/composables/auth/useAuth";
 
-
 const form = ref({
   password: "",
   passwordRepeat: "",
@@ -11,23 +10,53 @@ const form = ref({
 
 const loading = ref(false);
 const { resetPassword } = useAuth();
-
 const route = useRoute();
+const router = useRouter();
+const notification = useNotification();
+const { t } = useI18n();
+
+const token = computed(() => String(route.query.token || ""));
+const id = computed(() => String(route.query.id || ""));
+
+onMounted(() => {
+  if (!token.value) {
+    router.push("/password/forgot");
+  }
+});
 
 const handleResetPassword = async () => {
+  if (form.value.password !== form.value.passwordRepeat) {
+    notification.error(
+      t("resetPassword.passwordMismatch.message"),
+      t("resetPassword.passwordMismatch.title"),
+    );
+    return;
+  }
+
   loading.value = true;
   try {
-    if (form.value.password !== form.value.passwordRepeat) {
-      alert("Die Passwörter stimmen nicht überein!");
-      return;
-    }
-
-    // Token aus Query oder Route (z. B. /password/reset?token=XYZ)
-    const token = route.query.token as string;
-    console.log("Resetting password with token:", token);
-
-    //await resetPassword({ token, password: form.value.password });
+    await resetPassword({
+      token: token.value,
+      password: form.value.password,
+      id: id.value || undefined,
+    });
+    notification.success(
+      t("notifications.resetPasswordSuccess.message"),
+      t("notifications.resetPasswordSuccess.title"),
+    );
     await navigateTo("/login");
+  } catch (err) {
+    if (err?.statusCode === 400) {
+      notification.error(
+        t("notifications.resetPasswordInvalidToken.message"),
+        t("notifications.resetPasswordInvalidToken.title"),
+      );
+    } else {
+      notification.error(
+        t("notifications.resetPasswordError.message"),
+        t("notifications.resetPasswordError.title"),
+      );
+    }
   } finally {
     loading.value = false;
   }
@@ -47,6 +76,7 @@ const handleResetPassword = async () => {
     <div class="flex w-full lg:w-2/5 items-center justify-center p-6">
       <ResetPasswordCard
         v-model:user-data="form"
+        class="shadow-2xl/50"
         :loading="loading"
         @submit="handleResetPassword"
       />

@@ -25,6 +25,51 @@ export const useAuth = () => {
     });
   };
 
+  const forgotPassword = async (email, resetUrl) => {
+    return await $fetch("/api/auth/forgot-password", {
+      method: "POST",
+      body: { email, resetUrl },
+    });
+  };
+
+  const resetPassword = async ({ token, password, id }) => {
+    return await $fetch("/api/auth/reset-password", {
+      method: "POST",
+      body: { token, password, id },
+    });
+  };
+
+  const verifyCardLink = async (token, id) => {
+    const response = await $fetch("/api/auth/card/verify-link", {
+      method: "POST",
+      body: { token, id },
+    });
+    return response;
+  };
+
+  const getCardAuthMethods = async () => {
+    const response = await $fetch("/api/auth/card-methods");
+    return response.data;
+  };
+
+  const cardSignup = async (
+    payload = {
+      appId,
+      publicId,
+      secret,
+      email,
+      firstName,
+      lastName,
+      company,
+    }
+  ) => {
+    const response = await $fetch("/api/auth/card/signup", {
+      method: "POST",
+      body: payload,
+    });
+    return response.data;
+  };
+
   return {
     user: readonly(computed(() => authStore.user)),
     permission: readonly(computed(() => authStore.permission)),
@@ -36,6 +81,12 @@ export const useAuth = () => {
     logout: authStore.logout,
     register,
     verifyEmail,
+    verifyCardLink,
     changePassword,
+    getCardAuthMethods,
+    cardSignup,
+    cardLogin: authStore.cardLogin,
+    forgotPassword,
+    resetPassword,
   };
 };

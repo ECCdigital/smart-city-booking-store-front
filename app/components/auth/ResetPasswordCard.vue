@@ -7,10 +7,13 @@
       <h2 class="text-2xl font-semibold text-center">
         {{ $t("resetPassword.title") }}
       </h2>
+
+      <p class="text-sm text-center text-gray-500 dark:text-gray-400">
+        {{ $t("resetPassword.description") }}
+      </p>
     </template>
 
     <UForm :state="userData" class="flex flex-col gap-2" @submit="submitForm">
-      <!-- Neues Passwort -->
       <PasswordInput
         v-model="userData.password"
         :label="$t('common.newPassword')"
@@ -20,7 +23,6 @@
       <PasswordProgress :password="userData.password" />
 
 
-      <!-- Passwort wiederholen -->
       <PasswordInput
         v-model="userData.passwordRepeat"
         :label="$t('common.repeatPassword')"
@@ -28,7 +30,6 @@
         input-style-classes="w-full"
       />
 
-      <!-- Submit -->
       <UButton
         type="submit"
         color="primary"
@@ -72,10 +73,6 @@ const userData = defineModel("userData", {
 const emit = defineEmits(["submit"]);
 
 function submitForm() {
-  if (userData.value.password !== userData.value.passwordRepeat) {
-    alert("Die Passwörter stimmen nicht überein!");
-    return;
-  }
   emit("submit");
 }
 </script>

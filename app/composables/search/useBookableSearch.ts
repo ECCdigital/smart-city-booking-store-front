@@ -1,7 +1,11 @@
 import Fuse from "fuse.js";
 import { useBookables } from "~/composables/api/useBookables";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState";
-import type { CatalogQueryState, SortMode } from "~/types/catalogParams";
+import type {
+  CatalogQueryState,
+  SortMode,
+  ViewMode,
+} from "~/types/catalogParams";
 import haversine from "haversine-distance";
 import { getCustomFieldValue } from "~/composables/search/useCustomFieldFilters";
 
@@ -75,9 +79,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     keys: [
       "item.information.description",
       "item.eventLocation.name",
-      "item.eventAddress.city",
-      "item.eventAddress.zip",
-      "item.eventAddress.street",
+      "item.location.display_address",
+      "item.location.address.city",
+      "item.location.address.post_code",
+      "item.location.address.street",
     ],
     includeScore: true,
     shouldSort: true,
@@ -101,16 +106,17 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
 
     if (query.customFields && typeof query.customFields === "object") {
-      for (const [fieldId, value] of Object.entries(query.customFields)) {
-        if (isEmptyFilterValue(value)) continue;
+      for (const [fieldId, filterValue] of Object.entries(query.customFields)) {
+        if (isEmptyFilterValue(filterValue)) continue;
 
         const def = getCustomFieldDef(updatedItems.value, fieldId);
         if (!def) continue;
-        const type = def?.usageOptions?.catalogFilterType;
+
+        const filterType = def?.usageOptions?.catalogFilterType;
 
         filtered = filtered.filter((b) => {
           const itemValue = getCustomFieldValue(b.item, fieldId);
-          return matchesCustomField(itemValue, value, type);
+          return matchesCustomField(itemValue, filterValue, filterType, def);
         });
       }
     }
@@ -120,28 +126,15 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     }
 
     if (Array.isArray(query.cities) && query.cities.length > 0) {
-      if (isEvent) {
-        //toDo - adjust for new address object
-        filtered = filtered.filter((b) => {
-          if (!b.item.eventAddress.city) {
-            return false;
-          }
-          return query.cities.some((city) => {
-            return b.item.eventAddress.city
-              .toLowerCase()
-              .includes(city.toLowerCase());
-          });
-        });
-      } else {
-        filtered = filtered.filter((b) => {
-          if (!b.item.location) return false;
-          return query.cities.some((city) =>
-            b.item.location.display_address
-              .toLowerCase()
-              .includes(city.toLowerCase()),
-          );
-        });
-      }
+      filtered = filtered.filter((b) => {
+        if (!b.item.location) return false;
+        const city =
+          b.item.location.address?.city || b.item.location.display_address;
+        if (!city) return false;
+        return query.cities.some((c) =>
+          city.toLowerCase().includes(c.toLowerCase()),
+        );
+      });
     }
 
     const maxDistance = query.distance;
@@ -340,6 +333,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     query.sortMode = sortMode;
   }
 
+  function setViewQueryParams(viewMode: ViewMode) {
+    query.viewMode = viewMode;
+  }
+
   function initializeResults() {
     if (!isEvent) {
       updatedItems.value = toValue(sourceItems).map((item: any) => {
@@ -475,39 +472,45 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       return { item, isBookable: false, matchStatus: MatchStatus.MATCH };
     });
 
-    //add location coordinates to items based on address for better location search and distance calculation
+    //add location coordinates to events without coordinates for better location search and distance calculation
     if (isEvent && typeof searchCriteria.location === "object") {
       result = await Promise.all(
         result.map(async (item) => {
-          //if (isEvent) {
+          const location = item.item.location;
+
+          const hasCoordinates =
+            location &&
+            location.coordinates &&
+            location.coordinates.points &&
+            location.coordinates.points[0] != null &&
+            location.coordinates.points[1] != null;
+
+          if (hasCoordinates) {
+            return item;
+          }
+
+          const addressString = location?.display_address || "";
+
           let addressCoordinates: number[] = [];
-
-          const addressString = `${item.item.eventAddress.street || ""} ${
-            item.item.eventAddress.houseNumber || ""
-          }, ${item.item.eventAddress.zip || ""} ${
-            item.item.eventAddress.city || ""
-          }`;
-
           if (addressString) {
             addressCoordinates = await searchAddress(addressString);
           }
 
-          item = {
+          return {
             ...item,
             item: {
               ...item.item,
               location: {
+                ...location,
                 display_address: addressString,
                 coordinates: addressCoordinates
                   ? {
                       points: addressCoordinates,
                     }
-                  : null,
+                  : location?.coordinates || null,
               },
             },
           };
-          return item;
-          //}
         }),
       );
     }
@@ -958,31 +961,50 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   function matchesCustomField(
     itemValue: any,
     filterValue: any,
-    type: string | undefined,
+    filterType: string | undefined,
+    filterDef: object = { inputType: "" },
   ) {
     if (itemValue === undefined || itemValue === null || itemValue === "") {
       return false;
     }
 
-    if (type === "select") {
+    if (filterType === "select") {
       if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
+      if (filterDef.inputType === "numeric") {
+        return filterValue.some((v) => Number(v) === itemValue);
+      }
       return filterValue.includes(itemValue);
     }
 
-    if (type === "checkbox") {
+    if (filterType === "checkbox") {
       if (filterValue !== true) return true;
       return itemValue === true || itemValue === "true";
     }
 
-    if (type === "slider") {
-      const n = Number(itemValue);
+    if (filterType === "slider") {
+      let n;
+      if (filterDef && filterDef.inputType === "select") {
+        const temp =
+          filterDef.options?.findIndex((o: any) => o.value === itemValue) + 1;
+        n = temp;
+      } else {
+        n = Number(itemValue);
+      }
+
       if (Number.isNaN(n)) return false;
       return n <= Number(filterValue);
     }
 
-    if (type === "range") {
-      const n = Number(itemValue);
+    if (filterType === "range") {
+      let n;
+      if (filterDef && filterDef.inputType === "select") {
+        n = filterDef.options?.findIndex((o: any) => o.value === itemValue) + 1;
+      } else {
+        n = Number(itemValue);
+      }
+
       if (Number.isNaN(n)) return false;
+
       return n >= filterValue[0] && n <= filterValue[1];
     }
 
@@ -999,8 +1021,10 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     suitableCount,
     setFilterQueryParams,
     setSortedQueryParams,
+    setViewQueryParams,
     runSearch,
     resetResults,
+    searchAddress,
     isMounted,
   };
 }

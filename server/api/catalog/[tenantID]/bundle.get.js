@@ -1,14 +1,35 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
+import { loadBundleData } from "~~/server/api/utils/loadBundleData.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 
 export default createConditionalCachedHandler(
   async (event) => {
     const tenantID = getRouterParam(event, "tenantID");
-    const { bookableId, eventId, include } = getQuery(event);
+    const { slug, bookableId, eventId, include, base } = getQuery(event);
 
-    const { data, error } = await serverFetch(event, `/api/catalog/bundle`, {
+    if (base === "false") {
+      return await loadBundleData(event, {
+        catalog: { type: "single", tenantId: tenantID },
+        tenants: [{ id: tenantID }],
+        bookableId,
+        eventId,
+        include,
+      });
+    }
+
+    const bundlePromise = serverFetch(event, `/api/catalog/bundle`, {
       method: "GET",
+      query: slug ? { slug } : undefined,
     });
+
+    const slugCatalogPromise = slug
+      ? serverFetch(event, `/api/catalog/${slug}`, { method: "GET" })
+      : Promise.resolve(null);
+
+    const [{ data, error }, slugRes] = await Promise.all([
+      bundlePromise,
+      slugCatalogPromise,
+    ]);
 
     if (error) {
       throw createError({
@@ -18,78 +39,58 @@ export default createConditionalCachedHandler(
       });
     }
 
-    const result = { catalog: data.catalog, tenants: data.tenants };
+    const slugCatalog =
+      slugRes && !slugRes.error ? slugRes.data?.catalog ?? slugRes.data : null;
 
-    const tenantExists = result.tenants.some(
-      (tenant) => tenant.id === tenantID
-    );
+    const result = {
+      offersEnabled: data.offersEnabled,
+      branding: slugRes?.data?.branding ?? data.branding,
+      portalUrl: slugRes?.data?.portalUrl ?? data.portalUrl,
+      catalog: slugCatalog ?? data.catalog,
+      tenants: data.tenants ?? [],
+    };
 
-    if (!tenantExists) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: "Tenant Not Found",
-      });
-    }
-
-    if (bookableId) {
-      const { data, error } = await serverFetch(
-        event,
-        `/json/${tenantID}/bookables/${bookableId}`,
-        { method: "GET" }
-      );
-      if (error) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: "Bookable not Found",
-        });
-      }
-      result.bookable = data;
+    if (!result.offersEnabled) {
       return result;
     }
 
-    if (eventId) {
-      const { data, error } = await serverFetch(
-        event,
-        `/json/${tenantID}/events/${eventId}`,
-        { method: "GET" }
-      );
-      if (error) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: "Event not Found",
-        });
-      }
-      result.event = data;
-      return result;
+    if (!result.tenants.some((t) => t.id === tenantID)) {
+      throw createError({ statusCode: 404, statusMessage: "Tenant Not Found" });
     }
 
-    if (include?.includes("bookables")) {
-      const { data, error } = await serverFetch(
-        event,
-        `/json/${tenantID}/bookables/`,
-        {
-          method: "GET",
-        }
-      );
-      if (!error) {
-        result.bookables = data;
-      }
-    }
+    const scopedTenants = [{ id: tenantID }];
+    const items = await loadBundleData(event, {
+      catalog: { ...(result.catalog || {}), type: result.catalog?.type ?? "single", tenantId: tenantID },
+      tenants: scopedTenants,
+      bookableId,
+      eventId,
+      include,
+    });
 
-    if (include?.includes("events")) {
-      const { data, error } = await serverFetch(
-        event,
-        `/json/${tenantID}/events/`,
-        {
-          method: "GET",
-        }
-      );
-      if (!error) {
-        result.events = data;
-      }
-    }
-
-    return result;
+    return { ...result, ...items };
   },
-  { maxAge: 300, swr: true }
+  {
+    maxAge: 300,
+    swr: true,
+    authScoped: true,
+    getKey: (event) => {
+      const token = getCookie(event, "access-token");
+      const scope = token ? "auth" : "anon";
+      const tenantID = getRouterParam(event, "tenantID") ?? "-";
+      const { slug, bookableId, eventId, include, base } = getQuery(event);
+      const inc = include
+        ? String(include).split(",").map((s) => s.trim()).sort().join(",")
+        : "";
+      return [
+        "catalog-bundle",
+        scope,
+        tenantID,
+        slug ?? "root",
+        bookableId ?? "-",
+        eventId ?? "-",
+        inc,
+        base === "false" ? "items" : "base",
+      ].join("::");
+    },
+  }
 );

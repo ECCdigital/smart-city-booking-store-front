@@ -1,35 +1,41 @@
-import { logger } from "../utils/logger";
-import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
+import { getThemeBundle } from "~~/server/api/utils/themeBundle.ts";
+import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 
-export default defineEventHandler(async (event) => {
-  const log = logger.child({ caller: "server/api/theme/[..slug].get" });
+const defaultTheme = {
+  primary: "#3b82f6",
+  secondary: "#10b981",
+};
 
-  const url = event.node.req.url || "";
-  const slug = url.split("/").pop()?.replace(".css", "") || "";
+export default createConditionalCachedHandler(
+  async (event) => {
+    const url = event.node.req.url || "";
+    const slug = url.split("/").pop()?.replace(".css", "") || "";
 
-  let theme = defaultTheme;
+    const bundle = await getThemeBundle(event, slug);
+    const colors = bundle?.theme?.colors;
+    const theme =
+      colors?.primary && colors?.secondary ? colors : defaultTheme;
 
-  const { data, error } = await serverFetch(event, `/api/catalog/themes/${slug}`, {
-    method: "GET",
-  });
-
-  if (error) {
-    log.error(`Error fetching theme for slug "${slug}": ${error}`);
+    setHeader(event, "Content-Type", "text/css");
+    setHeader(event, "Cache-Control", "public, max-age=300, s-maxage=300");
+    return `
+      :root {
+        --ui-primary: ${theme.primary};
+        --ui-secondary: ${theme.secondary};
+      }
+      .dark {
+        --ui-primary: ${theme.primary};
+        --ui-secondary: ${theme.secondary};
+      }
+    `;
+  },
+  {
+    maxAge: 300,
+    authScoped: false,
+    getKey: (event) => {
+      const url = event.node?.req?.url || "";
+      const slug = url.split("/").pop()?.replace(".css", "") || "";
+      return `theme-css::${slug}`;
+    },
   }
-
-  if (data?.colors?.primary && data?.colors?.secondary) {
-    theme = data.colors;
-  } else {
-    log.warn(
-      `Theme for slug "${slug}" does not have primary or secondary colors, using default theme.`
-    );
-  }
-
-  setHeader(event, "Content-Type", "text/css");
-  return `
-    :root {
-      --ui-primary: ${theme.primary};
-      --ui-secondary: ${theme.secondary};
-    }
-  `;
-});
+);

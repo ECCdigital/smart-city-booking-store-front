@@ -1,7 +1,5 @@
 <script setup>
-import { useCatalogStore } from "~~/stores/catalog.js";
-import { useBookableStore } from "~~/stores/bookable.js";
-import { useCatalog } from "~/composables/api/useCatalog.js";
+import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import NavigationBar from "../../components/navigation/NavigationBar.vue";
 
 definePageMeta({
@@ -10,34 +8,18 @@ definePageMeta({
 });
 
 const route = useRoute();
-
-const { fetchCatalogBundle } = useCatalog();
-
 const t = useI18n().t;
 
-const catalogSlug = computed(() => {
-  return route?.params?.catalogSlug;
-});
+const catalogSlug = computed(() => route?.params?.catalogSlug);
 
-const catalogStore = useCatalogStore();
+const { loadBundle } = useCatalogBundle();
 
-const bookableStore = useBookableStore();
-
-const { data, error } = await useAsyncData(
-  `catalog:${catalogSlug.value}`,
-  () => fetchCatalogBundle({ slug: catalogSlug.value }),
-  { server: true },
-);
-
-if (error.value) {
-  handleError({ statusCode: 404 }, t("errors.noCatalog"));
-}
-
-if (data.value?.catalog) {
-  catalogStore.$patch({ catalog: data.value.catalog });
-}
-if (data.value?.bookables) {
-  bookableStore.$patch({ bookables: data.value.bookables });
+try {
+  await loadBundle({ slug: catalogSlug.value });
+} catch (err) {
+  if (err?.statusCode !== 401) {
+    handleError({ statusCode: 404 }, t("errors.noCatalog"));
+  }
 }
 
 useHead({

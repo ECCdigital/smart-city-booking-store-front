@@ -12,10 +12,12 @@ export const useBookingStore = defineStore("booking", {
       state.bookings.filter((b) => b.bookableId === bookableId),
   },
   actions: {
-    async fetchBookings() {
+    async fetchBookings({ force = false } = {}) {
+      if (this.initialized && !force) return this.bookings;
       const { fetchBookings } = useBookings();
       try {
         this.bookings = await fetchBookings();
+        this.initialized = true;
         return this.bookings;
       } catch (error) {
         console.error("Error fetching bookings:", error);

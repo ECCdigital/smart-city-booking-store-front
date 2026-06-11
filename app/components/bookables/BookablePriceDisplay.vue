@@ -1,5 +1,8 @@
 <template>
-  <div class="text-right">
+  <div
+    class="text-gray-800 dark:text-gray-100"
+    :class="isMapStripe ? '' : 'text-right'"
+  >
     <!-- special price for user -->
     <p
       v-if="
@@ -35,7 +38,7 @@
     </p>
 
     <!-- price without calculation -->
-    <p v-else class="grid">
+    <p v-else :class="isMapStripe ? '' : 'grid'">
       {{ displayMinDefaultPrice() }}
       <span class="text-xs mt-0 font-normal text-gray-600 dark:text-gray-300">
         {{ displayPricePerUnit() }}
@@ -52,6 +55,10 @@ const props = defineProps({
   calculatedPrice: {
     type: Object,
     default: null,
+  },
+  isMapStripe: {
+    type: Boolean,
+    default: false,
   },
 });
 

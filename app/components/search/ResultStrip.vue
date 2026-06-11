@@ -4,7 +4,7 @@
     class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-sm"
     :class="[
       isNotSuitable ? 'opacity-70' : ' ',
-      isEvent ? 'max-h-100 h-100' : 'max-h-74 h-74',
+      isEvent ? 'max-h-100 h-100' : mapMode ? '' : 'max-h-74 h-74',
     ]"
   >
     <div class="basis-1/4 flex items-center">
@@ -12,7 +12,8 @@
         <BookableTypeBadge
           :type="item?.type"
           :is-event="isEvent"
-          class="absolute top-2 left-2"
+          class="absolute "
+          :class="mapMode ? 'top-1 left-1' : 'top-2 left-2'"
         />
 
         <img
@@ -53,6 +54,7 @@
       :is-not-suitable="isNotSuitable"
       :is-not-bookable="isNotBookable"
       :entry-page-mode="entryPageMode"
+      :map-mode="mapMode"
     />
     <ResultStripEventContent
       v-if="isEvent"
@@ -95,6 +97,10 @@ const props = defineProps({
     default: false,
   },
   entryPageMode: {
+    type: Boolean,
+    default: false,
+  },
+  mapMode: {
     type: Boolean,
     default: false,
   },

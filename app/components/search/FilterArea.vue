@@ -45,10 +45,9 @@
     <!-- Kategorie -->
     <div v-if="!isEvent" class="my-7">
       <p class="mb-3">Kategorie</p>
-      <UCheckboxGroup
+      <FilterCheckboxGroup
         v-model="_categories"
         :items="possibleCategories"
-        :ui="{ label: 'text-base' }"
         @change="instantFilter"
       />
     </div>
@@ -56,43 +55,12 @@
     <!-- Orte -->
     <div v-if="possibleCities && possibleCities.length" class="my-7">
       <p class="mb-3">Orte</p>
-      <UCheckboxGroup
+      <FilterCheckboxGroup
         v-model="_cities"
-        :items="possibleCities.slice(0, numberOfVisibleCities)"
-        :ui="{ label: 'text-base' }"
+        :items="possibleCities"
+        use-more-button
         @change="instantFilter"
-      >
-        <template #label="{ item }">
-          <div class="flex">
-            {{ item.lable }}
-            <span class="text-gray-500 ml-2 text-sm content-center"
-              >({{ item.count }})</span
-            >
-          </div>
-        </template>
-      </UCheckboxGroup>
-      <div class="flex justify-center w-full mt-2">
-        <UButton
-          v-if="numberOfVisibleCities < possibleCities.length"
-          label="Alle Städe anzeigen"
-          variant="ghost"
-          @click="
-            () => {
-              numberOfVisibleCities = possibleCities.length;
-            }
-          "
-        />
-        <UButton
-          v-if="numberOfVisibleCities === possibleCities.length"
-          label="Weniger Städe anzeigen"
-          variant="ghost"
-          @click="
-            () => {
-              numberOfVisibleCities = 3;
-            }
-          "
-        />
-      </div>
+      />
     </div>
 
     <!-- Distanz -->
@@ -127,11 +95,11 @@
     </div>
 
     <!-- Custom Field Filter -->
-    <div v-if="customFieldFilters.length > 0" class="my-7">
+    <div v-if="sortedCustomFieldFilters.length > 0" class="my-7">
       <p class="mb-3">Weitere Filter</p>
       <div class="space-y-4">
         <CustomFieldFilter
-          v-for="cf in customFieldFilters"
+          v-for="cf in sortedCustomFieldFilters"
           :key="cf.definition.id"
           v-model="_customFieldValues[cf.definition.id]"
           :definition="cf.definition"
@@ -169,6 +137,7 @@ import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState"
 import { useCustomFieldFilters } from "~/composables/search/useCustomFieldFilters";
 import CustomFieldFilter from "~/components/search/CustomFieldFilter.vue";
 import FilterHistogramSlider from "~/components/search/FilterHistogramSlider.vue";
+import FilterCheckboxGroup from "~/components/search/FilterCheckboxGroup.vue";
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -220,7 +189,7 @@ const props = defineProps({
 const emit = defineEmits(["filter"]);
 
 const suitableBookables = computed(() =>
-  props.bookables.filter((b) => b.matchStatus === "match")
+  props.bookables.filter((b) => b.matchStatus === "match"),
 );
 
 //Filter Variables
@@ -236,20 +205,20 @@ const _categories = ref(props.categories);
 const possibleCategories = computed(() => {
   return [
     {
-      value: "room",
       label: "Räume",
+      value: "room",
     },
     {
-      value: "event-location",
       label: "Veranstaltungsorte",
+      value: "event-location",
     },
     {
-      value: "resource",
       label: "Geräte",
+      value: "resource",
     },
     {
-      value: "ticket",
       label: "Tickets",
+      value: "ticket",
     },
   ];
 });
@@ -427,9 +396,7 @@ const possibleCities = computed(() => {
   const cityCount = {};
   props.bookables.forEach((b) => {
     let city = "";
-    if (props.isEvent && b.matchStatus === "match") {
-      city = extractCity(b.item.eventAddress.city); //toDo - adjust for new location object !!!
-    } else if (b.matchStatus === "match") {
+    if (b.matchStatus === "match") {
       city = extractCity(b.item.location);
     }
 
@@ -440,14 +407,13 @@ const possibleCities = computed(() => {
 
   return Object.entries(cityCount)
     .map(([value, count]) => ({
-      lable: value,
+      label: value,
       value: value.toLowerCase(),
       count,
     }))
     .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
 });
 
-const numberOfVisibleCities = ref(5); //toDo - später auf 10 setzen!!!!!!!!! ***
 function extractCity(location) {
   if (location && typeof location === "string") {
     return extractCityFromString(location);
@@ -556,6 +522,13 @@ const bookablesRef = computed(() => props.bookables);
 const { aggregated: customFieldFilters } = useCustomFieldFilters(bookablesRef, {
   position: "sidebar",
 });
+const sortedCustomFieldFilters = computed(() =>
+  customFieldFilters.value.slice().sort((a, b) => {
+    if (a.filterType === "checkbox" && b.filterType !== "checkbox") return -1;
+    if (a.filterType !== "checkbox" && b.filterType === "checkbox") return 1;
+    return 0;
+  }),
+);
 
 const _customFieldValues = ref({ ...(props.customFields || {}) });
 

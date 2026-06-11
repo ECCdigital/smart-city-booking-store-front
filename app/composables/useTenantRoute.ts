@@ -1,10 +1,11 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
+import { useTenant } from "./useTenant";
 
 export const useTenantRoute = () => {
   const route = useRoute();
+  const { tenantID, isTenantContext } = useTenant();
 
-  const tenantID = computed(() => route.params.tenantID as string | undefined);
   const itemID = computed(() => {
     const id =
       route.params.locationID ||
@@ -12,6 +13,7 @@ export const useTenantRoute = () => {
       route.params.eventID;
     return id as string | undefined;
   });
+
   const bookingID = computed(() => {
     const id = route.params.bookingID;
     return id as string | undefined;
@@ -76,6 +78,7 @@ export const useTenantRoute = () => {
 
   return {
     tenantID,
+    isTenantContext,
     tenantPath,
     isActivePath,
     tenantTo,
