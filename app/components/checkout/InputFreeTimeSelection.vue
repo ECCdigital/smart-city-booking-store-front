@@ -1,6 +1,6 @@
 <template>
-  <div class="space-y-5">
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <div ref="wrapperRef" class="@container space-y-5">
+    <div class="grid grid-cols-1 @lg:grid-cols-2 gap-4">
       <div>
         <label
           class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
@@ -41,7 +41,11 @@
       @click="toggleCalendarOnMobile"
     >
       <UIcon
-        :name="calendarVisibleOnMobile ? 'i-lucide-calendar-x' : 'i-lucide-calendar-days'"
+        :name="
+          calendarVisibleOnMobile
+            ? 'i-lucide-calendar-x'
+            : 'i-lucide-calendar-days'
+        "
         class="flex-shrink-0"
         size="18"
       />
@@ -53,75 +57,77 @@
     </button>
 
     <div v-if="showCalendarPanel">
-    <div
-      class="flex items-center justify-between px-3 py-1.5 rounded-t-md border border-b-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
-    >
-      <button
-        type="button"
-        :disabled="!canGoPrev"
-        class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        @click="navigatePrev"
-      >
-        &larr; {{ $t("scheduleSelection.previousWeek") }}
-      </button>
-
-      <div class="flex items-center gap-2">
-        <span class="font-semibold text-sm text-gray-800 dark:text-gray-200">
-          {{ dateRangeLabel }}
-        </span>
-        <DateJumper @select="onJumpDate" />
-      </div>
-
-      <button
-        type="button"
-        class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-        @click="navigateNext"
-      >
-        {{ $t("scheduleSelection.nextWeek") }} &rarr;
-      </button>
-    </div>
-
-    <div
-      class="rounded-b-md border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900"
-    >
-      <!-- FullCalendar -->
-      <ClientOnly>
-        <div class="fc-wrapper">
-          <FullCalendar ref="calendarRef" :options="calendarOptions" />
-        </div>
-        <template #fallback>
-          <div class="flex items-center justify-center py-20">
-            <UIcon
-              name="i-lucide-loader-2"
-              class="animate-spin text-gray-400"
-              size="24"
-            />
-          </div>
-        </template>
-      </ClientOnly>
-
-      <!-- Legend -->
       <div
-        class="flex items-center gap-4 px-3 py-1.5 border-t border-gray-200 dark:border-gray-700 text-[11px] text-gray-600 dark:text-gray-400"
+        class="flex items-center justify-between px-1 sm:px-3 py-1.5 rounded-t-md border border-b-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
       >
-        <span class="flex items-center gap-1.5">
-          <span
-            class="inline-block w-4 h-3 rounded-sm border border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/50"
-          />
-          {{ $t("scheduleSelection.free") }}
-        </span>
-        <span class="flex items-center gap-1.5">
-          <span class="inline-block w-4 h-3 rounded-sm occupied-legend" />
-          {{ $t("scheduleSelection.occupied") }}
-        </span>
-        <span class="flex items-center gap-1.5">
-          <span
-            class="inline-block w-4 h-3 rounded-sm bg-primary/90 dark:bg-primary/10"
-          />
-          {{ $t("scheduleSelection.yourSelection") }}
-        </span>
+        <button
+          type="button"
+          :disabled="!canGoPrev"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          @click="navigatePrev"
+        >
+          <UIcon name="i-lucide-chevron-left" size="14" />
+          <span class="hidden sm:block">{{ $t("scheduleSelection.previousWeek") }}</span>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <span class="font-semibold text-sm text-gray-800 dark:text-gray-200">
+            {{ dateRangeLabel }}
+          </span>
+          <DateJumper @select="onJumpDate" />
+        </div>
+
+        <button
+          type="button"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          @click="navigateNext"
+        >
+          <UIcon name="i-lucide-chevron-right" size="14" class="order-1 sm:order-2" />
+          <span class="hidden sm:block sm:order-1">{{ $t("scheduleSelection.nextWeek") }} </span>
+        </button>
       </div>
-    </div>
+
+      <div
+        class="rounded-b-md border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900"
+      >
+        <!-- FullCalendar -->
+        <ClientOnly>
+          <div class="fc-wrapper">
+            <FullCalendar ref="calendarRef" :options="calendarOptions" />
+          </div>
+          <template #fallback>
+            <div class="flex items-center justify-center py-20">
+              <UIcon
+                name="i-lucide-loader-2"
+                class="animate-spin text-gray-400"
+                size="24"
+              />
+            </div>
+          </template>
+        </ClientOnly>
+
+        <!-- Legend -->
+        <div
+          class="flex items-center gap-4 px-3 py-1.5 border-t border-gray-200 dark:border-gray-700 text-[11px] text-gray-600 dark:text-gray-400"
+        >
+          <span class="flex items-center gap-1.5">
+            <span
+              class="inline-block w-4 h-3 rounded-sm border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-950/50"
+            />
+            {{ $t("scheduleSelection.free") }}
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="inline-block w-4 h-3 rounded-sm occupied-legend" />
+            {{ $t("scheduleSelection.occupied") }}
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span
+              class="inline-block w-4 h-3 rounded-sm bg-primary/90 dark:bg-primary/10"
+            />
+            {{ $t("scheduleSelection.yourSelection") }}
+          </span>
+        </div>
+      </div>
     </div>
 
     <!-- Overlap warning -->
@@ -173,13 +179,31 @@ const emit = defineEmits(["update:modelValue", "change"]);
 const { getBookableAvailability } = useBookables();
 
 /* ── helpers ─────────────────────────────────────────────── */
+const wrapperRef = ref(null);
+onMounted(() => {
+  const observer = new ResizeObserver(() => {
+    getApi()?.updateSize();
+  });
+
+  observer.observe(wrapperRef.value);
+
+  onUnmounted(() => observer.disconnect());
+});
+onMounted(() => {
+  if (props.modelValue?.start) {
+    nextTick(() => {
+      getApi()?.gotoDate(new Date(props.modelValue.start));
+    });
+  }
+});
+
 function pad2(n) {
   return n.toString().padStart(2, "0");
 }
 
 function localISODate(date) {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
-    date.getDate()
+    date.getDate(),
   )}`;
 }
 
@@ -209,7 +233,7 @@ const calendarRef = ref(null);
 const calendarVisibleOnMobile = ref(false);
 const isSmUp = useMediaQuery("(min-width: 640px)");
 const showCalendarPanel = computed(
-  () => isSmUp.value || calendarVisibleOnMobile.value
+  () => isSmUp.value || calendarVisibleOnMobile.value,
 );
 const currentViewStart = ref(null);
 const currentViewEnd = ref(null);
@@ -328,8 +352,8 @@ async function fetchAvailability(start, end) {
     const raw = Array.isArray(data)
       ? data
       : Array.isArray(data?.availability)
-      ? data.availability
-      : [];
+        ? data.availability
+        : [];
 
     availabilityCache.set(key, raw);
     availability.value = raw;
@@ -347,7 +371,7 @@ watch(
     if (currentViewStart.value && currentViewEnd.value) {
       fetchAvailability(currentViewStart.value, currentViewEnd.value);
     }
-  }
+  },
 );
 
 /* ── calendar events (occupied + selection) ──────────────── */
@@ -383,19 +407,24 @@ const calendarEvents = computed(() => {
         sd.getMonth(),
         sd.getDate(),
         sh,
-        sm || 0
+        sm || 0,
       );
       const end = new Date(
         ed.getFullYear(),
         ed.getMonth(),
         ed.getDate(),
         eh,
-        em || 0
+        em || 0,
       );
       if (end > start) {
+        const label =
+          `${pad2(start.getHours())}:${pad2(start.getMinutes())}` +
+          ` - ` +
+          `${pad2(end.getHours())}:${pad2(end.getMinutes())}`;
+
         events.push({
           id: "user-selection",
-          title: "",
+          title: label,
           start,
           end,
           display: "auto",
@@ -406,8 +435,70 @@ const calendarEvents = computed(() => {
     }
   }
 
+  //handle past times (if selection includes past, mark past part as occupied)
+  const now = new Date();
+
+  for (let d = new Date(currentViewStart.value || now);
+       d < (currentViewEnd.value || now);
+       d.setDate(d.getDate() + 1)) {
+
+    const dayStart = new Date(d);
+    dayStart.setHours(0, 0, 0, 0);
+
+    const dayEnd = new Date(d);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    // past day: whole day as occupied
+    if (dayEnd < now) {
+      events.push({
+        start: new Date(dayStart),
+        end: new Date(dayEnd),
+        display: "background",
+        classNames: ["fc-past-time"],
+      });
+    }
+
+    // current day: only past part as occupied
+    else if (localISODate(dayStart) === localISODate(now)) {
+      events.push({
+        start: new Date(dayStart),
+        end: now,
+        display: "background",
+        classNames: ["fc-past-time"],
+      });
+    }
+  }
+
   return events;
 });
+
+function renderEventContent(arg) {
+  if (arg.event.id !== "user-selection") {
+    return true;
+  }
+
+  //for short events, only show the time range
+  const durationMs = arg.event.end - arg.event.start;
+  const durationMinutes = durationMs / (1000 * 60);
+
+  if (durationMinutes < 60) {
+    return {
+      html: `
+        <div>
+          ${arg.event.title}
+        </div>
+      `,
+    };
+  }
+
+  return {
+    html: `
+      <div>
+        <div class="font-bold">Ihre Auswahl</div>${arg.event.title}
+      </div>
+    `,
+  };
+}
 
 /* ── day header renderer ─────────────────────────────────── */
 function renderDayHeader(arg) {
@@ -438,11 +529,11 @@ function renderDayHeader(arg) {
 function handleCalendarSelect(info) {
   startDateInput.value = localISODate(info.start);
   startTimeInput.value = `${pad2(info.start.getHours())}:${pad2(
-    info.start.getMinutes()
+    info.start.getMinutes(),
   )}`;
   endDateInput.value = localISODate(info.end);
   endTimeInput.value = `${pad2(info.end.getHours())}:${pad2(
-    info.end.getMinutes()
+    info.end.getMinutes(),
   )}`;
   emitValue();
 
@@ -460,7 +551,7 @@ function handleDatesSet(info) {
 }
 
 /* ── calendar options ────────────────────────────────────── */
-const calendarOptions = computed(() => ({
+const calendarOptions = reactive({
   plugins: [timeGridPlugin, interactionPlugin],
   initialView: "timeGridWeek",
   locale: deLocale,
@@ -480,15 +571,25 @@ const calendarOptions = computed(() => ({
   dayHeaderContent: renderDayHeader,
   height: "auto",
   selectable: true,
+  selectAllow: allowSelection,
   selectMirror: true,
   unselectAuto: true,
   selectOverlap: true,
   snapDuration: "00:15:00",
+  eventContent: renderEventContent,
   events: calendarEvents.value,
   select: handleCalendarSelect,
   datesSet: handleDatesSet,
   validRange: { start: localISODate(getMonday(today)) },
-}));
+});
+
+watch(calendarEvents, (events) => {
+  const api = getApi();
+  if (!api) return;
+
+  api.removeAllEvents();
+  api.addEventSource(events);
+});
 
 function timeFromString(str) {
   if (!str) return null;
@@ -536,13 +637,25 @@ function applyDefaultEndFromStart() {
   if (!sd) return;
 
   const [sh, sm] = startTimeInput.value.split(":").map(Number);
-  const start = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate(), sh, sm || 0);
+  const start = new Date(
+    sd.getFullYear(),
+    sd.getMonth(),
+    sd.getDate(),
+    sh,
+    sm || 0,
+  );
 
   if (endDateInput.value && endTimeInput.value) {
     const ed = parseLocalDate(endDateInput.value);
     if (ed) {
       const [eh, em] = endTimeInput.value.split(":").map(Number);
-      const end = new Date(ed.getFullYear(), ed.getMonth(), ed.getDate(), eh, em || 0);
+      const end = new Date(
+        ed.getFullYear(),
+        ed.getMonth(),
+        ed.getDate(),
+        eh,
+        em || 0,
+      );
       if (end > start) return;
     }
   }
@@ -556,6 +669,10 @@ function applyDefaultEndFromStart() {
 function onStartTimeChange() {
   applyDefaultEndFromStart();
   onManualInputChange();
+}
+
+function allowSelection(selectInfo) {
+  return selectInfo.start >= new Date();
 }
 
 /* ── manual input change ─────────────────────────────────── */
@@ -580,6 +697,24 @@ function onManualInputChange() {
   }
 }
 
+watch(showCalendarPanel, (visible) => {
+  if (!visible) return;
+  nextTick(() => {
+    const api = getApi();
+    if (!api) return;
+
+    const selectedDate = startDateInput.value
+        ? parseLocalDate(startDateInput.value)
+        : null;
+
+    if (selectedDate) {
+      api.gotoDate(selectedDate);
+    }
+
+    api.updateSize();
+  });
+});
+
 /* ── overlap warning ─────────────────────────────────────── */
 const overlapWarning = computed(() => {
   if (
@@ -603,14 +738,14 @@ const overlapWarning = computed(() => {
     sd.getMonth(),
     sd.getDate(),
     sh,
-    sm || 0
+    sm || 0,
   ).getTime();
   const endMs = new Date(
     ed.getFullYear(),
     ed.getMonth(),
     ed.getDate(),
     eh,
-    em || 0
+    em || 0,
   ).getTime();
 
   if (endMs <= startMs) return false;
@@ -645,14 +780,14 @@ function emitValue() {
         sd.getMonth(),
         sd.getDate(),
         sh,
-        sm || 0
+        sm || 0,
       );
       const end = new Date(
         ed.getFullYear(),
         ed.getMonth(),
         ed.getDate(),
         eh,
-        em || 0
+        em || 0,
       );
       if (end.getTime() > start.getTime()) {
         payload = { start: start.getTime(), end: end.getTime() };
@@ -671,7 +806,7 @@ function emitValue() {
 /* ── watch external modelValue ───────────────────────────── */
 watch(
   () => props.modelValue,
-  (v) => {
+  async (v) => {
     if (!v || (!v.start && !v.end)) return;
 
     if (v.start) {
@@ -686,8 +821,14 @@ watch(
     }
 
     lastEmittedKey = `${v.start ?? ""}|${v.end ?? ""}`;
+
+    await nextTick();
+
+    if (v.start) {
+      getApi()?.gotoDate(new Date(v.start));
+    }
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 </script>
 
@@ -796,26 +937,35 @@ watch(
   border-color: #1f2937;
 }
 
-/* ── Occupied background events (pink hatched) ───────────── */
-:deep(.fc-bg-event.fc-occupied) {
-  background: repeating-linear-gradient(
-    -45deg,
-    #fca5a5,
-    #fca5a5 3px,
-    #fee2e2 3px,
-    #fee2e2 7px
-  ) !important;
+/*  ── Past time background ───────────── */
+:deep(.fc-bg-event.fc-past-time) {
+  background: rgba(156, 163, 175, 0.15) !important;
   opacity: 1 !important;
 }
 
-:is(.dark) :deep(.fc-bg-event.fc-occupied) {
+/* ── Occupied background events ───────────── */
+:deep(.fc-bg-event.fc-occupied) {
   background: repeating-linear-gradient(
     -45deg,
-    rgba(248, 113, 113, 0.25),
-    rgba(248, 113, 113, 0.25) 3px,
-    rgba(248, 113, 113, 0.08) 3px,
-    rgba(248, 113, 113, 0.08) 7px
+    #e5e7eb,
+    #e5e7eb 3px,
+    #f3f4f6 3px,
+    #f3f4f6 7px
   ) !important;
+  opacity: 0.8 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :deep(.fc-bg-event.fc-occupied) {
+    background: repeating-linear-gradient(
+      -45deg,
+      #4b5563,
+      #4b5563 3px,
+      #374151 3px,
+      #374151 7px
+    ) !important;
+    opacity: 0.8 !important;
+  }
 }
 
 /* ── User selection event ────────────────────────────────── */
@@ -832,11 +982,6 @@ watch(
 
 :deep(.fc-user-selection .fc-event-main) {
   padding: 0 !important;
-}
-
-:deep(.fc-user-selection .fc-event-time),
-:deep(.fc-user-selection .fc-event-title) {
-  display: none !important;
 }
 
 /* ── Selection highlight (while dragging) ────────────────── */
@@ -863,20 +1008,23 @@ watch(
 .occupied-legend {
   background: repeating-linear-gradient(
     -45deg,
-    #fca5a5,
-    #fca5a5 2px,
-    #fee2e2 2px,
-    #fee2e2 5px
+    #e5e7eb,
+    #e5e7eb 3px,
+    #f3f4f6 3px,
+    #f3f4f6 7px
   );
 }
 
-:is(.dark) .occupied-legend {
-  background: repeating-linear-gradient(
-    -45deg,
-    rgba(248, 113, 113, 0.25),
-    rgba(248, 113, 113, 0.25) 2px,
-    rgba(248, 113, 113, 0.08) 2px,
-    rgba(248, 113, 113, 0.08) 5px
-  );
+@media (prefers-color-scheme: dark) {
+  .occupied-legend {
+    background: repeating-linear-gradient(
+      -45deg,
+      #4b5563,
+      #4b5563 3px,
+      #374151 3px,
+      #374151 7px
+    );
+  }
 }
+
 </style>

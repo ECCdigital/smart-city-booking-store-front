@@ -19,13 +19,14 @@
       leave-to-class="opacity-0 scale-95"
     >
       <div
-        v-if="showPicker"
-        class="absolute left-0 top-full mt-2 z-50 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl"
-        @click.stop
+          v-if="showPicker"
+          id="myPicker"
+          class="absolute left-1/2 sm:left-0 -translate-x-1/2 sm:translate-x-0 top-full flex mt-2 z-50 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl"
+          @click.stop
       >
         <VueDatePicker
-          :min-date="minDate"
-          :locale="locale"
+          :min-date="props.minDate"
+          :locale="props.locale"
           month-name-format="long"
           inline
           auto-apply

@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="@container space-y-6">
     <p class="text-gray-500 dark:text-gray-400">
       {{ $t("monthSelection.subtitle") }}
     </p>
@@ -8,10 +8,13 @@
       <button
         type="button"
         :disabled="!canGoPreviousYear"
-        class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium"
+        class="flex items-center max-w-25 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium"
         @click="navigateYear(-1)"
       >
-        &larr; {{ $t("monthSelection.previousYear") }}
+        <UIcon name="i-lucide-chevron-left" size="14" />
+        <span class="hidden sm:block">
+          {{ $t("monthSelection.previousYear") }}
+        </span>
       </button>
 
       <h3 class="flex items-center gap-2">
@@ -23,15 +26,22 @@
 
       <button
         type="button"
-        class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary transition-colors text-sm font-medium"
+        class="flex items-center max-w-25 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary transition-colors text-sm font-medium"
         @click="navigateYear(1)"
       >
-        {{ $t("monthSelection.nextYear") }} &rarr;
+        <UIcon
+          name="i-lucide-chevron-right"
+          size="14"
+          class="order-1 sm:order-2"
+        />
+        <span class="hidden sm:block sm:order-1">{{
+          $t("monthSelection.nextYear")
+        }}</span>
       </button>
     </div>
 
     <!-- Month Cards Grid -->
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 @3xl:grid-cols-3 gap-4">
       <button
         v-for="month in monthsWithAvailability"
         :key="month.startMs"
@@ -41,8 +51,8 @@
         :class="getMonthCardClass(month)"
         @click="selectMonth(month)"
       >
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
+        <div class="grid sm:flex items-start sm:justify-between gap-3">
+          <div class="min-w-0 order-2 sm:order-1">
             <span
               class="text-sm font-medium"
               :class="
@@ -65,7 +75,9 @@
             </p>
           </div>
 
-          <div class="flex items-center gap-1.5">
+          <div
+            class="flex items-center justify-end sm:justify-around gap-1.5 order-1 sm:order-2"
+          >
             <span
               class="w-2.5 h-2.5 rounded-full shrink-0"
               :class="
@@ -311,7 +323,12 @@ async function fetchAvailability() {
 }
 
 watch(
-  [() => props.tenantId, () => props.bookableId, () => props.amount, displayYear],
+  [
+    () => props.tenantId,
+    () => props.bookableId,
+    () => props.amount,
+    displayYear,
+  ],
   () => {
     fetchAvailability();
   },
@@ -348,9 +365,7 @@ function makeMonthKey(month) {
 }
 
 const selectionLabel = computed(() => {
-  const selected = monthsWithAvailability.value.find((m) =>
-    isSelectedMonth(m),
-  );
+  const selected = monthsWithAvailability.value.find((m) => isSelectedMonth(m));
   if (!selected) return null;
   return `${selected.label} ${selected.year}`;
 });

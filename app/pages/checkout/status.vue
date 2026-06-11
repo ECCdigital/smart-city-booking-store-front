@@ -4,6 +4,8 @@ import {
   effectiveBookingStatusI18nKey,
   BOOKING_STATUS_REASONS,
 } from "~/utils/bookingStatus.js";
+import { useBookableStore } from "~~/stores/bookable.js";
+import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 
 definePageMeta({
   layout: "checkout",
@@ -22,10 +24,20 @@ const route = useRoute();
 const { t, te, locale } = useI18n();
 const checkoutNavTab = useState("checkoutNavTab", () => "");
 
+const bookableId = computed(() => String(route.query.bookableId || "").trim());
 const bookingId = computed(() => String(route.query.bookingId || "").trim());
 const tenantId = computed(() => String(route.query.tenantId || "").trim());
 
 const { getStatus } = useBookings();
+
+const bookable = computed(() => {
+  const id = bookableId.value;
+  return id ? useBookableStore().getBookableById(id) : null;
+});
+const { loadBundle } = useCatalogBundle();
+if (!bookable.value) {
+  await loadBundle({ bookableID: bookableId.value });
+}
 
 const statusResponse = ref(null);
 const statusPending = ref(false);
@@ -45,11 +57,11 @@ let autoPollTimer = null;
 let autoPollClockTimer = null;
 
 const isValid = computed(
-  () => bookingId.value.length > 0 && tenantId.value.length > 0
+  () => bookingId.value.length > 0 && tenantId.value.length > 0,
 );
 
 const envelopeOk = computed(
-  () => !statusResponse.value || statusResponse.value.success !== false
+  () => !statusResponse.value || statusResponse.value.success !== false,
 );
 
 const bookingsFromApi = computed(() => {
@@ -141,19 +153,19 @@ function isAutoPollingCandidate(booking) {
 }
 
 const pendingAutoPollBookings = computed(() =>
-  bookingsFromApi.value.filter((booking) =>
-    isAutoPollingCandidate(booking)
-  )
+  bookingsFromApi.value.filter((booking) => isAutoPollingCandidate(booking)),
 );
 
 const hasPendingAutoPollBookings = computed(
-  () => pendingAutoPollBookings.value.length > 0
+  () => pendingAutoPollBookings.value.length > 0,
 );
 
 const hasPaidAutoPollBookings = computed(() =>
   bookingsFromApi.value.some((booking) => {
     const priceEur = Number(booking?.priceEur);
-    const paymentProvider = normalizePaymentProviderId(booking?.paymentProvider);
+    const paymentProvider = normalizePaymentProviderId(
+      booking?.paymentProvider,
+    );
 
     return (
       booking?.isCommitted === true &&
@@ -163,7 +175,7 @@ const hasPaidAutoPollBookings = computed(() =>
       priceEur > 0 &&
       paymentProvider !== "invoice"
     );
-  })
+  }),
 );
 
 const canAutoPoll = computed(
@@ -172,33 +184,23 @@ const canAutoPoll = computed(
     isValid.value &&
     envelopeOk.value &&
     hasPendingAutoPollBookings.value &&
-    !autoPollExpired.value
+    !autoPollExpired.value,
 );
 
 const isAutoPolling = computed(
-  () => canAutoPoll.value && autoPollStartedAt.value != null
+  () => canAutoPoll.value && autoPollStartedAt.value != null,
 );
 
 const autoPollRemainingMs = computed(() => {
   if (!autoPollStartedAt.value) return POLL_WINDOW_MS;
   return Math.max(
     POLL_WINDOW_MS - (autoPollTick.value - autoPollStartedAt.value),
-    0
+    0,
   );
 });
 
-const autoPollRemainingSeconds = computed(() =>
-  Math.max(0, Math.ceil(autoPollRemainingMs.value / 1000))
-);
-
-const autoPollProgress = computed(() => {
-  if (!autoPollStartedAt.value) return 0;
-  const elapsed = POLL_WINDOW_MS - autoPollRemainingMs.value;
-  return Math.min(100, Math.max(0, (elapsed / POLL_WINDOW_MS) * 100));
-});
-
 const paymentConfirmedDuringPolling = computed(
-  () => paymentConfirmedByPolling.value
+  () => paymentConfirmedByPolling.value,
 );
 
 function scheduleAutoPollingIfNeeded() {
@@ -300,7 +302,7 @@ watch(
     hasLoadedOnce.value = false;
     await loadStatus();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 onUnmounted(() => {
@@ -427,13 +429,13 @@ function rowForBooking(booking) {
 }
 
 const bookingRows = computed(() =>
-  bookingsFromApi.value.map((booking) => rowForBooking(booking))
+  bookingsFromApi.value.map((booking) => rowForBooking(booking)),
 );
 
 const isSingleBookingView = computed(() => bookingRows.value.length === 1);
 
 const singleBookingRow = computed(() =>
-  isSingleBookingView.value ? bookingRows.value[0] : null
+  isSingleBookingView.value ? bookingRows.value[0] : null,
 );
 
 const showPaymentDetails = computed(() => {
@@ -547,6 +549,26 @@ async function handleManualRefresh() {
 
       <div class="mt-8 border-t border-gray-100 dark:border-gray-800" />
 
+      <div
+        v-if="singleBookingRow && singleBookingRow.isRejected === false"
+        class="mt-5 px-10 p-4 rounded-xl bg-primary/20"
+      >
+        <h2
+          class="mt-4 mb-2 text-xl font-semibold text-gray-900 dark:text-white md:text-2xl"
+        >
+          {{ $t("checkout.status.thankYouTitle") }}
+        </h2>
+
+        <div class="mt-1">
+          {{ $t("checkout.status.thankYouBody") }}
+          <span v-if="singleBookingRow && singleBookingRow.isInvoicePayment">{{
+            $t("checkout.status.invoiceMailHint")
+          }}</span>
+          <br >
+          {{ $t("checkout.status.closeWindowHint") }}
+        </div>
+      </div>
+
       <div class="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div class="space-y-5">
           <template v-if="!isValid">
@@ -645,10 +667,10 @@ async function handleManualRefresh() {
             </div>
 
             <div v-else-if="isSingleBookingView && singleBookingRow">
-              <article class="rounded-md bg-gray-50 p-6 dark:bg-gray-900/60 md:p-8">
+              <article
+                class="rounded-md bg-gray-50 p-6 dark:bg-gray-900/60 md:p-8"
+              >
                 <div class="flex flex-col gap-6 sm:flex-row sm:items-start">
-
-
                   <div class="min-w-0 flex-1">
                     <span
                       class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium"
@@ -673,9 +695,11 @@ async function handleManualRefresh() {
                     >
                       {{ singleBookingRow.detailBody }}
                     </p>
-
                     <p
-                      v-if="!singleBookingRow.success && singleBookingRow.errorMessage"
+                      v-if="
+                        !singleBookingRow.success &&
+                        singleBookingRow.errorMessage
+                      "
                       class="mt-3 text-sm leading-6 text-red-600 dark:text-red-400"
                     >
                       {{ singleBookingRow.errorMessage }}
@@ -692,6 +716,18 @@ async function handleManualRefresh() {
                         #{{ singleBookingRow.id }}
                       </span>
                     </p>
+
+                    <p
+                      v-if="bookable && bookable.title"
+                      class="mt-5 text-sm text-gray-500 dark:text-gray-400"
+                    >
+                      {{ $t("checkout.status.bookableTitle") }}:
+                      <span
+                        class="font-mono font-semibold text-gray-700 dark:text-gray-200"
+                      >
+                        {{ bookable.title }}
+                      </span>
+                    </p>
                   </div>
                 </div>
 
@@ -701,7 +737,7 @@ async function handleManualRefresh() {
                 >
                   <div class="space-y-1">
                     <dt
-                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                      class="text-xs font-medium tracking-wide text-gray-500 dark:text-gray-400"
                     >
                       {{ $t("checkout.status.paymentProviderLabel") }}
                     </dt>
@@ -714,7 +750,7 @@ async function handleManualRefresh() {
 
                   <div class="space-y-1">
                     <dt
-                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                      class="text-xs font-medium tracking-wide text-gray-500 dark:text-gray-400"
                     >
                       {{ $t("checkout.status.paymentStateLabel") }}
                     </dt>
@@ -730,7 +766,7 @@ async function handleManualRefresh() {
 
                   <div class="space-y-1">
                     <dt
-                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                      class="text-xs font-medium tracking-wide text-gray-500 dark:text-gray-400"
                     >
                       {{ $t("checkout.status.amountLabel") }}
                     </dt>
@@ -772,6 +808,17 @@ async function handleManualRefresh() {
             </div>
 
             <div v-else class="divide-y divide-gray-100 dark:divide-gray-800">
+              <div
+                v-if="bookable && bookable.title"
+                class="grid pb-6 text-sm font-medium tracking-wide text-gray-500 dark:text-gray-400"
+              >
+                {{ $t("checkout.status.bookableTitle") }}:
+                <div
+                  class="mt-1 text-md font-semibold text-gray-900 dark:text-white"
+                >
+                  {{ bookable.title }}
+                </div>
+              </div>
               <article
                 v-for="row in bookingRows"
                 :key="row.id || row.statusKey"
@@ -783,7 +830,7 @@ async function handleManualRefresh() {
                   <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                       <span
-                        class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                        class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 font-mono text-[11px] font-semibold tracking-wide text-gray-600 dark:bg-gray-800 dark:text-gray-300"
                       >
                         #{{ row.id || "—" }}
                       </span>
@@ -818,7 +865,7 @@ async function handleManualRefresh() {
                 <dl class="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-3">
                   <div class="space-y-1">
                     <dt
-                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                      class="text-xs font-medium tracking-wide text-gray-500 dark:text-gray-400"
                     >
                       {{ $t("checkout.status.paymentProviderLabel") }}
                     </dt>
@@ -831,7 +878,7 @@ async function handleManualRefresh() {
 
                   <div class="space-y-1">
                     <dt
-                      class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                      class="text-xs font-medium tracking-wide text-gray-500 dark:text-gray-400"
                     >
                       {{ $t("checkout.status.paymentStateLabel") }}
                     </dt>
@@ -933,28 +980,20 @@ async function handleManualRefresh() {
                   : 'mt-6 border-t border-gray-200 pt-6 dark:border-gray-800'
               "
             >
-              <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                {{ $t("checkout.status.actionsTitle") }}
-              </p>
-
               <div class="mt-4 space-y-3">
                 <UButton
-                  color="primary"
+                  color="neutral"
+                  variant="subtle"
                   block
                   :loading="statusPending || isRefreshing"
                   icon="i-lucide-refresh-cw"
+                  class="cursor-pointer"
                   @click="handleManualRefresh"
                 >
                   {{ $t("checkout.status.manualRefreshAction") }}
                 </UButton>
 
-                <UButton
-                  color="neutral"
-                  variant="soft"
-                  block
-                  to="/"
-                  icon="i-lucide-home"
-                >
+                <UButton color="primary" block to="/" icon="i-lucide-home">
                   {{ $t("common.home") }}
                 </UButton>
               </div>

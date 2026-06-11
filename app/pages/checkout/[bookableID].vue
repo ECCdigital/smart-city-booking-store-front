@@ -14,8 +14,8 @@ import CheckoutPaymentStep from "~/components/checkout/CheckoutPaymentStep.vue";
 import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useNotification } from "~/composables/useNotification.js";
-import { Splitpanes, Pane } from 'splitpanes'
-import 'splitpanes/dist/splitpanes.css'
+import { Splitpanes, Pane } from "splitpanes";
+import "splitpanes/dist/splitpanes.css";
 
 const CONTACT_FIELD_KEYS = [
   "firstName",
@@ -102,8 +102,11 @@ function hasRequiredCommentField(bookable) {
         .trim()
         .toLowerCase()
         .replace(/[-_]/g, "");
-      const isRequired = value === true || value === "true" || value === 1 || value === "1";
-      return isRequired && (normalized === "comment" || normalized === "kommentar");
+      const isRequired =
+        value === true || value === "true" || value === 1 || value === "1";
+      return (
+        isRequired && (normalized === "comment" || normalized === "kommentar")
+      );
     });
   }
 
@@ -132,7 +135,8 @@ const bookableID = route.params.bookableID;
 const tenantID = route.query.tenantId;
 
 const { fetchBookable, fetchCheckoutPermissions } = useCheckout();
-const { fetchTenant, fetchTenantPaymentProviders, fetchTenantUserRoles } = useTenants();
+const { fetchTenant, fetchTenantPaymentProviders, fetchTenantUserRoles } =
+  useTenants();
 
 const isLoading = ref(true);
 
@@ -142,33 +146,36 @@ const { data, error } = await useAsyncData(
     if (!bookableID || !tenantID) return null;
 
     try {
-      const [leadBookable, tenant, paymentProviders, permissions] = await Promise.all([
-        fetchBookable(bookableID, tenantID),
-        fetchTenant(tenantID),
-        fetchTenantPaymentProviders(tenantID),
-        fetchCheckoutPermissions(tenantID, bookableID),
-      ]);
+      const [leadBookable, tenant, paymentProviders, permissions] =
+        await Promise.all([
+          fetchBookable(bookableID, tenantID),
+          fetchTenant(tenantID),
+          fetchTenantPaymentProviders(tenantID),
+          fetchCheckoutPermissions(tenantID, bookableID),
+        ]);
 
       const additionalIds = leadBookable?.checkoutBookableIds || [];
       const additionalBookables = await Promise.all(
         additionalIds.map(async ({ bookableId, mandatory }) => ({
           item: await fetchBookable(bookableId, tenantID),
           mandatory,
-        }))
+        })),
       );
 
       return {
         leadBookable,
         tenant,
         additionalBookables,
-        paymentProviders: Array.isArray(paymentProviders) ? paymentProviders : [],
+        paymentProviders: Array.isArray(paymentProviders)
+          ? paymentProviders
+          : [],
         permissionCheck: permissions ?? null,
       };
     } finally {
       isLoading.value = false;
     }
   },
-  { server: false, lazy: true }
+  { server: false, lazy: true },
 );
 
 if (error.value) {
@@ -192,7 +199,7 @@ function isLoginRequiredPermissionError(result) {
 }
 
 const requiresLoginForCheckout = computed(() =>
-  isLoginRequiredPermissionError(permissionCheck.value)
+  isLoginRequiredPermissionError(permissionCheck.value),
 );
 
 const hasBlockingPermissionError = computed(() => {
@@ -203,10 +210,13 @@ const hasBlockingPermissionError = computed(() => {
   return !isLoginRequiredPermissionError(result);
 });
 const isResolvingPermissionGuard = computed(
-  () => !isLoading.value && hasBlockingPermissionError.value && !authStore.authChecked
+  () =>
+    !isLoading.value &&
+    hasBlockingPermissionError.value &&
+    !authStore.authChecked,
 );
 const showPermissionGuard = computed(
-  () => hasBlockingPermissionError.value && authStore.authChecked
+  () => hasBlockingPermissionError.value && authStore.authChecked,
 );
 const permissionGuardMessage = computed(() => {
   if (!showPermissionGuard.value) return "";
@@ -215,16 +225,20 @@ const permissionGuardMessage = computed(() => {
 const permissionGuardTitle = computed(() =>
   isLoggedIn.value
     ? t("checkout.permissionGuard.loggedInTitle")
-    : t("checkout.permissionGuard.loggedOutTitle")
+    : t("checkout.permissionGuard.loggedOutTitle"),
 );
 const permissionGuardDescription = computed(() =>
   isLoggedIn.value
     ? t("checkout.permissionGuard.loggedInDescription")
-    : t("checkout.permissionGuard.loggedOutDescription")
+    : t("checkout.permissionGuard.loggedOutDescription"),
 );
 const couponsEnabled = computed(() => {
   const b = leadBookable.value;
-  return b?.enableCoupons === true || b?.enableCoupons === "true" || b?.enableCoupons === 1;
+  return (
+    b?.enableCoupons === true ||
+    b?.enableCoupons === "true" ||
+    b?.enableCoupons === 1
+  );
 });
 
 const requiresManualApproval = computed(() => {
@@ -255,20 +269,20 @@ watch(
     const url = `/checkout/${bookableID}?tenantId=${tenantID}`;
     checkoutNavTab.value = { label, url };
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 onUnmounted(() => {
   checkoutNavTab.value = "";
 });
 const additionalBookables = computed(
-  () => data.value?.additionalBookables || []
+  () => data.value?.additionalBookables || [],
 );
 
 const mandatoryBookableIds = computed(() =>
   additionalBookables.value
     .filter((entry) => entry.mandatory)
-    .map((entry) => entry.item.id)
+    .map((entry) => entry.item.id),
 );
 
 const checkoutID = ref(null);
@@ -289,7 +303,7 @@ watch(
       amounts.value[b.id] = 1;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -301,7 +315,7 @@ watch(
       }
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 const { t, te } = useI18n();
@@ -311,10 +325,10 @@ const isLoggedIn = computed(() => authStore.isLoggedIn);
 const isLoggingOut = ref(false);
 const lastAutofilledUserKey = ref(null);
 const loginUrl = computed(
-  () => `/login?redirect=${encodeURIComponent(route.fullPath)}`
+  () => `/login?redirect=${encodeURIComponent(route.fullPath)}`,
 );
 const checkoutStateStorageKey = computed(
-  () => `checkout-state:${String(tenantID ?? "")}:${String(bookableID ?? "")}`
+  () => `checkout-state:${String(tenantID ?? "")}:${String(bookableID ?? "")}`,
 );
 
 const bookablesInCheckout = computed(() => {
@@ -338,7 +352,7 @@ const mergedRequiredContactFields = computed(() => {
 });
 
 const isCommentRequired = computed(() =>
-  bookablesInCheckout.value.some((b) => hasRequiredCommentField(b))
+  bookablesInCheckout.value.some((b) => hasRequiredCommentField(b)),
 );
 
 const checkoutVisibleAttachments = computed(() => {
@@ -369,7 +383,9 @@ const reviewCustomFieldRows = computed(() => {
     let display = "–";
     if (field.inputType === "boolean") {
       display =
-        raw === true ? t("checkout.review.boolYes") : t("checkout.review.boolNo");
+        raw === true
+          ? t("checkout.review.boolYes")
+          : t("checkout.review.boolNo");
     } else if (field.inputType === "numeric") {
       if (raw != null && raw !== "" && !Number.isNaN(Number(raw))) {
         display = String(raw);
@@ -424,23 +440,32 @@ const hasResolvedFreeCheckout = computed(() => {
 });
 
 const needsPaymentSelectionStep = computed(
-  () => paymentProviders.value.length > 1 && !hasResolvedFreeCheckout.value
+  () => paymentProviders.value.length > 1 && !hasResolvedFreeCheckout.value,
 );
 
 function applyUserToContactForm(user, force = false) {
   if (!user) return;
 
   const userKey = String(user.id || user.email || "");
-  const shouldForce = force || (userKey && userKey !== lastAutofilledUserKey.value);
+  const shouldForce =
+    force || (userKey && userKey !== lastAutofilledUserKey.value);
 
-  if ((shouldForce || !contactForm.firstName) && user.firstName) contactForm.firstName = user.firstName;
-  if ((shouldForce || !contactForm.lastName) && user.lastName) contactForm.lastName = user.lastName;
-  if ((shouldForce || !contactForm.email) && user.id) contactForm.email = user.id;
-  if ((shouldForce || !contactForm.phone) && user.phone) contactForm.phone = user.phone;
-  if ((shouldForce || !contactForm.company) && user.company) contactForm.company = user.company;
-  if ((shouldForce || !contactForm.address) && user.address) contactForm.address = user.address;
-  if ((shouldForce || !contactForm.zipCode) && user.zipCode) contactForm.zipCode = user.zipCode;
-  if ((shouldForce || !contactForm.city) && user.city) contactForm.city = user.city;
+  if ((shouldForce || !contactForm.firstName) && user.firstName)
+    contactForm.firstName = user.firstName;
+  if ((shouldForce || !contactForm.lastName) && user.lastName)
+    contactForm.lastName = user.lastName;
+  if ((shouldForce || !contactForm.email) && user.id)
+    contactForm.email = user.id;
+  if ((shouldForce || !contactForm.phone) && user.phone)
+    contactForm.phone = user.phone;
+  if ((shouldForce || !contactForm.company) && user.company)
+    contactForm.company = user.company;
+  if ((shouldForce || !contactForm.address) && user.address)
+    contactForm.address = user.address;
+  if ((shouldForce || !contactForm.zipCode) && user.zipCode)
+    contactForm.zipCode = user.zipCode;
+  if ((shouldForce || !contactForm.city) && user.city)
+    contactForm.city = user.city;
 
   if (userKey) {
     lastAutofilledUserKey.value = userKey;
@@ -453,7 +478,7 @@ watch(
     const prev = attachmentAccepted.value;
     const restored = restoredAttachmentAccepted.value || {};
     const requiredIds = new Set(
-      list.filter((a) => a.required === true).map((a) => a.id)
+      list.filter((a) => a.required === true).map((a) => a.id),
     );
     const next = {};
     for (const id of requiredIds) {
@@ -467,7 +492,7 @@ watch(
     }
     attachmentAccepted.value = next;
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 
 watch(
@@ -483,7 +508,7 @@ watch(
       appliedCouponDetails.value = null;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -501,7 +526,7 @@ watch(
     if (current && list.some((p) => p.id === current)) return;
     selectedPaymentProviderId.value = null;
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -523,7 +548,7 @@ watch(
     }
     customFieldValues.value = next;
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 
 function isNonEmptyContactValue(v) {
@@ -552,7 +577,10 @@ const isDataStepComplete = computed(() => {
       return false;
     }
   }
-  if (isCommentRequired.value && !isNonEmptyContactValue(customerComment.value)) {
+  if (
+    isCommentRequired.value &&
+    !isNonEmptyContactValue(customerComment.value)
+  ) {
     return false;
   }
   for (const field of checkoutVisibleCustomFields.value) {
@@ -561,7 +589,8 @@ const isDataStepComplete = computed(() => {
     if (field.inputType === "boolean") {
       if (value !== true) return false;
     } else if (field.inputType === "numeric") {
-      if (value === null || value === undefined || Number.isNaN(value)) return false;
+      if (value === null || value === undefined || Number.isNaN(value))
+        return false;
     } else {
       if (!isNonEmptyContactValue(value)) return false;
     }
@@ -598,11 +627,12 @@ watch(
     }
     applyUserToContactForm(u);
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 async function continueAsGuest() {
-  if (requiresLoginForCheckout.value || !isLoggedIn.value || isLoggingOut.value) return;
+  if (requiresLoginForCheckout.value || !isLoggedIn.value || isLoggingOut.value)
+    return;
   isLoggingOut.value = true;
   try {
     await authStore.logout();
@@ -629,18 +659,18 @@ function handleAmountUpdate({ id, amount }) {
   const minAllowed = id === bookableID || isMandatory ? 1 : 0;
 
   if (amount <= 0 && id !== bookableID && !isMandatory) {
-    selectedAdditionalBookables.value = selectedAdditionalBookables.value.filter(
-      (bid) => bid !== id
-    );
+    selectedAdditionalBookables.value =
+      selectedAdditionalBookables.value.filter((bid) => bid !== id);
     amounts.value = Object.fromEntries(
-      Object.entries(amounts.value).filter(([k]) => k !== id)
+      Object.entries(amounts.value).filter(([k]) => k !== id),
     );
   } else {
     amounts.value[id] = Math.max(amount, minAllowed);
   }
 }
 
-const { validateBookable, completeCheckout, completeGroupCheckout } = useCheckout();
+const { validateBookable, completeCheckout, completeGroupCheckout } =
+  useCheckout();
 
 const groupBookingEnabled = computed(() => {
   const b = leadBookable.value;
@@ -654,7 +684,13 @@ function normalizeRoleIdentifier(value) {
     return s || null;
   }
   if (typeof value === "object") {
-    const candidates = [value.id, value.roleId, value.name, value.code, value.slug];
+    const candidates = [
+      value.id,
+      value.roleId,
+      value.name,
+      value.code,
+      value.slug,
+    ];
     for (const c of candidates) {
       if (c != null) {
         const s = String(c).trim();
@@ -673,7 +709,7 @@ const groupBookingPermittedRoles = computed(() => {
 });
 
 const groupBookingHasRoleRestriction = computed(
-  () => groupBookingPermittedRoles.value.length > 0
+  () => groupBookingPermittedRoles.value.length > 0,
 );
 
 const userTenantRoles = ref([]);
@@ -743,7 +779,7 @@ watch(
       hasResolvedUserTenantRoles.value = true;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const useGroupBooking = ref(false);
@@ -763,7 +799,7 @@ const groupBookingAttempts = ref([]);
 const groupBookingAttemptStatuses = ref({});
 
 const isGroupBookingActive = computed(
-  () => groupBookingEnabled.value && useGroupBooking.value
+  () => groupBookingEnabled.value && useGroupBooking.value,
 );
 
 watch(groupBookingEnabled, (enabled) => {
@@ -797,15 +833,19 @@ watch(
   groupBookingAttempts,
   () => {
     if (!isGroupBookingActive.value) return;
-    const currentStarts = new Set(groupBookingAttempts.value.map((a) => a.start));
+    const currentStarts = new Set(
+      groupBookingAttempts.value.map((a) => a.start),
+    );
     const next = {};
-    for (const [key, value] of Object.entries(groupBookingAttemptStatuses.value)) {
+    for (const [key, value] of Object.entries(
+      groupBookingAttemptStatuses.value,
+    )) {
       if (currentStarts.has(Number(key))) next[key] = value;
     }
     groupBookingAttemptStatuses.value = next;
     scheduleValidation();
   },
-  { deep: true }
+  { deep: true },
 );
 
 const couponForValidation = computed(() => {
@@ -817,7 +857,7 @@ const couponForValidation = computed(() => {
 });
 
 const hasFreeBookingOption = computed(() =>
-  Object.values(freeBookingEligibility.value).some((value) => value === true)
+  Object.values(freeBookingEligibility.value).some((value) => value === true),
 );
 
 const isBookingWithPrice = computed(() => {
@@ -879,7 +919,10 @@ async function validateAll() {
   const start = normalizePeriodTimestamp(selectedTimePeriod.value?.start);
   const end = normalizePeriodTimestamp(selectedTimePeriod.value?.end);
 
-  if (requiresTimeSelection.value && (start == null || end == null || end <= start)) {
+  if (
+    requiresTimeSelection.value &&
+    (start == null || end == null || end <= start)
+  ) {
     summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
     validationErrors.value = {};
     checkoutID.value = null;
@@ -889,7 +932,6 @@ async function validateAll() {
 
   const myToken = ++validationToken;
   isValidating.value = true;
-  validationErrors.value = {};
 
   try {
     const targets = [
@@ -913,8 +955,8 @@ async function validateAll() {
           bookWithPrice: isBookingWithPrice.value,
         })
           .then((res) => ({ id, isLead, res }))
-          .catch((err) => ({ id, isLead, error: err }))
-      )
+          .catch((err) => ({ id, isLead, error: err })),
+      ),
     );
 
     if (myToken !== validationToken) return;
@@ -962,7 +1004,9 @@ async function validateAll() {
       const freeBookingAllowed = validationData.freeBookingAllowed === true;
       const freeBookingActive = freeBookingAllowed && !isBookingWithPrice.value;
       const userPriceEur = toFiniteAmount(validationData.userPriceEur);
-      const userGrossPriceEur = toFiniteAmount(validationData.userGrossPriceEur);
+      const userGrossPriceEur = toFiniteAmount(
+        validationData.userGrossPriceEur,
+      );
       const regularPriceEur =
         toNullableAmount(validationData.regularPriceEur) ??
         toNullableAmount(validationData.userPriceEur);
@@ -1000,7 +1044,7 @@ async function validateAll() {
     ) {
       const rawDiscount = computeCouponGrossDiscount(
         appliedCouponDetails.value,
-        total
+        total,
       );
       const discountGross = Math.min(rawDiscount, total);
       if (discountGross > 0.005) {
@@ -1084,8 +1128,8 @@ async function validateGroupBookingAttempts() {
           bookWithPrice: isBookingWithPrice.value,
         })
           .then((res) => ({ attempt, target, res }))
-          .catch((err) => ({ attempt, target, error: err }))
-      )
+          .catch((err) => ({ attempt, target, error: err })),
+      ),
     );
 
     if (myToken !== validationToken) return;
@@ -1152,7 +1196,9 @@ async function validateGroupBookingAttempts() {
       const freeBookingAllowed = validationData.freeBookingAllowed === true;
       const freeBookingActive = freeBookingAllowed && !isBookingWithPrice.value;
       const userPriceEur = toFiniteAmount(validationData.userPriceEur);
-      const userGrossPriceEur = toFiniteAmount(validationData.userGrossPriceEur);
+      const userGrossPriceEur = toFiniteAmount(
+        validationData.userGrossPriceEur,
+      );
 
       const lineNet = freeBookingActive ? 0 : userPriceEur;
       const lineGross = freeBookingActive ? 0 : userGrossPriceEur;
@@ -1237,7 +1283,7 @@ async function validateGroupBookingAttempts() {
     ) {
       const rawDiscount = computeCouponGrossDiscount(
         appliedCouponDetails.value,
-        total
+        total,
       );
       const discountGross = Math.min(rawDiscount, total);
       if (discountGross > 0.005) {
@@ -1306,29 +1352,25 @@ watch(
   scheduleValidation,
   {
     deep: true,
-  }
+  },
 );
 
 const isScheduleRelated = computed(
-  () => leadBookable.value?.isScheduleRelated === true
+  () => leadBookable.value?.isScheduleRelated === true,
 );
 
 const isTimePeriodRelated = computed(
-  () => leadBookable.value?.isTimePeriodRelated === true
+  () => leadBookable.value?.isTimePeriodRelated === true,
 );
 
 const isLongRangeWeek = computed(() => {
   const b = leadBookable.value;
-  return (
-    b?.isLongRange === true && b?.longRangeOptions?.type === "week"
-  );
+  return b?.isLongRange === true && b?.longRangeOptions?.type === "week";
 });
 
 const isLongRangeMonth = computed(() => {
   const b = leadBookable.value;
-  return (
-    b?.isLongRange === true && b?.longRangeOptions?.type === "month"
-  );
+  return b?.isLongRange === true && b?.longRangeOptions?.type === "month";
 });
 
 const longRangeMonthPrice = computed(() => {
@@ -1354,10 +1396,10 @@ const longRangeWeekPrice = computed(() => {
   if (categories.length === 0) return null;
 
   const internal = categories.filter(
-    (c) => !c.external || (c.external && c.unit !== "service-fee")
+    (c) => !c.external || (c.external && c.unit !== "service-fee"),
   );
   const withoutHolidays = internal.filter(
-    (c) => !c.holidays || c.holidays.length === 0
+    (c) => !c.holidays || c.holidays.length === 0,
   );
   const prices = withoutHolidays
     .map((c) => c.priceEur)
@@ -1368,19 +1410,22 @@ const longRangeWeekPrice = computed(() => {
 });
 
 const bookableTimePeriods = computed(
-  () => leadBookable.value?.timePeriods || []
+  () => leadBookable.value?.timePeriods || [],
 );
 
 const hasValidTimePeriod = computed(
   () =>
     !!selectedTimePeriod.value?.start &&
     !!selectedTimePeriod.value?.end &&
-    selectedTimePeriod.value.end > selectedTimePeriod.value.start
+    selectedTimePeriod.value.end > selectedTimePeriod.value.start,
 );
 
 const hasValidGroupBookingSelection = computed(() => {
   if (!isGroupBookingActive.value) return false;
-  if (!Array.isArray(groupBookingAttempts.value) || groupBookingAttempts.value.length === 0) {
+  if (
+    !Array.isArray(groupBookingAttempts.value) ||
+    groupBookingAttempts.value.length === 0
+  ) {
     return false;
   }
   for (const attempt of groupBookingAttempts.value) {
@@ -1395,19 +1440,19 @@ const requiresTimeSelection = computed(
     isScheduleRelated.value ||
     isTimePeriodRelated.value ||
     isLongRangeWeek.value ||
-    isLongRangeMonth.value
+    isLongRangeMonth.value,
 );
 
 const hasAdditionalBookables = computed(
-  () => additionalBookables.value.length > 0
+  () => additionalBookables.value.length > 0,
 );
 
 const needsStandaloneObjectsStep = computed(
-  () => !requiresTimeSelection.value && hasAdditionalBookables.value
+  () => !requiresTimeSelection.value && hasAdditionalBookables.value,
 );
 
 const showAdditionalBookablesInPeriodStep = computed(
-  () => requiresTimeSelection.value && hasAdditionalBookables.value
+  () => requiresTimeSelection.value && hasAdditionalBookables.value,
 );
 
 const needsTimePeriodSelection = computed(() => {
@@ -1469,7 +1514,10 @@ function persistCheckoutState() {
     useGroupBooking: useGroupBooking.value,
     groupBookingRule: groupBookingRule.value,
   };
-  sessionStorage.setItem(checkoutStateStorageKey.value, JSON.stringify(payload));
+  sessionStorage.setItem(
+    checkoutStateStorageKey.value,
+    JSON.stringify(payload),
+  );
 }
 
 function restoreCheckoutState() {
@@ -1480,9 +1528,16 @@ function restoreCheckoutState() {
   try {
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed === "object") {
-      if (parsed.selectedTimePeriod && typeof parsed.selectedTimePeriod === "object") {
-        const restoredStart = normalizePeriodTimestamp(parsed.selectedTimePeriod.start);
-        const restoredEnd = normalizePeriodTimestamp(parsed.selectedTimePeriod.end);
+      if (
+        parsed.selectedTimePeriod &&
+        typeof parsed.selectedTimePeriod === "object"
+      ) {
+        const restoredStart = normalizePeriodTimestamp(
+          parsed.selectedTimePeriod.start,
+        );
+        const restoredEnd = normalizePeriodTimestamp(
+          parsed.selectedTimePeriod.end,
+        );
         selectedTimePeriod.value = {
           start: restoredStart,
           end: restoredEnd,
@@ -1504,11 +1559,17 @@ function restoreCheckoutState() {
       if (typeof parsed.customerComment === "string") {
         customerComment.value = parsed.customerComment;
       }
-      if (parsed.attachmentAccepted && typeof parsed.attachmentAccepted === "object") {
+      if (
+        parsed.attachmentAccepted &&
+        typeof parsed.attachmentAccepted === "object"
+      ) {
         restoredAttachmentAccepted.value = parsed.attachmentAccepted;
         attachmentAccepted.value = parsed.attachmentAccepted;
       }
-      if (parsed.customFieldValues && typeof parsed.customFieldValues === "object") {
+      if (
+        parsed.customFieldValues &&
+        typeof parsed.customFieldValues === "object"
+      ) {
         restoredCustomFieldValues.value = parsed.customFieldValues;
         customFieldValues.value = parsed.customFieldValues;
       }
@@ -1519,10 +1580,16 @@ function restoreCheckoutState() {
       if (typeof parsed.selectedPaymentProviderId === "string") {
         selectedPaymentProviderId.value = parsed.selectedPaymentProviderId;
       }
-      if (typeof parsed.appliedCouponCode === "string" && parsed.appliedCouponCode.trim()) {
+      if (
+        typeof parsed.appliedCouponCode === "string" &&
+        parsed.appliedCouponCode.trim()
+      ) {
         appliedCouponCode.value = parsed.appliedCouponCode.trim();
       }
-      if (parsed.appliedCouponDetails && typeof parsed.appliedCouponDetails === "object") {
+      if (
+        parsed.appliedCouponDetails &&
+        typeof parsed.appliedCouponDetails === "object"
+      ) {
         appliedCouponDetails.value = parsed.appliedCouponDetails;
       }
       if (typeof parsed.bookWithPricePreference === "boolean") {
@@ -1531,7 +1598,10 @@ function restoreCheckoutState() {
       if (typeof parsed.useGroupBooking === "boolean") {
         useGroupBooking.value = parsed.useGroupBooking;
       }
-      if (parsed.groupBookingRule && typeof parsed.groupBookingRule === "object") {
+      if (
+        parsed.groupBookingRule &&
+        typeof parsed.groupBookingRule === "object"
+      ) {
         groupBookingRule.value = {
           ...groupBookingRule.value,
           ...parsed.groupBookingRule,
@@ -1596,6 +1666,12 @@ function normalizeStep(value) {
 
 const currentStep = ref(1);
 
+watch(currentStep, (step) => {
+  if (step === maxStep.value) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+});
+
 watch(maxStep, (max) => {
   if (currentStep.value > max) {
     currentStep.value = max;
@@ -1603,7 +1679,7 @@ watch(maxStep, (max) => {
 });
 
 const hasValidationErrors = computed(
-  () => Object.keys(validationErrors.value).length > 0
+  () => Object.keys(validationErrors.value).length > 0,
 );
 
 const hasConfirmableSummary = computed(() => {
@@ -1622,7 +1698,7 @@ const hasConfirmableSummary = computed(() => {
 });
 
 const leadBookableError = computed(
-  () => validationErrors.value[bookableID] || null
+  () => validationErrors.value[bookableID] || null,
 );
 
 const currentStepKey = computed(() => {
@@ -1661,15 +1737,12 @@ const canGoNext = computed(() => {
   return true;
 });
 
-watch(
-  [() => route.query.step, maxStep],
-  ([step]) => {
-    const nextStep = normalizeStep(step);
-    if (nextStep != null && nextStep !== currentStep.value) {
-      currentStep.value = nextStep;
-    }
+watch([() => route.query.step, maxStep], ([step]) => {
+  const nextStep = normalizeStep(step);
+  if (nextStep != null && nextStep !== currentStep.value) {
+    currentStep.value = nextStep;
   }
-);
+});
 
 watch(
   currentStep,
@@ -1684,7 +1757,7 @@ watch(
       query: nextQuery,
     });
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -1707,7 +1780,7 @@ watch(
     if (!hasRestoredCheckoutState.value) return;
     persistCheckoutState();
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 
 watch(
@@ -1719,7 +1792,7 @@ watch(
     if (JSON.stringify(route.query) === JSON.stringify(nextQuery)) return;
     await router.replace({ query: nextQuery });
   },
-  { deep: true }
+  { deep: true },
 );
 
 function buildCustomFieldValuesPayload() {
@@ -1734,7 +1807,7 @@ function buildCustomFieldValuesPayload() {
       value:
         field.inputType === "boolean"
           ? raw[field.id] === true
-          : raw[field.id] ?? null,
+          : (raw[field.id] ?? null),
     }));
 }
 
@@ -1761,7 +1834,8 @@ function buildCheckoutPayload() {
   if (contactForm.address?.trim()) payload.street = contactForm.address.trim();
   if (contactForm.zipCode?.trim()) payload.zipCode = contactForm.zipCode.trim();
   if (contactForm.city?.trim()) payload.location = contactForm.city.trim();
-  if (customerComment.value?.trim()) payload.comment = customerComment.value.trim();
+  if (customerComment.value?.trim())
+    payload.comment = customerComment.value.trim();
 
   const start = normalizePeriodTimestamp(selectedTimePeriod.value?.start);
   const end = normalizePeriodTimestamp(selectedTimePeriod.value?.end);
@@ -1817,7 +1891,8 @@ function buildGroupCheckoutPayload() {
   if (contactForm.address?.trim()) payload.street = contactForm.address.trim();
   if (contactForm.zipCode?.trim()) payload.zipCode = contactForm.zipCode.trim();
   if (contactForm.city?.trim()) payload.location = contactForm.city.trim();
-  if (customerComment.value?.trim()) payload.comment = customerComment.value.trim();
+  if (customerComment.value?.trim())
+    payload.comment = customerComment.value.trim();
 
   const code = couponForValidation.value;
   if (code) payload.couponCode = code;
@@ -1861,7 +1936,8 @@ function firstPaymentContinueUrl(payment) {
   if (!trimmed) return null;
   try {
     const parsed = new URL(trimmed);
-    if (parsed.protocol === "http:" || parsed.protocol === "https:") return trimmed;
+    if (parsed.protocol === "http:" || parsed.protocol === "https:")
+      return trimmed;
   } catch {
     return null;
   }
@@ -1910,15 +1986,12 @@ function messageForStructuredCheckoutErrorNotify(apiError) {
       ? apiError.params
       : {};
   const parts = [main];
-  if (
-    params.remaining !== undefined &&
-    params.totalCapacity !== undefined
-  ) {
+  if (params.remaining !== undefined && params.totalCapacity !== undefined) {
     parts.push(
       t("checkout.errors.capacityInfo", {
         remaining: params.remaining,
         total: params.totalCapacity,
-      })
+      }),
     );
   }
   const checkType = apiError?.checkType ?? params.checkType;
@@ -1938,7 +2011,9 @@ function messageForCheckoutApiError(errPayload) {
   const code = errPayload.code;
   if (typeof code === "string") {
     if (te(code)) return t(code);
-    const tail = code.startsWith("checkout.") ? code.slice("checkout.".length) : code;
+    const tail = code.startsWith("checkout.")
+      ? code.slice("checkout.".length)
+      : code;
     const nestedKey = `checkout.${tail}`;
     if (te(nestedKey)) return t(nestedKey);
   }
@@ -1985,7 +2060,10 @@ async function handleFinish() {
       : [];
     const booking = data?.data?.booking || bookings[0] || null;
     const payment = data?.data?.payment || null;
-    const bookingIds = data?.data?.groupBooking?.bookingIds || (booking ? [booking.id] : []) || [];
+    const bookingIds =
+      data?.data?.groupBooking?.bookingIds ||
+      (booking ? [booking.id] : []) ||
+      [];
 
     if (!booking) {
       notifyError(t("checkout.unknown_error"));
@@ -2068,6 +2146,7 @@ function onReviewEdit(section) {
       </div>
     </div>
 
+    <!-- No Bookable -->
     <div
       v-else-if="!leadBookable"
       class="flex items-center justify-center min-h-screen"
@@ -2082,6 +2161,7 @@ function onReviewEdit(section) {
       </div>
     </div>
 
+    <!-- Permissions -->
     <div
       v-else-if="showPermissionGuard"
       class="flex items-center justify-center min-h-screen p-6"
@@ -2261,9 +2341,7 @@ function onReviewEdit(section) {
                       {{ $t("groupBooking.toggleDescription") }}
                     </p>
                     <p
-                      v-if="
-                        groupBookingPermissionReason === 'loginRequired'
-                      "
+                      v-if="groupBookingPermissionReason === 'loginRequired'"
                       class="text-xs mt-1.5 text-amber-700 dark:text-amber-300"
                     >
                       {{ $t("groupBooking.permission.loginRequired") }}
@@ -2275,17 +2353,13 @@ function onReviewEdit(section) {
                       </NuxtLink>
                     </p>
                     <p
-                      v-else-if="
-                        groupBookingPermissionReason === 'missingRole'
-                      "
+                      v-else-if="groupBookingPermissionReason === 'missingRole'"
                       class="text-xs mt-1.5 text-amber-700 dark:text-amber-300"
                     >
                       {{ $t("groupBooking.permission.missingRole") }}
                     </p>
                     <p
-                      v-else-if="
-                        groupBookingPermissionReason === 'loading'
-                      "
+                      v-else-if="groupBookingPermissionReason === 'loading'"
                       class="text-xs mt-1.5 text-gray-500 dark:text-gray-400 inline-flex items-center gap-1.5"
                     >
                       <UIcon
@@ -2301,8 +2375,7 @@ function onReviewEdit(section) {
                   v-model="useGroupBooking"
                   :label="$t('groupBooking.toggleLabel')"
                   :disabled="
-                    !canCreateGroupBooking ||
-                    isCheckingGroupBookingPermission
+                    !canCreateGroupBooking || isCheckingGroupBookingPermission
                   "
                 />
               </div>
@@ -2361,7 +2434,7 @@ function onReviewEdit(section) {
                   v-if="showAdditionalBookablesInPeriodStep"
                   :size="35"
                   :min-size="20"
-                  class="overflow-hidden"
+                  class="overflow-hidden mt-5 sm:mt-0"
                 >
                   <div class="pl-0 lg:pl-4">
                     <AdditionalBookablesSelector
@@ -2396,8 +2469,8 @@ function onReviewEdit(section) {
                           ? $t("checkout.data.loggedInTitle")
                           : $t("checkout.data.loginRequiredTitle")
                         : isLoggedIn
-                        ? $t("checkout.data.loggedInTitle")
-                        : $t("checkout.data.guestTitle")
+                          ? $t("checkout.data.loggedInTitle")
+                          : $t("checkout.data.guestTitle")
                     }}
                   </p>
                   <p class="text-sm text-gray-600 dark:text-gray-300">
@@ -2407,8 +2480,8 @@ function onReviewEdit(section) {
                           ? $t("checkout.data.loggedInDescription")
                           : $t("checkout.data.loginRequiredDescription")
                         : isLoggedIn
-                        ? $t("checkout.data.loggedInDescription")
-                        : $t("checkout.data.guestDescription")
+                          ? $t("checkout.data.loggedInDescription")
+                          : $t("checkout.data.guestDescription")
                     }}
                   </p>
                 </div>
@@ -2507,7 +2580,7 @@ function onReviewEdit(section) {
               "
               :show-selection-edit="
                 steps.some(
-                  (step) => step.key === 'period' || step.key === 'objects'
+                  (step) => step.key === 'period' || step.key === 'objects',
                 )
               "
               :step-current="currentStep"
@@ -2552,7 +2625,9 @@ function onReviewEdit(section) {
   transform: translateX(-50%);
   background-color: #d1d5db;
   border-radius: 9999px;
-  transition: background-color 0.2s ease, width 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    width 0.2s ease;
 }
 
 .checkout-splitpanes :deep(.splitpanes__splitter:hover::before) {

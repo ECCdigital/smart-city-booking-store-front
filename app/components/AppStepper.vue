@@ -4,9 +4,9 @@ const props = defineProps({
     type: Array,
     required: true,
     validator: (value) =>
-        Array.isArray(value) &&
-        value.length > 0 &&
-        value.every((s) => s && typeof s.title === "string"),
+      Array.isArray(value) &&
+      value.length > 0 &&
+      value.every((s) => s && typeof s.title === "string"),
   },
   modelValue: {
     type: Number,
@@ -54,7 +54,6 @@ const emit = defineEmits(["update:modelValue", "next", "back", "finish"]);
 
 const { t } = useI18n();
 
-
 const totalSteps = computed(() => props.steps.length);
 
 const currentIndex = computed(() => {
@@ -75,17 +74,10 @@ const nextButtonLabel = computed(() => {
   if (isLastStep.value) {
     return props.finishLabel ?? t("stepper.finish");
   }
-  return (
-      currentStep.value?.nextLabel ??
-      props.nextLabel ??
-      t("stepper.next")
-  );
+  return currentStep.value?.nextLabel ?? props.nextLabel ?? t("stepper.next");
 });
 
-const backButtonLabel = computed(
-    () => props.backLabel ?? t("stepper.back"),
-);
-
+const backButtonLabel = computed(() => props.backLabel ?? t("stepper.back"));
 
 function goNext() {
   if (!props.canGoNext || props.loading) return;
@@ -113,10 +105,10 @@ function isSegmentActive(index) {
     <!-- Progress-Bar -->
     <div class="flex gap-2 mb-10">
       <div
-          v-for="(_, idx) in steps"
-          :key="idx"
-          class="flex-1 h-1 rounded-full transition-colors duration-300"
-          :class="
+        v-for="(_, idx) in steps"
+        :key="idx"
+        class="flex-1 h-1 rounded-full transition-colors duration-300"
+        :class="
           isSegmentActive(idx)
             ? 'bg-secondary dark:bg-secondary'
             : 'bg-gray-200 dark:bg-gray-700'
@@ -126,16 +118,16 @@ function isSegmentActive(index) {
 
     <!-- Header -->
     <div
-        v-if="!hideStepHeading"
-        class="flex items-baseline justify-between gap-4 mb-8"
+      v-if="!hideStepHeading"
+      class="flex items-baseline justify-between gap-4 mb-8"
     >
       <h2
-          class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white truncate"
+        class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white truncate"
       >
         {{ currentStep?.title }}
       </h2>
       <span
-          class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap"
+        class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:block"
       >
         {{
           t("stepper.stepOf", {
@@ -149,37 +141,39 @@ function isSegmentActive(index) {
     <!-- Inhalt (über Named-Slot) -->
     <div class="mb-10 flex-1">
       <slot
-          :name="slotName"
-          :step="currentStep"
-          :index="currentIndex"
-          :is-first="isFirstStep"
-          :is-last="isLastStep"
+        :name="slotName"
+        :step="currentStep"
+        :index="currentIndex"
+        :is-first="isFirstStep"
+        :is-last="isLastStep"
       />
     </div>
 
     <!-- Footer / Navigation -->
     <div
-        v-if="!hideFooter"
-        class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-6 flex items-center justify-between gap-4 z-10"
+      v-if="!hideFooter"
+      class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-6 flex items-center justify-between gap-4 z-10"
     >
       <UButton
-          v-if="!hideBackOnFirst || !isFirstStep"
-          variant="ghost"
-          color="neutral"
-          :disabled="!canGoBack || isFirstStep || loading"
-          icon="i-lucide-arrow-left"
-          @click="goBack"
+        v-if="!hideBackOnFirst || !isFirstStep"
+        variant="ghost"
+        color="neutral"
+        :disabled="!canGoBack || isFirstStep || loading"
+        icon="i-lucide-arrow-left"
+        @click="goBack"
       >
         {{ backButtonLabel }}
       </UButton>
       <span v-else />
 
       <UButton
-          color="primary"
-          trailing-icon="i-lucide-arrow-right"
-          :loading="loading"
-          :disabled="!canGoNext"
-          @click="goNext"
+        color="primary"
+        :variant="canGoNext ? 'solid' : 'soft'"
+        trailing-icon="i-lucide-arrow-right"
+        :loading="loading"
+        :disabled="!canGoNext"
+        :class="!canGoNext ? 'text-gray-500' : ''"
+        @click="goNext"
       >
         {{ nextButtonLabel }}
       </UButton>

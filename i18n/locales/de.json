@@ -27,6 +27,7 @@
     "mandatory": "Pflichtfeld",
     "obligation": "Pflicht",
     "phone": "Telefon",
+    "completeAddress": "Adresse",
     "address": "Straße und Hausnummer",
     "zipCode": "PLZ",
     "city": "Stadt"
@@ -291,7 +292,8 @@
       "loggedInDescription": "Sie können sich ausloggen und diese Buchung stattdessen als Gast abschließen.",
       "logoutGuestAction": "Ausloggen und als Gast fortfahren",
       "customFieldsSectionTitle": "Zusätzliche Angaben",
-      "customFieldSelectPlaceholder": "Bitte auswählen"
+      "customFieldSelectPlaceholder": "Bitte auswählen",
+      "invalidEmailHint": "Die eingegebene E-Mail-Adresse ist ungültig."
     },
     "permissionGuard": {
       "loggedOutTitle": "Anmeldung erforderlich",
@@ -407,7 +409,7 @@
       "submitHint": "Mit dem Absenden senden Sie eine unverbindliche Buchungsanfrage. Die Buchung wird erst nach Freigabe durch den Anbieter verbindlich."
     },
     "steps": {
-      "periodTitle": "Zeitraum & Extras",
+      "periodTitle": "Zeitraum & Extras auswählen",
       "dataTitle": "Daten eingeben",
       "paymentTitle": "Zahlung",
       "confirmTitle": "Zusammenfassung",
@@ -456,6 +458,7 @@
       "actionsTitle": "Aktionen",
       "manualRefreshAction": "Status aktualisieren",
       "singleBookingReference": "Buchungsnummer",
+      "bookableTitle": "Gebuchtes Objekt",
       "detail": {
         "awaiting_approval": {
           "title": "Anfrage eingegangen",
@@ -477,7 +480,11 @@
           "title": "Buchung bestätigt",
           "body": "Ihre Buchung wurde bestätigt. Für diese Buchung ist keine Zahlung erforderlich. Sie erhalten eine Bestätigung per E-Mail."
         }
-      }
+      },
+      "thankYouTitle": "Vielen Dank für Ihre Buchung",
+      "thankYouBody": "Ihre Buchung wurde erfolgreich übermittelt.",
+      "closeWindowHint": "Sie können dieses Fenster nun schließen oder zur Startseite zurückkehren und weitere Buchungsprozesse beginnen.",
+      "invoiceMailHint": "Die Rechnung wird in Kürze an die von Ihnen angegebene E-Mail-Adresse versendet."
     }
   },
 
@@ -505,7 +512,7 @@
   },
 
   "weekSelection": {
-    "subtitle": "Wählen Sie eine Kalenderwoche",
+    "subtitle": "Wählen Sie eine Kalenderwoche.",
     "previousMonth": "Vorheriger Monat",
     "nextMonth": "Nächster Monat",
     "available": "Verfügbar",
@@ -566,11 +573,17 @@
     "toggleDescription": "Erstellen Sie mehrere Buchungen in einem festen Intervall mit einer einzigen Buchungsanfrage.",
     "toggleLabel": "Serienbuchung aktivieren",
     "fields": {
+      "timeExplanation" : "Legen Sie die Start- und Endzeit Ihrer ersten Buchung fest. Diese Uhrzeiten bilden die Grundlage für die Berechnung der weiteren Termine in der Serie.",
       "firstStart": "Erster Startzeitpunkt",
       "firstEnd": "Erster Endzeitpunkt",
+      "rhythmExplanation": "Wählen Sie das Intervall, in dem die Termine wiederholt werden sollen.",
+      "rhythmExample": "Zum Beispiel „Alle 2 Wochen“ oder „Alle 3 Monate“.",
+      "each": "Alle",
+      "repeat": "wiederholen",
       "frequency": "Intervall",
       "intervalWeeks": "Alle … Wochen",
       "intervalMonths": "Alle … Monate",
+      "untilExplanation": "Legen Sie optional fest, bis wann die Serie laufen soll.",
       "until": "Wiederholen bis",
       "untilPlaceholder": "Datum auswählen",
       "untilDialogTitle": "Enddatum der Serie",
@@ -578,21 +591,24 @@
       "clearUntil": "Enddatum zurücksetzen",
       "weekdays": "Wochentage",
       "weekday": "Wochentag",
-      "monthlyByDay": "Am Tag des Monats",
-      "monthlyByWeekday": "Am Wochentag",
-      "dayOfMonth": "Tag im Monat",
-      "ordinal": "Position im Monat"
+      "monthlyByDay": "Nach Datum",
+      "monthlyByWeekday": "Nach Wochentag",
+      "dayOfMonth": "Monatlich am",
+      "every": "Jeden",
+      "ofMonth": "im Monat"
     },
     "frequency": {
+      "weeks": "Wochen",
+      "months": "Monate",
       "weekly": "Wöchentlich",
       "monthly": "Monatlich"
     },
     "ordinals": {
-      "first": "Erster",
-      "second": "Zweiter",
-      "third": "Dritter",
-      "fourth": "Vierter",
-      "last": "Letzter"
+      "first": "Ersten",
+      "second": "Zweiten",
+      "third": "Dritten",
+      "fourth": "Vierten",
+      "last": "Letzten"
     },
     "actions": {
       "generate": "Serie erzeugen",

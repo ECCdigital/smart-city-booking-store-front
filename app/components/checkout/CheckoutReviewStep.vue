@@ -182,7 +182,7 @@ watch(
       appliedCouponDetails.value = null;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 function formatEur(value) {
@@ -251,12 +251,12 @@ const formattedTimeRange = computed(() => {
     return `${formatTime(start)} – ${formatTime(end)}`;
   }
   return `${formatDate(start)}, ${formatTime(start)} – ${formatDate(
-    end
+    end,
   )}, ${formatTime(end)}`;
 });
 
 const summaryItemsNoCoupon = computed(() =>
-  (props.summary?.items || []).filter((row) => row?.id !== COUPON_ROW_ID)
+  (props.summary?.items || []).filter((row) => row?.id !== COUPON_ROW_ID),
 );
 
 const leadSummaryRow = computed(() => {
@@ -320,7 +320,7 @@ const contactReviewRows = computed(() => {
       if (line2) lines.push(line2);
       rows.push({
         key: "addressBlock",
-        label: t("common.address"),
+        label: t("common.completeAddress"),
         value: lines.join("\n"),
       });
       used.add("address");
@@ -474,9 +474,8 @@ function onEdit(section) {
 const submitButtonLabel = computed(() =>
   props.requiresManualApproval
     ? t("checkout.review.sendBookingRequest")
-    : t("checkout.review.commitBooking")
+    : t("checkout.review.commitBooking"),
 );
-
 </script>
 
 <template>
@@ -505,9 +504,9 @@ const submitButtonLabel = computed(() =>
           <dl class="space-y-6">
             <div
               v-if="showPeriodSummary"
-              class="grid grid-cols-1 sm:grid-cols-[minmax(7rem,auto)_1fr] gap-x-8 gap-y-1"
+              class="grid grid-cols-1 sm:grid-cols-[minmax(9rem,auto)_1fr] gap-x-8 gap-y-1"
             >
-              <dt class="text-sm text-gray-500 dark:text-gray-400">
+              <dt class="text-sm text-gray-500 dark:text-gray-400 mb-0.5">
                 {{ $t("checkout.review.dateLabel") }}
               </dt>
               <dd class="text-sm text-gray-900 dark:text-white">
@@ -538,10 +537,18 @@ const submitButtonLabel = computed(() =>
                   </ul>
                 </template>
                 <template
-                  v-else-if="selectedTimePeriod?.start && selectedTimePeriod?.end"
+                  v-else-if="
+                    selectedTimePeriod?.start && selectedTimePeriod?.end
+                  "
                 >
                   <div class="font-semibold">
-                    {{ formatDateLong(selectedTimePeriod.start) }}
+                    {{
+                      formatDateLong(selectedTimePeriod.start) +
+                      (new Date(selectedTimePeriod.start).toDateString() !==
+                      new Date(selectedTimePeriod.end).toDateString()
+                        ? ` – ${formatDateLong(selectedTimePeriod.end)}`
+                        : "")
+                    }}
                   </div>
                   <div
                     v-if="formattedTimeRange"
@@ -559,7 +566,7 @@ const submitButtonLabel = computed(() =>
             </div>
 
             <div
-              class="grid grid-cols-1 sm:grid-cols-[minmax(7rem,auto)_1fr] gap-x-8 gap-y-1"
+              class="grid grid-cols-1 sm:grid-cols-[minmax(9rem,auto)_1fr] gap-x-8 gap-y-1"
             >
               <dt class="text-sm text-gray-500 dark:text-gray-400">
                 {{ $t("checkout.review.bookingLabel") }}
@@ -579,7 +586,7 @@ const submitButtonLabel = computed(() =>
             </div>
 
             <div
-              class="grid grid-cols-1 sm:grid-cols-[minmax(7rem,auto)_1fr] gap-x-8 gap-y-1"
+              class="grid grid-cols-1 sm:grid-cols-[minmax(9rem,auto)_1fr] gap-x-8 gap-y-1"
             >
               <dt class="text-sm text-gray-500 dark:text-gray-400">
                 {{ $t("checkout.review.addonsLabel") }}
@@ -624,22 +631,30 @@ const submitButtonLabel = computed(() =>
             </UButton>
           </div>
 
-          <dl
-            class="grid grid-cols-1 sm:grid-cols-[13rem_1fr] sm:items-start gap-x-8 gap-y-6"
-          >
-            <template v-for="row in contactReviewRows" :key="row.key">
-              <dt class="text-sm text-gray-500 dark:text-gray-400 break-words">
+          <dl class="space-y-6">
+            <div
+              v-for="row in contactReviewRows"
+              :key="row.key"
+              class="grid grid-cols-1 sm:grid-cols-[minmax(9rem,auto)_1fr] gap-x-8 gap-y-1"
+            >
+              <dt
+                class="text-sm text-gray-500 dark:text-gray-400 mb-0.5 break-words"
+              >
                 {{ row.label }}
               </dt>
               <dd
-                class="text-sm font-semibold text-gray-900 dark:text-white break-words min-w-0 whitespace-pre-line"
+                class="text-sm text-gray-900 dark:text-white break-words min-w-0 whitespace-pre-line"
               >
-                {{ row.value }}
+                <div class="font-semibold">
+                  {{ row.value }}
+                </div>
               </dd>
-            </template>
+            </div>
 
-            <template v-if="showComment && customerComment?.trim()">
-              <dt class="text-sm text-gray-500 dark:text-gray-400 break-words">
+            <div v-if="showComment && customerComment?.trim()">
+              <dt
+                class="text-sm text-gray-500 dark:text-gray-400 break-words mb-0.5"
+              >
                 {{ $t("checkout.data.commentLabel") }}
               </dt>
               <dd
@@ -647,16 +662,24 @@ const submitButtonLabel = computed(() =>
               >
                 {{ customerComment }}
               </dd>
-            </template>
+            </div>
 
-            <template v-for="(row, idx) in customFieldRows" :key="'cf-' + idx">
-              <dt class="text-sm text-gray-500 dark:text-gray-400 break-words">
+            <div
+              v-for="(row, idx) in customFieldRows"
+              :key="'cf-' + idx"
+              class="grid grid-cols-1 sm:grid-cols-[minmax(9rem,auto)_1fr] gap-x-8 gap-y-1"
+            >
+              <dt
+                class="text-sm text-gray-500 dark:text-gray-400 break-words mb-0.5"
+              >
                 {{ row.label }}
               </dt>
-              <dd class="text-sm text-gray-900 dark:text-white break-all min-w-0">
+              <dd
+                class="text-sm text-gray-900 dark:text-white whitespace-pre-wrap break-words min-w-0"
+              >
                 {{ row.value }}
               </dd>
-            </template>
+            </div>
           </dl>
         </section>
 
@@ -678,7 +701,7 @@ const submitButtonLabel = computed(() =>
 
           <dl class="space-y-6">
             <div
-              class="grid grid-cols-1 sm:grid-cols-[minmax(7rem,auto)_1fr] gap-x-8 gap-y-1"
+              class="grid grid-cols-1 sm:grid-cols-[minmax(9rem,auto)_1fr] gap-x-8 gap-y-1"
             >
               <dt class="text-sm text-gray-500 dark:text-gray-400">
                 {{ $t("checkout.review.paymentMethodLabel") }}
@@ -812,7 +835,7 @@ const submitButtonLabel = computed(() =>
               class="flex justify-between gap-3"
             >
               <span
-                class="text-gray-600 dark:text-gray-400"
+                class="text-gray-600 dark:text-gray-400 line-clamp-3"
                 :class="
                   row.skipQuantity
                     ? 'text-emerald-800 dark:text-emerald-200'
@@ -821,7 +844,9 @@ const submitButtonLabel = computed(() =>
               >
                 {{ row.label }}
               </span>
-              <div class="tabular-nums font-medium shrink-0 text-right min-w-[80px]">
+              <div
+                class="tabular-nums font-medium shrink-0 text-right min-w-[80px]"
+              >
                 <span
                   v-if="hasOriginalPriceForSummaryRow(row)"
                   class="block text-xs text-gray-400 line-through"
@@ -883,10 +908,12 @@ const submitButtonLabel = computed(() =>
             </p>
             <UButton
               color="primary"
+              :variant="canSubmit ? 'solid' : 'soft'"
               block
               size="lg"
-              trailing-icon="i-lucide-check"
+              :trailing-icon="canSubmit ? 'i-lucide-check' : 'i_lucide-x'"
               :disabled="!canSubmit"
+              :class="!canSubmit ? 'text-gray-500' : ''"
               :loading="isSubmitting"
               @click="onFinish"
             >

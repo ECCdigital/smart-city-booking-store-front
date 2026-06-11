@@ -23,7 +23,7 @@
             variant="ghost"
             :disabled="props.disabled"
             :min-value="minCalendarDate"
-            class="shrink-0"
+            class="shrink-0 px-1"
           />
         </template>
 
@@ -41,6 +41,7 @@
             :hour-cycle="24"
             variant="ghost"
             :disabled="props.disabled"
+            class="px-1"
           />
           <div
             class="click-area cursor-pointer"

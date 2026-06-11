@@ -24,20 +24,37 @@ const comment = defineModel("comment", {
   default: "",
 });
 
+const isAddressMenuOpen = ref(false);
+const isCityMenuOpen = ref(false);
+
 const attachmentAccepted = defineModel("attachmentAccepted", {
   type: Object,
   default: () => ({}),
 });
 
 const { t, locale } = useI18n();
+
+const emailChanged = ref(false);
+const isValidEmail = computed(() => {
+  const email = contact.value.email;
+  if (!email) {
+    return true;
+  }
+  if (typeof email !== "string") return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+});
+
 const requiredAttachmentCount = computed(
-  () => props.attachments.filter((att) => att?.required === true).length
+  () => props.attachments.filter((att) => att?.required === true).length,
 );
+
 const selectedAddressSuggestion = ref(null);
 const addressLookupQuery = ref("");
+const cityLookupQuery = ref("");
 const addressSuggestions = ref([]);
 const isAddressLookupLoading = ref(false);
 let addressLookupDebounce = null;
+let cityLookupDebounce = null;
 
 function isRequired(key) {
   return props.requiredFieldKeys.includes(key);
@@ -78,7 +95,8 @@ function toAddressSuggestion(item) {
   const zipCode = address.postcode || "";
 
   return {
-    label: item.display_name || [street, zipCode, city].filter(Boolean).join(", "),
+    label:
+      item.display_name || [street, zipCode, city].filter(Boolean).join(", "),
     street,
     zipCode,
     city,
@@ -115,32 +133,31 @@ async function searchAddressSuggestions(query) {
       return;
     }
 
+    //toDo - weiter einschränken??!? Weniger Detailliert!
     const filtered = data.filter((item) => {
       const a = item.address || {};
       return (
-          a.road ||
-          a.house_number ||
-          a.city ||
-          a.town ||
-          a.village ||
-          a.hamlet ||
-          a.suburb ||
-          a.postcode ||
-          item.class === "place" ||
-          item.class === "highway" ||
-          item.class === "building"
+        a.road ||
+        a.house_number ||
+        a.city ||
+        a.town ||
+        a.village ||
+        a.hamlet ||
+        a.suburb ||
+        a.postcode ||
+        item.class === "place" ||
+        item.class === "highway" ||
+        item.class === "building"
       );
     });
 
-
     filtered.sort(
-        (a, b) => (Number(b.importance) || 0) - (Number(a.importance) || 0)
+      (a, b) => (Number(b.importance) || 0) - (Number(a.importance) || 0),
     );
 
     addressSuggestions.value = filtered
-        .slice(0, 8)
-        .map((item) => toAddressSuggestion(item));
-
+      .slice(0, 8)
+      .map((item) => toAddressSuggestion(item));
   } catch {
     addressSuggestions.value = [];
   } finally {
@@ -148,43 +165,63 @@ async function searchAddressSuggestions(query) {
   }
 }
 
-watch(addressLookupQuery, (query) => {
+watch([addressLookupQuery, cityLookupQuery], ([addressQuery, cityQuery]) => {
+  console.log("*B*", addressQuery, cityQuery);
   clearTimeout(addressLookupDebounce);
+  clearTimeout(cityLookupDebounce);
 
-  if (!query || query.trim().length < 3) {
+  const query = (addressQuery || cityQuery || "").trim();
+
+  if (query.length < 3) {
     addressSuggestions.value = [];
     return;
   }
 
-  addressLookupDebounce = setTimeout(() => {
-    searchAddressSuggestions(query);
-  }, 300);
+  if (addressQuery?.trim()) {
+    addressLookupDebounce = setTimeout(() => {
+      searchAddressSuggestions(addressQuery);
+    }, 300);
+  }
+
+  if (cityQuery?.trim()) {
+    cityLookupDebounce = setTimeout(() => {
+      searchAddressSuggestions(cityQuery);
+    }, 300);
+  }
 });
 
 onBeforeUnmount(() => {
   clearTimeout(addressLookupDebounce);
+  clearTimeout(cityLookupDebounce);
 });
 
 function resolveAddressSuggestion(suggestion) {
   if (suggestion == null) return null;
   if (typeof suggestion === "string") {
     return (
-      addressSuggestions.value.find((item) => item.label === suggestion) ||
-      null
+      addressSuggestions.value.find((item) => item.label === suggestion) || null
     );
   }
   return typeof suggestion === "object" ? suggestion : null;
 }
 
 function onAddressSuggestionSelect(suggestion) {
+  console.log("*A*", suggestion); //nur aufgerufen wenn ein Vorschlag ausgewählt wird, nicht bei manueller Eingabe oder Blur
   const resolved = resolveAddressSuggestion(suggestion);
+
   if (!resolved) return;
 
-  Object.assign(contact.value, {
-    address: resolved.street || "",
-    zipCode: resolved.zipCode || "",
-    city: resolved.city || "",
-  });
+  selectedAddressSuggestion.value = resolved;
+
+  if (resolved.street) {
+    contact.value.address = resolved.street || "";
+  }
+  if (resolved.zipCode) {
+    contact.value.zipCode = resolved.zipCode || "";
+  }
+  if (resolved.city) {
+    contact.value.city = resolved.city || "";
+  }
 }
 </script>
 
@@ -198,32 +235,33 @@ function onAddressSuggestionSelect(suggestion) {
       </template>
 
       <div class="grid gap-3 sm:grid-cols-2">
-        <UFormField
-          :label="$t('common.firstName')"
-          :required="true"
-        >
+        <UFormField :label="$t('common.firstName')" :required="true">
           <UInput
             v-model="contact.firstName"
             type="text"
             autocomplete="given-name"
             icon="i-lucide-user"
+            class="w-full"
           />
         </UFormField>
-        <UFormField
-          :label="$t('common.lastName')"
-          :required="true"
-        >
+        <UFormField :label="$t('common.lastName')" :required="true">
           <UInput
             v-model="contact.lastName"
             type="text"
             autocomplete="family-name"
             icon="i-lucide-user"
+            class="w-full"
           />
         </UFormField>
         <UFormField
           class="sm:col-span-2"
           :label="$t('common.email')"
           :required="true"
+          :error="
+            emailChanged && !isValidEmail
+              ? $t('checkout.data.invalidEmailHint')
+              : undefined
+          "
         >
           <UInput
             v-model="contact.email"
@@ -232,17 +270,16 @@ function onAddressSuggestionSelect(suggestion) {
             icon="i-lucide-mail"
             size="xl"
             class="w-full"
+            @blur="emailChanged = true"
           />
         </UFormField>
-        <UFormField
-          :label="$t('common.phone')"
-          :required="isRequired('phone')"
-        >
+        <UFormField :label="$t('common.phone')" :required="isRequired('phone')">
           <UInput
             v-model="contact.phone"
             type="tel"
             autocomplete="tel"
             icon="i-lucide-phone"
+            class="w-full"
           />
         </UFormField>
         <UFormField
@@ -254,41 +291,60 @@ function onAddressSuggestionSelect(suggestion) {
             type="text"
             autocomplete="organization"
             icon="i-lucide-building-2"
+            class="w-full"
           />
         </UFormField>
 
-        <UFormField
-            class="sm:col-span-2"
-            :label="$t('checkout.data.addressLookupLabel')"
-        >
-          <UInputMenu
-              v-model="selectedAddressSuggestion"
-              v-model:search-term="addressLookupQuery"
-              :items="addressSuggestions"
-              :placeholder="$t('checkout.data.addressLookupPlaceholder')"
-              icon="i-lucide-search"
-              label-key="label"
-              class="w-full"
-              :loading="isAddressLookupLoading"
-              ignore-filter
-              @update:model-value="onAddressSuggestionSelect"
-          />
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {{ $t("checkout.data.addressLookupHint") }}
-          </p>
-        </UFormField>
         <UFormField
           class="sm:col-span-2"
           :label="$t('common.address')"
           :required="isRequired('address')"
         >
-          <UInput
+          <UInputMenu
             v-model="contact.address"
-            type="text"
-            autocomplete="street-address"
+            v-model:open="isAddressMenuOpen"
+            v-model:search-term="addressLookupQuery"
+            :items="addressSuggestions"
             icon="i-lucide-map-pin"
-          />
+            label-key="label"
+            class="w-full"
+            :loading="isAddressLookupLoading"
+            ignore-filter
+            :ui="{
+              trailing: 'pe-1',
+            }"
+            @update:model-value="onAddressSuggestionSelect"
+            @focusout="
+              () => {
+                isAddressMenuOpen = false;
+                if (!selectedAddressSuggestion || addressLookupQuery) {
+                  contact.address = addressLookupQuery;
+                }
+              }
+            "
+          >
+            <template #trailing>
+              <UButton
+                v-if="contact.address"
+                color="neutral"
+                variant="ghost"
+                icon="i-lucide-x"
+                size="xs"
+                :aria-label="$t('common.clear')"
+                @click.stop="
+                  () => {
+                    contact.address = '';
+                    addressLookupQuery = '';
+                    selectedAddressSuggestion = null;
+                    addressSuggestions = [];
+                    isAddressMenuOpen = false;
+                  }
+                "
+              />
+            </template>
+          </UInputMenu>
         </UFormField>
+
         <UFormField
           :label="$t('common.zipCode')"
           :required="isRequired('zipCode')"
@@ -297,42 +353,93 @@ function onAddressSuggestionSelect(suggestion) {
             v-model="contact.zipCode"
             type="text"
             autocomplete="postal-code"
-            icon="i-lucide-mailbox"
-          />
+            leading-icon="i-lucide-mailbox"
+            class="w-full"
+            :ui="{
+              trailing: 'pe-1',
+            }"
+          >
+            <template #trailing>
+              <UButton
+                v-if="contact.zipCode?.trim()"
+                color="neutral"
+                variant="ghost"
+                icon="i-lucide-x"
+                size="xs"
+                :aria-label="$t('common.clear')"
+                @click.stop="contact.zipCode = ''"
+              />
+            </template>
+          </UInput>
         </UFormField>
-        <UFormField
-          :label="$t('common.city')"
-          :required="isRequired('city')"
-        >
-          <UInput
+        <UFormField :label="$t('common.city')" :required="isRequired('city')">
+          <UInputMenu
             v-model="contact.city"
-            type="text"
-            autocomplete="address-level2"
+            v-model:open="isCityMenuOpen"
+            v-model:search-term="cityLookupQuery"
+            :items="addressSuggestions"
             icon="i-lucide-building"
-          />
+            label-key="label"
+            class="w-full"
+            :loading="isAddressLookupLoading"
+            ignore-filter
+            :ui="{
+              trailing: 'pe-1',
+            }"
+            @update:model-value="onAddressSuggestionSelect"
+            @blur="
+              () => {
+                isCityMenuOpen = false;
+                if (!selectedAddressSuggestion || cityLookupQuery)
+                  contact.city = cityLookupQuery;
+              }
+            "
+          >
+            <template #trailing>
+              <UButton
+                v-if="contact.city"
+                color="neutral"
+                variant="ghost"
+                icon="i-lucide-x"
+                size="xs"
+                :aria-label="$t('common.clear')"
+                @click.stop="
+                  () => {
+                    contact.city = '';
+                    cityLookupQuery = '';
+                    selectedAddressSuggestion = null;
+                    addressSuggestions = [];
+                    isCityMenuOpen = false;
+                  }
+                "
+              />
+            </template>
+          </UInputMenu>
         </UFormField>
       </div>
     </UCard>
 
-    <UFormField
-      :label="$t('checkout.data.commentLabel')"
-      :required="commentRequired"
-    >
-      <UTextarea
-        v-model="comment"
-        :rows="4"
-        autoresize
-        :placeholder="$t('checkout.data.commentPlaceholder')"
+    <UCard variant="soft" class="rounded-lg">
+      <UFormField
+        :label="$t('checkout.data.commentLabel')"
         :required="commentRequired"
-        class="w-full"
-      />
-      <p
-        v-if="commentRequired"
-        class="mt-1 text-xs text-red-600 dark:text-red-400"
       >
-        {{ $t("checkout.data.commentRequiredHint") }}
-      </p>
-    </UFormField>
+        <UTextarea
+          v-model="comment"
+          :rows="4"
+          autoresize
+          :placeholder="$t('checkout.data.commentPlaceholder')"
+          :required="commentRequired"
+          class="w-full"
+        />
+        <p
+          v-if="commentRequired"
+          class="mt-1 text-xs text-red-600 dark:text-red-400"
+        >
+          {{ $t("checkout.data.commentRequiredHint") }}
+        </p>
+      </UFormField>
+    </UCard>
 
     <UCard
       v-if="attachments.length > 0"
@@ -367,9 +474,13 @@ function onAddressSuggestionSelect(suggestion) {
           :key="att.id"
           class="rounded-md border border-gray-200 dark:border-gray-700 p-2 bg-white/60 dark:bg-gray-900/40"
         >
-          <div class="flex flex-col gap-0.5 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
+          <div
+            class="flex flex-col gap-0.5 sm:flex-row sm:items-start sm:justify-between sm:gap-2"
+          >
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium leading-tight text-gray-900 dark:text-white">
+              <p
+                class="text-sm font-medium leading-tight text-gray-900 dark:text-white"
+              >
                 {{ att.title }}
               </p>
               <p class="text-[11px] text-gray-500 dark:text-gray-400">
