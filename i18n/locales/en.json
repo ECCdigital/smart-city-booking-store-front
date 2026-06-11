@@ -1,3 +1,403 @@
 {
-  "welcome": "Welcome!"
+  "welcome": "Welcome!",
+  "common": {
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "repeatPassword": "Repeat Password",
+    "newPassword": "New Password",
+    "username": "Username",
+    "email": "Email",
+    "name": "Name",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "company": "Company",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "search": "Search",
+    "home": "Home",
+    "settings": "Settings",
+    "profile": "Profile",
+    "back": "Back",
+    "loading": "Loading...",
+    "freeOfCharge": "Free of charge",
+    "optional": "optional",
+    "mandatory": "Mandatory",
+    "obligation": "Required",
+    "phone": "Phone",
+    "address": "Street and number",
+    "zipCode": "Postal code",
+    "city": "City"
+  },
+  "checkout": {
+    "noBookable": "No matching resources found",
+    "additionalObjects": "Additional Objects",
+    "mandatoryObjects": "Mandatory Objects",
+    "login_required": "Sign-in is required for this booking.",
+    "bookable_unavailable": "This object is not available for the selected time period.",
+    "unknown_error": "An error occurred during validation.",
+    "group_booking_disabled": "Recurring bookings are not allowed for this object.",
+    "group_booking_role_required": "Recurring bookings require a specific role.",
+    "group_booking_partial_failure": "At least one occurrence in the series is unavailable. Please adjust the time or recurrence settings.",
+    "payment_failed": "Payment could not be started. Please try again or choose another payment method.",
+    "payment_provider_unavailable": "The selected payment method is not available right now.",
+    "locker_unavailable": "The booking could not be completed (locker reservation). Please check the time slot or your selection.",
+    "invoice_payment_not_permitted": "Invoice payment is not enabled for your account.",
+    "capacity_exceeded": "The maximum capacity for this object has been reached.",
+    "time_conflict": "There is a time conflict with another booking for this object.",
+    "selectTimePeriodTitle": "Select a time period",
+    "selectTimePeriodHint": "Please select a time period first to see the price summary.",
+    "data": {
+      "contactSectionTitle": "Contact details",
+      "addressLookupLabel": "Find address",
+      "addressLookupPlaceholder": "Enter an address (e.g. Main Street 1, Berlin)",
+      "addressLookupHint": "Select a result to auto-fill street, postal code, and city.",
+      "commentLabel": "Comment on your booking",
+      "commentPlaceholder": "Optional: notes or requests for the provider …",
+      "commentRequiredHint": "This field is required for this booking.",
+      "documentsTitle": "Information and documents",
+      "openDocument": "Open document",
+      "attachmentConfirm": "I have read \"{title}\" and accept its contents.",
+      "requiredAttachmentsHint": "{count} attachment(s) must be confirmed.",
+      "requiredConfirmationBadge": "Confirmation required",
+      "guestTitle": "Continue as guest or sign in",
+      "guestDescription": "You can complete this booking as a guest or sign in to use your saved details.",
+      "loginRequiredTitle": "Sign-in required",
+      "loginRequiredDescription": "You must be signed in to complete this booking. Please sign in to continue.",
+      "loginAction": "Sign in now",
+      "loggedInTitle": "You are signed in",
+      "loggedInDescription": "You can sign out and continue this booking as a guest instead.",
+      "logoutGuestAction": "Sign out and continue as guest",
+      "customFieldsSectionTitle": "Additional details",
+      "customFieldSelectPlaceholder": "Please select"
+    },
+    "permissionGuard": {
+      "loggedOutTitle": "Sign-in required",
+      "loggedOutDescription": "Please sign in so we can verify whether you are allowed to book this item.",
+      "loggedInTitle": "Booking not available for this account",
+      "loggedInDescription": "The currently signed-in account does not have permission to complete this booking. You can sign in with another account instead.",
+      "loginAction": "Sign in",
+      "switchAccountAction": "Sign in with another account"
+    },
+    "attachmentTypes": {
+      "agreement": "User agreement",
+      "privacy-agreement": "Privacy policy",
+      "user-manual": "Operating instructions",
+      "security-information": "Safety information",
+      "product-information": "Product information"
+    },
+    "errors": {
+      "capacityInfo": "Available: {remaining} of {total}",
+      "unavailableHint": "Please choose a different time period or remove the object."
+    },
+    "payment": {
+      "description": "Please choose how you would like to pay.",
+      "lead": "Choose how you want to pay. Online providers collect payment during checkout; with invoice you complete the booking without paying online right away.",
+      "kindOnline": "Online payment",
+      "kindInvoice": "Invoice",
+      "fallbackOnlineDescription": "Pay during checkout using an online payment service.",
+      "fallbackInvoiceDescription": "You will receive an invoice and pay later according to the provider’s terms.",
+      "providers": {
+        "giroCockpit": {
+          "title": "GiroCockpit",
+          "description": "Secure online payment via GiroCockpit, with familiar bank and payment options in the payment flow."
+        },
+        "pmPayment": {
+          "title": "Pay online",
+          "description": "Card and other online payment methods in a secure payment window."
+        },
+        "ePayBL": {
+          "title": "ePayBL",
+          "description": "Online payment using the ePayBL service."
+        },
+        "invoice": {
+          "title": "Pay by invoice",
+          "description": "No immediate online payment: you book now and receive an invoice from the provider."
+        }
+      }
+    },
+    "coupon": {
+      "summaryLine": "Voucher ({code})",
+      "errors": {
+        "not_found": "This voucher code was not found.",
+        "expired": "This voucher has expired.",
+        "already_used": "This voucher has already been used.",
+        "invalid": "This voucher code is invalid.",
+        "generic": "The voucher could not be redeemed."
+      }
+    },
+    "review": {
+      "periodTitle": "Time period",
+      "periodMissing": "No time period selected.",
+      "priceTitle": "Price summary",
+      "priceUpdating": "Updating prices…",
+      "priceUnavailable": "No valid price for the current selection.",
+      "taxLabel": "incl. VAT",
+      "totalLabel": "Total",
+      "totalFree": "Free",
+      "paymentTitle": "Payment method",
+      "paymentMethodLabel": "Method",
+      "couponTitle": "Voucher",
+      "discountCodeTitle": "Discount code",
+      "overviewCardTitle": "Overview",
+      "couponFieldLabel": "Voucher code",
+      "couponPlaceholder": "Enter code",
+      "couponApply": "Redeem",
+      "couponRemove": "Remove",
+      "couponAppliedHint": "The voucher is applied; prices above reflect the discount.",
+      "couponActiveSummary": "Code “{code}” active · {amount}",
+      "couponRequired": "Please enter a voucher code.",
+      "couponInvalid": "This voucher code is invalid or can no longer be redeemed.",
+      "couponDiscountFixed": "Discount: {value}",
+      "couponDiscountPercent": "{value} % discount",
+      "freeBookingTitle": "Free booking eligibility",
+      "freeBookingAppliedDescription": "You can use your free booking entitlement for at least one selected item. Eligible items are shown below with a price of 0.00 €.",
+      "freeBookingPaidDescription": "You are currently booking at the regular price. Disable this option to use the free booking entitlement for eligible items.",
+      "bookWithPriceToggle": "Book at the regular price despite eligibility",
+      "stepKicker": "Step {current} of {total} — {context}",
+      "heroBefore": "One last ",
+      "heroHighlight": "look,",
+      "heroAfter": " before we get started.",
+      "heroLead": "Please review your details carefully. By confirming, you complete your booking.",
+      "sectionPeriod": "Time period",
+      "sectionContact": "Contact",
+      "sectionPayment": "Payment",
+      "dateLabel": "Date",
+      "bookingLabel": "Booking",
+      "addonsLabel": "Add-ons",
+      "fullNameLabel": "Name",
+      "lineQtyPrice": "{qty} × {price}",
+      "edit": "Edit",
+      "commitBooking": "Confirm booking",
+      "sendBookingRequest": "Send booking request",
+      "backToPayment": "Back to payment",
+      "backToData": "Back to your details",
+      "termsHint": "By completing this booking you accept our terms and conditions.",
+      "boolYes": "Yes",
+      "boolNo": "No",
+      "submitSuccessTitle": "Booking",
+      "submitSuccessDone": "Your booking has been created (reference: {id}). You will receive a confirmation by email.",
+      "submitSuccessManualApproval": "Your request has been submitted. The provider will review the booking; you will receive further information by email."
+    },
+    "manualApproval": {
+      "bannerTitle": "Manual approval required",
+      "bannerDescription": "For this bookable, the provider reviews your request before the booking is confirmed. You will receive a response by email.",
+      "submitHint": "By submitting, you send a non-binding booking request. The booking becomes binding only after the provider approves it."
+    },
+    "steps": {
+      "periodTitle": "Period & extras",
+      "dataTitle": "Your details",
+      "paymentTitle": "Payment",
+      "confirmTitle": "Summary",
+      "nextToData": "Continue to details",
+      "nextToPayment": "Continue to payment",
+      "nextToConfirm": "Continue to summary",
+      "finishBooking": "Complete booking"
+    },
+    "status": {
+      "continueLabel": "Book again",
+      "invalidLinkTitle": "Invalid link",
+      "invalidLinkBody": "This page has no booking context. Please complete checkout again or return to the home page.",
+      "pageTitle": "Booking status",
+      "pageLead": "Your booking has been created. This page shows the latest processing and payment state.",
+      "loading": "Loading status…",
+      "loadErrorTitle": "Status could not be loaded",
+      "loadErrorBody": "Please check your connection and try again.",
+      "retryAction": "Try again",
+      "apiFailedTitle": "Status unavailable",
+      "apiFailedBody": "The booking status could not be retrieved. Please try again later or contact support.",
+      "noBookingsInResponse": "No booking details were returned for this link.",
+      "referenceLabel": "Reference",
+      "paymentProviderLabel": "Payment",
+      "paymentStateLabel": "Payment status",
+      "paymentPaid": "Paid",
+      "paymentPending": "Unpaid",
+      "amountLabel": "Amount",
+      "bookingStatusError": "This booking could not be loaded.",
+      "summaryTotalLabel": "Bookings",
+      "summaryOpenInvoiceLabel": "Open online payments",
+      "summaryPaidLabel": "Paid",
+      "lastUpdatedLabel": "Last updated",
+      "waitingForFirstUpdate": "No update has been loaded yet",
+      "refreshingLabel": "Refreshing status",
+      "autoRefreshActiveTitle": "Payment status is being checked automatically",
+      "autoRefreshActiveBody": "Open bookings with online payment are refreshed automatically every 5 seconds for about {seconds} more seconds.",
+      "refreshAttemptLabel": "Refresh {count}",
+      "autoRefreshExpiredTitle": "Automatic checking finished",
+      "autoRefreshExpiredBody": "Open bookings with online payment were refreshed automatically for one minute. You can refresh the status manually at any time.",
+      "paymentConfirmedTitle": "Payment confirmed",
+      "paymentConfirmedBody": "At least one previously open booking with online payment has now been confirmed as paid.",
+      "paymentConfirmedLead": "The payment state has been updated. Your booking with online payment is now confirmed as paid.",
+      "backgroundRefreshError": "The last background refresh was not successful. The most recently loaded status is still shown.",
+      "invoicePollingHintActive": "This booking is refreshed in the background until payment is confirmed or the time window ends.",
+      "invoicePollingHintIdle": "Automatic checking is no longer active for this booking. You can refresh the status manually at any time.",
+      "actionsTitle": "Actions",
+      "manualRefreshAction": "Refresh status",
+      "singleBookingReference": "Booking reference",
+      "detail": {
+        "awaiting_approval": {
+          "title": "Request received",
+          "body": "We have received your booking request. A coordinator will review it as soon as possible. You will receive an email when there is an update."
+        },
+        "payment_expected": {
+          "title": "Payment pending",
+          "body": "Your booking has been approved. Please complete payment to finalise the booking. After successful payment you will receive a confirmation by email."
+        },
+        "paid_completed": {
+          "title": "Booking complete",
+          "body": "Your payment has been received and the booking is complete. You will receive a confirmation by email shortly."
+        },
+        "rejected": {
+          "title": "Request not accepted",
+          "body": "Unfortunately your booking request could not be accepted. If you have questions, please contact the provider."
+        },
+        "confirmed_without_payment": {
+          "title": "Booking confirmed",
+          "body": "Your booking has been confirmed. No payment is required for this booking. You will receive a confirmation by email."
+        }
+      }
+    }
+  },
+  "stepper": {
+    "stepOf": "Step {current} of {total}",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish"
+  },
+  "timePeriods": {
+    "selectDate": "Select date",
+    "previousDays": "Show earlier days",
+    "laterDays": "Show later days",
+    "jumpToDate": "Jump to date",
+    "jumpToNextFree": "Jump to next free day",
+    "selectTime": "Select time",
+    "noTimePeriods": "No times available for the selected day",
+    "selected": "Selected time",
+    "fullyBooked": "Fully booked",
+    "closedDay": "Not bookable",
+    "legendAvailable": "Available",
+    "legendFullyBooked": "Fully booked",
+    "legendClosed": "Not bookable"
+  },
+
+  "weekSelection": {
+    "subtitle": "Select a calendar week",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "available": "Available",
+    "occupied": "Occupied",
+    "past": "Past"
+  },
+
+  "monthSelection": {
+    "subtitle": "Select a month",
+    "previousYear": "Previous year",
+    "nextYear": "Next year",
+    "available": "Available",
+    "occupied": "Occupied",
+    "past": "Past",
+    "selected": "Selected month"
+  },
+
+  "status": {
+    "awaiting_approval": "Awaiting approval from the provider",
+    "payment_expected": "Payment required to complete the booking",
+    "paid_completed": "Paid and completed",
+    "rejected": "Rejected or cancelled",
+    "confirmed_without_payment": "Confirmed (no payment required)"
+  },
+
+  "booking_status": {
+    "missing_parameters": "Required information is missing.",
+    "internal_error": "A technical error occurred. Please try again later.",
+    "booking_not_found": "This booking was not found."
+  },
+
+  "inputDate": {
+    "openPicker": "Select date",
+    "clear": "Clear date",
+    "dialogTitle": "Select date",
+    "dialogDescription": "Choose the desired date."
+  },
+
+  "scheduleSelection": {
+    "availability": "Availability",
+    "weekOverview": "Week overview",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "free": "Available",
+    "occupied": "Occupied",
+    "yourSelection": "Your selection",
+    "startTimePoint": "Start time",
+    "endTimePoint": "End time",
+    "showOccupancy": "Show occupancy",
+    "hideOccupancy": "Hide occupancy",
+    "dragHint": "Click or drag on the calendar to select a time range. Alternatively, enter the times manually below.",
+    "overlapWarning": "The selected time range overlaps with already occupied times. The booking may not be possible."
+  },
+
+  "groupBooking": {
+    "toggleTitle": "Recurring booking",
+    "toggleDescription": "Create multiple bookings on a fixed schedule with a single booking request.",
+    "toggleLabel": "Enable recurring booking",
+    "fields": {
+      "firstStart": "First start",
+      "firstEnd": "First end",
+      "frequency": "Frequency",
+      "intervalWeeks": "Every … week(s)",
+      "intervalMonths": "Every … month(s)",
+      "until": "Repeat until",
+      "untilPlaceholder": "Select date",
+      "untilDialogTitle": "Series end date",
+      "untilDialogDescription": "Choose the date up to which the series should be repeated.",
+      "clearUntil": "Clear end date",
+      "weekdays": "Weekdays",
+      "weekday": "Weekday",
+      "monthlyByDay": "On day of month",
+      "monthlyByWeekday": "On weekday of month",
+      "dayOfMonth": "Day of month",
+      "ordinal": "Position in month"
+    },
+    "frequency": {
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "ordinals": {
+      "first": "First",
+      "second": "Second",
+      "third": "Third",
+      "fourth": "Fourth",
+      "last": "Last"
+    },
+    "actions": {
+      "generate": "Generate series",
+      "regenerate": "Regenerate series",
+      "clear": "Clear series",
+      "hint": "Please configure start, end and recurrence settings, then click \"Generate series\"."
+    },
+    "preview": {
+      "title": "Generated occurrences",
+      "counts": "{total} occurrences · {invalid} invalid · {validated} validated",
+      "empty": "No series generated yet. Configure the recurrence and click \"Generate series\".",
+      "stale": "Settings changed since the last generation. Please regenerate the series.",
+      "pending": "pending",
+      "valid": "valid",
+      "invalid": "invalid",
+      "remove": "Remove occurrence"
+    },
+    "review": {
+      "heading": "Recurring booking · {count} occurrences"
+    },
+    "summary": {
+      "line": "{title} – series with {count} occurrences"
+    },
+    "permission": {
+      "loginRequired": "Recurring bookings require you to be signed in.",
+      "loginCta": "Sign in now",
+      "missingRole": "Your account is not allowed to create recurring bookings for this item.",
+      "checking": "Checking permission…"
+    }
+  }
 }

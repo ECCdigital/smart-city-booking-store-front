@@ -150,6 +150,7 @@ function goToCheckout() {
     tenantId: props.bookable.tenantId,
     start: route.query.start,
     end: route.query.end,
+    url: props.bookable.checkoutUrl,
   });
 }
 </script>

@@ -10,15 +10,34 @@ export function useBookables() {
 
     return data;
   };
-  const getBookableAvailability = async (tenantID, bookableId, start, end) => {
+  const getBookableOccupancy = async (tenantID, bookableId, start, end) => {
     const api = useApiClient();
 
     const { data, error } = await api.post(
-      `/api/bookables/${tenantID}/availability/${bookableId}`,
+      `/api/bookables/${tenantID}/occupancy/${bookableId}`,
       {
         start: start,
         end: end,
       }
+    );
+
+    if (error) {
+      console.error("Error checking bookable occupancy:", error);
+      throw error;
+    }
+
+    return data;
+  };
+  const getBookableAvailability = async ({
+    tenantID,
+    bookableId,
+    start,
+    end,
+    amount = 1,
+  }) => {
+    const api = useApiClient();
+    const { data, error } = await api.get(
+      `/api/bookables/${tenantID}/availability/${bookableId}/?start=${start}&end=${end}&amount=${amount}`,
     );
 
     if (error) {
@@ -28,6 +47,7 @@ export function useBookables() {
 
     return data;
   };
+
   const getBookablePrice = async (tenantID, bookableId, start, end) => {
     const api = useApiClient();
 
@@ -47,6 +67,7 @@ export function useBookables() {
   };
   return {
     fetchBookables,
+    getBookableOccupancy,
     getBookableAvailability,
     getBookablePrice,
   };

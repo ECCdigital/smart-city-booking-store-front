@@ -57,15 +57,23 @@ export const useTenantRoute = () => {
     return clone;
   }
 
-  function isActivePath(path: string) {
-    let targetPath = tenantPath(path);
+  function normalizePath(p: string) {
+    const withoutQuery = p.split("?")[0].split("#")[0];
+    return withoutQuery.length > 1
+      ? withoutQuery.replace(/\/+$/, "")
+      : withoutQuery;
+  }
 
-    if (itemID.value) {
-      targetPath += `/${itemID.value}`;
-    } else if (bookingID.value) {
-      targetPath += `/${bookingID.value}`;
+  function isActivePath(path: string) {
+    let targetPath = normalizePath(tenantPath(path));
+    const currentPath = normalizePath(route.path);
+
+    const suffix = itemID.value || bookingID.value;
+    if (suffix && !targetPath.endsWith(`/${suffix}`)) {
+      targetPath += `/${suffix}`;
     }
-    return route.path === targetPath;
+
+    return currentPath === targetPath;
   }
 
   return {

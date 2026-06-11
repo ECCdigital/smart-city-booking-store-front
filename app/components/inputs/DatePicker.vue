@@ -10,7 +10,7 @@
       :min-date="new Date()"
       locale="de"
       month-name-format="long"
-      range
+      :range="props.range"
       inline
       auto-apply
       :enable-time-picker="false"
@@ -25,11 +25,19 @@
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 
+const props = defineProps({
+  range: {
+    type: Boolean,
+    default: true,
+  },
+});
+
 const model = defineModel();
 const mode = useColorMode();
 const isDark = computed(() => mode.value === "dark");
 
 function onStartRange(startDate) {
+  if (!props.range) return;
   model.value = [startDate, null];
 }
 
