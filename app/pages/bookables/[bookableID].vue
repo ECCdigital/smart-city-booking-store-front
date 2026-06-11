@@ -20,7 +20,9 @@ const bookableID = computed(() => route.params.bookableID);
 
 const { loadBundle } = useCatalogBundle();
 
-const bookable = computed(() => bookableStore.getBookableById(bookableID.value));
+const bookable = computed(() =>
+  bookableStore.getBookableById(bookableID.value),
+);
 
 if (!bookable.value) {
   await loadBundle({

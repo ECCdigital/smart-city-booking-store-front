@@ -36,11 +36,7 @@ const props = defineProps({
 
 const hasCoordinates = computed(() => {
   const points = props.item.location?.coordinates?.points;
-  return (
-    Array.isArray(points) &&
-    points[0] != null &&
-    points[1] != null
-  );
+  return Array.isArray(points) && points[0] != null && points[1] != null;
 });
 const hasAddressString = computed(() => {
   return !!props.item.location?.display_address;
