@@ -30,9 +30,10 @@
     "completeAddress": "Adresse",
     "address": "Straße und Hausnummer",
     "zipCode": "PLZ",
-    "city": "Stadt"
+    "city": "Stadt",
+    "clear": "Löschen",
     "backToLogin": "Zurück zur Anmeldung",
-    "retry": "Erneut versuchen",
+    "retry": "Erneut versuchen"
   },
   "navigation": {
     "home": "Startseite",

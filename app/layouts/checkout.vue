@@ -1,8 +1,13 @@
 <script setup lang="ts">
 const checkoutNavTab = useState("checkoutNavTab", () => "");
 
+const mounted = ref(false);
+onMounted(() => {
+  mounted.value = true;
+});
+
 const checkoutTabs = computed(() => {
-  if (!checkoutNavTab.value) return [];
+  if (!mounted.value || !checkoutNavTab.value) return [];
   return [
     {
       label: checkoutNavTab.value.label,

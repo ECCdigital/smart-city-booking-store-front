@@ -166,7 +166,6 @@ async function searchAddressSuggestions(query) {
 }
 
 watch([addressLookupQuery, cityLookupQuery], ([addressQuery, cityQuery]) => {
-  console.log("*B*", addressQuery, cityQuery);
   clearTimeout(addressLookupDebounce);
   clearTimeout(cityLookupDebounce);
 
@@ -206,7 +205,6 @@ function resolveAddressSuggestion(suggestion) {
 }
 
 function onAddressSuggestionSelect(suggestion) {
-  console.log("*A*", suggestion); //nur aufgerufen wenn ein Vorschlag ausgewählt wird, nicht bei manueller Eingabe oder Blur
   const resolved = resolveAddressSuggestion(suggestion);
 
   if (!resolved) return;
