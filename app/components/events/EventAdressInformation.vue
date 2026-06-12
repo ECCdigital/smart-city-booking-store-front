@@ -53,10 +53,7 @@ const hasLocationParam = computed(() => {
 const location = computed(() => {
   if (typeof props.event.location === "string") {
     return props.event.location;
-  } else if (
-    props.event.location &&
-    typeof props.event.location === "object"
-  ) {
+  } else if (props.event.location && typeof props.event.location === "object") {
     return props.event.location.display_address || "";
   } else {
     return "";
@@ -77,7 +74,7 @@ const copyAddressToClipboard = async () => {
     const notification = useNotification();
     notification.success(
       "Die Adresse wurde in Ihre Zwischenablage kopiert.",
-      "Adresse erfolgreich kopiert!"
+      "Adresse erfolgreich kopiert!",
     );
   }
 };

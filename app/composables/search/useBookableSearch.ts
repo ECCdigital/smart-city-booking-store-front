@@ -454,12 +454,9 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     filterResetKey.value++;
   }
 
-  async function enrichItems(
-    itemsToSearch: () => any[],
-    searchCriteria: object,
-  ) {
+  async function enrichItems(itemsToSearch: () => any[]) {
     //add status to items based on bookable and event criteria
-    let result: object[] = toValue(itemsToSearch).map((item: any) => {
+    const result: object[] = toValue(itemsToSearch).map((item: any) => {
       if (isEvent) {
         return { item, isBookable: true, matchStatus: MatchStatus.MATCH };
       }
@@ -472,48 +469,6 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       return { item, isBookable: false, matchStatus: MatchStatus.MATCH };
     });
 
-    //add location coordinates to events without coordinates for better location search and distance calculation
-    if (isEvent && typeof searchCriteria.location === "object") {
-      result = await Promise.all(
-        result.map(async (item) => {
-          const location = item.item.location;
-
-          const hasCoordinates =
-            location &&
-            location.coordinates &&
-            location.coordinates.points &&
-            location.coordinates.points[0] != null &&
-            location.coordinates.points[1] != null;
-
-          if (hasCoordinates) {
-            return item;
-          }
-
-          const addressString = location?.display_address || "";
-
-          let addressCoordinates: number[] = [];
-          if (addressString) {
-            addressCoordinates = await searchAddress(addressString);
-          }
-
-          return {
-            ...item,
-            item: {
-              ...item.item,
-              location: {
-                ...location,
-                display_address: addressString,
-                coordinates: addressCoordinates
-                  ? {
-                      points: addressCoordinates,
-                    }
-                  : location?.coordinates || null,
-              },
-            },
-          };
-        }),
-      );
-    }
     return result;
   }
 

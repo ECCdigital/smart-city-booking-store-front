@@ -6,10 +6,10 @@
       <BackButton />
       <UDropdownMenu :items="dropdownItems">
         <UButton
-            icon="i-lucide-ellipsis-vertical"
-            size="lg"
-            aria-label="Aktionen"
-            :style="{ color: contrastToPrimary, cursor: 'pointer' }"
+          icon="i-lucide-ellipsis-vertical"
+          size="lg"
+          aria-label="Aktionen"
+          :style="{ color: contrastToPrimary, cursor: 'pointer' }"
         />
       </UDropdownMenu>
     </div>
@@ -45,8 +45,8 @@ const notification = useNotification();
 async function share() {
   await navigator.clipboard.writeText(window.location.href);
   notification.success(
-      "Der Link zur aktuellen Suche wurde in Ihre Zwischenablage kopiert.",
-      "Link erfolgreich kopiert!",
+    "Der Link zur aktuellen Suche wurde in Ihre Zwischenablage kopiert.",
+    "Link erfolgreich kopiert!",
   );
 }
 

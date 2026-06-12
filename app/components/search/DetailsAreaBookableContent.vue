@@ -10,7 +10,7 @@
       </div>
       <div class="grid content-center">
         <UButton
-            v-if="item.isBookable"
+          v-if="item.isBookable"
           label="Jetzt buchen"
           icon="i-lucide-shopping-cart"
           class="justify-center px-5 mt-5 md:my-0"
@@ -18,13 +18,13 @@
           @click="goToCheckout()"
         />
         <UButton
-          v-else-if="item.relatedBookableIds.length >0"
+          v-else-if="item.relatedBookableIds.length > 0"
           label="Buchungsoptionen ansehen"
           icon="i-lucide-list"
           class="justify-center px-5 mt-5 md:my-0"
           :style="{ color: contrastToPrimary, cursor: 'pointer' }"
           @click="goToRelatedItems()"
-          />
+        />
       </div>
     </div>
 
@@ -124,9 +124,7 @@
           <div class="font-bold mr-1 content-center line-clamp-2">
             {{ item?.title }}
           </div>
-          <div
-            class="flex justify-end mt-3 md:mt-0 ml-2"
-          >
+          <div class="flex justify-end mt-3 md:mt-0 ml-2">
             <BookablePriceDisplay
               v-if="items.length > 0"
               :bookable="items[0].item"
@@ -135,18 +133,18 @@
             />
             <div class="content-center">
               <UButton
-                  v-if="isBookable"
-                  label="Buchen"
-                  class="justify-center px-5"
-                  :style="{ color: contrastToPrimary }"
-                  @click="goToCheckout()"
+                v-if="isBookable"
+                label="Buchen"
+                class="justify-center px-5"
+                :style="{ color: contrastToPrimary }"
+                @click="goToCheckout()"
               />
               <UButton
-                  v-else
-                  label="Nicht verfügbar"
-                  variant="soft"
-                  class="justify-center px-5"
-                  :style="{ color: contrastToPrimary }"
+                v-else
+                label="Nicht verfügbar"
+                variant="soft"
+                class="justify-center px-5"
+                :style="{ color: contrastToPrimary }"
               />
             </div>
           </div>
@@ -165,7 +163,10 @@
         </div>
 
         <!-- Related Bookables -->
-        <div v-if="item.relatedBookables && item.relatedBookables.length" id="relatedBookables">
+        <div
+          v-if="item.relatedBookables && item.relatedBookables.length"
+          id="relatedBookables"
+        >
           <h3 class="text-xl font-bold">Könnte Sie auch interessieren:</h3>
         </div>
         <BookableRelatedItems :related-bookables="item.relatedBookables" />
@@ -189,7 +190,9 @@
           v-if="moreInfoFields.length"
           class="bg-gray-200 dark:bg-gray-700 rounded-md p-3"
         >
-          <h3 class="font-bold mr-1 content-center line-clamp-2">Weitere Informationen</h3>
+          <h3 class="font-bold mr-1 content-center line-clamp-2">
+            Weitere Informationen
+          </h3>
           <dl class="space-y-2">
             <div
               v-for="field in moreInfoFields"
@@ -284,7 +287,9 @@ const detailFields = computed(() => {
     if (field.inputType === "boolean") {
       return field.value === true || field.value === "true";
     }
-    return field.value !== null && field.value !== undefined && field.value !== "";
+    return (
+      field.value !== null && field.value !== undefined && field.value !== ""
+    );
   });
 });
 
@@ -295,10 +300,14 @@ function fieldsByPosition(position) {
 }
 
 const badgeFields = computed(() => fieldsByPosition("badge"));
-const belowDescriptionFields = computed(() => fieldsByPosition("belowDescription"));
+const belowDescriptionFields = computed(() =>
+  fieldsByPosition("belowDescription"),
+);
 const moreInfoFields = computed(() => fieldsByPosition("moreInfo"));
 
-const badgeFieldLabels = computed(() => badgeFields.value.map(customFieldBadgeLabel));
+const badgeFieldLabels = computed(() =>
+  badgeFields.value.map(customFieldBadgeLabel),
+);
 
 function customFieldValueText(field) {
   if (field.inputType === "select") {
