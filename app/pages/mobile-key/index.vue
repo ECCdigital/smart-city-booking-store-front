@@ -253,7 +253,13 @@ import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 
 definePageMeta({
   requiresAuth: true,
-  layout: "default",
+  layout: "panel",
+  navigation: "user",
+  hero: {
+    height: "sm",
+    showOnMobile: true,
+    staticSubtitle: "Mobile Key",
+  },
 });
 
 const {
@@ -368,7 +374,7 @@ const runAction = async (action, booking, accessPoint) => {
         booking.tenantId,
         accessPoint.id,
         booking.id,
-        openProcessIds.value[processKey(booking, accessPoint)]
+        openProcessIds.value[processKey(booking, accessPoint)],
       );
     }
 
