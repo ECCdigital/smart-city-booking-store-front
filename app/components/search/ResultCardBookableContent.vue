@@ -12,7 +12,7 @@
       >
         {{ bookable.title }}
       </p>
-      <p>{{ tenantName }}</p>
+      <p>{{ getTenantName(bookable.tenantId) }}</p>
 
       <!-- Adresse und Entfernung -->
       <div class="w-full" :class="mapDetailMode ? '' : 'my-5'">
@@ -88,12 +88,10 @@ const props = defineProps({
   },
 });
 
+const { getTenantName } = useTenant();
+
 const hasLongTitle = computed(() => {
   return (props.bookable?.title?.length ?? 0) > 60;
-});
-
-const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.bookable.tenantId).name;
 });
 </script>
 

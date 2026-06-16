@@ -1,3 +1,5 @@
+import {useTenantStore} from "~~/stores/tenant.js";
+
 export function useTenant() {
   const route = useRoute();
 
@@ -5,5 +7,16 @@ export function useTenant() {
 
   const isTenantContext = computed(() => !!tenantID.value);
 
-  return { tenantID, isTenantContext };
+  function getTenantName(tenantId: string) {
+      const tenantsStore = useTenantStore();
+
+          const tenant = tenantsStore.getTenantById(tenantId);
+          if (tenant) {
+              return tenant.name;
+          }
+          return "Unbekannt";
+
+  }
+
+  return { tenantID, isTenantContext, getTenantName };
 }

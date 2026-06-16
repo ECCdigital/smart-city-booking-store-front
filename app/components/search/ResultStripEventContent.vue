@@ -8,7 +8,7 @@
       >
         {{ event.information.name }}
       </p>
-      <p>{{ tenantName }}</p>
+      <p>{{ getTenantName(event.tenantId) }}</p>
 
       <!-- Zeitpunkt, Adresse und Entfernung -->
       <div class="w-full my-5">
@@ -100,6 +100,7 @@ const props = defineProps({
 });
 
 const { goToDetails } = useRedirection();
+const { getTenantName } = useTenant();
 
 const hasLongTitle = computed(() => {
   return (props.event?.information.name?.length ?? 0) > 60;
@@ -108,10 +109,6 @@ const hasLongTitle = computed(() => {
 const { sanitizeHtml } = useSanitizeHtml();
 const htmlTeaserText = computed(() => {
   return sanitizeHtml(props.event.information.teaserText || "");
-});
-
-const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.event.tenantId).name;
 });
 
 const { contrastToPrimary } = useContrastColor();

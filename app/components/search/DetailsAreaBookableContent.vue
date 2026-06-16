@@ -4,7 +4,7 @@
     <div class="md:flex justify-between">
       <div>
         <p class="text-sm font-bold text-primary">
-          {{ tenantName }}
+          {{ getTenantName(item.tenantId) }}
         </p>
         <h2 class="text-2xl font-bold">{{ item?.title }}</h2>
       </div>
@@ -224,6 +224,8 @@ const {
   resetResults,
 } = useBookableSearch({ isEvent: false, sourceItems: [props.item] });
 
+const { getTenantName } = useTenant();
+
 const { sanitizeHtml } = useSanitizeHtml();
 const htmlDescription = computed(() => {
   return sanitizeHtml(props.item.description || "");
@@ -276,10 +278,6 @@ function customFieldBadgeLabel(field) {
 const timePeriod = ref({
   start: query.start,
   end: query.end,
-});
-
-const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.item.tenantId).name;
 });
 
 const isBookable = computed(() => {
