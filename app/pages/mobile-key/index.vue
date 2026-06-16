@@ -1,250 +1,135 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold">MobileKey</h1>
-      <p class="mt-2 text-neutral-600 dark:text-neutral-300">
-        Testbereich für Buchungen mit Schließberechtigungen und Access-Point
-        Interaktionen.
-      </p>
+  <div class="w-full">
+    <div class="md:flex justify-between items-center w-full mb-4">
+      <PageHeader
+        title="Ihre Schlüssel"
+        description="Öffnen und schließen Sie Türen im Zeitraum Ihrer Buchung."
+        class="mb-3 md:mb-0"
+      />
+      <!-- Suchleiste für Schlüssel??? -->
     </div>
 
-    <UCard class="mb-6">
-      <template #header>
-        <div class="flex items-center justify-between gap-4">
-          <div>
-            <h2 class="text-xl font-semibold">Buchungen laden</h2>
-            <p class="text-sm text-neutral-500">
-              Lädt tenant-übergreifend Buchungen mit Schließberechtigung.
-            </p>
-          </div>
-          <UButton
-            :loading="loadingKey === 'bookings'"
-            icon="i-lucide-refresh-cw"
-            label="Buchungen laden"
-            @click="loadBookings"
+    <!-- Help Information -->
+    <div
+      class="rounded-lg items-center border border-primary bg-primary/10 p-3"
+    >
+      <div class="flex gap-3 rounded-lg items-center">
+        <div class="">
+          <UIcon
+            name="i-lucide-circle-question-mark"
+            size="28"
+            class="text-primary"
           />
         </div>
-      </template>
 
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <UFormField label="Filter">
-          <USelect v-model="bookingFilter" :items="filterOptions" />
-        </UFormField>
-
-        <UCheckbox
-          v-model="includeAccessPoints"
-          label="Access-Points einschließen"
-        />
-        <UCheckbox v-model="includeLockers" label="Locker einschließen" />
-        <UCheckbox
-          v-model="includeBuffer"
-          label="Access-Buffer berücksichtigen"
-        />
-      </div>
-    </UCard>
-
-    <UCard class="mb-6">
-      <template #header>
         <div>
-          <h2 class="text-xl font-semibold">Buchungen für Access-Point</h2>
-          <p class="text-sm text-neutral-500">
-            Zeigt die eigenen Buchungen, die einen bestimmten Access-Point
-            berechtigen (Workflow B).
+          <h3 class="text-md font-semibold">
+            Schlüssel nicht sichtbar oder Tür-Problem?
+          </h3>
+          <p class="text-sm my-1">
+            Es werden nur Türen angezeigt, für die Sie aktuell eine Buchung mit
+            Schließberechtigung haben. Fehlt ein Schlüssel oder lässt sich eine
+            Tür nicht öffnen, hilft Ihnen unser Support weiter.
           </p>
+
+          <button
+            type="button"
+            class="mt-1 inline-flex items-center gap-2 text-sm font-medium text-primary underline"
+            @click="showHelpContact = !showHelpContact"
+          >
+            Hilfe &amp; Kontakt anzeigen
+          </button>
         </div>
-      </template>
+      </div>
 
-      <form
-        class="flex flex-col gap-3 sm:flex-row sm:items-end"
-        @submit.prevent="loadBookingsForAccessPoint"
-      >
-        <UFormField label="Access-Point ID" class="flex-1">
-          <UInput
-            v-model="accessPointIdInput"
-            placeholder="z.B. ap-1"
-            class="w-full"
-          />
-        </UFormField>
-        <UButton
-          type="submit"
-          icon="i-lucide-search"
-          label="Buchungen suchen"
-          :loading="loadingKey === 'ap-bookings'"
-          :disabled="!accessPointIdInput.trim()"
-        />
-      </form>
-    </UCard>
+      <div v-if="showHelpContact" class="mt-3 mx-10 space-y-2 text-sm">
+        <USeparator color="primary" type="solid" size="md" class="w-full" />
 
-    <UAlert
-      v-if="errorMessage"
-      class="mb-6"
-      color="error"
-      icon="i-lucide-triangle-alert"
-      title="API-Fehler"
-      :description="errorMessage"
-    />
+        <!-- toDo - dynamisch auslesen?!?!? -->
+        <div class="flex items-center gap-2">
+          <UIcon name="i-lucide-phone" size="16" class="text-primary" />
+          <div>
+            <span> Telefon-Support: </span>
+            <br class="sm:hidden" >
+            <a href="tel:04315550123" class="text-primary font-bold"
+              >0431 555 0123</a
+            >
+            <span>(Mo-So, 7-22 Uhr) </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <UIcon name="i-lucide-mail" size="16" class="text-primary" />
+          <div>
+            <span> E-Mail: </span>
+            <br class="sm:hidden" >
+            <a
+              href="mailto: support@ecc-digital.de"
+              class="text-primary font-bold"
+              >support@ecc-digital.de</a
+            >
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <UIcon name="i-lucide-wrench" size="16" class="text-primary" />
+          <div>
+            <span> Hausmeister vor Ort: </span>
+            <br class="sm:hidden" >
+            <span>Klingel am Haupteingang</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <UCard v-if="bookings.length === 0" class="text-center">
-      <UIcon
-        name="i-lucide-key-round"
-        class="mx-auto mb-3 size-10 text-neutral-400"
+    <!-- View Switch -->
+    <div class="flex my-5 gap-2">
+      <UButton
+        icon="i-lucide-list"
+        :variant="viewMode === 'list' ? 'subtle' : 'ghost'"
+        label="Liste"
+        class="p-3 cursor-pointer"
+        @click="() => (viewMode = 'list')"
       />
-      <h2 class="text-lg font-semibold">Noch keine Buchungen geladen</h2>
-      <p class="mt-1 text-sm text-neutral-500">
-        Nutze den Button oben, um testweise die Access-Bookings API aufzurufen.
-      </p>
-    </UCard>
+      <UButton
+        icon="i-lucide-map"
+        :variant="viewMode === 'map' ? 'subtle' : 'ghost'"
+        label="Raumkarte"
+        class="p-3 cursor-pointer"
+        @click="() => (viewMode = 'map')"
+      />
+    </div>
 
-    <div class="space-y-4">
+    <div v-if="viewMode === 'list'" class="space-y-3">
       <UCard v-for="booking in bookings" :key="booking.id">
         <template #header>
           <div
-            class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between"
+            class="flex gap-3 items-center"
           >
+            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+              <UIcon name="i-lucide-key" class="w-5 h-5 text-primary font-bold" />
+            </div>
+
             <div>
-              <h2 class="text-lg font-semibold">Buchung {{ booking.id }}</h2>
+              <h2 class="text-lg font-semibold">{{booking.leadBookable?.title || 'Unbekanntes Buchungsobjekt'}}</h2>
               <p class="text-sm text-neutral-500">
-                Tenant: {{ booking.tenantId }} · Status:
+                #{{booking.id}}
+                &middot;
+                Tenant: {{ getTenantName(booking.tenantId) }}
+                <!--
+                Status:
                 {{ booking.state || bookingStateLabel(booking) }}
-              </p>
-              <p class="text-sm text-neutral-500">
-                {{ formatDate(booking.timeBegin) }} bis
-                {{ formatDate(booking.timeEnd) }}
+                -->
               </p>
             </div>
-            <div class="flex flex-wrap gap-2">
-              <UButton
-                color="neutral"
-                variant="soft"
-                :loading="loadingKey === `points:${booking.id}`"
-                label="Access-Points laden"
-                @click="loadAccessPoints(booking)"
-              />
-              <UButton
-                color="neutral"
-                variant="outline"
-                label="JSON anzeigen"
-                @click="toggleJson(`booking:${booking.id}`)"
-              />
-            </div>
+            <!-- toDo - Badge für aktuellen Status -->
           </div>
         </template>
-
-        <pre
-          v-if="visibleJson[`booking:${booking.id}`]"
-          class="mb-4 overflow-auto rounded-md bg-neutral-100 p-3 text-xs dark:bg-neutral-900"
-          >{{ pretty(booking) }}</pre
-        >
-
-        <div
-          v-if="booking.accessPointIds?.length"
-          class="mb-4 text-sm text-neutral-500"
-        >
-          Access-Point IDs: {{ booking.accessPointIds.join(", ") }}
-        </div>
-
-        <div
-          v-if="accessPointsForBooking(booking).length"
-          class="grid gap-4 md:grid-cols-2"
-        >
-          <UCard
-            v-for="accessPoint in accessPointsForBooking(booking)"
-            :key="accessPoint.id"
-            variant="subtle"
-          >
-            <template #header>
-              <div class="flex items-start justify-between gap-4">
-                <div>
-                  <h3 class="font-semibold">
-                    {{ accessPoint.label || accessPoint.id }}
-                  </h3>
-                  <p class="text-sm text-neutral-500">
-                    {{ accessPoint.type }} · {{ accessPoint.provider }} ·
-                    {{ accessPoint.mode || "kein Modus" }}
-                  </p>
-                  <p class="text-xs text-neutral-500">
-                    Bedienbar: {{ formatDate(accessPoint.accessFrom) }} bis
-                    {{ formatDate(accessPoint.accessTo) }}
-                  </p>
-                </div>
-                <UBadge
-                  :color="canOperate(accessPoint) ? 'success' : 'neutral'"
-                  variant="soft"
-                >
-                  {{ canOperate(accessPoint) ? "bedienbar" : "gesperrt" }}
-                </UBadge>
-              </div>
-            </template>
-
-            <div class="flex flex-wrap gap-2">
-              <UButton
-                label="Open"
-                :disabled="!canOperate(accessPoint)"
-                :loading="
-                  loadingKey === actionKey('open', booking, accessPoint)
-                "
-                @click="runAction('open', booking, accessPoint)"
-              />
-              <UButton
-                label="Unlatch"
-                color="neutral"
-                variant="soft"
-                :disabled="!canOperate(accessPoint)"
-                :loading="
-                  loadingKey === actionKey('unlatch', booking, accessPoint)
-                "
-                @click="runAction('unlatch', booking, accessPoint)"
-              />
-              <UButton
-                label="Close"
-                color="neutral"
-                variant="soft"
-                :disabled="!canOperate(accessPoint)"
-                :loading="
-                  loadingKey === actionKey('close', booking, accessPoint)
-                "
-                @click="runAction('close', booking, accessPoint)"
-              />
-              <UButton
-                label="Status"
-                color="neutral"
-                variant="outline"
-                :loading="
-                  loadingKey === actionKey('status', booking, accessPoint)
-                "
-                @click="runAction('status', booking, accessPoint)"
-              />
-              <UButton
-                label="Open-Status pollen"
-                color="neutral"
-                variant="outline"
-                :disabled="!openProcessIds[processKey(booking, accessPoint)]"
-                :loading="
-                  loadingKey === actionKey('poll', booking, accessPoint)
-                "
-                @click="runAction('poll', booking, accessPoint)"
-              />
-            </div>
-
-            <pre
-              v-if="responses[processKey(booking, accessPoint)]"
-              class="mt-4 overflow-auto rounded-md bg-neutral-100 p-3 text-xs dark:bg-neutral-900"
-              >{{ pretty(responses[processKey(booking, accessPoint)]) }}</pre
-            >
-          </UCard>
+        <div class="flex">
         </div>
       </UCard>
     </div>
-
-    <UCard v-if="lastResponse" class="mt-6">
-      <template #header>
-        <h2 class="text-lg font-semibold">Letzte API-Antwort</h2>
-      </template>
-      <pre
-        class="overflow-auto rounded-md bg-neutral-100 p-3 text-xs dark:bg-neutral-900"
-        >{{ pretty(lastResponse) }}</pre
-      >
-    </UCard>
+    <div v-if="viewMode === 'map'">
+      <USkeleton class="h-64 w-full rounded-lg" />
+    </div>
   </div>
 </template>
 
@@ -272,6 +157,10 @@ const {
   getStatus,
   pollOpenStatus,
 } = useAccessPoints();
+const { getTenantName } = useTenant();
+
+const showHelpContact = ref(false);
+const viewMode = ref("list");
 
 const filterOptions = [
   { label: "Aktive", value: "active" },
@@ -317,6 +206,10 @@ const loadBookings = async () => {
     }
   });
 };
+
+onMounted(() => {
+  loadBookings();
+});
 
 const loadBookingsForAccessPoint = async () => {
   const accessPointId = accessPointIdInput.value.trim();
