@@ -45,26 +45,88 @@
     <div v-if="viewMode === 'list'" class="space-y-3">
       <UCard v-for="booking in bookings" :key="booking.id">
         <template #header>
-          <div
-            class="flex gap-3 items-center"
-          >
-            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-              <UIcon name="i-lucide-key" class="w-5 h-5 text-primary font-bold" />
+          <!-- Status -->
+          <div class="flex justify-end">
+            <div
+              class="flex px-3 py-1 rounded-full text-xs font-medium w-max"
+              :class="bookingStatus(booking).color"
+            >
+              <UIcon
+                :name="bookingStatus(booking).icon"
+                class="w-4 h-4 mr-1 mt-0.5"
+              />
+              {{ bookingStatus(booking).label }}
+            </div>
+          </div>
+          <!-- Title and Tenant -->
+          <div class="flex gap-3 items-center">
+            <div
+              class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10"
+            >
+              <UIcon
+                name="i-lucide-key"
+                class="w-5 h-5 text-primary font-bold"
+              />
             </div>
 
-            <div>
-              <h2 class="text-lg font-semibold">{{booking.leadBookable?.title || 'Unbekanntes Buchungsobjekt'}}</h2>
+            <div class="basis-6/7">
+              <h2
+                class="font-semibold line-clamp-2"
+                :class="
+                  booking.leadBookable?.title.length > 40 ? '' : 'text-lg'
+                "
+              >
+                {{
+                  booking.leadBookable?.title || "Unbekanntes Buchungsobjekt"
+                }}
+              </h2>
               <p class="text-sm text-neutral-500">
-                #{{booking.id}}
-                &middot;
-                Tenant: {{ getTenantName(booking.tenantId) }}
-                <!--
-                Status:
-                {{ booking.state || bookingStateLabel(booking) }}
-                -->
+                #{{ booking.id }} &middot; Tenant:
+                {{ getTenantName(booking.tenantId) }}
               </p>
             </div>
-            <!-- toDo - Badge für aktuellen Status -->
+          </div>
+
+          <!-- Time and Address -->
+          <div class="mt-5 flex flex-col gap-3">
+            <div class="flex flex-col sm:flex-row gap-3">
+              <div class="basis-full sm:basis-1/2 flex items-center">
+                <UIcon
+                  name="i-lucide-calendar"
+                  class="basis-1/10 sm:basis-auto w-4 h-4 m-0.5 mr-2"
+                />
+                <p class="text-sm text-neutral-500">
+                  {{ formatDate(booking.timeBegin) }} bis
+                  {{ formatDate(booking.timeEnd) }}
+                </p>
+              </div>
+              <div
+                class="basis-full sm:basis-1/2 flex items-center order-2 md:order-1"
+              >
+                <UIcon
+                  name="i-lucide-door-closed"
+                  class="basis-1/10 sm:basis-auto w-4 h-4 m-0.5 mr-2"
+                />
+                <p class="text-sm text-neutral-500">
+                  {{ booking.accessPoints.length }}
+                  {{ booking.accessPoints.length === 1 ? "Tür" : "Türen" }}
+                </p>
+              </div>
+            </div>
+            <div>
+              <div class="w-full flex items-center order-1 md:order-2">
+                <UIcon
+                  name="i-lucide-map-pin-house"
+                  class="basis-1/10 sm:basis-auto w-4 h-4 m-0.5 mr-2"
+                />
+                <p class="text-sm text-neutral-500">
+                  {{
+                    booking.leadBookable.location.display_address ||
+                    "Keine Adresse angegeben"
+                  }}
+                </p>
+              </div>
+            </div>
           </div>
         </template>
         <div class="flex">
@@ -124,6 +186,34 @@ const includeLockers = ref(true);
 const includeBuffer = ref(true);
 
 const bookings = ref([]);
+
+
+const bookingStatus = (booking) => {
+  const now = Date.now();
+
+  if (booking.timeBegin && now < booking.timeBegin) {
+    return {
+      label: "Kommend",
+      color: "bg-yellow-100 text-yellow-800",
+      icon: "i-lucide-clock",
+    };
+  }
+
+  if (booking.timeEnd && now > booking.timeEnd) {
+    return {
+      label: "Vergangen",
+      color: "bg-gray-100 text-gray-800",
+      icon: "i-lucide-clock",
+    };
+  }
+
+  return {
+    label: "Aktiv",
+    color: "bg-green-100 text-green-800",
+    icon: "i-lucide-check",
+  };
+};
+
 const accessPointsByBooking = ref({});
 const visibleJson = ref({});
 const responses = ref({});
@@ -144,7 +234,21 @@ const loadBookings = async () => {
     });
 
     lastResponse.value = response;
-    bookings.value = responsePayload(response) || [];
+
+    bookings.value = (responsePayload(response) || []).sort((a, b) => {
+      const now = Date.now();
+
+      const statusRank = (booking) => {
+        if (booking.timeBegin && now < booking.timeBegin) return 1; // kommend
+        if (booking.timeEnd && now > booking.timeEnd) return 2; // vergangen
+        return 0; // aktiv
+      };
+
+      const rankDiff = statusRank(a) - statusRank(b);
+      if (rankDiff !== 0) return rankDiff;
+
+      return (b.timeBegin ?? 0) - (a.timeBegin ?? 0);
+    });
 
     if (includeAccessPoints.value) {
       for (const booking of bookings.value) {
@@ -173,21 +277,7 @@ const loadBookingsForAccessPoint = async () => {
     });
 
     lastResponse.value = response;
-
-    bookings.value = (responsePayload(response) || []).sort((a, b) => {
-      const now = Date.now();
-
-      const statusRank = (booking) => {
-        if (booking.timeBegin && now < booking.timeBegin) return 1; // kommend
-        if (booking.timeEnd && now > booking.timeEnd) return 2; // vergangen
-        return 0; // aktiv
-      };
-
-      const rankDiff = statusRank(a) - statusRank(b);
-      if (rankDiff !== 0) return rankDiff;
-
-      return (b.timeBegin ?? 0) - (a.timeBegin ?? 0);
-    });
+    bookings.value = responsePayload(response) || [];
 
     if (includeAccessPoints.value) {
       for (const booking of bookings.value) {
