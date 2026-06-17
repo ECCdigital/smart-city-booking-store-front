@@ -2249,6 +2249,11 @@ function onReviewEdit(section) {
       </div>
       <!-- RIGHT: Checkout Flow -->
       <main class="flex-3 min-w-0 bg-white dark:bg-gray-900 p-6 md:p-8 lg:p-10">
+        <CheckoutBookingNotes
+          :bookables="bookablesInCheckout"
+          class="mb-6"
+        />
+
         <UAlert
           v-if="requiresManualApproval"
           class="mb-6"

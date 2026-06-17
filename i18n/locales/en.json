@@ -181,6 +181,9 @@
       "submitSuccessDone": "Your booking has been created (reference: {id}). You will receive a confirmation by email.",
       "submitSuccessManualApproval": "Your request has been submitted. The provider will review the booking; you will receive further information by email."
     },
+    "bookingNotes": {
+      "sectionTitle": "Booking information"
+    },
     "manualApproval": {
       "bannerTitle": "Manual approval required",
       "bannerDescription": "For this bookable, the provider reviews your request before the booking is confirmed. You will receive a response by email.",

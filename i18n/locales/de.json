@@ -552,6 +552,9 @@
       "submitSuccessDone": "Ihre Buchung wurde angelegt (Referenz: {id}). Sie erhalten eine Bestätigung per E-Mail.",
       "submitSuccessManualApproval": "Ihre Anfrage wurde übermittelt. Der Anbieter prüft die Buchung; Sie erhalten weitere Informationen per E-Mail."
     },
+    "bookingNotes": {
+      "sectionTitle": "Hinweise zur Buchung"
+    },
     "manualApproval": {
       "bannerTitle": "Manuelle Freigabe erforderlich",
       "bannerDescription": "Für dieses Buchungsobjekt prüft der Anbieter Ihre Anfrage, bevor die Buchung bestätigt wird. Sie erhalten eine Rückmeldung per E-Mail.",

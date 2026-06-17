@@ -28,7 +28,9 @@ onMounted(async () => {
 const handleConfirm = async () => {
   loading.value = true;
   try {
-    await $fetch("/api/auth/sso/confirm", {
+    const redirectTarget = pendingRedirect.value || "/";
+
+    const response = await $fetch("/api/auth/sso/confirm", {
       method: "POST",
     });
 
@@ -45,12 +47,11 @@ const handleConfirm = async () => {
       t("notifications.loginSuccess.title")
     );
 
-    const redirect = pendingRedirect.value || "/";
+    const redirect = response?.data?.redirect || redirectTarget || "/";
     pendingRedirect.value = null;
 
     await navigateTo(redirect);
   } catch (err) {
-    console.error("SSO confirm error:", err);
     notification.error(
       t("notifications.loginError.message"),
       t("notifications.loginError.title")
@@ -69,6 +70,11 @@ const handleChangeUser = async () => {
 };
 
 const handleBack = () => {
+  const redirect = pendingRedirect.value;
+  if (redirect) {
+    navigateTo(`/login?redirect=${encodeURIComponent(redirect)}`);
+    return;
+  }
   navigateTo("/login");
 };
 </script>
