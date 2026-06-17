@@ -83,6 +83,9 @@
       <div class="flex items-center gap-2 my-2">
         <AccessPointLabel :access-point="accessPoint" show-mode />
 
+        <div class="flex-1" />
+        <AccessPointSideover :access-point="accessPoint"/>
+        <!-- toDo - bei Desktop-Version ein PopUp ergänzen!  -->
 
       </div>
       <USeparator
@@ -101,6 +104,7 @@
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import AccessPointLabel from "~/components/mobileKey/AccessPointLabel.vue";
+import AccessPointSideover from "~/components/mobileKey/AccessPointSideover.vue";
 
 const props = defineProps({
   bookings: {
