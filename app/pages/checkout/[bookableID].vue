@@ -17,6 +17,10 @@ import { useNotification } from "~/composables/useNotification.js";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 
+definePageMeta({
+  layout: "checkout",
+});
+
 const CONTACT_FIELD_KEYS = [
   "firstName",
   "lastName",
@@ -124,10 +128,6 @@ function checkoutCustomFieldsFromBookable(bookable) {
   if (!Array.isArray(list)) return [];
   return list.filter((f) => f?.usageOptions?.context === "checkout");
 }
-
-definePageMeta({
-  layout: "checkout",
-});
 
 const route = useRoute();
 const router = useRouter();

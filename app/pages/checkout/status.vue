@@ -1,11 +1,10 @@
 <script setup>
 import { useBookings } from "~/composables/api/useBookings.js";
+import { useCheckout } from "~/composables/api/useCheckout.js";
 import {
   effectiveBookingStatusI18nKey,
   BOOKING_STATUS_REASONS,
 } from "~/utils/bookingStatus.js";
-import { useBookableStore } from "~~/stores/bookable.js";
-import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 
 definePageMeta({
   layout: "checkout",
@@ -29,14 +28,15 @@ const bookingId = computed(() => String(route.query.bookingId || "").trim());
 const tenantId = computed(() => String(route.query.tenantId || "").trim());
 
 const { getStatus } = useBookings();
+const { fetchBookable } = useCheckout();
 
-const bookable = computed(() => {
-  const id = bookableId.value;
-  return id ? useBookableStore().getBookableById(id) : null;
-});
-const { loadBundle } = useCatalogBundle();
-if (!bookable.value) {
-  await loadBundle({ bookableID: bookableId.value });
+const bookable = ref(null);
+if (bookableId.value && tenantId.value) {
+  try {
+    bookable.value = await fetchBookable(bookableId.value, tenantId.value);
+  } catch (error) {
+    console.warn("Could not load bookable for checkout status:", error);
+  }
 }
 
 const statusResponse = ref(null);
