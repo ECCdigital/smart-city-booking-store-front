@@ -49,7 +49,7 @@ const items = [
     {
       label: "Schlüssel",
       icon: "i-lucide-key-round",
-      onSelect: () => goTo("/account/keys"),
+      onSelect: () => goTo("/mobile-key"),
     },
     {
       label: "Rechnungen",
