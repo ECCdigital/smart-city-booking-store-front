@@ -260,7 +260,13 @@
           "title": "Booking confirmed",
           "body": "Your booking has been confirmed. No payment is required for this booking. You will receive a confirmation by email."
         }
-      }
+      },
+      "thankYouTitle": "Thank you for your booking",
+      "thankYouBody": "Your booking was submitted successfully.",
+      "thankYouRequestTitle": "Thank you for your request",
+      "thankYouRequestBody": "Your booking request was submitted successfully.",
+      "closeWindowHint": "You can close this window now or return to the home page to start another booking.",
+      "invoiceMailHint": "The invoice will be sent shortly to the email address you provided."
     }
   },
   "stepper": {

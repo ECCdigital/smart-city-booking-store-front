@@ -438,6 +438,21 @@ const singleBookingRow = computed(() =>
   isSingleBookingView.value ? bookingRows.value[0] : null,
 );
 
+const isAwaitingApproval = computed(
+  () => singleBookingRow.value?.statusKey === "status.awaiting_approval",
+);
+
+const showThankYouBanner = computed(() => {
+  const row = singleBookingRow.value;
+  return row != null && !row.isRejected;
+});
+
+const showInvoiceMailHint = computed(() => {
+  const row = singleBookingRow.value;
+  if (!row) return false;
+  return row.isCommitted && row.isInvoicePayment;
+});
+
 const showPaymentDetails = computed(() => {
   const row = singleBookingRow.value;
   if (!row) return false;
@@ -550,20 +565,28 @@ async function handleManualRefresh() {
       <div class="mt-8 border-t border-gray-100 dark:border-gray-800" />
 
       <div
-        v-if="singleBookingRow && singleBookingRow.isRejected === false"
+        v-if="showThankYouBanner"
         class="mt-5 px-10 p-4 rounded-xl bg-primary/20"
       >
         <h2
           class="mt-4 mb-2 text-xl font-semibold text-gray-900 dark:text-white md:text-2xl"
         >
-          {{ $t("checkout.status.thankYouTitle") }}
+          {{
+            isAwaitingApproval
+              ? $t("checkout.status.thankYouRequestTitle")
+              : $t("checkout.status.thankYouTitle")
+          }}
         </h2>
 
         <div class="mt-1">
-          {{ $t("checkout.status.thankYouBody") }}
-          <span v-if="singleBookingRow && singleBookingRow.isInvoicePayment">{{
-            $t("checkout.status.invoiceMailHint")
-          }}</span>
+          {{
+            isAwaitingApproval
+              ? $t("checkout.status.thankYouRequestBody")
+              : $t("checkout.status.thankYouBody")
+          }}
+          <span v-if="showInvoiceMailHint">
+            {{ " " }}{{ $t("checkout.status.invoiceMailHint") }}
+          </span>
           <br >
           {{ $t("checkout.status.closeWindowHint") }}
         </div>

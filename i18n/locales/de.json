@@ -635,6 +635,8 @@
       },
       "thankYouTitle": "Vielen Dank für Ihre Buchung",
       "thankYouBody": "Ihre Buchung wurde erfolgreich übermittelt.",
+      "thankYouRequestTitle": "Vielen Dank für Ihre Anfrage",
+      "thankYouRequestBody": "Ihre Buchungsanfrage wurde erfolgreich übermittelt.",
       "closeWindowHint": "Sie können dieses Fenster nun schließen oder zur Startseite zurückkehren und weitere Buchungsprozesse beginnen.",
       "invoiceMailHint": "Die Rechnung wird in Kürze an die von Ihnen angegebene E-Mail-Adresse versendet."
     }
