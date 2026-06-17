@@ -10,75 +10,7 @@
     </div>
 
     <!-- Help Information -->
-    <div
-      class="rounded-lg items-center border border-primary bg-primary/10 p-3"
-    >
-      <div class="flex gap-3 rounded-lg items-center">
-        <div class="">
-          <UIcon
-            name="i-lucide-circle-question-mark"
-            size="28"
-            class="text-primary"
-          />
-        </div>
-
-        <div>
-          <h3 class="text-md font-semibold">
-            Schlüssel nicht sichtbar oder Tür-Problem?
-          </h3>
-          <p class="text-sm my-1">
-            Es werden nur Türen angezeigt, für die Sie aktuell eine Buchung mit
-            Schließberechtigung haben. Fehlt ein Schlüssel oder lässt sich eine
-            Tür nicht öffnen, hilft Ihnen unser Support weiter.
-          </p>
-
-          <button
-            type="button"
-            class="mt-1 inline-flex items-center gap-2 text-sm font-medium text-primary underline"
-            @click="showHelpContact = !showHelpContact"
-          >
-            Hilfe &amp; Kontakt anzeigen
-          </button>
-        </div>
-      </div>
-
-      <div v-if="showHelpContact" class="mt-3 mx-10 space-y-2 text-sm">
-        <USeparator color="primary" type="solid" size="md" class="w-full" />
-
-        <!-- toDo - dynamisch auslesen?!?!? -->
-        <div class="flex items-center gap-2">
-          <UIcon name="i-lucide-phone" size="16" class="text-primary" />
-          <div>
-            <span> Telefon-Support: </span>
-            <br class="sm:hidden" >
-            <a href="tel:04315550123" class="text-primary font-bold"
-              >0431 555 0123</a
-            >
-            <span>(Mo-So, 7-22 Uhr) </span>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-lucide-mail" size="16" class="text-primary" />
-          <div>
-            <span> E-Mail: </span>
-            <br class="sm:hidden" >
-            <a
-              href="mailto: support@ecc-digital.de"
-              class="text-primary font-bold"
-              >support@ecc-digital.de</a
-            >
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-lucide-wrench" size="16" class="text-primary" />
-          <div>
-            <span> Hausmeister vor Ort: </span>
-            <br class="sm:hidden" >
-            <span>Klingel am Haupteingang</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <GeneralHelpSection :tenant-ids="bookings.map(b => b.tenantId)"/>
 
     <!-- View Switch -->
     <div class="flex my-5 gap-2">
@@ -135,6 +67,7 @@
 
 <script setup>
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
+import GeneralHelpSection from "~/components/mobileKey/GeneralHelpSection.vue";
 
 definePageMeta({
   requiresAuth: true,
@@ -159,7 +92,7 @@ const {
 } = useAccessPoints();
 const { getTenantName } = useTenant();
 
-const showHelpContact = ref(false);
+
 const viewMode = ref("list");
 
 const filterOptions = [

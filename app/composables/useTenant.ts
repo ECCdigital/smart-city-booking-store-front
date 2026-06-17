@@ -7,8 +7,17 @@ export function useTenant() {
 
   const isTenantContext = computed(() => !!tenantID.value);
 
+    const tenantsStore = useTenantStore();
+
+  function getTenant(tenantId: string){
+      const tenant = tenantsStore.getTenantById(tenantId);
+      if (tenant) {
+          return tenant;
+      }
+      return {};
+  }
+
   function getTenantName(tenantId: string) {
-      const tenantsStore = useTenantStore();
 
           const tenant = tenantsStore.getTenantById(tenantId);
           if (tenant) {
@@ -18,5 +27,5 @@ export function useTenant() {
 
   }
 
-  return { tenantID, isTenantContext, getTenantName };
+  return { tenantID, isTenantContext, getTenant, getTenantName };
 }
