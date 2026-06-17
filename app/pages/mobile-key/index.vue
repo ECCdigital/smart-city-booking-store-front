@@ -13,20 +13,32 @@
     <GeneralHelpSection :tenant-ids="bookings.map(b => b.tenantId)"/>
 
     <!-- View Switch -->
-    <div class="flex my-5 gap-2">
-      <UButton
-        icon="i-lucide-list"
-        :variant="viewMode === 'list' ? 'subtle' : 'ghost'"
-        label="Liste"
-        class="p-3 cursor-pointer"
-        @click="() => (viewMode = 'list')"
-      />
-      <UButton
-        icon="i-lucide-map"
-        :variant="viewMode === 'map' ? 'subtle' : 'ghost'"
-        label="Raumkarte"
-        class="p-3 cursor-pointer"
-        @click="() => (viewMode = 'map')"
+    <div class="flex my-5 justify-between">
+      <div class="space-x-2">
+        <UButton
+          icon="i-lucide-list"
+          :variant="viewMode === 'list' ? 'subtle' : 'ghost'"
+          label="Liste"
+          class="p-3 cursor-pointer"
+          @click="() => (viewMode = 'list')"
+        />
+        <UButton
+          icon="i-lucide-map"
+          :variant="viewMode === 'map' ? 'subtle' : 'ghost'"
+          label="Raumkarte"
+          class="p-3 cursor-pointer"
+          @click="() => (viewMode = 'map')"
+        />
+      </div>
+      <USelect
+        v-model="bookingFilter"
+        :items="filterOptions"
+        :content="{
+          align: 'center',
+          side: 'bottom',
+          sideOffset: 8,
+        }"
+        class="w-28"
       />
     </div>
 
@@ -101,12 +113,16 @@ const filterOptions = [
   { label: "Vergangene", value: "past" },
   { label: "Alle", value: "all" },
 ];
-
 const bookingFilter = ref("active");
+watch(bookingFilter, () => {
+  loadBookings();
+});
+
 const accessPointIdInput = ref("");
 const includeAccessPoints = ref(true);
 const includeLockers = ref(true);
 const includeBuffer = ref(true);
+
 const bookings = ref([]);
 const accessPointsByBooking = ref({});
 const visibleJson = ref({});
@@ -157,7 +173,21 @@ const loadBookingsForAccessPoint = async () => {
     });
 
     lastResponse.value = response;
-    bookings.value = responsePayload(response) || [];
+
+    bookings.value = (responsePayload(response) || []).sort((a, b) => {
+      const now = Date.now();
+
+      const statusRank = (booking) => {
+        if (booking.timeBegin && now < booking.timeBegin) return 1; // kommend
+        if (booking.timeEnd && now > booking.timeEnd) return 2; // vergangen
+        return 0; // aktiv
+      };
+
+      const rankDiff = statusRank(a) - statusRank(b);
+      if (rankDiff !== 0) return rankDiff;
+
+      return (b.timeBegin ?? 0) - (a.timeBegin ?? 0);
+    });
 
     if (includeAccessPoints.value) {
       for (const booking of bookings.value) {
