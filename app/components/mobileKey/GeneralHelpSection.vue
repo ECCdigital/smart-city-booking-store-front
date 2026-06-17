@@ -30,26 +30,29 @@
     </div>
 
     <div v-if="showHelpContact" class="mt-3 mx-10 space-y-2 text-sm">
-
       <UAccordion
-          :items="tenants.map(tenant => ({
-    label: tenant.name,
-    value: tenant.id
-  }))"
+        :items="
+          tenants.map((tenant) => ({
+            label: tenant.name,
+            value: tenant.id,
+          }))
+        "
       >
         <template #content="{ item }">
           <div class="space-y-3">
-            <!-- Tenant über item.value finden -->
             <template
-                v-for="tenant in tenants.filter(t => t.id === item.value)"
-                :key="tenant.id"
+              v-for="tenant in tenants.filter((t) => t.id === item.value)"
+              :key="tenant.id"
             >
               <div class="flex items-center gap-2">
                 <UIcon name="i-lucide-phone" size="16" class="text-primary" />
                 <div>
                   <span> Telefon-Support: </span>
-                  <br class="sm:hidden" >
-                  <a :href="`tel:${tenant.phone}`" class="text-primary font-bold">
+                  <br class="sm:hidden" />
+                  <a
+                    :href="`tel:${tenant.phone}`"
+                    class="text-primary font-bold"
+                  >
                     {{ tenant.phone }}
                   </a>
                 </div>
@@ -58,10 +61,10 @@
                 <UIcon name="i-lucide-mail" size="16" class="text-primary" />
                 <div>
                   <span> E-Mail: </span>
-                  <br class="sm:hidden" >
+                  <br class="sm:hidden" />
                   <a
-                      :href="`mailto:${tenant.mail}`"
-                      class="text-primary font-bold"
+                    :href="`mailto:${tenant.mail}`"
+                    class="text-primary font-bold"
                   >
                     {{ tenant.mail }}
                   </a>
@@ -71,8 +74,8 @@
                 <UIcon name="i-lucide-wrench" size="16" class="text-primary" />
                 <div>
                   <span> Kontaktperson: </span>
-                  <br class="sm:hidden" >
-                  <span>{{tenant.contactName}}</span>
+                  <br class="sm:hidden" />
+                  <span>{{ tenant.contactName }}</span>
                 </div>
               </div>
             </template>
