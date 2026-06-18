@@ -10,7 +10,7 @@
     </div>
 
     <!-- Help Information -->
-    <GeneralHelpSection :tenant-ids="bookings.map(b => b.tenantId)"/>
+    <GeneralHelpSection :tenant-ids="bookings.map((b) => b.tenantId)" />
 
     <!-- View Switch -->
     <div class="flex my-5 justify-between">
@@ -98,9 +98,6 @@ const includeBuffer = ref(true);
 
 const bookings = ref([]);
 
-
-
-
 const accessPointsByBooking = ref({});
 const visibleJson = ref({});
 const responses = ref({});
@@ -126,9 +123,10 @@ const loadBookings = async () => {
       const now = Date.now();
 
       const statusRank = (booking) => {
-        if (booking.timeBegin && now < booking.timeBegin) return 1; // kommend
-        if (booking.timeEnd && now > booking.timeEnd) return 2; // vergangen
-        return 0; // aktiv
+        if (booking.timeBegin && now < booking.timeBegin - 60 * 60 * 1000)
+          return 1; // kommend (mit 60 Min Puffer)
+        if (booking.timeEnd && now > booking.timeEnd + 60 * 60 * 1000) return 2; // vergangen (mit 60 Min Puffer)
+        return 0; // aktiv (inkl. Puffer)
       };
 
       const rankDiff = statusRank(a) - statusRank(b);
