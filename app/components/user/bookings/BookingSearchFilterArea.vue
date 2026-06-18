@@ -137,7 +137,7 @@ function sortBookings(bookings) {
     case "bookingDate-asc":
       sortedBookings.sort((a, b) => a.timeCreated - b.timeCreated);
       break;
-    case "bookingsDate-desc":
+    case "bookingDate-desc":
       sortedBookings.sort((a, b) => b.timeCreated - a.timeCreated);
       break;
     case "price-asc":
