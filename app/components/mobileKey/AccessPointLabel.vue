@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex items-center justify-center rounded-lg w-8 h-8 bg-primary/10"
+    class="flex shrink-0 items-center justify-center rounded-lg w-8 h-8 bg-primary/10"
   >
     <UIcon name="i-lucide-lock" class="w-5 h-5 text-primary font-bold" />
   </div>

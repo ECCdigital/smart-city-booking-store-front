@@ -84,7 +84,7 @@
         <AccessPointLabel :access-point="accessPoint" show-mode />
 
         <div class="flex-1" />
-        <AccessPointSideover :access-point="accessPoint"/>
+        <AccessPointSideover :access-point="accessPoint" :booking-id="booking.id"/>
         <!-- toDo - bei Desktop-Version ein PopUp ergänzen!  -->
 
       </div>

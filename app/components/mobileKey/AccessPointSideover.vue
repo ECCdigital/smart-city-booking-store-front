@@ -32,14 +32,18 @@
       </div>
     </template>
     <template #body>
-      <!-- for remote access -->
+      <div class="pb-5 h-[60vh]">
+        <!-- for remote access -->
       <AccessPointSideoverRemoteContent
         v-if="accessPoint.mode === 'remote'"
         :access-point="accessPoint"
+        :booking-id="bookingId"
+        @close-sideover="() => isOpen = false"
       />
       <USkeleton v-else class="h-64 w-full rounded-lg" />
 
       <!-- toDo - add help information !!!!!!!!!!!!!!!!!!!!!!!!!! -->
+      </div>
     </template>
   </USlideover>
 </template>
@@ -50,6 +54,10 @@ import AccessPointSideoverRemoteContent from "~/components/mobileKey/AccessPoint
 const props = defineProps({
   accessPoint: {
     type: Object,
+    required: true,
+  },
+  bookingId: {
+    type: String,
     required: true,
   },
 });
