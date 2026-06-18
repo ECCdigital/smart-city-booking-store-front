@@ -1,6 +1,7 @@
 <script setup>
 import { useAuthStore } from "~~/stores/auth.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import { useMemberships } from "~/composables/api/useMemberships.js";
 
 const { tenantTo } = useTenantRoute();
 
@@ -24,59 +25,80 @@ const user = computed(() => authStore.getUser);
 const userName = computed(() => {
   const fullname = user.value?.firstName + " " + user.value?.lastName;
   const suffix = fullname.length > 20 ? "..." : "";
-  return fullname.slice(0, 20)+suffix;
+  return fullname.slice(0, 20) + suffix;
 });
 
-const items = [
-  [
-    {
-      label: t("navigation.admin"),
-      icon: "i-lucide-user-star",
-      to: config.public.adminBaseUrl,
-      target: "_blank",
-    },
-  ],
-  [
-    {
-      label: "Benutzerkonto",
-      class: "font-bold cursor-default hover:bg-transparent",
-    },
-    {
-      label: "Buchungen",
-      icon: "i-lucide-book-marked",
-      onSelect: () => goTo("/account/bookings"),
-    },
-    {
-      label: "Schlüssel",
-      icon: "i-lucide-key-round",
-      onSelect: () => goTo("/account/keys"),
-    },
-    {
-      label: "Rechnungen",
-      icon: "i-lucide-wallet-cards",
-      onSelect: () => goTo("/account/invoices"),
-      disabled: true,
-    },
-    {
-      label: "Favoriten",
-      icon: "i-lucide-book-heart",
-      onSelect: () => goTo("/account/favorites"),
-      disabled: true,
-    },
-  ],
-  [
-    {
-      label: t("navigation.settings"),
-      icon: "i-lucide-settings",
-      onSelect: () => goTo("/account/settings")
-    },
-    {
-      label: t("common.logout"),
-      icon: "i-lucide-log-out",
-      onSelect: () => logout(),
-    },
-  ],
-];
+const hasMemberships = ref(false);
+
+onMounted(async () => {
+  const { fetchMyMemberships } = useMemberships();
+
+  try {
+    const memberships = await fetchMyMemberships();
+    hasMemberships.value = Array.isArray(memberships) && memberships.length > 0;
+  } catch {
+    hasMemberships.value = false;
+  }
+});
+
+const items = computed(() => {
+  const adminSection = hasMemberships.value
+    ? [
+        [
+          {
+            label: t("navigation.admin"),
+            icon: "i-lucide-user-star",
+            to: config.public.adminBaseUrl,
+            target: "_blank",
+          },
+        ],
+      ]
+    : [];
+
+  return [
+    ...adminSection,
+    [
+      {
+        label: "Benutzerkonto",
+        class: "font-bold cursor-default hover:bg-transparent",
+      },
+      {
+        label: "Buchungen",
+        icon: "i-lucide-book-marked",
+        onSelect: () => goTo("/account/bookings"),
+      },
+      {
+        label: "Schlüssel",
+        icon: "i-lucide-key-round",
+        onSelect: () => goTo("/account/keys"),
+      },
+      {
+        label: "Rechnungen",
+        icon: "i-lucide-wallet-cards",
+        onSelect: () => goTo("/account/invoices"),
+        disabled: true,
+      },
+      {
+        label: "Favoriten",
+        icon: "i-lucide-book-heart",
+        onSelect: () => goTo("/account/favorites"),
+        disabled: true,
+      },
+    ],
+    [
+      {
+        label: t("navigation.settings"),
+        icon: "i-lucide-settings",
+        onSelect: () => goTo("/account/settings"),
+      },
+      {
+        label: t("common.logout"),
+        icon: "i-lucide-log-out",
+        onSelect: () => logout(),
+      },
+    ],
+  ];
+});
 function goTo(targetString) {
   const router = useRouter();
   const tenantTargetString = tenantTo(targetString);
@@ -88,14 +110,14 @@ async function logout() {
     await authStore.logout();
     notification.success(
       t("notifications.logoutSuccess.message"),
-      t("notifications.logoutSuccess.title"),
+      t("notifications.logoutSuccess.title")
     );
     const router = useRouter();
     await router.push("/login");
   } catch {
     notification.error(
       t("login.logoutErrorMessage.message"),
-      t("login.logoutErrorMessage.title"),
+      t("login.logoutErrorMessage.title")
     );
   }
 }
@@ -108,7 +130,7 @@ async function logout() {
     :ui="{
       content: 'ring-0 shadow-lg glass',
       itemLeadingIcon: 'mt-1',
-      item: 'before:bg-transparent data-highlighted:before:bg-transparent'
+      item: 'before:bg-transparent data-highlighted:before:bg-transparent',
     }"
   >
     <UButton
