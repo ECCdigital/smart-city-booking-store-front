@@ -1,134 +1,134 @@
 # Smart City Booking Store Front
 
-Kundenorientiertes Web-Interface für das **Smart City Booking**-Ökosystem. Die Anwendung stellt Buchungsangebote dar, ermöglicht den Checkout und bietet eingeloggten Nutzern eine Übersicht über ihre Buchungen.
+Customer-facing web interface for the **Smart City Booking** ecosystem. The application displays booking offers, provides checkout, and gives logged-in users an overview of their bookings.
 
-Alle Geschäftsdaten (Angebote, Verfügbarkeiten, Buchungen, Zahlungen, Authentifizierung) werden vom Backend bereitgestellt:
+All business data (offers, availability, bookings, payments, authentication) is provided by the backend:
 
 **[smart-city-booking-backend](https://github.com/ECCdigital/smart-city-booking-backend/pkgs/container/smart-city-booking-backend)**
 
-Dieses Repository enthält ausschließlich das Store-Front (Nuxt 4 / Vue 3). Server-Routen unter `/api/*` fungieren als BFF-Proxy zum Backend und halten Tokens in HTTP-only Cookies.
+This repository contains only the store front (Nuxt 4 / Vue 3). Server routes under `/api/*` act as a BFF proxy to the backend and store tokens in HTTP-only cookies.
 
 ---
 
-## Inhaltsverzeichnis
+## Table of Contents
 
-- [Funktionen](#funktionen)
-- [Architektur](#architektur)
-- [Voraussetzungen](#voraussetzungen)
-- [Lokales Setup](#lokales-setup)
-- [Umgebungsvariablen](#umgebungsvariablen)
-- [Entwicklung](#entwicklung)
-- [Produktions-Build](#produktions-build)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Prerequisites](#prerequisites)
+- [Local Setup](#local-setup)
+- [Environment Variables](#environment-variables)
+- [Development](#development)
+- [Production Build](#production-build)
 - [Docker](#docker)
-- [Betrieb](#betrieb)
+- [Operations](#operations)
 - [Server-Side Cache](#server-side-cache)
 
 ---
 
-## Funktionen
+## Features
 
-| Bereich | Beschreibung |
+| Area | Description |
 | --- | --- |
-| **Katalog** | Durchsuchen von Buchungsangeboten (Bookables, Events), Suche nach Ort/Zeitraum, mandantenspezifische Kataloge |
-| **Checkout** | Mehrstufiger Buchungsprozess inkl. Zeitauswahl, Kontaktdaten, Zahlung und Bestätigung |
-| **Mein Konto** | Buchungsübersicht, Rechnungen, Favoriten, Mobile Keys, Einstellungen |
-| **Authentifizierung** | E-Mail/Passwort, SSO (Keycloak), Karten-Login, Silent SSO |
-| **Theming** | Mandantenspezifisches CSS, Logo und Hero-Bilder über Backend-Konfiguration |
-| **Internationalisierung** | Deutsch (Standard) und Englisch |
+| **Catalog** | Browse booking offers (bookables, events), search by location/time range, tenant-specific catalogs |
+| **Checkout** | Multi-step booking flow including time selection, contact details, payment, and confirmation |
+| **My Account** | Booking overview, invoices, favorites, mobile keys, settings |
+| **Authentication** | Email/password, SSO (Keycloak), card login, silent SSO |
+| **Theming** | Tenant-specific CSS, logo, and hero images via backend configuration |
+| **Internationalization** | German (default) and English |
 
 ---
 
-## Architektur
+## Architecture
 
 ```
 Browser  →  Store Front (Nuxt SSR / Nitro)  →  smart-city-booking-backend
-              /api/*  (BFF-Proxy)                REST API
+              /api/*  (BFF proxy)                REST API
 ```
 
-- **Frontend**: Nuxt 4 mit SSR, Pinia-State, Nuxt UI
-- **Server**: Nitro (`node-server` Preset) – alle sensiblen API-Aufrufe laufen serverseitig
-- **Backend**: Separater Container/Dienst – muss erreichbar sein unter `NUXT_API_BASE_URL`
-- **Multi-Tenant**: Routen unter `/t/:tenantID/...` werden automatisch aus den Standard-Routen abgeleitet
+- **Frontend**: Nuxt 4 with SSR, Pinia state, Nuxt UI
+- **Server**: Nitro (`node-server` preset) – all sensitive API calls run server-side
+- **Backend**: Separate container/service – must be reachable at `NUXT_API_BASE_URL`
+- **Multi-tenant**: Routes under `/t/:tenantID/...` are automatically derived from the standard routes
 
 ---
 
-## Voraussetzungen
+## Prerequisites
 
-| Komponente | Version |
+| Component | Version |
 | --- | --- |
-| Node.js | 20.x (empfohlen; CI testet 18.x und 20.x) |
+| Node.js | 20.x (recommended; CI tests 18.x and 20.x) |
 | npm | 9+ |
-| Backend | [smart-city-booking-backend](https://github.com/ECCdigital/smart-city-booking-backend/pkgs/container/smart-city-booking-backend) läuft und ist erreichbar |
+| Backend | [smart-city-booking-backend](https://github.com/ECCdigital/smart-city-booking-backend/pkgs/container/smart-city-booking-backend) running and reachable |
 
 ---
 
-## Lokales Setup
+## Local Setup
 
-### 1. Repository klonen
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/ECCdigital/smart-city-booking-store-front.git
 cd smart-city-booking-store-front
 ```
 
-### 2. Abhängigkeiten installieren
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Umgebungsvariablen konfigurieren
+### 3. Configure environment variables
 
 ```bash
 cp .env.example .env
 ```
 
-Mindestens folgende Werte anpassen:
+At minimum, adjust the following values:
 
 ```bash
-NUXT_API_BASE_URL=http://localhost:8080        # URL des Backends
-NUXT_USER_BASE_URL=http://localhost:3000        # URL dieses Store Fronts
+NUXT_API_BASE_URL=http://localhost:8080        # Backend URL
+NUXT_USER_BASE_URL=http://localhost:3000        # URL of this store front
 NUXT_PUBLIC_USER_BASE_URL=http://localhost:3000
-NUXT_CACHE_ENABLED=false                        # Cache in der Entwicklung deaktivieren
+NUXT_CACHE_ENABLED=false                        # Disable cache during development
 ```
 
-> **Hinweis:** Nuxt lädt `.env` automatisch (`dotenv/config` in `nuxt.config.js`). Runtime-Config-Werte werden zur Build-Zeit bzw. beim Serverstart eingebunden.
+> **Note:** Nuxt loads `.env` automatically (`dotenv/config` in `nuxt.config.js`). Runtime config values are applied at build time or on server start.
 
-### 4. Backend starten
+### 4. Start the backend
 
-Das Backend muss vor dem Store Front laufen und unter der konfigurierten `NUXT_API_BASE_URL` erreichbar sein. Siehe die Backend-Dokumentation im verlinkten Repository.
+The backend must be running before the store front and reachable at the configured `NUXT_API_BASE_URL`. See the backend documentation in the linked repository.
 
-### 5. Entwicklungsserver starten
+### 5. Start the development server
 
 ```bash
 npm run dev
 ```
 
-Die Anwendung ist unter **http://localhost:3000** erreichbar.
+The application is available at **http://localhost:3000**.
 
 ---
 
-## Umgebungsvariablen
+## Environment Variables
 
-Nuxt mappt `runtimeConfig`-Felder automatisch auf `NUXT_*`-Variablen. Öffentliche Werte (für den Browser) benötigen das Präfix `NUXT_PUBLIC_`.
+Nuxt automatically maps `runtimeConfig` fields to `NUXT_*` variables. Public values (exposed to the browser) require the `NUXT_PUBLIC_` prefix.
 
-| Variable | Pflicht | Standard | Beschreibung |
+| Variable | Required | Default | Description |
 | --- | --- | --- | --- |
-| `NUXT_API_BASE_URL` | **Ja** | `""` | Basis-URL des Backends (z. B. `https://api.booking.example.com`). Wird serverseitig für alle API-Aufrufe verwendet. |
-| `NUXT_PUBLIC_API_BASE_URL` | Nein | `""` | Öffentliche Backend-URL, falls vom Client benötigt. |
-| `NUXT_USER_BASE_URL` | **Ja** | `""` | Öffentliche URL des Store Fronts. Wird serverseitig für Verify-/Reset-Links in Auth-E-Mails gebaut. |
-| `NUXT_PUBLIC_USER_BASE_URL` | **Ja** | `""` | Gleiche URL, für clientseitige Redirects (z. B. Passwort-Reset). |
-| `NUXT_ADMIN_BASE_URL` | Nein | `""` | URL des Admin-Portals (serverseitig). |
-| `NUXT_PUBLIC_ADMIN_BASE_URL` | Nein | `""` | Admin-Portal-Link in der Navigation (nur für Nutzer mit Mitgliedschaften). |
-| `NUXT_PUBLIC_SILENT_SSO_ENABLED` | Nein | `false` | `true` aktiviert automatischen SSO-Check beim Seitenaufruf (Keycloak Silent Check). |
-| `NUXT_CACHE_ENABLED` | Nein | aktiv | `false` deaktiviert den serverseitigen SWR-Cache für Katalog- und Theme-Routen. |
-| `LOG_LEVEL` | Nein | `info` | Pino Log-Level: `trace`, `debug`, `info`, `warn`, `error`, `fatal`. |
-| `PORT` | Nein | `3000` | HTTP-Port im Docker-/Produktionsbetrieb. |
-| `NODE_ENV` | – | – | `development` oder `production`. Steuert u. a. `secure`-Flag bei Cookies. |
+| `NUXT_API_BASE_URL` | **Yes** | `""` | Base URL of the backend (e.g. `https://api.booking.example.com`). Used server-side for all API calls. |
+| `NUXT_PUBLIC_API_BASE_URL` | No | `""` | Public backend URL, if needed by the client. |
+| `NUXT_USER_BASE_URL` | **Yes** | `""` | Public URL of the store front. Used server-side to build verify/reset links in auth emails. |
+| `NUXT_PUBLIC_USER_BASE_URL` | **Yes** | `""` | Same URL, for client-side redirects (e.g. password reset). |
+| `NUXT_ADMIN_BASE_URL` | No | `""` | Admin portal URL (server-side). |
+| `NUXT_PUBLIC_ADMIN_BASE_URL` | No | `""` | Admin portal link in navigation (only for users with memberships). |
+| `NUXT_PUBLIC_SILENT_SSO_ENABLED` | No | `false` | `true` enables automatic SSO check on page load (Keycloak silent check). |
+| `NUXT_CACHE_ENABLED` | No | enabled | `false` disables the server-side SWR cache for catalog and theme routes. |
+| `LOG_LEVEL` | No | `info` | Pino log level: `trace`, `debug`, `info`, `warn`, `error`, `fatal`. |
+| `PORT` | No | `3000` | HTTP port in Docker/production. |
+| `NODE_ENV` | – | – | `development` or `production`. Controls e.g. the `secure` flag on cookies. |
 
-Eine vollständige Vorlage mit Kommentaren liegt in [`.env.example`](.env.example).
+A full template with comments is available in [`.env.example`](.env.example).
 
-### Beispiel: Produktion
+### Example: Production
 
 ```bash
 NUXT_API_BASE_URL=https://api.booking.example.com
@@ -144,17 +144,17 @@ NODE_ENV=production
 
 ---
 
-## Entwicklung
+## Development
 
 ```bash
-# Entwicklungsserver mit Hot-Reload
+# Development server with hot reload
 npm run dev
 
 # ESLint
 npm run lint:check
 ```
 
-Weitere Paketmanager (pnpm, yarn, bun) funktionieren analog:
+Other package managers work the same way:
 
 ```bash
 pnpm install && pnpm dev
@@ -164,29 +164,29 @@ bun install && bun run dev
 
 ---
 
-## Produktions-Build
+## Production Build
 
 ```bash
-# Build erstellen
+# Create build
 npm run build
 
-# Lokalen Produktions-Server starten (zum Testen)
+# Start local production server (for testing)
 npm run preview
 ```
 
-Der Build erzeugt ein Nitro-Bundle unter `.output/`, das mit `node .output/server/index.mjs` gestartet werden kann.
+The build produces a Nitro bundle under `.output/`, which can be started with `node .output/server/index.mjs`.
 
 ---
 
 ## Docker
 
-### Image bauen
+### Build image
 
 ```bash
 docker build -t smart-city-booking-store-front .
 ```
 
-### Container starten
+### Start container
 
 ```bash
 docker run -d \
@@ -201,7 +201,21 @@ docker run -d \
   smart-city-booking-store-front
 ```
 
-### Typisches Deployment mit Backend
+### Published images
+
+On GitHub releases, a container image is automatically pushed to `ghcr.io`:
+
+```
+ghcr.io/eccdigital/smart-city-booking-store-front:<version>
+```
+
+```bash
+docker pull ghcr.io/eccdigital/smart-city-booking-store-front:1.0.0-rc.14
+```
+
+> Environment variables must be set when starting the container – they are not baked into the image.
+
+### Typical deployment with backend
 
 ```
 ┌─────────────────────┐     ┌──────────────────────────────┐
@@ -215,87 +229,87 @@ docker run -d \
 └─────────────────────┘     └──────────────────────────────┘
 ```
 
-Beide Container sollten im selben Netzwerk liegen; der Reverse Proxy terminiert TLS und leitet an Port `3000` weiter.
+Both containers should be on the same network; the reverse proxy terminates TLS and forwards to port `3000`.
 
 ---
 
-## Betrieb
+## Operations
 
-### Health & Verfügbarkeit
+### Health & availability
 
-- Die App lauscht auf `PORT` (Standard `3000`).
-- Stelle sicher, dass das Backend unter `NUXT_API_BASE_URL` erreichbar ist – ohne Backend funktionieren Katalog, Checkout und Auth nicht.
-- Setze `NUXT_USER_BASE_URL` / `NUXT_PUBLIC_USER_BASE_URL` auf die öffentlich erreichbare URL (inkl. Schema und ohne trailing slash), damit Auth-Links in E-Mails korrekt sind.
+- The app listens on `PORT` (default `3000`).
+- Ensure the backend is reachable at `NUXT_API_BASE_URL` – without the backend, catalog, checkout, and auth will not work.
+- Set `NUXT_USER_BASE_URL` / `NUXT_PUBLIC_USER_BASE_URL` to the publicly reachable URL (including scheme, no trailing slash) so auth links in emails are correct.
 
 ### Logging
 
-Server-Logs werden über **Pino** geschrieben. Log-Level über `LOG_LEVEL` steuern:
+Server logs are written via **Pino**. Control the log level with `LOG_LEVEL`:
 
 ```bash
-LOG_LEVEL=debug   # Entwicklung / Fehlersuche
-LOG_LEVEL=warn    # Produktion mit wenig Rauschen
+LOG_LEVEL=debug   # Development / troubleshooting
+LOG_LEVEL=warn    # Production with less noise
 ```
 
 ### Cookies & HTTPS
 
-In `NODE_ENV=production` werden Auth-Cookies mit dem `Secure`-Flag gesetzt. Der Store Front muss daher hinter HTTPS betrieben werden.
+In `NODE_ENV=production`, auth cookies are set with the `Secure` flag. The store front must therefore run behind HTTPS.
 
 ### SSO / Keycloak
 
-- SSO-Endpunkte: `/api/auth/sso/*`
-- Silent SSO (`NUXT_PUBLIC_SILENT_SSO_ENABLED=true`) prüft beim ersten Seitenaufruf, ob eine Keycloak-Session besteht.
-- Keycloak-Konfiguration erfolgt im Backend/Instance-Setup, nicht im Store Front.
+- SSO endpoints: `/api/auth/sso/*`
+- Silent SSO (`NUXT_PUBLIC_SILENT_SSO_ENABLED=true`) checks on the first page load whether a Keycloak session exists.
+- Keycloak configuration is done in the backend/instance setup, not in the store front.
 
-### Skalierung
+### Scaling
 
-- Stateless Nitro-Server – horizontal skalierbar hinter einem Load Balancer.
-- Der serverseitige SWR-Cache (`NUXT_CACHE_ENABLED`) ist pro Instanz lokal (LRU). Bei mehreren Replicas kann kurzzeitig leicht unterschiedlicher Cache-Stand entstehen – für Katalog-Daten in der Regel akzeptabel.
+- Stateless Nitro server – horizontally scalable behind a load balancer.
+- The server-side SWR cache (`NUXT_CACHE_ENABLED`) is local per instance (LRU). With multiple replicas, cache state may briefly differ – generally acceptable for catalog data.
 
-### Release-Versionierung
+### Release versioning
 
 ```bash
-npm run release:patch    # Patch-Release
-npm run release:minor    # Minor-Release
-npm run release:major    # Major-Release
-npm run release:rc       # Release Candidate
+npm run release:patch    # Patch release
+npm run release:minor    # Minor release
+npm run release:major    # Major release
+npm run release:rc       # Release candidate
 ```
 
-Veröffentlichte GitHub-Releases triggern den Docker-Build-Workflow (`.github/workflows/docker-publish.yml`).
+Published GitHub releases trigger the Docker build workflow (`.github/workflows/docker-publish.yml`).
 
 ---
 
 ## Server-Side Cache
 
-Die Nitro-Server-Proxy-Routen (`/api/catalog/...`, `/api/theme/...`) nutzen
-`createConditionalCachedHandler`, um Antworten optional in einem SWR-Cache zu halten.
-Das Verhalten wird über die Umgebungsvariable gesteuert:
+The Nitro server proxy routes (`/api/catalog/...`, `/api/theme/...`) use
+`createConditionalCachedHandler` to optionally keep responses in an SWR cache.
+Behavior is controlled by the environment variable:
 
 ```bash
-NUXT_CACHE_ENABLED=true   # SWR-Cache aktiv (Standard, wenn nicht gesetzt)
-NUXT_CACHE_ENABLED=false  # Cache deaktivieren (empfohlen für lokale Entwicklung)
+NUXT_CACHE_ENABLED=true   # SWR cache enabled (default when not set)
+NUXT_CACHE_ENABLED=false  # Disable cache (recommended for local development)
 ```
 
-> Der Cache ist **standardmäßig aktiv**, solange `NUXT_CACHE_ENABLED` nicht explizit auf `false` gesetzt wird.
+> The cache is **enabled by default** unless `NUXT_CACHE_ENABLED` is explicitly set to `false`.
 
-### Empfohlene `maxAge`-Werte
+### Recommended `maxAge` values
 
-| Route | maxAge | swr | Hinweise |
+| Route | maxAge | swr | Notes |
 | --- | --- | --- | --- |
-| `/api/catalog/bundle` | 300s | ja | Auth-scoped Key (anon vs. auth Cookie) |
-| `/api/catalog/[t]/bundle` | 300s | ja | Enthält tenantID + Slug im Cache-Key |
-| `/api/catalog/mode` | 300s | ja | Öffentlich |
-| `/api/theme/css` | 300s | n/a | Öffentlich, anon-scoped |
-| `/api/theme/[slug].css` | 300s | n/a | Enthält Slug im Key |
-| `/api/theme/hero` | 300s | n/a | Nutzt `themeBundle` pro Request |
-| `/api/theme/logo` | 300s | n/a | Nutzt `themeBundle` pro Request |
+| `/api/catalog/bundle` | 300s | yes | Auth-scoped key (anon vs. auth cookie) |
+| `/api/catalog/[t]/bundle` | 300s | yes | Includes tenantID + slug in cache key |
+| `/api/catalog/mode` | 300s | yes | Public |
+| `/api/theme/css` | 300s | n/a | Public, anon-scoped |
+| `/api/theme/[slug].css` | 300s | n/a | Includes slug in key |
+| `/api/theme/hero` | 300s | n/a | Reuses `themeBundle` per request |
+| `/api/theme/logo` | 300s | n/a | Reuses `themeBundle` per request |
 
-Die Bundle-Endpunkte teilen den Cache-Key in `auth` vs. `anon` anhand des `access-token`-Cookies.
-Anonyme Anfragen teilen sich eine gecachte Antwort, authentifizierte Anfragen fallen in den
-`auth`-Scope (weiter aufgeschlüsselt nach Slug / Tenant / Bookable / Event / Include).
+The bundle endpoints split the cache key into `auth` vs. `anon` based on the `access-token` cookie.
+Anonymous requests share a cached response; authenticated requests fall into the
+`auth` scope (further keyed by slug / tenant / bookable / event / include).
 
 ---
 
-## Lizenz
+## License
 
 This project is licensed under the
 [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html). See the
