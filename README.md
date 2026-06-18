@@ -201,20 +201,6 @@ docker run -d \
   smart-city-booking-store-front
 ```
 
-### Published images
-
-On GitHub releases, a container image is automatically pushed to `ghcr.io`:
-
-```
-ghcr.io/eccdigital/smart-city-booking-store-front:<version>
-```
-
-```bash
-docker pull ghcr.io/eccdigital/smart-city-booking-store-front:1.0.0-rc.14
-```
-
-> Environment variables must be set when starting the container – they are not baked into the image.
-
 ### Typical deployment with backend
 
 ```
