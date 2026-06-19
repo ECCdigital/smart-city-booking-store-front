@@ -21,6 +21,7 @@ const KNOWN_PAYMENT_PROVIDER_LABELS = {
 
 const route = useRoute();
 const { t, te, locale } = useI18n();
+usePageTitle(() => t("meta.pages.checkoutStatus"));
 const checkoutNavTab = useState("checkoutNavTab", () => "");
 
 const bookableId = computed(() => String(route.query.bookableId || "").trim());

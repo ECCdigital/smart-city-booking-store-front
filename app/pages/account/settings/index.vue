@@ -20,6 +20,9 @@ definePageMeta({
   requiresAuth: true,
 });
 
+const { t } = useI18n();
+usePageTitle(() => t("meta.pages.accountSettings"));
+
 const authStore = useAuthStore();
 const user = computed(() => authStore.getUser);
 </script>

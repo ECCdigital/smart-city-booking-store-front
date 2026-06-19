@@ -17,6 +17,9 @@ definePageMeta({
   requiresAuth: true,
 });
 
+const { t } = useI18n();
+usePageTitle(() => t("meta.pages.accountKeys"));
+
 const bookingsStore = useBookingStore();
 
 const { pending } = useAsyncData("bookings", async () => {

@@ -43,6 +43,8 @@ definePageMeta({
   },
 });
 
+usePageTitle();
+
 const route = useRoute();
 const { tenantTo } = useTenantRoute();
 const { loadBundle } = useCatalogBundle();

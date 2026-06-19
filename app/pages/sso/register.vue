@@ -5,6 +5,7 @@ import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
 definePageMeta({ layout: "default" });
 
 const { t } = useI18n();
+usePageTitle(() => t("meta.pages.ssoRegister"));
 const notification = useNotification();
 const loading = ref(false);
 const authStore = useAuthStore();

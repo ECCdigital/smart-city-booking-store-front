@@ -28,6 +28,13 @@ if (!event.value) {
     eventID: eventID.value,
   });
 }
+
+const { t } = useI18n();
+usePageTitle(() =>
+  event.value?.title
+    ? t("meta.pages.eventDetail", { title: event.value.title })
+    : t("meta.pages.events"),
+);
 </script>
 
 <template>

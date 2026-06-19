@@ -319,6 +319,11 @@ watch(
 );
 
 const { t, te } = useI18n();
+usePageTitle(() =>
+  leadBookable.value?.title
+    ? t("meta.pages.checkoutDetail", { title: leadBookable.value.title })
+    : t("meta.pages.checkout"),
+);
 const { error: notifyError } = useNotification();
 const authStore = useAuthStore();
 const isLoggedIn = computed(() => authStore.isLoggedIn);

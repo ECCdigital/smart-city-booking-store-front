@@ -1,5 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: "default" });
+
+const { t } = useI18n();
+usePageTitle(() => t("meta.pages.cardLinkSuccess"));
 </script>
 
 <template>

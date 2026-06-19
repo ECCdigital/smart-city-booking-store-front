@@ -49,6 +49,14 @@ const booking = computed(() => {
   return bookingStore.getBookingById(bookingID.value);
 });
 
+const { t } = useI18n();
+usePageTitle(() => {
+  const itemTitle = booking.value?.bookableItems?.[0]?._bookableUsed?.title;
+  return itemTitle
+    ? t("meta.pages.bookableDetail", { title: itemTitle })
+    : t("meta.pages.accountBookingDetail");
+});
+
 const hasIfbsLockerInfo = computed(() => {
   if (!booking.value) {
     return false;

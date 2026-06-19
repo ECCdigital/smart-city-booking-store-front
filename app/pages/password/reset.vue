@@ -14,6 +14,7 @@ const route = useRoute();
 const router = useRouter();
 const notification = useNotification();
 const { t } = useI18n();
+usePageTitle(() => t("meta.pages.resetPassword"));
 
 const token = computed(() => String(route.query.token || ""));
 const id = computed(() => String(route.query.id || ""));

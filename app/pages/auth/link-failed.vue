@@ -5,6 +5,7 @@ definePageMeta({ layout: "default" });
 
 const route = useRoute();
 const { t } = useI18n();
+usePageTitle(() => t("meta.pages.cardLinkFailed"));
 
 interface ReasonMapping {
   title: string;

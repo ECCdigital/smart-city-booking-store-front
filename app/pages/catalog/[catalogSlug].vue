@@ -22,6 +22,8 @@ try {
   }
 }
 
+usePageTitle();
+
 useHead({
   link: [
     {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { NuxtError } from "#app";
 
-defineProps({
+const props = defineProps({
   error: Object as () => NuxtError,
 });
 
@@ -35,6 +35,18 @@ const getErrorInfo = (code?: number) =>
     icon: "i-lucide-bug",
     message: "Etwas ist schiefgelaufen.",
   };
+
+const { t } = useI18n();
+
+const pageTitle = computed(() => {
+  const code = props.error?.statusCode;
+  if (code === 404) return t("meta.pages.notFound");
+  if (code === 403) return t("meta.pages.forbidden");
+  if (code === 500) return t("meta.pages.serverError");
+  return t("meta.pages.error");
+});
+
+usePageTitle(pageTitle);
 </script>
 
 <template>
