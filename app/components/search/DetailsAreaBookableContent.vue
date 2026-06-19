@@ -150,18 +150,6 @@
           </div>
         </div>
 
-        <!-- Zusatzbuchungsobjekte -->
-        <div v-if="additionalBookables.length > 0" class="mt-6 mb-6">
-          <USeparator
-            class="w-full mb-6"
-            :ui="{ border: 'border-gray-300' }"
-          />
-          <AdditionalBookablesSelector
-            v-model="selectedAdditionalBookables"
-            :items="additionalBookables"
-          />
-        </div>
-
         <!-- Related Bookables -->
         <div
           v-if="item.relatedBookables && item.relatedBookables.length"

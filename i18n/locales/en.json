@@ -47,6 +47,7 @@
     "invoice_payment_not_permitted": "Invoice payment is not enabled for your account.",
     "capacity_exceeded": "The maximum capacity for this object has been reached.",
     "time_conflict": "There is a time conflict with another booking for this object.",
+    "block_period_mismatch": "A complete booking time window must be booked for this object.",
     "selectTimePeriodTitle": "Select a time period",
     "selectTimePeriodHint": "Please select a time period first to see the price summary.",
     "data": {
@@ -308,6 +309,25 @@
     "occupied": "Occupied",
     "past": "Past",
     "selected": "Selected month"
+  },
+
+  "bookingTimeWindowSelection": {
+    "subtitle": "Select a booking time window.",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "selected": "Selected booking time window",
+    "empty": "No booking time windows are available in this month.",
+    "permissionRequired": "Sign-in required",
+    "maxBookingDate": "Too far in the future",
+    "weekdays": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    }
   },
 
   "status": {

@@ -65,10 +65,47 @@ export function useBookables() {
 
     return data;
   };
+
+  const getBlockPeriods = async ({
+    tenantID,
+    bookableId,
+    startDate,
+    endDate,
+    amount = 1,
+  }) => {
+    const api = useApiClient();
+
+    const params = new URLSearchParams();
+    if (startDate != null && String(startDate).trim() !== "") {
+      params.set("startDate", String(startDate));
+    }
+    if (endDate != null && String(endDate).trim() !== "") {
+      params.set("endDate", String(endDate));
+    }
+    if (amount != null) {
+      params.set("amount", String(amount));
+    }
+
+    const queryString = params.toString();
+    const url = `/api/bookables/${tenantID}/block-periods/${bookableId}${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    const { data, error } = await api.get(url);
+
+    if (error) {
+      console.error("Error fetching block periods:", error);
+      throw error;
+    }
+
+    return data;
+  };
+
   return {
     fetchBookables,
     getBookableOccupancy,
     getBookableAvailability,
     getBookablePrice,
+    getBlockPeriods,
   };
 }

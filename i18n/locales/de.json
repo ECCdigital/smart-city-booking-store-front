@@ -417,6 +417,7 @@
     "invoice_payment_not_permitted": "Zahlung auf Rechnung ist für Ihr Konto nicht freigeschaltet.",
     "capacity_exceeded": "Die maximale Kapazität für dieses Objekt wurde erreicht.",
     "time_conflict": "Für dieses Objekt besteht ein Zeitkonflikt mit einer anderen Buchung.",
+    "block_period_mismatch": "Für dieses Objekt muss ein vollständiges Buchungszeitfenster gebucht werden.",
     "selectTimePeriodTitle": "Zeitraum auswählen",
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
     "data": {
@@ -683,6 +684,25 @@
     "occupied": "Belegt",
     "past": "Vergangen",
     "selected": "Ausgewählter Monat"
+  },
+
+  "bookingTimeWindowSelection": {
+    "subtitle": "Wählen Sie ein Buchungszeitfenster.",
+    "previousMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat",
+    "selected": "Ausgewähltes Buchungszeitfenster",
+    "empty": "In diesem Monat sind keine Buchungszeitfenster verfügbar.",
+    "permissionRequired": "Anmeldung erforderlich",
+    "maxBookingDate": "Zu weit in der Zukunft",
+    "weekdays": {
+      "0": "So",
+      "1": "Mo",
+      "2": "Di",
+      "3": "Mi",
+      "4": "Do",
+      "5": "Fr",
+      "6": "Sa"
+    }
   },
 
   "status": {

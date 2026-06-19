@@ -7,6 +7,7 @@ import InputFreeTimeSelection from "~/components/checkout/InputFreeTimeSelection
 import InputRecurringTimeSelection from "~/components/checkout/InputRecurringTimeSelection.vue";
 import InputWeekSelection from "~/components/checkout/InputWeekSelection.vue";
 import InputMonthSelection from "../../components/checkout/InputMonthSelection.vue";
+import InputBlockPeriodSelection from "~/components/checkout/InputBlockPeriodSelection.vue";
 import PriceSummaryBar from "~/components/checkout/PriceSummaryBar.vue";
 import CheckoutContactStep from "~/components/checkout/CheckoutContactStep.vue";
 import CheckoutCustomFields from "~/components/checkout/CheckoutCustomFields.vue";
@@ -1373,6 +1374,10 @@ const isLongRangeMonth = computed(() => {
   return b?.isLongRange === true && b?.longRangeOptions?.type === "month";
 });
 
+const isBlockPeriodRelated = computed(
+  () => leadBookable.value?.isBlockPeriodRelated === true,
+);
+
 const longRangeMonthPrice = computed(() => {
   const categories = leadBookable.value?.priceCategories || [];
   if (categories.length === 0) return null;
@@ -1440,7 +1445,8 @@ const requiresTimeSelection = computed(
     isScheduleRelated.value ||
     isTimePeriodRelated.value ||
     isLongRangeWeek.value ||
-    isLongRangeMonth.value,
+    isLongRangeMonth.value ||
+    isBlockPeriodRelated.value,
 );
 
 const hasAdditionalBookables = computed(
@@ -2427,6 +2433,14 @@ function onReviewEdit(section) {
                       :tenant-id="tenantID"
                       :bookable-id="bookableID"
                       :price-eur="longRangeMonthPrice"
+                    />
+
+                    <InputBlockPeriodSelection
+                      v-else-if="isBlockPeriodRelated"
+                      v-model="selectedTimePeriod"
+                      :tenant-id="tenantID"
+                      :bookable-id="bookableID"
+                      :amount="amounts[bookableID] || 1"
                     />
 
                     <p v-else class="text-gray-500 dark:text-gray-400">
