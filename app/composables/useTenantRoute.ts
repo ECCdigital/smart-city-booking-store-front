@@ -1,5 +1,6 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
+import { isCheckoutPath, stripCheckoutQuery } from "~/utils/checkoutQuery";
 import { useTenant } from "./useTenant";
 
 export const useTenantRoute = () => {
@@ -28,13 +29,41 @@ export const useTenantRoute = () => {
     return `/t/${tenantID.value}${cleaned}`;
   }
 
+  function resolveTargetPath(to: string | Record<string, any>): string {
+    if (typeof to === "string") return to;
+    if (typeof to.path === "string") return to.path;
+    return "";
+  }
+
+  function queryForNavigation(
+    to: string | Record<string, any>,
+  ): Record<string, string | string[]> {
+    const targetPath = resolveTargetPath(to);
+    const leavingCheckout =
+      isCheckoutPath(route.path) &&
+      !isCheckoutPath(tenantPath(targetPath));
+
+    const baseQuery = leavingCheckout
+      ? stripCheckoutQuery(route.query as Record<string, unknown>)
+      : (route.query as Record<string, string | string[]>);
+
+    if (typeof to === "string") {
+      return baseQuery;
+    }
+
+    return {
+      ...baseQuery,
+      ...((to.query as Record<string, string | string[]>) || {}),
+    };
+  }
+
   function tenantTo(to: string | Record<string, any>) {
-    const currentQuery = route.query;
+    const navigationQuery = queryForNavigation(to);
 
     if (typeof to === "string") {
       return {
         path: tenantPath(to),
-        query: currentQuery,
+        query: navigationQuery,
       };
     }
 
@@ -52,7 +81,7 @@ export const useTenantRoute = () => {
       };
     }
 
-    clone.query = { ...currentQuery, ...(to.query || {}) };
+    clone.query = navigationQuery;
 
     return clone;
   }

@@ -260,7 +260,6 @@ watch(
   leadBookable,
   (b) => {
     const type = b?.type;
-    checkoutNavTab.value = TYPE_LABELS[type] || type || "";
 
     const route = useRoute();
     const bookableID = route.params.bookableID;
