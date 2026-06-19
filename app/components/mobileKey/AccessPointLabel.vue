@@ -1,8 +1,13 @@
 <template>
   <div
-    class="flex shrink-0 items-center justify-center rounded-lg w-8 h-8 bg-primary/10"
+    class="flex shrink-0 items-center justify-center rounded-lg w-8 h-8"
+    :class="isOpen ? 'bg-green-600/10' : 'bg-primary/10'"
   >
-    <UIcon name="i-lucide-lock" class="w-5 h-5 text-primary font-bold" />
+    <UIcon
+        :name="isOpen? 'i-lucide-unlock' : 'i-lucide-lock'"
+        class="w-5 h-5 font-bold"
+        :class="isOpen ? 'text-green-600' : 'text-primary'"
+    />
   </div>
 
   <div v-if="accessPoint.provider === 'nuki'" class="basis-6/7">
@@ -33,6 +38,14 @@ const props = defineProps({
   accessPoint: {
     type: Object,
     required: true,
+  },
+  isOpen: {
+    type: Boolean,
+    default: false,
+  },
+  isLocked: {
+    type: Boolean,
+    default: true,
   },
   showMode: {
     type: Boolean,

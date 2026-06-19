@@ -231,14 +231,6 @@ const withLoading = async (key, callback) => {
 const accessPointsForBooking = (booking) =>
   accessPointsByBooking.value[booking.id] || [];
 
-const canOperate = (accessPoint) => {
-  if (!accessPoint.accessFrom || !accessPoint.accessTo) {
-    return true;
-  }
-
-  const now = Date.now();
-  return now >= accessPoint.accessFrom && now <= accessPoint.accessTo;
-};
 
 const processKey = (booking, accessPoint) => `${booking.id}:${accessPoint.id}`;
 

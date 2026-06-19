@@ -81,12 +81,25 @@
 
     <div v-for="accessPoint in booking.accessPoints" :key="accessPoint.id">
       <div class="flex items-center gap-2 my-2">
-        <AccessPointLabel :access-point="accessPoint" show-mode />
+        <AccessPointLabel
+          :access-point="accessPoint"
+          :is-open="
+            accessPointStatuses[`${booking.id}-${accessPoint.id}`]?.open
+          "
+          :is-locked="
+            accessPointStatuses[`${booking.id}-${accessPoint.id}`]?.locked
+          "
+          show-mode
+        />
 
         <div class="flex-1" />
-        <AccessPointSideover :access-point="accessPoint" :booking-id="booking.id"/>
+        <AccessPointSideover
+          :access-point="accessPoint"
+          :booking-id="booking.id"
+          :deny-access="!canOperate(accessPoint, booking)"
+          @closed="loadStatus(booking.tenantId, accessPoint.id, booking.id)"
+        />
         <!-- toDo - bei Desktop-Version ein PopUp ergänzen!  -->
-
       </div>
       <USeparator
         v-if="
@@ -95,8 +108,8 @@
         "
         color="primary"
         type="solid"
-        size="sm"
-        class="w-full"
+        size="xs"
+        class="w-full my-1"
       />
     </div>
   </UCard>
@@ -105,6 +118,7 @@
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import AccessPointLabel from "~/components/mobileKey/AccessPointLabel.vue";
 import AccessPointSideover from "~/components/mobileKey/AccessPointSideover.vue";
+import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 
 const props = defineProps({
   bookings: {
@@ -115,6 +129,7 @@ const props = defineProps({
 
 const { getTenantName } = useTenant();
 const { formatDate } = useFormatting();
+const { getStatus } = useAccessPoints();
 
 const bookingStatus = (booking) => {
   const now = Date.now();
@@ -140,6 +155,41 @@ const bookingStatus = (booking) => {
     color: "bg-green-100 text-green-800",
     icon: "i-lucide-check",
   };
+};
+
+const accessPointStatuses = ref({});
+const loadStatus = async (tenantId, accessPointId, bookingId) => {
+  const key = `${bookingId}-${accessPointId}`;
+
+  const response = await getStatus(tenantId, accessPointId, bookingId);
+
+  accessPointStatuses.value[key] = response.success ? response.data : null;
+};
+const loadAllStatuses = async () => {
+  const requests = [];
+
+  for (const booking of props.bookings) {
+    for (const accessPoint of booking.accessPoints) {
+      requests.push(loadStatus(booking.tenantId, accessPoint.id, booking.id));
+    }
+  }
+
+  await Promise.all(requests);
+};
+
+onMounted(loadAllStatuses);
+
+const canOperate = (accessPoint, booking) => {
+  if (!accessPoint.accessFrom || !accessPoint.accessTo) {
+    if (booking.timeBegin && booking.timeEnd) {
+      const now = Date.now();
+      return now >= booking.timeBegin && now <= booking.timeEnd;
+    }
+    return true;
+  }
+
+  const now = Date.now();
+  return now >= accessPoint.accessFrom && now <= accessPoint.accessTo;
 };
 
 function getTimeRange(startTimestamp, endTimestamp) {
