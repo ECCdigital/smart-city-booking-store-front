@@ -1,85 +1,116 @@
 <template>
-  <div class="space-y-6">
-    <p class="text-gray-500 dark:text-gray-400">
+  <div :class="compact ? 'space-y-2' : 'space-y-6'">
+    <p v-if="!compact" class="text-gray-500 dark:text-gray-400">
       {{ $t("bookingTimeWindowSelection.subtitle") }}
     </p>
 
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-2">
       <button
         type="button"
         :disabled="!canGoPreviousMonth"
-        class="flex items-center max-w-20 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium"
+        :class="navButtonClass"
         @click="navigateMonth(-1)"
       >
-        <UIcon name="i-lucide-chevron-left" size="14" />
-        <span class="hidden sm:block">
+        <UIcon name="i-lucide-chevron-left" :size="compact ? 16 : 14" />
+        <span v-if="!compact" class="hidden sm:block">
           {{ $t("bookingTimeWindowSelection.previousMonth") }}
         </span>
       </button>
 
-      <h3 class="flex items-center gap-2">
-        <span class="text-xl font-bold text-gray-900 dark:text-white">{{
-          currentMonthLabel
-        }}</span>
+      <h3 class="flex items-center gap-2 min-w-0">
+        <span
+          :class="
+            compact
+              ? 'text-xs font-semibold text-gray-900 dark:text-white'
+              : 'text-xl font-bold text-gray-900 dark:text-white'
+          "
+        >
+          {{ currentMonthLabel }}
+        </span>
         <DateJumper @select="onJumpDate" />
       </h3>
 
       <button
         type="button"
-        class="flex items-center max-w-20 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary transition-colors text-sm font-medium"
+        :class="navButtonClass"
         @click="navigateMonth(1)"
       >
         <UIcon
           name="i-lucide-chevron-right"
-          size="14"
-          class="order-1 sm:order-2"
+          :size="compact ? 16 : 14"
+          :class="compact ? '' : 'order-1 sm:order-2'"
         />
-        <span class="hidden sm:block sm:order-1">
+        <span v-if="!compact" class="hidden sm:block sm:order-1">
           {{ $t("bookingTimeWindowSelection.nextMonth") }}
         </span>
       </button>
     </div>
 
     <p
-      v-if="!isLoading && blockPeriodCards.length === 0"
-      class="text-sm text-gray-500 dark:text-gray-400 py-4 text-center"
+      v-if="!isLoading && displayBlockPeriodCards.length === 0"
+      class="text-xs text-gray-500 dark:text-gray-400 py-1 text-center"
     >
       {{ $t("bookingTimeWindowSelection.empty") }}
     </p>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div
+      v-else
+      :class="compact ? 'grid grid-cols-2 gap-1.5' : 'grid grid-cols-1 md:grid-cols-2 gap-4'"
+    >
       <button
-        v-for="block in blockPeriodCards"
+        v-for="block in displayBlockPeriodCards"
         :key="block.key"
         type="button"
         :disabled="!block.selectable"
-        class="p-3 rounded-xl border-2 text-left transition-all focus:outline-none"
-        :class="getBlockCardClass(block)"
+        :class="[
+          compact
+            ? 'px-2 py-1.5 rounded-md border text-left transition-all focus:outline-none'
+            : 'p-3 rounded-xl border-2 text-left transition-all focus:outline-none',
+          getBlockCardClass(block),
+        ]"
         @click="selectBlock(block)"
       >
-        <div class="flex items-start justify-between gap-3">
+        <div
+          v-if="compact"
+          class="flex items-center justify-between gap-2 min-w-0"
+        >
+          <p class="text-xs font-semibold text-gray-900 dark:text-white truncate leading-tight">
+            <span class="text-gray-500 font-medium">{{ block.label }}</span>
+            · {{ block.rangeLabel }}
+          </p>
+          <span
+            v-if="block.priceEur != null"
+            class="text-xs font-bold shrink-0 tabular-nums text-gray-900 dark:text-white"
+          >
+            {{ formatEur(block.priceEur) }}
+          </span>
+        </div>
+        <div v-else class="flex items-start justify-between gap-2">
           <div class="min-w-0">
             <span
-              class="text-sm font-medium"
-              :class="
+              :class="[
+                compact ? 'text-xs' : 'text-sm',
+                'font-medium',
                 block.selectable
                   ? 'text-gray-500 dark:text-gray-400'
-                  : 'text-gray-300 dark:text-gray-600'
-              "
+                  : 'text-gray-300 dark:text-gray-600',
+              ]"
             >
               {{ block.label }}
             </span>
             <p
-              class="text-lg font-bold mt-1"
-              :class="
+              :class="[
+                compact ? 'text-sm' : 'text-lg',
+                'font-bold mt-0.5',
                 block.selectable
                   ? 'text-gray-900 dark:text-white'
-                  : 'text-gray-300 dark:text-gray-600'
-              "
+                  : 'text-gray-300 dark:text-gray-600',
+              ]"
             >
               {{ block.rangeLabel }}
             </p>
             <p
+              v-if="!compact"
               class="text-sm mt-0.5 tabular-nums"
               :class="
                 block.selectable
@@ -91,15 +122,18 @@
             </p>
             <p
               v-if="block.selectable && block.priceEur != null"
-              class="text-sm font-semibold mt-1 text-gray-900 dark:text-white tabular-nums"
+              :class="[
+                compact ? 'text-xs' : 'text-sm',
+                'font-semibold mt-0.5 text-gray-900 dark:text-white tabular-nums',
+              ]"
             >
               {{ formatEur(block.priceEur) }}
             </p>
           </div>
 
-          <div class="flex items-center gap-1.5 shrink-0">
+          <div class="flex items-center gap-1 shrink-0">
             <span
-              class="w-2.5 h-2.5 rounded-full shrink-0"
+              class="w-2 h-2 rounded-full shrink-0"
               :class="
                 block.selectable
                   ? 'bg-green-500'
@@ -109,6 +143,7 @@
               "
             />
             <span
+              v-if="!compact"
               class="text-sm font-medium"
               :class="
                 block.selectable
@@ -126,7 +161,7 @@
     </div>
 
     <p
-      v-if="selectionLabel"
+      v-if="!compact && selectionLabel"
       class="text-sm text-gray-600 dark:text-gray-300 mt-4"
     >
       {{ $t("bookingTimeWindowSelection.selected") }}:
@@ -137,7 +172,7 @@
 
     <div
       v-if="isLoading"
-      class="flex items-center justify-center py-4"
+      :class="compact ? 'flex items-center justify-center py-2' : 'flex items-center justify-center py-4'"
     >
       <UIcon name="i-lucide-loader-2" class="text-gray-400 animate-spin mr-2" />
       <span class="text-sm text-gray-500">{{ $t("common.loading") }}</span>
@@ -157,9 +192,16 @@ const props = defineProps({
     type: Object,
     default: () => ({ start: null, end: null }),
   },
+  compact: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["update:modelValue", "change"]);
+
+const navButtonClass = computed(() =>
+  props.compact
+    ? "shrink-0 w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+    : "flex items-center max-w-20 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium",
+);
 
 const { t, locale } = useI18n();
 const { getBlockPeriods } = useBookables();
@@ -418,6 +460,11 @@ const blockPeriodCards = computed(() => {
     });
 });
 
+const displayBlockPeriodCards = computed(() => {
+  if (!props.compact) return blockPeriodCards.value;
+  return blockPeriodCards.value.filter((block) => block.selectable);
+});
+
 const selectedStartMs = ref(null);
 const selectedEndMs = ref(null);
 
@@ -485,6 +532,9 @@ watch(
       typeof v.start === "number" ? v.start : Number(v.start) || null;
     selectedEndMs.value =
       typeof v.end === "number" ? v.end : Number(v.end) || null;
+    if (selectedStartMs.value != null) {
+      onJumpDate(new Date(selectedStartMs.value));
+    }
   },
   { immediate: true, deep: true },
 );

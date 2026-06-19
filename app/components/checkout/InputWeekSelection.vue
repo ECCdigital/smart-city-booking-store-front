@@ -1,83 +1,101 @@
 <template>
-  <div class="space-y-6">
-    <p class="text-gray-500 dark:text-gray-400">
+  <div :class="compact ? 'space-y-2' : 'space-y-6'">
+    <p v-if="!compact" class="text-gray-500 dark:text-gray-400">
       {{ $t("weekSelection.subtitle") }}
     </p>
 
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-2">
       <button
         type="button"
         :disabled="!canGoPreviousMonth"
-        class="flex items-center max-w-20 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium"
+        :class="navButtonClass"
         @click="navigateMonth(-1)"
       >
-        <UIcon name="i-lucide-chevron-left" size="14" />
-        <span class="hidden sm:block">
+        <UIcon name="i-lucide-chevron-left" :size="compact ? 16 : 14" />
+        <span v-if="!compact" class="hidden sm:block">
           {{ $t("weekSelection.previousMonth") }}
         </span>
       </button>
 
-      <h3 class="flex items-center gap-2">
-        <span class="text-xl font-bold text-gray-900 dark:text-white">{{
-          currentMonthLabel
-        }}</span>
+      <h3 class="flex items-center gap-2 min-w-0">
+        <span
+          :class="
+            compact
+              ? 'text-xs font-semibold text-gray-900 dark:text-white'
+              : 'text-xl font-bold text-gray-900 dark:text-white'
+          "
+        >
+          {{ currentMonthLabel }}
+        </span>
         <DateJumper @select="onJumpDate" />
       </h3>
 
       <button
         type="button"
-        class="flex items-center max-w-20 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary transition-colors text-sm font-medium"
+        :class="navButtonClass"
         @click="navigateMonth(1)"
       >
         <UIcon
           name="i-lucide-chevron-right"
-          size="14"
-          class="order-1 sm:order-2"
+          :size="compact ? 16 : 14"
+          :class="compact ? '' : 'order-1 sm:order-2'"
         />
-        <span class="hidden sm:block sm:order-1">
+        <span v-if="!compact" class="hidden sm:block sm:order-1">
           {{ $t("weekSelection.nextMonth") }}
         </span>
       </button>
     </div>
 
     <!-- Week Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div :class="compact ? 'grid grid-cols-2 gap-1.5' : 'grid grid-cols-1 md:grid-cols-2 gap-4'">
       <button
-        v-for="week in weeksWithAvailability"
+        v-for="week in displayWeeks"
         :key="`${week.startMs}`"
         type="button"
         :disabled="!week.available"
-        class="p-3 rounded-xl border-2 text-left transition-all focus:outline-none"
-        :class="getWeekCardClass(week)"
+        :class="[
+          compact
+            ? 'px-2 py-1.5 rounded-md border text-left transition-all focus:outline-none'
+            : 'p-3 rounded-xl border-2 text-left transition-all focus:outline-none',
+          getWeekCardClass(week),
+        ]"
         @click="selectWeek(week)"
       >
-        <div class="flex items-start justify-between gap-3">
+        <div v-if="compact" class="min-w-0">
+          <p class="text-xs font-semibold text-gray-900 dark:text-white truncate leading-tight">
+            <span class="text-gray-500 font-medium">KW {{ week.weekNumber }}</span>
+            · {{ week.rangeLabel }}
+          </p>
+        </div>
+        <div v-else class="flex items-start justify-between gap-2">
           <div class="min-w-0">
             <span
-              class="text-sm font-medium"
-              :class="
+              :class="[
+                compact ? 'text-xs' : 'text-sm',
+                'font-medium',
                 week.available
                   ? 'text-gray-500 dark:text-gray-400'
-                  : 'text-gray-300 dark:text-gray-600'
-              "
+                  : 'text-gray-300 dark:text-gray-600',
+              ]"
             >
               KW {{ week.weekNumber }}
             </span>
             <p
-              class="text-lg font-bold mt-1"
-              :class="
+              :class="[
+                compact ? 'text-sm' : 'text-lg',
+                'font-bold mt-0.5',
                 week.available
                   ? 'text-gray-900 dark:text-white'
-                  : 'text-gray-300 dark:text-gray-600'
-              "
+                  : 'text-gray-300 dark:text-gray-600',
+              ]"
             >
               {{ week.rangeLabel }}
             </p>
           </div>
 
-          <div class="flex items-center gap-1.5">
+          <div class="flex items-center gap-1 shrink-0">
             <span
-              class="w-2.5 h-2.5 rounded-full shrink-0"
+              class="w-2 h-2 rounded-full shrink-0"
               :class="
                 week.available
                   ? 'bg-green-500'
@@ -87,6 +105,7 @@
               "
             />
             <span
+              v-if="!compact"
               class="text-sm font-medium"
               :class="
                 week.available
@@ -110,7 +129,7 @@
     </div>
 
     <p
-      v-if="selectionLabel"
+      v-if="!compact && selectionLabel"
       class="text-sm text-gray-600 dark:text-gray-300 mt-4"
     >
       {{ $t("weekSelection.selected") }}:
@@ -122,7 +141,7 @@
     <!-- Loading indicator -->
     <div
       v-if="isLoadingAvailability"
-      class="flex items-center justify-center py-4"
+      :class="compact ? 'flex items-center justify-center py-2' : 'flex items-center justify-center py-4'"
     >
       <UIcon name="i-lucide-loader-2" class="text-gray-400 animate-spin mr-2" />
       <span class="text-sm text-gray-500">{{ $t("common.loading") }}</span>
@@ -143,9 +162,16 @@ const props = defineProps({
     default: () => ({ start: null, end: null }),
   },
   priceEur: { type: Number, default: null },
+  compact: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["update:modelValue", "change"]);
+
+const navButtonClass = computed(() =>
+  props.compact
+    ? "shrink-0 w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+    : "flex items-center max-w-20 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium",
+);
 
 const { getBookableAvailability } = useBookables();
 
@@ -418,6 +444,11 @@ const weeksWithAvailability = computed(() => {
   }));
 });
 
+const displayWeeks = computed(() => {
+  if (!props.compact) return weeksWithAvailability.value;
+  return weeksWithAvailability.value.filter((week) => week.available);
+});
+
 // ── Selection ──────────────────────────────────────────────────────────────────
 
 const selectedWeekStartMs = ref(null);
@@ -463,6 +494,7 @@ watch(
     if (v.start) {
       const monday = getMondayOfWeek(new Date(v.start));
       selectedWeekStartMs.value = monday.getTime();
+      onJumpDate(monday);
     }
   },
   { immediate: true, deep: true },

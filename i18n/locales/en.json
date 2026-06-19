@@ -311,6 +311,17 @@
     "selected": "Selected month"
   },
 
+  "detailsAvailability": {
+    "title": "Availability",
+    "selectPeriodHint": "Select a time period to see availability and prices.",
+    "scheduleHint": "Select the start and end time of your booking.",
+    "timePeriodHint": "Select an available time slot.",
+    "longRangeWeekHint": "Select a calendar week.",
+    "longRangeMonthHint": "Select a month.",
+    "blockPeriodHint": "Select a booking time window.",
+    "noTimeSelection": "No time period selection is required for this object."
+  },
+
   "bookingTimeWindowSelection": {
     "subtitle": "Select a booking time window.",
     "previousMonth": "Previous month",

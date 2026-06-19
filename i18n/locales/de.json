@@ -686,6 +686,17 @@
     "selected": "Ausgewählter Monat"
   },
 
+  "detailsAvailability": {
+    "title": "Verfügbarkeit",
+    "selectPeriodHint": "Wählen Sie einen Zeitraum aus, um Verfügbarkeit und Preise zu sehen.",
+    "scheduleHint": "Wählen Sie Start- und Endzeit Ihrer gewünschten Buchung.",
+    "timePeriodHint": "Wählen Sie einen verfügbaren Zeit-Slot.",
+    "longRangeWeekHint": "Wählen Sie eine Kalenderwoche.",
+    "longRangeMonthHint": "Wählen Sie einen Monat.",
+    "blockPeriodHint": "Wählen Sie ein Buchungszeitfenster.",
+    "noTimeSelection": "Für dieses Objekt ist keine Zeitraumauswahl erforderlich."
+  },
+
   "bookingTimeWindowSelection": {
     "subtitle": "Wählen Sie ein Buchungszeitfenster.",
     "previousMonth": "Vorheriger Monat",

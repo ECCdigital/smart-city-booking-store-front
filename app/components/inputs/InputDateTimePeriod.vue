@@ -10,12 +10,15 @@
       }"
     >
       <UButton
-        size="lg"
+        :size="compact ? 'sm' : 'lg'"
         color="neutral"
         variant="ghost"
         icon="i-lucide-calendar-clock"
-        class="w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-lg bg-white dark:bg-gray-700 hover:bg-transparent py-2 px-3"
-        :ui="{ leadingIcon: 'text-[16px] dark:text-gray-200 mr-1' }"
+        :class="[
+          'w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-md bg-white dark:bg-gray-700 hover:bg-transparent',
+          compact ? 'py-1 px-2 text-sm' : 'py-2 px-3',
+        ]"
+        :ui="{ leadingIcon: compact ? 'text-[13px] dark:text-gray-200 mr-1' : 'text-[16px] dark:text-gray-200 mr-1' }"
       >
         <template v-if="dateRange[0]">
           <div class="flex justify-between w-full">
@@ -192,6 +195,7 @@ type TimeHM = { hours: number; minutes: number } | null;
 const props = defineProps<{
   modelValue?: TimePeriod; // alias falls du v-model ohne arg möchtest
   timePeriod?: TimePeriod; // unterstützt beide Varianten
+  compact?: boolean;
 }>();
 
 const emit = defineEmits<{
