@@ -10,8 +10,8 @@
       variant: 'ghost',
     }"
     :ui="{
-      wrapper: 'bg-black/70',
-      content: 'w-[90vw] mx-auto rounded-t-2xl',
+      wrapper: 'bg-black/60',
+      content: 'w-[90vw] mx-auto rounded-t-2xl shadow-lg',
     }"
   >
     <UButton
@@ -46,17 +46,35 @@
 
     <template #body>
       <div class="pb-5 h-[60vh]">
+        <!--
+        <div class="text-sm bg-pink-400">{{accessPoint}}</div>
+
+        <div class="text-sm bg-pink-300">
+          verified: {{ isVerified }} <br >
+          open: {{ accessPointStatus.open }} <br >
+          locked: {{ accessPointStatus.locked }}
+        </div>
+        -->
+
+        <!-- show multipe steps-->
+        <AccessPointStepper
+          v-if="accessPointStatus?.locked"
+          :steps="accessSteps"
+          :current-step="currentAccessStep"
+        />
+
         <!-- verify location -->
         <AccessPointVerifyLocation
           v-if="!isVerified && accessPointStatus?.locked"
           v-model:verified="isVerified"
           :access-point="accessPoint"
           :booking-id="bookingId"
+          @next-step="increaseStep"
         />
 
         <!-- open when closed and verified -->
         <div
-          v-else-if="isVerified && accessPointStatus?.locked && !hasResultState"
+          v-else-if="accessPointStatus?.locked && !hasResultState"
           class="py-10"
         >
           <AccessPointControlButton
@@ -102,6 +120,15 @@
           />
         </div>
 
+        <UButton
+            v-if="!isLoading && !(!isVerified && accessPointStatus?.locked)"
+          variant="subtle"
+          class="flex justify-center py-3 shadow-lg cursor-pointer w-full"
+          @click="loadStatus"
+        >
+          Status aktualisieren
+        </UButton>
+
         <ProviderHelpSection
           :provider-id="accessPoint.provider"
           :tenant-id="accessPoint.tenant"
@@ -119,6 +146,7 @@ import AccessPointControlButton from "~/components/mobileKey/AccessPointControlB
 import AccessPointLoadingSpinner from "~/components/mobileKey/AccessPointLoadingSpinner.vue";
 import AccessPointFeedbackSection from "~/components/mobileKey/AccessPointFeedbackSection.vue";
 import ProviderHelpSection from "~/components/mobileKey/ProviderHelpSection.vue";
+import AccessPointStepper from "~/components/mobileKey/AccessPointStepper.vue";
 
 const props = defineProps({
   accessPoint: {
@@ -141,6 +169,26 @@ const { open, close, getStatus } = useAccessPoints();
 
 const isOpenSlideover = ref(false);
 
+const accessSteps = computed(() => {
+  if (props.accessPoint.mode === "remote") {
+    return [
+      {
+        value: "confirmLocation",
+        label: "Standort bestätigen",
+        description:
+          "Bitte bestätigen Sie, dass Sie direkt vor der Tür stehen.",
+      },
+      {
+        value: "openDoor",
+        label: "Tür öffnen",
+        description: "",
+      },
+    ];
+  }
+  return [];
+});
+const currentAccessStep = ref(0);
+
 const isVerified = ref(false);
 const isLoading = ref(false);
 
@@ -157,42 +205,49 @@ const hasResultState = computed(() => {
   );
 });
 
-const openingError = ref(false);
-const openingSuccess = ref(false);
-const closingError = ref(false);
-const closingSuccess = ref(false);
-
 const accessPointStatus = ref(null);
 watch(isOpenSlideover, async (newValue) => {
-  if (newValue) {
-    isLoading.value = true;
-    try {
-      const response = await getStatus(
-        props.accessPoint.tenant,
-        props.accessPoint.id,
-        props.bookingId,
-      );
-      console.log("Access Point Status Response:", response);
-      accessPointStatus.value = response.success ? response.data : null;
-    } catch (e) {
-      console.error("Error fetching access point status:", e);
-      accessPointStatus.value = null;
-    } finally {
-      isLoading.value = false;
-    }
+  //toDo - Status auch bei IFBS laden?!?!?!?!?!??!?!?!?!
+  //toDo - Status auch bei IFBS laden?!?!?!?!?!??!?!?!?!
+  //toDo - Status auch bei IFBS laden?!?!?!?!?!??!?!?!?!
+  if (newValue && props.accessPoint.provider !== "ifbs") {
+    await loadStatus();
   }
 });
+async function loadStatus() {
+  isLoading.value = true;
 
+  try {
+    const response = await getStatus(
+      props.accessPoint.tenant,
+      props.accessPoint.id,
+      props.bookingId,
+    );
+    console.log("Access Point Status Response:", response);
+    accessPointStatus.value = response.success ? response.data : null;
+
+    if (accessPointStatus.value?.open) {
+      isVerified.value = false;
+    }
+  } catch (e) {
+    console.error("Error fetching access point status:", e);
+    accessPointStatus.value = null;
+  } finally {
+    resetState();
+    isLoading.value = false;
+  }
+}
+
+function increaseStep() {
+  currentAccessStep.value++;
+}
 function resetState() {
   errorKey.value = "";
   successKey.value = "";
 
-  openingError.value = false;
-  openingSuccess.value = false;
-  closingError.value = false;
-  closingSuccess.value = false;
   errorMessage.value = "";
 }
+
 function onCloseSlideover() {
   isOpenSlideover.value = false;
   isVerified.value = false;

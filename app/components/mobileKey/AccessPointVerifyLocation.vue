@@ -1,81 +1,70 @@
 <template>
   <div class="w-full flex flex-col">
+    <!-- remote mode-->
     <div v-if="accessPoint.mode === 'remote'">
-      <AccessPointStepper
-        :steps="remoteAccessSteps"
-        :current-step="currentAccessStep"
-      />
-
-      <!-- remote mode-->
-      <div v-if="currentAccessStep === 0">
-        <div v-if="!selectedAccessAction" class="space-y-3">
-          <AccessActionButton
-            v-for="action in accessActions"
-            :key="action.value"
-            :action="action"
-            @select="() => (selectedAccessAction = action.value)"
-          />
-        </div>
-
-        <div v-else-if="selectedAccessAction === 'qr'" class="mb-25">
-          <p class="text-sm text-gray-600 dark:text-gray-300 mb-6">
-            QR-Code scannen
-          </p>
-
-          <!-- ****************************************************** -->
-          <!-- toDo - QR Code Scanner Component einbauen --->
-          <!-- ****************************************************** -->
-          <!-- ****************************************************** -->
-          <UAlert
-            icon="i-lucide-qr-code"
-            color="primary"
-            variant="subtle"
-            title="QR-Code an der Tür scannen"
-            description="Scannen Sie den QR-Code direkt neben der Tür, um Ihren Standort zu bestätigen."
-            class="mb-4"
-          />
-
-          <ClientOnly>
-            <QrcodeStream
-              class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
-              @detect="onQrDetect"
-              @error="onQrError"
-            />
-          </ClientOnly>
-
-          <p v-if="qrError" class="mt-3 text-sm text-red-500">
-            {{ qrError }}
-          </p>
-          <!-- ****************************************************** -->
-          <!-- ****************************************************** -->
-          <!-- ****************************************************** -->
-        </div>
-
-        <div
-          v-else-if="selectedAccessAction === 'deviceLocation'"
-          class="mb-25"
-        >
-          <p class="text-sm text-gray-600 dark:text-gray-300 mb-6">
-            Gerätestandort prüfen
-          </p>
-          <!-- toDo - Location Check Component einbauen --->
-        </div>
-
-        <UButton
-          v-if="selectedAccessAction"
-          label="Andere Methode wählen"
-          icon="i-lucide-chevron-left"
-          variant="ghost"
-          class="px-0 text-sm"
-          @click="() => (selectedAccessAction = '')"
+      <div v-if="!selectedAccessAction" class="space-y-3">
+        <AccessActionButton
+          v-for="action in accessActions"
+          :key="action.value"
+          :action="action"
+          @select="() => (selectedAccessAction = action.value)"
         />
       </div>
+
+      <div v-else-if="selectedAccessAction === 'qr'" class="mb-25">
+        <p class="text-sm text-gray-600 dark:text-gray-300 mb-6">
+          QR-Code scannen
+        </p>
+
+        <!-- ****************************************************** -->
+        <!-- toDo - QR Code Scanner Component einbauen --->
+        <!-- ****************************************************** -->
+        <!-- ****************************************************** -->
+        <UAlert
+          icon="i-lucide-qr-code"
+          color="primary"
+          variant="subtle"
+          title="QR-Code an der Tür scannen"
+          description="Scannen Sie den QR-Code direkt neben der Tür, um Ihren Standort zu bestätigen."
+          class="mb-4"
+        />
+
+        <ClientOnly>
+          <QrcodeStream
+            class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+            @detect="onQrDetect"
+            @error="onQrError"
+          />
+        </ClientOnly>
+
+        <p v-if="qrError" class="mt-3 text-sm text-red-500">
+          {{ qrError }}
+        </p>
+        <!-- ****************************************************** -->
+        <!-- ****************************************************** -->
+        <!-- ****************************************************** -->
+      </div>
+
+      <div v-else-if="selectedAccessAction === 'deviceLocation'" class="mb-25">
+        <p class="text-sm text-gray-600 dark:text-gray-300 mb-6">
+          Gerätestandort prüfen
+        </p>
+        <!-- toDo - Location Check Component einbauen --->
+      </div>
+
+      <UButton
+        v-if="selectedAccessAction"
+        label="Andere Methode wählen"
+        icon="i-lucide-chevron-left"
+        variant="ghost"
+        class="px-0 text-sm"
+        @click="() => (selectedAccessAction = '')"
+      />
     </div>
     <USkeleton v-else class="h-64 w-full rounded-lg" />
   </div>
 </template>
 <script setup>
-import AccessPointStepper from "~/components/mobileKey/AccessPointStepper.vue";
 import AccessActionButton from "~/components/mobileKey/AccessActionButton.vue";
 
 const isVerified = defineModel("verified", {
@@ -92,20 +81,8 @@ const props = defineProps({
     required: true,
   },
 });
+const emit = defineEmits(["nextStep"]);
 
-const remoteAccessSteps = [
-  {
-    value: "confirmLocation",
-    label: "Standort bestätigen",
-    description: "Bitte bestätigen Sie, dass Sie direkt vor der Tür stehen.",
-  },
-  {
-    value: "openDoor",
-    label: "Tür öffnen",
-    description: "",
-  },
-];
-const currentAccessStep = ref(0);
 
 const accessActions = [
   {
@@ -130,7 +107,7 @@ watch(selectedAccessAction, () => {
   console.log("Going to next step soon... ");
   setTimeout(() => {
     isVerified.value = true;
-    currentAccessStep.value = 1;
+    emit("nextStep");
   }, 2000);
 });
 

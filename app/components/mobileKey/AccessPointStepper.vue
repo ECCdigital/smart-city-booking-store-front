@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="props.steps.length > 0">
     <div class="flex gap-2 mb-3">
       <div
         v-for="(_, idx) in steps"
