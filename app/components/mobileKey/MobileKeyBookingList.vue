@@ -1,4 +1,16 @@
 <template>
+  <!-- no bookings available -->
+  <UCard v-if="bookings.length === 0">
+    <div class="flex flex-col items-center justify-center py-10">
+      <UIcon
+        name="i-lucide-calendar-off"
+        class="w-12 h-12 text-neutral-400 mb-3"
+      />
+      <p class="text-sm text-neutral-500">Keine Schlüssel gefunden</p>
+    </div>
+  </UCard>
+
+  <!-- else -->
   <UCard v-for="booking in bookings" :key="booking.id">
     <template #header>
       <!-- Status -->
