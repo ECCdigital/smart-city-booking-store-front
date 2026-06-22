@@ -1,7 +1,7 @@
 <template>
   <USlideover
     v-model:open="isOpenSlideover"
-    :title="accessPoint.label"
+    :title="`Zugangspunkt ${accessPoint.label}`"
     :description="`Details und Aktionen für Zugangspunkt ${accessPoint.label}`"
     side="bottom"
     inset
@@ -102,7 +102,11 @@
           />
         </div>
 
-        <!-- toDo - add help information !!!!!!!!!!!!!!!!!!!!!!!!!! -->
+        <ProviderHelpSection
+          :provider-id="accessPoint.provider"
+          :tenant-id="accessPoint.tenant"
+          :booking-id="bookingId"
+        />
       </div>
     </template>
   </USlideover>
@@ -114,6 +118,7 @@ import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import AccessPointControlButton from "~/components/mobileKey/AccessPointControlButton.vue";
 import AccessPointLoadingSpinner from "~/components/mobileKey/AccessPointLoadingSpinner.vue";
 import AccessPointFeedbackSection from "~/components/mobileKey/AccessPointFeedbackSection.vue";
+import ProviderHelpSection from "~/components/mobileKey/ProviderHelpSection.vue";
 
 const props = defineProps({
   accessPoint: {
