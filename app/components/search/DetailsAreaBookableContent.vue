@@ -101,24 +101,14 @@
         />
 
         <!-- Availability -->
-        <div>
-          <h3 class="text-xl font-bold">Verfügbarkeit</h3>
-          <UAlert
-            v-if="!timePeriod || (!timePeriod.start && !timePeriod.end)"
-            title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
-            icon="i-lucide-info"
-            variant="ghost"
-            class="p-2 text-info w-full"
-          />
-          <InputDateTimePeriod
-            :time-period="timePeriod"
-            class="border dark:border-gray-600 rounded-lg mt-2 mb-5 w-full"
-            @select-date="setSearchTimePeriod"
-            @remove-date="removeSearchTimePeriod"
-          />
-        </div>
+        <DetailsAvailabilitySection
+          :bookable="item"
+          :time-period="timePeriod"
+          @period-selected="setSearchTimePeriod"
+          @period-cleared="removeSearchTimePeriod"
+        />
         <div
-          v-if="timePeriod && timePeriod.start && timePeriod.end"
+          v-if="showAvailabilityResult"
           class="bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-500 shadow-sm rounded-lg p-3 mb-2 md:flex justify-between content-center"
         >
           <div class="font-bold mr-1 content-center line-clamp-2">
@@ -148,18 +138,6 @@
               />
             </div>
           </div>
-        </div>
-
-        <!-- Zusatzbuchungsobjekte -->
-        <div v-if="additionalBookables.length > 0" class="mt-6 mb-6">
-          <USeparator
-            class="w-full mb-6"
-            :ui="{ border: 'border-gray-300' }"
-          />
-          <AdditionalBookablesSelector
-            v-model="selectedAdditionalBookables"
-            :items="additionalBookables"
-          />
         </div>
 
         <!-- Related Bookables -->
@@ -214,9 +192,9 @@
 <script setup>
 import { useTenantStore } from "~~/stores/tenant.js";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
-import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
+import { useBookableBookingMode } from "~/composables/useBookableBookingMode";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
@@ -224,8 +202,7 @@ import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import AddressInformationArea from "~/components/AddressInformationArea.vue";
 import PriceInformationArea from "~/components/PriceInformationArea.vue";
 import BookableRelatedItems from "~/components/bookables/BookableRelatedItems.vue";
-import AdditionalBookablesSelector from "~/components/checkout/AdditionalBookablesSelector.vue";
-import { useCheckout } from "~/composables/api/useCheckout.js";
+import DetailsAvailabilitySection from "~/components/search/DetailsAvailabilitySection.vue";
 
 const props = defineProps({
   item: {
@@ -240,36 +217,6 @@ const {
   runSearch,
   resetResults,
 } = useBookableSearch({ isEvent: false, sourceItems: [props.item] });
-
-// --- Zusatzbuchungsobjekte --------------------------------------------------
-const additionalBookables = ref([]);
-const selectedAdditionalBookables = ref([]);
-const isLoadingAdditional = ref(false);
-
-async function loadAdditionalBookables() {
-  const ids = props.item?.checkoutBookableIds || [];
-  if (ids.length === 0) return;
-
-  isLoadingAdditional.value = true;
-  try {
-    const { fetchBookable } = useCheckout();
-    const results = await Promise.all(
-      ids.map(async ({ bookableId, mandatory }) => ({
-        item: await fetchBookable(bookableId, props.item.tenantId),
-        mandatory,
-      }))
-    );
-    additionalBookables.value = results.filter((r) => r.item != null);
-  } catch (e) {
-    console.error("Error loading additional bookables:", e);
-  } finally {
-    isLoadingAdditional.value = false;
-  }
-}
-
-onMounted(() => {
-  loadAdditionalBookables();
-});
 
 const { sanitizeHtml } = useSanitizeHtml();
 const htmlDescription = computed(() => {
@@ -335,13 +282,26 @@ const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.item.tenantId).name;
 });
 
+const { requiresTimeSelection } = useBookableBookingMode(() => props.item);
+
 const isBookable = computed(() => {
-  if (items.value.length === 1 && items.value[0].status === "bookable") {
-    return true;
-  } else if (items.value.length === 1 && items.value[0].status === "suitable") {
-    return true;
+  const entry = items.value[0];
+  if (!entry) return false;
+  return entry.matchStatus === "match" && entry.isBookable !== false;
+});
+
+const hasValidTimePeriod = computed(() => {
+  const start = timePeriod.value?.start;
+  const end = timePeriod.value?.end;
+  if (!start || !end) return false;
+  return new Date(end).getTime() > new Date(start).getTime();
+});
+
+const showAvailabilityResult = computed(() => {
+  if (!requiresTimeSelection.value) {
+    return items.value.length > 0;
   }
-  return false;
+  return hasValidTimePeriod.value;
 });
 
 const { contrastToPrimary } = useContrastColor();
@@ -353,21 +313,30 @@ async function setSearchTimePeriod(tp) {
     location: "",
     timeStart: timePeriod.value.start,
     timeEnd: timePeriod.value.end,
-    isEvent: false,
   });
 }
 function removeSearchTimePeriod() {
-  timePeriod.value = null;
+  timePeriod.value = { start: null, end: null };
   resetResults();
 }
+
 onMounted(async () => {
-  if (timePeriod.value.start && timePeriod.value.end) {
+  if (hasValidTimePeriod.value) {
     await runSearch({
       term: "",
       location: "",
       timeStart: timePeriod.value.start,
       timeEnd: timePeriod.value.end,
-      isEvent: false,
+    });
+    return;
+  }
+
+  if (!requiresTimeSelection.value) {
+    await runSearch({
+      term: "",
+      location: "",
+      timeStart: null,
+      timeEnd: null,
     });
   }
 });
@@ -380,8 +349,10 @@ function goToCheckout(checkoutData) {
     useCheckoutRedirect().redirectToCheckout({
       id: props.item.id,
       tenantId: props.item.tenantId,
-      start: route.query.start,
-      end: route.query.end,
+      start: hasValidTimePeriod.value
+        ? timePeriod.value.start
+        : route.query.start,
+      end: hasValidTimePeriod.value ? timePeriod.value.end : route.query.end,
       url: props.item.checkoutUrl,
     });
   }

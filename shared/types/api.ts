@@ -82,3 +82,40 @@ export interface PersonalCatalog {
 }
 
 export type CatalogBySlugResponse = OffersEnabledCatalog | PersonalCatalog;
+
+/** Recurring block-period definition on a bookable (admin configuration). */
+export interface BlockPeriodDefinition {
+  id: string;
+  label: string;
+  /** 0 = Sunday … 6 = Saturday (Date.getDay convention). */
+  startWeekday: number;
+  startTime: string;
+  endWeekday: number;
+  endTime: string;
+}
+
+export type BlockPeriodUnavailableReason =
+  | "availability"
+  | "permission"
+  | "block-period-mismatch"
+  | "max-booking-date"
+  | "parent-availability"
+  | "child-bookings"
+  | "event-date"
+  | "event-seats";
+
+/** Concrete bookable block-period instance returned by GET /block-periods. */
+export interface BlockPeriodInstance {
+  blockPeriodId: string;
+  label: string;
+  timeBegin: number;
+  timeEnd: number;
+  available: boolean;
+  priceEur?: number;
+  reason?: BlockPeriodUnavailableReason;
+}
+
+export interface BlockPeriodsResponse {
+  title: string;
+  blockPeriods: BlockPeriodInstance[];
+}

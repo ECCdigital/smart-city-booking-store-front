@@ -1,57 +1,87 @@
 <template>
-  <div class="@container space-y-6">
-    <p class="text-gray-500 dark:text-gray-400">
+  <div :class="compact ? '@container space-y-2' : '@container space-y-6'">
+    <p v-if="!compact" class="text-gray-500 dark:text-gray-400">
       {{ $t("monthSelection.subtitle") }}
     </p>
 
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-2">
       <button
         type="button"
         :disabled="!canGoPreviousYear"
-        class="flex items-center max-w-25 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium"
+        :class="navButtonClass"
         @click="navigateYear(-1)"
       >
-        <UIcon name="i-lucide-chevron-left" size="14" />
-        <span class="hidden sm:block">
+        <UIcon name="i-lucide-chevron-left" :size="compact ? 16 : 14" />
+        <span v-if="!compact" class="hidden sm:block">
           {{ $t("monthSelection.previousYear") }}
         </span>
       </button>
 
-      <h3 class="flex items-center gap-2">
-        <span class="text-xl font-bold text-gray-900 dark:text-white">{{
-          displayYear
-        }}</span>
+      <h3 class="flex items-center gap-2 min-w-0">
+        <span
+          :class="
+            compact
+              ? 'text-xs font-semibold text-gray-900 dark:text-white'
+              : 'text-xl font-bold text-gray-900 dark:text-white'
+          "
+        >
+          {{ displayYear }}
+        </span>
         <DateJumper @select="onJumpDate" />
       </h3>
 
       <button
         type="button"
-        class="flex items-center max-w-25 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary transition-colors text-sm font-medium"
+        :class="navButtonClass"
         @click="navigateYear(1)"
       >
         <UIcon
           name="i-lucide-chevron-right"
-          size="14"
-          class="order-1 sm:order-2"
+          :size="compact ? 16 : 14"
+          :class="compact ? '' : 'order-1 sm:order-2'"
         />
-        <span class="hidden sm:block sm:order-1">{{
+        <span v-if="!compact" class="hidden sm:block sm:order-1">{{
           $t("monthSelection.nextYear")
         }}</span>
       </button>
     </div>
 
     <!-- Month Cards Grid -->
-    <div class="grid grid-cols-2 @3xl:grid-cols-3 gap-4">
+    <div
+      :class="
+        compact
+          ? 'grid grid-cols-3 gap-1.5'
+          : 'grid grid-cols-2 @3xl:grid-cols-3 gap-4'
+      "
+    >
       <button
-        v-for="month in monthsWithAvailability"
+        v-for="month in displayMonths"
         :key="month.startMs"
         type="button"
         :disabled="!month.available"
-        class="p-3 rounded-xl border-2 text-left transition-all focus:outline-none"
-        :class="getMonthCardClass(month)"
+        :class="[
+          compact
+            ? 'px-2 py-1.5 rounded-md border text-center transition-all focus:outline-none'
+            : 'p-3 rounded-xl border-2 text-left transition-all focus:outline-none',
+          getMonthCardClass(month),
+        ]"
         @click="selectMonth(month)"
       >
-        <div class="grid sm:flex items-start sm:justify-between gap-3">
+        <p
+          v-if="compact"
+          class="text-xs font-semibold truncate"
+          :class="
+            month.available
+              ? 'text-gray-900 dark:text-white'
+              : 'text-gray-300 dark:text-gray-600'
+          "
+        >
+          {{ month.label }}
+        </p>
+        <div
+          v-else
+          class="grid sm:flex items-start sm:justify-between gap-3"
+        >
           <div class="min-w-0 order-2 sm:order-1">
             <span
               class="text-sm font-medium"
@@ -112,7 +142,7 @@
     </div>
 
     <p
-      v-if="selectionLabel"
+      v-if="!compact && selectionLabel"
       class="text-sm text-gray-600 dark:text-gray-300 mt-4"
     >
       {{ $t("monthSelection.selected") }}:
@@ -124,7 +154,7 @@
     <!-- Loading indicator -->
     <div
       v-if="isLoadingAvailability"
-      class="flex items-center justify-center py-4"
+      :class="compact ? 'flex items-center justify-center py-2' : 'flex items-center justify-center py-4'"
     >
       <UIcon name="i-lucide-loader-2" class="text-gray-400 animate-spin mr-2" />
       <span class="text-sm text-gray-500">{{ $t("common.loading") }}</span>
@@ -145,9 +175,16 @@ const props = defineProps({
     default: () => ({ start: null, end: null }),
   },
   priceEur: { type: Number, default: null },
+  compact: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["update:modelValue", "change"]);
+
+const navButtonClass = computed(() =>
+  props.compact
+    ? "shrink-0 w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+    : "flex items-center max-w-25 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium",
+);
 
 const { getBookableAvailability } = useBookables();
 
@@ -356,6 +393,11 @@ const monthsWithAvailability = computed(() => {
   }));
 });
 
+const displayMonths = computed(() => {
+  if (!props.compact) return monthsWithAvailability.value;
+  return monthsWithAvailability.value.filter((month) => month.available);
+});
+
 // -- Selection ----------------------------------------------------------------
 
 const selectedMonthKey = ref(null);
@@ -406,6 +448,7 @@ watch(
     if (v.start) {
       const d = new Date(v.start);
       selectedMonthKey.value = `${d.getFullYear()}-${d.getMonth()}`;
+      onJumpDate(d);
     }
   },
   { immediate: true, deep: true },

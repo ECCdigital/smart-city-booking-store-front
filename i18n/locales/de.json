@@ -1,5 +1,41 @@
 {
   "welcome": "Willkommen",
+  "meta": {
+    "siteNameFallback": "Smart City Booking",
+    "pages": {
+      "home": "Startseite",
+      "bookables": "Buchungsobjekte",
+      "bookableDetail": "{title}",
+      "events": "Veranstaltungen",
+      "eventDetail": "{title}",
+      "login": "Anmelden",
+      "register": "Registrieren",
+      "emailVerify": "E-Mail bestätigen",
+      "forgotPassword": "Passwort vergessen",
+      "resetPassword": "Passwort zurücksetzen",
+      "checkout": "Buchung",
+      "checkoutDetail": "Buchung · {title}",
+      "checkoutStatus": "Buchungsstatus",
+      "accountBookings": "Meine Buchungen",
+      "accountBookingDetail": "Buchungsdetails",
+      "accountKeys": "Schlüssel",
+      "accountKeyDetail": "Schlüsseldetails",
+      "accountInvoices": "Rechnungen",
+      "accountFavorites": "Favoriten",
+      "accountSettings": "Einstellungen",
+      "accountAppearance": "Darstellung",
+      "cardLink": "Karte verknüpfen",
+      "cardLinkSuccess": "Karte verknüpft",
+      "cardLinkFailed": "Verknüpfung fehlgeschlagen",
+      "cardLogin": "Karten-Anmeldung",
+      "ssoConfirm": "SSO-Anmeldung",
+      "ssoRegister": "SSO-Registrierung",
+      "notFound": "Seite nicht gefunden",
+      "forbidden": "Zugriff verweigert",
+      "serverError": "Serverfehler",
+      "error": "Fehler"
+    }
+  },
   "common": {
     "password": "Passwort",
     "confirmPassword": "Passwort bestätigen",
@@ -417,6 +453,7 @@
     "invoice_payment_not_permitted": "Zahlung auf Rechnung ist für Ihr Konto nicht freigeschaltet.",
     "capacity_exceeded": "Die maximale Kapazität für dieses Objekt wurde erreicht.",
     "time_conflict": "Für dieses Objekt besteht ein Zeitkonflikt mit einer anderen Buchung.",
+    "block_period_mismatch": "Für dieses Objekt muss ein vollständiges Buchungszeitfenster gebucht werden.",
     "selectTimePeriodTitle": "Zeitraum auswählen",
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
     "data": {
@@ -683,6 +720,36 @@
     "occupied": "Belegt",
     "past": "Vergangen",
     "selected": "Ausgewählter Monat"
+  },
+
+  "detailsAvailability": {
+    "title": "Verfügbarkeit",
+    "selectPeriodHint": "Wählen Sie einen Zeitraum aus, um Verfügbarkeit und Preise zu sehen.",
+    "scheduleHint": "Wählen Sie Start- und Endzeit Ihrer gewünschten Buchung.",
+    "timePeriodHint": "Wählen Sie einen verfügbaren Zeit-Slot.",
+    "longRangeWeekHint": "Wählen Sie eine Kalenderwoche.",
+    "longRangeMonthHint": "Wählen Sie einen Monat.",
+    "blockPeriodHint": "Wählen Sie ein Buchungszeitfenster.",
+    "noTimeSelection": "Für dieses Objekt ist keine Zeitraumauswahl erforderlich."
+  },
+
+  "bookingTimeWindowSelection": {
+    "subtitle": "Wählen Sie ein Buchungszeitfenster.",
+    "previousMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat",
+    "selected": "Ausgewähltes Buchungszeitfenster",
+    "empty": "In diesem Monat sind keine Buchungszeitfenster verfügbar.",
+    "permissionRequired": "Anmeldung erforderlich",
+    "maxBookingDate": "Zu weit in der Zukunft",
+    "weekdays": {
+      "0": "So",
+      "1": "Mo",
+      "2": "Di",
+      "3": "Mi",
+      "4": "Do",
+      "5": "Fr",
+      "6": "Sa"
+    }
   },
 
   "status": {

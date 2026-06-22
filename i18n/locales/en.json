@@ -1,5 +1,41 @@
 {
   "welcome": "Welcome!",
+  "meta": {
+    "siteNameFallback": "Smart City Booking",
+    "pages": {
+      "home": "Home",
+      "bookables": "Bookable items",
+      "bookableDetail": "{title}",
+      "events": "Events",
+      "eventDetail": "{title}",
+      "login": "Sign in",
+      "register": "Register",
+      "emailVerify": "Verify email",
+      "forgotPassword": "Forgot password",
+      "resetPassword": "Reset password",
+      "checkout": "Booking",
+      "checkoutDetail": "Booking · {title}",
+      "checkoutStatus": "Booking status",
+      "accountBookings": "My bookings",
+      "accountBookingDetail": "Booking details",
+      "accountKeys": "Keys",
+      "accountKeyDetail": "Key details",
+      "accountInvoices": "Invoices",
+      "accountFavorites": "Favorites",
+      "accountSettings": "Settings",
+      "accountAppearance": "Appearance",
+      "cardLink": "Link card",
+      "cardLinkSuccess": "Card linked",
+      "cardLinkFailed": "Linking failed",
+      "cardLogin": "Card login",
+      "ssoConfirm": "SSO sign-in",
+      "ssoRegister": "SSO registration",
+      "notFound": "Page not found",
+      "forbidden": "Access denied",
+      "serverError": "Server error",
+      "error": "Error"
+    }
+  },
   "common": {
     "password": "Password",
     "confirmPassword": "Confirm Password",
@@ -47,6 +83,7 @@
     "invoice_payment_not_permitted": "Invoice payment is not enabled for your account.",
     "capacity_exceeded": "The maximum capacity for this object has been reached.",
     "time_conflict": "There is a time conflict with another booking for this object.",
+    "block_period_mismatch": "A complete booking time window must be booked for this object.",
     "selectTimePeriodTitle": "Select a time period",
     "selectTimePeriodHint": "Please select a time period first to see the price summary.",
     "data": {
@@ -308,6 +345,36 @@
     "occupied": "Occupied",
     "past": "Past",
     "selected": "Selected month"
+  },
+
+  "detailsAvailability": {
+    "title": "Availability",
+    "selectPeriodHint": "Select a time period to see availability and prices.",
+    "scheduleHint": "Select the start and end time of your booking.",
+    "timePeriodHint": "Select an available time slot.",
+    "longRangeWeekHint": "Select a calendar week.",
+    "longRangeMonthHint": "Select a month.",
+    "blockPeriodHint": "Select a booking time window.",
+    "noTimeSelection": "No time period selection is required for this object."
+  },
+
+  "bookingTimeWindowSelection": {
+    "subtitle": "Select a booking time window.",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "selected": "Selected booking time window",
+    "empty": "No booking time windows are available in this month.",
+    "permissionRequired": "Sign-in required",
+    "maxBookingDate": "Too far in the future",
+    "weekdays": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    }
   },
 
   "status": {

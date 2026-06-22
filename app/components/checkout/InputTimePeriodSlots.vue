@@ -1,11 +1,14 @@
 <template>
-  <div class="space-y-8">
+  <div :class="compact ? 'space-y-2' : 'space-y-8'">
     <section>
-      <div class="flex items-center gap-2 mb-4">
+      <div :class="compact ? 'flex items-center gap-1.5 mb-1.5' : 'flex items-center gap-2 mb-4'">
         <h3
-          class="text-xs font-bold text-gray-400 dark:text-gray-500  tracking-widest flex items-center gap-2"
+          :class="[
+            'font-bold text-gray-400 dark:text-gray-500 tracking-widest flex items-center gap-1.5',
+            compact ? 'text-[10px]' : 'text-xs',
+          ]"
         >
-          <UIcon name="i-lucide-calendar-days" class="text-base" />
+          <UIcon name="i-lucide-calendar-days" :class="compact ? 'text-sm' : 'text-base'" />
           {{ $t("timePeriods.selectDate") }}
           <UIcon
             v-if="isLoadingAvailability"
@@ -17,6 +20,7 @@
         <DateJumper @select="onJumpDateSelected" />
 
         <button
+          v-if="!compact"
           type="button"
           :disabled="isSearchingNextFreeDay"
           class="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -38,23 +42,29 @@
         <button
           type="button"
           :disabled="!canGoBack"
-          class="shrink-0 w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors"
+          :class="compact ? 'shrink-0 w-7 h-7' : 'shrink-0 w-9 h-9'"
+          class="flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors"
           :aria-label="$t('timePeriods.previousDays')"
-          @click="navigateDays(-numDays)"
+          @click="navigateDays(-effectiveNumDays)"
         >
           <UIcon name="i-lucide-chevron-left" />
         </button>
 
         <div
-          class="flex-1 grid grid-cols-4 @md:grid-cols-7 gap-2"
+          class="flex-1 grid gap-1.5"
+          :class="compact ? 'grid-cols-4 gap-1' : 'grid-cols-4 @md:grid-cols-7 gap-2'"
         >
           <button
-            v-for="day in days"
+            v-for="day in displayDays"
             :key="day.iso"
             type="button"
             :disabled="!day.hasAvailability"
-            class="flex flex-col items-center justify-center py-3 px-2 border rounded-xl transition-all focus:outline-none relative"
-            :class="getDayClass(day)"
+            :class="[
+              compact
+                ? 'flex flex-col items-center justify-center py-1 px-0.5 border rounded-md transition-all focus:outline-none relative'
+                : 'flex flex-col items-center justify-center py-3 px-2 border rounded-xl transition-all focus:outline-none relative',
+              getDayClass(day),
+            ]"
             :title="getDayTitle(day)"
             @click="selectDay(day)"
           >
@@ -65,13 +75,16 @@
               {{ day.weekdayLabel }}
             </span>
             <span
-              class="text-2xl font-extrabold leading-none my-1 tabular-nums"
-              :class="getDayNumberClass(day)"
+              :class="[
+                compact ? 'text-base' : 'text-2xl',
+                'font-extrabold leading-none my-0.5 tabular-nums',
+                getDayNumberClass(day),
+              ]"
             >
               {{ day.dayNumber }}
             </span>
             <span
-              class="text-[11px]"
+              class="text-[10px]"
               :class="getDayWeekdayClass(day)"
             >
               {{ day.monthLabel }}
@@ -79,25 +92,27 @@
 
             <span
               v-if="day.hasMatchingPeriod && !day.hasAvailability"
-              class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-100 dark:bg-red-900/40 text-red-500 dark:text-red-400 flex items-center justify-center"
+              class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-100 dark:bg-red-900/40 text-red-500 dark:text-red-400 flex items-center justify-center"
               :aria-label="$t('timePeriods.fullyBooked')"
             >
-              <UIcon name="i-lucide-x" class="text-[10px]" />
+              <UIcon name="i-lucide-x" class="text-[9px]" />
             </span>
           </button>
         </div>
 
         <button
           type="button"
-          class="shrink-0 w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+          :class="compact ? 'shrink-0 w-7 h-7' : 'shrink-0 w-9 h-9'"
+          class="flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
           :aria-label="$t('timePeriods.laterDays')"
-          @click="navigateDays(numDays)"
+          @click="navigateDays(effectiveNumDays)"
         >
           <UIcon name="i-lucide-chevron-right" />
         </button>
       </div>
 
       <div
+        v-if="!compact"
         class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-[11px] text-gray-500 dark:text-gray-400"
       >
         <span class="flex items-center gap-1.5">
@@ -122,7 +137,10 @@
     <!-- timetable -->
     <section>
       <h3
-        class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-widest mb-4 flex items-center gap-2"
+        :class="[
+          'text-xs font-bold text-gray-400 dark:text-gray-500 tracking-widest flex items-center gap-2',
+          compact ? 'mb-1.5' : 'mb-4',
+        ]"
       >
         <UIcon name="i-lucide-clock" class="text-base" />
         {{ $t("timePeriods.selectTime") }}
@@ -134,16 +152,24 @@
       </h3>
 
       <div
-        v-if="hourSlots.length > 0"
-        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
+        v-if="displayHourSlots.length > 0"
+        :class="
+          compact
+            ? 'grid grid-cols-4 gap-1'
+            : 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3'
+        "
       >
         <button
-          v-for="slot in hourSlots"
+          v-for="slot in displayHourSlots"
           :key="slot.hour"
           type="button"
           :disabled="!slot.available"
-          class="px-4 py-3 rounded-lg border text-center font-medium tabular-nums transition-all focus:outline-none"
-          :class="getSlotClass(slot)"
+          :class="[
+            compact
+              ? 'px-1.5 py-1.5 rounded-md border text-center text-xs font-medium tabular-nums transition-all focus:outline-none'
+              : 'px-4 py-3 rounded-lg border text-center font-medium tabular-nums transition-all focus:outline-none',
+            getSlotClass(slot),
+          ]"
           @click="onSlotClick(slot)"
         >
           <span :class="!slot.available ? 'line-through' : ''">
@@ -157,7 +183,7 @@
       </p>
 
       <p
-        v-if="selectionLabel"
+        v-if="!compact && selectionLabel"
         class="text-sm text-gray-600 dark:text-gray-300 mt-4"
       >
         {{ $t("timePeriods.selected") }}:
@@ -199,9 +225,17 @@ const props = defineProps({
     type: Object,
     default: () => ({ start: null, end: null }),
   },
+  compact: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["update:modelValue", "change"]);
+
+const effectiveNumDays = computed(() =>
+  props.compact ? 4 : props.numDays,
+);
 
 const { getBookableAvailability } = useBookables();
 const { t } = useI18n();
@@ -254,7 +288,7 @@ function navigateDays(delta) {
   dayOffset.value = Math.max(0, next);
 }
 
-function onJumpDateSelected(date) {
+function syncDayOffsetToDate(date) {
   if (!date) return;
 
   const selected = new Date(date);
@@ -265,6 +299,14 @@ function onJumpDateSelected(date) {
   if (diffDays < 0) return;
 
   dayOffset.value = diffDays;
+}
+
+function onJumpDateSelected(date) {
+  if (!date) return;
+
+  syncDayOffsetToDate(date);
+  const selected = new Date(date);
+  selected.setHours(0, 0, 0, 0);
   selectedDayIso.value = localISODate(selected);
   startHour.value = null;
   endHour.value = null;
@@ -276,7 +318,7 @@ const MAX_NEXT_FREE_LOOKAHEAD_DAYS = 365;
 
 async function fetchAvailabilityBlock(blockBase) {
   const blockEnd = new Date(blockBase);
-  blockEnd.setDate(blockEnd.getDate() + props.numDays);
+  blockEnd.setDate(blockEnd.getDate() + effectiveNumDays.value);
   blockEnd.setMilliseconds(blockEnd.getMilliseconds() - 1);
 
   const cacheKey = buildCacheKey(
@@ -326,14 +368,14 @@ async function jumpToNextFreeDay() {
     for (
       let blockStart = startOffset;
       blockStart < startOffset + MAX_NEXT_FREE_LOOKAHEAD_DAYS;
-      blockStart += props.numDays
+      blockStart += effectiveNumDays.value
     ) {
       const blockBase = new Date(today);
       blockBase.setDate(today.getDate() + blockStart);
 
       const availData = await fetchAvailabilityBlock(blockBase);
 
-      for (let i = 0; i < props.numDays; i++) {
+      for (let i = 0; i < effectiveNumDays.value; i++) {
         const d = new Date(blockBase);
         d.setDate(blockBase.getDate() + i);
         const weekday = d.getDay();
@@ -362,7 +404,7 @@ const windowRange = computed(() => {
   start.setDate(start.getDate() + dayOffset.value);
 
   const end = new Date(start);
-  end.setDate(end.getDate() + props.numDays);
+  end.setDate(end.getDate() + effectiveNumDays.value);
   end.setMilliseconds(end.getMilliseconds() - 1);
 
   return { startMs: start.getTime(), endMs: end.getTime() };
@@ -445,7 +487,7 @@ const days = computed(() => {
   const base = startOfToday();
   base.setDate(base.getDate() + dayOffset.value);
 
-  for (let i = 0; i < props.numDays; i++) {
+  for (let i = 0; i < effectiveNumDays.value; i++) {
     const d = new Date(base);
     d.setDate(base.getDate() + i);
 
@@ -470,6 +512,11 @@ const days = computed(() => {
     });
   }
   return list;
+});
+
+const displayDays = computed(() => {
+  if (!props.compact) return days.value;
+  return days.value.filter((day) => day.hasAvailability);
 });
 
 const selectedDayIso = ref(null);
@@ -555,6 +602,11 @@ const hourSlots = computed(() => {
       label: `${pad2(h)}:00`,
       available: isHourSlotAvailable(day.date, h),
     }));
+});
+
+const displayHourSlots = computed(() => {
+  if (!props.compact) return hourSlots.value;
+  return hourSlots.value.filter((slot) => slot.available);
 });
 
 function slotTimestamps(date, hour) {
@@ -770,6 +822,7 @@ watch(
 
     if (v.start) {
       const d = new Date(v.start);
+      syncDayOffsetToDate(d);
       selectedDayIso.value = localISODate(d);
       startHour.value = d.getHours();
       endHour.value = null;

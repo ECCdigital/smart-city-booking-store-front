@@ -30,6 +30,13 @@ if (!bookable.value) {
     bookableID: bookableID.value,
   });
 }
+
+const { t } = useI18n();
+usePageTitle(() =>
+  bookable.value?.title
+    ? t("meta.pages.bookableDetail", { title: bookable.value.title })
+    : t("meta.pages.bookables"),
+);
 </script>
 
 <template>

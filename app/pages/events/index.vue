@@ -11,6 +11,9 @@ definePageMeta({
   },
 });
 
+const { t } = useI18n();
+usePageTitle(() => t("meta.pages.events"));
+
 const route = useRoute();
 const { loadBundle } = useCatalogBundle();
 const eventStore = useEventStore();

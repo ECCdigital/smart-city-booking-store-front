@@ -10,6 +10,7 @@ definePageMeta({
 });
 
 const t = useI18n().t;
+usePageTitle(() => t("meta.pages.login"));
 const route = useRoute();
 
 const form = ref({ id: "", password: "" });

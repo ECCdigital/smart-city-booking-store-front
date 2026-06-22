@@ -5,6 +5,9 @@ definePageMeta({
   middleware: "auth",
 });
 
+const { t } = useI18n();
+usePageTitle(() => t("meta.pages.home"));
+
 const { user } = useAuth();
 </script>
 

@@ -7,6 +7,7 @@ definePageMeta({
 });
 
 const { t } = useI18n();
+usePageTitle(() => t("meta.pages.ssoConfirm"));
 const notification = useNotification();
 const authStore = useAuthStore();
 
