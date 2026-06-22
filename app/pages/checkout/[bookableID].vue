@@ -260,14 +260,19 @@ watch(
   leadBookable,
   (b) => {
     const type = b?.type;
-
-    const route = useRoute();
     const bookableID = route.params.bookableID;
     const tenantID = route.query.tenantId;
-
     const label = TYPE_LABELS[type] || type || "";
-    const url = `/checkout/${bookableID}?tenantId=${tenantID}`;
-    checkoutNavTab.value = { label, url };
+
+    if (!bookableID || !tenantID) {
+      checkoutNavTab.value = { label, url: "" };
+      return;
+    }
+
+    checkoutNavTab.value = {
+      label,
+      url: `/checkout/${encodeURIComponent(String(bookableID))}?tenantId=${encodeURIComponent(String(tenantID))}`,
+    };
   },
   { immediate: true },
 );

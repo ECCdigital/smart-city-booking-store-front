@@ -5,6 +5,16 @@ export default defineEventHandler(async (event) => {
   const bookableID = getRouterParam(event, "bookableId");
   const query = getQuery(event);
 
+  if (!tenantID || !bookableID) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing tenantID or bookableId",
+    });
+  }
+
+  const safeTenantID = encodeURIComponent(tenantID);
+  const safeBookableID = encodeURIComponent(bookableID);
+
   const params = new URLSearchParams();
   if (query.startDate != null && String(query.startDate).trim() !== "") {
     params.set("startDate", String(query.startDate));
@@ -17,7 +27,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const queryString = params.toString();
-  const path = `/api/${tenantID}/bookables/${bookableID}/block-periods${
+  const path = `/api/${safeTenantID}/bookables/${safeBookableID}/block-periods${
     queryString ? `?${queryString}` : ""
   }`;
 

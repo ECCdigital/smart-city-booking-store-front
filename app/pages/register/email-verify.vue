@@ -7,7 +7,8 @@ import AlreadyVerifiedEmailCard from "~/components/auth/email-verification/Alrea
 import EmailVerificationActionCard from "~/components/auth/email-verification/EmailVerificationActionCard.vue";
 
 const { verifyEmail } = useAuth();
-usePageTitle(() => useI18n().t("meta.pages.emailVerify"));
+const { t } = useI18n();
+usePageTitle(() => t("meta.pages.emailVerify"));
 
 const router = useRouter();
 const route = useRoute();

@@ -203,8 +203,6 @@ import AddressInformationArea from "~/components/AddressInformationArea.vue";
 import PriceInformationArea from "~/components/PriceInformationArea.vue";
 import BookableRelatedItems from "~/components/bookables/BookableRelatedItems.vue";
 import DetailsAvailabilitySection from "~/components/search/DetailsAvailabilitySection.vue";
-import AdditionalBookablesSelector from "~/components/checkout/AdditionalBookablesSelector.vue";
-import { useCheckout } from "~/composables/api/useCheckout.js";
 
 const props = defineProps({
   item: {
@@ -219,36 +217,6 @@ const {
   runSearch,
   resetResults,
 } = useBookableSearch({ isEvent: false, sourceItems: [props.item] });
-
-// --- Zusatzbuchungsobjekte --------------------------------------------------
-const additionalBookables = ref([]);
-const selectedAdditionalBookables = ref([]);
-const isLoadingAdditional = ref(false);
-
-async function loadAdditionalBookables() {
-  const ids = props.item?.checkoutBookableIds || [];
-  if (ids.length === 0) return;
-
-  isLoadingAdditional.value = true;
-  try {
-    const { fetchBookable } = useCheckout();
-    const results = await Promise.all(
-      ids.map(async ({ bookableId, mandatory }) => ({
-        item: await fetchBookable(bookableId, props.item.tenantId),
-        mandatory,
-      }))
-    );
-    additionalBookables.value = results.filter((r) => r.item != null);
-  } catch (e) {
-    console.error("Error loading additional bookables:", e);
-  } finally {
-    isLoadingAdditional.value = false;
-  }
-}
-
-onMounted(() => {
-  loadAdditionalBookables();
-});
 
 const { sanitizeHtml } = useSanitizeHtml();
 const htmlDescription = computed(() => {
@@ -322,15 +290,18 @@ const isBookable = computed(() => {
   return entry.matchStatus === "match" && entry.isBookable !== false;
 });
 
+const hasValidTimePeriod = computed(() => {
+  const start = timePeriod.value?.start;
+  const end = timePeriod.value?.end;
+  if (!start || !end) return false;
+  return new Date(end).getTime() > new Date(start).getTime();
+});
+
 const showAvailabilityResult = computed(() => {
   if (!requiresTimeSelection.value) {
     return items.value.length > 0;
   }
-  return (
-    timePeriod.value &&
-    timePeriod.value.start &&
-    timePeriod.value.end
-  );
+  return hasValidTimePeriod.value;
 });
 
 const { contrastToPrimary } = useContrastColor();
@@ -350,7 +321,7 @@ function removeSearchTimePeriod() {
 }
 
 onMounted(async () => {
-  if (timePeriod.value?.start && timePeriod.value?.end) {
+  if (hasValidTimePeriod.value) {
     await runSearch({
       term: "",
       location: "",
@@ -378,8 +349,10 @@ function goToCheckout(checkoutData) {
     useCheckoutRedirect().redirectToCheckout({
       id: props.item.id,
       tenantId: props.item.tenantId,
-      start: timePeriod.value?.start ?? route.query.start,
-      end: timePeriod.value?.end ?? route.query.end,
+      start: hasValidTimePeriod.value
+        ? timePeriod.value.start
+        : route.query.start,
+      end: hasValidTimePeriod.value ? timePeriod.value.end : route.query.end,
       url: props.item.checkoutUrl,
     });
   }

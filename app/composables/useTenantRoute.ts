@@ -39,7 +39,9 @@ export const useTenantRoute = () => {
     to: string | Record<string, any>,
   ): Record<string, string | string[]> {
     const targetPath = resolveTargetPath(to);
+    const canResolveTargetPath = targetPath.length > 0;
     const leavingCheckout =
+      canResolveTargetPath &&
       isCheckoutPath(route.path) &&
       !isCheckoutPath(tenantPath(targetPath));
 

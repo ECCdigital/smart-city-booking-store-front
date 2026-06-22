@@ -206,35 +206,18 @@ const navButtonClass = computed(() =>
 const { t, locale } = useI18n();
 const { getBlockPeriods } = useBookables();
 
-const MONTH_LABELS_FULL = [
-  "Januar",
-  "Februar",
-  "März",
-  "April",
-  "Mai",
-  "Juni",
-  "Juli",
-  "August",
-  "September",
-  "Oktober",
-  "November",
-  "Dezember",
-];
+function buildMonthLabels(monthStyle) {
+  const formatter = new Intl.DateTimeFormat(
+    locale.value === "en" ? "en-GB" : "de-DE",
+    { month: monthStyle },
+  );
+  return Array.from({ length: 12 }, (_, i) =>
+    formatter.format(new Date(2024, i, 1)),
+  );
+}
 
-const MONTH_LABELS_SHORT = [
-  "Jan",
-  "Feb",
-  "Mär",
-  "Apr",
-  "Mai",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Okt",
-  "Nov",
-  "Dez",
-];
+const monthLabelsFull = computed(() => buildMonthLabels("long"));
+const monthLabelsShort = computed(() => buildMonthLabels("short"));
 
 function pad2(n) {
   return n.toString().padStart(2, "0");
@@ -266,8 +249,8 @@ function formatBlockDateRange(timeBegin, timeEnd) {
   const end = new Date(timeEnd);
   const startDay = pad2(start.getDate());
   const endDay = pad2(end.getDate());
-  const startMonth = MONTH_LABELS_SHORT[start.getMonth()];
-  const endMonth = MONTH_LABELS_SHORT[end.getMonth()];
+  const startMonth = monthLabelsShort.value[start.getMonth()];
+  const endMonth = monthLabelsShort.value[end.getMonth()];
 
   if (
     start.getMonth() === end.getMonth() &&
@@ -298,7 +281,7 @@ const displayMonth = ref(now.getMonth());
 const displayYear = ref(now.getFullYear());
 
 const currentMonthLabel = computed(
-  () => `${MONTH_LABELS_FULL[displayMonth.value]} ${displayYear.value}`,
+  () => `${monthLabelsFull.value[displayMonth.value]} ${displayYear.value}`,
 );
 
 const canGoPreviousMonth = computed(() => {
@@ -361,6 +344,7 @@ const visibleRange = computed(() => {
 const blockPeriods = ref([]);
 const isLoading = ref(false);
 const blockPeriodCache = new Map();
+let fetchToken = 0;
 
 function buildCacheKey(tenantId, bookableId, startDate, endDate, amount) {
   return `${tenantId}|${bookableId}|${startDate}|${endDate}|${amount}`;
@@ -393,6 +377,7 @@ async function fetchBlockPeriods() {
     return;
   }
 
+  const token = ++fetchToken;
   isLoading.value = true;
   try {
     const data = await getBlockPeriods({
@@ -403,13 +388,18 @@ async function fetchBlockPeriods() {
       amount: props.amount,
     });
 
+    if (token !== fetchToken) return;
+
     const result = Array.isArray(data?.blockPeriods) ? data.blockPeriods : [];
     blockPeriodCache.set(cacheKey, result);
     blockPeriods.value = result;
   } catch {
+    if (token !== fetchToken) return;
     blockPeriods.value = [];
   } finally {
-    isLoading.value = false;
+    if (token === fetchToken) {
+      isLoading.value = false;
+    }
   }
 }
 

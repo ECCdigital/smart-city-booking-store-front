@@ -28,4 +28,3 @@ const navItems = computed(
     </div>
   </div>
 </template>
-nuxi dev
