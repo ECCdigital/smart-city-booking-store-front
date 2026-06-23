@@ -1,9 +1,8 @@
 <template>
   <div class="px-2 pb-[50px]">
     <DetailsAreaImages :item="item" :is-event="props.isEvent" />
-
-    <div class="my-5 flex w-full items-center justify-between">
-      <BackButton />
+    <div class="my-5 flex w-full items-center" :class="!cameFromMap? 'justify-between' : 'justify-end'">
+      <BackButton v-if="!cameFromMap" />
       <UDropdownMenu :items="dropdownItems">
         <UButton
           icon="i-lucide-ellipsis-vertical"
@@ -37,6 +36,11 @@ const props = defineProps({
     default: false,
   },
 });
+
+const route = useRoute()
+const cameFromMap = computed(() => {
+  return route.query.view === 'map'
+})
 
 const { contrastToPrimary } = useContrastColor();
 const { downloadEventIcal } = useIcalDownload();

@@ -99,8 +99,8 @@ const isEvent = computed(() => {
 const openEventTicketOptions = ref(false);
 
 function onGoToDetails() {
-  if(!mapDetailMode.value){
-    goToDetails(item.value?.id, item.value?.type)
+  if(!props.mapDetailMode && props.item){
+    goToDetails(props.item.id, props.item.type)
   }
 }
 </script>
