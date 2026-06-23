@@ -49,42 +49,42 @@
       </div>
 
       <!-- Time and Address -->
-      <div class="mt-5 flex flex-col gap-3">
-        <div class="flex flex-col sm:flex-row gap-3">
-          <div class="basis-full sm:basis-1/2 flex items-center">
+      <div class="mt-5 flex flex-col lg:flex-row gap-3 lg:gap-5">
+        <div class="lg:basis-auto flex flex-col sm:flex-row gap-3 lg:gap-5">
+          <div
+            class="basis-full sm:basis-1/2 lg:basis-auto flex items-center order-1"
+          >
             <UIcon
               name="i-lucide-calendar"
               class="basis-1/10 sm:basis-auto w-4 h-4 m-0.5 mr-2"
             />
-            <p class="text-sm text-neutral-500">
+            <p class="text-sm text-neutral-500 whitespace-nowrap">
               {{ getTimeRange(booking.timeBegin, booking.timeEnd) }}
+            </p>
+          </div>
+          <div class="w-full flex items-center order-2 lg:order-3">
+            <UIcon
+              name="i-lucide-map-pin-house"
+              class="basis-1/10 sm:basis-auto w-4 h-4 m-0.5 mr-2"
+            />
+            <p class="text-sm text-neutral-500 lg:whitespace-nowrap">
+              {{
+                booking.leadBookable.location.display_address ||
+                "Keine Adresse angegeben"
+              }}
             </p>
           </div>
           <div
             v-if="booking.accessPoints.some((ap) => ap.type === 'door')"
-            class="basis-full sm:basis-1/2 flex items-center order-2 md:order-1"
+            class="basis-full sm:basis-1/2 lg:basis-auto flex items-center order-3 lg:order-4"
           >
             <UIcon
               name="i-lucide-door-closed"
               class="basis-1/10 sm:basis-auto w-4 h-4 m-0.5 mr-2"
             />
-            <p class="text-sm text-neutral-500">
+            <p class="text-sm text-neutral-500 whitespace-nowrap">
               {{ booking.accessPoints.length }}
               {{ booking.accessPoints.length === 1 ? "Tür" : "Türen" }}
-            </p>
-          </div>
-        </div>
-        <div>
-          <div class="w-full flex items-center order-1 md:order-2">
-            <UIcon
-              name="i-lucide-map-pin-house"
-              class="basis-1/10 sm:basis-auto w-4 h-4 m-0.5 mr-2"
-            />
-            <p class="text-sm text-neutral-500">
-              {{
-                booking.leadBookable.location.display_address ||
-                "Keine Adresse angegeben"
-              }}
             </p>
           </div>
         </div>

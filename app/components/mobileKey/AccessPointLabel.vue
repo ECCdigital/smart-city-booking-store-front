@@ -10,8 +10,8 @@
     />
   </div>
 
-  <div v-if="accessPoint.provider === 'nuki'" class="basis-6/7">
-    <div class="text-md font-semibold line-clamp-2">
+  <div v-if="accessPoint.provider === 'nuki'" class="lg:flex lg:gap-2 lg:items-center basis-6/7">
+    <div class=" text-md font-semibold line-clamp-2">
       {{ accessPoint.label }}
     </div>
     <div v-if="showMode" class="text-sm text-neutral-500">

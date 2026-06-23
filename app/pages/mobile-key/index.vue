@@ -38,7 +38,7 @@
           side: 'bottom',
           sideOffset: 8,
         }"
-        class="w-28"
+        class="w-28 lg:w-36"
       />
     </div>
 
@@ -69,13 +69,6 @@ definePageMeta({
 
 const {
   getAccessBookings,
-  getBookingsForAccessPoint,
-  getAccessPoints,
-  open,
-  unlatch,
-  close,
-  getStatus,
-  pollOpenStatus,
 } = useAccessPoints();
 
 const viewMode = ref("list");
@@ -91,7 +84,6 @@ watch(bookingFilter, () => {
   loadBookings();
 });
 
-const accessPointIdInput = ref("");
 const includeAccessPoints = ref(true);
 const includeLockers = ref(true);
 const includeBuffer = ref(true);
@@ -99,9 +91,7 @@ const includeBuffer = ref(true);
 const bookings = ref([]);
 
 const accessPointsByBooking = ref({});
-const visibleJson = ref({});
-const responses = ref({});
-const openProcessIds = ref({});
+
 const lastResponse = ref(null);
 const errorMessage = ref("");
 const loadingKey = ref("");
@@ -149,71 +139,6 @@ onMounted(() => {
   loadBookings();
 });
 
-const loadBookingsForAccessPoint = async () => {
-  const accessPointId = accessPointIdInput.value.trim();
-  if (!accessPointId) return;
-
-  await withLoading("ap-bookings", async () => {
-    const response = await getBookingsForAccessPoint(accessPointId, {
-      filter: bookingFilter.value,
-      includeAccessPoints: includeAccessPoints.value ? "true" : "false",
-      includeLockers: includeLockers.value ? "true" : "false",
-      includeBuffer: includeBuffer.value ? "true" : "false",
-    });
-
-    lastResponse.value = response;
-    bookings.value = responsePayload(response) || [];
-
-    if (includeAccessPoints.value) {
-      for (const booking of bookings.value) {
-        if (booking.accessPoints?.length) {
-          accessPointsByBooking.value[booking.id] = booking.accessPoints;
-        }
-      }
-    }
-  });
-};
-
-const loadAccessPoints = async (booking) => {
-  await withLoading(`points:${booking.id}`, async () => {
-    const response = await getAccessPoints(booking.tenantId, booking.id);
-    lastResponse.value = response;
-    accessPointsByBooking.value[booking.id] = responsePayload(response) || [];
-  });
-};
-
-const runAction = async (action, booking, accessPoint) => {
-  await withLoading(actionKey(action, booking, accessPoint), async () => {
-    let response;
-
-    if (action === "open") {
-      response = await open(booking.tenantId, accessPoint.id, booking.id);
-      const payload = responsePayload(response);
-
-      if (payload?.openProcessId) {
-        openProcessIds.value[processKey(booking, accessPoint)] =
-          payload.openProcessId;
-      }
-    } else if (action === "unlatch") {
-      response = await unlatch(booking.tenantId, accessPoint.id, booking.id);
-    } else if (action === "close") {
-      response = await close(booking.tenantId, accessPoint.id, booking.id);
-    } else if (action === "status") {
-      response = await getStatus(booking.tenantId, accessPoint.id, booking.id);
-    } else if (action === "poll") {
-      response = await pollOpenStatus(
-        booking.tenantId,
-        accessPoint.id,
-        booking.id,
-        openProcessIds.value[processKey(booking, accessPoint)],
-      );
-    }
-
-    lastResponse.value = response;
-    responses.value[processKey(booking, accessPoint)] = response;
-  });
-};
-
 const withLoading = async (key, callback) => {
   errorMessage.value = "";
   loadingKey.value = key;
@@ -227,44 +152,4 @@ const withLoading = async (key, callback) => {
     loadingKey.value = "";
   }
 };
-
-const accessPointsForBooking = (booking) =>
-  accessPointsByBooking.value[booking.id] || [];
-
-
-const processKey = (booking, accessPoint) => `${booking.id}:${accessPoint.id}`;
-
-const actionKey = (action, booking, accessPoint) =>
-  `${action}:${processKey(booking, accessPoint)}`;
-
-const toggleJson = (key) => {
-  visibleJson.value[key] = !visibleJson.value[key];
-};
-
-const bookingStateLabel = (booking) => {
-  const now = Date.now();
-
-  if (booking.timeBegin && now < booking.timeBegin) {
-    return "upcoming";
-  }
-
-  if (booking.timeEnd && now > booking.timeEnd) {
-    return "past";
-  }
-
-  return "active";
-};
-
-const formatDate = (value) => {
-  if (!value) {
-    return "unbekannt";
-  }
-
-  return new Intl.DateTimeFormat("de-DE", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(value));
-};
-
-const pretty = (value) => JSON.stringify(value, null, 2);
 </script>
