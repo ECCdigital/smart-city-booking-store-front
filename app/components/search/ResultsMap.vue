@@ -151,7 +151,7 @@ const currentCenter = ref([53.5, 10.0]);
 
 const initialBounds = computed(() => {
   const coords = props.bookables
-    .filter((b) => hasCoordinates(b.item))
+    .filter((b) => hasCoordinates(b.item) && b.matchStatus === 'match')
     .map((b) => getCoordinatesForBookable(b.item));
 
   if (!coords.length) return null;
