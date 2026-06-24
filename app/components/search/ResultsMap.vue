@@ -196,6 +196,11 @@ const visibleBookables = computed(() => {
       lng >= currentBounds.value[0][1] &&
       lng <= currentBounds.value[1][1]
     );
+  })
+      .sort((a, b) => {
+    const aIsMatch = a.matchStatus === "match" ? 0 : 1;
+    const bIsMatch = b.matchStatus === "match" ? 0 : 1;
+    return aIsMatch - bIsMatch;
   });
 });
 
