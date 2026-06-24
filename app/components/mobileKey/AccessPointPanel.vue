@@ -4,6 +4,8 @@
       v-model:open="isOpenSlideover"
       side="bottom"
       inset
+      :title="accessPoint.label"
+      description="Informationen und Status des Schließsystems"
       :ui="{
         wrapper: 'bg-black/60',
         content: 'w-[90vw] mx-auto rounded-t-2xl shadow-lg',
@@ -11,6 +13,14 @@
     >
       <AccessPointPanelButton :deny-access="denyAccess" />
       <template #header>
+        <DialogTitle class="sr-only">
+          {{ accessPoint.label }}
+        </DialogTitle>
+
+        <DialogDescription class="sr-only">
+          Informationen und Status des Schließsystems
+        </DialogDescription>
+
         <AccessPointPanelContentHeader
           :access-point="accessPoint"
           :access-point-status="accessPointStatus"
@@ -40,9 +50,20 @@
         overlay: 'bg-black/60',
         content: 'w-[50vw] max-w-[80vw] h-[60vh] p-5 shadow-lg',
       }"
+      :title="accessPoint.label"
+      description="Informationen und Status des Schließsystems"
     >
       <AccessPointPanelButton :deny-access="denyAccess" />
       <template #content>
+
+        <DialogTitle class="sr-only">
+          {{ accessPoint.label }}
+        </DialogTitle>
+
+        <DialogDescription class="sr-only">
+          Informationen und Status des Schließsystems
+        </DialogDescription>
+
         <AccessPointLoadingSpinner v-if="isLoading" class="my-10" />
         <div v-else>
           <AccessPointPanelContentHeader
@@ -65,6 +86,10 @@
 </template>
 <script setup>
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
+import {
+  DialogTitle,
+  DialogDescription
+} from 'reka-ui'
 
 import AccessPointPanelButton from "~/components/mobileKey/AccessPointPanelButton.vue";
 import AccessPointPanelContentHeader from "~/components/mobileKey/AccessPointPanelContentHeader.vue";
@@ -101,7 +126,7 @@ const errorKey = ref("");
 const successKey = ref("");
 
 //Status
-const accessPointStatus = ref(null);
+const accessPointStatus = ref({});
 watch([isOpenSlideover, isOpenPopup], async ([slideoverOpen, popupOpen]) => {
   //toDo - Status auch bei IFBS laden?!?!?!?!?!??!?!?!?!
   //toDo - Status auch bei IFBS laden?!?!?!?!?!??!?!?!?!
@@ -120,10 +145,10 @@ async function loadStatus() {
       props.bookingId,
     );
     console.log("Access Point Status Response:", response);
-    accessPointStatus.value = response.success ? response.data : null;
+    accessPointStatus.value = response.success ? response.data : {};
   } catch (e) {
     console.error("Error fetching access point status:", e);
-    accessPointStatus.value = null;
+    accessPointStatus.value = {};
   } finally {
     resetState();
     isLoading.value = false;
