@@ -75,7 +75,6 @@ function setFilteredBookings(newBookings) {
 const activeBookingsWithLocking = computed(() => {
   const withLockerInfo = filteredBookings.value.filter(
     (booking) =>
-        console.log(booking) ||
       booking.lockerInfo.length > 0 &&
       booking.lockerInfo.some((info) => info.lockerSystem === "ifbs")
   );
