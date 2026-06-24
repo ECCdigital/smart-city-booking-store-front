@@ -643,6 +643,10 @@ function dayHasAnyFreeSlot(date, matchingPeriods, availData = availability.value
   if (!availData.length) return true;
 
   for (const p of matchingPeriods) {
+    const ps = timeToHours(p.startTime);
+    const pe = timeToHours(p.endTime);
+    if (ps == null || pe == null || pe <= ps) continue;
+
     if (
       isPeriodSlotAvailable(date, p.startTime, p.endTime, availData)
     ) {
@@ -772,21 +776,28 @@ function emitValue() {
 watch(
   () => props.modelValue,
   (v) => {
-    if (!v || (!v.start && !v.end)) return;
+    const key = `${v?.start ?? ""}|${v?.end ?? ""}`;
+    if (!v?.start) {
+      selectedSlotKey.value = null;
+      lastEmittedKey = key;
+      return;
+    }
 
     if (v.start) {
       const d = new Date(v.start);
       syncDayOffsetToDate(d);
       selectedDayIso.value = localISODate(d);
     }
-    if (v.start && v.end) {
+    if (v.end) {
       selectedSlotKey.value = periodSlotKey(
         timeFromTimestamp(v.start),
         timeFromTimestamp(v.end)
       );
+    } else {
+      selectedSlotKey.value = null;
     }
 
-    lastEmittedKey = `${v.start ?? ""}|${v.end ?? ""}`;
+    lastEmittedKey = key;
   },
   { immediate: true, deep: true }
 );

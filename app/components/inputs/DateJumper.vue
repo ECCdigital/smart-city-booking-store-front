@@ -110,9 +110,10 @@ function onDateSelected(date) {
 
 function onClickOutside(event) {
   const target = event.target;
+  if (!(target instanceof Node)) return;
   if (wrapperRef.value?.contains(target)) return;
   if (pickerRef.value?.contains(target)) return;
-  if (target.closest(".dp__overlay, .dp__menu")) return;
+  if (target instanceof Element && target.closest(".dp__overlay, .dp__menu")) return;
   showPicker.value = false;
 }
 
