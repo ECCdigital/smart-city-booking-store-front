@@ -1,7 +1,10 @@
 <template>
   <div class="px-2 pb-[50px]">
     <DetailsAreaImages :item="item" :is-event="props.isEvent" />
-    <div class="my-5 flex w-full items-center" :class="!cameFromMap? 'justify-between' : 'justify-end'">
+    <div
+      class="my-5 flex w-full items-center"
+      :class="!cameFromMap ? 'justify-between' : 'justify-end'"
+    >
       <BackButton v-if="!cameFromMap" />
       <UDropdownMenu :items="dropdownItems">
         <UButton
@@ -37,10 +40,10 @@ const props = defineProps({
   },
 });
 
-const route = useRoute()
+const route = useRoute();
 const cameFromMap = computed(() => {
-  return route.query.view === 'map'
-})
+  return route.query.view === "map";
+});
 
 const { contrastToPrimary } = useContrastColor();
 const { downloadEventIcal } = useIcalDownload();
