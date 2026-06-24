@@ -454,6 +454,7 @@
     "capacity_exceeded": "Die maximale Kapazität für dieses Objekt wurde erreicht.",
     "time_conflict": "Für dieses Objekt besteht ein Zeitkonflikt mit einer anderen Buchung.",
     "block_period_mismatch": "Für dieses Objekt muss ein vollständiges Buchungszeitfenster gebucht werden.",
+    "time_period_mismatch": "Für dieses Objekt muss ein vollständiger Zeitslot gebucht werden.",
     "selectTimePeriodTitle": "Zeitraum auswählen",
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
     "data": {

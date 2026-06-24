@@ -84,6 +84,7 @@
     "capacity_exceeded": "The maximum capacity for this object has been reached.",
     "time_conflict": "There is a time conflict with another booking for this object.",
     "block_period_mismatch": "A complete booking time window must be booked for this object.",
+    "time_period_mismatch": "A complete time slot must be booked for this object.",
     "selectTimePeriodTitle": "Select a time period",
     "selectTimePeriodHint": "Please select a time period first to see the price summary.",
     "data": {
