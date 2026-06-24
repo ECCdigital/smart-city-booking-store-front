@@ -152,7 +152,7 @@
       </h3>
 
       <div
-        v-if="displayHourSlots.length > 0"
+        v-if="displayPeriodSlots.length > 0"
         :class="
           compact
             ? 'grid grid-cols-4 gap-1'
@@ -160,8 +160,8 @@
         "
       >
         <button
-          v-for="slot in displayHourSlots"
-          :key="slot.hour"
+          v-for="slot in displayPeriodSlots"
+          :key="slot.key"
           type="button"
           :disabled="!slot.available"
           :class="[
@@ -267,6 +267,22 @@ function timeToHours(timeStr) {
   return h + (Number.isNaN(m) ? 0 : m / 60);
 }
 
+function periodSlotKey(startTime, endTime) {
+  return `${startTime}|${endTime}`;
+}
+
+function parseTimeOnDate(date, timeStr) {
+  const [h, m] = timeStr.split(":").map(Number);
+  const d = new Date(date);
+  d.setHours(h, Number.isNaN(m) ? 0 : m, 0, 0);
+  return d.getTime();
+}
+
+function timeFromTimestamp(ts) {
+  const d = new Date(ts);
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+
 function localISODate(date) {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
     date.getDate()
@@ -308,8 +324,7 @@ function onJumpDateSelected(date) {
   const selected = new Date(date);
   selected.setHours(0, 0, 0, 0);
   selectedDayIso.value = localISODate(selected);
-  startHour.value = null;
-  endHour.value = null;
+  selectedSlotKey.value = null;
   emitValue();
 }
 
@@ -387,8 +402,7 @@ async function jumpToNextFreeDay() {
         if (dayHasAnyFreeSlot(d, matchingPeriods, availData)) {
           dayOffset.value = blockStart;
           selectedDayIso.value = localISODate(d);
-          startHour.value = null;
-          endHour.value = null;
+          selectedSlotKey.value = null;
           emitValue();
           return;
         }
@@ -550,8 +564,7 @@ function selectDay(day) {
   if (day.iso === selectedDayIso.value) return;
 
   selectedDayIso.value = day.iso;
-  startHour.value = null;
-  endHour.value = null;
+  selectedSlotKey.value = null;
   emitValue();
 }
 
@@ -575,52 +588,48 @@ const dayPeriods = computed(() => {
   );
 });
 
-const hourSlots = computed(() => {
+const periodSlots = computed(() => {
   const day = selectedDay.value;
   if (!day) return [];
 
-  const hours = new Set();
-  for (const p of dayPeriods.value) {
-    const ps = timeToHours(p.startTime);
-    const pe = timeToHours(p.endTime);
-    if (ps == null || pe == null) continue;
+  return dayPeriods.value
+    .map((p) => {
+      const ps = timeToHours(p.startTime);
+      const pe = timeToHours(p.endTime);
+      if (ps == null || pe == null || pe <= ps) return null;
 
-    const startH = Math.max(0, Math.floor(ps));
-    const endH = Math.min(24, Math.ceil(pe));
-
-    for (let h = startH; h < endH; h++) {
-      if (h >= ps && h + 1 <= pe) {
-        hours.add(h);
-      }
-    }
-  }
-
-  return Array.from(hours)
-    .sort((a, b) => a - b)
-    .map((h) => ({
-      hour: h,
-      label: `${pad2(h)}:00`,
-      available: isHourSlotAvailable(day.date, h),
-    }));
+      return {
+        key: periodSlotKey(p.startTime, p.endTime),
+        startTime: p.startTime,
+        endTime: p.endTime,
+        label: `${p.startTime} – ${p.endTime}`,
+        available: isPeriodSlotAvailable(day.date, p.startTime, p.endTime),
+      };
+    })
+    .filter(Boolean);
 });
 
-const displayHourSlots = computed(() => {
-  if (!props.compact) return hourSlots.value;
-  return hourSlots.value.filter((slot) => slot.available);
+const displayPeriodSlots = computed(() => {
+  if (!props.compact) return periodSlots.value;
+  return periodSlots.value.filter((slot) => slot.available);
 });
 
-function slotTimestamps(date, hour) {
-  const start = new Date(date);
-  start.setHours(hour, 0, 0, 0);
-  const end = new Date(date);
-  end.setHours(hour + 1, 0, 0, 0);
-  return { startMs: start.getTime(), endMs: end.getTime() };
+function periodTimestamps(date, startTime, endTime) {
+  return {
+    startMs: parseTimeOnDate(date, startTime),
+    endMs: parseTimeOnDate(date, endTime),
+  };
 }
 
-function isHourSlotAvailable(date, hour, availData = availability.value) {
+function isPeriodSlotAvailable(
+  date,
+  startTime,
+  endTime,
+  availData = availability.value
+) {
   if (!availData.length) return true;
 
-  const { startMs, endMs } = slotTimestamps(date, hour);
+  const { startMs, endMs } = periodTimestamps(date, startTime, endTime);
 
   for (const interval of availData) {
     if (interval.timeBegin < endMs && interval.timeEnd > startMs) {
@@ -634,16 +643,10 @@ function dayHasAnyFreeSlot(date, matchingPeriods, availData = availability.value
   if (!availData.length) return true;
 
   for (const p of matchingPeriods) {
-    const ps = timeToHours(p.startTime);
-    const pe = timeToHours(p.endTime);
-    if (ps == null || pe == null) continue;
-    const startH = Math.max(0, Math.floor(ps));
-    const endH = Math.min(24, Math.ceil(pe));
-
-    for (let h = startH; h < endH; h++) {
-      if (h >= ps && h + 1 <= pe) {
-        if (isHourSlotAvailable(date, h, availData)) return true;
-      }
+    if (
+      isPeriodSlotAvailable(date, p.startTime, p.endTime, availData)
+    ) {
+      return true;
     }
   }
   return false;
@@ -691,13 +694,10 @@ function getDayTitle(day) {
   return t("timePeriods.closedDay");
 }
 
-const startHour = ref(null);
-const endHour = ref(null);
+const selectedSlotKey = ref(null);
 
 function isSlotSelected(slot) {
-  if (startHour.value == null) return false;
-  if (endHour.value == null) return slot.hour === startHour.value;
-  return slot.hour >= startHour.value && slot.hour < endHour.value;
+  return selectedSlotKey.value === slot.key;
 }
 
 function getSlotClass(slot) {
@@ -710,71 +710,29 @@ function getSlotClass(slot) {
   return "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary cursor-pointer";
 }
 
-function rangeIsContiguouslyAvailable(fromHour, toHourExclusive) {
-  for (let h = fromHour; h < toHourExclusive; h++) {
-    const slot = hourSlots.value.find((s) => s.hour === h);
-    if (!slot || !slot.available) return false;
-  }
-  return true;
-}
-
 function onSlotClick(slot) {
   if (!slot.available) return;
 
-  if (startHour.value == null) {
-    startHour.value = slot.hour;
-    endHour.value = null;
-    emitValue();
-    return;
-  }
-
-  if (endHour.value == null) {
-    if (slot.hour === startHour.value) {
-      startHour.value = null;
-      endHour.value = null;
-      emitValue();
-      return;
-    }
-
-    const lo = Math.min(startHour.value, slot.hour);
-    const hiExclusive = Math.max(startHour.value, slot.hour) + 1;
-
-    if (rangeIsContiguouslyAvailable(lo, hiExclusive)) {
-      startHour.value = lo;
-      endHour.value = hiExclusive;
-      emitValue();
-      return;
-    }
-
-    startHour.value = slot.hour;
-    endHour.value = null;
-    emitValue();
-    return;
-  }
-
-  startHour.value = slot.hour;
-  endHour.value = null;
+  selectedSlotKey.value =
+    selectedSlotKey.value === slot.key ? null : slot.key;
   emitValue();
 }
 
 watch(availability, () => {
-  if (startHour.value != null && endHour.value != null) {
-    if (!rangeIsContiguouslyAvailable(startHour.value, endHour.value)) {
-      startHour.value = null;
-      endHour.value = null;
-      emitValue();
-    }
-  } else if (startHour.value != null) {
-    const slot = hourSlots.value.find((s) => s.hour === startHour.value);
-    if (!slot || !slot.available) {
-      startHour.value = null;
-      emitValue();
-    }
+  if (!selectedSlotKey.value) return;
+
+  const slot = periodSlots.value.find((s) => s.key === selectedSlotKey.value);
+  if (!slot || !slot.available) {
+    selectedSlotKey.value = null;
+    emitValue();
   }
 });
 
 const selectionLabel = computed(() => {
-  if (!selectedDay.value || startHour.value == null) return "";
+  if (!selectedDay.value || !selectedSlotKey.value) return "";
+
+  const slot = periodSlots.value.find((s) => s.key === selectedSlotKey.value);
+  if (!slot) return "";
 
   const date = selectedDay.value.date;
   const dateStr = date.toLocaleDateString("de-DE", {
@@ -784,10 +742,7 @@ const selectionLabel = computed(() => {
     year: "numeric",
   });
 
-  const startStr = `${pad2(startHour.value)}:00`;
-  const endStr = `${pad2(endHour.value ?? startHour.value + 1)}:00`;
-
-  return `${dateStr}, ${startStr} – ${endStr}`;
+  return `${dateStr}, ${slot.startTime} – ${slot.endTime}`;
 });
 
 let lastEmittedKey = "";
@@ -796,15 +751,14 @@ function emitValue() {
   const day = selectedDay.value;
   let payload = { start: null, end: null };
 
-  if (day && startHour.value != null) {
-    const start = new Date(day.date);
-    start.setHours(startHour.value, 0, 0, 0);
-
-    const endH = endHour.value ?? startHour.value + 1;
-    const end = new Date(day.date);
-    end.setHours(endH, 0, 0, 0);
-
-    payload = { start: start.getTime(), end: end.getTime() };
+  if (day && selectedSlotKey.value) {
+    const slot = periodSlots.value.find((s) => s.key === selectedSlotKey.value);
+    if (slot) {
+      payload = {
+        start: parseTimeOnDate(day.date, slot.startTime),
+        end: parseTimeOnDate(day.date, slot.endTime),
+      };
+    }
   }
 
   const key = `${payload.start ?? ""}|${payload.end ?? ""}`;
@@ -824,12 +778,12 @@ watch(
       const d = new Date(v.start);
       syncDayOffsetToDate(d);
       selectedDayIso.value = localISODate(d);
-      startHour.value = d.getHours();
-      endHour.value = null;
     }
-    if (v.end) {
-      const d = new Date(v.end);
-      endHour.value = d.getHours();
+    if (v.start && v.end) {
+      selectedSlotKey.value = periodSlotKey(
+        timeFromTimestamp(v.start),
+        timeFromTimestamp(v.end)
+      );
     }
 
     lastEmittedKey = `${v.start ?? ""}|${v.end ?? ""}`;

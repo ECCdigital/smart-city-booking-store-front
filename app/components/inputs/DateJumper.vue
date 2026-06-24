@@ -1,41 +1,45 @@
 <template>
   <div ref="wrapperRef" class="relative">
     <button
+      ref="triggerRef"
       type="button"
       class="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white transition-colors"
       :aria-label="$t('timePeriods.jumpToDate')"
       :title="$t('timePeriods.jumpToDate')"
-      @click.stop="showPicker = !showPicker"
+      @click.stop="togglePicker"
     >
       <UIcon name="i-lucide-calendar-search" class="text-sm" />
     </button>
 
-    <Transition
-      enter-active-class="transition duration-150 ease-out"
-      enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100"
-      leave-active-class="transition duration-100 ease-in"
-      leave-from-class="opacity-100 scale-100"
-      leave-to-class="opacity-0 scale-95"
-    >
-      <div
-          v-if="showPicker"
-          id="myPicker"
-          class="absolute left-1/2 sm:left-0 -translate-x-1/2 sm:translate-x-0 top-full flex mt-2 z-50 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl"
-          @click.stop
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-150 ease-out"
+        enter-from-class="opacity-0 scale-95"
+        enter-to-class="opacity-100 scale-100"
+        leave-active-class="transition duration-100 ease-in"
+        leave-from-class="opacity-100 scale-100"
+        leave-to-class="opacity-0 scale-95"
       >
-        <VueDatePicker
-          :min-date="props.minDate"
-          :locale="props.locale"
-          month-name-format="long"
-          inline
-          auto-apply
-          :enable-time-picker="false"
-          :dark="isDark"
-          @update:model-value="onDateSelected"
-        />
-      </div>
-    </Transition>
+        <div
+          v-if="showPicker"
+          ref="pickerRef"
+          class="fixed z-[100] rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl"
+          :style="pickerStyle"
+          @click.stop
+        >
+          <VueDatePicker
+            :min-date="props.minDate"
+            :locale="props.locale"
+            month-name-format="long"
+            inline
+            auto-apply
+            :enable-time-picker="false"
+            :dark="isDark"
+            @update:model-value="onDateSelected"
+          />
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -61,6 +65,42 @@ const isDark = computed(() => colorMode.value === "dark");
 
 const showPicker = ref(false);
 const wrapperRef = ref(null);
+const triggerRef = ref(null);
+const pickerRef = ref(null);
+const pickerStyle = ref({ top: "0px", left: "0px" });
+
+function updatePickerPosition() {
+  const trigger = triggerRef.value;
+  const picker = pickerRef.value;
+  if (!trigger) return;
+
+  const rect = trigger.getBoundingClientRect();
+  const gap = 8;
+  const pickerWidth = picker?.offsetWidth ?? 280;
+  const pickerHeight = picker?.offsetHeight ?? 320;
+
+  let top = rect.bottom + gap;
+  let left = rect.left;
+
+  if (window.innerWidth < 640) {
+    left = rect.left + rect.width / 2 - pickerWidth / 2;
+  }
+
+  left = Math.max(8, Math.min(left, window.innerWidth - pickerWidth - 8));
+
+  if (top + pickerHeight > window.innerHeight - 8) {
+    top = Math.max(8, rect.top - pickerHeight - gap);
+  }
+
+  pickerStyle.value = {
+    top: `${top}px`,
+    left: `${left}px`,
+  };
+}
+
+function togglePicker() {
+  showPicker.value = !showPicker.value;
+}
 
 function onDateSelected(date) {
   if (!date) return;
@@ -68,26 +108,34 @@ function onDateSelected(date) {
   showPicker.value = false;
 }
 
-/* ── close on outside click ────────────────────────────── */
 function onClickOutside(event) {
-  if (!wrapperRef.value) return;
-  if (wrapperRef.value.contains(event.target)) return;
-  if (event.target.closest(".dp__overlay, .dp__menu")) return;
+  const target = event.target;
+  if (wrapperRef.value?.contains(target)) return;
+  if (pickerRef.value?.contains(target)) return;
+  if (target.closest(".dp__overlay, .dp__menu")) return;
   showPicker.value = false;
 }
 
 watch(showPicker, (open) => {
   if (open) {
-    nextTick(() =>
-      document.addEventListener("pointerdown", onClickOutside),
-    );
+    nextTick(() => {
+      updatePickerPosition();
+      requestAnimationFrame(updatePickerPosition);
+    });
+    document.addEventListener("pointerdown", onClickOutside);
+    window.addEventListener("resize", updatePickerPosition);
+    window.addEventListener("scroll", updatePickerPosition, true);
   } else {
     document.removeEventListener("pointerdown", onClickOutside);
+    window.removeEventListener("resize", updatePickerPosition);
+    window.removeEventListener("scroll", updatePickerPosition, true);
   }
 });
 
 onUnmounted(() => {
   document.removeEventListener("pointerdown", onClickOutside);
+  window.removeEventListener("resize", updatePickerPosition);
+  window.removeEventListener("scroll", updatePickerPosition, true);
 });
 </script>
 
