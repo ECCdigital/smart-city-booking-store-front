@@ -8,6 +8,8 @@
       />
     </div>
 
+    <!--
+    toDo - bisher nur IFBS! Später noch für weitere Access Points erweitern
     <div v-if="activeBookingsWithLocking?.length">
       <h2 class="text-xl font-bold">
         Aktuelle Buchungen mit Schließberechtigung
@@ -19,6 +21,7 @@
 
       <h2 class="mt-5 text-xl font-bold">Alle Buchungen</h2>
     </div>
+    -->
 
     <BookingsSkeleton v-if="pending" :skeleton-count="9" />
     <BookingSection
@@ -67,9 +70,12 @@ function setFilteredBookings(newBookings) {
   filteredBookings.value = newBookings.map((b) => ({ ...b }));
 }
 
+//    toDo - bisher nur IFBS! Später noch für weitere Access Points erweitern
+/*
 const activeBookingsWithLocking = computed(() => {
   const withLockerInfo = filteredBookings.value.filter(
     (booking) =>
+        console.log(booking) ||
       booking.lockerInfo.length > 0 &&
       booking.lockerInfo.some((info) => info.lockerSystem === "ifbs")
   );
@@ -83,7 +89,8 @@ const activeBookingsWithLocking = computed(() => {
       b.timeEnd + twoHoursMs > currentTime &&
       b.isRejected === false
   );
-});
+})
+ */
 </script>
 
 <style scoped></style>

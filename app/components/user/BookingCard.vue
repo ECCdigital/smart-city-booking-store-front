@@ -27,7 +27,7 @@
         <UDropdownMenu
           :items="actionOptions"
           :content="{
-            align: 'end',
+            align: 'end'
           }"
           :ui="{
             content: 'w-48 ring-0 shadow-lg glass',
@@ -36,7 +36,7 @@
           }"
         >
           <UButton
-            icon="i-lucide-ellipsis"
+              icon="i-lucide-ellipsis-vertical"
             class="rounded-3xl"
             variant="soft"
             color="neutral"
@@ -159,13 +159,13 @@ const actionOptions = computed(() => {
     },
   ];
 
-  if(props.booking.lockerInfo.length > 0){
+  /*if(props.booking.lockerInfo.length > 0){
     options.push({
       label: "Schlüssel anzeigen",
       icon: "i-lucide-lock",
       onSelect: openMobileKey,
     });
-  }
+  }*/
 
   if (eventId.value || (props.booking.timeBegin && props.booking.timeEnd)) {
     options.push({
