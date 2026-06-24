@@ -4,14 +4,17 @@
     :class="isOpen ? 'bg-green-600/10' : 'bg-primary/10'"
   >
     <UIcon
-        :name="isOpen? 'i-lucide-unlock' : 'i-lucide-lock'"
-        class="w-5 h-5 font-bold"
-        :class="isOpen ? 'text-green-600' : 'text-primary'"
+      :name="isOpen ? 'i-lucide-unlock' : 'i-lucide-lock'"
+      class="w-5 h-5 font-bold"
+      :class="isOpen ? 'text-green-600' : 'text-primary'"
     />
   </div>
 
-  <div v-if="accessPoint.provider === 'nuki'" class="lg:flex lg:gap-2 lg:items-center basis-6/7">
-    <div class=" text-md font-semibold line-clamp-2">
+  <div
+    v-if="accessPoint.provider === 'nuki'"
+    class="lg:flex lg:gap-2 lg:items-center basis-6/7"
+  >
+    <div class="text-md font-semibold line-clamp-2">
       {{ accessPoint.label }}
     </div>
     <div v-if="showMode" class="text-sm text-neutral-500">

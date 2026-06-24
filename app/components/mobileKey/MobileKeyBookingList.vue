@@ -105,13 +105,12 @@
         />
 
         <div class="flex-1" />
-        <AccessPointSideover
-          :access-point="accessPoint"
-          :booking-id="booking.id"
-          :deny-access="!canOperate(accessPoint, booking)"
-          @closed="loadStatus(booking.tenantId, accessPoint.id, booking.id)"
+        <AccessPointPanel
+            :access-point="accessPoint"
+            :booking-id="booking.id"
+            :deny-access="!canOperate(accessPoint, booking)"
+            @closed="loadStatus(booking.tenantId, accessPoint.id, booking.id)"
         />
-        <!-- toDo - bei Desktop-Version ein PopUp ergänzen!  -->
       </div>
       <USeparator
         v-if="
@@ -129,8 +128,8 @@
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import AccessPointLabel from "~/components/mobileKey/AccessPointLabel.vue";
-import AccessPointSideover from "~/components/mobileKey/AccessPointSideover.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
+import AccessPointPanel from "~/components/mobileKey/AccessPointPanel.vue";
 
 const props = defineProps({
   bookings: {

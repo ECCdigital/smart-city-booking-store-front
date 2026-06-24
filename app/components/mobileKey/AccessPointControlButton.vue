@@ -82,7 +82,7 @@ const buttonColor = computed(() => {
     case "open":
       return "bg-primary/30";
     case "close":
-      return "bg-secondary/30";
+      return "bg-error/30";
     default:
       return "";
   }
@@ -125,7 +125,7 @@ function onAction() {
 );}
 .closeColor {background: linear-gradient(
     180deg,
-    var(--color-secondary),
-    color-mix(in srgb, var(--color-secondary) 85%, black)
+    #f15d5d,
+    color-mix(in srgb, #f15d5d 85%, black)
 );}
 </style>

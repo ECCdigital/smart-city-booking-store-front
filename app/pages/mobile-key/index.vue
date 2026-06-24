@@ -67,9 +67,7 @@ definePageMeta({
   },
 });
 
-const {
-  getAccessBookings,
-} = useAccessPoints();
+const { getAccessBookings } = useAccessPoints();
 
 const viewMode = ref("list");
 
