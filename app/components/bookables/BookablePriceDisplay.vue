@@ -1,7 +1,7 @@
 <template>
   <div
-    class="text-gray-800 dark:text-gray-100"
-    :class="isMapStripe ? '' : 'text-right'"
+    class="text-gray-800 dark:text-gray-100 w-auto"
+    :class="isMapStripe ? '' : 'text-right w-auto'"
   >
     <!-- special price for user -->
     <p
@@ -16,7 +16,7 @@
       <span>
         {{ displayPrice(calculatedPrice.userGrossPriceEur) }}
       </span>
-      <br />
+      <br >
       <span class="text-xs font-normal text-gray-600 dark:text-gray-300">
         {{ displayPricePerUnit() }}
       </span>
