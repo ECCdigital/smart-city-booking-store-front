@@ -151,7 +151,7 @@ const currentCenter = ref([53.5, 10.0]);
 
 const initialBounds = computed(() => {
   const coords = props.bookables
-    .filter((b) => hasCoordinates(b.item))
+    .filter((b) => hasCoordinates(b.item) && b.matchStatus === 'match')
     .map((b) => getCoordinatesForBookable(b.item));
 
   if (!coords.length) return null;
@@ -196,6 +196,11 @@ const visibleBookables = computed(() => {
       lng >= currentBounds.value[0][1] &&
       lng <= currentBounds.value[1][1]
     );
+  })
+      .sort((a, b) => {
+    const aIsMatch = a.matchStatus === "match" ? 0 : 1;
+    const bIsMatch = b.matchStatus === "match" ? 0 : 1;
+    return aIsMatch - bIsMatch;
   });
 });
 

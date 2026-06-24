@@ -7,7 +7,7 @@
       :title="hintText"
       icon="i-lucide-info"
       variant="ghost"
-      class="p-1 text-info w-full mt-1 mb-1.5 text-xs"
+      class="p-1 text-primary w-full mt-1 mb-1.5 text-xs flex items-center"
     />
 
     <UAlert
@@ -15,7 +15,7 @@
       :title="$t('detailsAvailability.noTimeSelection')"
       icon="i-lucide-info"
       variant="ghost"
-      class="p-1 text-info w-full mt-1 mb-1.5 text-xs"
+      class="p-1 text-primary w-full mt-1 mb-1.5 text-xs items-center"
     />
 
     <InputDateTimePeriod

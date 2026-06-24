@@ -14,21 +14,18 @@
     </UPageList>
 
     <!-- Nicht passende Ergebnisse -->
-    <h2
-      v-if="includeNonSuitable && nonSuitableBookables.length > 0"
-      class="text-2xl font-bold m-4 mt-7"
-    >
-      Nicht passende Objekte
-    </h2>
-    <UPageList>
-      <ResultStrip
-        v-for="(b, i) in nonSuitableBookables"
-        :key="i"
-        :item="b.item"
-        is-not-suitable
-        class="m-2"
-      />
-    </UPageList>
+    <div v-if="includeNonSuitable && nonSuitableBookables.length > 0">
+      <h2 class="text-2xl font-bold m-4 mt-7">Nicht passende Objekte</h2>
+      <UPageList>
+        <ResultStrip
+          v-for="(b, i) in nonSuitableBookables"
+          :key="i"
+          :item="b.item"
+          is-not-suitable
+          class="m-2"
+        />
+      </UPageList>
+    </div>
 
     <p v-if="bookables.length < 1">Keine Objekte gefunden.</p>
   </div>

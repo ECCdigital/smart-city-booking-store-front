@@ -93,14 +93,14 @@
           v-if="currentView === 'list' && sortedResources.length > 0"
           :bookables="sortedResources"
           include-non-bookable
-          include-non-suitable
+          :include-non-suitable="query.inclNoSuitable"
           class="hidden md:block"
         />
         <ResultsGrid
           v-if="currentView === 'list' && sortedResources.length > 0"
           :bookables="sortedResources"
           include-non-bookable
-          include-non-suitable
+          :include-non-suitable="query.inclNoSuitable"
           class="md:hidden"
         />
 
