@@ -85,6 +85,7 @@ watch(bookingFilter, () => {
 const includeAccessPoints = ref(true);
 const includeLockers = ref(true);
 const includeBuffer = ref(true);
+const includeEligibility = ref(true);
 
 const bookings = ref([]);
 
@@ -103,6 +104,7 @@ const loadBookings = async () => {
       includeAccessPoints: includeAccessPoints.value ? "true" : "false",
       includeLockers: includeLockers.value ? "true" : "false",
       includeBuffer: includeBuffer.value ? "true" : "false",
+      includeEligibility: includeEligibility.value ? "true" : "false",
     });
 
     lastResponse.value = response;

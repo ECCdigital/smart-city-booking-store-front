@@ -156,8 +156,20 @@ const { getTenantName } = useTenant();
 const { formatDate } = useFormatting();
 const { getStatus } = useAccessPoints();
 
+const blockingReasonLabels = {
+  rejected: "Abgelehnt",
+  not_committed: "Noch nicht bestätigt",
+  payment_required: "Zahlung ausstehend",
+  authorization_revoked: "Berechtigung widerrufen",
+  outside_access_window: "Außerhalb des Zeitfensters",
+  not_provisioned: "Noch nicht freigegeben",
+  locker_not_ready: "Schließfach nicht bereit",
+  no_remote_access: "Keine Fernsteuerung",
+};
+
 const bookingStatus = (booking) => {
   const now = Date.now();
+  const eligibility = booking.accessEligibility;
 
   if (booking.timeBegin && now < booking.timeBegin) {
     return {
@@ -172,6 +184,21 @@ const bookingStatus = (booking) => {
       label: "Vergangen",
       color: "bg-gray-100 text-gray-800",
       icon: "i-lucide-clock",
+    };
+  }
+
+  if (
+    eligibility &&
+    !eligibility.canOperate &&
+    eligibility.primaryBlockingReason &&
+    eligibility.primaryBlockingReason !== "outside_access_window"
+  ) {
+    return {
+      label:
+        blockingReasonLabels[eligibility.primaryBlockingReason] ||
+        "Nicht verfügbar",
+      color: "bg-orange-100 text-orange-800",
+      icon: "i-lucide-lock",
     };
   }
 
@@ -205,6 +232,14 @@ const loadAllStatuses = async () => {
 onMounted(loadAllStatuses);
 
 const canOperate = (accessPoint, booking) => {
+  if (booking.accessEligibility) {
+    return (
+      booking.accessEligibility.operableAccessPointIds?.includes(
+        String(accessPoint.id),
+      ) ?? false
+    );
+  }
+
   if (!accessPoint.accessFrom || !accessPoint.accessTo) {
     if (booking.timeBegin && booking.timeEnd) {
       const now = Date.now();
