@@ -40,7 +40,6 @@ export default defineNuxtConfig({
     "@vueuse/nuxt",
     "@nuxtjs/color-mode",
     "@nuxtjs/leaflet",
-      "nuxt-qrcode"
   ],
   css: ["~/assets/css/main.css"],
   colorMode: {

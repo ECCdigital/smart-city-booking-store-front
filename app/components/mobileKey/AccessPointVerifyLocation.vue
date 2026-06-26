@@ -29,13 +29,13 @@
           class="mb-4"
         />
 
-        <ClientOnly>
+        <!--<ClientOnly>
           <QrcodeStream
             class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
             @detect="onQrDetect"
             @error="onQrError"
           />
-        </ClientOnly>
+        </ClientOnly>-->
 
         <p v-if="qrError" class="mt-3 text-sm text-red-500">
           {{ qrError }}
@@ -116,7 +116,7 @@ watch(selectedAccessAction, () => {
 // ******************************************************
 const qrError = ref("");
 
-function onQrDetect(detectedCodes) {
+/*function onQrDetect(detectedCodes) {
   const qrValue = detectedCodes[0]?.rawValue;
 
   if (!qrValue) {
@@ -141,6 +141,7 @@ function onQrError(error) {
   qrError.value =
     "Die Kamera konnte nicht gestartet werden. Bitte erlauben Sie den Kamerazugriff.";
 }
+ */
 // ******************************************************
 // ******************************************************
 // ******************************************************

@@ -78,12 +78,12 @@ const title = computed(() => {
     return "Unklarer Zustand";
   }
   if (props.isError) {
-    return "Tür reagiert nicht";
+    return "Schloss reagiert nicht";
   }
   if(props.isSuccess && props.variant === "open") {
-    return "Tür erfolgreich geöffnet!";
+    return "Schloss erfolgreich geöffnet!";
   } else if(props.isSuccess && props.variant === "close") {
-    return "Tür erfolgreich geschlossen!";
+    return "Schloss erfolgreich geschlossen!";
   }
   return "";
 });

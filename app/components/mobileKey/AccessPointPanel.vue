@@ -48,18 +48,16 @@
       v-model:open="isOpenPopup"
       :ui="{
         overlay: 'bg-black/60',
-        content: 'w-[50vw] max-w-[80vw] h-[60vh] p-5 shadow-lg',
+        content: 'w-[50vw] max-w-[80vw] h-[60vh] p-5 shadow-lg overflow-y-scroll',
       }"
       :title="accessPoint.label"
       description="Informationen und Status des Schließsystems"
     >
       <AccessPointPanelButton :deny-access="denyAccess" />
       <template #content>
-
         <DialogTitle class="sr-only">
           {{ accessPoint.label }}
         </DialogTitle>
-
         <DialogDescription class="sr-only">
           Informationen und Status des Schließsystems
         </DialogDescription>

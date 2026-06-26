@@ -83,13 +83,15 @@
               class="basis-1/10 sm:basis-auto w-4 h-4 m-0.5 mr-2"
             />
             <p class="text-sm text-neutral-500 whitespace-nowrap">
-              {{ booking.accessPoints.length }}
-              {{ booking.accessPoints.length === 1 ? "Tür" : "Türen" }}
+              {{ booking.accessPoints.filter((ap) => ap.type === 'door').length }}
+              {{ booking.accessPoints.filter((ap) => ap.type === 'door').length === 1 ? "Tür" : "Türen" }}
             </p>
           </div>
         </div>
       </div>
     </template>
+
+    <pre class="text-xs bg-pink-50 border border-pink-200 rounded-md p-3 overflow-auto">{{ JSON.stringify(booking.accessPoints, null, 2) }}</pre>
 
     <div v-for="accessPoint in booking.accessPoints" :key="accessPoint.id">
       <div class="flex items-center gap-2 my-2">
