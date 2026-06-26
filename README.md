@@ -1,27 +1,138 @@
-# Smart City Booking Store Front
+# Smart City Booking — Storefront
 
-Customer-facing web interface for the **Smart City Booking** ecosystem. The application displays booking offers, provides checkout, and gives logged-in users an overview of their bookings.
+![Nuxt](https://img.shields.io/badge/Nuxt-blue)
+![Vue.js](https://img.shields.io/badge/Vue.js-blue)
+![Node.js](https://img.shields.io/badge/Node.js-blue)
+![npm](https://img.shields.io/badge/npm-blue)
+![Docker](https://img.shields.io/badge/Docker-blue)
 
-All business data (offers, availability, bookings, payments, authentication) is provided by the backend:
+**[Smart City Booking](https://smart-city-booking.de/)** makes your administration's offerings bookable online — from rooms and sports facilities to makerspaces. Operated and developed by the Biletado core team. Open source, GDPR-compliant, and ready to deploy.
 
-**[smart-city-booking-backend](https://github.com/ECCdigital/smart-city-booking-backend/pkgs/container/smart-city-booking-backend)**
-
-This repository contains only the store front (Nuxt 4 / Vue 3). Server routes under `/api/*` act as a BFF proxy to the backend and store tokens in HTTP-only cookies.
+This repository contains the **public storefront** (Nuxt 4 / Vue 3). Server routes under `/api/*` act as a BFF proxy to the backend API and store auth tokens in HTTP-only cookies. It is only compatible with the **v4.x** backend and admin UI (see [Ecosystem](#ecosystem)).
 
 ---
 
-## Table of Contents
+## Ecosystem
 
-- [Features](#features)
-- [Architecture](#architecture)
-- [Prerequisites](#prerequisites)
-- [Local Setup](#local-setup)
-- [Environment Variables](#environment-variables)
-- [Development](#development)
-- [Production Build](#production-build)
-- [Docker](#docker)
-- [Operations](#operations)
-- [Server-Side Cache](#server-side-cache)
+| Component | Repository | Role |
+|-----------|------------|------|
+| **Backend API** | [smart-city-booking-backend](https://github.com/ECCdigital/smart-city-booking-backend) | REST API, auth, bookings, tenants |
+| **Storefront** | [smart-city-booking-store-front](https://github.com/ECCdigital/smart-city-booking-store-front) | Public booking UI — connects to the API (v4) **(this repository)** |
+| **Admin UI** | [smart-city-booking-vue-app](https://github.com/ECCdigital/smart-city-booking-vue-app) | Administration, configuration, and JS web interface for embedding |
+
+```
+┌─────────────────┐     ┌──────────────────────┐     ┌─────────────────┐
+│   Storefront    │────▶│    Backend API       │◀────│    Admin UI     │
+│  (this repo)    │     │  (backend repository)│     │   (vue-app)     │
+└─────────────────┘     └──────────┬───────────┘     └─────────────────┘
+                                   │
+                                   ▼
+                              ┌─────────┐
+                              │ MongoDB │
+                              └─────────┘
+```
+
+> **v3 users:** Continue on branch `version/3.x` in the backend and admin UI repositories. v3 typically uses the vue-app for both admin and public flows. v4 introduces this separate storefront for public booking.
+
+More details: [smart-city-booking-backend/docs/architecture.md](https://github.com/ECCdigital/smart-city-booking-backend/blob/develop/docs/architecture.md)
+
+---
+
+## Versions & Branches
+
+This repository has its **own release line** (currently **v1.x**). It requires the **v4.x** backend API and admin UI — there is no v3 storefront.
+
+| Branch | Version line | Purpose |
+|--------|--------------|---------|
+| `develop` | **v1.x** (latest) | Active development and integration |
+| `version/1.x` | **v1.x** (stable) | Maintenance, security fixes, production tag source |
+
+| Backend / Admin UI | Storefront |
+|--------------------|------------|
+| v3.x (`version/3.x`) | Not supported — use the admin UI for public booking |
+| v4.x (`develop` / `version/4.x`) | Supported (this repository) |
+
+- v1.x releases: tags `v1.x.x` from `version/1.x`
+- Breaking API changes: [smart-city-booking-backend/docs/CHANGELOG.md](https://github.com/ECCdigital/smart-city-booking-backend/blob/develop/docs/CHANGELOG.md)
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) v20+ (recommended; CI tests 18.x and 20.x)
+- [npm](https://www.npmjs.com/) v10+
+- [Docker](https://www.docker.com/) v20+ (optional, for container deployments)
+- A running **[v4.x backend API](https://github.com/ECCdigital/smart-city-booking-backend)** instance
+
+### Installation
+
+```bash
+git clone https://github.com/ECCdigital/smart-city-booking-store-front.git
+cd smart-city-booking-store-front
+npm install
+cp .env.example .env
+```
+
+Configure at minimum the following values in `.env`:
+
+```bash
+NUXT_API_BASE_URL=http://localhost:8080
+NUXT_USER_BASE_URL=http://localhost:3000
+NUXT_PUBLIC_USER_BASE_URL=http://localhost:3000
+NUXT_CACHE_ENABLED=false
+```
+
+Start the development server (backend must be running):
+
+```bash
+npm run dev
+```
+
+The application is available at [http://localhost:3000](http://localhost:3000) with hot-reload enabled.
+
+---
+
+## Configuration
+
+Create a `.env` file in the project root by copying the provided example:
+
+```bash
+cp .env.example .env
+```
+
+Nuxt maps `runtimeConfig` fields to `NUXT_*` environment variables. Values with the `NUXT_PUBLIC_` prefix are exposed to the browser. Server-side variables are applied at build time or on server start.
+
+| Variable | Required | Description | Example |
+| -------- | -------- | ----------- | ------- |
+| `NUXT_API_BASE_URL` | **Yes** | Base URL of the backend API (server-side) | `https://api.booking.example.com` |
+| `NUXT_PUBLIC_API_BASE_URL` | No | Public backend URL, if needed by the client | `https://api.booking.example.com` |
+| `NUXT_USER_BASE_URL` | **Yes** | Public URL of this storefront (auth emails, server-side) | `https://booking.example.com` |
+| `NUXT_PUBLIC_USER_BASE_URL` | **Yes** | Same URL for client-side redirects (e.g. password reset) | `https://booking.example.com` |
+| `NUXT_ADMIN_BASE_URL` | No | Admin portal URL (server-side) | `https://admin.booking.example.com` |
+| `NUXT_PUBLIC_ADMIN_BASE_URL` | No | Admin portal link in navigation (users with memberships) | `https://admin.booking.example.com` |
+| `NUXT_PUBLIC_SILENT_SSO_ENABLED` | No | `true` enables automatic SSO check on page load (Keycloak) | `false` |
+| `NUXT_CACHE_ENABLED` | No | `false` disables the server-side SWR cache (recommended for local dev) | `false` |
+| `LOG_LEVEL` | No | Pino log level: `trace`, `debug`, `info`, `warn`, `error`, `fatal` | `info` |
+| `PORT` | No | HTTP port in Docker/production | `3000` |
+| `NODE_ENV` | – | `development` or `production` (controls e.g. the `secure` flag on cookies) | `production` |
+
+A complete overview with comments is available in [`.env.example`](.env.example).
+
+### Example: Production
+
+```bash
+NUXT_API_BASE_URL=https://api.booking.example.com
+NUXT_USER_BASE_URL=https://booking.example.com
+NUXT_PUBLIC_USER_BASE_URL=https://booking.example.com
+NUXT_PUBLIC_ADMIN_BASE_URL=https://admin.booking.example.com
+NUXT_PUBLIC_SILENT_SSO_ENABLED=true
+NUXT_CACHE_ENABLED=true
+LOG_LEVEL=info
+PORT=3000
+NODE_ENV=production
+```
 
 ---
 
@@ -41,152 +152,55 @@ This repository contains only the store front (Nuxt 4 / Vue 3). Server routes un
 ## Architecture
 
 ```
-Browser  →  Store Front (Nuxt SSR / Nitro)  →  smart-city-booking-backend
+Browser  →  Storefront (Nuxt SSR / Nitro)  →  Backend API (v4.x)
               /api/*  (BFF proxy)                REST API
 ```
 
-- **Frontend**: Nuxt 4 with SSR, Pinia state, Nuxt UI
-- **Server**: Nitro (`node-server` preset) – all sensitive API calls run server-side
-- **Backend**: Separate container/service – must be reachable at `NUXT_API_BASE_URL`
+- **Frontend**: Nuxt 4 with SSR, Pinia state, Nuxt UI, i18n (de/en)
+- **Server**: Nitro (`node-server` preset) — sensitive API calls run server-side
+- **Backend**: Separate service — must be reachable at `NUXT_API_BASE_URL`
 - **Multi-tenant**: Routes under `/t/:tenantID/...` are automatically derived from the standard routes
 
 ---
 
-## Prerequisites
+## Available npm Scripts
 
-| Component | Version |
-| --- | --- |
-| Node.js | 20.x (recommended; CI tests 18.x and 20.x) |
-| npm | 9+ |
-| Backend | [smart-city-booking-backend](https://github.com/ECCdigital/smart-city-booking-backend/pkgs/container/smart-city-booking-backend) running and reachable |
-
----
-
-## Local Setup
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/ECCdigital/smart-city-booking-store-front.git
-cd smart-city-booking-store-front
-```
-
-### 2. Install dependencies
-
-```bash
-npm install
-```
-
-### 3. Configure environment variables
-
-```bash
-cp .env.example .env
-```
-
-At minimum, adjust the following values:
-
-```bash
-NUXT_API_BASE_URL=http://localhost:8080        # Backend URL
-NUXT_USER_BASE_URL=http://localhost:3000        # URL of this store front
-NUXT_PUBLIC_USER_BASE_URL=http://localhost:3000
-NUXT_CACHE_ENABLED=false                        # Disable cache during development
-```
-
-> **Note:** Nuxt loads `.env` automatically (`dotenv/config` in `nuxt.config.js`). Runtime config values are applied at build time or on server start.
-
-### 4. Start the backend
-
-The backend must be running before the store front and reachable at the configured `NUXT_API_BASE_URL`. See the backend documentation in the linked repository.
-
-### 5. Start the development server
-
-```bash
-npm run dev
-```
-
-The application is available at **http://localhost:3000**.
+| Script | Description |
+| ------ | ----------- |
+| `npm run dev` | Dev server with hot-reload |
+| `npm run build` | Production build (Nitro `node-server` preset) |
+| `npm run preview` | Local production preview |
+| `npm run generate` | Static site generation |
+| `npm run lint:check` | ESLint — report problems |
+| `npm run release:patch` | Bump patch version |
+| `npm run release:minor` | Bump minor version |
+| `npm run release:major` | Bump major version |
+| `npm run release:rc` | Create release candidate |
 
 ---
 
-## Environment Variables
+## Production
 
-Nuxt automatically maps `runtimeConfig` fields to `NUXT_*` variables. Public values (exposed to the browser) require the `NUXT_PUBLIC_` prefix.
+For backend deployment (Docker, secrets, process management, reverse proxy), see [smart-city-booking-backend/docs/deployment.md](https://github.com/ECCdigital/smart-city-booking-backend/blob/develop/docs/deployment.md).
 
-| Variable | Required | Default | Description |
-| --- | --- | --- | --- |
-| `NUXT_API_BASE_URL` | **Yes** | `""` | Base URL of the backend (e.g. `https://api.booking.example.com`). Used server-side for all API calls. |
-| `NUXT_PUBLIC_API_BASE_URL` | No | `""` | Public backend URL, if needed by the client. |
-| `NUXT_USER_BASE_URL` | **Yes** | `""` | Public URL of the store front. Used server-side to build verify/reset links in auth emails. |
-| `NUXT_PUBLIC_USER_BASE_URL` | **Yes** | `""` | Same URL, for client-side redirects (e.g. password reset). |
-| `NUXT_ADMIN_BASE_URL` | No | `""` | Admin portal URL (server-side). |
-| `NUXT_PUBLIC_ADMIN_BASE_URL` | No | `""` | Admin portal link in navigation (only for users with memberships). |
-| `NUXT_PUBLIC_SILENT_SSO_ENABLED` | No | `false` | `true` enables automatic SSO check on page load (Keycloak silent check). |
-| `NUXT_CACHE_ENABLED` | No | enabled | `false` disables the server-side SWR cache for catalog and theme routes. |
-| `LOG_LEVEL` | No | `info` | Pino log level: `trace`, `debug`, `info`, `warn`, `error`, `fatal`. |
-| `PORT` | No | `3000` | HTTP port in Docker/production. |
-| `NODE_ENV` | – | – | `development` or `production`. Controls e.g. the `secure` flag on cookies. |
-
-A full template with comments is available in [`.env.example`](.env.example).
-
-### Example: Production
+### Build
 
 ```bash
-NUXT_API_BASE_URL=https://api.booking.example.com
-NUXT_USER_BASE_URL=https://booking.example.com
-NUXT_PUBLIC_USER_BASE_URL=https://booking.example.com
-NUXT_PUBLIC_ADMIN_BASE_URL=https://admin.booking.example.com
-NUXT_PUBLIC_SILENT_SSO_ENABLED=true
-NUXT_CACHE_ENABLED=true
-LOG_LEVEL=info
-PORT=3000
-NODE_ENV=production
-```
-
----
-
-## Development
-
-```bash
-# Development server with hot reload
-npm run dev
-
-# ESLint
-npm run lint:check
-```
-
-Other package managers work the same way:
-
-```bash
-pnpm install && pnpm dev
-yarn install && yarn dev
-bun install && bun run dev
-```
-
----
-
-## Production Build
-
-```bash
-# Create build
 npm run build
-
-# Start local production server (for testing)
-npm run preview
+npm run preview   # optional: test locally
 ```
 
-The build produces a Nitro bundle under `.output/`, which can be started with `node .output/server/index.mjs`.
+The build produces a Nitro bundle under `.output/`, started with `node .output/server/index.mjs`.
 
----
+### Docker
 
-## Docker
-
-### Build image
+**Build the image:**
 
 ```bash
 docker build -t smart-city-booking-store-front .
 ```
 
-### Start container
+**Run the container:**
 
 ```bash
 docker run -d \
@@ -201,7 +215,9 @@ docker run -d \
   smart-city-booking-store-front
 ```
 
-### Typical deployment with backend
+Pre-built images are published to GHCR on GitHub release (`ghcr.io/eccdigital/smart-city-booking-store-front`). See `.github/workflows/docker-publish.yml`.
+
+### Typical deployment
 
 ```
 ┌─────────────────────┐     ┌──────────────────────────────┐
@@ -224,7 +240,7 @@ Both containers should be on the same network; the reverse proxy terminates TLS 
 ### Health & availability
 
 - The app listens on `PORT` (default `3000`).
-- Ensure the backend is reachable at `NUXT_API_BASE_URL` – without the backend, catalog, checkout, and auth will not work.
+- Ensure the backend is reachable at `NUXT_API_BASE_URL` — without the backend, catalog, checkout, and auth will not work.
 - Set `NUXT_USER_BASE_URL` / `NUXT_PUBLIC_USER_BASE_URL` to the publicly reachable URL (including scheme, no trailing slash) so auth links in emails are correct.
 
 ### Logging
@@ -238,18 +254,18 @@ LOG_LEVEL=warn    # Production with less noise
 
 ### Cookies & HTTPS
 
-In `NODE_ENV=production`, auth cookies are set with the `Secure` flag. The store front must therefore run behind HTTPS.
+In `NODE_ENV=production`, auth cookies are set with the `Secure` flag. The storefront must therefore run behind HTTPS.
 
 ### SSO / Keycloak
 
 - SSO endpoints: `/api/auth/sso/*`
 - Silent SSO (`NUXT_PUBLIC_SILENT_SSO_ENABLED=true`) checks on the first page load whether a Keycloak session exists.
-- Keycloak configuration is done in the backend/instance setup, not in the store front.
+- Keycloak configuration is done in the backend/instance setup, not in the storefront.
 
 ### Scaling
 
-- Stateless Nitro server – horizontally scalable behind a load balancer.
-- The server-side SWR cache (`NUXT_CACHE_ENABLED`) is local per instance (LRU). With multiple replicas, cache state may briefly differ – generally acceptable for catalog data.
+- Stateless Nitro server — horizontally scalable behind a load balancer.
+- The server-side SWR cache (`NUXT_CACHE_ENABLED`) is local per instance (LRU). With multiple replicas, cache state may briefly differ — generally acceptable for catalog data.
 
 ### Release versioning
 
@@ -260,15 +276,13 @@ npm run release:major    # Major release
 npm run release:rc       # Release candidate
 ```
 
-Published GitHub releases trigger the Docker build workflow (`.github/workflows/docker-publish.yml`).
+Published GitHub releases trigger the Docker build workflow (`.github/workflows/docker-publish.yml`). Production tags `v1.x.x` are cut from `version/1.x`.
 
 ---
 
 ## Server-Side Cache
 
-The Nitro server proxy routes (`/api/catalog/...`, `/api/theme/...`) use
-`createConditionalCachedHandler` to optionally keep responses in an SWR cache.
-Behavior is controlled by the environment variable:
+The Nitro server proxy routes (`/api/catalog/...`, `/api/theme/...`) use `createConditionalCachedHandler` to optionally keep responses in an SWR cache:
 
 ```bash
 NUXT_CACHE_ENABLED=true   # SWR cache enabled (default when not set)
@@ -276,8 +290,6 @@ NUXT_CACHE_ENABLED=false  # Disable cache (recommended for local development)
 ```
 
 > The cache is **enabled by default** unless `NUXT_CACHE_ENABLED` is explicitly set to `false`.
-
-### Recommended `maxAge` values
 
 | Route | maxAge | swr | Notes |
 | --- | --- | --- | --- |
@@ -289,14 +301,23 @@ NUXT_CACHE_ENABLED=false  # Disable cache (recommended for local development)
 | `/api/theme/hero` | 300s | n/a | Reuses `themeBundle` per request |
 | `/api/theme/logo` | 300s | n/a | Reuses `themeBundle` per request |
 
-The bundle endpoints split the cache key into `auth` vs. `anon` based on the `access-token` cookie.
-Anonymous requests share a cached response; authenticated requests fall into the
-`auth` scope (further keyed by slug / tenant / bookable / event / include).
+The bundle endpoints split the cache key into `auth` vs. `anon` based on the `access-token` cookie. Anonymous requests share a cached response; authenticated requests use the `auth` scope (further keyed by slug / tenant / bookable / event / include).
+
+---
+
+## Documentation
+
+| Topic | Description |
+|-------|-------------|
+| [Architecture](https://github.com/ECCdigital/smart-city-booking-backend/blob/develop/docs/architecture.md) | System components, data flow, version lines |
+| [Deployment](https://github.com/ECCdigital/smart-city-booking-backend/blob/develop/docs/deployment.md) | Production setup, Docker, operations |
+| [API Reference](https://github.com/ECCdigital/smart-city-booking-backend/blob/develop/docs/api/README.md) | Endpoints, permissions, examples |
+| [Authentication](https://github.com/ECCdigital/smart-city-booking-backend/blob/develop/docs/api/authentication.md) | Auth routes and JWT configuration |
+| [Web Integration](https://github.com/ECCdigital/smart-city-booking-backend/blob/develop/docs/web-integration.md) | Embed bookables & events in existing websites (JS web interface) |
+| [Changelog](https://github.com/ECCdigital/smart-city-booking-backend/blob/develop/docs/CHANGELOG.md) | Version history and breaking changes |
 
 ---
 
 ## License
 
-This project is licensed under the
-[GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html). See the
-[LICENSE.md](LICENSE.md) file for details.
+GPL-3.0 — see [LICENSE.md](LICENSE.md)
