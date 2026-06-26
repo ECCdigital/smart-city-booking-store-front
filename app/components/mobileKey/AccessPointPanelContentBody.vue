@@ -17,10 +17,20 @@
     />
 
     <!-- open when closed and verified -->
-    <div v-else-if="accessPointStatus?.locked && !hasResultState" class="py-10">
+    <div
+      v-else-if="
+        (accessPointStatus?.locked && !hasResultState) ||
+        (accessPoint.provider === 'ifbs' && !isLoading && !hasResultState)
+      "
+      class="py-10"
+    >
       <AccessPointControlButton
         variant="open"
-        :access-point-label="accessPoint.label"
+        :access-point-label="
+          accessPoint.provider === 'ifbs'
+            ? `Fahrradbox #${accessPoint.id}`
+            : accessPoint.label
+        "
         @open="onOpenDoor"
       />
     </div>
@@ -43,9 +53,11 @@
     </div>
 
     <!-- feedback for success or error -->
-    <div class="flex flex-col gap-5 items-center justify-center my-5">
+    <div
+      v-if="!isLoading && (successKey !== '' || errorKey !== '')"
+      class="flex flex-col gap-5 items-center justify-center my-5"
+    >
       <AccessPointFeedbackSection
-        v-if="!isLoading && (successKey !== '' || errorKey !== '')"
         :is-success="successKey !== ''"
         :is-error="errorKey !== ''"
         :error-message="errorMessage"
@@ -56,26 +68,34 @@
               ? errorKey
               : ''
         "
-        :access-point-label="accessPoint.label"
+        :access-point-label="
+          accessPoint.provider === 'ifbs' ? 'Fahrradbox' : accessPoint.label
+        "
         @done="closeDialog"
       />
     </div>
 
     <!-- update status -->
     <UButton
-      v-if="!isLoading && !(!isVerified && accessPointStatus?.locked)"
+      v-if="
+        !isLoading &&
+        !(!isVerified && accessPointStatus?.locked) &&
+        accessPoint.provider !== 'ifbs'
+      "
       variant="subtle"
-      class="flex justify-center py-3 shadow-lg cursor-pointer w-full"
+      class="flex justify-center py-3 shadow-lg cursor-pointer w-full my-3"
       @click="() => emit('status-updated')"
     >
       Status aktualisieren
     </UButton>
+    <USeparator v-if="accessPoint.provider === 'ifbs'" class="mb-5" />
 
     <!-- help section -->
     <ProviderHelpSection
       :provider-id="accessPoint.provider"
       :tenant-id="accessPoint.tenant"
       :booking-id="bookingId"
+      class="my-5"
     />
   </div>
 </template>
@@ -107,6 +127,7 @@ const { open, close } = useAccessPoints();
 
 //State
 const isLoading = ref(false);
+const openProcessIds = ref(null);
 
 const errorMessage = ref("");
 const errorKey = ref("");
@@ -162,22 +183,14 @@ function closeDialog() {
 }
 
 async function onOpenDoor() {
-  console.log("\u{231B} Tür wird geöffnet...");
-
   isLoading.value = true;
   resetState();
 
   try {
-    const response = await open(
-      props.accessPoint.tenant,
-      props.accessPoint.id,
-      props.bookingId,
-    );
-
-    if (response.data.state === "open") {
-      successKey.value = "open";
-    } else {
-      errorKey.value = "open";
+    if (props.accessPoint.provider === "nuki") {
+      await openNuki();
+    } else if (props.accessPoint.provider === "ifbs") {
+      await openIfbs();
     }
   } catch (error) {
     errorKey.value = "open";
@@ -188,6 +201,43 @@ async function onOpenDoor() {
     setTimeout(() => {
       isLoading.value = false;
     }, 3000);
+  }
+}
+async function openNuki() {
+  console.log("\u{231B} Tür wird geöffnet...");
+
+  const response = await open(
+    props.accessPoint.tenant,
+    props.accessPoint.id,
+    props.bookingId,
+  );
+
+  if (response.data.state === "open") {
+    successKey.value = "open";
+  } else {
+    errorKey.value = "open";
+  }
+}
+
+async function openIfbs() {
+  console.log("\u{231B} Fahrradbox wird geöffnet...");
+
+  const response = await open(
+    props.accessPoint.tenant,
+    props.accessPoint.id,
+    props.bookingId,
+  );
+
+  const payload = response?.data ?? response;
+
+  if (payload?.openProcessId) {
+    openProcessIds.value = payload.openProcessId;
+  }
+
+  if (response.success) {
+    successKey.value = "open";
+  } else {
+    errorKey.value = "open";
   }
 }
 async function onLockDoor() {

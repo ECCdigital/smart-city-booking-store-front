@@ -30,9 +30,21 @@
       </span>
     </div>
   </div>
-  <div v-else-if="accessPoint.provider === 'ifbs'" class="basis-6/7">
+  <div v-else-if="accessPoint.provider === 'ifbs'" class="lg:flex lg:gap-2 lg:items-center basis-6/7">
     <div class="text-md font-semibold line-clamp-2">
       Fahrradbox #{{ accessPoint.externalBookingId }}
+    </div>
+    <div v-if="showMode" class="text-sm text-neutral-500">
+      <span
+          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+          :class="accessPointMode(accessPoint.mode).color"
+      >
+        <UIcon
+            :name="accessPointMode(accessPoint.mode).icon"
+            class="w-3.5 h-3.5"
+        />
+        {{ accessPointMode(accessPoint.mode).label }}
+      </span>
     </div>
   </div>
 </template>
