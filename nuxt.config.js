@@ -81,9 +81,14 @@ export default defineNuxtConfig({
       },
     },
     headers: {
+      // HSTS + upgrade-insecure-requests break local HTTP dev in Safari (forces https://localhost).
+      strictTransportSecurity:
+        process.env.NODE_ENV === "development" ? false : undefined,
       contentSecurityPolicy: {
         "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://www.orka-mv.de"],
         "script-src": ["'self'", "https:", "'unsafe-inline'"],
+        "upgrade-insecure-requests":
+          process.env.NODE_ENV === "development" ? false : true,
       },
     },
     nonce: true,
