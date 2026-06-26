@@ -48,7 +48,8 @@
       v-model:open="isOpenPopup"
       :ui="{
         overlay: 'bg-black/60',
-        content: 'w-[50vw] max-w-[80vw] h-[60vh] p-5 shadow-lg overflow-y-scroll',
+        content:
+          'w-[50vw] max-w-[80vw] h-[60vh] p-5 shadow-lg overflow-y-scroll',
       }"
       :title="accessPoint.label"
       description="Informationen und Status des Schließsystems"
@@ -84,10 +85,7 @@
 </template>
 <script setup>
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
-import {
-  DialogTitle,
-  DialogDescription
-} from 'reka-ui'
+import { DialogTitle, DialogDescription } from "reka-ui";
 
 import AccessPointPanelButton from "~/components/mobileKey/AccessPointPanelButton.vue";
 import AccessPointPanelContentHeader from "~/components/mobileKey/AccessPointPanelContentHeader.vue";
@@ -126,10 +124,7 @@ const successKey = ref("");
 //Status
 const accessPointStatus = ref({});
 watch([isOpenSlideover, isOpenPopup], async ([slideoverOpen, popupOpen]) => {
-  //toDo - Status auch bei IFBS laden?!?!?!?!?!??!?!?!?!
-  //toDo - Status auch bei IFBS laden?!?!?!?!?!??!?!?!?!
-  //toDo - Status auch bei IFBS laden?!?!?!?!?!??!?!?!?!
-  if ((slideoverOpen || popupOpen) && props.accessPoint.provider !== "ifbs") {
+  if (slideoverOpen || popupOpen) {
     await loadStatus();
   }
 });

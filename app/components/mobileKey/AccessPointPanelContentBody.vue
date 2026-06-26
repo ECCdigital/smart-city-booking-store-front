@@ -27,7 +27,9 @@
       <AccessPointControlButton
         variant="open"
         :access-point-label="
-          accessPoint.provider === 'ifbs' ? `Fahrradbox #${accessPoint.id}` : accessPoint.label
+          accessPoint.provider === 'ifbs'
+            ? `Fahrradbox #${accessPoint.id}`
+            : accessPoint.label
         "
         @open="onOpenDoor"
       />
@@ -75,7 +77,11 @@
 
     <!-- update status -->
     <UButton
-      v-if="!isLoading && !(!isVerified && accessPointStatus?.locked) && accessPoint.provider !== 'ifbs'"
+      v-if="
+        !isLoading &&
+        !(!isVerified && accessPointStatus?.locked) &&
+        accessPoint.provider !== 'ifbs'
+      "
       variant="subtle"
       class="flex justify-center py-3 shadow-lg cursor-pointer w-full my-3"
       @click="() => emit('status-updated')"
@@ -83,7 +89,6 @@
       Status aktualisieren
     </UButton>
     <USeparator v-if="accessPoint.provider === 'ifbs'" class="mb-5" />
-
 
     <!-- help section -->
     <ProviderHelpSection

@@ -20,8 +20,8 @@
   </div>
 
   <div
-      v-if="errorMessage"
-      class="bg-error/50 w-full rounded-xl text-sm mx-2 p-2"
+    v-if="errorMessage"
+    class="bg-error/50 w-full rounded-xl text-sm mx-2 p-2"
   >
     <p class="mb-0.5 font-semibold text-red-800">Fehler:</p>
     {{ errorDescription }}
@@ -33,7 +33,7 @@
     class="nextStepButton mt-1 flex justify-center py-3 shadow-lg cursor-pointer w-full"
     @click="() => emit('done')"
   >
-    {{nextStepButtonLabel}}
+    {{ nextStepButtonLabel }}
   </UButton>
 </template>
 <script setup>
@@ -74,34 +74,34 @@ const icon = computed(() => {
   return "";
 });
 const title = computed(() => {
-  if(props.isSuccess && props.isError) {
+  if (props.isSuccess && props.isError) {
     return "Unklarer Zustand";
   }
   if (props.isError) {
     return "Schloss reagiert nicht";
   }
-  if(props.isSuccess && props.variant === "open") {
+  if (props.isSuccess && props.variant === "open") {
     return "Schloss erfolgreich geöffnet!";
-  } else if(props.isSuccess && props.variant === "close") {
+  } else if (props.isSuccess && props.variant === "close") {
     return "Schloss erfolgreich geschlossen!";
   }
   return "";
 });
 
 const subtitle = computed(() => {
-  if(props.isSuccess && props.isError) {
+  if (props.isSuccess && props.isError) {
     return "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut...";
   }
 
   if (props.isError && props.variant === "open") {
     return `${props.accessPointLabel} konnte nicht geöffnet werden. Bitte versuchen Sie es erneut.`;
-  } else if(props.isError && props.variant === "close") {
+  } else if (props.isError && props.variant === "close") {
     return `${props.accessPointLabel} konnte nicht geschlossen werden. Bitte versuchen Sie es erneut.`;
   }
 
-  if(props.isSuccess && props.variant === "open") {
+  if (props.isSuccess && props.variant === "open") {
     return `${props.accessPointLabel} wurde erfolgreich geöffnet.`;
-  } else if(props.isSuccess && props.variant === "close") {
+  } else if (props.isSuccess && props.variant === "close") {
     return `${props.accessPointLabel} wurde erfolgreich geschlossen.`;
   }
   return "";
@@ -125,7 +125,7 @@ const errorDescription = computed(() => {
 });
 
 const nextStepButtonLabel = computed(() => {
-  if(props.isSuccess ) {
+  if (props.isSuccess) {
     return "Fertig";
   }
   return "Erneut versuchen";

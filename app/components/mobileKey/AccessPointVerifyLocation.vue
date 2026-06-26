@@ -83,7 +83,6 @@ const props = defineProps({
 });
 const emit = defineEmits(["nextStep"]);
 
-
 const accessActions = [
   {
     value: "qr",
