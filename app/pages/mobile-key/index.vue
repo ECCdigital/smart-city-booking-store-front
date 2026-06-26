@@ -42,7 +42,7 @@
       />
     </div>
 
-    <div v-if="viewMode === 'list'" class="space-y-3">
+    <div v-if="viewMode === 'list'" class="space-y-3 mb-15">
       <MobileKeyBookingList :bookings="bookings" />
     </div>
     <div v-if="viewMode === 'map'">
