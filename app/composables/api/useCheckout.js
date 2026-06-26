@@ -87,7 +87,29 @@ export function useCheckout() {
     const api = useApiClient();
     const { data, error } = await api.get(`/api/checkout/${bookableID}/permissions/?tenantID=${tenantID}`);
     if (error) {
-      console.error("Error fetching checkout permissions:", error);
+      const payload = error?.data;
+      if (
+        payload?.success === false &&
+        payload?.error?.checkType === "permissions"
+      ) {
+        return payload;
+      }
+
+      const status = error?.statusCode ?? error?.status ?? error?.response?.status;
+      if (status === 401) {
+        return {
+          success: false,
+          error: {
+            checkType: "permissions",
+            reason: "checkout.login_required",
+          },
+        };
+      }
+
+      if (status !== 403) {
+        throw error;
+      }
+
       return {
         success: false,
         error: {

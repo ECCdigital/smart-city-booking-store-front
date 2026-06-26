@@ -149,9 +149,9 @@ const isLoading = ref(true);
 const { data, error, refresh: refreshCheckoutData } = await useAsyncData(
   `checkout-${bookableID}-${tenantID}`,
   async () => {
-    if (!bookableID || !tenantID) return null;
-
+    isLoading.value = true;
     try {
+      if (!bookableID || !tenantID) return null;
       const [leadBookable, tenant, paymentProviders, permissions] =
         await Promise.all([
           fetchBookable(bookableID, tenantID),
@@ -220,7 +220,7 @@ const hasBlockingPermissionError = computed(() => {
     return false;
   }
   if (isLoginRequiredPermissionError(result)) {
-    return !authStore.isLoggedIn;
+    return true;
   }
   return true;
 });
