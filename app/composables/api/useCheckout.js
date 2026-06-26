@@ -88,7 +88,13 @@ export function useCheckout() {
     const { data, error } = await api.get(`/api/checkout/${bookableID}/permissions/?tenantID=${tenantID}`);
     if (error) {
       console.error("Error fetching checkout permissions:", error);
-      throw error;
+      return {
+        success: false,
+        error: {
+          checkType: "permissions",
+          reason: "checkout.permission_denied",
+        },
+      };
     }
     return data;
   }

@@ -102,7 +102,6 @@ export const useAuthStore = defineStore("auth", {
     },
     invalidateAuth() {
       this.clearAuthPayload();
-      this.authChecked = false;
       if (import.meta.client) {
         localStorage.removeItem("auth-store");
       }

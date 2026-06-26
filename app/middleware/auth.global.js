@@ -4,10 +4,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const authStore = useAuthStore();
 
   if (!authStore.authChecked) {
-    const isValid = await authStore.validateAuth();
-    if (!isValid) {
-      authStore.invalidateAuth();
-    }
+    await authStore.validateAuth();
   }
 
   const publicPaths = ["/login", "/register", "/sso/register", "/password"];
