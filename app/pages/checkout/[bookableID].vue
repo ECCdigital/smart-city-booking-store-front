@@ -135,18 +135,23 @@ const router = useRouter();
 const bookableID = route.params.bookableID;
 const tenantID = route.query.tenantId;
 
+const authStore = useAuthStore();
+if (!authStore.authChecked) {
+  await authStore.validateAuth();
+}
+
 const { fetchBookable, fetchCheckoutPermissions } = useCheckout();
 const { fetchTenant, fetchTenantPaymentProviders, fetchTenantUserRoles } =
   useTenants();
 
 const isLoading = ref(true);
 
-const { data, error } = await useAsyncData(
+const { data, error, refresh: refreshCheckoutData } = await useAsyncData(
   `checkout-${bookableID}-${tenantID}`,
   async () => {
-    if (!bookableID || !tenantID) return null;
-
+    isLoading.value = true;
     try {
+      if (!bookableID || !tenantID) return null;
       const [leadBookable, tenant, paymentProviders, permissions] =
         await Promise.all([
           fetchBookable(bookableID, tenantID),
@@ -203,18 +208,24 @@ const requiresLoginForCheckout = computed(() =>
   isLoginRequiredPermissionError(permissionCheck.value),
 );
 
+function hasCheckoutPermissionError(result) {
+  return (
+    result?.success === false && result?.error?.checkType === "permissions"
+  );
+}
+
 const hasBlockingPermissionError = computed(() => {
   const result = permissionCheck.value;
-  if (result?.success !== false || result?.error?.checkType !== "permissions") {
+  if (!hasCheckoutPermissionError(result)) {
     return false;
   }
-  return !isLoginRequiredPermissionError(result);
+  if (isLoginRequiredPermissionError(result)) {
+    return true;
+  }
+  return true;
 });
 const isResolvingPermissionGuard = computed(
-  () =>
-    !isLoading.value &&
-    hasBlockingPermissionError.value &&
-    !authStore.authChecked,
+  () => !isLoading.value && hasBlockingPermissionError.value && !authStore.authChecked,
 );
 const showPermissionGuard = computed(
   () => hasBlockingPermissionError.value && authStore.authChecked,
@@ -330,9 +341,14 @@ usePageTitle(() =>
     : t("meta.pages.checkout"),
 );
 const { error: notifyError } = useNotification();
-const authStore = useAuthStore();
 const isLoggedIn = computed(() => authStore.isLoggedIn);
 const isLoggingOut = ref(false);
+
+watch(isLoggedIn, (loggedIn, wasLoggedIn) => {
+  if (loggedIn && wasLoggedIn === false) {
+    void refreshCheckoutData();
+  }
+});
 const lastAutofilledUserKey = ref(null);
 const loginUrl = computed(
   () => `/login?redirect=${encodeURIComponent(route.fullPath)}`,
@@ -624,7 +640,9 @@ onMounted(() => {
   }
   applyUserToContactForm(authStore.user, true);
   hasRestoredCheckoutState.value = true;
-  authStore.validateAuth();
+  if (!authStore.authChecked) {
+    void authStore.validateAuth();
+  }
   scheduleValidation();
 });
 
