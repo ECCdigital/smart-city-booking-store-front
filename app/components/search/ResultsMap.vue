@@ -24,30 +24,31 @@
             name="Light  OpenStreetMap"
           />
 
-          <div v-for="bookable in bookables" :key="bookable.item.id">
-            <LMarker
-              v-if="hasCoordinates(bookable.item)"
-              :lat-lng="getCoordinatesForBookable(bookable.item)"
-              :z-index-offset="
+          <div
+            v-for="group in groupedBookables"
+            :key="group.coordinates.join('_')"
+          >
+            <!--
+            :z-index-offset="
                 bookable.item.id === currentBookable?.item.id
                   ? 1000
                   : bookable.matchStatus === 'match'
                     ? 500
                     : 0
               "
-              @click="openBookableDetails(bookable)"
-            >
+            -->
+            <LMarker :lat-lng="group.coordinates" @click="openGroup(group)">
               <LIcon :icon-anchor="[20, 40]">
-                <UIcon
-                  :name="iconMapPin"
-                  :class="
-                    bookable.item.id === currentBookable?.item.id
-                      ? 'activeIconPin size-11'
-                      : bookable.matchStatus === 'match'
-                        ? 'matchingIconPin size-10'
-                        : 'nonMatchingIconPin size-10'
-                  "
-                />
+                <div class="relative">
+                  <UIcon :name="iconMapPin" class="matchingIconPin size-10" />
+
+                  <div
+                    v-if="group.bookables.length > 1"
+                    class="absolute -top-1 left-6 w-5 h-5 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center"
+                  >
+                    {{ group.bookables.length }}
+                  </div>
+                </div>
               </LIcon>
 
               <LTooltip
@@ -146,6 +147,30 @@ const mapRef = ref(null);
 const mapReady = ref(false);
 
 const fetchedCoordinates = ref(false);
+
+const groupedBookables = computed(() => {
+  const groups = new Map();
+
+  props.bookables.forEach((bookable) => {
+    if (!hasCoordinates(bookable.item)) return;
+
+    const [lat, lng] = getCoordinatesForBookable(bookable.item);
+
+    // Falls die Koordinaten minimal unterschiedlich sein können:
+    const key = `${lat.toFixed(6)}_${lng.toFixed(6)}`;
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        coordinates: [lat, lng],
+        bookables: [],
+      });
+    }
+
+    groups.get(key).bookables.push(bookable);
+  });
+
+  return [...groups.values()];
+});
 
 const currentCenter = ref([53.5, 10.0]);
 
