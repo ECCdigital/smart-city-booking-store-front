@@ -5,6 +5,8 @@ import {
   effectiveBookingStatusI18nKey,
   BOOKING_STATUS_REASONS,
 } from "~/utils/bookingStatus.js";
+import { useTenants } from "~/composables/api/useTenants.js";
+import { useAuthStore } from "~~/stores/auth.js";
 
 definePageMeta({
   layout: "checkout",
@@ -20,6 +22,8 @@ const KNOWN_PAYMENT_PROVIDER_LABELS = {
 };
 
 const route = useRoute();
+const authStore = useAuthStore();
+const isLoggedIn = computed(() => authStore.isLoggedIn);
 const { t, te, locale } = useI18n();
 usePageTitle(() => t("meta.pages.checkoutStatus"));
 const checkoutNavTab = useState("checkoutNavTab", () => "");
@@ -30,6 +34,7 @@ const tenantId = computed(() => String(route.query.tenantId || "").trim());
 
 const { getStatus } = useBookings();
 const { fetchBookable } = useCheckout();
+const { fetchTenant } = useTenants();
 
 const bookable = ref(null);
 if (bookableId.value && tenantId.value) {
@@ -58,11 +63,11 @@ let autoPollTimer = null;
 let autoPollClockTimer = null;
 
 const isValid = computed(
-  () => bookingId.value.length > 0 && tenantId.value.length > 0,
+  () => bookingId.value.length > 0 && tenantId.value.length > 0
 );
 
 const envelopeOk = computed(
-  () => !statusResponse.value || statusResponse.value.success !== false,
+  () => !statusResponse.value || statusResponse.value.success !== false
 );
 
 const bookingsFromApi = computed(() => {
@@ -99,6 +104,11 @@ function stopAutoPollClock() {
   if (!import.meta.client || autoPollClockTimer == null) return;
   window.clearInterval(autoPollClockTimer);
   autoPollClockTimer = null;
+}
+
+async function getTenant() {
+  const Tenant = await fetchTenant(tenantId.value);
+  console.log("Tenant", Tenant);
 }
 
 function resetAutoPollingState() {
@@ -154,18 +164,18 @@ function isAutoPollingCandidate(booking) {
 }
 
 const pendingAutoPollBookings = computed(() =>
-  bookingsFromApi.value.filter((booking) => isAutoPollingCandidate(booking)),
+  bookingsFromApi.value.filter((booking) => isAutoPollingCandidate(booking))
 );
 
 const hasPendingAutoPollBookings = computed(
-  () => pendingAutoPollBookings.value.length > 0,
+  () => pendingAutoPollBookings.value.length > 0
 );
 
 const hasPaidAutoPollBookings = computed(() =>
   bookingsFromApi.value.some((booking) => {
     const priceEur = Number(booking?.priceEur);
     const paymentProvider = normalizePaymentProviderId(
-      booking?.paymentProvider,
+      booking?.paymentProvider
     );
 
     return (
@@ -176,7 +186,7 @@ const hasPaidAutoPollBookings = computed(() =>
       priceEur > 0 &&
       paymentProvider !== "invoice"
     );
-  }),
+  })
 );
 
 const canAutoPoll = computed(
@@ -185,23 +195,23 @@ const canAutoPoll = computed(
     isValid.value &&
     envelopeOk.value &&
     hasPendingAutoPollBookings.value &&
-    !autoPollExpired.value,
+    !autoPollExpired.value
 );
 
 const isAutoPolling = computed(
-  () => canAutoPoll.value && autoPollStartedAt.value != null,
+  () => canAutoPoll.value && autoPollStartedAt.value != null
 );
 
 const autoPollRemainingMs = computed(() => {
   if (!autoPollStartedAt.value) return POLL_WINDOW_MS;
   return Math.max(
     POLL_WINDOW_MS - (autoPollTick.value - autoPollStartedAt.value),
-    0,
+    0
   );
 });
 
 const paymentConfirmedDuringPolling = computed(
-  () => paymentConfirmedByPolling.value,
+  () => paymentConfirmedByPolling.value
 );
 
 function scheduleAutoPollingIfNeeded() {
@@ -295,6 +305,7 @@ async function loadStatus({ background = false, resetPolling = false } = {}) {
 watch(
   [tenantId, bookingId],
   async () => {
+    getTenant();
     resetAutoPollingState();
     statusResponse.value = null;
     statusError.value = null;
@@ -303,7 +314,7 @@ watch(
     hasLoadedOnce.value = false;
     await loadStatus();
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 onUnmounted(() => {
@@ -430,17 +441,17 @@ function rowForBooking(booking) {
 }
 
 const bookingRows = computed(() =>
-  bookingsFromApi.value.map((booking) => rowForBooking(booking)),
+  bookingsFromApi.value.map((booking) => rowForBooking(booking))
 );
 
 const isSingleBookingView = computed(() => bookingRows.value.length === 1);
 
 const singleBookingRow = computed(() =>
-  isSingleBookingView.value ? bookingRows.value[0] : null,
+  isSingleBookingView.value ? bookingRows.value[0] : null
 );
 
 const isAwaitingApproval = computed(
-  () => singleBookingRow.value?.statusKey === "status.awaiting_approval",
+  () => singleBookingRow.value?.statusKey === "status.awaiting_approval"
 );
 
 const showThankYouBanner = computed(() => {
@@ -579,7 +590,7 @@ async function handleManualRefresh() {
           }}
         </h2>
 
-        <div class="mt-1">
+        <div class="mt-1 text-sm leading-6 text-gray-700 dark:text-gray-200">
           {{
             isAwaitingApproval
               ? $t("checkout.status.thankYouRequestBody")
@@ -588,9 +599,11 @@ async function handleManualRefresh() {
           <span v-if="showInvoiceMailHint">
             {{ " " }}{{ $t("checkout.status.invoiceMailHint") }}
           </span>
-          <br >
-          {{ $t("checkout.status.closeWindowHint") }}
         </div>
+
+        <p class="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
+          {{ $t("checkout.status.closeWindowHint") }}
+        </p>
       </div>
 
       <div class="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem]">
@@ -1017,7 +1030,23 @@ async function handleManualRefresh() {
                   {{ $t("checkout.status.manualRefreshAction") }}
                 </UButton>
 
-                <UButton color="primary" block to="/" icon="i-lucide-home">
+                <UButton
+                  v-if="isLoggedIn"
+                  color="primary"
+                  block
+                  to="/account/bookings"
+                  icon="i-lucide-book-marked"
+                >
+                  {{ $t("meta.pages.accountBookings") }}
+                </UButton>
+
+                <UButton
+                  color="neutral"
+                  variant="subtle"
+                  block
+                  to="/"
+                  icon="i-lucide-home"
+                >
                   {{ $t("common.home") }}
                 </UButton>
               </div>
