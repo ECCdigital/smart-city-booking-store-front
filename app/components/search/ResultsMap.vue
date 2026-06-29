@@ -176,7 +176,7 @@ const currentCenter = ref([53.5, 10.0]);
 
 const initialBounds = computed(() => {
   const coords = props.bookables
-    .filter((b) => hasCoordinates(b.item) && b.matchStatus === 'match')
+    .filter((b) => hasCoordinates(b.item) && b.matchStatus === "match")
     .map((b) => getCoordinatesForBookable(b.item));
 
   if (!coords.length) return null;
@@ -210,23 +210,24 @@ const currentBookable = ref(null);
 const visibleBookables = computed(() => {
   if (!currentBounds.value) return props.bookables;
 
-  return props.bookables.filter((b) => {
-    if (!hasCoordinates(b.item)) return false;
+  return props.bookables
+    .filter((b) => {
+      if (!hasCoordinates(b.item)) return false;
 
-    const [lat, lng] = getCoordinatesForBookable(b.item);
+      const [lat, lng] = getCoordinatesForBookable(b.item);
 
-    return (
-      lat >= currentBounds.value[0][0] &&
-      lat <= currentBounds.value[1][0] &&
-      lng >= currentBounds.value[0][1] &&
-      lng <= currentBounds.value[1][1]
-    );
-  })
-      .sort((a, b) => {
-    const aIsMatch = a.matchStatus === "match" ? 0 : 1;
-    const bIsMatch = b.matchStatus === "match" ? 0 : 1;
-    return aIsMatch - bIsMatch;
-  });
+      return (
+        lat >= currentBounds.value[0][0] &&
+        lat <= currentBounds.value[1][0] &&
+        lng >= currentBounds.value[0][1] &&
+        lng <= currentBounds.value[1][1]
+      );
+    })
+    .sort((a, b) => {
+      const aIsMatch = a.matchStatus === "match" ? 0 : 1;
+      const bIsMatch = b.matchStatus === "match" ? 0 : 1;
+      return aIsMatch - bIsMatch;
+    });
 });
 
 function hasCoordinates(bookable) {
