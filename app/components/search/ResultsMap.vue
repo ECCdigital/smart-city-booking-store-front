@@ -52,17 +52,44 @@
               </LIcon>
 
               <LTooltip
-                class="hidden md:block"
                 :options="{ className: 'clean-tooltip' }"
+                class="hidden md:block"
               >
-                <div class="overflow-hidden rounded-2xl shadow-2xl">
+                <div
+                  v-if="group.bookables.length === 1"
+                  class="overflow-hidden rounded-2xl shadow-2xl"
+                >
                   <ResultCard
-                    :item="bookable.item"
-                    :is-not-bookable="!bookable.isBookable"
-                    :calculated-price="bookable.calculatedPrice"
+                    :item="group.bookables[0].item"
+                    :is-not-bookable="!group.bookables[0].isBookable"
+                    :calculated-price="group.bookables[0].calculatedPrice"
                     entry-page-mode
                     class="w-[300px] break-normal"
                   />
+                </div>
+
+                <div v-else class="rounded-2xl bg-white shadow-2xl p-2 w-80">
+                  <p class="text-md font-bold mb-2">
+                    {{ group.bookables.length }} Ergebnisse an diesem Standort:
+                  </p>
+                  <div
+                    v-for="bookable in group.bookables"
+                    :key="bookable.item.id"
+                    class="bg-gray-200 dark:bg-gray-700 rounded-sm mb-2 last:mb-0 p-1 flex"
+                  >
+                    <div class="basis-1/5 flex items-center">
+                      <BookablesBookableTypeBadge :type="bookable.item?.type" />
+                    </div>
+                    <div class="basis-4/5 flex items-center">
+                      <div class="font-semibold break-words whitespace-normal">
+                        {{ bookable.item?.title }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <p class="text-center italic">
+                    [ Klick um Auswahl zu öffnen ]
+                  </p>
                 </div>
               </LTooltip>
             </LMarker>
