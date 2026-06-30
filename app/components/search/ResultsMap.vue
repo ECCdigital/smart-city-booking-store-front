@@ -28,19 +28,28 @@
             v-for="group in groupedBookables"
             :key="group.coordinates.join('_')"
           >
-            <!--
-            :z-index-offset="
-                bookable.item.id === currentBookable?.item.id
+            <LMarker
+                :lat-lng="group.coordinates"
+                :z-index-offset="
+                group.bookables.some(b=> b.item.id === currentBookable?.item.id)
                   ? 1000
-                  : bookable.matchStatus === 'match'
+                  : group.bookables.some(b=> b.matchStatus === 'match')
                     ? 500
                     : 0
               "
-            -->
-            <LMarker :lat-lng="group.coordinates" @click="openGroup(group)">
+                @click="openGroup(group)">
               <LIcon :icon-anchor="[20, 40]">
                 <div class="relative">
-                  <UIcon :name="iconMapPin" class="matchingIconPin size-10" />
+                  <UIcon
+                      :name="iconMapPin"
+                      :class="
+                    group.bookables.some(b=> b.item.id === currentBookable?.item.id)
+                      ? 'activeIconPin size-11'
+                      : group.bookables.some(b=> b.matchStatus === 'match')
+                        ? 'matchingIconPin size-10'
+                        : 'nonMatchingIconPin size-10'
+                  "
+                  />
 
                   <div
                     v-if="group.bookables.length > 1"
@@ -138,6 +147,7 @@
                     v-for="bookable in group.bookables"
                     :key="bookable.item.id"
                     class="bg-gray-200 dark:bg-gray-700 rounded-sm mb-2 last:mb-0 p-1 flex"
+                    :class="bookable.matchStatus !== 'match'? 'opacity-70' : ''"
                   >
                     <div class="basis-1/5 flex items-center">
                       <BookablesBookableTypeBadge :type="bookable.item?.type" />
@@ -259,6 +269,11 @@ const groupedBookables = computed(() => {
     }
 
     groups.get(key).bookables.push(bookable);
+    groups.get(key).bookables.sort((a, b) => {
+      const aIsMatch = a.matchStatus === "match" ? 0 : 1;
+      const bIsMatch = b.matchStatus === "match" ? 0 : 1;
+      return aIsMatch - bIsMatch;
+    });
   });
 
   return [...groups.values()];
