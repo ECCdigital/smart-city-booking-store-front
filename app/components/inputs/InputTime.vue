@@ -6,8 +6,9 @@
       @update-time="setTime"
     >
       <div
-        class="flex items-center bg-default border rounded-md px-1  border-accented focus-within:ring-1 focus-within:border-primary focus-within:ring-primary"
+        class="flex items-center bg-default border rounded-md px-1 border-accented focus-within:ring-1 focus-within:border-primary focus-within:ring-primary"
         :class="{ 'flex-wrap gap-1': props.showDate }"
+        @focusout="handleFieldFocusOut"
       >
         <template v-if="props.showDate">
           <UTooltip text="Datum auswählen">
@@ -19,11 +20,14 @@
             />
           </UTooltip>
           <UInputDate
-            v-model="calendarDate"
+            ref="dateFieldRef"
+            v-model="internalCalendarDate"
             variant="ghost"
             :disabled="props.disabled"
             :min-value="minCalendarDate"
             class="shrink-0 px-1"
+            @focus="onDateFieldFocus"
+            @blur="commitCalendarDate"
           />
         </template>
 
@@ -37,11 +41,13 @@
             />
           </UTooltip>
           <UInputTime
+            ref="timeFieldRef"
             v-model="time"
             :hour-cycle="24"
             variant="ghost"
             :disabled="props.disabled"
             class="px-1"
+            @focus="commitCalendarDate"
           />
           <div
             class="click-area cursor-pointer"
@@ -93,15 +99,11 @@
   </UModal>
 </template>
 <script setup lang="ts">
-import {
-  Time,
-  fromDate,
-  getLocalTimeZone,
-  today,
-  toCalendarDate,
-} from "@internationalized/date";
+import { Time, getLocalTimeZone, today } from "@internationalized/date";
 import DatePicker from "~/components/inputs/DatePicker.vue";
 import TimePickerDialog from "~/components/inputs/TimePickerDialog.vue";
+import { useCalendarDateField } from "~/composables/useCalendarDateField.js";
+import { readTimeFromTimeFieldRoot } from "~/utils/localDate.js";
 
 const model = defineModel();
 const dateModel = defineModel("date", { default: null });
@@ -125,9 +127,40 @@ const openTimePickerDialog = ref(false);
 const openDatePickerDialog = ref(false);
 const pendingDate = ref<Date | null>(null);
 const minCalendarDate = today(getLocalTimeZone());
+const dateFieldRef = ref<{ $el?: HTMLElement } | null>(null);
+const timeFieldRef = ref<{ $el?: HTMLElement } | null>(null);
+
+function getFieldRoot() {
+  const el = dateFieldRef.value?.$el;
+  return el instanceof HTMLElement ? el : null;
+}
+
+const {
+  internalCalendarDate,
+  onDateFieldFocus,
+  commitCalendarDate,
+  setCalendarDateFromPicker,
+} = useCalendarDateField(dateModel, { getFieldRoot });
+
+function syncTimeFromDom() {
+  const el = timeFieldRef.value?.$el;
+  const root = el instanceof HTMLElement ? el : null;
+  const parsed = readTimeFromTimeFieldRoot(root);
+  if (parsed) {
+    model.value = parsed;
+  }
+}
+
+function handleFieldFocusOut(event) {
+  if (event.currentTarget.contains(event.relatedTarget)) return;
+  commitCalendarDate();
+  syncTimeFromDom();
+}
 
 function openPicker() {
   if (props.disabled) return;
+  commitCalendarDate();
+  syncTimeFromDom();
   openTimePickerDialog.value = true;
 }
 
@@ -143,35 +176,10 @@ function closeDatePicker() {
 
 function confirmDateSelection() {
   if (pendingDate.value) {
-    const d = new Date(pendingDate.value);
-    d.setHours(0, 0, 0, 0);
-    dateModel.value = d;
+    setCalendarDateFromPicker(pendingDate.value);
   }
   closeDatePicker();
 }
-
-function jsDateToCalendarDate(value: unknown) {
-  if (!value) return null;
-  const d = value instanceof Date ? value : new Date(value as string | number);
-  if (Number.isNaN(d.getTime())) return null;
-  return toCalendarDate(fromDate(d, getLocalTimeZone()));
-}
-
-const calendarDate = computed({
-  get() {
-    return jsDateToCalendarDate(dateModel.value);
-  },
-  set(val) {
-    if (!val) {
-      dateModel.value = null;
-      return;
-    }
-    const result = val.toDate(getLocalTimeZone());
-    result.setFullYear(val.year, val.month - 1, val.day);
-    result.setHours(0, 0, 0, 0);
-    dateModel.value = result;
-  },
-});
 
 const time = computed({
   get() {

@@ -198,6 +198,7 @@
 <script setup>
 import { useBookables } from "~/composables/api/useBookables.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
+import { parseLocalDateIso } from "~/utils/localDate.js";
 
 
 const props = defineProps({
@@ -374,8 +375,7 @@ async function jumpToNextFreeDay() {
 
     let startOffset = dayOffset.value;
     if (selectedDayIso.value) {
-      const [y, m, d] = selectedDayIso.value.split("-").map(Number);
-      const sel = new Date(y, m - 1, d);
+      const sel = parseLocalDateIso(selectedDayIso.value);
       const diff = Math.round((sel - today) / 86_400_000);
       startOffset = Math.max(diff + 1, 0);
     }
@@ -541,8 +541,8 @@ const selectedDay = computed(() => {
   const fromWindow = days.value.find((d) => d.iso === selectedDayIso.value);
   if (fromWindow) return fromWindow;
 
-  const [y, m, d] = selectedDayIso.value.split("-").map(Number);
-  const date = new Date(y, m - 1, d);
+  const date = parseLocalDateIso(selectedDayIso.value);
+  if (!date) return null;
   return {
     date,
     iso: selectedDayIso.value,
