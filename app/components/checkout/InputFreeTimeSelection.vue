@@ -34,6 +34,17 @@
       </div>
     </div>
 
+    <div v-if="hasTimeSelection" class="flex justify-end -mt-2">
+      <button
+        type="button"
+        class="inline-flex items-center gap-1 px-1 py-0.5 text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+        @click="resetTimeSelection"
+      >
+        <UIcon name="i-lucide-rotate-ccw" class="size-3.5 shrink-0" />
+        {{ $t("scheduleSelection.resetTime") }}
+      </button>
+    </div>
+
     <button
       type="button"
       class="sm:hidden inline-flex items-center justify-center gap-2 w-full px-3 py-2.5 text-sm font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
@@ -164,6 +175,11 @@ import { useMediaQuery } from "@vueuse/core";
 import { useBookables } from "~/composables/api/useBookables.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
 import InputTime from "~/components/inputs/InputTime.vue";
+import {
+  formatLocalDateIso,
+  jsDateWithTime,
+  parseLocalDateIso,
+} from "~/utils/localDate.js";
 
 const props = defineProps({
   tenantId: { type: String, default: null },
@@ -201,17 +217,8 @@ function pad2(n) {
   return n.toString().padStart(2, "0");
 }
 
-function localISODate(date) {
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
-    date.getDate(),
-  )}`;
-}
-
-function parseLocalDate(iso) {
-  if (!iso) return null;
-  const [y, m, d] = iso.split("-").map(Number);
-  return new Date(y, m - 1, d);
-}
+const localISODate = formatLocalDateIso;
+const parseLocalDate = parseLocalDateIso;
 
 function getMonday(date) {
   const d = new Date(date);
@@ -402,20 +409,8 @@ const calendarEvents = computed(() => {
     if (sd && ed) {
       const [sh, sm] = startTimeInput.value.split(":").map(Number);
       const [eh, em] = endTimeInput.value.split(":").map(Number);
-      const start = new Date(
-        sd.getFullYear(),
-        sd.getMonth(),
-        sd.getDate(),
-        sh,
-        sm || 0,
-      );
-      const end = new Date(
-        ed.getFullYear(),
-        ed.getMonth(),
-        ed.getDate(),
-        eh,
-        em || 0,
-      );
+      const start = jsDateWithTime(sd, sh, sm || 0);
+      const end = jsDateWithTime(ed, eh, em || 0);
       if (end > start) {
         const label =
           `${pad2(start.getHours())}:${pad2(start.getMinutes())}` +
@@ -630,6 +625,28 @@ const endInputDate = computed({
   },
 });
 
+const hasTimeSelection = computed(
+  () =>
+    !!(
+      startDateInput.value ||
+      startTimeInput.value ||
+      endDateInput.value ||
+      endTimeInput.value
+    ),
+);
+
+function resetTimeSelection() {
+  startDateInput.value = "";
+  startTimeInput.value = "";
+  endDateInput.value = "";
+  endTimeInput.value = "";
+  lastEmittedKey = "";
+  const cleared = { start: null, end: null };
+  emit("update:modelValue", cleared);
+  emit("change", cleared);
+  nextTick(() => getApi()?.unselect());
+}
+
 function applyDefaultEndFromStart() {
   if (!startDateInput.value || !startTimeInput.value) return;
 
@@ -637,25 +654,13 @@ function applyDefaultEndFromStart() {
   if (!sd) return;
 
   const [sh, sm] = startTimeInput.value.split(":").map(Number);
-  const start = new Date(
-    sd.getFullYear(),
-    sd.getMonth(),
-    sd.getDate(),
-    sh,
-    sm || 0,
-  );
+  const start = jsDateWithTime(sd, sh, sm || 0);
 
   if (endDateInput.value && endTimeInput.value) {
     const ed = parseLocalDate(endDateInput.value);
     if (ed) {
       const [eh, em] = endTimeInput.value.split(":").map(Number);
-      const end = new Date(
-        ed.getFullYear(),
-        ed.getMonth(),
-        ed.getDate(),
-        eh,
-        em || 0,
-      );
+      const end = jsDateWithTime(ed, eh, em || 0);
       if (end > start) return;
     }
   }
@@ -733,20 +738,8 @@ const overlapWarning = computed(() => {
   const [sh, sm] = startTimeInput.value.split(":").map(Number);
   const [eh, em] = endTimeInput.value.split(":").map(Number);
 
-  const startMs = new Date(
-    sd.getFullYear(),
-    sd.getMonth(),
-    sd.getDate(),
-    sh,
-    sm || 0,
-  ).getTime();
-  const endMs = new Date(
-    ed.getFullYear(),
-    ed.getMonth(),
-    ed.getDate(),
-    eh,
-    em || 0,
-  ).getTime();
+  const startMs = jsDateWithTime(sd, sh, sm || 0).getTime();
+  const endMs = jsDateWithTime(ed, eh, em || 0).getTime();
 
   if (endMs <= startMs) return false;
 
@@ -775,20 +768,8 @@ function emitValue() {
     if (sd && ed) {
       const [sh, sm] = startTimeInput.value.split(":").map(Number);
       const [eh, em] = endTimeInput.value.split(":").map(Number);
-      const start = new Date(
-        sd.getFullYear(),
-        sd.getMonth(),
-        sd.getDate(),
-        sh,
-        sm || 0,
-      );
-      const end = new Date(
-        ed.getFullYear(),
-        ed.getMonth(),
-        ed.getDate(),
-        eh,
-        em || 0,
-      );
+      const start = jsDateWithTime(sd, sh, sm || 0);
+      const end = jsDateWithTime(ed, eh, em || 0);
       if (end.getTime() > start.getTime()) {
         payload = { start: start.getTime(), end: end.getTime() };
       }

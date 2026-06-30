@@ -7,6 +7,11 @@ import {
   ORDINAL_OPTIONS,
   WEEKDAY_ORDER,
 } from "~/utils/recurrence.js";
+import {
+  formatLocalDateIso,
+  jsDateWithTime,
+  parseLocalDateIso,
+} from "~/utils/localDate.js";
 
 const props = defineProps({
   tenantId: { type: String, default: null },
@@ -45,19 +50,8 @@ const intlLocale = computed(() => (locale.value === "de" ? "de-DE" : "en-GB"));
 
 const pad2 = (n) => String(n).padStart(2, "0");
 
-const localISODate = (date) => {
-  if (!date) return "";
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
-    date.getDate(),
-  )}`;
-};
-
-const parseLocalDate = (iso) => {
-  if (!iso) return null;
-  const [y, m, d] = iso.split("-").map(Number);
-  if (!y || !m || !d) return null;
-  return new Date(y, m - 1, d);
-};
+const localISODate = formatLocalDateIso;
+const parseLocalDate = parseLocalDateIso;
 
 const timeFromString = (str) => {
   if (!str) return null;
@@ -117,30 +111,35 @@ const endTime = computed({
   },
 });
 
+const hasTimeSelection = computed(
+  () =>
+    !!(
+      startDateInput.value ||
+      startTimeInput.value ||
+      endDateInput.value ||
+      endTimeInput.value
+    ),
+);
+
+function resetTimeSelection() {
+  startDateInput.value = "";
+  startTimeInput.value = "";
+  endDateInput.value = "";
+  endTimeInput.value = "";
+}
+
 function applyDefaultEndFromStart() {
   if (!startDateInput.value || !startTimeInput.value) return;
   const sd = parseLocalDate(startDateInput.value);
   if (!sd) return;
   const [sh, sm] = startTimeInput.value.split(":").map(Number);
-  const start = new Date(
-    sd.getFullYear(),
-    sd.getMonth(),
-    sd.getDate(),
-    sh,
-    sm || 0,
-  );
+  const start = jsDateWithTime(sd, sh, sm || 0);
 
   if (endDateInput.value && endTimeInput.value) {
     const ed = parseLocalDate(endDateInput.value);
     if (ed) {
       const [eh, em] = endTimeInput.value.split(":").map(Number);
-      const end = new Date(
-        ed.getFullYear(),
-        ed.getMonth(),
-        ed.getDate(),
-        eh,
-        em || 0,
-      );
+      const end = jsDateWithTime(ed, eh, em || 0);
       if (end > start) return;
     }
   }
@@ -202,13 +201,7 @@ const seedStartMs = computed(() => {
   const sd = parseLocalDate(startDateInput.value);
   if (!sd) return null;
   const [h, m] = startTimeInput.value.split(":").map(Number);
-  return new Date(
-    sd.getFullYear(),
-    sd.getMonth(),
-    sd.getDate(),
-    h,
-    m || 0,
-  ).getTime();
+  return jsDateWithTime(sd, h, m || 0).getTime();
 });
 
 const seedEndMs = computed(() => {
@@ -216,13 +209,7 @@ const seedEndMs = computed(() => {
   const ed = parseLocalDate(endDateInput.value);
   if (!ed) return null;
   const [h, m] = endTimeInput.value.split(":").map(Number);
-  return new Date(
-    ed.getFullYear(),
-    ed.getMonth(),
-    ed.getDate(),
-    h,
-    m || 0,
-  ).getTime();
+  return jsDateWithTime(ed, h, m || 0).getTime();
 });
 
 const untilMs = computed(() => {
@@ -538,6 +525,17 @@ function getWeekDayCardClass(wd) {
           class="w-full"
         />
       </div>
+    </div>
+
+    <div v-if="hasTimeSelection" class="flex justify-end -mt-2">
+      <button
+        type="button"
+        class="inline-flex items-center gap-1 px-1 py-0.5 text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+        @click="resetTimeSelection"
+      >
+        <UIcon name="i-lucide-rotate-ccw" class="size-3.5 shrink-0" />
+        {{ $t("scheduleSelection.resetTime") }}
+      </button>
     </div>
 
     <!-- Rhythm / interval -->

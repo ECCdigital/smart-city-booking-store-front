@@ -414,7 +414,8 @@
     "showOccupancy": "Show occupancy",
     "hideOccupancy": "Hide occupancy",
     "dragHint": "Click or drag on the calendar to select a time range. Alternatively, enter the times manually below.",
-    "overlapWarning": "The selected time range overlaps with already occupied times. The booking may not be possible."
+    "overlapWarning": "The selected time range overlaps with already occupied times. The booking may not be possible.",
+    "resetTime": "Reset time selection"
   },
 
   "groupBooking": {

@@ -2,6 +2,7 @@
   <div
     class="flex items-center bg-default border border-1.5 rounded-md px-1 border-accented focus-within:ring-1 focus-within:border-primary focus-within:ring-primary gap-1"
     :class="{ 'opacity-60': props.disabled }"
+    @focusout="onFieldFocusOut"
   >
     <UTooltip :text="$t('inputDate.openPicker')">
       <UIcon
@@ -13,12 +14,15 @@
     </UTooltip>
 
     <UInputDate
-      v-model="calendarDate"
+      ref="dateFieldRef"
+      v-model="internalCalendarDate"
       variant="ghost"
       :disabled="props.disabled"
       :min-value="minCalendarDate"
       :max-value="maxCalendarDate"
       class="flex-1 min-w-0"
+      @focus="onDateFieldFocus"
+      @blur="commitCalendarDate"
     />
 
     <UButton
@@ -74,13 +78,10 @@
 </template>
 
 <script setup lang="ts">
-import {
-  fromDate,
-  getLocalTimeZone,
-  today,
-  toCalendarDate,
-} from "@internationalized/date";
+import { getLocalTimeZone, today } from "@internationalized/date";
 import DatePicker from "~/components/inputs/DatePicker.vue";
+import { jsDateToCalendarDate } from "~/utils/localDate.js";
+import { useCalendarDateField } from "~/composables/useCalendarDateField.js";
 
 const model = defineModel<Date | null>({ default: null });
 
@@ -118,13 +119,21 @@ const props = defineProps({
 
 const openDatePickerDialog = ref(false);
 const pendingDate = ref<Date | null>(null);
+const dateFieldRef = ref<{ $el?: HTMLElement } | null>(null);
 
-function jsDateToCalendarDate(value: unknown) {
-  if (!value) return null;
-  const d = value instanceof Date ? value : new Date(value as string | number);
-  if (Number.isNaN(d.getTime())) return null;
-  return toCalendarDate(fromDate(d, getLocalTimeZone()));
+function getFieldRoot() {
+  const el = dateFieldRef.value?.$el;
+  return el instanceof HTMLElement ? el : null;
 }
+
+const {
+  internalCalendarDate,
+  onDateFieldFocus,
+  commitCalendarDate,
+  onFieldFocusOut,
+  setCalendarDateFromPicker,
+  clearCalendarDate,
+} = useCalendarDateField(model, { getFieldRoot });
 
 const minCalendarDate = computed(() => {
   if (props.minDate) return jsDateToCalendarDate(props.minDate);
@@ -135,22 +144,6 @@ const minCalendarDate = computed(() => {
 const maxCalendarDate = computed(() =>
   props.maxDate ? jsDateToCalendarDate(props.maxDate) : undefined
 );
-
-const calendarDate = computed({
-  get() {
-    return jsDateToCalendarDate(model.value);
-  },
-  set(val) {
-    if (!val) {
-      model.value = null;
-      return;
-    }
-    const result = val.toDate(getLocalTimeZone());
-    result.setFullYear(val.year, val.month - 1, val.day);
-    result.setHours(0, 0, 0, 0);
-    model.value = result;
-  },
-});
 
 function openDatePicker() {
   if (props.disabled) return;
@@ -164,17 +157,15 @@ function closeDatePicker() {
 
 function confirmDateSelection() {
   if (pendingDate.value) {
-    const d = new Date(pendingDate.value);
-    d.setHours(0, 0, 0, 0);
-    model.value = d;
+    setCalendarDateFromPicker(pendingDate.value);
   } else {
-    model.value = null;
+    clearCalendarDate();
   }
   closeDatePicker();
 }
 
 function clearDate() {
   pendingDate.value = null;
-  model.value = null;
+  clearCalendarDate();
 }
 </script>

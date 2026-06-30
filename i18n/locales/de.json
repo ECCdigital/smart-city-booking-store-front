@@ -789,7 +789,8 @@
     "showOccupancy": "Belegung anzeigen",
     "hideOccupancy": "Belegung ausblenden",
     "dragHint": "Klicken oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen. Alternativ können Sie die Zeiten oben manuell eingeben.",
-    "overlapWarning": "Der gewählte Zeitraum überschneidet sich mit bereits belegten Zeiten. Die Buchung kann unter Umständen nicht durchgeführt werden."
+    "overlapWarning": "Der gewählte Zeitraum überschneidet sich mit bereits belegten Zeiten. Die Buchung kann unter Umständen nicht durchgeführt werden.",
+    "resetTime": "Zeitauswahl zurücksetzen"
   },
 
   "groupBooking": {
