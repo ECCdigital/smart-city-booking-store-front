@@ -3,6 +3,8 @@ const CHECKOUT_REASON_BY_CHECK_TYPE = {
 };
 
 const GENERIC_CHECKOUT_REASONS = new Set([
+  "unknown",
+  "unknown_error",
   "checkout.unknown",
   "checkout.unknown_error",
 ]);

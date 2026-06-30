@@ -2004,8 +2004,10 @@ function messageForStructuredCheckoutError(apiError) {
     }
   }
   if (!core) {
-    const msg = apiError.message ?? apiError.debugMessage;
-    if (typeof msg === "string" && msg.trim()) return msg.trim();
+    const msg = [apiError.message, apiError.debugMessage].find(
+      (value) => typeof value === "string" && value.trim(),
+    );
+    if (msg) return msg.trim();
     return t("checkout.unknown_error");
   }
   const title =
