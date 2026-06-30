@@ -29,26 +29,31 @@
             :key="group.coordinates.join('_')"
           >
             <LMarker
-                :lat-lng="group.coordinates"
-                :z-index-offset="
-                group.bookables.some(b=> b.item.id === currentBookable?.item.id)
+              :lat-lng="group.coordinates"
+              :z-index-offset="
+                group.bookables.some(
+                  (b) => b.item.id === currentBookable?.item.id,
+                )
                   ? 1000
-                  : group.bookables.some(b=> b.matchStatus === 'match')
+                  : group.bookables.some((b) => b.matchStatus === 'match')
                     ? 500
                     : 0
               "
-                @click="openGroup(group)">
+              @click="openGroup(group)"
+            >
               <LIcon :icon-anchor="[20, 40]">
                 <div class="relative">
                   <UIcon
-                      :name="iconMapPin"
-                      :class="
-                    group.bookables.some(b=> b.item.id === currentBookable?.item.id)
-                      ? 'activeIconPin size-11'
-                      : group.bookables.some(b=> b.matchStatus === 'match')
-                        ? 'matchingIconPin size-10'
-                        : 'nonMatchingIconPin size-10'
-                  "
+                    :name="iconMapPin"
+                    :class="
+                      group.bookables.some(
+                        (b) => b.item.id === currentBookable?.item.id,
+                      )
+                        ? 'activeIconPin size-11'
+                        : group.bookables.some((b) => b.matchStatus === 'match')
+                          ? 'matchingIconPin size-10'
+                          : 'nonMatchingIconPin size-10'
+                    "
                   />
 
                   <div
@@ -66,7 +71,7 @@
                   minWidth: 320,
                   maxWidth: 320,
                 }"
-                class="flex justify-center bg-transparent"
+                class="justify-center bg-transparent hidden md:flex"
               >
                 <UCarousel
                   :items="group.bookables"
@@ -148,10 +153,15 @@
                     v-for="bookable in group.bookables"
                     :key="bookable.item.id"
                     class="bg-gray-200 dark:bg-gray-700 rounded-sm mb-2 last:mb-0 p-1 flex"
-                    :class="bookable.matchStatus !== 'match'? 'opacity-70' : ''"
+                    :class="
+                      bookable.matchStatus !== 'match' ? 'opacity-70' : ''
+                    "
                   >
                     <div class="basis-1/8 flex items-center">
-                      <BookablesBookableTypeBadge :type="bookable.item?.type" icon-only />
+                      <BookablesBookableTypeBadge
+                        :type="bookable.item?.type"
+                        icon-only
+                      />
                     </div>
                     <div class="basis-7/8 flex items-center">
                       <div class="font-semibold break-words whitespace-normal">
@@ -191,11 +201,55 @@
           </div>
         </div>
       </Transition>
+      <Transition name="fade-up">
+        <div
+          v-if="showMultiPinItems && currentMultiPinGroup"
+          class="fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
+          @click="closeBookableDetails"
+        >
+          <div
+            class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+            @click.stop
+          >
+            <UCarousel
+              :items="currentMultiPinGroup.bookables"
+              fade
+              dots
+              arrows
+              :prev="{ variant: 'soft', color: 'primary' }"
+              :next="{ variant: 'soft', color: 'primary' }"
+              indicators
+              :ui="{
+                controls:
+                  'absolute bottom-6 left-0 right-0 flex justify-between px-4 pointer-events-none',
+                prev: 'pointer-events-auto',
+                next: 'pointer-events-auto',
+                dots: 'absolute left-1/2 -translate-x-1/2 bottom-0',
+                dot: 'w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-600',
+              }"
+              class=""
+            >
+              <template #default="{ item }">
+                <div class="flex justify-center w-full">
+                  <ResultCard
+                    :item="item.item"
+                    :is-not-bookable="!item.isBookable"
+                    :calculated-price="item.calculatedPrice"
+                    map-detail-mode
+                    class="w-full shadow-none"
+                    @click="openBookableDetails(item, true)"
+                  />
+                </div>
+              </template>
+            </UCarousel>
+          </div>
+        </div>
+      </Transition>
     </div>
 
     <!-- List of visible bookables -->
     <div
-      class="bg-auto w-[25%] h-[80vh] z-20 m-2 overflow-auto p-2 border border-gray-200 rounded"
+      class="bg-auto w-[25%] h-[80vh] z-20 m-2 overflow-auto p-2 border border-gray-200 rounded hidden lg:block"
     >
       <TransitionGroup name="list" tag="div" class="space-y-1">
         <div
@@ -279,8 +333,6 @@ const groupedBookables = computed(() => {
 
   return [...groups.values()];
 });
-
-const currentCenter = ref([53.5, 10.0]);
 
 const initialBounds = computed(() => {
   const coords = props.bookables
@@ -394,6 +446,15 @@ function updateMapBounds() {
     [mapBounds.getNorth(), mapBounds.getEast()],
   ];
 }
+function updateMapCenter(coordinates, southOffset = 0.05) {
+  const map = mapRef.value?.leafletObject;
+
+  if (map) {
+    map.setView([coordinates[0] - southOffset, coordinates[1]], 8, {
+      animate: false,
+    });
+  }
+}
 
 function openGroup(group) {
   if (group.bookables.length === 1) {
@@ -404,7 +465,10 @@ function openGroup(group) {
   console.log("open group", group);
 
   currentMultiPinGroup.value = group;
+  currentBookable.value = group.bookables[0];
   showMultiPinItems.value = true;
+
+  updateMapCenter(group.coordinates);
 }
 
 function openBookableDetails(bookable, handleCardClickOnMobile = false) {
@@ -417,8 +481,9 @@ function openBookableDetails(bookable, handleCardClickOnMobile = false) {
     goToDetailsNewTab(bookable.item.id, bookable.item.type);
   } else {
     showCurrentBookable.value = true;
-    currentCenter.value = getCoordinatesForBookable(bookable.item);
     currentBookable.value = bookable;
+
+    updateMapCenter(getCoordinatesForBookable(bookable.item));
 
     document
       .querySelector(".leaflet-container")
@@ -428,6 +493,9 @@ function openBookableDetails(bookable, handleCardClickOnMobile = false) {
 function closeBookableDetails() {
   showCurrentBookable.value = false;
   currentBookable.value = null;
+
+  showMultiPinItems.value = false;
+  currentMultiPinGroup.value = null;
 }
 
 function onMapReady() {
@@ -553,7 +621,6 @@ watch(
 .list-leave-active {
   position: absolute;
 }
-
 
 /*Pop up*/
 .leaflet-popup-content-wrapper {
