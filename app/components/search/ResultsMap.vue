@@ -94,6 +94,7 @@
                         :calculated-price="item.calculatedPrice"
                         map-detail-mode
                         class="w-full shadow-none"
+                        @click="openBookableDetails(item, true)"
                       />
                     </div>
                   </template>
