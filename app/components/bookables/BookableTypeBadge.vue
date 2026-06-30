@@ -31,7 +31,7 @@ const props = defineProps({
 //toDo - read dynamically from instance
 const category = computed(() => {
   if (props.isEvent) {
-    return "Veranstaltung";
+    return { label: "Veranstaltung", icon: "i-lucide-calendar-check-2" };
   }
   switch (props.type) {
     case "room":
