@@ -1,9 +1,11 @@
 <template>
-<UBadge
+  <UBadge
     class="z-10"
     :color="color"
     size="md"
-    :label="categoryName"
+    :label="iconOnly ? '' : category.label"
+    :icon="category.icon"
+    :class="iconOnly? 'pl-2' : ''"
   />
 </template>
 <script setup>
@@ -20,26 +22,30 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  iconOnly: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 //toDo - read dynamically from instance
-const categoryName = computed(() => {
+const category = computed(() => {
   if (props.isEvent) {
     return "Veranstaltung";
   }
   switch (props.type) {
     case "room":
-      return "Raum";
+      return { label: "Raum", icon: "i-lucide-door-open" };
     case "event-location":
-      return "Veranstaltungsort";
+      return { label: "Veranstaltungsort", icon: "i-lucide-building-2" };
     case "resource":
-      return "Gerät";
+      return { label: "Gerät", icon: "i-lucide-wrench" };
     case "event":
-      return "Veranstaltung";
+      return { label: "Veranstaltung", icon: "i-lucide-calendar-check-2" };
     case "ticket":
-      return "Ticket";
+      return { label: "Ticket", icon: "i-lucide-ticket" };
     default:
-      return "";
+      return { label: "", icon: "" };
   }
 });
 </script>

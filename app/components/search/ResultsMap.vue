@@ -149,10 +149,10 @@
                     class="bg-gray-200 dark:bg-gray-700 rounded-sm mb-2 last:mb-0 p-1 flex"
                     :class="bookable.matchStatus !== 'match'? 'opacity-70' : ''"
                   >
-                    <div class="basis-1/5 flex items-center">
-                      <BookablesBookableTypeBadge :type="bookable.item?.type" />
+                    <div class="basis-1/8 flex items-center">
+                      <BookablesBookableTypeBadge :type="bookable.item?.type" icon-only />
                     </div>
-                    <div class="basis-4/5 flex items-center">
+                    <div class="basis-7/8 flex items-center">
                       <div class="font-semibold break-words whitespace-normal">
                         {{ bookable.item?.title }}
                       </div>
