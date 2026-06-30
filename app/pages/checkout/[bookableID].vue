@@ -15,6 +15,7 @@ import CheckoutPaymentStep from "~/components/checkout/CheckoutPaymentStep.vue";
 import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useNotification } from "~/composables/useNotification.js";
+import { resolveCheckoutErrorKey } from "~/utils/checkoutErrors.js";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 
@@ -1014,8 +1015,9 @@ async function validateAll() {
       }
 
       if (!row.res?.success) {
-        const errorReason = row.res?.error?.reason || "checkout.unknown_error";
-        const errorDetails = row.res?.error?.params || {};
+        const apiError = row.res?.error || {};
+        const errorReason = resolveCheckoutErrorKey(apiError);
+        const errorDetails = apiError.params || {};
         errorMap[id] = { reason: errorReason, params: errorDetails, isLead };
         errors.push({
           id,
@@ -1204,8 +1206,9 @@ async function validateGroupBookingAttempts() {
       }
 
       if (!row.res?.success) {
-        const reason = row.res?.error?.reason || "checkout.unknown_error";
-        const params = row.res?.error?.params || {};
+        const apiError = row.res?.error || {};
+        const reason = resolveCheckoutErrorKey(apiError);
+        const params = apiError.params || {};
         attemptAcc.valid = false;
         if (!attemptAcc.firstError) {
           attemptAcc.firstError = { reason, params, target: row.target };
@@ -1981,7 +1984,7 @@ function messageForStructuredCheckoutError(apiError) {
   if (!apiError || typeof apiError !== "object") {
     return t("checkout.unknown_error");
   }
-  const reason = apiError.reason;
+  const reason = resolveCheckoutErrorKey(apiError);
   const params =
     apiError.params && typeof apiError.params === "object"
       ? apiError.params
@@ -2001,7 +2004,7 @@ function messageForStructuredCheckoutError(apiError) {
     }
   }
   if (!core) {
-    const msg = apiError.message;
+    const msg = apiError.message ?? apiError.debugMessage;
     if (typeof msg === "string" && msg.trim()) return msg.trim();
     return t("checkout.unknown_error");
   }
@@ -2030,6 +2033,8 @@ function messageForStructuredCheckoutErrorNotify(apiError) {
   const checkType = apiError?.checkType ?? params.checkType;
   if (checkType === "availability") {
     parts.push(t("checkout.errors.unavailableHint"));
+  } else if (checkType === "insufficient-lead-time") {
+    parts.push(t("checkout.errors.leadTimeHint"));
   }
   return parts.join("\n");
 }

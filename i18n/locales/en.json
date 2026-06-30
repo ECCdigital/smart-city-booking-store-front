@@ -85,6 +85,7 @@
     "time_conflict": "There is a time conflict with another booking for this object.",
     "block_period_mismatch": "A complete booking time window must be booked for this object.",
     "time_period_mismatch": "A complete time slot must be booked for this object.",
+    "insufficient_lead_time": "The booking is too soon. There must be sufficient preparation time within service hours between booking and start.",
     "selectTimePeriodTitle": "Select a time period",
     "selectTimePeriodHint": "Please select a time period first to see the price summary.",
     "data": {
@@ -128,7 +129,8 @@
     },
     "errors": {
       "capacityInfo": "Available: {remaining} of {total}",
-      "unavailableHint": "Please choose a different time period or remove the object."
+      "unavailableHint": "Please choose a different time period or remove the object.",
+      "leadTimeHint": "Please choose a later appointment."
     },
     "payment": {
       "description": "Please choose how you would like to pay.",
