@@ -41,248 +41,52 @@
               "
               @click="openGroup(group)"
             >
-              <LIcon :icon-anchor="[20, 40]">
-                <div class="relative">
-                  <UIcon
-                    :name="iconMapPin"
-                    :class="
-                      group.bookables.some(
-                        (b) => b.item.id === currentBookable?.item.id,
-                      )
-                        ? 'activeIconPin size-11'
-                        : group.bookables.some((b) => b.matchStatus === 'match')
-                          ? 'matchingIconPin size-10'
-                          : 'nonMatchingIconPin size-10'
-                    "
-                  />
+              <ResultsMapMarkerIcon
+                :group="group"
+                :current-bookable="currentBookable"
+              />
 
-                  <div
-                    v-if="group.bookables.length > 1"
-                    class="absolute -top-1 left-6 w-5 h-5 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center"
-                  >
-                    {{ group.bookables.length }}
-                  </div>
-                </div>
-              </LIcon>
+              <ResultsMapMarkerPopup
+                :group="group"
+                @open-details="openBookableDetails"
+                @close-group="closeGroup"
+              />
 
-              <LPopup
-                v-if="group.bookables.length > 1"
-                :options="{
-                  minWidth: 320,
-                  maxWidth: 320,
-                }"
-                class="justify-center bg-transparent hidden md:flex"
-              >
-                <UCarousel
-                  :items="group.bookables"
-                  fade
-                  dots
-                  arrows
-                  :prev="{ variant: 'soft', color: 'primary' }"
-                  :next="{ variant: 'soft', color: 'primary' }"
-                  indicators
-                  :ui="{
-                    controls:
-                      'absolute inset-y-0 left-0 right-0 flex items-center justify-between pointer-events-none',
-                    prev: 'pointer-events-auto translate-x-12',
-                    next: 'pointer-events-auto -translate-x-12',
-                    dots: 'absolute left-1/2 -translate-x-1/2 bottom-2',
-                    dot: 'w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-600',
-                  }"
-                  class="w-[300px] mx-auto pb-5"
-                >
-                  <template #default="{ item }">
-                    <div class="flex justify-center w-full">
-                      <ResultCard
-                        :item="item.item"
-                        :is-not-bookable="!item.isBookable"
-                        :calculated-price="item.calculatedPrice"
-                        map-detail-mode
-                        class="w-full shadow-none"
-                        @click="openBookableDetails(item, true)"
-                      />
-                    </div>
-                  </template>
-                </UCarousel>
-              </LPopup>
-
-              <LTooltip
-                :options="{ className: 'clean-tooltip' }"
-                class="hidden md:block"
-              >
-                <div
-                  v-if="group.bookables?.length === 1"
-                  class="overflow-hidden rounded-2xl shadow-2xl"
-                >
-                  <ResultCard
-                    :item="group.bookables[0].item"
-                    :is-not-bookable="!group.bookables[0].isBookable"
-                    :calculated-price="group.bookables[0].calculatedPrice"
-                    map-detail-mode
-                    class="w-[300px] break-normal"
-                  />
-                </div>
-
-                <div
-                  v-else-if="
-                    group.bookables?.length === 2 ||
-                    group.bookables?.length === 3
-                  "
-                  class="rounded-2xl bg-white shadow-2xl p-2 space-y-1"
-                >
-                  <div
-                    v-for="bookable in group.bookables"
-                    :key="bookable.item.id"
-                    class=""
-                  >
-                    <ResultStrip
-                      :item="bookable.item"
-                      :is-not-suitable="bookable.matchStatus !== 'match'"
-                      :calculated-price="bookable.calculatedPrice"
-                      map-mode
-                      icon-only
-                      class="h-36 w-85"
-                    />
-                  </div>
-                </div>
-
-                <div v-else class="rounded-2xl bg-white shadow-2xl p-2 w-80">
-                  <p class="text-md font-bold mb-2">
-                    {{ group.bookables.length }} Ergebnisse an diesem Standort:
-                  </p>
-                  <div
-                    v-for="bookable in group.bookables"
-                    :key="bookable.item.id"
-                    class="bg-gray-200 dark:bg-gray-700 rounded-sm mb-2 last:mb-0 p-1 flex"
-                    :class="
-                      bookable.matchStatus !== 'match' ? 'opacity-70' : ''
-                    "
-                  >
-                    <div class="basis-1/8 flex items-center">
-                      <BookablesBookableTypeBadge
-                        :type="bookable.item?.type"
-                        icon-only
-                      />
-                    </div>
-                    <div class="basis-7/8 flex items-center">
-                      <div class="font-semibold break-words whitespace-normal">
-                        {{ bookable.item?.title }}
-                      </div>
-                    </div>
-                  </div>
-
-                  <p class="text-center italic">
-                    [ Klick um Auswahl zu öffnen ]
-                  </p>
-                </div>
-              </LTooltip>
+              <ResultsMapMarkerTooltip :group="group" />
             </LMarker>
           </div>
         </LMap>
       </ClientOnly>
 
       <!-- Mobile Detail Popup -->
-      <Transition name="bottom-up" mode="out-in">
-        <div
-          v-if="showCurrentBookable && currentBookable"
-          class="fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
-          @click="closeBookableDetails"
-        >
-          <div
-            class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
-            @click.stop="openBookableDetails(currentBookable, true)"
-          >
-            <ResultCard
-              :item="currentBookable.item"
-              :is-not-bookable="!currentBookable.isBookable"
-              :calculated-price="currentBookable.calculatedPrice"
-              entry-page-mode
-              map-detail-mode
-            />
-          </div>
-        </div>
-      </Transition>
-      <Transition name="bottom-up" mode="out-in">
-        <div
-          v-if="showMultiPinItems && currentMultiPinGroup"
-          class="fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
-          @click="closeBookableDetails"
-        >
-          <div
-            class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
-            @click.stop
-          >
-            <UCarousel
-              :items="currentMultiPinGroup.bookables"
-              fade
-              dots
-              arrows
-              :prev="{ variant: 'soft', color: 'primary' }"
-              :next="{ variant: 'soft', color: 'primary' }"
-              indicators
-              :ui="{
-                controls:
-                  'absolute bottom-6 left-0 right-0 flex justify-between px-4 pointer-events-none',
-                prev: 'pointer-events-auto',
-                next: 'pointer-events-auto',
-                dots: 'absolute left-1/2 -translate-x-1/2 bottom-0',
-                dot: 'w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-600',
-              }"
-              class=""
-            >
-              <template #default="{ item }">
-                <div class="flex justify-center w-full">
-                  <ResultCard
-                    :item="item.item"
-                    :is-not-bookable="!item.isBookable"
-                    :calculated-price="item.calculatedPrice"
-                    map-detail-mode
-                    class="w-full shadow-none"
-                    @click="openBookableDetails(item, true)"
-                  />
-                </div>
-              </template>
-            </UCarousel>
-          </div>
-        </div>
-      </Transition>
+      <ResultsMapMobilePopup
+        :current-bookable="currentBookable"
+        :current-group="currentMultiPinGroup"
+        :show-current-bookable="showCurrentBookable"
+        :show-current-group="showMultiPinItems"
+        @open-details="openBookableDetails"
+        @close-details="closeBookableDetails"
+      />
     </div>
 
     <!-- List of visible bookables -->
-    <div
-      class="bg-auto w-[25%] h-[80vh] z-20 m-2 overflow-auto p-2 border border-gray-200 rounded hidden lg:block"
-    >
-      <TransitionGroup name="list" tag="div" class="space-y-1">
-        <div
-          v-for="bookable in visibleBookables"
-          :key="bookable.item.id"
-          @mouseenter="currentBookable = bookable"
-          @mouseleave="currentBookable = null"
-        >
-          <ResultStrip
-            class="cursor-pointer"
-            :item="bookable.item"
-            :is-not-suitable="bookable.matchStatus !== 'match'"
-            :calculated-price="bookable.calculatedPrice"
-            map-mode
-            @click="openBookableDetails(bookable, true)"
-          />
-        </div>
-        <div v-if="!visibleBookables || visibleBookables.length === 0">
-          <p class="text-center text-gray-500 mt-10">
-            Keine Ergebnisse in diesem Bereich.
-          </p>
-        </div>
-      </TransitionGroup>
-    </div>
+    <ResultsMapList
+      v-model="currentBookable"
+      :bookables="visibleBookables"
+      @open-details="openBookableDetails"
+    />
+
   </div>
 </template>
 <script setup>
-import ResultCard from "~/components/search/ResultCard.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 import { nextTick } from "vue";
-import ResultStrip from "~/components/search/ResultStrip.vue";
+import ResultsMapMarkerIcon from "~/components/search/ResultsMapMarkerIcon.vue";
+import ResultsMapMarkerPopup from "~/components/search/ResultsMapMarkerPopup.vue";
+import ResultsMapMarkerTooltip from "~/components/search/ResultsMapMarkerTooltip.vue";
+import ResultsMapMobilePopup from "~/components/search/ResultsMapMobilePopup.vue";
+import ResultsMapList from "~/components/search/ResultsMapList.vue";
 
 const props = defineProps({
   bookables: {
@@ -291,7 +95,6 @@ const props = defineProps({
   },
 });
 
-const { iconMapPin } = useBookableMap();
 const { goToDetailsNewTab } = useRedirection();
 const { searchAddress } = useBookableSearch({
   isEvent: false,
@@ -463,8 +266,6 @@ function openGroup(group) {
     return;
   }
 
-  console.log("open group", group);
-
   currentMultiPinGroup.value = group;
   currentBookable.value = group.bookables[0];
   showMultiPinItems.value = true;
@@ -485,11 +286,12 @@ function openBookableDetails(bookable, handleCardClickOnMobile = false) {
     currentBookable.value = bookable;
 
     updateMapCenter(getCoordinatesForBookable(bookable.item));
-
-    document
-      .querySelector(".leaflet-container")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+}
+function closeGroup() {
+  showMultiPinItems.value = false;
+  currentMultiPinGroup.value = null;
+  currentBookable.value = null;
 }
 function closeBookableDetails() {
   showCurrentBookable.value = false;
@@ -571,98 +373,4 @@ watch(
 );
 </script>
 
-<style>
-/*map icons*/
-.leaflet-tooltip.clean-tooltip {
-  background: transparent;
-  border: none;
-  border-radius: 50px;
-  box-shadow: 5px;
-  padding: 0;
-  color: #000;
-}
-
-.leaflet-tooltip.clean-tooltip::before {
-  display: none;
-}
-
-.leaflet-div-icon {
-  background: transparent;
-  border: transparent;
-}
-
-/*map pins*/
-.activeIconPin,
-.matchingIconPin,
-.nonMatchingIconPin {
-  transition: color 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
-}
-
-.activeIconPin {
-  color: var(--color-secondary);
-  z-index: 999;
-  transform: scale(1.08);
-}
-
-.matchingIconPin {
-  color: var(--color-primary);
-  z-index: 500;
-  opacity: 1;
-}
-
-.nonMatchingIconPin {
-  color: #cccdcf;
-  opacity: 0.7;
-  z-index: 50;
-}
-
-/*list transition*/
-.list-move, /* apply transition to moving elements */
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.5s ease;
-}
-
-.list-enter-from,
-.list-leave-to {
-  opacity: 0;
-  transform: translateX(30px);
-}
-
-.list-leave-active {
-  position: absolute;
-}
-
-/*Pop up*/
-.leaflet-popup-content-wrapper {
-  /*background: transparent !important;*/
-  /*box-shadow: none !important;*/
-  padding: 5px !important;
-}
-
-.leaflet-popup-content {
-  margin: 0 !important;
-  width: auto !important;
-}
-.leaflet-popup-content p {
-  margin: 0 !important;
-}
-
-.leaflet-popup-tip {
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-/* transition*/
-.bottom-up-enter-active {
-  transition: all 0.3s ease-out;
-}
-.bottom-up-leave-active {
-  transition: all 0.3s ease-in;
-}
-.bottom-up-enter-from,
-.bottom-up-leave-to {
-  transform: translateY(100%);
-  opacity: 0;
-}
-</style>
+<style></style>
