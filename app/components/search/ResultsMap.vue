@@ -51,6 +51,46 @@
                 </div>
               </LIcon>
 
+              <LPopup
+                v-if="group.bookables.length > 1"
+                :options="{
+                  minWidth: 320,
+                  maxWidth: 320,
+                }"
+                class="flex justify-center bg-transparent"
+              >
+                <UCarousel
+                  :items="group.bookables"
+                  fade
+                  dots
+                  arrows
+                  :prev="{ variant: 'soft', color: 'primary' }"
+                  :next="{ variant: 'soft', color: 'primary' }"
+                  indicators
+                  :ui="{
+                    controls:
+                      'absolute inset-y-0 left-0 right-0 flex items-center justify-between pointer-events-none',
+                    prev: 'pointer-events-auto translate-x-12',
+                    next: 'pointer-events-auto -translate-x-12',
+                    dots: 'absolute left-1/2 -translate-x-1/2 bottom-2',
+                    dot: 'w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-600',
+                  }"
+                  class="w-[300px] mx-auto pb-5"
+                >
+                  <template #default="{ item }">
+                    <div class="flex justify-center w-full">
+                      <ResultCard
+                        :item="item.item"
+                        :is-not-bookable="!item.isBookable"
+                        :calculated-price="item.calculatedPrice"
+                        map-detail-mode
+                        class="w-full shadow-none"
+                      />
+                    </div>
+                  </template>
+                </UCarousel>
+              </LPopup>
+
               <LTooltip
                 :options="{ className: 'clean-tooltip' }"
                 class="hidden md:block"
@@ -63,7 +103,7 @@
                     :item="group.bookables[0].item"
                     :is-not-bookable="!group.bookables[0].isBookable"
                     :calculated-price="group.bookables[0].calculatedPrice"
-                    entry-page-mode
+                    map-detail-mode
                     class="w-[300px] break-normal"
                   />
                 </div>
@@ -175,6 +215,8 @@ const mapReady = ref(false);
 
 const fetchedCoordinates = ref(false);
 
+const showMultiPinItems = ref(false);
+const currentMultiPinGroup = ref(null);
 const groupedBookables = computed(() => {
   const groups = new Map();
 
@@ -312,6 +354,18 @@ function updateMapBounds() {
     [mapBounds.getSouth(), mapBounds.getWest()],
     [mapBounds.getNorth(), mapBounds.getEast()],
   ];
+}
+
+function openGroup(group) {
+  if (group.bookables.length === 1) {
+    openBookableDetails(group.bookables[0]);
+    return;
+  }
+
+  console.log("open group", group);
+
+  currentMultiPinGroup.value = group;
+  showMultiPinItems.value = true;
 }
 
 function openBookableDetails(bookable, handleCardClickOnMobile = false) {
@@ -459,5 +513,24 @@ watch(
 
 .list-leave-active {
   position: absolute;
+}
+
+.leaflet-popup-content-wrapper {
+  /*background: transparent !important;*/
+  /*box-shadow: none !important;*/
+  padding: 5px !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  width: auto !important;
+}
+.leaflet-popup-content p {
+  margin: 0 !important;
+}
+
+.leaflet-popup-tip {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 </style>

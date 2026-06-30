@@ -1,10 +1,17 @@
 <template>
   <div
     class="shadow-lg bg-white dark:bg-gray-700 rounded-xl"
-    :class="isNotSuitable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer'"
+    :class="[
+      isNotSuitable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer',
+      mapDetailMode ? 'h-80' : '',
+    ]"
     @click="onGoToDetails"
   >
-    <div id="header" class="flex flex-col" :class="mapDetailMode? 'h-30' : 'h-36'">
+    <div
+      id="header"
+      class=""
+      :class="mapDetailMode ? 'h-28' : 'flex flex-col h-36'"
+    >
       <div class="flex h-9/10 relative">
         <BookableTypeBadge
           :type="item?.type"
@@ -99,8 +106,8 @@ const isEvent = computed(() => {
 const openEventTicketOptions = ref(false);
 
 function onGoToDetails() {
-  if(!props.mapDetailMode && props.item){
-    goToDetails(props.item.id, props.item.type)
+  if (!props.mapDetailMode && props.item) {
+    goToDetails(props.item.id, props.item.type);
   }
 }
 </script>
