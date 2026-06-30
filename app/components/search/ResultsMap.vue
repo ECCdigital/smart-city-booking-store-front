@@ -140,6 +140,7 @@
                       :is-not-suitable="bookable.matchStatus !== 'match'"
                       :calculated-price="bookable.calculatedPrice"
                       map-mode
+                      icon-only
                       class="h-36 w-85"
                     />
                   </div>
@@ -181,7 +182,7 @@
       </ClientOnly>
 
       <!-- Mobile Detail Popup -->
-      <Transition name="fade-up">
+      <Transition name="bottom-up" mode="out-in">
         <div
           v-if="showCurrentBookable && currentBookable"
           class="fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
@@ -201,7 +202,7 @@
           </div>
         </div>
       </Transition>
-      <Transition name="fade-up">
+      <Transition name="bottom-up" mode="out-in">
         <div
           v-if="showMultiPinItems && currentMultiPinGroup"
           class="fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
@@ -590,13 +591,23 @@ watch(
   border: transparent;
 }
 
+/*map pins*/
+.activeIconPin,
+.matchingIconPin,
+.nonMatchingIconPin {
+  transition: color 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
+}
+
 .activeIconPin {
   color: var(--color-secondary);
   z-index: 999;
+  transform: scale(1.08);
 }
 
 .matchingIconPin {
+  color: var(--color-primary);
   z-index: 500;
+  opacity: 1;
 }
 
 .nonMatchingIconPin {
@@ -640,5 +651,18 @@ watch(
 .leaflet-popup-tip {
   background: transparent !important;
   box-shadow: none !important;
+}
+
+/* transition*/
+.bottom-up-enter-active {
+  transition: all 0.3s ease-out;
+}
+.bottom-up-leave-active {
+  transition: all 0.3s ease-in;
+}
+.bottom-up-enter-from,
+.bottom-up-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
 }
 </style>

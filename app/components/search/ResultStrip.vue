@@ -12,6 +12,7 @@
         <BookableTypeBadge
           :type="item?.type"
           :is-event="isEvent"
+          :icon-only="iconOnly"
           class="absolute "
           :class="mapMode ? 'top-1 left-1' : 'top-2 left-2'"
         />
@@ -101,6 +102,10 @@ const props = defineProps({
     default: false,
   },
   mapMode: {
+    type: Boolean,
+    default: false,
+  },
+  iconOnly: {
     type: Boolean,
     default: false,
   },
