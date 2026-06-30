@@ -455,6 +455,7 @@
     "time_conflict": "Für dieses Objekt besteht ein Zeitkonflikt mit einer anderen Buchung.",
     "block_period_mismatch": "Für dieses Objekt muss ein vollständiges Buchungszeitfenster gebucht werden.",
     "time_period_mismatch": "Für dieses Objekt muss ein vollständiger Zeitslot gebucht werden.",
+    "insufficient_lead_time": "Die Buchung liegt zu kurzfristig. Zwischen Buchung und Beginn muss ausreichend Vorbereitungszeit in den Servicezeiten liegen.",
     "selectTimePeriodTitle": "Zeitraum auswählen",
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
     "data": {
@@ -499,7 +500,8 @@
     },
     "errors": {
       "capacityInfo": "Verfügbar: {remaining} von {total}",
-      "unavailableHint": "Bitte wählen Sie einen anderen Zeitraum oder entfernen Sie das Objekt."
+      "unavailableHint": "Bitte wählen Sie einen anderen Zeitraum oder entfernen Sie das Objekt.",
+      "leadTimeHint": "Bitte wählen Sie einen späteren Termin."
     },
     "payment": {
       "description": "Bitte wählen Sie aus, wie Sie bezahlen möchten.",
