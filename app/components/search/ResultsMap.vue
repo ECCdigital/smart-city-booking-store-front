@@ -96,7 +96,7 @@
                 class="hidden md:block"
               >
                 <div
-                  v-if="group.bookables.length === 1"
+                  v-if="group.bookables?.length === 1"
                   class="overflow-hidden rounded-2xl shadow-2xl"
                 >
                   <ResultCard
@@ -106,6 +106,28 @@
                     map-detail-mode
                     class="w-[300px] break-normal"
                   />
+                </div>
+
+                <div
+                  v-else-if="
+                    group.bookables?.length === 2 ||
+                    group.bookables?.length === 3
+                  "
+                  class="rounded-2xl bg-white shadow-2xl p-2 space-y-1"
+                >
+                  <div
+                    v-for="bookable in group.bookables"
+                    :key="bookable.item.id"
+                    class=""
+                  >
+                    <ResultStrip
+                      :item="bookable.item"
+                      :is-not-suitable="bookable.matchStatus !== 'match'"
+                      :calculated-price="bookable.calculatedPrice"
+                      map-mode
+                      class="h-36 w-85"
+                    />
+                  </div>
                 </div>
 
                 <div v-else class="rounded-2xl bg-white shadow-2xl p-2 w-80">
@@ -175,11 +197,12 @@
             class="cursor-pointer"
             :item="bookable.item"
             :is-not-suitable="bookable.matchStatus !== 'match'"
+            :calculated-price="bookable.calculatedPrice"
             map-mode
             @click="openBookableDetails(bookable, true)"
           />
         </div>
-        <div v-if="visibleBookables.length === 0">
+        <div v-if="!visibleBookables || visibleBookables.length === 0">
           <p class="text-center text-gray-500 mt-10">
             Keine Ergebnisse in diesem Bereich.
           </p>
@@ -515,6 +538,8 @@ watch(
   position: absolute;
 }
 
+
+/*Pop up*/
 .leaflet-popup-content-wrapper {
   /*background: transparent !important;*/
   /*box-shadow: none !important;*/
