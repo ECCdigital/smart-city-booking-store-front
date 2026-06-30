@@ -1,6 +1,5 @@
 import {
   calendarDateToJsDate,
-  formatLocalDateIso,
   jsDateToCalendarDate,
   readCalendarDateFromDateFieldRoot,
 } from "~/utils/localDate.js";
@@ -9,10 +8,16 @@ function isCompleteCalendarDate(val) {
   return !!(val?.year && val?.month && val?.day && val.year >= 1000);
 }
 
-function sameLocalDate(a, b) {
+function sameDateTime(a, b) {
   if (!a && !b) return true;
   if (!a || !b) return false;
-  return formatLocalDateIso(a) === formatLocalDateIso(b);
+  const dateA = a instanceof Date ? a : new Date(a);
+  const dateB = b instanceof Date ? b : new Date(b);
+  return (
+    !Number.isNaN(dateA.getTime()) &&
+    !Number.isNaN(dateB.getTime()) &&
+    dateA.getTime() === dateB.getTime()
+  );
 }
 
 /**
@@ -27,7 +32,7 @@ export function useCalendarDateField(model, { getFieldRoot } = {}) {
 
   function commitModelValue(val = internalCalendarDate.value) {
     const next = val ? calendarDateToJsDate(val) : null;
-    if (sameLocalDate(model.value, next)) return;
+    if (sameDateTime(model.value, next)) return;
     model.value = next;
   }
 
@@ -62,6 +67,13 @@ export function useCalendarDateField(model, { getFieldRoot } = {}) {
   function commitCalendarDate() {
     isFocused.value = false;
     syncFromDom();
+    if (
+      internalCalendarDate.value &&
+      !isCompleteCalendarDate(internalCalendarDate.value)
+    ) {
+      internalCalendarDate.value = jsDateToCalendarDate(model.value);
+      return;
+    }
     commitModelValue();
   }
 

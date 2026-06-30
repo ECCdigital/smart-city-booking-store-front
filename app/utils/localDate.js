@@ -79,12 +79,24 @@ export function formatLocalDateIso(date) {
  */
 export function parseLocalDateIso(iso) {
   if (!iso) return null;
-  const [y, m, d] = iso.split("-").map(Number);
-  if (!y || !m || !d) return null;
-  const cal = new CalendarDate(y, m, d);
-  const result = cal.toDate(getLocalTimeZone());
-  result.setHours(0, 0, 0, 0);
-  return result;
+  const match = /^(\d{1,4})-(\d{1,2})-(\d{1,2})$/.exec(String(iso));
+  if (!match) return null;
+
+  const [, y, m, d] = match;
+  const year = Number(y);
+  const month = Number(m);
+  const day = Number(d);
+
+  try {
+    const cal = new CalendarDate(year, month, day);
+    if (cal.year !== year || cal.month !== month || cal.day !== day) return null;
+
+    const result = cal.toDate(getLocalTimeZone());
+    result.setHours(0, 0, 0, 0);
+    return result;
+  } catch {
+    return null;
+  }
 }
 
 /**

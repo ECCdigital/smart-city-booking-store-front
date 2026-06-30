@@ -376,8 +376,10 @@ async function jumpToNextFreeDay() {
     let startOffset = dayOffset.value;
     if (selectedDayIso.value) {
       const sel = parseLocalDateIso(selectedDayIso.value);
-      const diff = Math.round((sel - today) / 86_400_000);
-      startOffset = Math.max(diff + 1, 0);
+      if (sel) {
+        const diff = Math.round((sel - today) / 86_400_000);
+        startOffset = Math.max(diff + 1, 0);
+      }
     }
 
     for (
