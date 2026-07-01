@@ -41,7 +41,7 @@ defineProps({
   },
 });
 
-const emit = defineEmits(["openDetails", "updateCurrentBookable"]);
+const emit = defineEmits(["openDetails"]);
 </script>
 
 
