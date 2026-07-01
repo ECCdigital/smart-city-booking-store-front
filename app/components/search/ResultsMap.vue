@@ -31,11 +31,9 @@
             <LMarker
               :lat-lng="group.coordinates"
               :z-index-offset="
-                group.bookables.some(
-                  (b) => b.item.id === currentBookable?.item.id,
-                )
+                getMarkerStatus(group) === 'active'
                   ? 1000
-                  : group.bookables.some((b) => b.matchStatus === 'match')
+                  : getMarkerStatus(group) === 'match'
                     ? 500
                     : 0
               "
@@ -44,6 +42,7 @@
               <ResultsMapMarkerIcon
                 :group="group"
                 :current-bookable="currentBookable"
+                :marker-status="getMarkerStatus(group)"
               />
 
               <ResultsMapMarkerPopup
@@ -194,6 +193,16 @@ const visibleBookables = computed(() => {
     });
 });
 
+function getMarkerStatus(group){
+  if(currentBookable.value && group.bookables.some(
+      (b) => b.item.id === currentBookable.value.item.id,
+  )){
+    return "active"
+  } else if(group.bookables.some((b) => b.matchStatus === 'match')){
+    return "match"
+  }
+  return "nomatch"
+}
 function hasCoordinates(bookable) {
   return (
     !!bookable.location &&

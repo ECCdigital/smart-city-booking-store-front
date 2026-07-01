@@ -4,9 +4,9 @@
       <UIcon
         :name="iconMapPin"
         :class="
-          group.bookables.some((b) => b.item.id === currentBookable?.item.id)
+          markerStatus === 'active'
             ? 'activeIconPin size-11'
-            : group.bookables.some((b) => b.matchStatus === 'match')
+            : markerStatus === 'match'
               ? 'matchingIconPin size-10'
               : 'nonMatchingIconPin size-10'
         "
@@ -34,6 +34,10 @@ defineProps({
     required: false,
     default: () => {},
   },
+  markerStatus: {
+    type: String,
+    required: true,
+  }
 });
 </script>
 
