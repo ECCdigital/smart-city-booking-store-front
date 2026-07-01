@@ -131,7 +131,6 @@ function onGoToDetails() {
 }
 
 function onImageError() {
-  console.log("got image error");
   showImageErrorHint.value = true;
 }
 

@@ -139,7 +139,6 @@ const price = computed(() => {
 const showImageErrorHint = ref(false);
 
 function onImageError() {
-  console.log("got image error");
   showImageErrorHint.value = true;
 }
 </script>
