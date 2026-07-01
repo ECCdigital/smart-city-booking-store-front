@@ -31,6 +31,9 @@
 import BookingCard from "~/components/user/BookingCard.vue";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
+import { resolveBookingPaymentSearchLabel } from "~/utils/bookingPaymentStatus.js";
+
+const { t } = useI18n();
 
 const props = defineProps({
   bookings: {
@@ -59,7 +62,7 @@ const allBookings = computed(() =>
       : b.isCommitted
         ? "Bestätigt"
         : "Ausstehend",
-    payedLabel: b.isPayed ? "bezahlt" : "nicht bezahlt",
+    payedLabel: resolveBookingPaymentSearchLabel(b, t),
   })),
 );
 

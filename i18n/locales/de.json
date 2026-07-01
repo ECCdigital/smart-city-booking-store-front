@@ -628,6 +628,7 @@
       "paymentStateLabel": "Zahlungsstatus",
       "paymentPaid": "Bezahlt",
       "paymentPending": "Nicht bezahlt",
+      "paymentFree": "Kostenfrei",
       "amountLabel": "Betrag",
       "bookingStatusError": "Diese Buchung konnte nicht geladen werden.",
       "summaryTotalLabel": "Buchungen",
@@ -669,7 +670,7 @@
           "body": "Ihre Buchungsanfrage konnte leider nicht angenommen werden. Bei Fragen wenden Sie sich bitte an den Anbieter."
         },
         "confirmed_without_payment": {
-          "title": "Buchung bestätigt",
+          "title": "Abgeschlossen (kostenfrei)",
           "body": "Ihre Buchung wurde bestätigt. Für diese Buchung ist keine Zahlung erforderlich. Sie erhalten eine Bestätigung per E-Mail."
         }
       },
@@ -760,7 +761,15 @@
     "payment_expected": "Zahlung zum Abschluss der Buchung erforderlich",
     "paid_completed": "Bezahlt und abgeschlossen",
     "rejected": "Abgelehnt oder storniert",
-    "confirmed_without_payment": "Bestätigt (keine Zahlung erforderlich)"
+    "confirmed_without_payment": "Abgeschlossen (kostenfrei)"
+  },
+
+  "booking": {
+    "payment": {
+      "free": "Kostenfrei",
+      "paid": "Bezahlt",
+      "unpaid": "Nicht bezahlt"
+    }
   },
 
   "booking_status": {

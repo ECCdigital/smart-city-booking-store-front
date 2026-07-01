@@ -257,6 +257,7 @@
       "paymentStateLabel": "Payment status",
       "paymentPaid": "Paid",
       "paymentPending": "Unpaid",
+      "paymentFree": "Free of charge",
       "amountLabel": "Amount",
       "bookingStatusError": "This booking could not be loaded.",
       "summaryTotalLabel": "Bookings",
@@ -297,7 +298,7 @@
           "body": "Unfortunately your booking request could not be accepted. If you have questions, please contact the provider."
         },
         "confirmed_without_payment": {
-          "title": "Booking confirmed",
+          "title": "Completed (free of charge)",
           "body": "Your booking has been confirmed. No payment is required for this booking. You will receive a confirmation by email."
         }
       },
@@ -385,7 +386,15 @@
     "payment_expected": "Payment required to complete the booking",
     "paid_completed": "Paid and completed",
     "rejected": "Rejected or cancelled",
-    "confirmed_without_payment": "Confirmed (no payment required)"
+    "confirmed_without_payment": "Completed (free of charge)"
+  },
+
+  "booking": {
+    "payment": {
+      "free": "Free of charge",
+      "paid": "Paid",
+      "unpaid": "Unpaid"
+    }
   },
 
   "booking_status": {
