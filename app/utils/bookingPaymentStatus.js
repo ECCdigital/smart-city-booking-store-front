@@ -9,8 +9,17 @@ export const PAYMENT_DISPLAY_STATUS = {
  * @returns {boolean}
  */
 export function isFreeBooking(booking) {
-  const priceEur = Number(booking?.priceEur);
-  return !Number.isFinite(priceEur) || priceEur <= 0;
+  const rawPriceEur = booking?.priceEur;
+  if (
+    rawPriceEur === null ||
+    rawPriceEur === undefined ||
+    (typeof rawPriceEur === "string" && rawPriceEur.trim() === "")
+  ) {
+    return false;
+  }
+
+  const priceEur = Number(rawPriceEur);
+  return Number.isFinite(priceEur) && priceEur <= 0;
 }
 
 /**

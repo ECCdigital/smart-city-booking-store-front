@@ -81,7 +81,7 @@
             <p>Zahlungsmethode</p>
             <p class="font-bold text-primary">{{ paymentMethod }}</p>
           </div>
-          <div>
+          <div v-if="!isFree">
             <p>Status</p>
             <BookingPayedChip :booking="booking" />
           </div>
@@ -131,6 +131,8 @@ import {useIcalDownload} from "~/composables/api/useIcalDownload.js";
 import {useEventStore} from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
+
+const { t } = useI18n();
 
 const props = defineProps({
   booking: {
@@ -186,15 +188,17 @@ const bookingTimeSlot = computed(() => {
   return null;
 });
 
+const isFree = computed(() => isFreeBooking(props.booking));
+
 const bookingPrice = computed(() => {
-  if (props.booking.priceEur > 0) {
-    return formatPrice(props.booking.priceEur);
+  if (isFree.value) {
+    return t("booking.payment.free");
   }
-  return "0,00 €";
+  return formatPrice(props.booking.priceEur);
 });
 
 const paymentMethod = computed(() => {
-  if (isFreeBooking(props.booking)) {
+  if (isFree.value) {
     return "–";
   }
   if (!props.booking.isPayed) {

@@ -89,7 +89,7 @@
           <!-- status -->
           <BookingStatusChip :booking="booking" />
 
-          <BookingPayedChip v-if="!isFreeBooking(booking)" :booking="booking" />
+          <BookingPayedChip v-if="!isFree" :booking="booking" />
         </div>
       </div>
     </div>
@@ -120,6 +120,15 @@ const props = defineProps({
       paymentStatus: "unpaid",
     }),
   },
+});
+
+const isFree = computed(() => isFreeBooking(props.booking));
+
+const bookingPrice = computed(() => {
+  if (isFree.value) {
+    return t("booking.payment.free");
+  }
+  return formatPrice(props.booking.priceEur);
 });
 
 const eventStore = useEventStore();
@@ -197,13 +206,6 @@ const bookingTimeSlot = computed(() => {
     return [beginn, end];
   }
   return null;
-});
-
-const bookingPrice = computed(() => {
-  if (isFreeBooking(props.booking)) {
-    return t("booking.payment.free");
-  }
-  return formatPrice(props.booking.priceEur);
 });
 
 //events
