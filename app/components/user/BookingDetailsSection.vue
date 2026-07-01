@@ -83,7 +83,7 @@
           </div>
           <div>
             <p>Status</p>
-            <BookingPayedChip :booking-is-payed="booking.isPayed" />
+            <BookingPayedChip :booking="booking" />
           </div>
         </div>
       </div>
@@ -130,6 +130,7 @@ import {useFormatting} from "~/composables/utils/useFormatting.js";
 import {useIcalDownload} from "~/composables/api/useIcalDownload.js";
 import {useEventStore} from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
+import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
 
 const props = defineProps({
   booking: {
@@ -193,6 +194,9 @@ const bookingPrice = computed(() => {
 });
 
 const paymentMethod = computed(() => {
+  if (isFreeBooking(props.booking)) {
+    return "–";
+  }
   if (!props.booking.isPayed) {
     switch (props.booking.paymentProvider) {
       case "invoice": {
