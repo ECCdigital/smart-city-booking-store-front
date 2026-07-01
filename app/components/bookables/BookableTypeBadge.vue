@@ -45,7 +45,7 @@ const category = computed(() => {
     case "ticket":
       return { label: "Ticket", icon: "i-lucide-ticket" };
     default:
-      return { label: "", icon: "" };
+      return { label: "Unbekannt", icon: "i-lucide-file-exclamation-point" };
   }
 });
 </script>
