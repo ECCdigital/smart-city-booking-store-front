@@ -14,6 +14,10 @@
 <script setup>
 import BookingsFilter from "~/components/user/bookings/BookingsFilter.vue";
 import Fuse from "fuse.js";
+import {
+  isPaidBooking,
+  isUnpaidBooking,
+} from "~/utils/bookingPaymentStatus.js";
 
 const props = defineProps({
   bookings: {
@@ -93,10 +97,10 @@ function filterForPaymentStatus(bookings) {
     return bookings;
   }
   return bookings.filter((b) => {
-    if (filters.value.paymentsConfirmed && b.isPayed) {
+    if (filters.value.paymentsConfirmed && isPaidBooking(b)) {
       return true;
     }
-    if (filters.value.paymentsUnconfirmed && !b.isPayed) {
+    if (filters.value.paymentsUnconfirmed && isUnpaidBooking(b)) {
       return true;
     }
     return false;

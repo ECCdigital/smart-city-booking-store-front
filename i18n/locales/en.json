@@ -85,6 +85,7 @@
     "time_conflict": "There is a time conflict with another booking for this object.",
     "block_period_mismatch": "A complete booking time window must be booked for this object.",
     "time_period_mismatch": "A complete time slot must be booked for this object.",
+    "insufficient_lead_time": "The booking is too soon. There must be sufficient preparation time within service hours between booking and start.",
     "selectTimePeriodTitle": "Select a time period",
     "selectTimePeriodHint": "Please select a time period first to see the price summary.",
     "data": {
@@ -128,7 +129,8 @@
     },
     "errors": {
       "capacityInfo": "Available: {remaining} of {total}",
-      "unavailableHint": "Please choose a different time period or remove the object."
+      "unavailableHint": "Please choose a different time period or remove the object.",
+      "leadTimeHint": "Please choose a later appointment."
     },
     "payment": {
       "description": "Please choose how you would like to pay.",
@@ -255,6 +257,7 @@
       "paymentStateLabel": "Payment status",
       "paymentPaid": "Paid",
       "paymentPending": "Unpaid",
+      "paymentFree": "Free of charge",
       "amountLabel": "Amount",
       "bookingStatusError": "This booking could not be loaded.",
       "summaryTotalLabel": "Bookings",
@@ -295,7 +298,7 @@
           "body": "Unfortunately your booking request could not be accepted. If you have questions, please contact the provider."
         },
         "confirmed_without_payment": {
-          "title": "Booking confirmed",
+          "title": "Completed (free of charge)",
           "body": "Your booking has been confirmed. No payment is required for this booking. You will receive a confirmation by email."
         }
       },
@@ -383,7 +386,15 @@
     "payment_expected": "Payment required to complete the booking",
     "paid_completed": "Paid and completed",
     "rejected": "Rejected or cancelled",
-    "confirmed_without_payment": "Confirmed (no payment required)"
+    "confirmed_without_payment": "Completed (free of charge)"
+  },
+
+  "booking": {
+    "payment": {
+      "free": "Free of charge",
+      "paid": "Paid",
+      "unpaid": "Unpaid"
+    }
   },
 
   "booking_status": {
@@ -412,7 +423,8 @@
     "showOccupancy": "Show occupancy",
     "hideOccupancy": "Hide occupancy",
     "dragHint": "Click or drag on the calendar to select a time range. Alternatively, enter the times manually below.",
-    "overlapWarning": "The selected time range overlaps with already occupied times. The booking may not be possible."
+    "overlapWarning": "The selected time range overlaps with already occupied times. The booking may not be possible.",
+    "resetTime": "Reset time selection"
   },
 
   "groupBooking": {

@@ -5,6 +5,10 @@ import {
   effectiveBookingStatusI18nKey,
   BOOKING_STATUS_REASONS,
 } from "~/utils/bookingStatus.js";
+import {
+  isPaidBooking,
+  resolveCheckoutPaymentState,
+} from "~/utils/bookingPaymentStatus.js";
 import { useTenants } from "~/composables/api/useTenants.js";
 import { useAuthStore } from "~~/stores/auth.js";
 
@@ -413,6 +417,7 @@ function rowForBooking(booking) {
   }
 
   const detail = statusDetailParts(statusKey);
+  const paymentState = resolveCheckoutPaymentState(booking, t);
 
   return {
     id: String(booking.bookingId ?? booking.id ?? ""),
@@ -431,12 +436,9 @@ function rowForBooking(booking) {
     paymentLabel: paymentProviderLabel(booking.paymentProvider),
     isInvoicePayment: paymentProvider === "invoice",
     shouldPoll: isAutoPollingCandidate(booking),
-    paymentStateLabel: booking?.isPayed
-      ? t("checkout.status.paymentPaid")
-      : t("checkout.status.paymentPending"),
-    paymentStateClass: booking?.isPayed
-      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200"
-      : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200",
+    paymentStateLabel: paymentState.label,
+    paymentStateClass: paymentState.className,
+    paymentDisplayStatus: paymentState.status,
   };
 }
 
@@ -489,7 +491,7 @@ const summaryStats = computed(() => [
   {
     key: "paid",
     label: t("checkout.status.summaryPaidLabel"),
-    value: bookingRows.value.filter((row) => row.isPayed).length,
+    value: bookingRows.value.filter((row) => isPaidBooking(row)).length,
   },
 ]);
 

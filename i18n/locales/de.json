@@ -455,6 +455,7 @@
     "time_conflict": "Für dieses Objekt besteht ein Zeitkonflikt mit einer anderen Buchung.",
     "block_period_mismatch": "Für dieses Objekt muss ein vollständiges Buchungszeitfenster gebucht werden.",
     "time_period_mismatch": "Für dieses Objekt muss ein vollständiger Zeitslot gebucht werden.",
+    "insufficient_lead_time": "Die Buchung liegt zu kurzfristig. Zwischen Buchung und Beginn muss ausreichend Vorbereitungszeit in den Servicezeiten liegen.",
     "selectTimePeriodTitle": "Zeitraum auswählen",
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
     "data": {
@@ -499,7 +500,8 @@
     },
     "errors": {
       "capacityInfo": "Verfügbar: {remaining} von {total}",
-      "unavailableHint": "Bitte wählen Sie einen anderen Zeitraum oder entfernen Sie das Objekt."
+      "unavailableHint": "Bitte wählen Sie einen anderen Zeitraum oder entfernen Sie das Objekt.",
+      "leadTimeHint": "Bitte wählen Sie einen späteren Termin."
     },
     "payment": {
       "description": "Bitte wählen Sie aus, wie Sie bezahlen möchten.",
@@ -626,6 +628,7 @@
       "paymentStateLabel": "Zahlungsstatus",
       "paymentPaid": "Bezahlt",
       "paymentPending": "Nicht bezahlt",
+      "paymentFree": "Kostenfrei",
       "amountLabel": "Betrag",
       "bookingStatusError": "Diese Buchung konnte nicht geladen werden.",
       "summaryTotalLabel": "Buchungen",
@@ -667,7 +670,7 @@
           "body": "Ihre Buchungsanfrage konnte leider nicht angenommen werden. Bei Fragen wenden Sie sich bitte an den Anbieter."
         },
         "confirmed_without_payment": {
-          "title": "Buchung bestätigt",
+          "title": "Abgeschlossen (kostenfrei)",
           "body": "Ihre Buchung wurde bestätigt. Für diese Buchung ist keine Zahlung erforderlich. Sie erhalten eine Bestätigung per E-Mail."
         }
       },
@@ -758,7 +761,15 @@
     "payment_expected": "Zahlung zum Abschluss der Buchung erforderlich",
     "paid_completed": "Bezahlt und abgeschlossen",
     "rejected": "Abgelehnt oder storniert",
-    "confirmed_without_payment": "Bestätigt (keine Zahlung erforderlich)"
+    "confirmed_without_payment": "Abgeschlossen (kostenfrei)"
+  },
+
+  "booking": {
+    "payment": {
+      "free": "Kostenfrei",
+      "paid": "Bezahlt",
+      "unpaid": "Nicht bezahlt"
+    }
   },
 
   "booking_status": {
@@ -787,7 +798,8 @@
     "showOccupancy": "Belegung anzeigen",
     "hideOccupancy": "Belegung ausblenden",
     "dragHint": "Klicken oder ziehen Sie im Kalender, um einen Zeitraum auszuwählen. Alternativ können Sie die Zeiten oben manuell eingeben.",
-    "overlapWarning": "Der gewählte Zeitraum überschneidet sich mit bereits belegten Zeiten. Die Buchung kann unter Umständen nicht durchgeführt werden."
+    "overlapWarning": "Der gewählte Zeitraum überschneidet sich mit bereits belegten Zeiten. Die Buchung kann unter Umständen nicht durchgeführt werden.",
+    "resetTime": "Zeitauswahl zurücksetzen"
   },
 
   "groupBooking": {

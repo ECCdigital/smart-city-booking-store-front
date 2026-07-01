@@ -89,7 +89,7 @@
           <!-- status -->
           <BookingStatusChip :booking="booking" />
 
-          <BookingPayedChip :booking-is-payed="booking.isPayed" />
+          <BookingPayedChip v-if="!isFree" :booking="booking" />
         </div>
       </div>
     </div>
@@ -103,6 +103,9 @@ import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue"
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
+import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
+
+const { t } = useI18n();
 
 const props = defineProps({
   booking: {
@@ -117,6 +120,15 @@ const props = defineProps({
       paymentStatus: "unpaid",
     }),
   },
+});
+
+const isFree = computed(() => isFreeBooking(props.booking));
+
+const bookingPrice = computed(() => {
+  if (isFree.value) {
+    return t("booking.payment.free");
+  }
+  return formatPrice(props.booking.priceEur);
 });
 
 const eventStore = useEventStore();
@@ -194,13 +206,6 @@ const bookingTimeSlot = computed(() => {
     return [beginn, end];
   }
   return null;
-});
-
-const bookingPrice = computed(() => {
-  if (props.booking.priceEur > 0) {
-    return formatPrice(props.booking.priceEur);
-  }
-  return "0,00 €";
 });
 
 //events
