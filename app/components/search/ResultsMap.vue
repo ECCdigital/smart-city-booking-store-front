@@ -138,9 +138,11 @@ const groupedBookables = computed(() => {
 });
 
 const initialBounds = computed(() => {
-  const coords = props.bookables
-    .filter((b) => hasCoordinates(b.item) && b.matchStatus === "match")
-    .map((b) => getCoordinatesForBookable(b.item));
+  const withCoords = props.bookables.filter((b) => hasCoordinates(b.item));
+  const matches = withCoords.filter((b) => b.matchStatus === "match");
+  const coords = (matches.length ? matches : withCoords).map((b) =>
+    getCoordinatesForBookable(b.item),
+  );
 
   if (!coords.length) return null;
 
