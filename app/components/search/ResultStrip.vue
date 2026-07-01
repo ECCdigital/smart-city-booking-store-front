@@ -13,31 +13,44 @@
           :type="item?.type"
           :is-event="isEvent"
           :icon-only="iconOnly"
-          class="absolute "
+          class="absolute"
           :class="mapMode ? 'top-1 left-1' : 'top-2 left-2'"
         />
 
         <img
-          v-if="!isEvent && item?.imgUrl"
+          v-if="!isEvent && item?.imgUrl && !showImageErrorHint"
           :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
           alt=""
           class="w-full h-full object-cover rounded-l-sm"
+          @error="onImageError"
         >
         <img
-          v-else-if="isEvent && item?.information?.teaserImage"
+          v-else-if="
+            isEvent && item?.information?.teaserImage && !showImageErrorHint
+          "
           :src="`/api/img?url=${encodeURIComponent(
             item.information.teaserImage,
           )}`"
           alt=""
           class="w-full h-full object-cover rounded-l-sm"
+          @error="onImageError"
         >
         <ClientOnly v-else>
-          <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-sm" />
-          <template #fallback>
-            <div
-              class="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"
+          <div
+            class="@container w-full h-full flex items-center justify-center relative"
+          >
+            <ImagePlaceholder
+              :theme="theme"
+              class="w-full h-full rounded-l-sm"
             />
-          </template>
+            <div class="absolute text-center">
+              <UIcon
+                name="i-lucide-image-off"
+                :class="iconOnly ? 'w-8 h-8' : 'w-4 h-4'"
+              />
+              <p v-if="!iconOnly" class="text-xs">Nicht gefunden</p>
+            </div>
+          </div>
         </ClientOnly>
       </div>
 
@@ -122,6 +135,13 @@ const price = computed(() => {
   }
   return props.calculatedPrice;
 });
+
+const showImageErrorHint = ref(false);
+
+function onImageError() {
+  console.log("got image error");
+  showImageErrorHint.value = true;
+}
 </script>
 
 <style scoped></style>
