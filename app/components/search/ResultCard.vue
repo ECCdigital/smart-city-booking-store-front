@@ -134,6 +134,11 @@ function onImageError() {
   console.log("got image error");
   showImageErrorHint.value = true;
 }
+
+// Reset image error state when item changes
+watch(() => props.item.id, () => {
+  showImageErrorHint.value = false;
+});
 </script>
 
 <style scoped></style>

@@ -254,7 +254,8 @@ function updateMapCenter(coordinates, southOffset = 0.05) {
   const map = mapRef.value?.leafletObject;
 
   if (map) {
-    map.setView([coordinates[0] - southOffset, coordinates[1]], 8, {
+    const currentZoom = map.getZoom();
+    map.setView([coordinates[0] - southOffset, coordinates[1]], currentZoom, {
       animate: false,
     });
   }
@@ -270,7 +271,10 @@ function openGroup(group) {
   currentBookable.value = group.bookables[0];
   showMultiPinItems.value = true;
 
-  updateMapCenter(group.coordinates);
+  // Only recenter on mobile
+  if (!window.matchMedia("(min-width: 768px)").matches) {
+    updateMapCenter(group.coordinates);
+  }
 }
 
 function openBookableDetails(bookable, handleCardClickOnMobile = false) {

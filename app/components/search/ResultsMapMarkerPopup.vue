@@ -45,7 +45,7 @@
 <script setup>
 import ResultCard from "~/components/search/ResultCard.vue";
 
-const props = defineProps({
+defineProps({
   group: {
     type: Object,
     required: true,

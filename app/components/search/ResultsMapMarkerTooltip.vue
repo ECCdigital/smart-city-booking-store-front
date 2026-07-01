@@ -24,7 +24,7 @@
           :calculated-price="bookable.calculatedPrice"
           map-mode
           icon-only
-          class="h-36 w-85"
+          class="h-36 w-[21.25rem]"
         />
       </div>
     </div>
@@ -57,7 +57,7 @@
 import ResultStrip from "~/components/search/ResultStrip.vue";
 import ResultCard from "~/components/search/ResultCard.vue";
 
-const props = defineProps({
+defineProps({
   group: {
     type: Object,
     required: true,

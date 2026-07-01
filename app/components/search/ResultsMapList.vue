@@ -18,7 +18,7 @@
             @click="emit('openDetails',bookable, true)"
         />
       </div>
-      <div v-if="!bookables || bookables.length === 0">
+      <div v-if="!bookables || bookables.length === 0" key="empty-state">
         <p class="text-center text-gray-500 mt-10">
           Keine Ergebnisse in diesem Bereich.
         </p>
@@ -34,7 +34,7 @@ const currentBookable = defineModel({
   required: false,
   default: () => {},
 });
-const props = defineProps({
+defineProps({
   bookables: {
     type: Array,
     required: true,

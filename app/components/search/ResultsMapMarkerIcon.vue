@@ -24,7 +24,7 @@
 <script setup>
 const { iconMapPin } = useBookableMap();
 
-const props = defineProps({
+defineProps({
   group: {
     type: Object,
     required: true,
@@ -75,7 +75,9 @@ const props = defineProps({
     transform: scale(1.08) translateY(-4px);
   }
 }
+</style>
 
+<style>
 .leaflet-div-icon {
   background: transparent;
   border: transparent;
