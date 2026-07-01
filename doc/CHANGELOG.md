@@ -5,6 +5,13 @@ Notable changes for the Smart City Booking Storefront.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).  
 Releases are tagged `v1.x.x` from branch `version/1.x`.
 
+## [1.1.1] — 2026-07-01
+
+### Fixed
+
+- Free bookings (zero price) display as "Kostenfrei" in the storefront UI — account bookings, checkout status, and filters — aligned with the admin UI
+- Payment status logic centralized; only explicit zero prices are treated as free
+
 ## [1.1.0] — 2026-06-30
 
 ### Added
@@ -68,6 +75,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 See git tags `v1.0.0-rc.*` for release-candidate history.
 
+[1.1.1]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.0.2...v1.0.3
