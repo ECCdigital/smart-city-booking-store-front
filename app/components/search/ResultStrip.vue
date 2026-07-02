@@ -23,7 +23,7 @@
           alt=""
           class="w-full h-full object-cover rounded-l-sm"
           @error="onImageError"
-        >
+        />
         <img
           v-else-if="
             isEvent && item?.information?.teaserImage && !showImageErrorHint
@@ -34,7 +34,7 @@
           alt=""
           class="w-full h-full object-cover rounded-l-sm"
           @error="onImageError"
-        >
+        />
         <ClientOnly v-else>
           <div
             class="@container w-full h-full flex items-center justify-center relative"
@@ -43,7 +43,7 @@
               :theme="theme"
               class="w-full h-full rounded-l-sm"
             />
-            <div class="absolute text-center">
+            <div v-if="showImageErrorHint" class="absolute text-center">
               <UIcon
                 name="i-lucide-image-off"
                 :class="iconOnly ? 'w-8 h-8' : 'w-4 h-4'"
