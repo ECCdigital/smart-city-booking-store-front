@@ -21,7 +21,7 @@
         <span
           :class="
             compact
-              ? 'text-xs font-semibold text-gray-900 dark:text-white'
+              ? 'text-sm font-semibold text-gray-900 dark:text-white'
               : 'text-xl font-bold text-gray-900 dark:text-white'
           "
         >
@@ -30,11 +30,7 @@
         <DateJumper @select="onJumpDate" />
       </h3>
 
-      <button
-        type="button"
-        :class="navButtonClass"
-        @click="navigateMonth(1)"
-      >
+      <button type="button" :class="navButtonClass" @click="navigateMonth(1)">
         <UIcon
           name="i-lucide-chevron-right"
           :size="compact ? 16 : 14"
@@ -47,7 +43,13 @@
     </div>
 
     <!-- Week Cards Grid -->
-    <div :class="compact ? 'grid grid-cols-2 gap-1.5' : 'grid grid-cols-1 md:grid-cols-2 gap-4'">
+    <div
+      :class="
+        compact
+          ? 'grid grid-cols-2 gap-1.5'
+          : 'grid grid-cols-1 md:grid-cols-2 gap-4'
+      "
+    >
       <button
         v-for="week in displayWeeks"
         :key="`${week.startMs}`"
@@ -62,16 +64,20 @@
         @click="selectWeek(week)"
       >
         <div v-if="compact" class="min-w-0">
-          <p class="text-xs font-semibold text-gray-900 dark:text-white truncate leading-tight">
-            <span class="text-gray-500 font-medium">KW {{ week.weekNumber }}</span>
+          <p
+            class="text-sm font-semibold text-gray-900 dark:text-white truncate leading-tight"
+          >
+            <span class="text-gray-500 font-medium"
+              >KW {{ week.weekNumber }}</span
+            >
             · {{ week.rangeLabel }}
           </p>
         </div>
         <div v-else class="flex items-start justify-between gap-2">
           <div class="min-w-0">
             <span
+              class="text-sm"
               :class="[
-                compact ? 'text-xs' : 'text-sm',
                 'font-medium',
                 week.available
                   ? 'text-gray-500 dark:text-gray-400'
@@ -141,7 +147,11 @@
     <!-- Loading indicator -->
     <div
       v-if="isLoadingAvailability"
-      :class="compact ? 'flex items-center justify-center py-2' : 'flex items-center justify-center py-4'"
+      :class="
+        compact
+          ? 'flex items-center justify-center py-2'
+          : 'flex items-center justify-center py-4'
+      "
     >
       <UIcon name="i-lucide-loader-2" class="text-gray-400 animate-spin mr-2" />
       <span class="text-sm text-gray-500">{{ $t("common.loading") }}</span>

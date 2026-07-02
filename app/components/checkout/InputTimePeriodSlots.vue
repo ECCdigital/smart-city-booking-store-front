@@ -1,14 +1,19 @@
 <template>
   <div :class="compact ? 'space-y-2' : 'space-y-8'">
     <section>
-      <div :class="compact ? 'flex items-center gap-1.5 mb-1.5' : 'flex items-center gap-2 mb-4'">
+      <div
+        :class="
+          compact
+            ? 'flex items-center gap-1.5 mb-1.5'
+            : 'flex items-center gap-2 mb-4'
+        "
+      >
         <h3
           :class="[
-            'font-bold text-gray-400 dark:text-gray-500 tracking-widest flex items-center gap-1.5',
-            compact ? 'text-[10px]' : 'text-xs',
+            'text-sm font-bold text-gray-400 dark:text-gray-500 tracking-widest flex items-center gap-1.5',
           ]"
         >
-          <UIcon name="i-lucide-calendar-days" :class="compact ? 'text-sm' : 'text-base'" />
+          <UIcon name="i-lucide-calendar-days" class="text-sm" />
           {{ $t("timePeriods.selectDate") }}
           <UIcon
             v-if="isLoadingAvailability"
@@ -20,7 +25,6 @@
         <DateJumper @select="onJumpDateSelected" />
 
         <button
-          v-if="!compact"
           type="button"
           :disabled="isSearchingNextFreeDay"
           class="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -29,9 +33,11 @@
           @click="jumpToNextFreeDay"
         >
           <UIcon
-            :name="isSearchingNextFreeDay
-              ? 'i-lucide-loader-2'
-              : 'i-lucide-fast-forward'"
+            :name="
+              isSearchingNextFreeDay
+                ? 'i-lucide-loader-2'
+                : 'i-lucide-fast-forward'
+            "
             class="text-sm"
             :class="isSearchingNextFreeDay ? 'animate-spin' : ''"
           />
@@ -52,7 +58,9 @@
 
         <div
           class="flex-1 grid gap-1.5"
-          :class="compact ? 'grid-cols-4 gap-1' : 'grid-cols-4 @md:grid-cols-7 gap-2'"
+          :class="
+            compact ? 'grid-cols-4 gap-1' : 'grid-cols-4 @md:grid-cols-7 gap-2'
+          "
         >
           <button
             v-for="day in displayDays"
@@ -83,10 +91,7 @@
             >
               {{ day.dayNumber }}
             </span>
-            <span
-              class="text-[10px]"
-              :class="getDayWeekdayClass(day)"
-            >
+            <span class="text-[10px]" :class="getDayWeekdayClass(day)">
               {{ day.monthLabel }}
             </span>
 
@@ -138,7 +143,7 @@
     <section>
       <h3
         :class="[
-          'text-xs font-bold text-gray-400 dark:text-gray-500 tracking-widest flex items-center gap-2',
+          'text-sm font-bold text-gray-400 dark:text-gray-500 tracking-widest flex items-center gap-2',
           compact ? 'mb-1.5' : 'mb-4',
         ]"
       >
@@ -166,7 +171,7 @@
           :disabled="!slot.available"
           :class="[
             compact
-              ? 'px-1.5 py-1.5 rounded-md border text-center text-xs font-medium tabular-nums transition-all focus:outline-none'
+              ? 'px-1.5 py-1.5 rounded-md border text-center text-sm font-medium tabular-nums transition-all focus:outline-none'
               : 'px-4 py-3 rounded-lg border text-center font-medium tabular-nums transition-all focus:outline-none',
             getSlotClass(slot),
           ]"
@@ -199,7 +204,6 @@
 import { useBookables } from "~/composables/api/useBookables.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
 import { parseLocalDateIso } from "~/utils/localDate.js";
-
 
 const props = defineProps({
   timePeriods: {
@@ -234,9 +238,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "change"]);
 
-const effectiveNumDays = computed(() =>
-  props.compact ? 4 : props.numDays,
-);
+const effectiveNumDays = computed(() => (props.compact ? 4 : props.numDays));
 
 const { getBookableAvailability } = useBookables();
 const { t } = useI18n();
@@ -286,7 +288,7 @@ function timeFromTimestamp(ts) {
 
 function localISODate(date) {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
-    date.getDate()
+    date.getDate(),
   )}`;
 }
 
@@ -342,7 +344,7 @@ async function fetchAvailabilityBlock(blockBase) {
     props.bookableId,
     blockBase.getTime(),
     blockEnd.getTime(),
-    props.amount
+    props.amount,
   );
 
   if (availabilityCache.has(cacheKey)) {
@@ -397,7 +399,7 @@ async function jumpToNextFreeDay() {
         d.setDate(blockBase.getDate() + i);
         const weekday = d.getDay();
         const matchingPeriods = (props.timePeriods || []).filter(
-          (p) => Array.isArray(p.weekdays) && p.weekdays.includes(weekday)
+          (p) => Array.isArray(p.weekdays) && p.weekdays.includes(weekday),
         );
         if (!matchingPeriods.length) continue;
 
@@ -451,7 +453,7 @@ async function fetchAvailabilityForWindow() {
     props.bookableId,
     startMs,
     endMs,
-    props.amount
+    props.amount,
   );
 
   if (availabilityCache.has(cacheKey)) {
@@ -487,7 +489,7 @@ watch(
   () => [props.tenantId, props.bookableId, props.amount],
   () => {
     clearAvailabilityCache();
-  }
+  },
 );
 
 watch(
@@ -495,7 +497,7 @@ watch(
   () => {
     fetchAvailabilityForWindow();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const days = computed(() => {
@@ -509,7 +511,7 @@ const days = computed(() => {
 
     const weekday = d.getDay();
     const matchingPeriods = (props.timePeriods || []).filter(
-      (p) => Array.isArray(p.weekdays) && p.weekdays.includes(weekday)
+      (p) => Array.isArray(p.weekdays) && p.weekdays.includes(weekday),
     );
 
     const hasMatchingPeriod = matchingPeriods.length > 0;
@@ -531,8 +533,11 @@ const days = computed(() => {
 });
 
 const displayDays = computed(() => {
-  if (!props.compact) return days.value;
-  return days.value.filter((day) => day.hasAvailability);
+  return days.value;
+  /*if (!props.compact) return days.value;
+
+  const availableDays = days.value.filter((day) => day.hasAvailability);
+  return availableDays.length > 0 ? availableDays : days.value;*/
 });
 
 const selectedDayIso = ref(null);
@@ -579,14 +584,14 @@ watch(
     const first = list.find((d) => d.hasAvailability);
     if (first) selectedDayIso.value = first.iso;
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const dayPeriods = computed(() => {
   const day = selectedDay.value;
   if (!day) return [];
   return (props.timePeriods || []).filter(
-    (p) => Array.isArray(p.weekdays) && p.weekdays.includes(day.weekday)
+    (p) => Array.isArray(p.weekdays) && p.weekdays.includes(day.weekday),
   );
 });
 
@@ -627,7 +632,7 @@ function isPeriodSlotAvailable(
   date,
   startTime,
   endTime,
-  availData = availability.value
+  availData = availability.value,
 ) {
   if (!availData.length) return true;
 
@@ -641,7 +646,11 @@ function isPeriodSlotAvailable(
   return true;
 }
 
-function dayHasAnyFreeSlot(date, matchingPeriods, availData = availability.value) {
+function dayHasAnyFreeSlot(
+  date,
+  matchingPeriods,
+  availData = availability.value,
+) {
   if (!availData.length) return true;
 
   for (const p of matchingPeriods) {
@@ -649,9 +658,7 @@ function dayHasAnyFreeSlot(date, matchingPeriods, availData = availability.value
     const pe = timeToHours(p.endTime);
     if (ps == null || pe == null || pe <= ps) continue;
 
-    if (
-      isPeriodSlotAvailable(date, p.startTime, p.endTime, availData)
-    ) {
+    if (isPeriodSlotAvailable(date, p.startTime, p.endTime, availData)) {
       return true;
     }
   }
@@ -719,8 +726,7 @@ function getSlotClass(slot) {
 function onSlotClick(slot) {
   if (!slot.available) return;
 
-  selectedSlotKey.value =
-    selectedSlotKey.value === slot.key ? null : slot.key;
+  selectedSlotKey.value = selectedSlotKey.value === slot.key ? null : slot.key;
   emitValue();
 }
 
@@ -793,7 +799,7 @@ watch(
     if (v.end) {
       selectedSlotKey.value = periodSlotKey(
         timeFromTimestamp(v.start),
-        timeFromTimestamp(v.end)
+        timeFromTimestamp(v.end),
       );
     } else {
       selectedSlotKey.value = null;
@@ -801,7 +807,7 @@ watch(
 
     lastEmittedKey = key;
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 </script>
 

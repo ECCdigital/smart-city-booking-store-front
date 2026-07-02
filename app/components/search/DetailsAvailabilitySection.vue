@@ -2,12 +2,18 @@
   <div class="details-availability-compact">
     <h3 class="text-base font-bold">{{ $t("detailsAvailability.title") }}</h3>
 
+    <!--
+    <pre
+      class="text-xs bg-pink-50 border border-pink-200 rounded-md p-3 overflow-auto"
+      >{{ JSON.stringify(bookable, null, 2) }}</pre>
+    -->
+
     <UAlert
       v-if="requiresTimeSelection && !hasValidPeriod"
       :title="hintText"
       icon="i-lucide-info"
       variant="ghost"
-      class="p-1 text-primary w-full mt-1 mb-1.5 text-xs flex items-center"
+      class="p-1 text-primary w-full my-2 text-sm flex items-center"
     />
 
     <UAlert
@@ -15,7 +21,7 @@
       :title="$t('detailsAvailability.noTimeSelection')"
       icon="i-lucide-info"
       variant="ghost"
-      class="p-1 text-primary w-full mt-1 mb-1.5 text-xs items-center"
+      class="p-1 text-primary w-full my-2 text-sm items-center"
     />
 
     <InputDateTimePeriod
