@@ -1,13 +1,13 @@
 <template>
   <div
     v-if="props.item"
-    class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-sm"
+    class="@container dark:bg-gray-700 flex flex-row rounded-sm"
     :class="[
       isNotSuitable ? 'opacity-70' : ' ',
       isEvent ? 'max-h-100 h-100' : mapMode ? '' : 'max-h-74 h-74',
     ]"
   >
-    <div class="basis-1/4 flex items-center">
+    <div class="w-24 shrink-0 @sm:basis-1/4 flex items-center">
       <div class="basis-9/10 w-full h-full relative">
         <BookableTypeBadge
           :type="item?.type"
