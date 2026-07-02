@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div class="bg-purple-300">{{isVerified}}</div>
     <!-- show multipe steps-->
     <AccessPointStepper
       v-if="accessPointStatus?.locked"
@@ -108,6 +109,7 @@ import AccessPointFeedbackSection from "~/components/mobileKey/AccessPointFeedba
 import ProviderHelpSection from "~/components/mobileKey/ProviderHelpSection.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 
+const isVerified = defineModel({ type: Boolean, default: false})
 const props = defineProps({
   accessPoint: {
     type: Object,
@@ -149,7 +151,7 @@ function resetState() {
 }
 
 //Steps
-const isVerified = ref(false);
+//const isVerified = ref(false);
 const currentAccessStep = ref(0);
 
 const accessSteps = computed(() => {

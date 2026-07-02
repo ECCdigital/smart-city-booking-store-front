@@ -72,6 +72,7 @@
           />
           <USeparator class="my-5" />
           <AccessPointPanelContentBody
+            v-model="isVerified"
             :access-point="accessPoint"
             :access-point-status="accessPointStatus"
             :booking-id="bookingId"
@@ -115,6 +116,7 @@ const isOpenSlideover = ref(false);
 const isOpenPopup = ref(false);
 
 const isLoading = ref(false);
+const isVerified = ref(false);
 
 //State
 const errorMessage = ref("");
