@@ -179,7 +179,17 @@ function increaseStep() {
 function closeDialog() {
   isVerified.value = false;
 
+  if (errorKey.value !== "") {
+    isLoading.value = true;
+    setTimeout(() => {
+      emit("status-updated");
+    }, 1000);
+    return;
+  }
+
+  if(errorKey.value === ""){
   emit("close");
+  }
 }
 
 async function onOpenDoor() {
