@@ -24,7 +24,7 @@
           :calculated-price="bookable.calculatedPrice"
           map-mode
           icon-only
-          class="h-36 w-[21.25rem]"
+          class="h-36 w-85"
         />
       </div>
     </div>

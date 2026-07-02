@@ -74,7 +74,6 @@
       :bookables="visibleBookables"
       @open-details="openBookableDetails"
     />
-
   </div>
 </template>
 <script setup>
@@ -195,15 +194,16 @@ const visibleBookables = computed(() => {
     });
 });
 
-function getMarkerStatus(group){
-  if(currentBookable.value && group.bookables.some(
-      (b) => b.item.id === currentBookable.value.item.id,
-  )){
-    return "active"
-  } else if(group.bookables.some((b) => b.matchStatus === 'match')){
-    return "match"
+function getMarkerStatus(group) {
+  if (
+    currentBookable.value &&
+    group.bookables.some((b) => b.item.id === currentBookable.value.item.id)
+  ) {
+    return "active";
+  } else if (group.bookables.some((b) => b.matchStatus === "match")) {
+    return "match";
   }
-  return "nomatch"
+  return "nomatch";
 }
 function hasCoordinates(bookable) {
   return (
