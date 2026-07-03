@@ -11,7 +11,9 @@
   </div>
 </template>
 <script setup>
-const canGoBack = computed(() => window?.history.length > 1);
+const canGoBack = computed(
+  () => import.meta.client && window.history.length > 1,
+);
 </script>
 
 <style scoped></style>
