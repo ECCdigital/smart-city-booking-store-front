@@ -51,7 +51,7 @@
         >
           <UButton
             label="Details ansehen"
-            :variant="entryPageMode ? 'solid' : 'outline'"
+            variant="outline"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer' }"
             @click="goToDetails(bookable.id, bookable.type)"
