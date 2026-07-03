@@ -14,11 +14,10 @@
         />
         <div>
           <p class="font-semibold text-gray-900 dark:text-white">
-            Serienbuchung möglich
+            {{ $t("detailsAvailability.groupBookingTitle") }}
           </p>
           <p class="text-sm text-gray-600 dark:text-gray-300">
-            Sie können für dieses Objekt mit einer Buchung innerhalb eines
-            festen Intervalls mehrere Buchungen erstellen.
+            {{ $t("detailsAvailability.groupBookingDescription") }}
           </p>
         </div>
       </div>

@@ -728,6 +728,8 @@
 
   "detailsAvailability": {
     "title": "Verfügbarkeit",
+    "groupBookingTitle": "Serienbuchungen möglich",
+    "groupBookingDescription": "Sie können für dieses Objekt mit einer Buchung innerhalb eines festen Intervalls mehrere Buchungen erstellen. Dieses Objekt kann in einem festen Intervall mehrfach gebucht werden. Bitte wählen Sie Start- und Endzeit Ihrer ersten Buchung, um die weiteren Termine zu berechnen.",
     "selectPeriodHint": "Wählen Sie einen Zeitraum aus, um Verfügbarkeit und Preise zu sehen.",
     "scheduleHint": "Wählen Sie Start- und Endzeit Ihrer gewünschten Buchung.",
     "timePeriodHint": "Wählen Sie einen verfügbaren Zeit-Slot.",
