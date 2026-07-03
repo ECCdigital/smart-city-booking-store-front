@@ -1,5 +1,8 @@
 <template>
-  <div class="basis-3/4 p-4 flex flex-col justify-between">
+  <div
+    class="basis-3/4 flex flex-col justify-between"
+    :class="mapMode ? 'p-2' : 'p-4'"
+  >
     <div>
       <!-- Title -->
       <p

@@ -1,42 +1,56 @@
 <template>
   <div
     v-if="props.item"
-    class="bg-gray-200 dark:bg-gray-700 flex flex-row rounded-sm"
+    class="@container dark:bg-gray-700 flex flex-row rounded-sm"
     :class="[
       isNotSuitable ? 'opacity-70' : ' ',
       isEvent ? 'max-h-100 h-100' : mapMode ? '' : 'max-h-74 h-74',
     ]"
   >
-    <div class="basis-1/4 flex items-center">
+    <div class="w-24 shrink-0 @sm:basis-1/4 flex items-center">
       <div class="basis-9/10 w-full h-full relative">
         <BookableTypeBadge
           :type="item?.type"
           :is-event="isEvent"
-          class="absolute "
+          :icon-only="iconOnly"
+          class="absolute"
           :class="mapMode ? 'top-1 left-1' : 'top-2 left-2'"
         />
 
         <img
-          v-if="!isEvent && item?.imgUrl"
+          v-if="!isEvent && item?.imgUrl && !showImageErrorHint"
           :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
           alt=""
           class="w-full h-full object-cover rounded-l-sm"
-        >
+          @error="onImageError"
+        />
         <img
-          v-else-if="isEvent && item?.information?.teaserImage"
+          v-else-if="
+            isEvent && item?.information?.teaserImage && !showImageErrorHint
+          "
           :src="`/api/img?url=${encodeURIComponent(
             item.information.teaserImage,
           )}`"
           alt=""
           class="w-full h-full object-cover rounded-l-sm"
-        >
+          @error="onImageError"
+        />
         <ClientOnly v-else>
-          <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-sm" />
-          <template #fallback>
-            <div
-              class="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"
+          <div
+            class="@container w-full h-full flex items-center justify-center relative"
+          >
+            <ImagePlaceholder
+              :theme="theme"
+              class="w-full h-full rounded-l-sm"
             />
-          </template>
+            <div v-if="showImageErrorHint" class="absolute text-center">
+              <UIcon
+                name="i-lucide-image-off"
+                :class="iconOnly ? 'w-8 h-8' : 'w-4 h-4'"
+              />
+              <p v-if="!iconOnly" class="text-xs">Nicht gefunden</p>
+            </div>
+          </div>
         </ClientOnly>
       </div>
 
@@ -104,6 +118,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  iconOnly: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const isEvent = computed(() => {
@@ -117,6 +135,12 @@ const price = computed(() => {
   }
   return props.calculatedPrice;
 });
+
+const showImageErrorHint = ref(false);
+
+function onImageError() {
+  showImageErrorHint.value = true;
+}
 </script>
 
 <style scoped></style>
