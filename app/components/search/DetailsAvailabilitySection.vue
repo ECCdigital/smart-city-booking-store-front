@@ -2,11 +2,27 @@
   <div class="details-availability-compact">
     <h3 class="text-base font-bold">{{ $t("detailsAvailability.title") }}</h3>
 
-    <!--
-    <pre
-      class="text-xs bg-pink-50 border border-pink-200 rounded-md p-3 overflow-auto"
-      >{{ JSON.stringify(bookable, null, 2) }}</pre>
-    -->
+    <div
+      v-if="bookable.groupBooking?.enabled"
+      class="my-2 flex flex-col rounded-xl border border-primary-200 bg-primary-50/50 p-4 dark:border-primary-800 dark:bg-primary-950/30 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div class="flex items-start gap-3">
+        <UIcon
+          name="i-lucide-repeat"
+          class="mt-0.5 text-primary-600 dark:text-primary-400"
+          size="20"
+        />
+        <div>
+          <p class="font-semibold text-gray-900 dark:text-white">
+            Serienbuchung möglich
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">
+            Sie können für dieses Objekt mit einer Buchung innerhalb eines
+            festen Intervalls mehrere Buchungen erstellen.
+          </p>
+        </div>
+      </div>
+    </div>
 
     <UAlert
       v-if="requiresTimeSelection && !hasValidPeriod"
