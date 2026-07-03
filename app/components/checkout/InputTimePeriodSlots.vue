@@ -534,10 +534,6 @@ const days = computed(() => {
 
 const displayDays = computed(() => {
   return days.value;
-  /*if (!props.compact) return days.value;
-
-  const availableDays = days.value.filter((day) => day.hasAvailability);
-  return availableDays.length > 0 ? availableDays : days.value;*/
 });
 
 const selectedDayIso = ref(null);
