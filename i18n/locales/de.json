@@ -728,13 +728,15 @@
 
   "detailsAvailability": {
     "title": "Verfügbarkeit",
+    "groupBookingTitle": "Serienbuchungen möglich",
+    "groupBookingDescription": "Sie können für dieses Objekt mit einer Buchung innerhalb eines festen Intervalls mehrere Buchungen erstellen. Dieses Objekt kann in einem festen Intervall mehrfach gebucht werden. Bitte wählen Sie Start- und Endzeit Ihrer ersten Buchung, um die weiteren Termine zu berechnen.",
     "selectPeriodHint": "Wählen Sie einen Zeitraum aus, um Verfügbarkeit und Preise zu sehen.",
     "scheduleHint": "Wählen Sie Start- und Endzeit Ihrer gewünschten Buchung.",
     "timePeriodHint": "Wählen Sie einen verfügbaren Zeit-Slot.",
-    "longRangeWeekHint": "Wählen Sie eine Kalenderwoche.",
-    "longRangeMonthHint": "Wählen Sie einen Monat.",
+    "longRangeWeekHint": "Das Objekt ist nur wochenweise buchbar. Bitte wählen Sie eine Kalenderwoche.",
+    "longRangeMonthHint": "Das Objekt ist nur monatsweise buchbar. Bitte wählen Sie einen Monat.",
     "blockPeriodHint": "Wählen Sie ein Buchungszeitfenster.",
-    "noTimeSelection": "Für dieses Objekt ist keine Zeitraumauswahl erforderlich."
+    "noTimeSelection": "Für dieses Objekt ist keine Zeitauswahl erforderlich."
   },
 
   "bookingTimeWindowSelection": {
@@ -807,7 +809,7 @@
     "toggleDescription": "Erstellen Sie mehrere Buchungen in einem festen Intervall mit einer einzigen Buchungsanfrage.",
     "toggleLabel": "Serienbuchung aktivieren",
     "fields": {
-      "timeExplanation" : "Legen Sie die Start- und Endzeit Ihrer ersten Buchung fest. Diese Uhrzeiten bilden die Grundlage für die Berechnung der weiteren Termine in der Serie.",
+      "timeExplanation": "Legen Sie die Start- und Endzeit Ihrer ersten Buchung fest. Diese Uhrzeiten bilden die Grundlage für die Berechnung der weiteren Termine in der Serie.",
       "firstStart": "Erster Startzeitpunkt",
       "firstEnd": "Erster Endzeitpunkt",
       "rhythmExplanation": "Wählen Sie das Intervall, in dem die Termine wiederholt werden sollen.",

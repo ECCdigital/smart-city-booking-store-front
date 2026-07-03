@@ -147,7 +147,11 @@ const { fetchTenant, fetchTenantPaymentProviders, fetchTenantUserRoles } =
 
 const isLoading = ref(true);
 
-const { data, error, refresh: refreshCheckoutData } = await useAsyncData(
+const {
+  data,
+  error,
+  refresh: refreshCheckoutData,
+} = await useAsyncData(
   `checkout-${bookableID}-${tenantID}`,
   async () => {
     isLoading.value = true;
@@ -226,7 +230,10 @@ const hasBlockingPermissionError = computed(() => {
   return true;
 });
 const isResolvingPermissionGuard = computed(
-  () => !isLoading.value && hasBlockingPermissionError.value && !authStore.authChecked,
+  () =>
+    !isLoading.value &&
+    hasBlockingPermissionError.value &&
+    !authStore.authChecked,
 );
 const showPermissionGuard = computed(
   () => hasBlockingPermissionError.value && authStore.authChecked,
@@ -2289,10 +2296,7 @@ function onReviewEdit(section) {
       </div>
       <!-- RIGHT: Checkout Flow -->
       <main class="flex-3 min-w-0 bg-white dark:bg-gray-900 p-6 md:p-8 lg:p-10">
-        <CheckoutBookingNotes
-          :bookables="bookablesInCheckout"
-          class="mb-6"
-        />
+        <CheckoutBookingNotes :bookables="bookablesInCheckout" class="mb-6" />
 
         <UAlert
           v-if="requiresManualApproval"
