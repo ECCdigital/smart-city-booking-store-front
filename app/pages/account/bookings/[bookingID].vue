@@ -12,12 +12,12 @@
     </div>
     <PageHeader title="Buchungsdetails" class="my-5" />
     <EmergencyHelpAccordion
-        v-if="hasIfbsLockerInfo"
-        :tenant-id="booking.tenantId"
-        :locker-info="booking.lockerInfo"
-        :booking-id="booking.id"
-        class="mb-5"
-        style="max-width: 800px"
+      v-if="hasIfbsLockerInfo"
+      :tenant-id="booking.tenantId"
+      :locker-info="booking.lockerInfo"
+      :booking-id="booking.id"
+      class="mb-5"
+      style="max-width: 800px"
     />
     <BookingDetailsSection v-if="booking" :booking="booking" />
   </div>
@@ -68,8 +68,8 @@ const currentTime = ref(new Date().getTime());
 const isActive = computed(() => {
   if (booking.value.timeBegin && booking.value.timeEnd) {
     return (
-        currentTime.value >= booking.value.timeBegin &&
-        currentTime.value <= booking.value.timeEnd
+      currentTime.value >= booking.value.timeBegin &&
+      currentTime.value <= booking.value.timeEnd
     );
   }
 
