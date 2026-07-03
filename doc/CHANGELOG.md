@@ -5,6 +5,30 @@ Notable changes for the Smart City Booking Storefront.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).  
 Releases are tagged `v1.x.x` from branch `version/1.x`.
 
+## [1.1.2] — 2026-07-03
+
+### Added
+
+- Map shows multiple bookables at the same location — browse them via a popup or mobile carousel
+- Type icons on map results, including events
+- Group booking notice in the availability section
+- "Unknown" badge when a bookable's availability status cannot be determined
+
+### Fixed
+
+- Map loads correctly when a search returns no exact matches
+- Back button only appears when there is a previous page to return to
+- Broken or missing images in search results no longer break the layout
+- Map result images display at the correct size
+- Map uses the full width on large screens
+
+### Changed
+
+- Details button restyled for clearer visual hierarchy
+- Availability check section layout improved
+- Active and matching locations on the map are easier to spot
+- Tapping a map result card opens its details directly
+
 ## [1.1.1] — 2026-07-01
 
 ### Fixed
@@ -75,6 +99,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 See git tags `v1.0.0-rc.*` for release-candidate history.
 
+[1.1.2]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.0.3...v1.0.4
