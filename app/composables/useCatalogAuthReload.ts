@@ -99,15 +99,17 @@ export function useCatalogAuthReload() {
     const params = resolveReloadParams(route);
     if (!params || reloading.value) return;
 
+    const isDetailRoute = Boolean(params.bookableID || params.eventID);
+
     reloading.value = true;
-    if (force) {
+    if (force && !isDetailRoute) {
       invalidateBundle();
     }
 
     try {
       await authStore.validateAuth(true);
 
-      if (params.bookableID || params.eventID) {
+      if (isDetailRoute) {
         await loadDetail({
           slug: params.slug,
           bookableID: params.bookableID,

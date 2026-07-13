@@ -20,7 +20,7 @@ const authStore = useAuthStore();
 const catalogSlug = computed(() => route.params.catalogSlug);
 const eventID = computed(() => route.params.eventID);
 
-const { loadDetail, isDetailLoadedForCurrentAuth } = useCatalogBundle();
+const { loadDetail } = useCatalogBundle();
 
 const event = computed(() => eventStore.getEventById(eventID.value));
 
@@ -37,25 +37,6 @@ async function refreshEventDetail({ force = false } = {}) {
 }
 
 await refreshEventDetail();
-
-onMounted(async () => {
-  if (
-    !isDetailLoadedForCurrentAuth({
-      slug: catalogSlug.value || null,
-      eventID: eventID.value,
-    })
-  ) {
-    await refreshEventDetail({ force: true });
-  }
-});
-
-watch(
-  () => authStore.isLoggedIn,
-  (loggedIn, wasLoggedIn) => {
-    if (wasLoggedIn === undefined || loggedIn === wasLoggedIn) return;
-    void refreshEventDetail({ force: true });
-  },
-);
 
 const { t } = useI18n();
 usePageTitle(() =>

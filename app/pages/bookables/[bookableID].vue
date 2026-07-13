@@ -20,7 +20,7 @@ const authStore = useAuthStore();
 const catalogSlug = computed(() => route.params.catalogSlug);
 const bookableID = computed(() => route.params.bookableID);
 
-const { loadDetail, isDetailLoadedForCurrentAuth } = useCatalogBundle();
+const { loadDetail } = useCatalogBundle();
 
 const bookable = computed(() =>
   bookableStore.getBookableById(bookableID.value),
@@ -39,25 +39,6 @@ async function refreshBookableDetail({ force = false } = {}) {
 }
 
 await refreshBookableDetail();
-
-onMounted(async () => {
-  if (
-    !isDetailLoadedForCurrentAuth({
-      slug: catalogSlug.value || null,
-      bookableID: bookableID.value,
-    })
-  ) {
-    await refreshBookableDetail({ force: true });
-  }
-});
-
-watch(
-  () => authStore.isLoggedIn,
-  (loggedIn, wasLoggedIn) => {
-    if (wasLoggedIn === undefined || loggedIn === wasLoggedIn) return;
-    void refreshBookableDetail({ force: true });
-  },
-);
 
 const { t } = useI18n();
 usePageTitle(() =>

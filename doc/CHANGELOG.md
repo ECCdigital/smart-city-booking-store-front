@@ -16,7 +16,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 - **DEV-803:** Catalog bookables and events now reload after login so permission-dependent content (e.g. restricted bookables, group booking) is visible without a manual page refresh
 - Bookable and event detail pages reload with the authenticated API response after login redirect instead of showing stale anonymous data
-- Login and register links in the catalog navigation preserve the current page via `?redirect=`
+- Login and register links in the catalog navigation preserve the current page via `?redirect=` (with safe redirect validation on login)
 - Search result lists update when catalog source data changes after an auth state change
 - Logout keeps the user on the current page instead of redirecting to `/login`
 
