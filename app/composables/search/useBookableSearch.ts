@@ -867,20 +867,43 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     () => isSearchActive.value || isFilterActive.value,
   );
 
+  function getSourceItemIds(items: unknown[] | null | undefined) {
+    if (!Array.isArray(items)) return "";
+    return items
+      .map((item: { id?: string }) => item?.id ?? "")
+      .filter(Boolean)
+      .sort()
+      .join(",");
+  }
+
   watch(
     () => toValue(sourceItems),
-    (val) => {
+    async (val, oldVal) => {
       if (!val || val.length === 0) {
         updatedItems.value = [];
         return;
       }
 
-      const hasStatus = updatedItems.value.some((b) => b?.matchStatus);
-      if (hasStatus) return;
+      const newIds = getSourceItemIds(val);
+      const oldIds = getSourceItemIds(oldVal);
+      if (newIds === oldIds && updatedItems.value.length > 0) {
+        return;
+      }
+
+      if (searchIsInitialized.value && isMounted.value) {
+        await runSearch({
+          term: query.term,
+          location: query.location,
+          distance: query.distance,
+          timeStart: query.start,
+          timeEnd: query.end,
+        });
+        return;
+      }
 
       initializeResults();
     },
-    { immediate: true, deep: true },
+    { immediate: true },
   );
 
   onMounted(async () => {

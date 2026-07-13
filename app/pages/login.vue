@@ -30,6 +30,7 @@ const handleLogin = async () => {
   loading.value = true;
   try {
     await login(form.value);
+    await authStore.validateAuth(true);
     notification.success(
         t("notifications.loginSuccess.message") + ", " + userName.value + "!",
         t("notifications.loginSuccess.title")

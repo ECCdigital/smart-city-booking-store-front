@@ -136,6 +136,8 @@ const props = defineProps({
   },
 });
 
+const sourceItems = computed(() => props.bookables);
+
 const {
   query,
   searchIsInitialized,
@@ -148,7 +150,7 @@ const {
   setViewQueryParams,
   runSearch,
   resetResults,
-} = useBookableSearch({ isEvent: false, sourceItems: props.bookables });
+} = useBookableSearch({ isEvent: false, sourceItems });
 
 const currentView = ref(query.viewMode);
 
