@@ -1,6 +1,7 @@
 <script setup>
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useEventStore } from "~~/stores/event.js";
+import { useAuthStore } from "~~/stores/auth.js";
 import DetailsArea from "~/components/search/DetailsArea.vue";
 
 definePageMeta({
@@ -14,20 +15,28 @@ definePageMeta({
 
 const route = useRoute();
 const eventStore = useEventStore();
+const authStore = useAuthStore();
 
 const catalogSlug = computed(() => route.params.catalogSlug);
 const eventID = computed(() => route.params.eventID);
 
-const { loadBundle } = useCatalogBundle();
+const { loadDetail } = useCatalogBundle();
 
 const event = computed(() => eventStore.getEventById(eventID.value));
 
-if (!event.value) {
-  await loadBundle({
+async function refreshEventDetail({ force = false } = {}) {
+  if (import.meta.client) {
+    await authStore.validateAuth(true);
+  }
+
+  await loadDetail({
     slug: catalogSlug.value || null,
     eventID: eventID.value,
+    force,
   });
 }
+
+await refreshEventDetail();
 
 const { t } = useI18n();
 usePageTitle(() =>
