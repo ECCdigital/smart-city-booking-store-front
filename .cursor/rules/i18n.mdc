@@ -1,0 +1,13 @@
+---
+description: i18n translation conventions
+globs: i18n/**/*
+alwaysApply: false
+---
+
+# Internationalization
+
+See `docs/agents/i18n.md` for full conventions.
+
+- Always add keys to both `i18n/locales/de.json` and `i18n/locales/en.json`
+- German is the default/source locale — nested keys grouped by feature area
+- No hardcoded UI strings in components — use `t("key")` from `useI18n()`

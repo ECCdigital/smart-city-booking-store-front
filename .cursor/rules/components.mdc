@@ -1,0 +1,15 @@
+---
+description: Vue component and page conventions
+globs: app/components/**/*,app/pages/**/*
+alwaysApply: false
+---
+
+# Vue Components & Pages
+
+See `docs/agents/components.md` for full conventions.
+
+- `<script setup>` with Composition API — use Nuxt UI components and Tailwind utilities
+- All user-facing text via `t("key")` from `useI18n()` — add keys to both `de.json` and `en.json`
+- Use `useTenantRoute()` for tenant-aware navigation links
+- Load data via composables, not inline `$fetch` — prefer `useApiClient()` for API calls
+- Set `definePageMeta` with layout and middleware on pages
