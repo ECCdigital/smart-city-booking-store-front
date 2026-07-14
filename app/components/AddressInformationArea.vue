@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-200 dark:bg-gray-700 rounded-md p-3">
+  <div class="bg-surface-muted rounded-md p-3">
     <div v-if="hasCoordinates" class="mb-2">
       <AddressMap :coordinates="item.location.coordinates" />
     </div>

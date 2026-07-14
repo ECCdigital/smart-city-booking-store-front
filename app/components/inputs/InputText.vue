@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full group content-center dark:bg-gray-700">
+  <div class="w-full group content-center bg-surface-raised">
     <div class="flex justify-between">
       <UInput
         v-model="model"
@@ -7,7 +7,7 @@
         size="lg"
         variant="ghost"
         :placeholder="props.placeholder"
-        class="w-full bg-white dark:bg-gray-700"
+        class="w-full bg-surface-raised"
         :ui="{
           base: 'w-full pr-1 hover:bg-transparent rounded-none rounded-l-md',
           placeholder: 'text-gray-400 dark:text-gray-200',

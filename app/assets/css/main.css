@@ -1,20 +1,78 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-body {
-    background-color: rgb(250 250 250); /* bg-neutral-50  */
+:root {
+  --surface-base: rgb(250 250 250);
+  --surface-raised: rgb(229 231 235);
+  --surface-muted: rgb(250 250 250);
+  --surface-border: rgb(229 229 229);
+  --text-primary: rgb(23 23 23);
+  --text-secondary: rgb(115 115 115);
 }
 
-.dark body {
-    background-color: #020617; /* bg-gray-950 */
+.dark {
+  --surface-base: rgb(23 23 23);
+  --surface-raised: rgb(55 65 81);
+  --surface-muted: rgb(55 65 81);
+  --surface-border: rgb(64 64 64);
+  --text-primary: rgb(245 245 245);
+  --text-secondary: rgb(163 163 163);
+}
+
+@theme inline {
+  --color-surface-base: var(--surface-base);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-border: var(--surface-border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+}
+
+body {
+  background-color: var(--surface-base);
+  color: var(--text-primary);
+}
+
+.bg-surface-base {
+  background-color: var(--surface-base);
+}
+
+.bg-surface-raised {
+  background-color: var(--surface-raised);
+}
+
+.bg-surface-muted {
+  background-color: var(--surface-muted);
+}
+
+.border-surface {
+  border-color: var(--surface-border);
+}
+
+.text-surface-primary {
+  color: var(--text-primary);
+}
+
+.text-surface-secondary {
+  color: var(--text-secondary);
 }
 
 .glass {
-  @apply bg-slate-50/60 dark:bg-gray-900/80 backdrop-blur-lg;
+  background-color: rgb(248 250 252 / 0.6);
+  @apply backdrop-blur-lg;
+}
+
+.dark .glass {
+  background-color: rgb(38 38 38 / 0.85);
 }
 
 .glass-light {
-  @apply bg-slate-50/20 dark:bg-gray-900/40 backdrop-blur-lg;
+  background-color: rgb(248 250 252 / 0.2);
+  @apply backdrop-blur-lg;
+}
+
+.dark .glass-light {
+  background-color: rgb(38 38 38 / 0.45);
 }
 
 .container {

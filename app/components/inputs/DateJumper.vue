@@ -3,7 +3,7 @@
     <button
       ref="triggerRef"
       type="button"
-      class="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white transition-colors"
+      class="w-7 h-7 flex items-center justify-center rounded-md border border-surface-border text-gray-400 dark:text-gray-500 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white transition-colors"
       :aria-label="$t('timePeriods.jumpToDate')"
       :title="$t('timePeriods.jumpToDate')"
       @click.stop="togglePicker"
@@ -23,7 +23,7 @@
         <div
           v-if="showPicker"
           ref="pickerRef"
-          class="fixed z-[100] rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl"
+          class="fixed z-[100] rounded-xl border border-surface-border bg-surface-raised shadow-xl"
           :style="pickerStyle"
           @click.stop
         >

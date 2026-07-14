@@ -19,7 +19,7 @@ const checkoutTabs = computed(() => {
 </script>
 
 <template>
-  <div class="bg-neutral-50 dark:bg-gray-950">
+  <div class="bg-surface-base">
     <NavigationBar :tabs="checkoutTabs" />
     <div>
       <slot />

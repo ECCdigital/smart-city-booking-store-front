@@ -1,5 +1,6 @@
 import { getThemeBundle } from "~~/server/api/utils/themeBundle.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
+import { buildThemeCss } from "~~/shared/utils/themeCss.js";
 
 const defaultTheme = {
   primary: "#FF8B00",
@@ -15,16 +16,7 @@ export default createConditionalCachedHandler(
 
     setHeader(event, "Content-Type", "text/css");
     setHeader(event, "Cache-Control", "public, max-age=300, s-maxage=300");
-    return `
-      :root {
-        --ui-primary: ${theme.primary};
-        --ui-secondary: ${theme.secondary};
-      }
-      .dark {
-        --ui-primary: ${theme.primary};
-        --ui-secondary: ${theme.secondary};
-      }
-    `;
+    return buildThemeCss(theme);
   },
   { maxAge: 300, authScoped: false }
 );

@@ -27,7 +27,7 @@
         <button
           type="button"
           :disabled="isSearchingNextFreeDay"
-          class="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-7 h-7 flex items-center justify-center rounded-md border border-surface-border text-gray-400 dark:text-gray-500 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           :aria-label="$t('timePeriods.jumpToNextFree')"
           :title="$t('timePeriods.jumpToNextFree')"
           @click="jumpToNextFreeDay"
@@ -49,7 +49,7 @@
           type="button"
           :disabled="!canGoBack"
           :class="compact ? 'shrink-0 w-7 h-7' : 'shrink-0 w-9 h-9'"
-          class="flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors"
+          class="flex items-center justify-center rounded-lg border border-surface-border text-gray-600 dark:text-gray-300 hover:border-primary dark:hover:border-primary hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-surface-border transition-colors"
           :aria-label="$t('timePeriods.previousDays')"
           @click="navigateDays(-effectiveNumDays)"
         >
@@ -108,7 +108,7 @@
         <button
           type="button"
           :class="compact ? 'shrink-0 w-7 h-7' : 'shrink-0 w-9 h-9'"
-          class="flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+          class="flex items-center justify-center rounded-lg border border-surface-border text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
           :aria-label="$t('timePeriods.laterDays')"
           @click="navigateDays(effectiveNumDays)"
         >
@@ -132,7 +132,7 @@
         </span>
         <span class="flex items-center gap-1.5">
           <span
-            class="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600 inline-block"
+            class="w-2.5 h-2.5 rounded-full bg-surface-border inline-block"
           />
           {{ $t("timePeriods.legendClosed") }}
         </span>
@@ -669,9 +669,9 @@ function getDayClass(day) {
     if (day.hasMatchingPeriod) {
       return "border-dashed border-red-200 dark:border-red-900/50 bg-red-50/40 dark:bg-red-950/20 cursor-not-allowed";
     }
-    return "border-dashed border-gray-200 dark:border-gray-800 opacity-50 cursor-not-allowed";
+    return "border-dashed border-surface-border opacity-50 cursor-not-allowed";
   }
-  return "border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary cursor-pointer";
+  return "border-surface-border hover:border-primary dark:hover:border-primary cursor-pointer";
 }
 
 function getDayNumberClass(day) {
@@ -711,12 +711,12 @@ function isSlotSelected(slot) {
 
 function getSlotClass(slot) {
   if (!slot.available) {
-    return "border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 text-gray-300 dark:text-gray-600 cursor-not-allowed";
+    return "border-surface-border bg-surface-muted/40 text-gray-300 dark:text-gray-600 cursor-not-allowed";
   }
   if (isSlotSelected(slot)) {
     return "border-primary dark:border-primary bg-primary/10 dark:bg-primary text-primary shadow-sm cursor-pointer ring-1 ring-primary dark:ring-primary";
   }
-  return "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary cursor-pointer";
+  return "border-surface-border text-text-primary hover:border-primary dark:hover:border-primary cursor-pointer";
 }
 
 function onSlotClick(slot) {

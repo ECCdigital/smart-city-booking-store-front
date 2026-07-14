@@ -141,12 +141,12 @@ const hasContent = computed(() => {
   <Transition name="summary-bar">
     <div
       v-if="hasContent"
-      class="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-2xl p-4 md:p-5 space-y-3"
+      class="relative rounded-xl border border-surface bg-surface-raised/95 dark:bg-surface-raised/95 backdrop-blur-md shadow-2xl p-4 md:p-5 space-y-3"
     >
       <!-- Loading Overlay -->
       <div
         v-if="isValidating"
-        class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm"
+        class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-surface-raised/60 backdrop-blur-sm"
       >
         <UIcon
           name="i-lucide-loader-2"
@@ -249,7 +249,7 @@ const hasContent = computed(() => {
               type="number"
               :value="amounts[item.id] || 1"
               :min="minAmount(item.id)"
-              class="amount-input w-8 h-6 text-center tabular-nums text-sm font-medium text-gray-900 dark:text-white bg-transparent border-b border-gray-200 dark:border-gray-700 focus:border-primary focus:outline-none"
+              class="amount-input w-8 h-6 text-center tabular-nums text-sm font-medium text-gray-900 dark:text-white bg-transparent border-b border-surface-border focus:border-primary focus:outline-none"
               @change="handleDirectInput(item.id, $event)"
             >
             <button
@@ -291,7 +291,7 @@ const hasContent = computed(() => {
         </div>
 
         <div
-          class="border-t border-gray-200 dark:border-gray-700 pt-3 flex items-center justify-between"
+          class="border-t border-surface-border pt-3 flex items-center justify-between"
         >
           <span
             class="text-base md:text-lg font-bold text-gray-900 dark:text-white"

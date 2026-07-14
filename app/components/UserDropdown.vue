@@ -133,7 +133,7 @@ async function logout() {
   >
     <UButton
       variant="ghost"
-      class="flex items-center gap-2 outline-none cursor-pointer"
+      class="h-12 px-3 flex items-center gap-2 outline-none cursor-pointer"
     >
       <UUser
         :name="userName"

@@ -109,7 +109,7 @@
         />
         <div
           v-if="showAvailabilityResult"
-          class="bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-500 shadow-sm rounded-lg p-3 mb-2 md:flex justify-between content-center"
+          class="bg-surface-muted border border-surface-border shadow-sm rounded-lg p-3 mb-2 md:flex justify-between content-center"
         >
           <div class="font-bold mr-1 content-center line-clamp-2">
             {{ item?.title }}
@@ -166,7 +166,7 @@
         <!-- Custom Fields: Mehr Informationen -->
         <div
           v-if="moreInfoFields.length"
-          class="bg-gray-200 dark:bg-gray-700 rounded-md p-3"
+          class="bg-surface-muted rounded-md p-3"
         >
           <h3 class="font-bold mr-1 content-center line-clamp-2">
             Weitere Informationen

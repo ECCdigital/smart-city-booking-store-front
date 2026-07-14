@@ -106,7 +106,7 @@
                 week.available
                   ? 'bg-green-500'
                   : week.isPast
-                    ? 'bg-gray-300 dark:bg-gray-600'
+                    ? 'bg-surface-border'
                     : 'bg-red-400'
               "
             />
@@ -179,8 +179,8 @@ const emit = defineEmits(["update:modelValue", "change"]);
 
 const navButtonClass = computed(() =>
   props.compact
-    ? "shrink-0 w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-    : "flex items-center max-w-20 sm:max-w-none px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-gray-700 transition-colors text-sm font-medium",
+    ? "shrink-0 w-7 h-7 flex items-center justify-center rounded-md border border-surface-border text-gray-600 dark:text-gray-300 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+    : "flex items-center max-w-20 sm:max-w-none px-4 py-2 rounded-lg border border-surface-border text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:dark:hover:border-surface-border transition-colors text-sm font-medium",
 );
 
 const { getBookableAvailability } = useBookables();
@@ -484,12 +484,12 @@ function isSelectedWeek(week) {
 
 function getWeekCardClass(week) {
   if (!week.available) {
-    return "border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 cursor-not-allowed opacity-70";
+    return "border-surface-border bg-surface-muted/40 cursor-not-allowed opacity-70";
   }
   if (isSelectedWeek(week)) {
     return "border-primary dark:border-primary bg-primary/5 dark:bg-primary/10 ring-1 ring-primary dark:ring-primary cursor-pointer";
   }
-  return "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-primary dark:hover:border-primary cursor-pointer";
+  return "border-surface-border bg-surface-raised hover:border-primary dark:hover:border-primary cursor-pointer";
 }
 
 // ── Sync with modelValue prop ──────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between w-full bg-white dark:bg-gray-700">
+  <div class="flex justify-between w-full bg-surface-raised">
     <UModal
       v-model:open="isOpen"
       title="Zeitraum auswählen"
@@ -15,7 +15,7 @@
         variant="ghost"
         icon="i-lucide-calendar-clock"
         :class="[
-          'w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-md bg-white dark:bg-gray-700 hover:bg-transparent',
+          'w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-md bg-surface-raised hover:bg-transparent',
           compact ? 'py-1 px-2 text-sm' : 'py-2 px-3',
         ]"
         :ui="{ leadingIcon: compact ? 'text-[13px] dark:text-gray-200 mr-1' : 'text-[16px] dark:text-gray-200 mr-1' }"

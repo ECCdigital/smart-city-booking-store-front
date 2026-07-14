@@ -19,10 +19,10 @@ const catalogTabs = [
 </script>
 
 <template>
-  <div class="bg-neutral-50 dark:bg-gray-950">
+  <div class="bg-surface-base">
     <NavigationBar :tabs="catalogTabs">
       <template #actions>
-        <TenantSwitcher class="mr-2" />
+        <TenantSwitcher />
       </template>
     </NavigationBar>
 

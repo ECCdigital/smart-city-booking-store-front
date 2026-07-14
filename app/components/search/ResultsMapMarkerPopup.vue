@@ -23,7 +23,7 @@
         prev: 'pointer-events-auto translate-x-12',
         next: 'pointer-events-auto -translate-x-12',
         dots: 'absolute left-1/2 -translate-x-1/2 bottom-2',
-        dot: 'w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-600',
+        dot: 'w-2 h-2 rounded-full bg-surface-border',
       }"
       class="w-[300px] mx-auto pb-5 hidden md:flex"
     >

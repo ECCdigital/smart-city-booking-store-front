@@ -1,6 +1,6 @@
 <template>
   <div
-    class="content-center dark:bg-gray-700 group-focus-within:bg-gray-100 dark:group-focus-within:bg-gray-800"
+    class="content-center bg-surface-raised group-focus-within:bg-surface-muted dark:group-focus-within:bg-surface-muted"
   >
     <USelect
       v-model="distance"

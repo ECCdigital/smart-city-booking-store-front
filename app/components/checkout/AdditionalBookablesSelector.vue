@@ -101,7 +101,7 @@ function getErrorForItem(itemId) {
               ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950'
               : isSelected(entry.item.id)
                 ? 'border-primary bg-primary/5 dark:bg-primary/10'
-                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600',
+                : 'border-surface-border bg-surface-raised hover:border-gray-300 dark:hover:border-gray-600',
             entry.item.isBookable ? '' : 'opacity-50 cursor-not-allowed',
           ]"
           @click="!isMandatory(entry) && toggleSelection(entry.item.id)"
@@ -112,7 +112,7 @@ function getErrorForItem(itemId) {
               :class="
                 isSelected(entry.item.id)
                   ? 'bg-primary border-primary'
-                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
+                  : 'border-surface-border bg-surface-raised'
               "
             >
               <UIcon
@@ -131,7 +131,7 @@ function getErrorForItem(itemId) {
                 ? getErrorForItem(entry.item.id)
                   ? 'bg-red-400/10 dark:bg-red-500/20'
                   : 'bg-primary/10 dark:bg-primary/20'
-                : 'bg-gray-100 dark:bg-gray-800'
+                : 'bg-surface-muted'
             "
           >
             <img

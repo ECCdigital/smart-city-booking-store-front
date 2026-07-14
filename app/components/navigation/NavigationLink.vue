@@ -48,7 +48,7 @@ const isActive = computed(() => {
 const { contrastToPrimary, contrastToSecondary } = useContrastColor();
 
 const linkClass = computed(() => [
-  "flex items-center px-4 relative h-12",
+  "flex items-center justify-center px-3 sm:px-4 relative h-12",
   isActive.value
     ? "text-[var(--color-on-primary)] bg-[var(--color-primary)]"
     : "bg-transparent",

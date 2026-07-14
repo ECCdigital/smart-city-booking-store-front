@@ -48,7 +48,7 @@
                 prev: 'pointer-events-auto',
                 next: 'pointer-events-auto',
                 dots: 'absolute left-1/2 -translate-x-1/2 bottom-0',
-                dot: 'w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-600',
+                dot: 'w-2 h-2 rounded-full bg-surface-border',
               }"
             class=""
         >

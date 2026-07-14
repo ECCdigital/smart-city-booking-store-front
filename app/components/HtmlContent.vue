@@ -68,7 +68,7 @@ const props = defineProps({
   fadeClass: {
     type: String,
     default:
-      "bg-gradient-to-t from-neutral-50 dark:from-gray-950 to-transparent",
+      "bg-gradient-to-t from-surface-base to-transparent",
   },
   /** Höhe des Fade-Gradients als Tailwind-Klasse. */
   fadeHeightClass: {

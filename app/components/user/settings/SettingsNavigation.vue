@@ -1,6 +1,6 @@
 <template>
   <div
-    class="md:basis-1/6 border border-gray-200 rounded m-2 md:m-0 md:p-2 md:space-y-1 flex md:block md:h-64 "
+    class="md:basis-1/6 border border-surface rounded m-2 md:m-0 md:p-2 md:space-y-1 flex md:block md:h-64 "
   >
     <div
       v-for="(item, i) in settingsNavigation"
@@ -39,10 +39,10 @@ const settingsNavigation = computed(() => [
 //const route = useRoute();
 
 const inactiveLinkStyle = computed(
-  () => "bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 hover:dark:bg-gray-800"
+  () => "bg-surface-muted hover:bg-gray-200 dark:hover:bg-neutral-700",
 );
 const disabledLinkStyle = computed(
-  () => "cursor-not-allowed opacity-75 bg-gray-100 dark:bg-gray-900"
+  () => "cursor-not-allowed opacity-75 bg-surface-muted",
 );
 const activeLinkStyle = computed(
   () => "bg-primary/20 hover:bg-primary/40 font-semibold"

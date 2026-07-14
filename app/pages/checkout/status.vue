@@ -378,8 +378,8 @@ function statusPresentation(statusKey) {
     default:
       return {
         icon: "i-lucide-info",
-        badge: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-        ring: "bg-gray-100 dark:bg-gray-800",
+        badge: "bg-surface-muted text-gray-700 dark:text-gray-300",
+        ring: "bg-surface-muted",
         iconClass: "text-gray-600 dark:text-gray-300",
       };
   }
@@ -528,7 +528,7 @@ async function handleManualRefresh() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white dark:bg-gray-950">
+  <div class="min-h-screen bg-surface-base">
     <div class="mx-auto max-w-6xl px-4 py-8 md:px-6 lg:px-8 lg:py-10">
       <header
         class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"
@@ -576,7 +576,7 @@ async function handleManualRefresh() {
         </div>
       </header>
 
-      <div class="mt-8 border-t border-gray-100 dark:border-gray-800" />
+      <div class="mt-8 border-t border-surface-border" />
 
       <div
         v-if="showThankYouBanner"
@@ -592,7 +592,7 @@ async function handleManualRefresh() {
           }}
         </h2>
 
-        <div class="mt-1 text-sm leading-6 text-gray-700 dark:text-gray-200">
+        <div class="mt-1 text-sm leading-6 text-text-primary">
           {{
             isAwaitingApproval
               ? $t("checkout.status.thankYouRequestBody")
@@ -612,7 +612,7 @@ async function handleManualRefresh() {
         <div class="space-y-5">
           <template v-if="!isValid">
             <div
-              class="rounded-2xl bg-gray-50 px-6 py-5 text-gray-700 dark:bg-gray-900/60 dark:text-gray-200"
+              class="rounded-2xl bg-surface-muted px-6 py-5 text-surface-primary"
             >
               <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
                 {{ $t("checkout.status.invalidLinkTitle") }}
@@ -627,7 +627,7 @@ async function handleManualRefresh() {
 
           <template v-else-if="statusPending && !hasLoadedOnce">
             <div
-              class="flex min-h-[18rem] flex-col items-center justify-center rounded-2xl bg-gray-50 p-6 text-center dark:bg-gray-900/60"
+              class="flex min-h-[18rem] flex-col items-center justify-center rounded-2xl bg-surface-muted p-6 text-center"
             >
               <UIcon
                 name="i-lucide-loader-2"
@@ -698,7 +698,7 @@ async function handleManualRefresh() {
 
             <div
               v-if="!bookingRows.length"
-              class="rounded-2xl bg-gray-50 p-6 dark:bg-gray-900/60"
+              class="rounded-2xl bg-surface-muted p-6"
             >
               <p class="text-sm leading-6 text-gray-600 dark:text-gray-300">
                 {{ $t("checkout.status.noBookingsInResponse") }}
@@ -707,7 +707,7 @@ async function handleManualRefresh() {
 
             <div v-else-if="isSingleBookingView && singleBookingRow">
               <article
-                class="rounded-md bg-gray-50 p-6 dark:bg-gray-900/60 md:p-8"
+                class="rounded-md bg-surface-muted p-6 md:p-8"
               >
                 <div class="flex flex-col gap-6 sm:flex-row sm:items-start">
                   <div class="min-w-0 flex-1">
@@ -750,7 +750,7 @@ async function handleManualRefresh() {
                     >
                       {{ $t("checkout.status.singleBookingReference") }}:
                       <span
-                        class="font-mono font-semibold text-gray-700 dark:text-gray-200"
+                        class="font-mono font-semibold text-text-primary"
                       >
                         #{{ singleBookingRow.id }}
                       </span>
@@ -762,7 +762,7 @@ async function handleManualRefresh() {
                     >
                       {{ $t("checkout.status.bookableTitle") }}:
                       <span
-                        class="font-mono font-semibold text-gray-700 dark:text-gray-200"
+                        class="font-mono font-semibold text-text-primary"
                       >
                         {{ bookable.title }}
                       </span>
@@ -772,7 +772,7 @@ async function handleManualRefresh() {
 
                 <dl
                   v-if="showPaymentDetails"
-                  class="mt-8 grid gap-x-8 gap-y-4 border-t border-gray-200/80 pt-6 dark:border-gray-800 sm:grid-cols-3"
+                  class="mt-8 grid gap-x-8 gap-y-4 border-t border-surface-border pt-6 sm:grid-cols-3"
                 >
                   <div class="space-y-1">
                     <dt
@@ -846,7 +846,7 @@ async function handleManualRefresh() {
               </article>
             </div>
 
-            <div v-else class="divide-y divide-gray-100 dark:divide-gray-800">
+            <div v-else class="divide-y divide-surface-border">
               <div
                 v-if="bookable && bookable.title"
                 class="grid pb-6 text-sm font-medium tracking-wide text-gray-500 dark:text-gray-400"
@@ -869,7 +869,7 @@ async function handleManualRefresh() {
                   <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                       <span
-                        class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 font-mono text-[11px] font-semibold tracking-wide text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                        class="inline-flex items-center rounded-full bg-surface-muted px-2.5 py-1 font-mono text-[11px] font-semibold tracking-wide text-gray-600 dark:text-gray-300"
                       >
                         #{{ row.id || "—" }}
                       </span>
@@ -973,7 +973,7 @@ async function handleManualRefresh() {
         </div>
 
         <aside class="lg:sticky lg:top-6">
-          <div class="rounded-lg bg-gray-50 px-5 py-6 dark:bg-gray-900/60">
+          <div class="rounded-lg bg-surface-muted px-5 py-6">
             <div v-if="!isSingleBookingView">
               <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
                 {{ $t("checkout.review.overviewCardTitle") }}
@@ -1016,7 +1016,7 @@ async function handleManualRefresh() {
               :class="
                 isSingleBookingView
                   ? ''
-                  : 'mt-6 border-t border-gray-200 pt-6 dark:border-gray-800'
+                  : 'mt-6 border-t border-surface-border pt-6'
               "
             >
               <div class="mt-4 space-y-3">

@@ -60,7 +60,7 @@ const subtitle = computed(() => props.tenant?.name || "");
         <span
           v-for="flag in leadBookable.flags"
           :key="flag"
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-200"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-surface-border bg-surface-raised text-sm text-text-primary"
         >
           <UIcon
             name="i-lucide-check"

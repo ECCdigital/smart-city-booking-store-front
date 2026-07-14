@@ -5,7 +5,7 @@
       keyCardClasses,
       isActive
         ? 'border-2 border-primary/60 shadow-primary/20'
-        : 'border border-gray-200 dark:border-gray-700',
+        : 'border border-surface-border',
     ]"
   >
     <div class="mb-3 h-2/5">
@@ -13,7 +13,7 @@
         <div class="flex flex-wrap gap-2 items-center">
           <UTooltip :text="`Buchungs-ID: ${booking.id}`">
             <div
-              class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full"
+              class="text-xs bg-surface-muted text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full"
             >
               #{{ booking.id }}
             </div>
@@ -126,7 +126,7 @@ const isActive = computed(() => {
 });
 
 const keyCardClasses =
-  "bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow";
+  "bg-surface-raised shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow";
 
 function openDetails() {
   const router = useRouter();

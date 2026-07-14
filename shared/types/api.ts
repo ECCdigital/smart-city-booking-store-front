@@ -3,6 +3,8 @@ export type PortalMode = "offers" | "personal";
 export interface ThemeColors {
   primary?: string;
   secondary?: string;
+  primaryDark?: string;
+  secondaryDark?: string;
 }
 
 export interface Theme {

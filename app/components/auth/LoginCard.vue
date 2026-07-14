@@ -69,10 +69,10 @@
       <template v-if="cardMethods.length > 0">
         <div class="relative my-3">
           <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-gray-300 dark:border-gray-600" />
+            <div class="w-full border-t border-surface-border" />
           </div>
           <div class="relative flex justify-center text-sm">
-            <span class="bg-gray-50 dark:bg-gray-800 px-2 text-gray-500">
+            <span class="bg-surface-muted px-2 text-gray-500">
               {{ $t("login.or") }}
             </span>
           </div>

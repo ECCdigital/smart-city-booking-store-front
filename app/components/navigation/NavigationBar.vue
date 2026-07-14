@@ -1,6 +1,9 @@
 <template>
-  <div :class="barClass" class="flex justify-between">
-    <div class="flex">
+  <div
+    :class="barClass"
+    class="flex items-center justify-between h-12 px-3 sm:px-4"
+  >
+    <div class="flex items-center h-full min-w-0">
       <UTooltip text="Zurück zur Startseite">
         <NavigationLink
           :tab="{ value: '/', icon: 'i-lucide-home', label: '' }"
@@ -12,12 +15,13 @@
     </div>
 
     <ClientOnly>
-      <div class="flex items-center">
+      <div class="flex items-center h-full gap-2 sm:gap-3 shrink-0">
+        <ColorModeToggle :icon-color="contrastToSecondary" />
         <slot name="actions" />
         <AuthActions />
       </div>
       <template #fallback>
-        <div class="flex items-center gap-2 px-4 opacity-50">
+        <div class="flex items-center h-full gap-2 sm:gap-3 opacity-50">
           <USkeleton class="h-8 w-20" />
           <USkeleton class="h-8 w-24" />
         </div>
@@ -29,6 +33,10 @@
 <script setup>
 import NavigationLink from "./NavigationLink.vue";
 import AuthActions from "~/components/navigation/AuthActions.vue";
+import ColorModeToggle from "~/components/ColorModeToggle.vue";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+
+const { contrastToSecondary } = useContrastColor();
 
 defineProps({
   tabs: {

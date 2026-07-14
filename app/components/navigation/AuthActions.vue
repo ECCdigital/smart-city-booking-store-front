@@ -1,18 +1,18 @@
 <template>
-  <div class="flex items-center">
+  <div class="flex items-center gap-2 sm:gap-3">
     <template v-if="!isAuthenticated">
       <UButton
         :label="isGreaterThanSm ? 'Anmelden' : ' '"
         :icon="isGreaterThanSm ? '' : 'i-lucide-log-in'"
         variant="ghost"
-        class="block px-2"
+        class="h-12 px-3"
         :style="{ color: contrastToSecondary }"
         :to="loginTo"
       />
       <UButton
         v-if="isGreaterThanSm"
         label="Registrieren"
-        class="hidden sm:block px-4 text-black dark:text-white bg-white dark:bg-black"
+        class="hidden sm:flex h-10 px-4 text-black dark:text-white bg-white dark:bg-black"
         :to="registerTo"
       />
     </template>

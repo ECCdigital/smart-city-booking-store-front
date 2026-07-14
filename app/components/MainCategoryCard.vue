@@ -1,6 +1,6 @@
 <template>
   <UCard
-      class="mainCategoryCard h-full bg-white dark:bg-gray-700 text-black dark:text-gray-200 shadow-lg  hover:scale-125 hover:border-3 hover:-m-3 hover:border-primary"
+      class="mainCategoryCard h-full bg-surface-raised text-black dark:text-gray-200 shadow-lg  hover:scale-125 hover:border-3 hover:-m-3 hover:border-primary"
       variant="solid"
       @click="goToCategory"
   >

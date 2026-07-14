@@ -36,7 +36,7 @@
       <div
         v-for="bookable in group.bookables"
         :key="bookable.item.id"
-        class="bg-gray-200 dark:bg-gray-700 rounded-sm mb-2 last:mb-0 p-1 flex"
+        class="bg-surface-muted rounded-sm mb-2 last:mb-0 p-1 flex"
         :class="bookable.matchStatus !== 'match' ? 'opacity-70' : ''"
       >
         <div class="basis-1/8 flex items-center">

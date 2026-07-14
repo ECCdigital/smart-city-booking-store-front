@@ -135,7 +135,7 @@
 
     <div
         v-if="fadeBottom"
-        class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white dark:from-gray-950 to-transparent"
+        class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-surface-base to-transparent"
     />
 
     <div class="relative z-10 h-full">
@@ -179,7 +179,7 @@ const heightClass = computed(() => {
 });
 
 const baseGradientClass =
-    "bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-950";
+    "bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-neutral-900 dark:via-neutral-900 dark:to-neutral-950";
 
 const meshClasses = [
   "bg-gradient-to-br from-indigo-200 to-violet-200 dark:from-indigo-500 dark:to-violet-500",

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-gray-200 dark:bg-gray-700 flex justify-between rounded-md p-2 mb-2"
+    class="bg-surface-muted flex justify-between rounded-md p-2 mb-2"
   >
     <p class="text-lg basis-2/3 content-center">
       {{ props.ticket.title }}

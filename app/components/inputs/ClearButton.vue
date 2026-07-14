@@ -3,7 +3,7 @@
 <template>
   <div
       v-if="showClearButton"
-      class="rounded-r content-center pr-2 transition-colors group-focus-within:bg-gray-100 dark:group-focus-within:bg-gray-800"
+      class="rounded-r content-center pr-2 transition-colors group-focus-within:bg-surface-muted dark:group-focus-within:bg-surface-muted"
   >
     <UTooltip text="Eintrag löschen">
       <UButton

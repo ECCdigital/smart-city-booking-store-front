@@ -2177,7 +2177,7 @@ function onReviewEdit(section) {
 </script>
 
 <template>
-  <div class="bg-neutral-50 dark:bg-gray-950 w-full min-h-screen">
+  <div class="bg-surface-base w-full min-h-screen">
     <!-- Loading / Empty State -->
     <div
       v-if="isLoading || isResolvingPermissionGuard"
@@ -2295,7 +2295,7 @@ function onReviewEdit(section) {
         </div>
       </div>
       <!-- RIGHT: Checkout Flow -->
-      <main class="flex-3 min-w-0 bg-white dark:bg-gray-900 p-6 md:p-8 lg:p-10">
+      <main class="flex-3 min-w-0 bg-surface-raised p-6 md:p-8 lg:p-10">
         <CheckoutBookingNotes :bookables="bookablesInCheckout" class="mb-6" />
 
         <UAlert

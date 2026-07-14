@@ -483,7 +483,7 @@ const submitButtonLabel = computed(() =>
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
       <div class="lg:col-span-7 xl:col-span-8 space-y-0">
         <section
-          class="border-b border-gray-200 dark:border-gray-700 pb-8 mb-8"
+          class="border-b border-surface-border pb-8 mb-8"
         >
           <div class="flex items-start justify-between gap-4 mb-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -614,7 +614,7 @@ const submitButtonLabel = computed(() =>
         </section>
 
         <section
-          class="border-b border-gray-200 dark:border-gray-700 pb-8 mb-8"
+          class="border-b border-surface-border pb-8 mb-8"
         >
           <div class="flex items-start justify-between gap-4 mb-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -751,7 +751,7 @@ const submitButtonLabel = computed(() =>
 
           <div v-if="appliedCoupon" class="space-y-3">
             <div
-              class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-200 dark:border-gray-700"
+              class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-surface-border"
             >
               <span
                 class="font-mono text-sm text-gray-900 dark:text-white truncate"
@@ -785,7 +785,7 @@ const submitButtonLabel = computed(() =>
 
           <div v-else class="space-y-2">
             <div
-              class="flex flex-wrap items-end gap-3 border-b border-gray-200 dark:border-gray-700 pb-2"
+              class="flex flex-wrap items-end gap-3 border-b border-surface-border pb-2"
             >
               <UInput
                 v-model="couponDraft"
@@ -877,7 +877,7 @@ const submitButtonLabel = computed(() =>
               }}</span>
             </li>
             <li
-              class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-2 flex justify-between items-baseline gap-3"
+              class="border-t border-surface-border pt-4 mt-2 flex justify-between items-baseline gap-3"
             >
               <span class="text-sm text-gray-500 dark:text-gray-400">{{
                 $t("checkout.review.totalLabel")

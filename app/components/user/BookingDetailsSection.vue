@@ -43,7 +43,7 @@
         </div>
         <p v-if="bookingTimeSlot">{{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}</p>
         <div v-if="eventIds.length > 0 && events.length > 0" class="space-y-0.5">
-          <div v-for="event in events" :key="event.id" class="rounded-md bg-gray-200 p-1">
+          <div v-for="event in events" :key="event.id" class="rounded-md bg-surface-muted p-1">
             <span>{{event.information.name}}</span>
             <EventTimeInformation
                 :event="event"
@@ -71,7 +71,7 @@
     <!-- payment information  -->
     <div class="mb-5">
       <p class="font-medium">Zahlungsinformationen</p>
-      <div class="md:flex bg-gray-200 dark:bg-gray-800 p-3 rounded mb-3">
+      <div class="md:flex bg-surface-muted p-3 rounded mb-3">
         <div class="md:basis-1/3 mb-5 md:mb-0">
           <p>Summe</p>
           <p class="font-bold text-primary">{{ bookingPrice }}</p>

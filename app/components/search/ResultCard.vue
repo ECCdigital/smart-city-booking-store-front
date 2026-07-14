@@ -1,6 +1,6 @@
 <template>
   <div
-    class="shadow-lg bg-white dark:bg-gray-700 rounded-xl"
+    class="shadow-lg bg-surface-raised rounded-xl"
     :class="[
       isNotSuitable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer',
       mapDetailMode ? 'h-80' : '',
@@ -46,7 +46,7 @@
             />
             <div
               v-if="showImageErrorHint"
-              class="absolute bottom-2 left-2 right-2 flex items-center justify-center space-x-1 text-xs text-center text-gray-600 dark:text-gray-300 bg-white/80 dark:bg-gray-800/80 rounded px-2 py-1"
+              class="absolute bottom-2 left-2 right-2 flex items-center justify-center space-x-1 text-xs text-center text-gray-600 dark:text-gray-300 bg-surface-raised/80 rounded px-2 py-1"
             >
               <UIcon name="i-lucide-image-off" class="w-4 h-4" />
               <p>Bild konnte nicht geladen werden</p>

@@ -101,7 +101,7 @@ const { contrastToPrimary, contrastToSecondary } = useContrastColor();
   >
     <button
       :class="[
-        'flex items-center px-4 relative h-12 transition-colors',
+        'flex items-center justify-center px-3 sm:px-4 relative h-12 transition-colors',
         selectedTenant
           ? 'text-[var(--color-on-primary)] bg-[var(--color-primary)]'
           : 'hover:bg-white/10',

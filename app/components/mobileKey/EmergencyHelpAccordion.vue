@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="serviceInfo && ifbsLockerInfo?.isConfirmed"
-    class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+    class="bg-surface-raised rounded-lg border border-surface-border"
   >
     <button
       class="flex items-center justify-between w-full px-4 py-3 cursor-pointer"
@@ -29,7 +29,7 @@
 
     <div
       v-if="isOpen"
-      class="border-t border-gray-200 dark:border-gray-700 p-4"
+      class="border-t border-surface-border p-4"
     >
       <EmergencyHelpContent
         :service-info="serviceInfo"

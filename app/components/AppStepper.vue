@@ -111,7 +111,7 @@ function isSegmentActive(index) {
         :class="
           isSegmentActive(idx)
             ? 'bg-secondary dark:bg-secondary'
-            : 'bg-gray-200 dark:bg-gray-700'
+            : 'bg-surface-muted'
         "
       />
     </div>
@@ -152,7 +152,7 @@ function isSegmentActive(index) {
     <!-- Footer / Navigation -->
     <div
       v-if="!hideFooter"
-      class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-6 flex items-center justify-between gap-4 z-10"
+      class="sticky bottom-0 bg-surface-raised border-t border-surface py-6 flex items-center justify-between gap-4 z-10"
     >
       <UButton
         v-if="!hideBackOnFirst || !isFirstStep"

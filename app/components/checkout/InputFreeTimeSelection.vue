@@ -47,7 +47,7 @@
 
     <button
       type="button"
-      class="sm:hidden inline-flex items-center justify-center gap-2 w-full px-3 py-2.5 text-sm font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+      class="sm:hidden inline-flex items-center justify-center gap-2 w-full px-3 py-2.5 text-sm font-medium rounded-md border border-surface-border bg-surface-raised text-gray-700 dark:text-gray-300 hover:bg-surface-muted transition-colors"
       :aria-expanded="calendarVisibleOnMobile"
       @click="toggleCalendarOnMobile"
     >
@@ -69,12 +69,12 @@
 
     <div v-if="showCalendarPanel">
       <div
-        class="flex items-center justify-between px-1 sm:px-3 py-1.5 rounded-t-md border border-b-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30"
+        class="flex items-center justify-between px-1 sm:px-3 py-1.5 rounded-t-md border border-b-0 border-surface-border bg-surface-muted/30"
       >
         <button
           type="button"
           :disabled="!canGoPrev"
-          class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-surface-border bg-surface-raised text-gray-700 dark:text-gray-300 hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           @click="navigatePrev"
         >
           <UIcon name="i-lucide-chevron-left" size="14" />
@@ -90,7 +90,7 @@
 
         <button
           type="button"
-          class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-surface-border bg-surface-raised text-gray-700 dark:text-gray-300 hover:bg-surface-muted transition-colors"
           @click="navigateNext"
         >
           <UIcon name="i-lucide-chevron-right" size="14" class="order-1 sm:order-2" />
@@ -99,7 +99,7 @@
       </div>
 
       <div
-        class="rounded-b-md border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900"
+        class="rounded-b-md border border-surface-border overflow-hidden bg-surface-raised"
       >
         <!-- FullCalendar -->
         <ClientOnly>
@@ -119,11 +119,11 @@
 
         <!-- Legend -->
         <div
-          class="flex items-center gap-4 px-3 py-1.5 border-t border-gray-200 dark:border-gray-700 text-[11px] text-gray-600 dark:text-gray-400"
+          class="flex items-center gap-4 px-3 py-1.5 border-t border-surface-border text-[11px] text-gray-600 dark:text-gray-400"
         >
           <span class="flex items-center gap-1.5">
             <span
-              class="inline-block w-4 h-3 rounded-sm border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-950/50"
+              class="inline-block w-4 h-3 rounded-sm border border-surface-border bg-surface-muted/50"
             />
             {{ $t("scheduleSelection.free") }}
           </span>
@@ -936,17 +936,15 @@ watch(
   opacity: 0.8 !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  :deep(.fc-bg-event.fc-occupied) {
-    background: repeating-linear-gradient(
-      -45deg,
-      #4b5563,
-      #4b5563 3px,
-      #374151 3px,
-      #374151 7px
-    ) !important;
-    opacity: 0.8 !important;
-  }
+:is(.dark) :deep(.fc-bg-event.fc-occupied) {
+  background: repeating-linear-gradient(
+    -45deg,
+    #4b5563,
+    #4b5563 3px,
+    #374151 3px,
+    #374151 7px
+  ) !important;
+  opacity: 0.8 !important;
 }
 
 /* ── User selection event ────────────────────────────────── */
@@ -996,16 +994,14 @@ watch(
   );
 }
 
-@media (prefers-color-scheme: dark) {
-  .occupied-legend {
-    background: repeating-linear-gradient(
-      -45deg,
-      #4b5563,
-      #4b5563 3px,
-      #374151 3px,
-      #374151 7px
-    );
-  }
+.dark .occupied-legend {
+  background: repeating-linear-gradient(
+    -45deg,
+    #4b5563,
+    #4b5563 3px,
+    #374151 3px,
+    #374151 7px
+  );
 }
 
 </style>

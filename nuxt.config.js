@@ -46,6 +46,8 @@ export default defineNuxtConfig({
     classSuffix: "",
     preference: "system",
     fallback: "light",
+    storage: "localStorage",
+    storageKey: "scb-color-mode",
   },
   i18n: {
     locales: [

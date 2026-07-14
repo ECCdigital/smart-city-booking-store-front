@@ -470,7 +470,7 @@ function onAddressSuggestionSelect(suggestion) {
         <li
           v-for="att in attachments"
           :key="att.id"
-          class="rounded-md border border-gray-200 dark:border-gray-700 p-2 bg-white/60 dark:bg-gray-900/40"
+          class="rounded-md border border-surface-border p-2 bg-surface-raised/60"
         >
           <div
             class="flex flex-col gap-0.5 sm:flex-row sm:items-start sm:justify-between sm:gap-2"
@@ -514,7 +514,7 @@ function onAddressSuggestionSelect(suggestion) {
 
           <div
             v-if="att.required"
-            class="mt-1.5 pt-1.5 border-t border-gray-200 dark:border-gray-700"
+            class="mt-1.5 pt-1.5 border-t border-surface-border"
           >
             <UCheckbox
               :model-value="!!attachmentAccepted[att.id]"

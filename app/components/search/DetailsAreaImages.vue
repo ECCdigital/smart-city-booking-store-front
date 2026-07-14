@@ -1,7 +1,7 @@
 <template>
   <div class="flex justify-center">
     <div
-      class="mt-2 md:-mt-10 bg-gray-300/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg rounded-md overflow-hidden w-[100vw] md:w-[50vw]"
+      class="mt-2 md:-mt-10 bg-surface-muted/30 backdrop-blur-lg shadow-lg rounded-md overflow-hidden w-[100vw] md:w-[50vw]"
       style="max-width: 1000px; aspect-ratio: 16/9"
     >
       <img
@@ -22,7 +22,7 @@
         <ImagePlaceholder :theme="colorMode.value" variant="poly" />
         <template #fallback>
           <div
-            class="w-full h-full rounded-l-xl bg-gray-200 dark:bg-gray-800 animate-pulse"
+            class="w-full h-full rounded-l-xl bg-surface-muted animate-pulse"
           />
         </template>
       </ClientOnly>

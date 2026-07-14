@@ -79,7 +79,7 @@
             />
             <InputDateTimePeriod
               :time-period="timePeriod"
-              class="border border-gray-400 dark:border-gray-600 rounded-lg mt-2 mb-5 w-full"
+              class="border border-surface-border rounded-lg mt-2 mb-5 w-full"
               @select-date="setSearchTimePeriod"
               @remove-date="removeSearchTimePeriod"
             />
@@ -88,7 +88,7 @@
           <!--externe Tickets -->
           <div
             v-if="item.externalBookingUrl"
-            class="bg-gray-200 dark:bg-gray-700 rounded-lg p-3 mb-2 flex content-center"
+            class="bg-surface-muted rounded-lg p-3 mb-2 flex content-center"
           >
             <span class="font-bold mr-1 content-center">{{
               item?.information.name

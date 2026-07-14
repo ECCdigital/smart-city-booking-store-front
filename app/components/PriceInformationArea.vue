@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-200 dark:bg-gray-700 rounded-md p-3">
+  <div class="bg-surface-muted rounded-md p-3">
     <p class="font-bold">Preisinformationen</p>
     <p
       v-if="props.item.priceValueAddedTax"

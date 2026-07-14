@@ -485,7 +485,7 @@ function getWeekDayCardClass(wd) {
   if (weeklyByWeekday?.value.includes(wd)) {
     return "border-primary dark:border-primary bg-primary/5 dark:bg-primary/10 ring-1 ring-primary dark:ring-primary cursor-pointer";
   }
-  return "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-primary dark:hover:border-primary cursor-pointer";
+  return "border-surface-border bg-surface-raised hover:border-primary dark:hover:border-primary cursor-pointer";
 }
 </script>
 
@@ -708,7 +708,7 @@ function getWeekDayCardClass(wd) {
     <!-- Preview -->
     <div class="space-y-2">
       <div class="flex items-center justify-between">
-        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+        <h4 class="text-sm font-semibold text-text-primary">
           {{ $t("groupBooking.preview.title") }}
         </h4>
         <span
@@ -748,7 +748,7 @@ function getWeekDayCardClass(wd) {
 
       <ul
         v-else
-        class="divide-y divide-gray-200 dark:divide-gray-700 rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-900"
+        class="divide-y divide-surface-border rounded-md border border-surface-border overflow-hidden bg-surface-raised"
       >
         <li
           v-for="attempt in committedAttempts"
@@ -763,7 +763,7 @@ function getWeekDayCardClass(wd) {
           "
         >
           <div class="min-w-0 flex-1">
-            <p class="font-medium text-gray-800 dark:text-gray-200 break-words">
+            <p class="font-medium text-text-primary break-words">
               {{ formatAttempt(attempt.start, attempt.end) }}
             </p>
             <p

@@ -203,7 +203,7 @@ const intensityMultiplier = computed(() => {
 
 const baseGradient = computed(() => {
   const gradients = {
-    dark: "bg-gradient-to-br from-gray-900 via-gray-950 to-black",
+    dark: "bg-gradient-to-br from-neutral-900 via-neutral-950 to-black",
     light: "bg-gradient-to-br from-gray-50 via-white to-gray-100",
     purple: "bg-gradient-to-br from-purple-50 via-white to-violet-50",
     blue: "bg-gradient-to-br from-blue-50 via-white to-cyan-50",
@@ -216,11 +216,11 @@ const baseGradient = computed(() => {
 const themeColors = computed(() => {
   const palettes = {
     dark: {
-      primary: ["#6366f1", "#8b5cf6"],
-      secondary: ["#3b82f6", "#06b6d4"],
-      tertiary: ["#8b5cf6", "#ec4899"],
-      quaternary: ["#10b981", "#3b82f6"],
-      accent: "99, 102, 241",
+      primary: ["#e67a00", "#ff8b00"],
+      secondary: ["#1a8fb8", "#1d9ecc"],
+      tertiary: ["#c2700a", "#e67a00"],
+      quaternary: ["#1d9ecc", "#38bdf8"],
+      accent: "255, 139, 0",
       base: "255, 255, 255",
       line: "255, 255, 255",
     },

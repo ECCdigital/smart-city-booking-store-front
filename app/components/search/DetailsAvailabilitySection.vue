@@ -43,7 +43,7 @@
       v-if="isScheduleRelated"
       compact
       :time-period="timePeriod"
-      class="border dark:border-gray-600 rounded-md mt-1 mb-2 w-full"
+      class="border border-surface-border rounded-md mt-1 mb-2 w-full"
       @select-date="onPeriodSelected"
       @remove-date="onPeriodCleared"
     />

@@ -2,7 +2,7 @@
   <!-- Strip for md and larger screens -->
   <div class="hidden lg:block">
     <div
-      class="flex justify-between bg-white dark:bg-gray-700 z-100 rounded shadow-lg"
+      class="flex justify-between bg-surface-muted z-100 rounded shadow-lg"
       :class="entryPageMode ? 'p-5 space-x-1 -mt-10' : 'p-2 -mt-5'"
       style="position: relative"
       :style="entryPageMode ? 'width:80vw; height: 100px ' : 'width:70vw'"
@@ -14,7 +14,7 @@
         placeholder="Was suchen Sie?"
         size="lg"
         variant="ghost"
-        class="basis-1/6 rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent"
+        class="basis-1/6 rounded-md w-full bg-surface-raised hover:bg-transparent"
         :ui="{
           placeholder: hasMissingType
             ? 'text-red-500 font-bold'
@@ -71,7 +71,7 @@
 
   <!--Card for smaller screens -->
   <UCard
-    class="bg-white dark:bg-gray-700 mx-5 -mt-15 p-0 shadow-lg lg:hidden"
+    class="bg-surface-raised mx-5 -mt-15 p-0 shadow-lg lg:hidden"
     :class="entryPageMode ? '-mt-20' : '-mt-10'"
     :ui="{ root: 'p-0', body: 'p-0' }"
     style="position: relative; width: 80vw"
@@ -84,7 +84,7 @@
       placeholder="Was suchen Sie?"
       size="lg"
       variant="ghost"
-      class="rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent"
+      class="rounded-md w-full bg-surface-raised hover:bg-transparent"
       :ui="{
         placeholder: hasMissingType
           ? 'text-red-500 font-bold'

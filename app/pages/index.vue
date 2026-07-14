@@ -1,5 +1,5 @@
 <template>
-  <div class="container bg-neutral-50 dark:bg-gray-950">
+  <div class="container bg-surface-base">
     <div class="relative h-0 bg-transparent">
       <div class="flex justify-center">
         <SearchBar
@@ -15,11 +15,11 @@
     </div>
 
     <!-- Main Categories -->
-    <div class="pt-20 sm:pt-25 md:pt-10 bg-neutral-50 dark:bg-gray-950">
+    <div class="pt-20 sm:pt-25 md:pt-10 bg-surface-base">
       <MainCategoryArea />
     </div>
 
-    <div class="bg-neutral-50 dark:bg-gray-950">
+    <div class="bg-surface-base">
       <LatestEventsArea v-if="allEvents.length > 0" :items="allEvents" />
     </div>
   </div>
