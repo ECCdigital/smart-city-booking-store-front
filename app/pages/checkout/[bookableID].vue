@@ -913,22 +913,6 @@ const selectedBookWithPrice = computed({
 
 let validationToken = 0;
 
-const COUPON_SUMMARY_ROW_ID = "__coupon__";
-
-function computeCouponGrossDiscount(details, baseGross) {
-  if (!details || !(baseGross > 0)) return 0;
-  const discount = Number(details.discount);
-  if (!Number.isFinite(discount) || discount <= 0) return 0;
-  const type = String(details.type || "").toLowerCase();
-  if (type === "percentage") {
-    return baseGross * (discount / 100);
-  }
-  if (type === "fixed") {
-    return discount;
-  }
-  return 0;
-}
-
 function toFiniteAmount(value) {
   const amount = Number(value);
   return Number.isFinite(amount) ? amount : 0;
@@ -1057,12 +1041,23 @@ async function validateAll() {
       const lineNetAmount = freeBookingActive ? 0 : userPriceEur;
       const lineGrossAmount = freeBookingActive ? 0 : userGrossPriceEur;
 
+      let originalAmountEur = null;
+      if (freeBookingActive) {
+        originalAmountEur = regularPriceEur;
+      } else if (
+        couponForValidation.value &&
+        regularPriceEur != null &&
+        lineNetAmount < regularPriceEur - 0.005
+      ) {
+        originalAmountEur = regularPriceEur;
+      }
+
       items.push({
         id,
         label,
         amountEur: lineNetAmount,
         priceDisplayEur: freeBookingActive ? 0 : null,
-        originalAmountEur: freeBookingActive ? regularPriceEur : null,
+        originalAmountEur,
         freeBookingAllowed,
         freeBookingActive,
       });
@@ -1071,35 +1066,6 @@ async function validateAll() {
     }
 
     freeBookingEligibility.value = eligibilityMap;
-
-    if (
-      couponForValidation.value &&
-      appliedCouponDetails.value &&
-      errors.length === 0 &&
-      items.length === targets.length &&
-      total > 0
-    ) {
-      const rawDiscount = computeCouponGrossDiscount(
-        appliedCouponDetails.value,
-        total,
-      );
-      const discountGross = Math.min(rawDiscount, total);
-      if (discountGross > 0.005) {
-        const remainingFactor = (total - discountGross) / total;
-        taxAmount = Math.max(0, taxAmount * remainingFactor);
-        total = total - discountGross;
-
-        items.push({
-          id: COUPON_SUMMARY_ROW_ID,
-          label: t("checkout.coupon.summaryLine", {
-            code: String(appliedCouponCode.value || "").trim(),
-          }),
-          amountEur: 0,
-          priceDisplayEur: -discountGross,
-          skipQuantity: true,
-        });
-      }
-    }
 
     validationErrors.value = errorMap;
     summary.value = { items, taxAmount, total, errors };
@@ -1308,33 +1274,6 @@ async function validateGroupBookingAttempts() {
           }),
           amountEur: acc.netTotal,
           priceDisplayEur: null,
-          skipQuantity: true,
-        });
-      }
-    }
-
-    if (
-      couponForValidation.value &&
-      appliedCouponDetails.value &&
-      errors.length === 0 &&
-      total > 0
-    ) {
-      const rawDiscount = computeCouponGrossDiscount(
-        appliedCouponDetails.value,
-        total,
-      );
-      const discountGross = Math.min(rawDiscount, total);
-      if (discountGross > 0.005) {
-        const remainingFactor = (total - discountGross) / total;
-        taxAmount = Math.max(0, taxAmount * remainingFactor);
-        total = total - discountGross;
-        items.push({
-          id: COUPON_SUMMARY_ROW_ID,
-          label: t("checkout.coupon.summaryLine", {
-            code: String(appliedCouponCode.value || "").trim(),
-          }),
-          amountEur: 0,
-          priceDisplayEur: -discountGross,
           skipQuantity: true,
         });
       }
