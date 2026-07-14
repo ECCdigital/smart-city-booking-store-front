@@ -23,6 +23,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ### Changed
 
+- **DEV-781:** Checkout supports role-based booking discounts (`bookingDiscountPercent`) — partial discounts show a struck-through original price; `bookWithPrice` replaced by `bookWithoutDiscount` (inverted semantics, applies to all discount levels)
 - Catalog bundle client cache keys now include auth scope (`anon` vs `auth`) to prevent cross-session data leakage
 - `useBookableSearch` re-initializes or re-runs search when underlying bookable/event source items change
 

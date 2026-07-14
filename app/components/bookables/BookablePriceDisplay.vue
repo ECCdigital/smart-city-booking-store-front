@@ -3,7 +3,7 @@
     class="text-gray-800 dark:text-gray-100 w-auto"
     :class="isMapStripe ? '' : 'text-right w-auto'"
   >
-    <!-- special price for user -->
+    <!-- discounted price for user (role discount, coupon, etc.) -->
     <p
       v-if="
         props.calculatedPrice &&
@@ -17,19 +17,28 @@
         {{ displayPrice(calculatedPrice.userGrossPriceEur) }}
       </span>
       <br >
-      <span class="text-xs font-normal text-gray-600 dark:text-gray-300">
+      <span
+        v-if="discountPercentLabel"
+        class="text-xs font-normal text-emerald-700 dark:text-emerald-300"
+      >
+        {{ discountPercentLabel }}
+      </span>
+      <span
+        v-else
+        class="text-xs font-normal text-gray-600 dark:text-gray-300"
+      >
         {{ displayPricePerUnit() }}
       </span>
     </p>
 
-    <!-- free for users -->
+    <!-- free for users (legacy fallback when prices are equal) -->
     <p
       v-else-if="props.calculatedPrice && !!calculatedPrice.freeBookingAllowed"
     >
       <span class="text-gray-500 line-through mr-2">
         {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
       </span>
-      <span> Kostenlos </span>
+      <span>{{ $t("checkout.review.totalFree") }}</span>
     </p>
 
     <!-- regular calculated price -->
@@ -47,6 +56,8 @@
   </div>
 </template>
 <script setup>
+const { t } = useI18n();
+
 const props = defineProps({
   bookable: {
     type: Object,
@@ -60,6 +71,18 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+});
+
+function toDiscountPercent(value) {
+  const percent = Number(value);
+  if (!Number.isFinite(percent)) return 0;
+  return Math.min(100, Math.max(0, Math.round(percent)));
+}
+
+const discountPercentLabel = computed(() => {
+  const percent = toDiscountPercent(props.calculatedPrice?.bookingDiscountPercent);
+  if (percent <= 0 || percent >= 100) return null;
+  return t("checkout.review.roleDiscountBadge", { percent });
 });
 
 function getMinPrice() {
