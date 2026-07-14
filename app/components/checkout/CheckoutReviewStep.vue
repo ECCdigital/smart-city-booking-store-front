@@ -52,9 +52,13 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  hasFreeBookingOption: {
+  hasBookingDiscountOption: {
     type: Boolean,
     default: false,
+  },
+  bookingDiscountPercent: {
+    type: Number,
+    default: 0,
   },
   tenantId: {
     type: String,
@@ -122,9 +126,9 @@ const appliedCouponDetails = defineModel("appliedCouponDetails", {
   default: null,
 });
 
-const bookWithPrice = defineModel("bookWithPrice", {
+const bookWithoutDiscount = defineModel("bookWithoutDiscount", {
   type: Boolean,
-  default: true,
+  default: false,
 });
 
 const { t, te, locale } = useI18n();
@@ -471,6 +475,26 @@ function onEdit(section) {
   emit("edit", section);
 }
 
+const bookingDiscountDescription = computed(() => {
+  const percent = Math.max(
+    0,
+    Math.round(Number(props.bookingDiscountPercent) || 0),
+  );
+  if (bookWithoutDiscount.value) {
+    if (percent >= 100) {
+      return t("checkout.review.bookingDiscountPaidDescriptionFree");
+    }
+    return t("checkout.review.bookingDiscountPaidDescription", { percent });
+  }
+  if (percent >= 100) {
+    return t("checkout.review.bookingDiscountAppliedDescriptionFree");
+  }
+  if (percent > 0) {
+    return t("checkout.review.bookingDiscountAppliedDescription", { percent });
+  }
+  return t("checkout.review.bookingDiscountAppliedDescriptionGeneric");
+});
+
 const submitButtonLabel = computed(() =>
   props.requiresManualApproval
     ? t("checkout.review.sendBookingRequest")
@@ -722,24 +746,20 @@ const submitButtonLabel = computed(() =>
 
       <aside class="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-6 space-y-6">
         <UCard
-          v-if="hasFreeBookingOption"
+          v-if="hasBookingDiscountOption"
           variant="soft"
           class="rounded-lg border border-emerald-200 dark:border-emerald-900"
         >
           <div class="space-y-3">
             <p class="text-sm font-medium text-gray-900 dark:text-white">
-              {{ $t("checkout.review.freeBookingTitle") }}
+              {{ $t("checkout.review.bookingDiscountTitle") }}
             </p>
             <p class="text-sm text-gray-600 dark:text-gray-300">
-              {{
-                bookWithPrice
-                  ? $t("checkout.review.freeBookingPaidDescription")
-                  : $t("checkout.review.freeBookingAppliedDescription")
-              }}
+              {{ bookingDiscountDescription }}
             </p>
             <USwitch
-              v-model="bookWithPrice"
-              :label="$t('checkout.review.bookWithPriceToggle')"
+              v-model="bookWithoutDiscount"
+              :label="$t('checkout.review.bookWithoutDiscountToggle')"
             />
           </div>
         </UCard>

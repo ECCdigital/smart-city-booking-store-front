@@ -22,7 +22,7 @@ export function useCheckout() {
     end,
     couponCode = null,
     couponId = null,
-    bookWithPrice = true,
+    bookWithoutDiscount = false,
   }) => {
     const api = useApiClient();
 
@@ -40,7 +40,7 @@ export function useCheckout() {
       start,
       end,
       couponCode: trimmedCode,
-      bookWithPrice,
+      bookWithoutDiscount,
       tenantID,
     };
     if (trimmedId) {

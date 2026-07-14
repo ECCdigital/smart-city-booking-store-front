@@ -460,8 +460,8 @@ const restoredCustomFieldValues = ref({});
 const selectedPaymentProviderId = ref(null);
 const appliedCouponCode = ref(null);
 const appliedCouponDetails = ref(null);
-const bookWithPricePreference = ref(null);
-const freeBookingEligibility = ref({});
+const bookWithoutDiscountPreference = ref(null);
+const bookingDiscountEligibility = ref({});
 
 const hasResolvedFreeCheckout = computed(() => {
   const total = Number(summary.value?.total ?? 0);
@@ -892,22 +892,37 @@ const couponForValidation = computed(() => {
   return s || null;
 });
 
-const hasFreeBookingOption = computed(() =>
-  Object.values(freeBookingEligibility.value).some((value) => value === true),
+function toDiscountPercent(value) {
+  const percent = Number(value);
+  if (!Number.isFinite(percent)) return 0;
+  return Math.min(100, Math.max(0, Math.round(percent)));
+}
+
+const hasBookingDiscountOption = computed(() =>
+  Object.values(bookingDiscountEligibility.value).some(
+    (value) => toDiscountPercent(value) > 0,
+  ),
 );
 
-const isBookingWithPrice = computed(() => {
-  if (!hasFreeBookingOption.value) return true;
-  if (typeof bookWithPricePreference.value === "boolean") {
-    return bookWithPricePreference.value;
+const maxBookingDiscountPercent = computed(() => {
+  const values = Object.values(bookingDiscountEligibility.value).map(
+    toDiscountPercent,
+  );
+  return values.length > 0 ? Math.max(...values) : 0;
+});
+
+const isBookingWithoutDiscount = computed(() => {
+  if (!hasBookingDiscountOption.value) return false;
+  if (typeof bookWithoutDiscountPreference.value === "boolean") {
+    return bookWithoutDiscountPreference.value;
   }
   return false;
 });
 
-const selectedBookWithPrice = computed({
-  get: () => isBookingWithPrice.value,
+const selectedBookWithoutDiscount = computed({
+  get: () => isBookingWithoutDiscount.value,
   set: (value) => {
-    bookWithPricePreference.value = value === true;
+    bookWithoutDiscountPreference.value = value === true;
   },
 });
 
@@ -928,7 +943,7 @@ async function validateAll() {
     summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
     validationErrors.value = {};
     checkoutID.value = null;
-    freeBookingEligibility.value = {};
+    bookingDiscountEligibility.value = {};
     return;
   }
 
@@ -946,7 +961,7 @@ async function validateAll() {
     summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
     validationErrors.value = {};
     checkoutID.value = null;
-    freeBookingEligibility.value = {};
+    bookingDiscountEligibility.value = {};
     return;
   }
 
@@ -972,7 +987,7 @@ async function validateAll() {
           end: requiresTimeSelection.value ? end : undefined,
           couponCode: couponForValidation.value,
           couponId: appliedCouponDetails.value?.id ?? null,
-          bookWithPrice: isBookingWithPrice.value,
+          bookWithoutDiscount: isBookingWithoutDiscount.value,
         })
           .then((res) => ({ id, isLead, res }))
           .catch((err) => ({ id, isLead, error: err })),
@@ -1022,8 +1037,15 @@ async function validateAll() {
 
       const validationData =
         row.res?.data && typeof row.res.data === "object" ? row.res.data : {};
-      const freeBookingAllowed = validationData.freeBookingAllowed === true;
-      const freeBookingActive = freeBookingAllowed && !isBookingWithPrice.value;
+      let bookingDiscountPercent = toDiscountPercent(
+        validationData.bookingDiscountPercent,
+      );
+      if (
+        bookingDiscountPercent === 0 &&
+        validationData.freeBookingAllowed === true
+      ) {
+        bookingDiscountPercent = 100;
+      }
       const userPriceEur = toFiniteAmount(validationData.userPriceEur);
       const userGrossPriceEur = toFiniteAmount(
         validationData.userGrossPriceEur,
@@ -1032,20 +1054,17 @@ async function validateAll() {
         toNullableAmount(validationData.regularPriceEur) ??
         toNullableAmount(validationData.userPriceEur);
 
-      eligibilityMap[id] = freeBookingAllowed;
+      eligibilityMap[id] = bookingDiscountPercent;
 
       if (isLead || newCheckoutId == null) {
         newCheckoutId = row.res.checkoutId;
       }
 
-      const lineNetAmount = freeBookingActive ? 0 : userPriceEur;
-      const lineGrossAmount = freeBookingActive ? 0 : userGrossPriceEur;
+      const lineNetAmount = userPriceEur;
+      const lineGrossAmount = userGrossPriceEur;
 
       let originalAmountEur = null;
-      if (freeBookingActive) {
-        originalAmountEur = regularPriceEur;
-      } else if (
-        couponForValidation.value &&
+      if (
         regularPriceEur != null &&
         lineNetAmount < regularPriceEur - 0.005
       ) {
@@ -1056,16 +1075,15 @@ async function validateAll() {
         id,
         label,
         amountEur: lineNetAmount,
-        priceDisplayEur: freeBookingActive ? 0 : null,
+        priceDisplayEur: null,
         originalAmountEur,
-        freeBookingAllowed,
-        freeBookingActive,
+        bookingDiscountPercent,
       });
       taxAmount += lineGrossAmount - lineNetAmount;
       total += lineGrossAmount;
     }
 
-    freeBookingEligibility.value = eligibilityMap;
+    bookingDiscountEligibility.value = eligibilityMap;
 
     validationErrors.value = errorMap;
     summary.value = { items, taxAmount, total, errors };
@@ -1083,7 +1101,7 @@ async function validateGroupBookingAttempts() {
   const myToken = ++validationToken;
   isValidating.value = true;
   validationErrors.value = {};
-  freeBookingEligibility.value = {};
+  bookingDiscountEligibility.value = {};
 
   if (attempts.length === 0) {
     summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
@@ -1128,7 +1146,7 @@ async function validateGroupBookingAttempts() {
           end: attempt.end,
           couponCode: couponForValidation.value,
           couponId: appliedCouponDetails.value?.id ?? null,
-          bookWithPrice: isBookingWithPrice.value,
+          bookWithoutDiscount: isBookingWithoutDiscount.value,
         })
           .then((res) => ({ attempt, target, res }))
           .catch((err) => ({ attempt, target, error: err })),
@@ -1153,7 +1171,7 @@ async function validateGroupBookingAttempts() {
         target,
         netTotal: 0,
         grossTotal: 0,
-        freeBookingAllowedAll: true,
+        bookingDiscountPercentAll: 0,
         failedAttempts: 0,
       });
     }
@@ -1174,7 +1192,6 @@ async function validateGroupBookingAttempts() {
           };
         }
         bookableAcc.failedAttempts += 1;
-        bookableAcc.freeBookingAllowedAll = false;
         continue;
       }
 
@@ -1187,7 +1204,6 @@ async function validateGroupBookingAttempts() {
           attemptAcc.firstError = { reason, params, target: row.target };
         }
         bookableAcc.failedAttempts += 1;
-        bookableAcc.freeBookingAllowedAll = false;
         continue;
       }
 
@@ -1197,22 +1213,32 @@ async function validateGroupBookingAttempts() {
 
       const validationData =
         row.res?.data && typeof row.res.data === "object" ? row.res.data : {};
-      const freeBookingAllowed = validationData.freeBookingAllowed === true;
-      const freeBookingActive = freeBookingAllowed && !isBookingWithPrice.value;
+      let bookingDiscountPercent = toDiscountPercent(
+        validationData.bookingDiscountPercent,
+      );
+      if (
+        bookingDiscountPercent === 0 &&
+        validationData.freeBookingAllowed === true
+      ) {
+        bookingDiscountPercent = 100;
+      }
       const userPriceEur = toFiniteAmount(validationData.userPriceEur);
       const userGrossPriceEur = toFiniteAmount(
         validationData.userGrossPriceEur,
       );
 
-      const lineNet = freeBookingActive ? 0 : userPriceEur;
-      const lineGross = freeBookingActive ? 0 : userGrossPriceEur;
+      const lineNet = userPriceEur;
+      const lineGross = userGrossPriceEur;
 
       attemptAcc.net += lineNet;
       attemptAcc.gross += lineGross;
 
       bookableAcc.netTotal += lineNet;
       bookableAcc.grossTotal += lineGross;
-      if (!freeBookingAllowed) bookableAcc.freeBookingAllowedAll = false;
+      bookableAcc.bookingDiscountPercentAll = Math.max(
+        bookableAcc.bookingDiscountPercentAll,
+        bookingDiscountPercent,
+      );
     }
 
     const statuses = {};
@@ -1255,9 +1281,9 @@ async function validateGroupBookingAttempts() {
 
     const eligibilityMap = {};
     for (const [id, acc] of perBookable.entries()) {
-      eligibilityMap[id] = acc.freeBookingAllowedAll;
+      eligibilityMap[id] = acc.bookingDiscountPercentAll;
     }
-    freeBookingEligibility.value = eligibilityMap;
+    bookingDiscountEligibility.value = eligibilityMap;
 
     const attemptCount = attempts.length;
     const items = [];
@@ -1323,7 +1349,7 @@ watch(
     amounts,
     appliedCouponCode,
     appliedCouponDetails,
-    isBookingWithPrice,
+    isBookingWithoutDiscount,
     useGroupBooking,
   ],
   scheduleValidation,
@@ -1492,7 +1518,7 @@ function persistCheckoutState() {
     selectedPaymentProviderId: selectedPaymentProviderId.value,
     appliedCouponCode: appliedCouponCode.value,
     appliedCouponDetails: appliedCouponDetails.value,
-    bookWithPricePreference: bookWithPricePreference.value,
+    bookWithoutDiscountPreference: bookWithoutDiscountPreference.value,
     useGroupBooking: useGroupBooking.value,
     groupBookingRule: groupBookingRule.value,
   };
@@ -1574,8 +1600,11 @@ function restoreCheckoutState() {
       ) {
         appliedCouponDetails.value = parsed.appliedCouponDetails;
       }
-      if (typeof parsed.bookWithPricePreference === "boolean") {
-        bookWithPricePreference.value = parsed.bookWithPricePreference;
+      if (typeof parsed.bookWithoutDiscountPreference === "boolean") {
+        bookWithoutDiscountPreference.value =
+          parsed.bookWithoutDiscountPreference;
+      } else if (typeof parsed.bookWithPricePreference === "boolean") {
+        bookWithoutDiscountPreference.value = parsed.bookWithPricePreference;
       }
       if (typeof parsed.useGroupBooking === "boolean") {
         useGroupBooking.value = parsed.useGroupBooking;
@@ -1753,7 +1782,7 @@ watch(
     selectedPaymentProviderId,
     appliedCouponCode,
     appliedCouponDetails,
-    bookWithPricePreference,
+    bookWithoutDiscountPreference,
     useGroupBooking,
     groupBookingRule,
     () => ({ ...contactForm }),
@@ -1806,7 +1835,7 @@ function buildCheckoutPayload() {
     tenantID,
     checkoutId: checkoutID.value || undefined,
     bookableItems,
-    bookWithPrice: isBookingWithPrice.value,
+    bookWithoutDiscount: isBookingWithoutDiscount.value,
     name: `${contactForm.firstName} ${contactForm.lastName}`.trim(),
     mail: String(contactForm.email || "").trim(),
   };
@@ -1863,7 +1892,7 @@ function buildGroupCheckoutPayload() {
       timeBegin: a.start,
       timeEnd: a.end,
     })),
-    bookWithPrice: isBookingWithPrice.value,
+    bookWithoutDiscount: isBookingWithoutDiscount.value,
     name: `${contactForm.firstName} ${contactForm.lastName}`.trim(),
     mail: String(contactForm.email || "").trim(),
   };
@@ -2551,7 +2580,7 @@ function onReviewEdit(section) {
             <CheckoutReviewStep
               v-model:applied-coupon="appliedCouponCode"
               v-model:applied-coupon-details="appliedCouponDetails"
-              v-model:book-with-price="selectedBookWithPrice"
+              v-model:book-without-discount="selectedBookWithoutDiscount"
               :summary="summary"
               :selected-time-period="selectedTimePeriod"
               :contact="contactForm"
@@ -2564,7 +2593,8 @@ function onReviewEdit(section) {
               :amounts="amounts"
               :lead-bookable-id="bookableID"
               :enable-coupons="couponsEnabled"
-              :has-free-booking-option="hasFreeBookingOption"
+              :has-booking-discount-option="hasBookingDiscountOption"
+              :booking-discount-percent="maxBookingDiscountPercent"
               :tenant-id="tenantID"
               :custom-field-rows="reviewCustomFieldRows"
               :is-validating="isValidating"
