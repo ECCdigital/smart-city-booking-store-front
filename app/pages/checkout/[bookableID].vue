@@ -928,6 +928,147 @@ const selectedBookWithoutDiscount = computed({
 
 let validationToken = 0;
 
+const COUPON_SUMMARY_ROW_ID = "__coupon__";
+
+function isFixedAmountCoupon(details) {
+  if (!details || typeof details !== "object") return false;
+  return String(details.type || "").toLowerCase() === "fixed";
+}
+
+function couponValidationParams() {
+  const code = couponForValidation.value;
+  const details = appliedCouponDetails.value;
+  if (!code) {
+    return { couponCode: null, couponId: null };
+  }
+  if (isFixedAmountCoupon(details)) {
+    return { couponCode: null, couponId: null };
+  }
+  return {
+    couponCode: code,
+    couponId: details?.id ?? null,
+  };
+}
+
+function appendFixedCouponSummaryRow({
+  items,
+  total,
+  taxAmount,
+  errors,
+  canApply,
+  attemptGrossTotals = null,
+}) {
+  const code = couponForValidation.value;
+  const details = appliedCouponDetails.value;
+  if (
+    !canApply ||
+    !code ||
+    !isFixedAmountCoupon(details) ||
+    errors.length > 0 ||
+    total <= 0.005
+  ) {
+    return { total, taxAmount };
+  }
+
+  const rawDiscount = toFiniteAmount(details.discount);
+  let discountGross = 0;
+  if (Array.isArray(attemptGrossTotals) && attemptGrossTotals.length > 0) {
+    discountGross = attemptGrossTotals.reduce(
+      (sum, attemptGross) =>
+        sum + Math.min(rawDiscount, toFiniteAmount(attemptGross)),
+      0,
+    );
+  } else {
+    discountGross = rawDiscount;
+  }
+  discountGross = Math.min(discountGross, total);
+  if (discountGross <= 0.005) {
+    return { total, taxAmount };
+  }
+
+  const remainingFactor = (total - discountGross) / total;
+  items.push({
+    id: COUPON_SUMMARY_ROW_ID,
+    label: t("checkout.coupon.summaryLine", {
+      code: String(code).trim(),
+    }),
+    amountEur: 0,
+    priceDisplayEur: -discountGross,
+    skipQuantity: true,
+  });
+
+  return {
+    total: total - discountGross,
+    taxAmount: Math.max(0, taxAmount * remainingFactor),
+  };
+}
+
+async function validateFixedCouponApplicabilityForAttempts({
+  bookableId,
+  amount,
+  attempts,
+}) {
+  if (
+    !couponForValidation.value ||
+    !isFixedAmountCoupon(appliedCouponDetails.value) ||
+    !Array.isArray(attempts) ||
+    attempts.length === 0
+  ) {
+    return { valid: true };
+  }
+
+  const results = await Promise.all(
+    attempts.map((attempt) =>
+      validateFixedCouponApplicability({
+        bookableId,
+        amount,
+        start: attempt.start,
+        end: attempt.end,
+      }),
+    ),
+  );
+
+  return results.find((result) => !result.valid) ?? { valid: true };
+}
+
+async function validateFixedCouponApplicability({
+  bookableId,
+  amount,
+  start,
+  end,
+}) {
+  if (
+    !couponForValidation.value ||
+    !isFixedAmountCoupon(appliedCouponDetails.value)
+  ) {
+    return { valid: true };
+  }
+
+  try {
+    const res = await validateBookable({
+      bookableID: bookableId,
+      tenantID,
+      amount,
+      start,
+      end,
+      couponCode: couponForValidation.value,
+      couponId: appliedCouponDetails.value?.id ?? null,
+      bookWithoutDiscount: isBookingWithoutDiscount.value,
+    });
+    if (!res?.success) {
+      const apiError = res?.error || {};
+      return {
+        valid: false,
+        reason: resolveCheckoutErrorKey(apiError),
+        params: apiError.params || {},
+      };
+    }
+    return { valid: true };
+  } catch (error) {
+    return { valid: false, reason: "checkout.unknown_error", error };
+  }
+}
+
 function toFiniteAmount(value) {
   const amount = Number(value);
   return Number.isFinite(amount) ? amount : 0;
@@ -977,22 +1118,31 @@ async function validateAll() {
       })),
     ];
 
-    const results = await Promise.all(
-      targets.map(({ id, isLead }) =>
-        validateBookable({
-          bookableID: id,
-          tenantID,
-          amount: amounts.value[id] || 1,
-          start: requiresTimeSelection.value ? start : undefined,
-          end: requiresTimeSelection.value ? end : undefined,
-          couponCode: couponForValidation.value,
-          couponId: appliedCouponDetails.value?.id ?? null,
-          bookWithoutDiscount: isBookingWithoutDiscount.value,
-        })
-          .then((res) => ({ id, isLead, res }))
-          .catch((err) => ({ id, isLead, error: err })),
+    const couponParams = couponValidationParams();
+
+    const [results, couponApplicability] = await Promise.all([
+      Promise.all(
+        targets.map(({ id, isLead }) =>
+          validateBookable({
+            bookableID: id,
+            tenantID,
+            amount: amounts.value[id] || 1,
+            start: requiresTimeSelection.value ? start : undefined,
+            end: requiresTimeSelection.value ? end : undefined,
+            ...couponParams,
+            bookWithoutDiscount: isBookingWithoutDiscount.value,
+          })
+            .then((res) => ({ id, isLead, res }))
+            .catch((err) => ({ id, isLead, error: err })),
+        ),
       ),
-    );
+      validateFixedCouponApplicability({
+        bookableId: bookableID,
+        amount: amounts.value[bookableID] || 1,
+        start: requiresTimeSelection.value ? start : undefined,
+        end: requiresTimeSelection.value ? end : undefined,
+      }),
+    ]);
 
     if (myToken !== validationToken) return;
 
@@ -1083,7 +1233,36 @@ async function validateAll() {
       total += lineGrossAmount;
     }
 
+    if (!couponApplicability.valid) {
+      const leadLabel = leadBookable.value?.title || t("checkout.review.bookingLabel");
+      errorMap[bookableID] = {
+        reason: couponApplicability.reason,
+        params: couponApplicability.params,
+        isLead: true,
+        error: couponApplicability.error,
+      };
+      errors.push({
+        id: bookableID,
+        isLead: true,
+        label: leadLabel,
+        reason: couponApplicability.reason,
+        params: couponApplicability.params,
+        error: couponApplicability.error,
+      });
+    }
+
     bookingDiscountEligibility.value = eligibilityMap;
+
+    const fixedCouponTotals = appendFixedCouponSummaryRow({
+      items,
+      total,
+      taxAmount,
+      errors,
+      canApply:
+        couponApplicability.valid && items.length === targets.length,
+    });
+    total = fixedCouponTotals.total;
+    taxAmount = fixedCouponTotals.taxAmount;
 
     validationErrors.value = errorMap;
     summary.value = { items, taxAmount, total, errors };
@@ -1136,22 +1315,33 @@ async function validateGroupBookingAttempts() {
       }
     }
 
-    const results = await Promise.all(
-      requests.map(({ attempt, target }) =>
-        validateBookable({
-          bookableID: target.id,
-          tenantID,
-          amount: target.amount,
-          start: attempt.start,
-          end: attempt.end,
-          couponCode: couponForValidation.value,
-          couponId: appliedCouponDetails.value?.id ?? null,
-          bookWithoutDiscount: isBookingWithoutDiscount.value,
-        })
-          .then((res) => ({ attempt, target, res }))
-          .catch((err) => ({ attempt, target, error: err })),
+    const couponParams = couponValidationParams();
+    const leadTarget = targets.find((target) => target.isLead) ?? targets[0];
+
+    const [results, couponApplicability] = await Promise.all([
+      Promise.all(
+        requests.map(({ attempt, target }) =>
+          validateBookable({
+            bookableID: target.id,
+            tenantID,
+            amount: target.amount,
+            start: attempt.start,
+            end: attempt.end,
+            ...couponParams,
+            bookWithoutDiscount: isBookingWithoutDiscount.value,
+          })
+            .then((res) => ({ attempt, target, res }))
+            .catch((err) => ({ attempt, target, error: err })),
+        ),
       ),
-    );
+      leadTarget
+        ? validateFixedCouponApplicabilityForAttempts({
+            bookableId: leadTarget.id,
+            amount: leadTarget.amount,
+            attempts,
+          })
+        : Promise.resolve({ valid: true }),
+    ]);
 
     if (myToken !== validationToken) return;
 
@@ -1305,13 +1495,56 @@ async function validateGroupBookingAttempts() {
       }
     }
 
+    if (!couponApplicability.valid) {
+      const leadLabel =
+        leadTarget?.title ||
+        leadBookable.value?.title ||
+        t("checkout.review.bookingLabel");
+      errors.push({
+        id: bookableID,
+        isLead: true,
+        label: leadLabel,
+        reason: couponApplicability.reason,
+        params: couponApplicability.params,
+        error: couponApplicability.error,
+      });
+      items.length = 0;
+    }
+
+    const fixedCouponTotals = appendFixedCouponSummaryRow({
+      items,
+      total,
+      taxAmount,
+      errors,
+      canApply: couponApplicability.valid && errors.length === 0,
+      attemptGrossTotals: attempts
+        .map((attempt) => perAttempt.get(attempt.start))
+        .filter((acc) => acc?.valid)
+        .map((acc) => acc.gross),
+    });
+    total = fixedCouponTotals.total;
+    taxAmount = fixedCouponTotals.taxAmount;
+
     const errorMap = {};
     if (errors.length > 0) {
-      errorMap[bookableID] = {
-        reason: "checkout.group_booking_partial_failure",
-        isLead: true,
-        params: { invalidCount: errors.length, totalCount: attempts.length },
-      };
+      if (
+        !couponApplicability.valid &&
+        errors.length === 1 &&
+        errors[0]?.id === bookableID
+      ) {
+        errorMap[bookableID] = {
+          reason: couponApplicability.reason,
+          params: couponApplicability.params,
+          isLead: true,
+          error: couponApplicability.error,
+        };
+      } else {
+        errorMap[bookableID] = {
+          reason: "checkout.group_booking_partial_failure",
+          isLead: true,
+          params: { invalidCount: errors.length, totalCount: attempts.length },
+        };
+      }
       for (const target of targets) {
         if (target.isLead) continue;
         const acc = perBookable.get(target.id);
