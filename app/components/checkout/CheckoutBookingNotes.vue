@@ -8,10 +8,20 @@ const props = defineProps({
   },
 });
 
+function htmlToPlainText(html) {
+  return html
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;|&#160;|&#xA0;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function normalizeBookingNotes(raw) {
-  if (raw == null) return "";
-  if (typeof raw === "string") return raw.trim();
-  return "";
+  if (raw == null || typeof raw !== "string") return "";
+  const html = raw.trim();
+  if (!html) return "";
+  return htmlToPlainText(html) ? html : "";
 }
 
 const entries = computed(() => {

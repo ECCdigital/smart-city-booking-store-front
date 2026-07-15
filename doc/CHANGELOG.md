@@ -14,6 +14,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ### Fixed
 
+- Checkout booking notes are hidden when the configured HTML is effectively empty (e.g. `<p></p>` or whitespace-only markup)
 - **DEV-805:** Checkout coupon discounts — percentage vouchers use per-line validate API prices; fixed-amount vouchers are applied once to the checkout total (or once per series-booking attempt), with the original price shown struck through when a voucher reduces the line total
 - **DEV-803:** Catalog bookables and events now reload after login so permission-dependent content (e.g. restricted bookables, group booking) is visible without a manual page refresh
 - Bookable and event detail pages reload with the authenticated API response after login redirect instead of showing stale anonymous data
