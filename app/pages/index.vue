@@ -53,7 +53,7 @@ const eventStore = useEventStore();
 const catalogSlug = computed(() => route.params.catalogSlug || null);
 
 const { error } = useLazyAsyncData("catalog-bundle-home", () =>
-    loadBundle({ slug: catalogSlug.value, include: ["events"] })
+  loadBundle({ slug: catalogSlug.value, include: ["events"] }),
 );
 
 if (error.value) {
@@ -73,12 +73,14 @@ async function goToListview(searchParams) {
   if (searchParams.timeEnd) query.end = searchParams.timeEnd;
   if (searchParams.location && typeof searchParams.location === "object") {
     query.loc = searchParams.location.display_address;
-  } else if (searchParams.location && typeof searchParams.location === "string") {
+  } else if (
+    searchParams.location &&
+    typeof searchParams.location === "string"
+  ) {
     query.loc = searchParams.location;
   }
 
-  const path =
-      searchParams.searchType === "events" ? "events" : "bookables";
+  const path = searchParams.searchType === "events" ? "events" : "bookables";
 
   await router.push({
     ...tenantTo(path),
