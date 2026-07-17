@@ -7,6 +7,8 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ## [Unreleased]
 
+## [1.1.3] — 2026-07-17
+
 ### Added
 
 - Catalog auth reload: bookables and events refresh automatically when the user logs in or out while browsing the catalog (`useCatalogAuthReload`, catalog layout)
@@ -21,6 +23,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 - Login and register links in the catalog navigation preserve the current page via `?redirect=` (with safe redirect validation on login)
 - Search result lists update when catalog source data changes after an auth state change
 - Logout keeps the user on the current page instead of redirecting to `/login`
+- Group booking notice is only shown when group booking is allowed
 
 ### Changed
 
@@ -122,6 +125,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 See git tags `v1.0.0-rc.*` for release-candidate history.
 
+[1.1.3]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.0.4...v1.1.0
