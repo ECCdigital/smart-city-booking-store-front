@@ -8,7 +8,10 @@
     ]"
   >
     <div class="w-24 shrink-0 @sm:basis-1/4 flex items-center">
-      <div class="basis-9/10 w-full h-full relative">
+      <div
+        class="basis-9/10 w-full h-full relative cursor-pointer"
+        @click="onOpenDetails(item?.id, item?.type)"
+      >
         <BookableTypeBadge
           :type="item?.type"
           :is-event="isEvent"
@@ -69,6 +72,7 @@
       :is-not-bookable="isNotBookable"
       :entry-page-mode="entryPageMode"
       :map-mode="mapMode"
+      @open-details="onOpenDetails"
     />
     <ResultStripEventContent
       v-if="isEvent"
@@ -76,6 +80,7 @@
       :is-not-suitable="isNotSuitable"
       :is-not-bookable="isNotBookable"
       :entry-page-mode="entryPageMode"
+      @open-details="onOpenDetails"
     />
   </div>
 </template>
@@ -84,6 +89,7 @@ import ResultStripEventContent from "~/components/search/ResultStripEventContent
 import ResultStripBookableContent from "~/components/search/ResultStripBookableContent.vue";
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
+import { useRedirection } from "~/composables/utils/useRedirection.js";
 
 const colorMode = useColorMode();
 
@@ -124,9 +130,10 @@ const props = defineProps({
   },
 });
 
+const { goToDetails } = useRedirection();
+
 const isEvent = computed(() => {
   return props.item.type === "event";
-  //return !("type" in props.item);
 });
 
 const price = computed(() => {
@@ -140,6 +147,10 @@ const showImageErrorHint = ref(false);
 
 function onImageError() {
   showImageErrorHint.value = true;
+}
+function onOpenDetails(id, type) {
+  console.log("onOpenDetails", id, type);
+  goToDetails(id, type);
 }
 </script>
 
