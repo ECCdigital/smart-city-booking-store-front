@@ -3,7 +3,7 @@
     <h3 class="text-base font-bold">{{ $t("detailsAvailability.title") }}</h3>
 
     <div
-      v-if="bookable.groupBooking?.enabled"
+      v-if="bookable.groupBookingAllowed"
       class="my-2 flex flex-col rounded-xl border border-primary-200 bg-primary-50/50 p-4 dark:border-primary-800 dark:bg-primary-950/30 sm:flex-row sm:items-center sm:justify-between"
     >
       <div class="flex items-start gap-3">
