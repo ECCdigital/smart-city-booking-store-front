@@ -109,7 +109,7 @@ export const useAuthStore = defineStore("auth", {
     async updateUser(user) {
       const { updateUser } = useUsers();
       try {
-        await updateUser(user);
+        await updateUser({ ...user, syncSelfBookingNames: false });
 
         this.user = user;
         return this.user;
