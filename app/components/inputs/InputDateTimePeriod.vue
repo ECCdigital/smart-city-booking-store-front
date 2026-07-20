@@ -18,7 +18,11 @@
           'w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-md bg-white dark:bg-gray-700 hover:bg-transparent',
           compact ? 'py-1 px-2 text-sm' : 'py-2 px-3',
         ]"
-        :ui="{ leadingIcon: compact ? 'text-[13px] dark:text-gray-200 mr-1' : 'text-[16px] dark:text-gray-200 mr-1' }"
+        :ui="{
+          leadingIcon: compact
+            ? 'text-[13px] dark:text-gray-200 mr-1'
+            : 'text-[16px] dark:text-gray-200 mr-1',
+        }"
       >
         <template v-if="dateRange[0]">
           <div class="flex justify-between w-full">
@@ -48,10 +52,7 @@
           </div>
 
           <DatePicker v-model="dateRange" class="date-picker-container" />
-          <p
-              v-if="missingValues.includes('date')"
-              class="text-red-500 text-sm"
-          >
+          <p v-if="missingValues.includes('date')" class="text-red-500 text-sm">
             (Bitte wählen Sie einen Tag aus, an dem Sie buchen möchten.)
           </p>
 
@@ -66,10 +67,10 @@
                 Startuhrzeit
               </p>
               <UButton
-                  label="Jetzt"
-                  color="neutral"
-                  variant="soft"
-                  @click="
+                label="Jetzt"
+                color="neutral"
+                variant="soft"
+                @click="
                   () =>
                     (timeRange.start = {
                       hours: new Date().getHours(),
@@ -106,37 +107,36 @@
               </p>
 
               <UButton
-                  label="0:30h"
-                  color="neutral"
-                  variant="soft"
-                  :disabled="!timeRange.start"
-                  @click="addToStartTime(30)"
+                label="0:30h"
+                color="neutral"
+                variant="soft"
+                :disabled="!timeRange.start"
+                @click="addToStartTime(30)"
               />
               <UButton
-                  label="1:00h"
-                  color="neutral"
-                  variant="soft"
-                  :disabled="!timeRange.start"
-                  @click="addToStartTime(60)"
+                label="1:00h"
+                color="neutral"
+                variant="soft"
+                :disabled="!timeRange.start"
+                @click="addToStartTime(60)"
               />
               <UButton
-                  label="2:00h"
-                  color="neutral"
-                  variant="soft"
-                  :disabled="!timeRange.start"
-                  @click="addToStartTime(120)"
+                label="2:00h"
+                color="neutral"
+                variant="soft"
+                :disabled="!timeRange.start"
+                @click="addToStartTime(120)"
               />
               <UButton
-                  label="4:00h"
-                  color="neutral"
-                  variant="soft"
-                  :disabled="!timeRange.start"
-                  @click="addToStartTime(240)"
+                label="4:00h"
+                color="neutral"
+                variant="soft"
+                :disabled="!timeRange.start"
+                @click="addToStartTime(240)"
               />
             </div>
 
             <div class="flex items-center space-x-2">
-
               <InputTime
                 v-model="timeRange.end"
                 v-model:date="endInputDate"
@@ -152,10 +152,7 @@
             >
               (Bitte geben Sie eine Uhrzeit für das Ende Ihrer Buchung an.)
             </p>
-            <p
-              v-if="invalidTimeslot"
-              class="text-red-500 text-sm"
-            >
+            <p v-if="invalidTimeslot" class="text-red-500 text-sm">
               (Die Endzeit muss nach der Startzeit liegen.)
             </p>
           </div>
@@ -216,7 +213,12 @@ const missingValues = ref<string[]>([]);
 const endTimeAutoSet = ref(false);
 const isUpdatingEndAutomatically = ref(false);
 const invalidTimeslot = computed(() => {
-  if ((dateRange.value.length === 2 && dateRange.value[1] !== null ) || !timeRange.value.start || !timeRange.value.end) return false;
+  if (
+    (dateRange.value.length === 2 && dateRange.value[1] !== null) ||
+    !timeRange.value.start ||
+    !timeRange.value.end
+  )
+    return false;
 
   const startTotalMinutes =
     timeRange.value.start.hours * 60 + timeRange.value.start.minutes;
@@ -494,7 +496,7 @@ function addToStartTime(addedMinutes: number) {
 }
 
 function removeValidation() {
-  if (dateRange.value.length >0) {
+  if (dateRange.value.length > 0) {
     missingValues.value = missingValues.value.filter((m) => m !== "date");
   }
   if (timeRange.value.start) {
@@ -507,8 +509,8 @@ function removeValidation() {
 
 // OK-Button -> validieren + emittieren als Timestamps
 function onSelectDate() {
-  removeValidation()
-  if(dateRange.value.length === 0) {
+  removeValidation();
+  if (dateRange.value.length === 0) {
     if (!missingValues.value.includes("date")) {
       missingValues.value.push("date");
     }
