@@ -1,12 +1,7 @@
-<script setup>
-
-</script>
+<script setup></script>
 
 <template>
-  <UCard
-    variant="soft"
-    class="w-full max-w-md rounded-xl glass"
-  >
+  <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
     <template #header>
       <div class="flex flex-col justify-center items-center">
         <UIcon
@@ -15,9 +10,9 @@
           class="text-success"
         />
 
-        <h2 class="text-2xl font-semibold mb-2">
+        <h1 class="text-2xl font-semibold mb-2">
           {{ $t("register.success.heading") }}
-        </h2>
+        </h1>
       </div>
     </template>
 

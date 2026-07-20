@@ -4,9 +4,9 @@
     class="w-full max-w-md bg-white/30 dark:bg-gray-800/40 backdrop-blur-md"
   >
     <template #header>
-      <h2 class="text-2xl font-semibold text-center">
+      <h1 class="text-2xl font-semibold text-center">
         {{ $t("resetPassword.title") }}
-      </h2>
+      </h1>
 
       <p class="text-sm text-center text-gray-500 dark:text-gray-400">
         {{ $t("resetPassword.description") }}
@@ -21,7 +21,6 @@
         input-style-classes="w-full"
       />
       <PasswordProgress :password="userData.password" />
-
 
       <PasswordInput
         v-model="userData.passwordRepeat"

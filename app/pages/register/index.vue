@@ -54,7 +54,6 @@ const handleRegister = async () => {
 <template>
   <PageBackground variant="poly" :vignette="true" intensity="normal">
     <AuthTitleSection
-      :description="$t('register.welcome')"
       is-large-version
       class="hidden lg:flex w-3/5 items-center justify-center"
     />

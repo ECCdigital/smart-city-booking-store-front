@@ -15,10 +15,6 @@
             {{ title }}
           </p>
         </div>
-
-        <h1 class="text-black dark:text-white text-4xl font-bold mb-4">
-          {{ description }}
-        </h1>
       </div>
     </div>
 
@@ -42,10 +38,6 @@ import { useHeroConfig } from "~/composables/useHeroConfig.ts";
 import { computed } from "vue";
 
 const props = defineProps({
-  description: {
-    type: String,
-    default: "",
-  },
   isLargeVersion: {
     type: Boolean,
     default: false,

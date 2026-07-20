@@ -1,23 +1,23 @@
 <template>
   <div class="flex justify-center">
     <div
-      class="mt-2 md:-mt-10 bg-gray-300/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg rounded-md overflow-hidden w-[100vw] md:w-[50vw]"
-      style="max-width: 1000px; aspect-ratio: 16/9"
+      class="mt-2 md:-mt-10 bg-gray-300/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg rounded-md overflow-hidden w-[80vw] md:w-[45vw]"
+      style="max-width: 800px; aspect-ratio: 16/9"
     >
       <img
         v-if="!props.isEvent && item?.imgUrl"
         :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
         alt=""
         class="w-full h-full object-contain rounded-l-xl"
-      >
+      />
       <img
         v-else-if="props.isEvent && item?.information?.teaserImage"
         :src="`/api/img?url=${encodeURIComponent(
-          item.information.teaserImage
+          item.information.teaserImage,
         )}`"
         alt=""
         class="w-full h-full object-contain rounded-l-xl"
-      >
+      />
       <ClientOnly v-else>
         <ImagePlaceholder :theme="colorMode.value" variant="poly" />
         <template #fallback>
