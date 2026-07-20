@@ -5,7 +5,7 @@ import LoginCard from "~/components/auth/LoginCard.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useInstanceStore } from "~~/stores/instance";
 import { getSafeRedirectPath } from "~/utils/safeRedirect";
-import { useHeroConfig } from "~/composables/useHeroConfig";
+import AuthTitleSection from "~/components/auth/AuthTitleSection.vue";
 
 definePageMeta({
   layout: "default",
@@ -54,49 +54,18 @@ const handleSsoLogin = () => {
   const redirect = (route.query.redirect as string) || "/";
   window.location.href = `/api/auth/sso/login?redirect=${encodeURIComponent(redirect)}`;
 };
-
-const { data: hero } = await useFetch("/api/theme/hero");
-
-const config = useHeroConfig();
-const title = computed(() => config.value.staticTitle ?? hero.value?.title);
-/*const subtitle = computed(
-  () => config.value.staticSubtitle ?? hero.value?.subtitle,
-);*/
 </script>
 
 <template>
   <PageBackground variant="poly" :vignette="true" intensity="normal">
-    <div class="hidden lg:flex w-full lg:w-3/5 items-center justify-center">
-      <div class="max-w-md text-center">
-        <div class="mb-10 grid space-y-2 content-center">
-          <img
-            :src="`/api/theme/logo`"
-            alt="logo"
-            class="max-h-[7vh] mx-auto dark:invert dark:hue-rotate-180"
-          />
-          <p class="text-primary font-bold text-xl" :class="config.titleClass">
-            {{ title }}
-          </p>
-        </div>
-
-        <h1 class="text-black dark:text-white text-4xl font-bold mb-4">
-          Willkommen zurück!
-        </h1>
-      </div>
-    </div>
+    <AuthTitleSection
+      description="Willkommen zurück!"
+      is-large-version
+      class="hidden lg:flex w-3/5 items-center justify-center"
+    />
 
     <div class="flex flex-col w-full lg:w-2/5 items-center justify-center p-6">
-      <img
-        :src="`/api/theme/logo`"
-        alt="logo"
-        class="lg:hidden max-h-[7vh] mb-6 dark:invert dark:hue-rotate-180"
-      />
-      <p
-        class="lg:hidden text-primary font-bold text-xl text-center mb-6"
-        :class="config.titleClass"
-      >
-        {{ title }}
-      </p>
+      <AuthTitleSection class="lg:hidden" />
       <LoginCard
         v-model:user-data="form"
         class="shadow-2xl/50"
