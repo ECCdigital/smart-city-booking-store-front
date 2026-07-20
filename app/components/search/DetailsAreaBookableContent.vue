@@ -3,7 +3,7 @@
     <!-- Title -->
     <div class="md:flex justify-between">
       <div>
-        <p class="text-sm font-bold text-primary">
+        <p class="text-sm font-bold text-gray-400 dark:text-gray-600">
           {{ tenantName }}
         </p>
         <h2 class="text-2xl font-bold">{{ item?.title }}</h2>
