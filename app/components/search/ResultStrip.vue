@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="props.item"
-    class="@container dark:bg-gray-700 flex flex-row rounded-sm"
+    class="@container bg-white dark:bg-gray-700 flex flex-row rounded-sm shadow-lg"
     :class="[
       isNotSuitable ? 'opacity-70' : ' ',
       isEvent ? 'max-h-100 h-100' : mapMode ? '' : 'max-h-74 h-74',
