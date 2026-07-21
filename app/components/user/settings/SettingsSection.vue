@@ -202,6 +202,19 @@ const hasUnsavedChanges = computed(
     JSON.stringify(currentUser.value) !== JSON.stringify(originalUser.value),
 );
 
+onBeforeRouteLeave(() => {
+  if (!hasUnsavedChanges.value) {
+    return true;
+  }
+
+  notification.error(
+    "Sie haben nicht gespeicherte Änderungen. Bitte speichern oder verwerfen Sie diese, bevor Sie die Seite verlassen.",
+    "Nicht gespeicherte Änderungen",
+  );
+
+  return false;
+});
+
 const newPassword = ref("");
 const repeatedPassword = ref("");
 
