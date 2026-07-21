@@ -59,7 +59,7 @@ const items = computed(() => {
     ...adminSection,
     [
       {
-        label: "Benutzerkonto",
+        label: "Aktivitäten",
         class: "font-bold cursor-default hover:bg-transparent",
       },
       {
@@ -68,7 +68,7 @@ const items = computed(() => {
         onSelect: () => goTo("/account/bookings"),
       },
       {
-        label: "Schlüssel",
+        label: "Digitale Schlüssel",
         icon: "i-lucide-key-round",
         onSelect: () => goTo("/account/keys"),
       },
@@ -87,10 +87,16 @@ const items = computed(() => {
     ],
     [
       {
+        label: "Benutzerkonto",
+        class: "font-bold cursor-default hover:bg-transparent",
+      },
+      {
         label: t("navigation.settings"),
         icon: "i-lucide-settings",
         onSelect: () => goTo("/account/settings"),
       },
+    ],
+    [
       {
         label: t("common.logout"),
         icon: "i-lucide-log-out",
@@ -110,12 +116,12 @@ async function logout() {
     await authStore.logout();
     notification.success(
       t("notifications.logoutSuccess.message"),
-      t("notifications.logoutSuccess.title")
+      t("notifications.logoutSuccess.title"),
     );
   } catch {
     notification.error(
       t("login.logoutErrorMessage.message"),
-      t("login.logoutErrorMessage.title")
+      t("login.logoutErrorMessage.title"),
     );
   }
 }

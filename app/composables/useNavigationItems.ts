@@ -1,6 +1,10 @@
 export const navigationPresets = {
   user: [
     {
+      value: null,
+      label: "Aktivitäten",
+    },
+    {
       value: "/account/bookings",
       label: "Buchungen",
       icon: "i-lucide-book-marked",
@@ -24,18 +28,14 @@ export const navigationPresets = {
       icon: "i-lucide-book-heart",
       disabled: true,
     },
-  ],
-  settings: [
     {
-      value: "/account/settings",
-      label: "Persönliche Daten",
-      icon: "i-lucide-user-round-pen",
-      disabled: false,
+      value: null,
+      label: "Benutzerkonto",
     },
     {
-      value: "/account/settings/appearance",
-      label: "Darstellung",
-      icon: "i-lucide-paintbrush",
+      value: "/account/settings",
+      label: "Einstellungen",
+      icon: "i-lucide-user-round-pen",
       disabled: false,
     },
   ],

@@ -2,6 +2,12 @@
   <div>
     <div class="mb-5">
       <h3 class="text-xl font-bold mb-2">Optische Darstellung</h3>
+      <p class="mt-2 mb-5">
+        Verwalten Sie die Darstellung der Anwendung. Sie können beispielsweise
+        zwischen einem hellen und einem dunklen Design wechseln. Optional können
+        Sie auch die Sprache der Benutzeroberfläche anpassen.
+      </p>
+
       <div class="md:flex items-center">
         <div class="basis-1/5 text-sm font-semibold">Farbgestaltung</div>
         <UFieldGroup class="flex justify-center">
