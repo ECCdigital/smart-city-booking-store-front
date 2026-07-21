@@ -71,12 +71,11 @@
         >
           {{ bookingTimeSlot }}
         </div>
-
         <EventTimeInformation
           v-else-if="eventId && event"
           :event="event"
           :use-icon="false"
-          class="text-lg font-semibold -mx-3"
+          class="text-lg text-primary font-semibold leading-tight h-12"
         />
       </div>
 
@@ -104,13 +103,13 @@
 </template>
 
 <script setup>
-import { useEventStore } from "~~/stores/event.js";
-import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
+import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
+import { useEvents } from "~/composables/api/useEvents.js";
 
 const { t } = useI18n();
 
@@ -138,8 +137,7 @@ const bookingPrice = computed(() => {
   return formatPrice(props.booking.priceEur);
 });
 
-const eventStore = useEventStore();
-const { formatDate, formatPrice, formateDateToTimestamp } = useFormatting();
+const { formatDate, formatPrice } = useFormatting();
 
 const currentTime = ref(new Date().getTime());
 const isActive = computed(() => {
@@ -152,19 +150,7 @@ const isActive = computed(() => {
       currentTime.value <= props.booking.timeEnd
     );
   }
-  if (event.value) {
-    const startTimestamp = formateDateToTimestamp(
-      event.value.information.startDate,
-      event.value.information.startTime,
-    );
-    const endTimestamp = formateDateToTimestamp(
-      event.value.information.endDate,
-      event.value.information.endTime,
-    );
-    return (
-      currentTime.value >= startTimestamp && currentTime.value <= endTimestamp
-    );
-  }
+
   return false;
 });
 
@@ -203,7 +189,7 @@ const bookingTitle = computed(() => {
 const sameDayBookingDateFormatter = new Intl.DateTimeFormat("de-DE", {
   day: "2-digit",
   month: "2-digit",
-  year: "numeric",
+  year: "2-digit",
 });
 
 const sameDayBookingTimeFormatter = new Intl.DateTimeFormat("de-DE", {
@@ -244,15 +230,29 @@ const bookingTimeSlot = computed(() => {
 });
 
 //events
+const { fetchEventById } = useEvents();
 const eventId = computed(() => {
   return props.booking.bookableItems[0]?._bookableUsed.eventId || null;
 });
-const event = computed(() => {
-  if (!eventId.value) {
-    return null;
-  }
-  return eventStore.getEventById(eventId.value);
-});
+
+const event = ref(null);
+
+watch(
+  [() => props.booking.tenantId, eventId],
+  async ([tenantId, currentEventId]) => {
+    if (!currentEventId) {
+      event.value = null;
+      return;
+    }
+
+    try {
+      event.value = await fetchEventById(tenantId, currentEventId);
+    } catch {
+      event.value = null;
+    }
+  },
+  { immediate: true },
+);
 
 const bookingCardClasses =
   "bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 my-2 hover:shadow-lg transition-shadow";
