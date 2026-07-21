@@ -1,12 +1,13 @@
 <template>
   <div
-    class="flex flex-col"
+    class="flex flex-col cursor-pointer"
     :class="[
       bookingCardClasses,
       isActive
         ? 'border-2 border-primary/60 shadow-primary/20'
         : 'border border-gray-200 dark:border-gray-700',
     ]"
+    @click="openDetails()"
   >
     <!-- title and booking-id -->
     <div class="mb-3 h-1/3">
@@ -24,24 +25,27 @@
             Aktiv
           </div>
         </div>
-        <UDropdownMenu
-          :items="actionOptions"
-          :content="{
-            align: 'end',
-          }"
-          :ui="{
-            content: 'w-48 ring-0 shadow-lg glass',
-            itemLeadingIcon: 'mt-1',
-            item: 'before:bg-transparent data-highlighted:before:bg-transparent',
-          }"
-        >
-          <UButton
-            icon="i-lucide-ellipsis"
-            class="rounded-3xl"
-            variant="soft"
-            color="neutral"
-          />
-        </UDropdownMenu>
+        <div @click.stop>
+          <UDropdownMenu
+            v-if="actionOptions && actionOptions.length"
+            :items="actionOptions"
+            :content="{
+              align: 'end',
+            }"
+            :ui="{
+              content: 'w-48 ring-0 shadow-lg glass',
+              itemLeadingIcon: 'mt-1',
+              item: 'before:bg-transparent data-highlighted:before:bg-transparent',
+            }"
+          >
+            <UButton
+              icon="i-lucide-ellipsis"
+              class="rounded-3xl"
+              variant="soft"
+              color="neutral"
+            />
+          </UDropdownMenu>
+        </div>
       </div>
 
       <h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2">
@@ -136,7 +140,7 @@ const { formatDate, formatPrice, formateDateToTimestamp } = useFormatting();
 
 const currentTime = ref(new Date().getTime());
 const isActive = computed(() => {
-  if(props.booking.isRejected) {
+  if (props.booking.isRejected) {
     return false;
   }
   if (props.booking.timeBegin && props.booking.timeEnd) {
@@ -163,15 +167,9 @@ const isActive = computed(() => {
 
 const { downloadBookingIcal } = useIcalDownload();
 const actionOptions = computed(() => {
-  const options = [
-    {
-      label: "Details anzeigen",
-      icon: "i-lucide-eye",
-      onSelect: openDetails,
-    },
-  ];
+  const options = [];
 
-  if(props.booking.lockerInfo.length > 0){
+  if (props.booking.lockerInfo.length > 0) {
     options.push({
       label: "Schlüssel anzeigen",
       icon: "i-lucide-lock",
