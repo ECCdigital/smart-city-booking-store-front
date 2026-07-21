@@ -73,7 +73,7 @@ export function useCatalogQueryState() {
     start: parseNumberOrNull(route.query.start),
     end: parseNumberOrNull(route.query.end),
 
-    inclNoSuitable: route.query.inclNoSuitable !== "false",
+    inclNoSuitable: route.query.inclNoSuitable === "false",
     pubEv: route.query.pubEv === "true",
     regEv: route.query.regEv === "true",
 
@@ -121,7 +121,7 @@ export function useCatalogQueryState() {
     if (s.start != null) q.start = String(s.start);
     if (s.end != null) q.end = String(s.end);
 
-    if (!s.inclNoSuitable) q.inclNoSuitable = "false";
+    if (s.inclNoSuitable) q.inclNoSuitable = "true";
     if (s.pubEv) q.pubEv = "true";
     if (s.regEv) q.regEv = "true";
 
@@ -168,7 +168,7 @@ export function useCatalogQueryState() {
   const isFilterActive = computed(() => {
     const s = state;
 
-    if (s.inclNoSuitable === false) return true;
+    if (s.inclNoSuitable) return true;
     if (s.pubEv) return true;
     if (s.regEv) return true;
     if (s.cat.length > 0) return true;

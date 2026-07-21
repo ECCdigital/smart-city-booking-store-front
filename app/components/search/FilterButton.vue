@@ -46,7 +46,7 @@ import FilterArea from "./FilterArea.vue";
 import { useRoute } from "#imports";
 
 const isInitialized = defineModel("isInitailized", { type: Boolean });
-const props = defineProps({
+defineProps({
   bookables: {
     type: Array,
     required: true,
@@ -57,7 +57,7 @@ const props = defineProps({
   },
   includeNonSuitable: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   categories: {
     type: Array,
