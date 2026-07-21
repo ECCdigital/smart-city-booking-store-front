@@ -53,47 +53,50 @@
       </h3>
     </div>
 
-    <div class="flex flex-col h-2/3">
-      <!-- time -->
-      <div class="h-1/3 mb-3">
+    <div class="flex flex-col flex-1 justify-between">
+      <!-- Zeitraum -->
+      <div class="mb-4">
         <div
           v-if="bookingTimeSlot || event"
-          class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-1"
+          class="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-2"
         >
           <UIcon name="i-lucide-clock" class="w-4 h-4 mr-1" />
-          <span v-if="event && !bookingTimeSlot">Veranstaltungszeit</span>
-          <span v-else>Zeitraum</span>
+          <span v-if="event && !bookingTimeSlot"> Veranstaltungszeit </span>
+          <span v-else> Zeitraum </span>
         </div>
-        <div v-else class="h-[44px]" />
-        <div v-if="bookingTimeSlot" class="text-sm font-medium">
-          {{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}
+
+        <div
+          v-if="bookingTimeSlot"
+          class="text-lg text-primary font-semibold leading-tight h-12"
+        >
+          {{ bookingTimeSlot }}
         </div>
+
         <EventTimeInformation
           v-else-if="eventId && event"
           :event="event"
           :use-icon="false"
-          class="text-sm font-medium -mx-3"
+          class="text-lg font-semibold -mx-3"
         />
       </div>
 
-      <!-- price -->
-      <div class="mb-4">
-        <div class="text-2xl font-bold text-primary">
-          {{ bookingPrice }}
-        </div>
+      <!-- Status -->
+      <div class="flex flex-wrap gap-2 mb-3">
+        <BookingStatusChip :booking="booking" />
+        <BookingPayedChip v-if="!isFree" :booking="booking" />
       </div>
 
-      <!-- Status Badges -->
-
-      <div class="mb-2">
-        <div class="text-sm text-medium text-gray-500 dark:text-gray-400 mb-1">
-          Gebucht am: {{ booking.displayBookingDate }}
+      <!-- Zusatzinformationen -->
+      <div class="space-y-1">
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          Preis:
+          <span class="font-medium text-gray-700 dark:text-gray-200">
+            {{ bookingPrice }}
+          </span>
         </div>
-        <div class="flex flex-wrap gap-2">
-          <!-- status -->
-          <BookingStatusChip :booking="booking" />
 
-          <BookingPayedChip v-if="!isFree" :booking="booking" />
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          Gebucht am: {{ booking.displayBookingDate }}
         </div>
       </div>
     </div>
@@ -197,11 +200,45 @@ const bookingTitle = computed(() => {
   return props.booking.objectName;
 });
 
+const sameDayBookingDateFormatter = new Intl.DateTimeFormat("de-DE", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
+const sameDayBookingTimeFormatter = new Intl.DateTimeFormat("de-DE", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+function isSameCalendarDay(startDate, endDate) {
+  return (
+    startDate.getFullYear() === endDate.getFullYear() &&
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getDate() === endDate.getDate()
+  );
+}
+
 const bookingTimeSlot = computed(() => {
   if (props.booking.timeBegin && props.booking.timeEnd) {
-    const beginn = formatDate(props.booking.timeBegin);
-    const end = formatDate(props.booking.timeEnd);
-    return [beginn, end];
+    const startDate = new Date(props.booking.timeBegin);
+    const endDate = new Date(props.booking.timeEnd);
+
+    if (isSameCalendarDay(startDate, endDate)) {
+      return (
+        sameDayBookingDateFormatter.format(startDate) +
+        ", " +
+        sameDayBookingTimeFormatter.format(startDate) +
+        " - " +
+        sameDayBookingTimeFormatter.format(endDate)
+      );
+    }
+
+    return (
+      formatDate(props.booking.timeBegin) +
+      " - " +
+      formatDate(props.booking.timeEnd)
+    );
   }
   return null;
 });
