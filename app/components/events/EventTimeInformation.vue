@@ -5,7 +5,9 @@
       <span v-if="event.information?.startDate" :class="useIcon ? 'p-3' : ''">
         {{ showDate() }}
       </span>
-      <span v-else class="italic p-3">Keine Zeitangaben</span>
+      <span v-else class="italic p-3" :class="useIcon ? 'p-3' : ''"
+        >Keine Zeitangaben</span
+      >
     </p>
   </div>
 </template>
