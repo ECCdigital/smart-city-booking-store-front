@@ -3,7 +3,7 @@
     <UInput
       v-model="currentValue"
       :icon="icon"
-      :variant="isDisabled? 'subtle' : 'outline'"
+      :variant="isDisabled ? 'subtle' : 'outline'"
       :disabled="isDisabled"
       class="w-full md:w-[70%]"
       @change="onUpdate()"
@@ -30,7 +30,7 @@ const props = defineProps({
   },
   isDisabled: {
     type: Boolean,
-    default: true,
+    default: false,
   },
 });
 const emit = defineEmits(["update"]);
