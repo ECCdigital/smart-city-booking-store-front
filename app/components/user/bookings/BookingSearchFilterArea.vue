@@ -82,22 +82,53 @@ function filterForBookingPeriod(bookings) {
   if (!filters.value || !filters.value.periodFilter) {
     return bookings;
   }
-  console.log("period filter", filters.value.periodFilter);
+
   const currentTime = new Date().getTime();
   const oneHourInMs = 60 * 60 * 1000;
 
-  if(filters.value.periodFilter === "all") {
+  const getBeginTime = (booking) => {
+    if (booking.timeBegin) {
+      return booking.timeBegin;
+    } else if (booking.eventBegin) {
+      return booking.eventBegin;
+    } else {
+      return null;
+    }
+  };
+  const getEndTime = (booking) => {
+    if (booking.timeEnd) {
+      return booking.timeEnd;
+    } else if (booking.eventEnd) {
+      return booking.eventEnd;
+    } else {
+      return null;
+    }
+  };
+
+  if (filters.value.periodFilter === "all") {
     return bookings;
   } else if (filters.value.periodFilter === "upcoming") {
-    return bookings.filter((b) => b.timeBegin > currentTime);
+    return bookings.filter((b) => {
+      const beginTime = getBeginTime(b);
+
+      return beginTime != null && beginTime > currentTime;
+    });
   } else if (filters.value.periodFilter === "past") {
-    return bookings.filter((b) => b.timeEnd < currentTime);
+    return bookings.filter((b) => {
+      const endTime = getEndTime(b);
+      return endTime != null && endTime < currentTime;
+    });
   } else if (filters.value.periodFilter === "active") {
-    return bookings.filter(
-      (b) =>
-        b.timeBegin < currentTime + oneHourInMs &&
-        b.timeEnd > currentTime - oneHourInMs,
-    );
+    return bookings.filter((b) => {
+      const beginTime = getBeginTime(b);
+      const endTime = getEndTime(b);
+      return (
+        beginTime != null &&
+        endTime != null &&
+        beginTime < currentTime + oneHourInMs &&
+        endTime > currentTime - oneHourInMs
+      );
+    });
   }
 
   return bookings;

@@ -57,45 +57,38 @@
       <!-- Zeitraum -->
       <div class="mb-4">
         <div
-          v-if="bookingTimeSlot || event"
+          v-if="bookingTimeSlot"
           class="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-2"
         >
           <UIcon name="i-lucide-clock" class="w-4 h-4 mr-1" />
-          <span v-if="event && !bookingTimeSlot"> Veranstaltungszeit </span>
+          <span v-if="isEvent && !booking.timeBegin && !booking.timeEnd">
+            Veranstaltungszeit
+          </span>
           <span v-else> Zeitraum </span>
         </div>
 
-        <div
-          v-if="bookingTimeSlot"
-          class="text-lg text-primary font-semibold leading-tight h-12"
-        >
+        <div class="text-lg text-primary font-semibold leading-tight h-14">
           {{ bookingTimeSlot }}
         </div>
-        <EventTimeInformation
-          v-else-if="eventId && event"
-          :event="event"
-          :use-icon="false"
-          class="text-lg text-primary font-semibold leading-tight h-12"
-        />
-      </div>
 
-      <!-- Status -->
-      <div class="flex flex-wrap gap-2 mb-3">
-        <BookingStatusChip :booking="booking" />
-        <BookingPayedChip v-if="!isFree" :booking="booking" />
-      </div>
-
-      <!-- Zusatzinformationen -->
-      <div class="space-y-1">
-        <div class="text-sm text-gray-500 dark:text-gray-400">
-          Preis:
-          <span class="font-medium text-gray-700 dark:text-gray-200">
-            {{ bookingPrice }}
-          </span>
+        <!-- Status -->
+        <div class="flex flex-wrap gap-2 mb-3">
+          <BookingStatusChip :booking="booking" />
+          <BookingPayedChip v-if="!isFree" :booking="booking" />
         </div>
 
-        <div class="text-sm text-gray-500 dark:text-gray-400">
-          Gebucht am: {{ booking.displayBookingDate }}
+        <!-- Zusatzinformationen -->
+        <div class="space-y-1">
+          <div class="text-sm text-gray-500 dark:text-gray-400">
+            Preis:
+            <span class="font-medium text-gray-700 dark:text-gray-200">
+              {{ bookingPrice }}
+            </span>
+          </div>
+
+          <div class="text-sm text-gray-500 dark:text-gray-400">
+            Gebucht am: {{ booking.displayBookingDate }}
+          </div>
         </div>
       </div>
     </div>
@@ -108,8 +101,6 @@ import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
-import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
-import { useEvents } from "~/composables/api/useEvents.js";
 
 const { t } = useI18n();
 
@@ -166,7 +157,7 @@ const actionOptions = computed(() => {
     });
   }
 
-  if (eventId.value || (props.booking.timeBegin && props.booking.timeEnd)) {
+  if (isEvent.value || (props.booking.timeBegin && props.booking.timeEnd)) {
     options.push({
       label: "Termin herunterladen",
       icon: "i-lucide-calendar-arrow-down",
@@ -206,9 +197,23 @@ function isSameCalendarDay(startDate, endDate) {
 }
 
 const bookingTimeSlot = computed(() => {
-  if (props.booking.timeBegin && props.booking.timeEnd) {
-    const startDate = new Date(props.booking.timeBegin);
-    const endDate = new Date(props.booking.timeEnd);
+  const startTime =
+    props.booking.timeBegin && props.booking.timeEnd
+      ? props.booking.timeBegin
+      : props.booking.eventBegin && props.booking.eventEnd
+        ? props.booking.eventBegin
+        : null;
+
+  const endTime =
+    props.booking.timeBegin && props.booking.timeEnd
+      ? props.booking.timeEnd
+      : props.booking.eventBegin && props.booking.eventEnd
+        ? props.booking.eventEnd
+        : null;
+
+  if (startTime && endTime) {
+    const startDate = new Date(startTime);
+    const endDate = new Date(endTime);
 
     if (isSameCalendarDay(startDate, endDate)) {
       return (
@@ -220,39 +225,16 @@ const bookingTimeSlot = computed(() => {
       );
     }
 
-    return (
-      formatDate(props.booking.timeBegin) +
-      " - " +
-      formatDate(props.booking.timeEnd)
-    );
+    return formatDate(startTime) + " - " + formatDate(endTime);
   }
+
   return null;
 });
 
 //events
-const { fetchEventById } = useEvents();
-const eventId = computed(() => {
-  return props.booking.bookableItems[0]?._bookableUsed.eventId || null;
+const isEvent = computed(() => {
+  return props.booking.bookableItems[0]?._bookableUsed.eventId || false;
 });
-
-const event = ref(null);
-
-watch(
-  [() => props.booking.tenantId, eventId],
-  async ([tenantId, currentEventId]) => {
-    if (!currentEventId) {
-      event.value = null;
-      return;
-    }
-
-    try {
-      event.value = await fetchEventById(tenantId, currentEventId);
-    } catch {
-      event.value = null;
-    }
-  },
-  { immediate: true },
-);
 
 const bookingCardClasses =
   "bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 my-2 hover:shadow-lg transition-shadow";
