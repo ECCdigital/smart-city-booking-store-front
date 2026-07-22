@@ -62,7 +62,7 @@ watch(filters, (newFilter) => {
   } else {
     let filtered = props.bookings;
 
-    filtered = filterForActiveBookings(filtered);
+    filtered = filterForBookingPeriod(filtered);
 
     filtered = filterForPaymentStatus(filtered);
 
@@ -78,15 +78,29 @@ function setFilter(filter) {
   filters.value = filter;
 }
 
-function filterForActiveBookings(bookings) {
-  if (!filters.value || !filters.value.activeBookings) {
+function filterForBookingPeriod(bookings) {
+  if (!filters.value || !filters.value.periodFilter) {
     return bookings;
   }
+  console.log("period filter", filters.value.periodFilter);
   const currentTime = new Date().getTime();
+  const oneHourInMs = 60 * 60 * 1000;
 
-  return bookings.filter(
-    (b) => b.timeBegin < currentTime && b.timeEnd > currentTime,
-  );
+  if(filters.value.periodFilter === "all") {
+    return bookings;
+  } else if (filters.value.periodFilter === "upcoming") {
+    return bookings.filter((b) => b.timeBegin > currentTime);
+  } else if (filters.value.periodFilter === "past") {
+    return bookings.filter((b) => b.timeEnd < currentTime);
+  } else if (filters.value.periodFilter === "active") {
+    return bookings.filter(
+      (b) =>
+        b.timeBegin < currentTime + oneHourInMs &&
+        b.timeEnd > currentTime - oneHourInMs,
+    );
+  }
+
+  return bookings;
 }
 
 function filterForPaymentStatus(bookings) {

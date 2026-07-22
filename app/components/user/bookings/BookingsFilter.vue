@@ -1,25 +1,18 @@
 <template>
-  <UDropdownMenu
-    arrow
-    :items="sortItems()"
-    :ui="{
-      itemLeadingIcon: 'mt-1',
-      item: 'hover:bg-primary/10',
+  <USelect
+    v-model="bookingPeriodFilter"
+    :items="periodFilterOptions"
+    :content="{
+      align: 'center',
+      side: 'bottom',
+      sideOffset: 8,
     }"
-  >
-    <UButton
-      :icon="
-        sortOption ? getSortIconByValue(sortOption) : 'i-lucide-arrow-down-up'
-      "
-      size="md"
-      variant="outline"
-      color="neutral"
-      class="mt-2 md:mt-0 ml-1"
-    />
-  </UDropdownMenu>
+    class="w-28 lg:w-36 ml-1"
+  />
+
   <UDropdownMenu
     arrow
-    :items="filterItems()"
+    :items="statusFilterItems()"
     :content="{ align: 'start' }"
     checked-icon="i-lucide-check"
     :ui="{
@@ -39,9 +32,38 @@
       />
     </UChip>
   </UDropdownMenu>
+  <UDropdownMenu
+    arrow
+    :items="sortItems()"
+    :ui="{
+      itemLeadingIcon: 'mt-1',
+      item: 'hover:bg-primary/10',
+    }"
+  >
+    <UButton
+      :icon="
+        sortOption ? getSortIconByValue(sortOption) : 'i-lucide-arrow-down-up'
+      "
+      size="md"
+      variant="outline"
+      color="neutral"
+      class="mt-2 md:mt-0 ml-1"
+    />
+  </UDropdownMenu>
 </template>
 <script setup>
 const emit = defineEmits(["setFilter"]);
+
+const bookingPeriodFilter = ref("all");
+const periodFilterOptions = [
+  { label: "Aktive", value: "active" },
+  { label: "Kommende", value: "upcoming" },
+  { label: "Vergangene", value: "past" },
+  { label: "Alle", value: "all" },
+];
+watch(bookingPeriodFilter, () => {
+  onSetFilter();
+});
 
 const sortOption = ref(null);
 const showActiveBookings = ref(false);
@@ -150,13 +172,13 @@ const sortItems = () => [
   },
 ];
 
-const filterItems = () => [
+const statusFilterItems = () => [
   {
     label: "Filtern nach:",
     class: "cursor-default font-bold opacity-50 hover:bg-transparent mb-1",
     disabled: true,
   },
-  {
+  /*{
     label: "Aktive Buchungen",
     icon: "i-lucide-tv-minimal-play",
     type: "checkbox",
@@ -166,7 +188,7 @@ const filterItems = () => [
       showActiveBookings.value = checked;
       onSetFilter();
     },
-  },
+  },*/
   {
     label: "Status:",
     class: "cursor-default opacity-50 hover:bg-transparent",
@@ -257,6 +279,7 @@ function getSortIconByValue(value) {
 function onSetFilter() {
   emit("setFilter", {
     sortOption: sortOption.value,
+    periodFilter: bookingPeriodFilter.value,
     activeBookings: showActiveBookings.value,
     statusConfirmed: showStatusConfirmed.value,
     statusRejected: showStatusRejected.value,
