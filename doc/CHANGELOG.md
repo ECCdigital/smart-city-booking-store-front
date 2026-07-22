@@ -10,6 +10,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 ### Added
 
 - Shared-session invalidation with Admin: BroadcastChannel + focus re-validation; on dead cookie session clear Pinia user and redirect to login only under `/account/*`
+- **DEV-817:** Group-booking validation uses a single batch BFF call (`POST /api/checkout/group-validate` → backend `validate-group`) instead of parallel per-slot validates, avoiding 429 on large series
 
 ### Fixed
 
