@@ -7,6 +7,15 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ## [Unreleased]
 
+### Added
+
+- Shared-session invalidation with Admin: BroadcastChannel + focus re-validation; on dead cookie session clear Pinia user and redirect to login only under `/account/*`
+
+### Fixed
+
+- Local logout also clears `auth-type` cookie (`path=/`) for Admin alignment
+- `/api/auth/me` renews via refresh token when the access cookie is already gone
+
 ## [1.1.4] — 2026-07-17
 
 ### Changed

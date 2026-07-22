@@ -1,5 +1,6 @@
 import type { FetchError } from "ofetch";
 import type { NitroFetchOptions, NitroFetchRequest } from "nitropack";
+import { useAuthStore } from "~~/stores/auth";
 
 type Result<T> =
   | { data: T; error: null }
@@ -10,6 +11,20 @@ type Result<T> =
 
 type RequestOptions = Omit<NitroFetchOptions<NitroFetchRequest>, "method">;
 type RequestBody = BodyInit | Record<string, unknown> | null;
+
+async function handleAuthFailure(url: string, statusCode: number) {
+  if (statusCode !== 401 || import.meta.server) return;
+  // Auth endpoints manage their own flow
+  if (url.includes("/api/auth/")) return;
+
+  const authStore = useAuthStore();
+  if (!authStore.isLoggedIn && !authStore.tokenValid) return;
+
+  const stillValid = await authStore.validateAuth(true);
+  if (!stillValid) {
+    await authStore.handleInvalidSession({ redirect: true });
+  }
+}
 
 export function useApiClient() {
   const requestFetch = useRequestFetch();
@@ -27,11 +42,14 @@ export function useApiClient() {
       return { data, error: null };
     } catch (err) {
       const error = err as FetchError;
+      const statusCode = error.statusCode ?? 500;
+
+      await handleAuthFailure(url, statusCode);
 
       return {
         data: null,
         error: {
-          statusCode: error.statusCode ?? 500,
+          statusCode,
           statusMessage: error.statusMessage ?? "Unknown error",
           data: error.data,
         },
