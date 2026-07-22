@@ -705,8 +705,12 @@ function handleAmountUpdate({ id, amount }) {
   }
 }
 
-const { validateBookable, completeCheckout, completeGroupCheckout } =
-  useCheckout();
+const {
+  validateBookable,
+  validateGroupBookable,
+  completeCheckout,
+  completeGroupCheckout,
+} = useCheckout();
 
 const groupBookingEnabled = computed(() => {
   const b = leadBookable.value;
@@ -1004,31 +1008,52 @@ function appendFixedCouponSummaryRow({
 }
 
 async function validateFixedCouponApplicabilityForAttempts({
-  bookableId,
-  amount,
-  attempts,
+  bookableItems,
+  bookingAttempts,
 }) {
   if (
     !couponForValidation.value ||
     !isFixedAmountCoupon(appliedCouponDetails.value) ||
-    !Array.isArray(attempts) ||
-    attempts.length === 0
+    !Array.isArray(bookingAttempts) ||
+    bookingAttempts.length === 0
   ) {
     return { valid: true };
   }
 
-  const results = await Promise.all(
-    attempts.map((attempt) =>
-      validateFixedCouponApplicability({
-        bookableId,
-        amount,
-        start: attempt.start,
-        end: attempt.end,
-      }),
-    ),
-  );
+  try {
+    const res = await validateGroupBookable({
+      tenantID,
+      bookableItems,
+      bookingAttempts,
+      checkoutId: checkoutID.value || undefined,
+      couponCode: couponForValidation.value,
+      bookWithoutDiscount: isBookingWithoutDiscount.value,
+    });
 
-  return results.find((result) => !result.valid) ?? { valid: true };
+    if (!res?.success) {
+      const apiError = res?.error || {};
+      return {
+        valid: false,
+        reason: resolveCheckoutErrorKey(apiError),
+        params: apiError.params || {},
+      };
+    }
+
+    const attempts = Array.isArray(res?.data?.attempts) ? res.data.attempts : [];
+    const failed = attempts.find((attempt) => !attempt?.success);
+    if (failed) {
+      const apiError = failed.error || {};
+      return {
+        valid: false,
+        reason: resolveCheckoutErrorKey(apiError),
+        params: apiError.params || {},
+      };
+    }
+
+    return { valid: true };
+  } catch (error) {
+    return { valid: false, reason: "checkout.unknown_error", error };
+  }
 }
 
 async function validateFixedCouponApplicability({
@@ -1308,101 +1333,141 @@ async function validateGroupBookingAttempts() {
       })),
     ];
 
-    const requests = [];
-    for (const attempt of attempts) {
-      for (const target of targets) {
-        requests.push({ attempt, target });
-      }
-    }
+    const bookableItems = targets.map((target) => ({
+      bookableId: target.id,
+      amount: target.amount,
+    }));
+    const bookingAttempts = attempts.map((attempt) => ({
+      timeBegin: attempt.start,
+      timeEnd: attempt.end,
+    }));
 
     const couponParams = couponValidationParams();
     const leadTarget = targets.find((target) => target.isLead) ?? targets[0];
 
-    const [results, couponApplicability] = await Promise.all([
-      Promise.all(
-        requests.map(({ attempt, target }) =>
-          validateBookable({
-            bookableID: target.id,
-            tenantID,
-            amount: target.amount,
-            start: attempt.start,
-            end: attempt.end,
-            ...couponParams,
-            bookWithoutDiscount: isBookingWithoutDiscount.value,
-          })
-            .then((res) => ({ attempt, target, res }))
-            .catch((err) => ({ attempt, target, error: err })),
-        ),
-      ),
-      leadTarget
-        ? validateFixedCouponApplicabilityForAttempts({
-            bookableId: leadTarget.id,
-            amount: leadTarget.amount,
-            attempts,
-          })
-        : Promise.resolve({ valid: true }),
+    const [batchResult, couponApplicability] = await Promise.all([
+      validateGroupBookable({
+        tenantID,
+        bookableItems,
+        bookingAttempts,
+        checkoutId: checkoutID.value || undefined,
+        couponCode: couponParams.couponCode,
+        bookWithoutDiscount: isBookingWithoutDiscount.value,
+      })
+        .then((res) => ({ res }))
+        .catch((error) => ({ error })),
+      validateFixedCouponApplicabilityForAttempts({
+        bookableItems,
+        bookingAttempts,
+      }),
     ]);
 
     if (myToken !== validationToken) return;
 
-    const perAttempt = new Map();
-    for (const attempt of attempts) {
-      perAttempt.set(attempt.start, {
-        valid: true,
-        net: 0,
-        gross: 0,
-        firstError: null,
-      });
+    if (batchResult.error) {
+      const reason = "checkout.unknown_error";
+      validationErrors.value = {
+        [bookableID]: { reason, error: batchResult.error, isLead: true },
+      };
+      groupBookingAttemptStatuses.value = {};
+      summary.value = {
+        items: [],
+        taxAmount: 0,
+        total: 0,
+        errors: [
+          {
+            id: bookableID,
+            isLead: true,
+            label: leadTarget?.title || t("checkout.review.bookingLabel"),
+            reason,
+            error: batchResult.error,
+          },
+        ],
+      };
+      checkoutID.value = null;
+      return;
     }
 
-    const perBookable = new Map();
-    for (const target of targets) {
-      perBookable.set(target.id, {
-        target,
-        netTotal: 0,
-        grossTotal: 0,
-        bookingDiscountPercentAll: 0,
-        failedAttempts: 0,
-      });
+    const res = batchResult.res;
+
+    if (!res?.success) {
+      const apiError = res?.error || {};
+      const reason = resolveCheckoutErrorKey(apiError);
+      const params = apiError.params || {};
+      if (res?.checkoutId) {
+        checkoutID.value = res.checkoutId;
+      }
+      validationErrors.value = {
+        [bookableID]: { reason, params, isLead: true },
+      };
+      groupBookingAttemptStatuses.value = {};
+      summary.value = {
+        items: [],
+        taxAmount: 0,
+        total: 0,
+        errors: [
+          {
+            id: bookableID,
+            isLead: true,
+            label: leadTarget?.title || t("checkout.review.bookingLabel"),
+            reason,
+            params,
+          },
+        ],
+      };
+      return;
     }
 
-    let firstCheckoutId = null;
+    if (res.checkoutId) {
+      checkoutID.value = res.checkoutId;
+    }
 
-    for (const row of results) {
-      const attemptAcc = perAttempt.get(row.attempt.start);
-      const bookableAcc = perBookable.get(row.target.id);
-      if (!attemptAcc || !bookableAcc) continue;
+    const responseAttempts = Array.isArray(res?.data?.attempts)
+      ? res.data.attempts
+      : [];
+    const statuses = {};
+    const errors = [];
+    let total = 0;
+    let taxAmount = 0;
+    let maxBookingDiscountPercentSeen = 0;
+    const attemptGrossTotals = [];
 
-      if (row.error) {
-        attemptAcc.valid = false;
-        if (!attemptAcc.firstError) {
-          attemptAcc.firstError = {
-            reason: "checkout.unknown_error",
-            target: row.target,
-          };
-        }
-        bookableAcc.failedAttempts += 1;
+    for (let i = 0; i < attempts.length; i++) {
+      const attempt = attempts[i];
+      const startKey = attempt.start;
+      const row = responseAttempts[i];
+
+      if (!row) {
+        const reason = "checkout.unknown_error";
+        statuses[startKey] = { valid: false, reason };
+        errors.push({
+          id: `${bookableID}@${startKey}`,
+          isLead: true,
+          label: leadTarget?.title || t("checkout.review.bookingLabel"),
+          reason,
+          attemptStart: attempt.start,
+        });
         continue;
       }
 
-      if (!row.res?.success) {
-        const apiError = row.res?.error || {};
+      if (!row.success) {
+        const apiError = row.error || {};
         const reason = resolveCheckoutErrorKey(apiError);
         const params = apiError.params || {};
-        attemptAcc.valid = false;
-        if (!attemptAcc.firstError) {
-          attemptAcc.firstError = { reason, params, target: row.target };
-        }
-        bookableAcc.failedAttempts += 1;
+        statuses[startKey] = { valid: false, reason, params };
+        errors.push({
+          id: `${bookableID}@${startKey}`,
+          isLead: true,
+          label: leadTarget?.title || t("checkout.review.bookingLabel"),
+          reason,
+          params,
+          attemptStart: attempt.start,
+        });
         continue;
-      }
-
-      if (firstCheckoutId == null && row.res.checkoutId) {
-        firstCheckoutId = row.res.checkoutId;
       }
 
       const validationData =
-        row.res?.data && typeof row.res.data === "object" ? row.res.data : {};
+        row.data && typeof row.data === "object" ? row.data : {};
       let bookingDiscountPercent = toDiscountPercent(
         validationData.bookingDiscountPercent,
       );
@@ -1412,87 +1477,56 @@ async function validateGroupBookingAttempts() {
       ) {
         bookingDiscountPercent = 100;
       }
+      maxBookingDiscountPercentSeen = Math.max(
+        maxBookingDiscountPercentSeen,
+        bookingDiscountPercent,
+      );
+
       const userPriceEur = toFiniteAmount(validationData.userPriceEur);
       const userGrossPriceEur = toFiniteAmount(
         validationData.userGrossPriceEur,
       );
 
-      const lineNet = userPriceEur;
-      const lineGross = userGrossPriceEur;
-
-      attemptAcc.net += lineNet;
-      attemptAcc.gross += lineGross;
-
-      bookableAcc.netTotal += lineNet;
-      bookableAcc.grossTotal += lineGross;
-      bookableAcc.bookingDiscountPercentAll = Math.max(
-        bookableAcc.bookingDiscountPercentAll,
-        bookingDiscountPercent,
-      );
-    }
-
-    const statuses = {};
-    const errors = [];
-    let total = 0;
-    let taxAmount = 0;
-
-    for (const attempt of attempts) {
-      const startKey = attempt.start;
-      const acc = perAttempt.get(startKey);
-      if (!acc) continue;
-      if (!acc.valid) {
-        const reason = acc.firstError?.reason || "checkout.unknown_error";
-        const params = acc.firstError?.params;
-        statuses[startKey] = { valid: false, reason, params };
-        const failedTarget = acc.firstError?.target;
-        errors.push({
-          id: `${failedTarget?.id || bookableID}@${startKey}`,
-          isLead: failedTarget?.isLead ?? true,
-          label:
-            failedTarget?.title ||
-            leadBookable.value?.title ||
-            t("checkout.review.bookingLabel"),
-          reason,
-          params,
-          attemptStart: attempt.start,
-        });
-        continue;
-      }
       statuses[startKey] = {
         valid: true,
-        userPriceEur: acc.net,
-        userGrossPriceEur: acc.gross,
+        userPriceEur,
+        userGrossPriceEur,
       };
-      total += acc.gross;
-      taxAmount += Math.max(0, acc.gross - acc.net);
+      total += userGrossPriceEur;
+      taxAmount += Math.max(0, userGrossPriceEur - userPriceEur);
+      attemptGrossTotals.push(userGrossPriceEur);
     }
 
     groupBookingAttemptStatuses.value = statuses;
 
     const eligibilityMap = {};
-    for (const [id, acc] of perBookable.entries()) {
-      eligibilityMap[id] = acc.bookingDiscountPercentAll;
+    for (const target of targets) {
+      eligibilityMap[target.id] = maxBookingDiscountPercentSeen;
     }
     bookingDiscountEligibility.value = eligibilityMap;
 
     const attemptCount = attempts.length;
     const items = [];
+    const totalNet = total - taxAmount;
 
     if (errors.length === 0) {
-      for (const target of targets) {
-        const acc = perBookable.get(target.id);
-        if (!acc) continue;
-        items.push({
-          id: target.id,
-          label: t("groupBooking.summary.line", {
-            title: target.title,
-            count: attemptCount,
-          }),
-          amountEur: acc.netTotal,
-          priceDisplayEur: null,
-          skipQuantity: true,
-        });
-      }
+      const addonTitles = targets
+        .filter((target) => !target.isLead)
+        .map((target) => target.title);
+      const seriesTitle =
+        addonTitles.length > 0
+          ? `${leadTarget.title} + ${addonTitles.join(", ")}`
+          : leadTarget.title;
+      items.push({
+        id: bookableID,
+        label: t("groupBooking.summary.line", {
+          title: seriesTitle,
+          count: attemptCount,
+        }),
+        amountEur: totalNet,
+        priceDisplayEur: null,
+        skipQuantity: true,
+      });
     }
 
     if (!couponApplicability.valid) {
@@ -1517,10 +1551,7 @@ async function validateGroupBookingAttempts() {
       taxAmount,
       errors,
       canApply: couponApplicability.valid && errors.length === 0,
-      attemptGrossTotals: attempts
-        .map((attempt) => perAttempt.get(attempt.start))
-        .filter((acc) => acc?.valid)
-        .map((acc) => acc.gross),
+      attemptGrossTotals,
     });
     total = fixedCouponTotals.total;
     taxAmount = fixedCouponTotals.taxAmount;
@@ -1545,16 +1576,6 @@ async function validateGroupBookingAttempts() {
           params: { invalidCount: errors.length, totalCount: attempts.length },
         };
       }
-      for (const target of targets) {
-        if (target.isLead) continue;
-        const acc = perBookable.get(target.id);
-        if (acc && acc.failedAttempts === attempts.length) {
-          errorMap[target.id] = {
-            reason: "checkout.bookable_unavailable",
-            isLead: false,
-          };
-        }
-      }
     }
     validationErrors.value = errorMap;
     summary.value = {
@@ -1563,7 +1584,6 @@ async function validateGroupBookingAttempts() {
       total,
       errors,
     };
-    checkoutID.value = firstCheckoutId;
   } finally {
     if (myToken === validationToken) isValidating.value = false;
   }
