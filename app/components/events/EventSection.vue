@@ -87,7 +87,7 @@
           v-if="sortedEvents.length > 0"
           :bookables="sortedEvents"
           include-non-bookable
-          include-non-suitable
+          :include-non-suitable="query.inclNoSuitable"
           is-event-list
           class="hidden md:block"
         />
@@ -95,7 +95,7 @@
           v-if="sortedEvents.length > 0"
           :bookables="sortedEvents"
           include-non-bookable
-          include-non-suitable
+          :include-non-suitable="query.inclNoSuitable"
           is-event-grid
           class="md:hidden"
         />
