@@ -53,42 +53,39 @@
       </h3>
     </div>
 
-    <div class="flex flex-col flex-1 justify-between">
+    <div class="flex flex-col flex-1 justify-between md:mb-2">
       <!-- Zeitraum -->
-      <div class="mb-4">
-        <div
-          v-if="bookingTimeSlot"
-          class="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-2"
-        >
-          <UIcon name="i-lucide-clock" class="w-4 h-4 mr-1" />
-          <span v-if="isEvent && !booking.timeBegin && !booking.timeEnd">
-            Veranstaltungszeit
+      <div
+        v-if="bookingTimeSlot"
+        class="flex items-center text-xs text-gray-500 dark:text-gray-400"
+      >
+        <UIcon name="i-lucide-clock" class="w-4 h-4 mr-1" />
+        <span v-if="isEvent && !booking.timeBegin && !booking.timeEnd">
+          Veranstaltungszeit
+        </span>
+        <span v-else> Zeitraum </span>
+      </div>
+      <div class="text-lg text-primary font-semibold leading-tight h-14">
+        {{ bookingTimeSlot }}
+      </div>
+
+      <!-- Status -->
+      <div class="flex flex-wrap gap-2 mb-3">
+        <BookingStatusChip :booking="booking" />
+        <BookingPayedChip v-if="!isFree" :booking="booking" />
+      </div>
+
+      <!-- Zusatzinformationen -->
+      <div class="space-y-1">
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          Preis:
+          <span class="font-medium text-gray-700 dark:text-gray-200">
+            {{ bookingPrice }}
           </span>
-          <span v-else> Zeitraum </span>
         </div>
 
-        <div class="text-lg text-primary font-semibold leading-tight h-14">
-          {{ bookingTimeSlot }}
-        </div>
-
-        <!-- Status -->
-        <div class="flex flex-wrap gap-2 mb-3">
-          <BookingStatusChip :booking="booking" />
-          <BookingPayedChip v-if="!isFree" :booking="booking" />
-        </div>
-
-        <!-- Zusatzinformationen -->
-        <div class="space-y-1">
-          <div class="text-sm text-gray-500 dark:text-gray-400">
-            Preis:
-            <span class="font-medium text-gray-700 dark:text-gray-200">
-              {{ bookingPrice }}
-            </span>
-          </div>
-
-          <div class="text-sm text-gray-500 dark:text-gray-400">
-            Gebucht am: {{ booking.displayBookingDate }}
-          </div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          Gebucht am: {{ booking.displayBookingDate }}
         </div>
       </div>
     </div>

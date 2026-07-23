@@ -12,20 +12,21 @@ export const navigationPresets = {
     },
     {
       value: "/account/keys",
-      label: "Schlüssel",
+      label: "Digitale Schlüssel",
       icon: "i-lucide-key-round",
       disabled: false,
+    },
+
+    {
+      value: "/account/favorites",
+      label: "Favoriten",
+      icon: "i-lucide-book-heart",
+      disabled: true,
     },
     {
       value: "/account/invoices",
       label: "Rechnungen",
       icon: "i-lucide-wallet-cards",
-      disabled: true,
-    },
-    {
-      value: "/account/favorites",
-      label: "Favoriten",
-      icon: "i-lucide-book-heart",
       disabled: true,
     },
     {
