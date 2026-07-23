@@ -1,11 +1,8 @@
 <script setup>
 import { computed } from "vue";
 import { useTenantStore } from "~~/stores/tenant.js";
-import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useTenant } from "~/composables/useTenant";
-
-const { isGreaterThanMd } = useBreakpointCheck();
 
 const t = useI18n().t;
 
@@ -13,15 +10,13 @@ const route = useRoute();
 const { tenantID } = useTenant();
 
 const tenantStore = useTenantStore();
-
 const tenants = computed(() => tenantStore.getTenants);
 
 const selectedTenant = computed(() => {
   return tenants.value.find((tenant) => tenant.id === tenantID.value);
 });
-
 const selectedTenantLabel = computed(() => {
-  return selectedTenant.value?.name ?? t("tenants.selectTenant");
+  return selectedTenant.value?.name ?? "Mandant...";
 });
 
 const tenantOptions = computed(() => {
@@ -45,7 +40,7 @@ const tenantOptions = computed(() => {
       id: tenant.id,
       onSelect: () => onSelect(tenant),
       slot: "prefix",
-    }))
+    })),
   );
 
   return items;
@@ -87,71 +82,62 @@ function onClear() {
   });
 }
 
-const { contrastToPrimary, contrastToSecondary } = useContrastColor();
+const { contrastToSecondary } = useContrastColor();
+const nameColor = computed(() => {
+  if (contrastToSecondary.value === "#ffffff") {
+    return "text-white hidden md:inline";
+  } else {
+    return "text-black hidden md:inline";
+  }
+});
 </script>
 
 <template>
+  <div
+    v-if="selectedTenant"
+    class="absolute top-0 left-0 w-full h-1 bg-secondary/40"
+  />
   <UDropdownMenu
-      v-if="tenantOptions.length > 0"
+    v-if="tenantOptions.length > 0"
+    size="lg"
     :items="tenantOptions"
     :ui="{
-      content:
-        'ring-0 shadow-lg glass',
+      content: 'ring-0 shadow-lg glass',
+      itemLeadingIcon: 'mt-1',
+      item: ' before:bg-transparent data-highlighted:before:bg-transparent',
     }"
+    class="pr-0 md:pr-1 md:pl-2 h-12"
+    :class="[
+      'transition-colors',
+      selectedTenant
+        ? 'rounded-none text-(--color-on-primary) bg-(--color-primary)'
+        : '',
+    ]"
   >
-    <button
-      :class="[
-        'flex items-center px-4 relative h-12 transition-colors',
-        selectedTenant
-          ? 'text-[var(--color-on-primary)] bg-[var(--color-primary)]'
-          : 'hover:bg-white/10',
-      ]"
+    <UButton
+      variant="ghost"
+      class="flex items-center gap-0 md:gap-2 outline-none cursor-pointer"
     >
-      <div
-        v-if="selectedTenant"
-        class="absolute top-0 left-0 w-full h-1 bg-[var(--color-secondary)]/40"
+      <UUser
+        :name="selectedTenantLabel"
+        :avatar="{
+          icon: 'i-lucide-building-2',
+        }"
+        :ui="{
+          base: 'transition-none',
+          avatar: {
+            size: 'h-8 w-8',
+          },
+          name: nameColor,
+        }"
+        class="mr-0"
       />
-      <UIcon
-        name="i-lucide-building-2"
-        class="text-lg"
-        :class="isGreaterThanMd ? 'mr-2' : ''"
-        :style="
-          selectedTenant
-            ? { color: contrastToPrimary }
-            : { color: contrastToSecondary }
-        "
-      />
-      <span
-        v-if="isGreaterThanMd"
-        class="text-base"
-        :style="
-          selectedTenant
-            ? { color: contrastToPrimary }
-            : { color: contrastToSecondary }
-        "
-      >
-        {{ selectedTenantLabel }}
-      </span>
       <UIcon
         name="i-lucide-chevron-down"
-        size="14"
-        class="ml-2"
-        :style="
-          selectedTenant
-            ? { color: contrastToPrimary }
-            : { color: contrastToSecondary }
-        "
+        :class="nameColor"
+        class="mr-1 md:mr-0"
       />
-    </button>
-
-    <template #prefix-trailing="{ item }">
-      <UIcon
-        v-if="selectedTenant?.id === item.id"
-        name="i-lucide-check"
-        size="16"
-        class="text-primary"
-      />
-    </template>
+    </UButton>
   </UDropdownMenu>
 </template>
 
