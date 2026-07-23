@@ -3,7 +3,11 @@
     <DetailsAreaImages :item="item" :is-event="props.isEvent" />
     <div class="my-5 flex w-full items-center justify-between">
       <BackButton />
-      <UDropdownMenu :items="dropdownItems">
+      <UDropdownMenu
+        :items="dropdownItems"
+        :content="{ align: 'end' }"
+        :ui="{ item: 'items-center' }"
+      >
         <UButton
           icon="i-lucide-ellipsis-vertical"
           size="lg"
@@ -36,8 +40,6 @@ const props = defineProps({
     default: false,
   },
 });
-
-const route = useRoute();
 
 const { contrastToPrimary } = useContrastColor();
 const { downloadEventIcal } = useIcalDownload();
