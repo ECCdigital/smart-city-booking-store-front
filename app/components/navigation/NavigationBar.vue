@@ -12,12 +12,12 @@
     </div>
 
     <ClientOnly>
-      <div class="flex items-center">
+      <div class="flex items-center mr-5">
         <slot name="actions" />
         <AuthActions />
       </div>
       <template #fallback>
-        <div class="flex items-center gap-2 px-4 opacity-50">
+        <div class="flex items-center gap-2 px-4 mr-5 opacity-50">
           <USkeleton class="h-8 w-20" />
           <USkeleton class="h-8 w-24" />
         </div>
