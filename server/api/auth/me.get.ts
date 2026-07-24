@@ -3,18 +3,30 @@ import {
   getKeycloakConfig,
   getKeycloakEndpoints,
 } from "~~/server/utils/keycloak";
+import { clearAuthCookies } from "~~/server/utils/authCookies";
 
 export default defineEventHandler(async (event) => {
   const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
-  const accessToken = getCookie(event, "access-token");
+  let accessToken = getCookie(event, "access-token");
   const refreshToken = getCookie(event, "refresh-token");
   const authType = getCookie(event, "auth-type");
 
-  if (!accessToken) {
+  if (!accessToken && !refreshToken) {
     throw createError({
       statusCode: 401,
       statusMessage: "Not authenticated",
     });
+  }
+
+  if (!accessToken && refreshToken) {
+    accessToken = await renewAccessToken(event, refreshToken, authType);
+    if (!accessToken) {
+      clearAuthCookies(event);
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Token refresh failed",
+      });
+    }
   }
 
   try {
@@ -30,15 +42,11 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Token abgelaufen → Refresh versuchen
-    let newAccessToken: string | null = null;
-
-    if (authType === "keycloak") {
-      newAccessToken = await refreshKeycloakToken(event, refreshToken);
-    } else {
-      const result = await AuthService.refreshToken(event, refreshToken);
-      newAccessToken = result.success ? result.accessToken : null;
-    }
+    const newAccessToken = await renewAccessToken(
+      event,
+      refreshToken,
+      authType
+    );
 
     if (!newAccessToken) {
       clearAuthCookies(event);
@@ -63,9 +71,21 @@ export default defineEventHandler(async (event) => {
   }
 });
 
+async function renewAccessToken(
+  event: any,
+  refreshToken: string,
+  authType: string | undefined
+): Promise<string | null> {
+  if (authType === "keycloak") {
+    return refreshKeycloakToken(event, refreshToken);
+  }
+  const result = await AuthService.refreshToken(event, refreshToken);
+  return result.success ? result.accessToken : null;
+}
+
 async function refreshKeycloakToken(
-    event: any,
-    refreshToken: string
+  event: any,
+  refreshToken: string
 ): Promise<string | null> {
   try {
     const config = await getKeycloakConfig();
@@ -106,10 +126,4 @@ async function refreshKeycloakToken(
     console.error("Keycloak token refresh failed:", err);
     return null;
   }
-}
-
-function clearAuthCookies(event: any) {
-  deleteCookie(event, "access-token");
-  deleteCookie(event, "refresh-token");
-  deleteCookie(event, "auth-type");
 }

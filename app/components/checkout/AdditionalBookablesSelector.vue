@@ -139,7 +139,7 @@ function getErrorForItem(itemId) {
               :src="`/api/img?url=${encodeURIComponent(entry.item.imgUrl)}`"
               :alt="entry.item.title"
               class="w-8 h-8 object-cover rounded"
-            >
+            />
             <UIcon
               v-else
               :name="getBookableIcon(entry.item)"

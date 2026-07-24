@@ -1,0 +1,15 @@
+---
+description: Nitro BFF server route conventions
+globs: server/**/*
+alwaysApply: false
+---
+
+# Server / BFF Layer
+
+See `docs/agents/server.md` for full conventions.
+
+- Proxy backend via `serverFetch()` or `$fetch` to `apiBaseUrl` — never call backend from client
+- Forward auth via `access-token` cookie (HTTP-only, never expose to client)
+- Return `{ success: true, data: … }` or throw `createError`
+- Use `createConditionalCachedHandler` with `authScoped: true` when responses vary by login state
+- Log with Pino via `server/api/utils/logger.js` — no `console.log`

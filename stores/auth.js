@@ -1,6 +1,10 @@
 import { defineStore } from "pinia";
 import { useUsers } from "~/composables/api/useUsers.js";
 import { useAuth } from "~/composables/auth/useAuth.js";
+import {
+  broadcastSessionEnded,
+  isAccountPath,
+} from "~/utils/sharedAuthSync";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -88,6 +92,8 @@ export const useAuthStore = defineStore("auth", {
       return { requiresRegistration: false };
     },
     async logout() {
+      // Notify Admin / other tabs immediately (before cookie clear round-trip)
+      broadcastSessionEnded();
       try {
         const authType = useCookie("auth-type").value;
 
@@ -97,19 +103,36 @@ export const useAuthStore = defineStore("auth", {
           await $fetch("/api/auth/logout", { method: "POST" });
         }
       } finally {
-        this.invalidateAuth();
+        this.invalidateAuth({ broadcast: true });
       }
     },
-    invalidateAuth() {
+    invalidateAuth({ broadcast = false } = {}) {
       this.clearAuthPayload();
       if (import.meta.client) {
         localStorage.removeItem("auth-store");
+        if (broadcast) {
+          broadcastSessionEnded();
+        }
+      }
+    },
+    /**
+     * Cookie session dead (logout elsewhere / refresh failed).
+     * Clears Pinia user; redirects to login only on /account/*.
+     */
+    async handleInvalidSession({ redirect = true } = {}) {
+      const wasLoggedIn = this.isLoggedIn || this.tokenValid;
+      this.invalidateAuth({ broadcast: false });
+      if (!import.meta.client || !redirect || !wasLoggedIn) return;
+
+      const path = useRoute().path;
+      if (isAccountPath(path)) {
+        await navigateTo(`/login?redirect=${encodeURIComponent(path)}`);
       }
     },
     async updateUser(user) {
       const { updateUser } = useUsers();
       try {
-        await updateUser(user);
+        await updateUser({ ...user, syncSelfBookingNames: false });
 
         this.user = user;
         return this.user;

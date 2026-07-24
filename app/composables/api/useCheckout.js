@@ -22,7 +22,7 @@ export function useCheckout() {
     end,
     couponCode = null,
     couponId = null,
-    bookWithPrice = true,
+    bookWithoutDiscount = false,
   }) => {
     const api = useApiClient();
 
@@ -40,7 +40,7 @@ export function useCheckout() {
       start,
       end,
       couponCode: trimmedCode,
-      bookWithPrice,
+      bookWithoutDiscount,
       tenantID,
     };
     if (trimmedId) {
@@ -83,6 +83,45 @@ export function useCheckout() {
     return api.post(`/api/checkout/group-complete`, payload);
   };
 
+  const validateGroupBookable = async ({
+    tenantID,
+    bookableItems,
+    bookingAttempts,
+    checkoutId = null,
+    couponCode = null,
+    bookWithoutDiscount = false,
+  }) => {
+    const api = useApiClient();
+
+    const trimmedCode =
+      couponCode != null && String(couponCode).trim() !== ""
+        ? String(couponCode).trim()
+        : null;
+
+    const body = {
+      tenantID,
+      bookableItems,
+      bookingAttempts,
+      bookWithoutDiscount,
+    };
+    if (checkoutId) {
+      body.checkoutId = checkoutId;
+    }
+    if (trimmedCode) {
+      body.couponCode = trimmedCode;
+    }
+
+    const { data, error } = await api.post(
+      `/api/checkout/group-validate`,
+      body,
+    );
+    if (error) {
+      console.error("Error validating group booking:", error);
+      throw error;
+    }
+    return data;
+  };
+
   const fetchCheckoutPermissions = async (tenantID, bookableID) => {
     const api = useApiClient();
     const { data, error } = await api.get(`/api/checkout/${bookableID}/permissions/?tenantID=${tenantID}`);
@@ -121,5 +160,13 @@ export function useCheckout() {
     return data;
   }
 
-  return { fetchBookable, validateBookable, redeemCoupon, completeCheckout, completeGroupCheckout, fetchCheckoutPermissions };
+  return {
+    fetchBookable,
+    validateBookable,
+    validateGroupBookable,
+    redeemCoupon,
+    completeCheckout,
+    completeGroupCheckout,
+    fetchCheckoutPermissions,
+  };
 }

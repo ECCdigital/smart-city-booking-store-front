@@ -119,6 +119,8 @@ const props = defineProps({
   },
 });
 
+const sourceItems = computed(() => props.events);
+
 const {
   query,
   searchIsInitialized,
@@ -130,7 +132,7 @@ const {
   setSortedQueryParams,
   runSearch,
   resetResults,
-} = useBookableSearch({ isEvent: true, sourceItems: props.events });
+} = useBookableSearch({ isEvent: true, sourceItems });
 </script>
 
 <style scoped></style>

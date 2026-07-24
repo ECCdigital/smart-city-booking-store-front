@@ -1,5 +1,8 @@
 <template>
-  <div class="basis-3/4 p-4 flex flex-col justify-between">
+  <div
+    class="basis-3/4 flex flex-col justify-between"
+    :class="mapMode ? 'p-2' : 'p-4'"
+  >
     <div>
       <!-- Title -->
       <p
@@ -51,7 +54,7 @@
         >
           <UButton
             label="Details ansehen"
-            :variant="entryPageMode ? 'solid' : 'ghost'"
+            variant="outline"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer' }"
             @click="goToDetails(bookable.id, bookable.type)"

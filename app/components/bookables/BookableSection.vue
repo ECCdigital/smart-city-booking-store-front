@@ -41,7 +41,7 @@
             :only-public-events="query.pubEv"
             :only-registration-needed-events="query.regEv"
             :custom-fields="query.customFields"
-            :class="query.viewMode === 'map' ? 'ml-2 2xl:hidden': 'lg:hidden'"
+            :class="query.viewMode === 'map' ? 'ml-2 2xl:hidden' : 'lg:hidden'"
             @filter="setFilterQueryParams"
           />
         </div>
@@ -56,7 +56,11 @@
     <div class="flex flex-row lg:my-5 m-5">
       <div
         v-if="searchedResources.length > 0"
-        :class="query.viewMode === 'map' ? 'hidden 2xl:block' : 'lg:basis-1/4 hidden lg:block'"
+        :class="
+          query.viewMode === 'map'
+            ? 'hidden 2xl:block'
+            : 'lg:basis-1/4 hidden lg:block'
+        "
       >
         <FilterArea
           :key="filterResetKey"
@@ -78,7 +82,9 @@
         :class="
           searchedResources.length === 0
             ? 'basis-full '
-            : query.viewMode === 'map' ? 'basis-full 2xl:basis-3/4' : 'basis-full lg:basis-3/4'
+            : query.viewMode === 'map'
+              ? 'basis-full'
+              : 'basis-full lg:basis-3/4'
         "
       >
         <div v-if="!sortedResources.length" class="text-center mt-10 lg:mt-25">
@@ -130,6 +136,8 @@ const props = defineProps({
   },
 });
 
+const sourceItems = computed(() => props.bookables);
+
 const {
   query,
   searchIsInitialized,
@@ -142,7 +150,7 @@ const {
   setViewQueryParams,
   runSearch,
   resetResults,
-} = useBookableSearch({ isEvent: false, sourceItems: props.bookables });
+} = useBookableSearch({ isEvent: false, sourceItems });
 
 const currentView = ref(query.viewMode);
 

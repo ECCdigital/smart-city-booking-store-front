@@ -2,12 +2,33 @@
   <div class="details-availability-compact">
     <h3 class="text-base font-bold">{{ $t("detailsAvailability.title") }}</h3>
 
+    <div
+      v-if="bookable.groupBookingAllowed"
+      class="my-2 flex flex-col rounded-xl border border-primary-200 bg-primary-50/50 p-4 dark:border-primary-800 dark:bg-primary-950/30 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div class="flex items-start gap-3">
+        <UIcon
+          name="i-lucide-repeat"
+          class="mt-0.5 text-primary-600 dark:text-primary-400"
+          size="20"
+        />
+        <div>
+          <p class="font-semibold text-gray-900 dark:text-white">
+            {{ $t("detailsAvailability.groupBookingTitle") }}
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">
+            {{ $t("detailsAvailability.groupBookingDescription") }}
+          </p>
+        </div>
+      </div>
+    </div>
+
     <UAlert
       v-if="requiresTimeSelection && !hasValidPeriod"
       :title="hintText"
       icon="i-lucide-info"
       variant="ghost"
-      class="p-1 text-primary w-full mt-1 mb-1.5 text-xs flex items-center"
+      class="p-1 text-primary w-full my-2 text-sm flex items-center"
     />
 
     <UAlert
@@ -15,7 +36,7 @@
       :title="$t('detailsAvailability.noTimeSelection')"
       icon="i-lucide-info"
       variant="ghost"
-      class="p-1 text-primary w-full mt-1 mb-1.5 text-xs items-center"
+      class="p-1 text-primary w-full my-2 text-sm items-center"
     />
 
     <InputDateTimePeriod

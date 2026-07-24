@@ -1,10 +1,17 @@
 <template>
   <div
     class="shadow-lg bg-white dark:bg-gray-700 rounded-xl"
-    :class="isNotSuitable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer'"
+    :class="[
+      isNotSuitable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer',
+      mapDetailMode ? 'h-80' : '',
+    ]"
     @click="onGoToDetails"
   >
-    <div id="header" class="flex flex-col" :class="mapDetailMode? 'h-30' : 'h-36'">
+    <div
+      id="header"
+      class=""
+      :class="mapDetailMode ? 'h-28' : 'flex flex-col h-36'"
+    >
       <div class="flex h-9/10 relative">
         <BookableTypeBadge
           :type="item?.type"
@@ -12,21 +19,39 @@
           class="absolute top-2 left-2"
         />
         <img
-          v-if="!isEvent && item?.imgUrl"
+          v-if="!isEvent && item?.imgUrl && !showImageErrorHint"
           :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"
           alt="Bild des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
+          @error="onImageError"
         >
         <img
-          v-else-if="isEvent && item?.information?.teaserImage"
+          v-else-if="
+            isEvent && item?.information?.teaserImage && !showImageErrorHint
+          "
           :src="`/api/img?url=${encodeURIComponent(
             item.information.teaserImage,
           )}`"
           alt=""
           class="w-full object-cover rounded-t-xl"
+          @error="onImageError"
         >
         <ClientOnly v-else>
-          <ImagePlaceholder :theme="theme" class="w-full h-full rounded-t-xl" />
+          <div
+            class="w-full h-full rounded-t-xl flex flex-col items-center justify-center gap-2"
+          >
+            <ImagePlaceholder
+              :theme="theme"
+              class="w-full h-full rounded-t-xl"
+            />
+            <div
+              v-if="showImageErrorHint"
+              class="absolute bottom-2 left-2 right-2 flex items-center justify-center space-x-1 text-xs text-center text-gray-600 dark:text-gray-300 bg-white/80 dark:bg-gray-800/80 rounded px-2 py-1"
+            >
+              <UIcon name="i-lucide-image-off" class="w-4 h-4" />
+              <p>Bild konnte nicht geladen werden</p>
+            </div>
+          </div>
         </ClientOnly>
       </div>
       <USeparator color="primary" type="solid" size="xl" class="w-full" />
@@ -97,12 +122,22 @@ const isEvent = computed(() => {
 });
 
 const openEventTicketOptions = ref(false);
+const showImageErrorHint = ref(false);
 
 function onGoToDetails() {
-  if(!props.mapDetailMode && props.item){
-    goToDetails(props.item.id, props.item.type)
+  if (!props.mapDetailMode && props.item) {
+    goToDetails(props.item.id, props.item.type);
   }
 }
+
+function onImageError() {
+  showImageErrorHint.value = true;
+}
+
+// Reset image error state when item changes
+watch(() => props.item.id, () => {
+  showImageErrorHint.value = false;
+});
 </script>
 
 <style scoped></style>

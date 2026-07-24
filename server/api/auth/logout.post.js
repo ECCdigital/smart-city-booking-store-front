@@ -1,6 +1,6 @@
-export default defineEventHandler(async (event) => {
-    deleteCookie(event, 'access-token')
-    deleteCookie(event, 'refresh-token')
+import { clearAuthCookies } from "~~/server/utils/authCookies";
 
-    return { success: true }
-})
+export default defineEventHandler(async (event) => {
+  clearAuthCookies(event);
+  return { success: true };
+});

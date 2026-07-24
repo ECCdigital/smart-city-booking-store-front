@@ -1,5 +1,6 @@
 <script setup>
 import { useBookableStore } from "~~/stores/bookable.js";
+import { useAuthStore } from "~~/stores/auth.js";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import DetailsArea from "~/components/search/DetailsArea.vue";
 
@@ -14,22 +15,30 @@ definePageMeta({
 
 const route = useRoute();
 const bookableStore = useBookableStore();
+const authStore = useAuthStore();
 
 const catalogSlug = computed(() => route.params.catalogSlug);
 const bookableID = computed(() => route.params.bookableID);
 
-const { loadBundle } = useCatalogBundle();
+const { loadDetail } = useCatalogBundle();
 
 const bookable = computed(() =>
   bookableStore.getBookableById(bookableID.value),
 );
 
-if (!bookable.value) {
-  await loadBundle({
+async function refreshBookableDetail({ force = false } = {}) {
+  if (import.meta.client) {
+    await authStore.validateAuth(true);
+  }
+
+  await loadDetail({
     slug: catalogSlug.value || null,
     bookableID: bookableID.value,
+    force,
   });
 }
+
+await refreshBookableDetail();
 
 const { t } = useI18n();
 usePageTitle(() =>

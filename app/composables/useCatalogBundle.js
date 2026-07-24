@@ -3,15 +3,30 @@ import { useBookableStore } from "~~/stores/bookable.js";
 import { useEventStore } from "~~/stores/event.js";
 import { useTenantStore } from "~~/stores/tenant.js";
 import { usePortalStore } from "~~/stores/portal.js";
+import { useAuthStore } from "~~/stores/auth.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
 import { sendRedirect } from "h3";
 
-function buildBundleKey({ slug, tenantID, bookableID, eventID, include, base }) {
+function getAuthScope() {
+  const authStore = useAuthStore();
+  return authStore.isLoggedIn ? "auth" : "anon";
+}
+
+function buildBundleKey({
+  slug,
+  tenantID,
+  bookableID,
+  eventID,
+  include,
+  base,
+  authScope,
+}) {
   const sortedInclude = Array.isArray(include)
     ? [...include].sort().join(",")
     : include ?? "";
   return [
     "catalog-bundle",
+    authScope ?? "anon",
     slug ?? "root",
     tenantID ?? "all",
     bookableID ?? "-",
@@ -21,8 +36,8 @@ function buildBundleKey({ slug, tenantID, bookableID, eventID, include, base }) 
   ].join(":");
 }
 
-function buildContextKey(slug, tenantID) {
-  return [slug ?? "root", tenantID ?? "all"].join(":");
+function buildContextKey(slug, tenantID, authScope) {
+  return [slug ?? "root", tenantID ?? "all", authScope ?? "anon"].join(":");
 }
 
 export function useCatalogBundle() {
@@ -34,44 +49,222 @@ export function useCatalogBundle() {
   const portalStore = usePortalStore();
   const { tenantID } = useTenant();
 
+  function applyBundleResponse(
+    data,
+    contextKey,
+    { effectiveBookableID = null, effectiveEventID = null } = {},
+  ) {
+    if (data?.branding) {
+      portalStore.$patch({
+        branding: data.branding,
+        portalUrl: data.portalUrl ?? null,
+        loadedFor: contextKey,
+      });
+    }
+
+    if (data?.offersEnabled === false) {
+      portalStore.$patch({ mode: "personal", loadedFor: contextKey });
+    } else if (data?.offersEnabled === true) {
+      portalStore.$patch({ mode: "offers", loadedFor: contextKey });
+    }
+
+    if (data?.catalog) {
+      catalogStore.$patch({
+        catalog: data.catalog,
+        loadedFor: contextKey,
+      });
+    }
+    if (data?.bookables) {
+      bookableStore.$patch({
+        bookables: data.bookables,
+        loadedFor: contextKey,
+        initialized: true,
+      });
+    }
+    if (data?.bookable) {
+      bookableStore.addOrUpdate(data.bookable);
+      bookableStore.$patch((state) => {
+        const details = state.loadedDetailsFor[contextKey] ?? [];
+        const id = data.bookable.id ?? effectiveBookableID;
+        state.loadedDetailsFor[contextKey] = [
+          ...new Set([...details, id].filter(Boolean)),
+        ];
+      });
+    }
+    if (data?.events) {
+      const eventsWithType = data.events.map((evt) => ({
+        ...evt,
+        type: "event",
+      }));
+      eventStore.$patch({
+        events: eventsWithType,
+        loadedFor: contextKey,
+        initialized: true,
+      });
+    }
+    if (data?.event) {
+      eventStore.addOrUpdate(data.event);
+      eventStore.$patch((state) => {
+        const details = state.loadedDetailsFor[contextKey] ?? [];
+        const id = data.event.id ?? effectiveEventID;
+        state.loadedDetailsFor[contextKey] = [
+          ...new Set([...details, id].filter(Boolean)),
+        ];
+      });
+    }
+    if (data?.tenants) {
+      tenantStore.$patch({
+        tenants: data.tenants,
+        loadedFor: contextKey,
+        initialized: true,
+      });
+    }
+  }
+
+  function isDetailLoadedForCurrentAuth({
+    slug = null,
+    bookableID = null,
+    eventID = null,
+  } = {}) {
+    const contextKey = buildContextKey(slug, tenantID.value, getAuthScope());
+    const detailId = bookableID ?? eventID;
+    if (!detailId) return false;
+
+    const detailsForScope = bookableID
+      ? bookableStore.loadedDetailsFor[contextKey]
+      : eventStore.loadedDetailsFor[contextKey];
+
+    return detailsForScope?.includes(detailId) ?? false;
+  }
+
+  function invalidateBundle() {
+    bookableStore.$patch({
+      bookables: [],
+      loadedFor: null,
+      loadedDetailsFor: {},
+      initialized: false,
+    });
+    eventStore.$patch({
+      events: [],
+      loadedFor: null,
+      loadedDetailsFor: {},
+      initialized: false,
+    });
+    catalogStore.$patch({ loadedFor: null });
+    tenantStore.$patch({ loadedFor: null, initialized: false });
+    portalStore.$patch({ loadedFor: null });
+
+    clearNuxtData(
+      (key) =>
+        typeof key === "string" &&
+        (key.startsWith("catalog-bundle:") || key === "catalog-bundle-home"),
+    );
+  }
+
+  async function loadDetail({
+    slug = null,
+    bookableID = null,
+    eventID = null,
+    force = false,
+  } = {}) {
+    if (!bookableID && !eventID) {
+      throw new Error("loadDetail requires bookableID or eventID");
+    }
+
+    const authScope = getAuthScope();
+    const contextKey = buildContextKey(slug, tenantID.value, authScope);
+    const detailId = bookableID ?? eventID;
+
+    if (
+      !force &&
+      isDetailLoadedForCurrentAuth({ slug, bookableID, eventID })
+    ) {
+      return bookableID
+        ? bookableStore.getBookableById(bookableID)
+        : eventStore.getEventById(eventID);
+    }
+
+    const canSkipBase = Boolean(
+      catalogStore.catalog?.type &&
+        (catalogStore.catalog?.tenantId || tenantStore.tenants.length > 0),
+    );
+
+    const data = await fetchCatalogBundle({
+      slug,
+      tenantID: tenantID.value,
+      bookableID: bookableID || undefined,
+      eventID: eventID || undefined,
+      include: undefined,
+      base: canSkipBase ? false : undefined,
+      catalogType: catalogStore.catalog?.type ?? null,
+      catalogTenantID: catalogStore.catalog?.tenantId ?? null,
+      tenantIDs: tenantStore.tenants.map((tenant) => tenant.id),
+    });
+
+    if (data?.offersEnabled === false) {
+      portalStore.$patch({ mode: "personal", loadedFor: contextKey });
+      if (import.meta.client) {
+        await navigateTo("/account");
+      }
+      return data;
+    }
+
+    applyBundleResponse(data, contextKey, {
+      effectiveBookableID: bookableID,
+      effectiveEventID: eventID,
+    });
+
+    return bookableID
+      ? bookableStore.getBookableById(detailId)
+      : eventStore.getEventById(detailId);
+  }
+
   async function loadBundle({
     slug = null,
     bookableID = null,
     eventID = null,
     include = [],
+    force = false,
   } = {}) {
-    const contextKey = buildContextKey(slug, tenantID.value);
     const includeList = Array.isArray(include) ? include : [include];
+    const hasOnlyDetailRequest =
+      (bookableID || eventID) && includeList.filter(Boolean).length === 0;
+
+    if (hasOnlyDetailRequest) {
+      return loadDetail({ slug, bookableID, eventID, force });
+    }
+
+    const authScope = getAuthScope();
+    const contextKey = buildContextKey(slug, tenantID.value, authScope);
     const baseKnown =
+      !force &&
       catalogStore.loadedFor === contextKey &&
       tenantStore.loadedFor === contextKey &&
       portalStore.loadedFor === contextKey;
-    const effectiveInclude = includeList
-      .filter(Boolean)
-      .filter((entry) => {
-        if (entry === "bookables") {
-          return bookableStore.loadedFor !== contextKey;
-        }
-        if (entry === "events") {
-          return eventStore.loadedFor !== contextKey;
-        }
-        return true;
-      });
+    const effectiveInclude = includeList.filter(Boolean).filter((entry) => {
+      if (force) return true;
+      if (entry === "bookables") {
+        return bookableStore.loadedFor !== contextKey;
+      }
+      if (entry === "events") {
+        return eventStore.loadedFor !== contextKey;
+      }
+      return true;
+    });
     const bookableKnown =
+      !force &&
       bookableID &&
-      bookableStore.getBookableById(bookableID) &&
-      (bookableStore.loadedFor === contextKey ||
-        bookableStore.loadedDetailsFor[contextKey]?.includes(bookableID));
+      isDetailLoadedForCurrentAuth({ slug, bookableID });
     const eventKnown =
+      !force &&
       eventID &&
-      eventStore.getEventById(eventID) &&
-      (eventStore.loadedFor === contextKey ||
-        eventStore.loadedDetailsFor[contextKey]?.includes(eventID));
+      isDetailLoadedForCurrentAuth({ slug, eventID });
     const effectiveBookableID =
       bookableID && !bookableKnown ? bookableID : null;
     const effectiveEventID = eventID && !eventKnown ? eventID : null;
 
     if (
+      !force &&
       baseKnown &&
       effectiveInclude.length === 0 &&
       !effectiveBookableID &&
@@ -106,6 +299,7 @@ export function useCatalogBundle() {
       eventID: effectiveEventID,
       include: effectiveInclude,
       base: !baseKnown,
+      authScope,
     });
 
     const event = import.meta.server ? useRequestEvent() : null;
@@ -127,9 +321,11 @@ export function useCatalogBundle() {
       {
         server: true,
         dedupe: "defer",
-        getCachedData: (key, nuxtApp) =>
-          nuxtApp.payload.data[key] ?? nuxtApp.static.data[key],
-      }
+        getCachedData: force
+          ? () => undefined
+          : (key, nuxtApp) =>
+              nuxtApp.payload.data[key] ?? nuxtApp.static.data[key],
+      },
     );
 
     if (error.value) {
@@ -142,14 +338,6 @@ export function useCatalogBundle() {
       throw error.value;
     }
 
-    if (data.value?.branding) {
-      portalStore.$patch({
-        branding: data.value.branding,
-        portalUrl: data.value.portalUrl ?? null,
-        loadedFor: contextKey,
-      });
-    }
-
     if (data.value?.offersEnabled === false) {
       portalStore.$patch({ mode: "personal", loadedFor: contextKey });
       if (import.meta.server && event) {
@@ -158,61 +346,10 @@ export function useCatalogBundle() {
       return navigateTo(`/account`);
     }
 
-    if (data.value?.offersEnabled === true) {
-      portalStore.$patch({ mode: "offers", loadedFor: contextKey });
-    }
-
-    if (data.value?.catalog) {
-      catalogStore.$patch({
-        catalog: data.value.catalog,
-        loadedFor: contextKey,
-      });
-    }
-    if (data.value?.bookables) {
-      bookableStore.$patch({
-        bookables: data.value.bookables,
-        loadedFor: contextKey,
-        initialized: true,
-      });
-    }
-    if (data.value?.bookable) {
-      bookableStore.addOrUpdate(data.value.bookable);
-      bookableStore.$patch((state) => {
-        const details = state.loadedDetailsFor[contextKey] ?? [];
-        const id = data.value.bookable.id ?? effectiveBookableID;
-        state.loadedDetailsFor[contextKey] = [
-          ...new Set([...details, id].filter(Boolean)),
-        ];
-      });
-    }
-    if (data.value?.events) {
-      const eventsWithType = data.value.events.map((evt) => ({
-        ...evt,
-        type: "event",
-      }));
-      eventStore.$patch({
-        events: eventsWithType,
-        loadedFor: contextKey,
-        initialized: true,
-      });
-    }
-    if (data.value?.event) {
-      eventStore.addOrUpdate(data.value.event);
-      eventStore.$patch((state) => {
-        const details = state.loadedDetailsFor[contextKey] ?? [];
-        const id = data.value.event.id ?? effectiveEventID;
-        state.loadedDetailsFor[contextKey] = [
-          ...new Set([...details, id].filter(Boolean)),
-        ];
-      });
-    }
-    if (data.value?.tenants) {
-      tenantStore.$patch({
-        tenants: data.value.tenants,
-        loadedFor: contextKey,
-        initialized: true,
-      });
-    }
+    applyBundleResponse(data.value, contextKey, {
+      effectiveBookableID,
+      effectiveEventID,
+    });
 
     return data.value;
   }
@@ -230,9 +367,16 @@ export function useCatalogBundle() {
       eventID,
       include,
       base: true,
+      authScope: getAuthScope(),
     });
     clearNuxtData(cacheKey);
   }
 
-  return { loadBundle, clearBundleCache };
+  return {
+    loadBundle,
+    loadDetail,
+    isDetailLoadedForCurrentAuth,
+    clearBundleCache,
+    invalidateBundle,
+  };
 }

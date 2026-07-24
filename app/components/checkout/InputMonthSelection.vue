@@ -21,7 +21,7 @@
         <span
           :class="
             compact
-              ? 'text-xs font-semibold text-gray-900 dark:text-white'
+              ? 'text-sm font-semibold text-gray-900 dark:text-white'
               : 'text-xl font-bold text-gray-900 dark:text-white'
           "
         >
@@ -30,11 +30,7 @@
         <DateJumper @select="onJumpDate" />
       </h3>
 
-      <button
-        type="button"
-        :class="navButtonClass"
-        @click="navigateYear(1)"
-      >
+      <button type="button" :class="navButtonClass" @click="navigateYear(1)">
         <UIcon
           name="i-lucide-chevron-right"
           :size="compact ? 16 : 14"
@@ -69,7 +65,7 @@
       >
         <p
           v-if="compact"
-          class="text-xs font-semibold truncate"
+          class="text-sm font-semibold truncate"
           :class="
             month.available
               ? 'text-gray-900 dark:text-white'
@@ -78,10 +74,7 @@
         >
           {{ month.label }}
         </p>
-        <div
-          v-else
-          class="grid sm:flex items-start sm:justify-between gap-3"
-        >
+        <div v-else class="grid sm:flex items-start sm:justify-between gap-3">
           <div class="min-w-0 order-2 sm:order-1">
             <span
               class="text-sm font-medium"
@@ -154,7 +147,11 @@
     <!-- Loading indicator -->
     <div
       v-if="isLoadingAvailability"
-      :class="compact ? 'flex items-center justify-center py-2' : 'flex items-center justify-center py-4'"
+      :class="
+        compact
+          ? 'flex items-center justify-center py-2'
+          : 'flex items-center justify-center py-4'
+      "
     >
       <UIcon name="i-lucide-loader-2" class="text-gray-400 animate-spin mr-2" />
       <span class="text-sm text-gray-500">{{ $t("common.loading") }}</span>

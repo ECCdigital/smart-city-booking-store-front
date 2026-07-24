@@ -1,0 +1,15 @@
+---
+description: Composable and store conventions
+globs: app/composables/**/*,stores/**/*
+alwaysApply: false
+---
+
+# Composables & Stores
+
+See `docs/agents/coding-standards.md` and `docs/agents/architecture.md`.
+
+- Composables: `use*` prefix, return reactive state + actions
+- API composables in `app/composables/api/` wrap `useApiClient()` for a resource
+- Pinia stores for shared cross-component state (`auth`, `catalog`, `bookings`)
+- Client API calls go to `/api/*` (BFF) — never to backend URL directly
+- Return `{ data, error }` result objects — don't throw in composables unless intentional

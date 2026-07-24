@@ -5,6 +5,74 @@ Notable changes for the Smart City Booking Storefront.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).  
 Releases are tagged `v1.x.x` from branch `version/1.x`.
 
+## [Unreleased]
+
+## [1.1.5] — 2026-07-22
+
+### Added
+
+- Shared-session invalidation with Admin: BroadcastChannel + focus re-validation; on dead cookie session clear Pinia user and redirect to login only under `/account/*`
+- **DEV-817:** Group-booking validation uses a single batch BFF call (`POST /api/checkout/group-validate` → backend `validate-group`) instead of parallel per-slot validates, avoiding 429 on large series
+
+### Fixed
+
+- Local logout also clears `auth-type` cookie (`path=/`) for Admin alignment
+- `/api/auth/me` renews via refresh token when the access cookie is already gone
+
+## [1.1.4] — 2026-07-17
+
+### Changed
+
+- User profile updates send `syncSelfBookingNames: false` so existing self-bookings keep their previous names
+
+## [1.1.3] — 2026-07-17
+
+### Added
+
+- Catalog auth reload: bookables and events refresh automatically when the user logs in or out while browsing the catalog (`useCatalogAuthReload`, catalog layout)
+- Direct detail fetch for bookable and event detail pages (`loadDetail`) with auth-scoped cache tracking via `loadedDetailsFor`
+
+### Fixed
+
+- Checkout booking notes are hidden when the configured HTML is effectively empty (e.g. `<p></p>` or whitespace-only markup)
+- **DEV-805:** Checkout coupon discounts — percentage vouchers use per-line validate API prices; fixed-amount vouchers are applied once to the checkout total (or once per series-booking attempt), with the original price shown struck through when a voucher reduces the line total
+- **DEV-803:** Catalog bookables and events now reload after login so permission-dependent content (e.g. restricted bookables, group booking) is visible without a manual page refresh
+- Bookable and event detail pages reload with the authenticated API response after login redirect instead of showing stale anonymous data
+- Login and register links in the catalog navigation preserve the current page via `?redirect=` (with safe redirect validation on login)
+- Search result lists update when catalog source data changes after an auth state change
+- Logout keeps the user on the current page instead of redirecting to `/login`
+- Group booking notice is only shown when group booking is allowed
+
+### Changed
+
+- **DEV-781:** Checkout supports role-based booking discounts (`bookingDiscountPercent`) — partial discounts show a struck-through original price; `bookWithPrice` replaced by `bookWithoutDiscount` (inverted semantics, applies to all discount levels)
+- Catalog bundle client cache keys now include auth scope (`anon` vs `auth`) to prevent cross-session data leakage
+- `useBookableSearch` re-initializes or re-runs search when underlying bookable/event source items change
+
+## [1.1.2] — 2026-07-03
+
+### Added
+
+- Map shows multiple bookables at the same location — browse them via a popup or mobile carousel
+- Type icons on map results, including events
+- Group booking notice in the availability section
+- "Unknown" badge when a bookable's availability status cannot be determined
+
+### Fixed
+
+- Map loads correctly when a search returns no exact matches
+- Back button only appears when there is a previous page to return to
+- Broken or missing images in search results no longer break the layout
+- Map result images display at the correct size
+- Map uses the full width on large screens
+
+### Changed
+
+- Details button restyled for clearer visual hierarchy
+- Availability check section layout improved
+- Active and matching locations on the map are easier to spot
+- Tapping a map result card opens its details directly
+
 ## [1.1.1] — 2026-07-01
 
 ### Fixed
@@ -75,6 +143,10 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 See git tags `v1.0.0-rc.*` for release-candidate history.
 
+[1.1.5]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.4...v1.1.5
+[1.1.4]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.3...v1.1.4
+[1.1.3]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.2...v1.1.3
+[1.1.2]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.0.3...v1.0.4
