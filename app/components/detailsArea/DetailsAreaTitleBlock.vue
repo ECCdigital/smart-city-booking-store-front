@@ -6,7 +6,7 @@
       </p>
       <h2 class="text-2xl font-bold">{{ title }}</h2>
     </div>
-    <div class="flex items-center space-x-1">
+    <div class="flex items-center space-x-2">
       <slot name="actions" />
     </div>
   </div>

@@ -1,12 +1,17 @@
 <template>
   <div class="">
     <!-- Title -->
-    <DetailsAreaTitleBlock :tenant-name="tenantName" :title="title">
-      <template #actions>
-        <DetailsAreaButtonBooking :item="item" :is-event="isEvent" />
-        <DetailsAreaButtonMoreActions :item="item" :is-event="isEvent" />
-      </template>
-    </DetailsAreaTitleBlock>
+    <div
+      ref="titleBlockRef"
+      class="sticky top-0 pt-4 z-50 px-4 -mx-4 bg-neutral-50"
+    >
+      <DetailsAreaTitleBlock :tenant-name="tenantName" :title="title">
+        <template #actions>
+          <DetailsAreaButtonBooking :item="item" :is-event="isEvent" />
+          <DetailsAreaButtonMoreActions :item="item" :is-event="isEvent" />
+        </template>
+      </DetailsAreaTitleBlock>
+    </div>
 
     <div class="mt-5 grid gap-6 md:grid-cols-[1.45fr_0.9fr] md:items-start">
       <!-- Left: image, tags, description, availability -->
@@ -31,13 +36,16 @@
         <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
 
         <DetailsAreaAvailabilitySection
-          v-if="!isEvent"
+          v-if="!isEvent && isBookable"
           :bookable="item"
           :time-period="timePeriod"
           @period-selected="setSearchTimePeriod"
           @period-cleared="removeSearchTimePeriod"
         />
-        <DetailsAreaAvailabilityResults v-if="!isEvent" :item="item" />
+        <DetailsAreaAvailabilityResults
+          v-if="!isEvent && isBookable"
+          :item="item"
+        />
 
         <DetailsAreaTicketOptions v-if="isEvent" :item="item" />
 
@@ -45,7 +53,7 @@
       </div>
 
       <!-- Right: Meta information -> address, price, cancellation under price, more info -->
-      <div class="hidden md:block space-y-3 md:sticky md:top-4">
+      <div class="hidden md:block space-y-3 md:sticky" :style="stickyMetaStyle">
         <AddressInformationArea :item="item" :is-event="isEvent" />
         <PriceInformationArea :item="item" :is-event="isEvent" />
         <DetailsAreaCancellationConditions :item="item" :is-event="isEvent" />
@@ -78,6 +86,7 @@ const props = defineProps({
 });
 
 const {
+  isBookable,
   title,
   tenantName,
   badgeFieldLabels,
@@ -85,5 +94,33 @@ const {
   setSearchTimePeriod,
   removeSearchTimePeriod,
 } = useBookableDetailContent(() => props.item, props.isEvent);
+
+const titleBlockRef = ref(null);
+const stickyTop = ref(0);
+let titleBlockResizeObserver;
+
+const stickyMetaStyle = computed(() => ({
+  top: `${stickyTop.value}px`,
+}));
+
+const updateStickyTop = () => {
+  const titleHeight = titleBlockRef.value?.offsetHeight || 0;
+  // Keep the same visual spacing as the grid's mt-5 beneath the title block.
+  stickyTop.value = titleHeight + 20;
+};
+
+onMounted(async () => {
+  await nextTick();
+  updateStickyTop();
+
+  if (typeof ResizeObserver !== "undefined" && titleBlockRef.value) {
+    titleBlockResizeObserver = new ResizeObserver(updateStickyTop);
+    titleBlockResizeObserver.observe(titleBlockRef.value);
+  }
+});
+
+onBeforeUnmount(() => {
+  titleBlockResizeObserver?.disconnect();
+});
 </script>
 <style scoped></style>
