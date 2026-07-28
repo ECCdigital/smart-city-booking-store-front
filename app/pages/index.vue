@@ -1,7 +1,7 @@
 <template>
   <div class="container bg-neutral-50 dark:bg-gray-950">
     <div class="relative h-0 bg-transparent">
-      <div class="flex justify-center">
+      <div class="flex justify-center mt-12 md:mt-0">
         <SearchBar
           :location="query.location"
           :distance="query.distance"
@@ -36,9 +36,9 @@ definePageMeta({
   layout: "catalog",
   middleware: ["catalog-auth", "catalog-guard"],
   hero: {
-    height: "xl",
+    height: "lg",
     titleClass: "text-2xl",
-    subtitleClass: "text-5xl",
+    subtitleClass: "text-xl md:text-5xl",
     showOnMobile: true,
   },
 });
