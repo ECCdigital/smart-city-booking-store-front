@@ -4,16 +4,25 @@
     :style="{ aspectRatio }"
   >
     <img
-      v-if="imageUrl"
+      v-if="imageUrl && !showImageErrorHint"
       :src="imageUrl"
       :alt="altText"
       class="w-full h-full object-cover"
+      @error="onImageError"
     />
     <ClientOnly v-else>
-      <ImagePlaceholder :theme="colorMode.value" variant="poly" />
-      <template #fallback>
-        <div class="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
-      </template>
+      <div
+        class="@container w-full h-full flex items-center justify-center relative"
+      >
+        <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-sm" />
+        <div v-if="showImageErrorHint" class="absolute text-center">
+          <UIcon
+            name="i-lucide-image-off"
+            :class="iconOnly ? 'w-8 h-8' : 'w-4 h-4'"
+          />
+          <p v-if="!iconOnly" class="text-xs">Nicht gefunden</p>
+        </div>
+      </div>
     </ClientOnly>
   </div>
 </template>
@@ -50,10 +59,21 @@ const altText = computed(() => {
     return props.item.information.name;
   } else if (props.item.title) {
     return props.item.title;
-    //item?.title || ''
   }
   return "";
 });
 
 const colorMode = useColorMode();
+const theme = computed(() => {
+  if (colorMode.value === "dark") return "dark";
+  if (colorMode.value === "light") return "light";
+  return "light";
+});
+
+const showImageErrorHint = ref(false);
+
+function onImageError() {
+  console.log("*_** Image failed to load:", imageUrl.value);
+  showImageErrorHint.value = true;
+}
 </script>
