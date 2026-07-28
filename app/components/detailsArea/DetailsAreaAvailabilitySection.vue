@@ -97,7 +97,7 @@ import InputTimePeriodSlots from "~/components/checkout/InputTimePeriodSlots.vue
 import InputWeekSelection from "~/components/checkout/InputWeekSelection.vue";
 import InputMonthSelection from "~/components/checkout/InputMonthSelection.vue";
 import InputBlockPeriodSelection from "~/components/checkout/InputBlockPeriodSelection.vue";
-import { useBookableBookingMode } from "~/composables/useBookableBookingMode";
+import { useBookableBookingMode } from "~/composables/useBookableBookingMode.ts";
 
 const props = defineProps({
   bookable: {

@@ -1,34 +1,32 @@
 <template>
   <div
-    class="bg-gray-200 dark:bg-gray-700 flex justify-between rounded-md p-2 mb-2"
+    class="flex justify-between items-center bg-white dark:bg-gray-700 rounded-lg shadow-sm px-4 py-2 border border-gray-200 dark:border-gray-500 min-w-[250px]"
   >
-    <p class="text-lg basis-2/3 content-center">
+    <p class="text-semibold basis-2/3 content-center">
       {{ props.ticket.title }}
     </p>
-    <div :class="detailsMode? 'md:flex content-center space-x-1' :''">
+    <div :class="detailsMode ? 'md:flex content-center space-x-2' : ''">
       <div class="content-center">
         <BookablePriceDisplay
-            :bookable="ticket"
-            :calculated-price="ticket.calculatedPrice"
-            class="grid place-content-end text-md font-bold"
+          :bookable="ticket"
+          :calculated-price="ticket.calculatedPrice"
+          class="grid place-content-end text-md font-bold"
         />
-
       </div>
       <div class="flex md:block justify-end md:content-center">
         <UTooltip
-            :disabled="ticketsAvailable"
-            text="Dieser Tickettyp ist ausverkauft."
+          :disabled="ticketsAvailable"
+          text="Dieser Tickettyp ist ausverkauft."
         >
           <UButton
-              label="Buchen"
-              class="justify-center px-5"
-              :style="{ color: contrastToPrimary }"
-              :disabled="!ticketsAvailable"
-              @click="goToCheckout"
+            label="Buchen"
+            class="justify-center px-5"
+            :style="{ color: contrastToPrimary }"
+            :disabled="!ticketsAvailable"
+            @click="goToCheckout"
           />
         </UTooltip>
       </div>
-
     </div>
   </div>
 </template>
@@ -48,11 +46,10 @@ const props = defineProps({
   },
 });
 const ticketsAvailable = computed(
-  () => props.ticket.availability?.remaining > 0 || true
+  () => props.ticket.availability?.remaining > 0 || true,
 );
 
 const { contrastToPrimary } = useContrastColor();
-
 
 function goToCheckout() {
   const route = useRoute();

@@ -149,7 +149,6 @@ function onImageError() {
   showImageErrorHint.value = true;
 }
 function onOpenDetails(id, type) {
-  console.log("onOpenDetails", id, type);
   goToDetails(id, type);
 }
 </script>

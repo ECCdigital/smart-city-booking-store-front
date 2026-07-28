@@ -317,6 +317,19 @@
     "noEvents": "Keine Veranstaltungen gefunden",
     "noEvent": "Keine Veranstaltung gefunden"
   },
+  "bookableDetail": {
+    "bookNow": "Jetzt buchen",
+    "viewBookingOptions": "Buchungsoptionen ansehen",
+    "book": "Buchen",
+    "unavailable": "Nicht verfügbar",
+    "viewAll": "Alles ansehen",
+    "descriptionTitle": "Beschreibung von {title}",
+    "moreInfo": "Weitere Informationen",
+    "relatedTitle": "Könnte Sie auch interessieren:",
+    "cancellationTitle": "Stornierungsbedingungen",
+    "yes": "Ja"
+  },
+
   "resources": {
     "resources": "Ressourcen",
     "resource": "Ressource",
