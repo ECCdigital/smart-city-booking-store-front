@@ -8,6 +8,7 @@
       icon="i-lucide-ellipsis-vertical"
       aria-label="Aktionen"
       size="xl"
+      class="justify-center px-3 mt-5 md:my-0"
       :style="{ color: contrastToPrimary, cursor: 'pointer' }"
     />
   </UDropdownMenu>
