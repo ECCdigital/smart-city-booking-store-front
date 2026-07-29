@@ -20,6 +20,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  maxAmounts: {
+    type: Object,
+    default: () => ({}),
+  },
   leadBookableId: {
     type: String,
     default: null,
@@ -32,6 +36,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update:amount"]);
 
+const { t } = useI18n();
 
 function formatEur(value) {
   if (value === null || value === undefined) return "–";
@@ -85,24 +90,66 @@ function minAmount(id) {
   return 0;
 }
 
+function maxAmount(id) {
+  const raw = props.maxAmounts?.[id];
+  if (raw == null) return null;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.trunc(n);
+}
+
+function clampAmount(id, amount) {
+  const min = minAmount(id);
+  let next = Number(amount);
+  if (!Number.isFinite(next)) next = min;
+  next = Math.max(next, min);
+  const max = maxAmount(id);
+  if (max != null) next = Math.min(next, max);
+  return next;
+}
+
+function currentAmount(id) {
+  return props.amounts[id] ?? minAmount(id);
+}
+
+function isAtMax(id) {
+  const max = maxAmount(id);
+  return max != null && currentAmount(id) >= max;
+}
+
+/** When min === max the quantity cannot change — show a static value. */
+function isQuantityFixed(id) {
+  const max = maxAmount(id);
+  return max != null && max <= minAmount(id);
+}
+
 function increment(id) {
-  emit("update:amount", { id, amount: (props.amounts[id] || 1) + 1 });
+  if (isAtMax(id)) return;
+  emit("update:amount", {
+    id,
+    amount: clampAmount(id, currentAmount(id) + 1),
+  });
 }
 
 function decrement(id) {
-  const current = props.amounts[id] || 1;
   const min = minAmount(id);
+  const current = currentAmount(id);
   if (current > min) {
-    emit("update:amount", { id, amount: current - 1 });
+    emit("update:amount", { id, amount: clampAmount(id, current - 1) });
   }
 }
 
 function handleDirectInput(id, event) {
   const val = parseInt(event.target.value, 10);
-  const min = minAmount(id);
-  const clamped = isNaN(val) || val < min ? min : val;
+  const clamped = clampAmount(id, isNaN(val) ? minAmount(id) : val);
   event.target.value = clamped;
   emit("update:amount", { id, amount: clamped });
+}
+
+function maxHint(id) {
+  const max = maxAmount(id);
+  if (max == null) return undefined;
+  return t("checkout.maxAmountHint", { max });
 }
 
 /** Netto-Zeilenpreis oder Brutto-Gutscheinrabatt (priceDisplayEur) */
@@ -203,23 +250,38 @@ const hasContent = computed(() => {
             </span>
           </div>
 
-          <div class="flex items-center gap-0.5 flex-shrink-0">
+          <div
+            v-if="isQuantityFixed(err.id)"
+            class="tabular-nums text-sm font-medium text-red-800 dark:text-red-200 flex-shrink-0 w-[5.25rem] text-center"
+            :title="maxHint(err.id)"
+          >
+            {{ currentAmount(err.id) }}
+          </div>
+          <div
+            v-else
+            class="flex items-center gap-0.5 flex-shrink-0"
+          >
             <button
+              type="button"
               class="w-5 h-5 flex items-center justify-center rounded text-red-400 dark:text-red-500 hover:text-red-600 dark:hover:text-red-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-              :disabled="(amounts[err.id] || 1) <= minAmount(err.id)"
+              :disabled="currentAmount(err.id) <= minAmount(err.id)"
               @click="decrement(err.id)"
             >
               <UIcon name="i-lucide-minus" size="12" />
             </button>
             <input
               type="number"
-              :value="amounts[err.id] || 1"
+              :value="currentAmount(err.id)"
               :min="minAmount(err.id)"
+              :max="maxAmount(err.id) ?? undefined"
               class="amount-input w-8 h-6 text-center tabular-nums text-sm font-medium text-red-800 dark:text-red-200 bg-transparent border-b border-red-300 dark:border-red-700 focus:border-red-500 focus:outline-none"
               @change="handleDirectInput(err.id, $event)"
             >
             <button
-              class="w-5 h-5 flex items-center justify-center rounded text-red-400 dark:text-red-500 hover:text-red-600 dark:hover:text-red-300 transition-colors"
+              type="button"
+              class="w-5 h-5 flex items-center justify-center rounded text-red-400 dark:text-red-500 hover:text-red-600 dark:hover:text-red-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+              :disabled="isAtMax(err.id)"
+              :title="isAtMax(err.id) ? maxHint(err.id) : undefined"
               @click="increment(err.id)"
             >
               <UIcon name="i-lucide-plus" size="12" />
@@ -235,25 +297,37 @@ const hasContent = computed(() => {
           <span :title="item.label" class="line-clamp-2 flex-1 min-w-0">{{ item.label }}</span>
 
           <div
-            v-if="!item.skipQuantity"
+            v-if="!item.skipQuantity && isQuantityFixed(item.id)"
+            class="tabular-nums text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 w-[5.25rem] text-center"
+            :title="maxHint(item.id)"
+          >
+            {{ currentAmount(item.id) }}
+          </div>
+          <div
+            v-else-if="!item.skipQuantity"
             class="flex items-center gap-0.5 flex-shrink-0"
           >
             <button
+              type="button"
               class="w-5 h-5 flex items-center justify-center rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-              :disabled="(amounts[item.id] || 1) <= minAmount(item.id)"
+              :disabled="currentAmount(item.id) <= minAmount(item.id)"
               @click="decrement(item.id)"
             >
               <UIcon name="i-lucide-minus" size="12" />
             </button>
             <input
               type="number"
-              :value="amounts[item.id] || 1"
+              :value="currentAmount(item.id)"
               :min="minAmount(item.id)"
+              :max="maxAmount(item.id) ?? undefined"
               class="amount-input w-8 h-6 text-center tabular-nums text-sm font-medium text-gray-900 dark:text-white bg-transparent border-b border-gray-200 dark:border-gray-700 focus:border-primary focus:outline-none"
               @change="handleDirectInput(item.id, $event)"
             >
             <button
-              class="w-5 h-5 flex items-center justify-center rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              type="button"
+              class="w-5 h-5 flex items-center justify-center rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+              :disabled="isAtMax(item.id)"
+              :title="isAtMax(item.id) ? maxHint(item.id) : undefined"
               @click="increment(item.id)"
             >
               <UIcon name="i-lucide-plus" size="12" />

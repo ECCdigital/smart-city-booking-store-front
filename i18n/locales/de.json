@@ -441,6 +441,7 @@
     "event_not_found": "Die Veranstaltung wurde nicht gefunden.",
     "no_price_category": "Es wurde keine gültige Preiskategorie für dieses Objekt gefunden.",
     "max_amount_exceeded": "Die maximale Anzahl für dieses Objekt wurde überschritten.",
+    "maxAmountHint": "Maximal {max} verfügbar",
     "booking_attempts_missing": "Es fehlen erforderliche Informationen zu den Buchungsversuchen.",
     "invalid_bookable_items": "Ungültige oder fehlende Informationen zu den buchbaren Objekten.",
     "group_booking_disabled": "Serienbuchungen sind für dieses Objekt nicht erlaubt.",
