@@ -351,10 +351,55 @@ usePageTitle(() =>
 const { error: notifyError } = useNotification();
 const isLoggedIn = computed(() => authStore.isLoggedIn);
 const isLoggingOut = ref(false);
+const isSwitchingToGuest = ref(false);
+
+function resetAuthSensitiveCheckoutState() {
+  checkoutID.value = null;
+  summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
+  validationErrors.value = {};
+  bookingDiscountEligibility.value = {};
+  groupBookingAttemptStatuses.value = {};
+}
+
+function prunePersistedCheckoutStateForGuest() {
+  if (!import.meta.client) return;
+  const raw = sessionStorage.getItem(checkoutStateStorageKey.value);
+  if (!raw) return;
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return;
+
+    // Keep neutral user input/selection state, drop auth-sensitive pricing context.
+    delete parsed.selectedPaymentProviderId;
+    delete parsed.appliedCouponCode;
+    delete parsed.appliedCouponDetails;
+    delete parsed.bookWithoutDiscountPreference;
+    delete parsed.bookWithPricePreference;
+    delete parsed.checkoutID;
+    delete parsed.checkoutId;
+    delete parsed.summary;
+    delete parsed.validationErrors;
+    delete parsed.bookingDiscountEligibility;
+
+    sessionStorage.setItem(checkoutStateStorageKey.value, JSON.stringify(parsed));
+  } catch (err) {
+    console.warn("Failed to prune checkout state after logout", err);
+  }
+}
 
 watch(isLoggedIn, (loggedIn, wasLoggedIn) => {
   if (loggedIn && wasLoggedIn === false) {
     void refreshCheckoutData();
+    return;
+  }
+  if (!loggedIn && wasLoggedIn === true) {
+    if (isSwitchingToGuest.value) return;
+    resetAuthSensitiveCheckoutState();
+    prunePersistedCheckoutStateForGuest();
+    void refreshCheckoutData().finally(() => {
+      scheduleValidation();
+    });
   }
 });
 const lastAutofilledUserKey = ref(null);
@@ -670,9 +715,15 @@ async function continueAsGuest() {
   if (requiresLoginForCheckout.value || !isLoggedIn.value || isLoggingOut.value)
     return;
   isLoggingOut.value = true;
+  isSwitchingToGuest.value = true;
   try {
     await authStore.logout();
+    resetAuthSensitiveCheckoutState();
+    prunePersistedCheckoutStateForGuest();
+    await refreshCheckoutData();
+    scheduleValidation();
   } finally {
+    isSwitchingToGuest.value = false;
     isLoggingOut.value = false;
   }
 }

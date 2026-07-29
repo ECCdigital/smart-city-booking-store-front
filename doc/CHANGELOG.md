@@ -7,6 +7,10 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ## [Unreleased]
 
+### Fixed
+
+- **DEV-847:** After choosing "Log out and continue as guest" in checkout, pricing is recalculated in guest context so role-based free booking discounts from the previous authenticated session are no longer reused
+
 ## [1.1.5] — 2026-07-22
 
 ### Added
