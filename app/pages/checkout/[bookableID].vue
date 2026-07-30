@@ -330,6 +330,8 @@ const checkoutSubmitting = ref(false);
 const summary = ref({ items: [], taxAmount: 0, total: 0, errors: [] });
 const isValidating = ref(false);
 const validationErrors = ref({});
+let validationToken = 0;
+let debounceTimer = null;
 
 const selectedTimePeriod = ref({ start: null, end: null });
 const selectedAdditionalBookables = ref([]);
@@ -348,19 +350,31 @@ const isLoggingOut = ref(false);
 const isSwitchingToGuest = ref(false);
 
 function resetAuthSensitiveCheckoutState() {
+  // Invalidate in-flight validate/pricing so authenticated responses cannot
+  // repopulate summary/checkoutID after switching to guest.
+  validationToken += 1;
+  clearTimeout(debounceTimer);
+  debounceTimer = null;
+  isValidating.value = false;
+
   checkoutID.value = null;
   summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
   validationErrors.value = {};
   bookingDiscountEligibility.value = {};
   groupBookingAttemptStatuses.value = {};
+  selectedPaymentProviderId.value = null;
+  appliedCouponCode.value = null;
+  appliedCouponDetails.value = null;
+  bookWithoutDiscountPreference.value = null;
 }
 
 function prunePersistedCheckoutStateForGuest() {
   if (!import.meta.client) return;
-  const raw = sessionStorage.getItem(checkoutStateStorageKey.value);
-  if (!raw) return;
 
   try {
+    const raw = sessionStorage.getItem(checkoutStateStorageKey.value);
+    if (!raw) return;
+
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return;
 
@@ -1067,8 +1081,6 @@ const selectedBookWithoutDiscount = computed({
   },
 });
 
-let validationToken = 0;
-
 const COUPON_SUMMARY_ROW_ID = "__coupon__";
 
 function isFixedAmountCoupon(details) {
@@ -1726,7 +1738,6 @@ async function validateGroupBookingAttempts() {
   }
 }
 
-let debounceTimer = null;
 function scheduleValidation() {
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(validateAll, 200);

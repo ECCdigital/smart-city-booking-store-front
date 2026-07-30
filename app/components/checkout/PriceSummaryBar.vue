@@ -152,6 +152,32 @@ function maxHint(id) {
   return t("checkout.maxAmountHint", { max });
 }
 
+function itemLabel(id) {
+  const fromItems = props.summary?.items?.find((item) => item.id === id);
+  if (fromItems?.label) return fromItems.label;
+  const fromErrors = props.summary?.errors?.find((err) => err.id === id);
+  return fromErrors?.label || "";
+}
+
+function quantityDecreaseLabel(id) {
+  return t("checkout.quantityDecrease", { item: itemLabel(id) });
+}
+
+function quantityIncreaseLabel(id) {
+  return t("checkout.quantityIncrease", { item: itemLabel(id) });
+}
+
+function quantityInputLabel(id) {
+  return t("checkout.quantityInput", { item: itemLabel(id) });
+}
+
+function quantityFixedLabel(id) {
+  return t("checkout.quantityFixed", {
+    item: itemLabel(id),
+    amount: currentAmount(id),
+  });
+}
+
 /** Netto-Zeilenpreis oder Brutto-Gutscheinrabatt (priceDisplayEur) */
 function displayPriceCell(item) {
   if (item.priceDisplayEur != null) return item.priceDisplayEur;
@@ -254,6 +280,7 @@ const hasContent = computed(() => {
             v-if="isQuantityFixed(err.id)"
             class="tabular-nums text-sm font-medium text-red-800 dark:text-red-200 flex-shrink-0 w-[5.25rem] text-center"
             :title="maxHint(err.id)"
+            :aria-label="quantityFixedLabel(err.id)"
           >
             {{ currentAmount(err.id) }}
           </div>
@@ -265,6 +292,7 @@ const hasContent = computed(() => {
               type="button"
               class="w-5 h-5 flex items-center justify-center rounded text-red-400 dark:text-red-500 hover:text-red-600 dark:hover:text-red-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
               :disabled="currentAmount(err.id) <= minAmount(err.id)"
+              :aria-label="quantityDecreaseLabel(err.id)"
               @click="decrement(err.id)"
             >
               <UIcon name="i-lucide-minus" size="12" />
@@ -274,6 +302,7 @@ const hasContent = computed(() => {
               :value="currentAmount(err.id)"
               :min="minAmount(err.id)"
               :max="maxAmount(err.id) ?? undefined"
+              :aria-label="quantityInputLabel(err.id)"
               class="amount-input w-8 h-6 text-center tabular-nums text-sm font-medium text-red-800 dark:text-red-200 bg-transparent border-b border-red-300 dark:border-red-700 focus:border-red-500 focus:outline-none"
               @change="handleDirectInput(err.id, $event)"
             >
@@ -282,6 +311,7 @@ const hasContent = computed(() => {
               class="w-5 h-5 flex items-center justify-center rounded text-red-400 dark:text-red-500 hover:text-red-600 dark:hover:text-red-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
               :disabled="isAtMax(err.id)"
               :title="isAtMax(err.id) ? maxHint(err.id) : undefined"
+              :aria-label="quantityIncreaseLabel(err.id)"
               @click="increment(err.id)"
             >
               <UIcon name="i-lucide-plus" size="12" />
@@ -300,6 +330,7 @@ const hasContent = computed(() => {
             v-if="!item.skipQuantity && isQuantityFixed(item.id)"
             class="tabular-nums text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 w-[5.25rem] text-center"
             :title="maxHint(item.id)"
+            :aria-label="quantityFixedLabel(item.id)"
           >
             {{ currentAmount(item.id) }}
           </div>
@@ -311,6 +342,7 @@ const hasContent = computed(() => {
               type="button"
               class="w-5 h-5 flex items-center justify-center rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
               :disabled="currentAmount(item.id) <= minAmount(item.id)"
+              :aria-label="quantityDecreaseLabel(item.id)"
               @click="decrement(item.id)"
             >
               <UIcon name="i-lucide-minus" size="12" />
@@ -320,6 +352,7 @@ const hasContent = computed(() => {
               :value="currentAmount(item.id)"
               :min="minAmount(item.id)"
               :max="maxAmount(item.id) ?? undefined"
+              :aria-label="quantityInputLabel(item.id)"
               class="amount-input w-8 h-6 text-center tabular-nums text-sm font-medium text-gray-900 dark:text-white bg-transparent border-b border-gray-200 dark:border-gray-700 focus:border-primary focus:outline-none"
               @change="handleDirectInput(item.id, $event)"
             >
@@ -328,6 +361,7 @@ const hasContent = computed(() => {
               class="w-5 h-5 flex items-center justify-center rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
               :disabled="isAtMax(item.id)"
               :title="isAtMax(item.id) ? maxHint(item.id) : undefined"
+              :aria-label="quantityIncreaseLabel(item.id)"
               @click="increment(item.id)"
             >
               <UIcon name="i-lucide-plus" size="12" />

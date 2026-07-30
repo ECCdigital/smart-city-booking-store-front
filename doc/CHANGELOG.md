@@ -11,7 +11,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 - **DEV-845:** Series booking occurrences are sorted chronologically by start time so weekly multi-weekday series appear in date order in checkout preview and review
 - **DEV-846:** Checkout quantity controls respect bookable max availability (`amount`); Plus/input are capped (and locked when max is 1) instead of failing only after validate
-- **DEV-847:** After choosing "Log out and continue as guest" in checkout, pricing is recalculated in guest context so role-based free booking discounts from the previous authenticated session are no longer reused
+- **DEV-847:** After choosing "Log out and continue as guest" in checkout, pricing is recalculated in guest context so role-based free booking discounts from the previous authenticated session are no longer reused; guest reset also clears coupon/payment prefs and invalidates in-flight validation
 
 ## [1.1.5] — 2026-07-22
 
