@@ -1,7 +1,6 @@
 <template>
   <div
     class="flex items-center gap-1 bg-default border rounded-md px-1.5 border-accented focus-within:ring-1 focus-within:border-primary focus-within:ring-primary min-h-10"
-    @focusout="onFocusOut"
   >
     <UPopover
       v-model:open="isOpen"
@@ -14,7 +13,7 @@
           <button
             type="button"
             tabindex="-1"
-            class="shrink-0 p-1 rounded text-gray-400 flex items-center hover:text-primary transition-colors"
+            class="cursor-pointer shrink-0 p-1 rounded text-gray-400 flex items-center hover:text-primary transition-colors"
             aria-label="Kalender öffnen"
             @click.stop="onOpenCalender"
           >
@@ -26,7 +25,7 @@
           <button
             type="button"
             tabindex="-1"
-            class="shrink-0 p-1 rounded text-gray-400 hover:text-primary transition-colors"
+            class="cursor-pointer shrink-0 p-1 rounded text-gray-400 hover:text-primary transition-colors"
             aria-label="Uhrzeit wählen"
             @click.stop="onOpenTimeScroller"
           >
@@ -71,8 +70,6 @@ const props = defineProps({
     required: true,
   },
 });
-
-const emit = defineEmits(["update:popoverOpen", "iconClick", "focusOut"]);
 
 const isOpen = ref(false);
 

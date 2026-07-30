@@ -31,9 +31,10 @@
 
     <!-- Desktop / large: strip below SearchBar -->
     <Teleport v-if="variant === 'bar' && panelHostEl" :to="panelHostEl">
+      
       <div
         v-if="isOpen"
-        class="glass rounded-b-lg shadow-lg border border-default bg-white dark:bg-gray-700 p-3 z-50"
+        class="glass rounded-b-lg shadow-lg border border-default bg-white dark:bg-gray-700 p-2 z-50"
       >
         <div class="flex items-center justify-between gap-2 mb-3">
           <p class="text-sm font-semibold">Zeitraum auswählen</p>
@@ -48,26 +49,8 @@
           </div>
         </div>
 
-        <!--
-        <div class="text-xs border-red-500 bg-red-200">
-          dateRange: {{ dateRange }}
-          <br />
-          timeRange: {{ timeRange }}
-          <br />
-          missing: {{ missingValues }}
-          <br />
-          startTime: {{ startTime }} || endTime: {{ endTime }}
-        </div>
-
-        <div class="text-xs border-b-purple-500 bg-purple-200">
-          timePerion von SearchBar: {{ timePeriod }}
-          <br />
-          confirmedPeriod: {{ confirmedPeriod }}
-        </div>
-        -->
-
         <div class="flex flex-wrap items-end gap-2 xl:gap-3">
-          <div class="flex flex-col gap-1 min-w-38 flex-1">
+          <div class="flex flex-col gap-1 w-40">
             <span class="text-xs text-muted">Beginn · Datum</span>
             <PeriodField
               v-model="startDate"
@@ -81,7 +64,7 @@
               <input
                 v-model="startDateInput"
                 type="date"
-                class="w-full min-w-0 rounded-md bg-white p-1 m-1 text-sm text-gray-900 transition-colors duration-150 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-0 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                class="inputFieldClass"
               />
             </PeriodField>
             <div class="h-8 space-x-0.5">
@@ -102,7 +85,7 @@
             </div>
           </div>
 
-          <div class="flex flex-col gap-1 min-w-30 flex-1">
+          <div class="flex flex-col gap-1 w-36">
             <span class="text-xs text-muted">Beginn · Uhrzeit</span>
 
             <PeriodField
@@ -117,7 +100,7 @@
               <input
                 v-model="startTimeInput"
                 type="time"
-                class="w-full min-w-0 rounded-md bg-white p-1 m-1 text-sm text-gray-900 transition-colors duration-150 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-0 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                class="inputFieldClass"
               />
             </PeriodField>
             <div class="h-8">
@@ -131,7 +114,7 @@
             </div>
           </div>
 
-          <div class="flex flex-col gap-1 min-w-38 flex-1">
+          <div class="flex flex-col gap-1 w-40">
             <span class="text-xs text-muted">Ende · Datum</span>
             <PeriodField
               v-model="endDate"
@@ -141,7 +124,7 @@
               <input
                 v-model="endDateInput"
                 type="date"
-                class="w-full min-w-0 rounded-md bg-white p-1 m-1 text-sm text-gray-900 transition-colors duration-150 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-0 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                class="inputFieldClass"
               />
             </PeriodField>
             <div class="h-8 space-x-0.5">
@@ -162,7 +145,7 @@
             </div>
           </div>
 
-          <div class="flex flex-col gap-1 min-w-30 flex-1">
+          <div class="flex flex-col gap-1 w-36">
             <span class="text-xs text-muted">Ende · Uhrzeit</span>
             <PeriodField
               v-model="endTime"
@@ -176,7 +159,7 @@
               <input
                 v-model="endTimeInput"
                 type="time"
-                class="w-full min-w-0 rounded-md bg-white p-1 m-1 text-sm text-gray-900 transition-colors duration-150 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-0 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                class="inputFieldClass"
               />
             </PeriodField>
             <div class="h-8 space-x-0.5">
@@ -192,10 +175,9 @@
               />
             </div>
           </div>
-
-          <div class="flex items-end gap-1 pb-0.5 ml-auto">
-            <UButton label="OK" size="sm" @click="onSelect" />
-          </div>
+        </div>
+        <div class="flex justify-end">
+          <UButton label="OK" size="sm" @click="onSelect" />
         </div>
 
         <p
@@ -223,6 +205,7 @@
           Die Endzeit muss nach der Startzeit liegen.
         </p>
       </div>
+
     </Teleport>
 
     <!-- Small screens: popup with calendar + two time scrollers -->
@@ -754,27 +737,6 @@ function syncInFromModel(v: TimePeriod) {
       minutes: end.getMinutes(),
     };
   }
-
-  /*const startDate = v.start ? new Date(v.start) : null;
-  const endDate = v.end ? new Date(v.end) : null;
-
-  const newRange: Date[] = [];
-  const normalizedStart = normalizeDate(startDate);
-  const normalizedEnd = normalizeDate(endDate);
-  if (normalizedStart) newRange.push(normalizedStart);
-  if (normalizedEnd) newRange.push(normalizedEnd);
-  dateRange.value = newRange;
-
-  timeRange.value = {
-    start:
-      startDate != null
-        ? { hours: startDate.getHours(), minutes: startDate.getMinutes() }
-        : null,
-    end:
-      endDate != null
-        ? { hours: endDate.getHours(), minutes: endDate.getMinutes() }
-        : null,
-  };*/
 }
 
 function buildTimestampsFromState(): TimePeriod {
@@ -811,14 +773,6 @@ function formatDate(dateStr: string | number | Date) {
   const year = date.getFullYear();
   return `${day}.${month}.${year}`;
 }
-
-/*function formatDateShort(dateStr: string | number | Date | undefined) {
-  if (!dateStr) return "";
-  const date = new Date(dateStr);
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  return `${day}.${month}.`;
-}*/
 
 function formatTime(timeObj: { hours: number; minutes: number } | null) {
   if (!timeObj) return "";
@@ -902,15 +856,6 @@ function addToTime(time: TimeHM, addedMinutes: number): TimeHM {
   };
 }
 
-function setDefaultEndTime() {
-  if (!startTime.value) return;
-  if (!endTime.value) {
-    endTime.value = addToTime(startTime.value, 60);
-  } else {
-    removeValidation();
-  }
-}
-
 function addToStartTime(addedMinutes: number) {
   endTime.value = addToTime(startTime.value, addedMinutes);
 }
@@ -961,9 +906,6 @@ function onSelect() {
     end: endTime.value,
   };
 
-  console.log("dateRange", dateRange.value);
-  console.log("timeRange", timeRange.value);
-
   // Validation
   removeValidation();
   useValidation();
@@ -1012,5 +954,40 @@ input::-webkit-calendar-picker-indicator {
 
 input[type="date"]::-webkit-input-placeholder {
   visibility: hidden !important;
+}
+
+.inputFieldClass {
+  width: 100%;
+  min-width: 0;
+  margin: 0.25rem;
+  padding: 0.25rem;
+
+  background-color: #fff;
+  color: #111827;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+
+  cursor: text;
+  text-align: center;
+
+  transition:
+    background-color 150ms,
+    border-color 150ms;
+}
+
+.inputFieldClass:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.inputFieldClass:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.inputFieldClass:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
 }
 </style>
