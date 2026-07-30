@@ -131,6 +131,22 @@ function checkoutCustomFieldsFromBookable(bookable) {
   return list.filter((f) => f?.usageOptions?.context === "checkout");
 }
 
+/** Configured max quantity from bookable.amount; null = unlimited. */
+function resolveMaxAmount(bookable) {
+  if (!bookable) return null;
+  const n = Number(bookable.amount);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.trunc(n);
+}
+
+function clampBookableAmount(amount, { min = 1, max = null } = {}) {
+  let next = Number(amount);
+  if (!Number.isFinite(next)) next = min;
+  next = Math.max(Math.trunc(next), min);
+  if (max != null) next = Math.min(next, max);
+  return next;
+}
+
 const route = useRoute();
 const router = useRouter();
 const bookableID = route.params.bookableID;
@@ -314,33 +330,13 @@ const checkoutSubmitting = ref(false);
 const summary = ref({ items: [], taxAmount: 0, total: 0, errors: [] });
 const isValidating = ref(false);
 const validationErrors = ref({});
+let validationToken = 0;
+let debounceTimer = null;
 
 const selectedTimePeriod = ref({ start: null, end: null });
 const selectedAdditionalBookables = ref([]);
 
 const amounts = ref({});
-
-watch(
-  leadBookable,
-  (b) => {
-    if (b?.id && !amounts.value[b.id]) {
-      amounts.value[b.id] = 1;
-    }
-  },
-  { immediate: true },
-);
-
-watch(
-  selectedAdditionalBookables,
-  (ids) => {
-    for (const id of ids) {
-      if (!amounts.value[id]) {
-        amounts.value[id] = 1;
-      }
-    }
-  },
-  { deep: true },
-);
 
 const { t, te } = useI18n();
 usePageTitle(() =>
@@ -351,10 +347,67 @@ usePageTitle(() =>
 const { error: notifyError } = useNotification();
 const isLoggedIn = computed(() => authStore.isLoggedIn);
 const isLoggingOut = ref(false);
+const isSwitchingToGuest = ref(false);
+
+function resetAuthSensitiveCheckoutState() {
+  // Invalidate in-flight validate/pricing so authenticated responses cannot
+  // repopulate summary/checkoutID after switching to guest.
+  validationToken += 1;
+  clearTimeout(debounceTimer);
+  debounceTimer = null;
+  isValidating.value = false;
+
+  checkoutID.value = null;
+  summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
+  validationErrors.value = {};
+  bookingDiscountEligibility.value = {};
+  groupBookingAttemptStatuses.value = {};
+  selectedPaymentProviderId.value = null;
+  appliedCouponCode.value = null;
+  appliedCouponDetails.value = null;
+  bookWithoutDiscountPreference.value = null;
+}
+
+function prunePersistedCheckoutStateForGuest() {
+  if (!import.meta.client) return;
+
+  try {
+    const raw = sessionStorage.getItem(checkoutStateStorageKey.value);
+    if (!raw) return;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return;
+
+    // Keep neutral user input/selection state, drop auth-sensitive pricing context.
+    delete parsed.selectedPaymentProviderId;
+    delete parsed.appliedCouponCode;
+    delete parsed.appliedCouponDetails;
+    delete parsed.bookWithoutDiscountPreference;
+    delete parsed.bookWithPricePreference;
+    delete parsed.checkoutID;
+    delete parsed.checkoutId;
+    delete parsed.summary;
+    delete parsed.validationErrors;
+    delete parsed.bookingDiscountEligibility;
+
+    sessionStorage.setItem(checkoutStateStorageKey.value, JSON.stringify(parsed));
+  } catch (err) {
+    console.warn("Failed to prune checkout state after logout", err);
+  }
+}
 
 watch(isLoggedIn, (loggedIn, wasLoggedIn) => {
   if (loggedIn && wasLoggedIn === false) {
     void refreshCheckoutData();
+    return;
+  }
+  if (!loggedIn && wasLoggedIn === true) {
+    if (isSwitchingToGuest.value) return;
+    resetAuthSensitiveCheckoutState();
+    prunePersistedCheckoutStateForGuest();
+    void refreshCheckoutData().finally(() => {
+      scheduleValidation();
+    });
   }
 });
 const lastAutofilledUserKey = ref(null);
@@ -373,6 +426,95 @@ const bookablesInCheckout = computed(() => {
     if (entry?.item) out.push(entry.item);
   }
   return out;
+});
+
+const maxAmounts = computed(() => {
+  const map = {};
+  for (const b of bookablesInCheckout.value) {
+    if (!b?.id) continue;
+    const max = resolveMaxAmount(b);
+    if (max != null) map[b.id] = max;
+  }
+  return map;
+});
+
+function minAmountForId(id) {
+  if (id === bookableID) return 1;
+  if (mandatoryBookableIds.value.includes(id)) return 1;
+  return 0;
+}
+
+function clampAmountForId(id, amount) {
+  return clampBookableAmount(amount, {
+    min: minAmountForId(id),
+    max: maxAmounts.value[id] ?? null,
+  });
+}
+
+function applyClampedAmounts(source) {
+  if (!source || typeof source !== "object") return;
+  const next = { ...amounts.value };
+  let changed = false;
+  for (const [id, value] of Object.entries(source)) {
+    const clamped = clampAmountForId(id, value);
+    if (next[id] !== clamped) {
+      next[id] = clamped;
+      changed = true;
+    }
+  }
+  if (changed) amounts.value = next;
+}
+
+function initialLeadAmount() {
+  const fromQuery = Number(route.query.amount);
+  const seed = Number.isFinite(fromQuery) && fromQuery > 0 ? fromQuery : 1;
+  return clampAmountForId(bookableID, seed);
+}
+
+watch(
+  leadBookable,
+  (b) => {
+    if (!b?.id) return;
+    if (!amounts.value[b.id]) {
+      amounts.value = {
+        ...amounts.value,
+        [b.id]: initialLeadAmount(),
+      };
+    } else {
+      amounts.value = {
+        ...amounts.value,
+        [b.id]: clampAmountForId(b.id, amounts.value[b.id]),
+      };
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  selectedAdditionalBookables,
+  (ids) => {
+    const next = { ...amounts.value };
+    let changed = false;
+    for (const id of ids) {
+      if (!next[id]) {
+        next[id] = clampAmountForId(id, 1);
+        changed = true;
+      } else {
+        const clamped = clampAmountForId(id, next[id]);
+        if (clamped !== next[id]) {
+          next[id] = clamped;
+          changed = true;
+        }
+      }
+    }
+    if (changed) amounts.value = next;
+  },
+  { deep: true },
+);
+
+watch(maxAmounts, () => {
+  if (!Object.keys(amounts.value).length) return;
+  applyClampedAmounts(amounts.value);
 });
 
 const mergedRequiredContactFields = computed(() => {
@@ -670,9 +812,15 @@ async function continueAsGuest() {
   if (requiresLoginForCheckout.value || !isLoggedIn.value || isLoggingOut.value)
     return;
   isLoggingOut.value = true;
+  isSwitchingToGuest.value = true;
   try {
     await authStore.logout();
+    resetAuthSensitiveCheckoutState();
+    prunePersistedCheckoutStateForGuest();
+    await refreshCheckoutData();
+    scheduleValidation();
   } finally {
+    isSwitchingToGuest.value = false;
     isLoggingOut.value = false;
   }
 }
@@ -692,7 +840,7 @@ async function signOutAndLogin() {
 
 function handleAmountUpdate({ id, amount }) {
   const isMandatory = mandatoryBookableIds.value.includes(id);
-  const minAllowed = id === bookableID || isMandatory ? 1 : 0;
+  const minAllowed = minAmountForId(id);
 
   if (amount <= 0 && id !== bookableID && !isMandatory) {
     selectedAdditionalBookables.value =
@@ -701,7 +849,10 @@ function handleAmountUpdate({ id, amount }) {
       Object.entries(amounts.value).filter(([k]) => k !== id),
     );
   } else {
-    amounts.value[id] = Math.max(amount, minAllowed);
+    amounts.value[id] = clampBookableAmount(amount, {
+      min: minAllowed,
+      max: maxAmounts.value[id] ?? null,
+    });
   }
 }
 
@@ -929,8 +1080,6 @@ const selectedBookWithoutDiscount = computed({
     bookWithoutDiscountPreference.value = value === true;
   },
 });
-
-let validationToken = 0;
 
 const COUPON_SUMMARY_ROW_ID = "__coupon__";
 
@@ -1589,7 +1738,6 @@ async function validateGroupBookingAttempts() {
   }
 }
 
-let debounceTimer = null;
 function scheduleValidation() {
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(validateAll, 200);
@@ -1808,7 +1956,7 @@ function restoreCheckoutState() {
         selectedAdditionalBookables.value = parsed.selectedAdditionalBookables;
       }
       if (parsed.amounts && typeof parsed.amounts === "object") {
-        amounts.value = parsed.amounts;
+        applyClampedAmounts(parsed.amounts);
       }
       if (parsed.contactForm && typeof parsed.contactForm === "object") {
         for (const key of CONTACT_FIELD_KEYS) {
@@ -2509,6 +2657,7 @@ function onReviewEdit(section) {
             :needs-time-period-selection="needsTimePeriodSelection"
             :is-validating="isValidating"
             :amounts="amounts"
+            :max-amounts="maxAmounts"
             :lead-bookable-id="bookableID"
             :mandatory-ids="mandatoryBookableIds"
             @update:amount="handleAmountUpdate"

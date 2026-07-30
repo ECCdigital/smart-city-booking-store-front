@@ -88,6 +88,11 @@
     "insufficient_lead_time": "The booking is too soon. There must be sufficient preparation time within service hours between booking and start.",
     "selectTimePeriodTitle": "Select a time period",
     "selectTimePeriodHint": "Please select a time period first to see the price summary.",
+    "maxAmountHint": "Maximum {max} available",
+    "quantityDecrease": "Decrease quantity: {item}",
+    "quantityIncrease": "Increase quantity: {item}",
+    "quantityInput": "Quantity for {item}",
+    "quantityFixed": "Quantity for {item}: {amount}",
     "data": {
       "contactSectionTitle": "Contact details",
       "addressLookupLabel": "Find address",

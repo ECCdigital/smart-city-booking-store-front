@@ -69,6 +69,10 @@ function startOfDay(date) {
   return d;
 }
 
+function sortOccurrencesByStart(occurrences) {
+  return occurrences.sort((a, b) => a.start - b.start);
+}
+
 /**
  * Generate booking attempts for a recurrence rule.
  *
@@ -171,7 +175,7 @@ export function generateBookingAttempts(rule) {
       weekIndex += 1;
     }
 
-    return occurrences;
+    return sortOccurrencesByStart(occurrences);
   }
 
   // Monthly
@@ -208,7 +212,7 @@ export function generateBookingAttempts(rule) {
       monthIndex += 1;
     }
 
-    return occurrences;
+    return sortOccurrencesByStart(occurrences);
   }
 
   // weekday-of-month
@@ -244,7 +248,7 @@ export function generateBookingAttempts(rule) {
     monthIndex += 1;
   }
 
-  return occurrences;
+  return sortOccurrencesByStart(occurrences);
 }
 
 /**
