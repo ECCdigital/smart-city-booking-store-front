@@ -58,6 +58,12 @@
           <br />
           startTime: {{ startTime }} || endTime: {{ endTime }}
         </div>
+
+        <div class="text-xs border-b-purple-500 bg-purple-200">
+          timePerion von SearchBar: {{ timePeriod }}
+          <br />
+          confirmedPeriod: {{ confirmedPeriod }}
+        </div>
         -->
 
         <div class="flex flex-wrap items-end gap-2 xl:gap-3">
@@ -501,6 +507,7 @@ const invalidTimeslot = computed(() => {
 
 const coalesceModel = computed<TimePeriod>(() => {
   const v = props.timePeriod ?? props.modelValue ?? { start: null, end: null };
+
   return {
     start: typeof v.start === "number" ? v.start : null,
     end: typeof v.end === "number" ? v.end : null,
@@ -723,13 +730,32 @@ function syncInFromModel(v: TimePeriod) {
   if (!v || (!v.start && !v.end)) {
     dateRange.value = [];
     timeRange.value = { start: null, end: null };
-    endTimeAutoSet.value = false;
+    endTimeAutoSet.value = false; //toDo - Weg damit?!
     return;
   }
 
-  endTimeAutoSet.value = false;
+  endTimeAutoSet.value = false; //toDo - Weg damit?!
 
-  const startDate = v.start ? new Date(v.start) : null;
+  const start = v.start ? new Date(v.start) : null;
+  const end = v.end ? new Date(v.end) : null;
+
+  if (start) {
+    startDate.value = start;
+    startTime.value = {
+      hours: start.getHours(),
+      minutes: start.getMinutes(),
+    };
+  }
+  if (end) {
+    endDate.value = end || null;
+
+    endTime.value = {
+      hours: end.getHours(),
+      minutes: end.getMinutes(),
+    };
+  }
+
+  /*const startDate = v.start ? new Date(v.start) : null;
   const endDate = v.end ? new Date(v.end) : null;
 
   const newRange: Date[] = [];
@@ -748,7 +774,7 @@ function syncInFromModel(v: TimePeriod) {
       endDate != null
         ? { hours: endDate.getHours(), minutes: endDate.getMinutes() }
         : null,
-  };
+  };*/
 }
 
 function buildTimestampsFromState(): TimePeriod {
@@ -958,9 +984,14 @@ function onDeleteTimePeriod() {
   dateRange.value = [];
   timeRange.value = { start: null, end: null };
   missingValues.value = [];
-  endTimeAutoSet.value = false;
-  confirmedPeriod.value = null;
+  endTimeAutoSet.value = false; //toDo - weg damit???
+  confirmedPeriod.value = null; //toDo - weg damit???
   isOpen.value = false;
+
+  startDate.value = null;
+  startTime.value = { hours: null, minutes: null };
+  endDate.value = null;
+  endTime.value = { hours: null, minutes: null };
 
   const cleared: TimePeriod = { start: null, end: null };
   emit("update:timePeriod", cleared);
