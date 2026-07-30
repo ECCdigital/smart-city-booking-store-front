@@ -1,75 +1,92 @@
 <template>
-  <!-- Strip for md and larger screens -->
-  <div class="hidden lg:block">
-    <div
-      class="flex justify-between bg-white dark:bg-gray-700 z-100 rounded shadow-lg"
-      :class="entryPageMode ? 'p-5 space-x-1 -mt-10' : 'p-2 -mt-5'"
-      style="position: relative"
-      :style="entryPageMode ? 'width:80vw; height: 100px ' : 'width:70vw'"
-    >
-      <USelect
-        v-if="entryPageMode"
-        v-model="_searchType"
-        :items="types"
-        placeholder="Was suchen Sie?"
-        size="lg"
-        variant="ghost"
-        class="basis-1/6 rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent"
-        :ui="{
-          placeholder: hasMissingType
-            ? 'text-red-500 font-bold'
-            : 'text-gray-400 dark:text-gray-200/60',
-        }"
-      />
-      <USeparator
-        v-if="entryPageMode"
-        orientation="vertical"
-        :ui="{ border: 'border-gray-300' }"
-      />
-      <InputText
-        v-model="_term"
-        icon="i-lucide-search"
-        placeholder="Stichwort"
-        clearable
-        class="rounded-md"
-        :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
-        :ui="{
-          base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
-          leadingIcon: 'text-gray-400 dark:text-gray-200',
-        }"
-        @keyup.enter="onSearch"
-      />
-      <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
-      <AddressLookup
-        v-model="_location"
-        :distance="_distance"
-        class="basis-1/4 rounded-md"
-        :class="entryPageMode ? 'basis-2/6' : 'basis-2/5'"
-        :ui="{
-          base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
-          leadingIcon: 'text-gray-400 dark:text-gray-200',
-        }"
-        @keyup.enter="onSearch"
-        @change-distance="setDistance"
-      />
-      <USeparator orientation="vertical" :ui="{ border: 'border-gray-300' }" />
-      <InputDateTimePeriod
-        v-model:time-period="_timePeriod"
-        :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
-        @select-date="setSearchTimePeriod"
-        @remove-date="removeSearchTimePeriod"
-      />
-      <UButton
-        label="Suchen"
-        class="w-full justify-center"
-        :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
-        :style="{ color: contrastToPrimary }"
-        @click="onSearch"
+  <!-- Strip for lg and larger screens -->
+  <div
+    class="hidden lg:block"
+    :style="entryPageMode ? 'width:80vw' : 'width:70vw'"
+  >
+    <div class="relative" style="position: relative">
+      <div
+        class="flex justify-between bg-white dark:bg-gray-700 z-100 rounded shadow-lg"
+        :class="entryPageMode ? 'p-5 space-x-1 -mt-10' : 'p-2 -mt-5'"
+        :style="entryPageMode ? 'height: 100px' : undefined"
+      >
+        <USelect
+          v-if="entryPageMode"
+          v-model="_searchType"
+          :items="types"
+          placeholder="Was suchen Sie?"
+          size="lg"
+          variant="ghost"
+          class="basis-1/6 rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent"
+          :ui="{
+            placeholder: hasMissingType
+              ? 'text-red-500 font-bold'
+              : 'text-gray-400 dark:text-gray-200/60',
+          }"
+        />
+        <USeparator
+          v-if="entryPageMode"
+          orientation="vertical"
+          :ui="{ border: 'border-gray-300' }"
+        />
+        <InputText
+          v-model="_term"
+          icon="i-lucide-search"
+          placeholder="Stichwort"
+          clearable
+          class="rounded-md"
+          :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
+          :ui="{
+            base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
+            leadingIcon: 'text-gray-400 dark:text-gray-200',
+          }"
+          @keyup.enter="onSearch"
+        />
+        <USeparator
+          orientation="vertical"
+          :ui="{ border: 'border-gray-300' }"
+        />
+        <AddressLookup
+          v-model="_location"
+          :distance="_distance"
+          class="basis-1/4 rounded-md"
+          :class="entryPageMode ? 'basis-2/6' : 'basis-2/5'"
+          :ui="{
+            base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
+            leadingIcon: 'text-gray-400 dark:text-gray-200',
+          }"
+          @keyup.enter="onSearch"
+          @change-distance="setDistance"
+        />
+        <USeparator
+          orientation="vertical"
+          :ui="{ border: 'border-gray-300' }"
+        />
+        <InputDateTimePeriod
+          v-model:time-period="_timePeriod"
+          variant="bar"
+          :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
+          @select-date="setSearchTimePeriod"
+          @remove-date="removeSearchTimePeriod"
+        />
+        <UButton
+          label="Suchen"
+          class="w-full justify-center"
+          :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
+          :style="{ color: contrastToPrimary }"
+          @click="onSearch"
+        />
+      </div>
+
+      <!-- Host for datetime expand strip (full SearchBar width) -->
+      <div
+        ref="desktopPanelHost"
+        class="absolute left-0 right-0 top-full z-50"
       />
     </div>
   </div>
 
-  <!--Card for smaller screens -->
+  <!-- Card for smaller screens -->
   <UCard
     class="bg-white dark:bg-gray-700 mx-5 -mt-15 p-0 shadow-lg lg:hidden"
     :class="entryPageMode ? '-mt-20' : '-mt-10'"
@@ -119,8 +136,10 @@
       @change-distance="setDistance"
     />
     <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
+
     <InputDateTimePeriod
       :time-period="_timePeriod"
+      variant="modal"
       @select-date="setSearchTimePeriod"
       @remove-date="removeSearchTimePeriod"
     />
@@ -183,6 +202,9 @@ const props = defineProps({
   },
 });
 
+const desktopPanelHost = ref(null);
+provide("searchBarDatetimePanelHost", desktopPanelHost);
+
 const _searchType = ref(props.searchType || "bookables");
 const _term = ref(props.term);
 const _location = ref(props.location);
@@ -193,13 +215,13 @@ const _timePeriod = ref({
 });
 
 watch(
-    () => props.distance,
-    (newVal) => {
-      if (newVal !== _distance.value) {
-        _distance.value = newVal;
-      }
-    },
-)
+  () => props.distance,
+  (newVal) => {
+    if (newVal !== _distance.value) {
+      _distance.value = newVal;
+    }
+  },
+);
 
 const types = ref([
   {

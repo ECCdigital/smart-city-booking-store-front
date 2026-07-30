@@ -12,9 +12,8 @@
       month-name-format="long"
       :range="props.range"
       inline
-      auto-apply
       :enable-time-picker="false"
-      :action-row="{ showPreview: true, showSelect: false }"
+      auto-apply
       :dark="isDark"
       @range-start="onStartRange"
     />
@@ -52,7 +51,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
 :deep(.dp__menu),
 :deep(.dp__main) {
   width: var(--picker-width) !important;
