@@ -1,15 +1,15 @@
 <template>
-  <div class="w-full group content-center dark:bg-gray-700">
-    <div class="flex justify-between">
+  <div class="w-full rounded-md group content-center dark:bg-gray-700">
+    <div class="flex justify-between round-md bg-transparent">
       <UInput
         v-model="model"
         :icon="icon"
         size="lg"
         variant="ghost"
         :placeholder="props.placeholder"
-        class="w-full bg-white dark:bg-gray-700"
+        class="w-full rounded-md bg-white dark:bg-gray-700"
         :ui="{
-          base: 'w-full pr-1 hover:bg-transparent rounded-none rounded-l-md',
+          base: 'w-full pr-1 hover:bg-transparent focus:bg-transparent rounded-none rounded-l-md',
           placeholder: 'text-gray-400 dark:text-gray-200',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
         }"
