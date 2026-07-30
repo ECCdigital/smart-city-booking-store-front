@@ -31,181 +31,163 @@
 
     <!-- Desktop / large: strip below SearchBar -->
     <Teleport v-if="variant === 'bar' && panelHostEl" :to="panelHostEl">
-      
       <div
         v-if="isOpen"
-        class="glass rounded-b-lg shadow-lg border border-default bg-white dark:bg-gray-700 p-2 z-50"
+        class="glass rounded-b-lg shadow-lg border border-default bg-white dark:bg-gray-700 px-2.5 py-2 z-50"
       >
-        <div class="flex items-center justify-between gap-2 mb-3">
-          <p class="text-sm font-semibold">Zeitraum auswählen</p>
-          <div class="flex items-center gap-1">
+        <div class="flex justify-between gap-x-2 gap-y-1.5">
+          <div class="flex justify-center w-full gap-x-2">
+            <div
+              class="text-xs font-semibold text-muted shrink-0 w-12 h-10 flex items-center"
+            >
+              Beginn
+            </div>
+            <div class="flex flex-col gap-1">
+              <div class="flex gap-1">
+                <div class="w-36 shrink-0">
+                  <PeriodField
+                    v-model="startDate"
+                    version="date"
+                    :class="
+                      missingValues.includes('date') || invalidDateSlot
+                        ? 'border-2 border-red-500'
+                        : ''
+                    "
+                  >
+                    <input
+                      v-model="startDateInput"
+                      type="date"
+                      class="inputFieldClass"
+                    />
+                  </PeriodField>
+                </div>
+
+                <div class="w-26 shrink-0">
+                  <PeriodField
+                    v-model="startTime"
+                    version="time"
+                    :class="
+                      missingValues.includes('startTime') || invalidTimeslot
+                        ? 'border-2 border-red-500'
+                        : ''
+                    "
+                  >
+                    <input
+                      v-model="startTimeInput"
+                      type="time"
+                      class="inputFieldClass"
+                    />
+                  </PeriodField>
+                </div>
+              </div>
+              <div>
+                <UButton
+                  label="Jetzt"
+                  color="primary"
+                  variant="soft"
+                  size="xs"
+                  @click="setPeriodToNow"
+                />
+              </div>
+            </div>
+
+            <span class="text-muted select-none px-0.5 h-10 flex items-center"
+              >→</span
+            >
+
+            <div
+              class="text-xs font-semibold text-muted shrink-0 w-8 h-10 flex items-center"
+            >
+              Ende
+            </div>
+            <div class="flex flex-col gap-1">
+              <div class="flex gap-1">
+                <div class="w-36 shrink-0">
+                  <PeriodField
+                    v-model="endDate"
+                    version="date"
+                    :class="invalidDateSlot ? 'border-2 border-red-500' : ''"
+                  >
+                    <input
+                      v-model="endDateInput"
+                      type="date"
+                      class="inputFieldClass"
+                    />
+                  </PeriodField>
+                </div>
+
+                <div class="w-26 shrink-0">
+                  <PeriodField
+                    v-model="endTime"
+                    version="time"
+                    :class="
+                      missingValues.includes('endTime') || invalidTimeslot
+                        ? 'border-2 border-red-500'
+                        : ''
+                    "
+                  >
+                    <input
+                      v-model="endTimeInput"
+                      type="time"
+                      class="inputFieldClass"
+                    />
+                  </PeriodField>
+                </div>
+              </div>
+              <div class="flex gap-1">
+                <UButton
+                  v-for="mins in durationPresets"
+                  :key="mins"
+                  :label="'+' + formatDurationLabel(mins)"
+                  color="primary"
+                  variant="soft"
+                  size="xs"
+                  :disabled="!startTime"
+                  @click="addToStartTime(mins)"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1 items-end justify-between">
             <UButton
               color="neutral"
               variant="ghost"
               icon="i-lucide-x"
-              size="xs"
-              @click="closeWithoutSaving"
+              size="sm"
+              @click="closeAndReset"
             />
+            <UButton label="OK" size="xs" class="" @click="onSelect" />
           </div>
         </div>
 
-        <div class="flex flex-wrap items-end gap-2 xl:gap-3">
-          <div class="flex flex-col gap-1 w-40">
-            <span class="text-xs text-muted">Beginn · Datum</span>
-            <PeriodField
-              v-model="startDate"
-              version="date"
-              :class="
-                missingValues.includes('date') || invalidDateSlot
-                  ? 'border-2 border-red-500'
-                  : ''
-              "
-            >
-              <input
-                v-model="startDateInput"
-                type="date"
-                class="inputFieldClass"
-              />
-            </PeriodField>
-            <div class="h-8 space-x-0.5">
-              <UButton
-                label="Heute"
-                color="primary"
-                variant="soft"
-                size="xs"
-                @click="setPeriodDateFromNow('start', 0)"
-              />
-              <UButton
-                label="Morgen"
-                color="primary"
-                variant="soft"
-                size="xs"
-                @click="setPeriodDateFromNow('start', 1)"
-              />
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-1 w-36">
-            <span class="text-xs text-muted">Beginn · Uhrzeit</span>
-
-            <PeriodField
-              v-model="startTime"
-              version="time"
-              :class="
-                missingValues.includes('startTime') || invalidTimeslot
-                  ? 'border-2 border-red-500'
-                  : ''
-              "
-            >
-              <input
-                v-model="startTimeInput"
-                type="time"
-                class="inputFieldClass"
-              />
-            </PeriodField>
-            <div class="h-8">
-              <UButton
-                label="Jetzt"
-                color="primary"
-                variant="soft"
-                size="xs"
-                @click="setPeriodTimeFromNow('start', 0)"
-              />
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-1 w-40">
-            <span class="text-xs text-muted">Ende · Datum</span>
-            <PeriodField
-              v-model="endDate"
-              version="date"
-              :class="invalidDateSlot ? 'border-2 border-red-500' : ''"
-            >
-              <input
-                v-model="endDateInput"
-                type="date"
-                class="inputFieldClass"
-              />
-            </PeriodField>
-            <div class="h-8 space-x-0.5">
-              <UButton
-                label="Heute"
-                color="primary"
-                variant="soft"
-                size="xs"
-                @click="setPeriodDateFromNow('end', 0)"
-              />
-              <UButton
-                label="Morgen"
-                color="primary"
-                variant="soft"
-                size="xs"
-                @click="setPeriodDateFromNow('end', 1)"
-              />
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-1 w-36">
-            <span class="text-xs text-muted">Ende · Uhrzeit</span>
-            <PeriodField
-              v-model="endTime"
-              version="time"
-              :class="
-                missingValues.includes('endTime') || invalidTimeslot
-                  ? 'border-2 border-red-500'
-                  : ''
-              "
-            >
-              <input
-                v-model="endTimeInput"
-                type="time"
-                class="inputFieldClass"
-              />
-            </PeriodField>
-            <div class="h-8 space-x-0.5">
-              <UButton
-                v-for="mins in durationPresets"
-                :key="mins"
-                :label="formatDurationLabel(mins)"
-                color="primary"
-                variant="soft"
-                size="xs"
-                :disabled="!startTime"
-                @click="addToStartTime(mins)"
-              />
-            </div>
-          </div>
+        <div class="text-center">
+          <p
+            v-if="missingValues.includes('date')"
+            class="text-red-500 text-sm mt-2"
+          >
+            Bitte wählen Sie ein Datum für den Beginn.
+          </p>
+          <p
+            v-if="missingValues.includes('startTime')"
+            class="text-red-500 text-sm mt-2"
+          >
+            Bitte geben Sie eine Startuhrzeit an.
+          </p>
+          <p
+            v-if="missingValues.includes('endTime')"
+            class="text-red-500 text-sm mt-2"
+          >
+            Bitte geben Sie eine Enduhrzeit an.
+          </p>
+          <p
+            v-if="invalidTimeslot || invalidDateSlot"
+            class="text-red-500 text-sm mt-2"
+          >
+            Die Endzeit muss nach der Startzeit liegen.
+          </p>
         </div>
-        <div class="flex justify-end">
-          <UButton label="OK" size="sm" @click="onSelect" />
-        </div>
-
-        <p
-          v-if="missingValues.includes('date')"
-          class="text-red-500 text-sm mt-2"
-        >
-          Bitte wählen Sie ein Datum für den Beginn.
-        </p>
-        <p
-          v-if="missingValues.includes('startTime')"
-          class="text-red-500 text-sm mt-2"
-        >
-          Bitte geben Sie eine Startuhrzeit an.
-        </p>
-        <p
-          v-if="missingValues.includes('endTime')"
-          class="text-red-500 text-sm mt-2"
-        >
-          Bitte geben Sie eine Enduhrzeit an.
-        </p>
-        <p
-          v-if="invalidTimeslot || invalidDateSlot"
-          class="text-red-500 text-sm mt-2"
-        >
-          Die Endzeit muss nach der Startzeit liegen.
-        </p>
       </div>
-
     </Teleport>
 
     <!-- Small screens: popup with calendar + two time scrollers -->
@@ -360,6 +342,11 @@ const startDateInput = computed({
     startDate.value = new Date(v);
   },
 });
+watch(startDate, () => {
+  if (!endDate.value) {
+    setTimeout(() => (endDate.value = startDate.value), 600);
+  }
+});
 
 const startTime = ref<TimeHM | null>({ hours: null, minutes: null });
 const startTimeInput = computed({
@@ -409,6 +396,7 @@ const endDateInput = computed({
     endDate.value = new Date(v);
   },
 });
+
 const endTime = ref<TimeHM | null>({ hours: null, minutes: null });
 const endTimeInput = computed({
   get() {
@@ -443,7 +431,7 @@ const endTimeInput = computed({
 const openPopover = ref<PopoverKey>(null);
 const missingValues = ref<string[]>([]);
 const endTimeAutoSet = ref(false);
-const durationPresets = [30, 60, 120, 240];
+const durationPresets = [60, 120, 240];
 
 const now = computed(() => new Date());
 
@@ -606,7 +594,7 @@ watch(isOpen, (open) => {
 
 function toggleOpen() {
   if (isOpen.value) {
-    closeWithoutSaving();
+    closeAndReset();
   } else {
     isOpen.value = true;
     syncInFromModel(coalesceModel.value);
@@ -674,6 +662,13 @@ function applyEndDate(d: Date | null) {
   }
 }*/
 
+function setPeriodToNow() {
+  const now = new Date();
+  startDate.value = now;
+  startTime.value = { hours: now.getHours(), minutes: now.getMinutes() };
+
+  if (!endDate.value) endDate.value = now;
+}
 function setPeriodDateFromNow(slot: "start" | "end", addedDays: number) {
   const now = new Date();
 
@@ -831,8 +826,14 @@ function formatDurationLabel(minutes: number) {
   return `${h}:${String(m).padStart(2, "0")}h`;
 }
 
-function closeWithoutSaving() {
+function closeAndReset() {
   isOpen.value = false;
+
+  startDate.value = null;
+  endDate.value = null;
+  startTime.value = { hours: null, minutes: null };
+  endTime.value = { hours: null, minutes: null };
+
   syncInFromModel(coalesceModel.value);
   missingValues.value = [];
 }
