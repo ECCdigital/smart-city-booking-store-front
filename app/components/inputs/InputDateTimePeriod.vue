@@ -190,102 +190,125 @@
       </div>
     </Teleport>
 
-    <!-- Small screens: popup with calendar + two time scrollers -->
-    <!--<UModal
+    <!-- Small screens: Slideover from bottom -->
+    <USlideover
       v-if="variant === 'modal'"
       v-model:open="isOpen"
+      side="bottom"
+      inset
       title="Zeitraum auswählen"
-      :overlay="true"
-      description="Datum und Uhrzeiten für Beginn und Ende wählen."
+      description="Beginn und Ende der Buchung festlegen."
       :ui="{
-        content: 'bg-transparent divide-y-0 flex flex-col focus:outline-none',
+        overlay: 'bg-black/60',
+        content: 'w-[94vw] mx-auto rounded-t-2xl shadow-lg max-h-[85vh] pb-2',
+        header: 'min-h-0 py-3 px-4',
+        body: 'px-4 py-2 overflow-y-auto',
+        footer: 'px-4 py-3 border-t border-default',
       }"
     >
-      <template #content>
-        <UCard
-          variant="soft"
-          class="w-[min(94vw,24rem)] glass max-h-[90vh] overflow-y-auto"
-        >
-          <div class="flex justify-between items-center gap-2 mb-2">
-            <p class="text-lg font-bold">Zeitraum auswählen</p>
-            <UButton
-              color="neutral"
-              variant="ghost"
-              icon="i-lucide-x"
-              class="rounded-xl"
-              @click="closeWithoutSaving"
-            />
-          </div>
+      <template #header>
+        <div class="flex items-center justify-between w-full gap-2">
+          <p class="text-base font-semibold">Zeitraum auswählen</p>
+          <UButton
+            color="neutral"
+            variant="ghost"
+            icon="i-lucide-x"
+            size="sm"
+            class="rounded-xl"
+            @click="closeAndReset"
+          />
+        </div>
+      </template>
 
-          <div class="flex justify-center mb-4">
-            <DatePicker v-model="mobileDateRange" class="w-full" />
-          </div>
+      <template #body>
+        <div class="space-y-1 pb-2">
+          <!-- BEGIN -->
+          <PeriodFieldCompact
+            v-model:date="startDate"
+            v-model:time="startTime"
+            label="Beginn"
+            :missing-values="missingValues"
+          >
+            <template #quickAccessButtons>
+              <UButton
+                label="Jetzt"
+                color="primary"
+                variant="soft"
+                size="xs"
+                @click="setPeriodToNow"
+              />
+            </template>
+          </PeriodFieldCompact>
 
-          <div class="grid grid-cols-2 gap-3 mb-3">
-            <div class="space-y-1">
-              <p class="text-sm font-semibold text-center">Beginn</p>
-              <p class="text-xs text-center text-muted tabular-nums">
-                {{ formatDateShort(dateRange[0]) || "–" }}
-              </p>
-              <TimePickerScroller
-                :hour="timeRange.start?.hours ?? nowHour"
-                :minute="timeRange.start?.minutes ?? 0"
-                @update-hour="(h) => onBarScrollerHour('start', h)"
-                @update-minute="(m) => onBarScrollerMinute('start', m)"
+          <USeparator />
+          <!-- END -->
+          <PeriodFieldCompact
+            v-model:date="endDate"
+            v-model:time="endTime"
+            label="Ende"
+            :missing-values="missingValues"
+          >
+            <template #quickAccessButtons>
+              <UButton
+                v-for="mins in durationPresets"
+                :key="mins"
+                :label="'+' + formatDurationLabel(mins)"
+                color="primary"
+                variant="soft"
+                size="xs"
+                :disabled="!startTime"
+                @click="addToStartTime(mins)"
               />
-            </div>
-            <div class="space-y-1">
-              <p class="text-sm font-semibold text-center">Ende</p>
-              <p class="text-xs text-center text-muted tabular-nums">
-                {{ formatDateShort(dateRange[1] ?? dateRange[0]) || "–" }}
-              </p>
-              <TimePickerScroller
-                :hour="timeRange.end?.hours ?? nowHour"
-                :minute="timeRange.end?.minutes ?? 0"
-                @update-hour="(h) => onBarScrollerHour('end', h)"
-                @update-minute="(m) => onBarScrollerMinute('end', m)"
-              />
-            </div>
-          </div>
+            </template>
+          </PeriodFieldCompact>
 
           <p
             v-if="missingValues.includes('date')"
-            class="text-red-500 text-sm mb-2"
+            class="text-red-500 text-sm mt-2"
           >
-            Bitte wählen Sie ein Datum.
+            Bitte wählen Sie ein Datum für den Beginn.
           </p>
           <p
-            v-if="
-              missingValues.includes('startTime') ||
-              missingValues.includes('endTime')
-            "
-            class="text-red-500 text-sm mb-2"
+            v-if="missingValues.includes('startTime')"
+            class="text-red-500 text-sm mt-2"
           >
-            Bitte Start- und Enduhrzeit festlegen.
+            Bitte geben Sie eine Startuhrzeit an.
           </p>
-          <p v-if="invalidTimeslot" class="text-red-500 text-sm mb-2">
+          <p
+            v-if="missingValues.includes('endTime')"
+            class="text-red-500 text-sm mt-2"
+          >
+            Bitte geben Sie eine Enduhrzeit an.
+          </p>
+          <p
+            v-if="invalidTimeslot || invalidDateSlot"
+            class="text-red-500 text-sm mt-2"
+          >
             Die Endzeit muss nach der Startzeit liegen.
           </p>
-
-          <div class="flex justify-end">
-            <UButton label="OK" @click="onSelect" />
-          </div>
-        </UCard>
+        </div>
       </template>
-    </UModal>
-    -->
+
+      <template #footer>
+        <div class="flex gap-2 w-full">
+          <UButton
+            label="Abbrechen"
+            color="neutral"
+            variant="soft"
+            class="flex-1 justify-center"
+            @click="closeAndReset"
+          />
+          <UButton label="OK" class="flex-1 justify-center" @click="onSelect" />
+        </div>
+      </template>
+    </USlideover>
   </div>
 </template>
 
 <script setup lang="ts">
-//import DatePicker from "./DatePicker.vue";
-//import TimePickerScroller from "./TimePickerScroller.vue";
 import ClearButton from "~/components/inputs/ClearButton.vue";
+import PeriodFieldCompact from "~/components/inputs/PeriodFieldCompact.vue";
 import PeriodField from "~/components/inputs/PeriodField.vue";
-import {
-  calendarDateToJsDate,
-  jsDateToCalendarDate,
-} from "~/utils/localDate.js";
 
 type TimePeriod = {
   start: number | null;
@@ -294,18 +317,13 @@ type TimePeriod = {
 
 type TimeHM = { hours: number | null; minutes: number | null } | null;
 
-type PopoverKey = "startDate" | "startTime" | "endDate" | "endTime" | null;
-
 const props = defineProps<{
-  modelValue?: TimePeriod;
   timePeriod?: TimePeriod;
   compact?: boolean;
-  /** bar = Leiste unter SearchBar; modal = Popup für kleine Screens */
   variant?: "bar" | "modal";
 }>();
 
 const emit = defineEmits<{
-  (e: "update:modelValue", v: TimePeriod): void;
   (e: "update:timePeriod", v: TimePeriod): void;
   (e: "selectDate", v: TimePeriod): void;
   (e: "removeDate"): void;
@@ -428,20 +446,10 @@ const endTimeInput = computed({
   },
 });
 
-const openPopover = ref<PopoverKey>(null);
 const missingValues = ref<string[]>([]);
-const endTimeAutoSet = ref(false);
 const durationPresets = [60, 120, 240];
 
 const now = computed(() => new Date());
-
-const startDateFocused = ref(false);
-const endDateFocused = ref(false);
-const startCalendarDate = shallowRef(jsDateToCalendarDate(null));
-const endCalendarDate = shallowRef(jsDateToCalendarDate(null));
-const startPickerDate = ref<Date | null>(null);
-const endPickerDate = ref<Date | null>(null);
-const confirmedPeriod = ref<TimePeriod | null>(null);
 
 const invalidDateSlot = computed(() => {
   if (
@@ -476,8 +484,8 @@ const invalidTimeslot = computed(() => {
   return endTotalMinutes <= startTotalMinutes;
 });
 
-const coalesceModel = computed<TimePeriod>(() => {
-  const v = props.timePeriod ?? props.modelValue ?? { start: null, end: null };
+const confirmedPeriod = computed<TimePeriod>(() => {
+  const v = props.timePeriod ?? { start: null, end: null };
 
   return {
     start: typeof v.start === "number" ? v.start : null,
@@ -486,181 +494,30 @@ const coalesceModel = computed<TimePeriod>(() => {
 });
 
 const hasAnyValue = computed(
-  () =>
-    !!(coalesceModel.value.start && coalesceModel.value.end) ||
-    dateRange.value.length > 0 ||
-    !!timeRange.value.start ||
-    !!timeRange.value.end,
+  () => !!(confirmedPeriod.value.start && confirmedPeriod.value.end),
 );
 
 const hasConfirmedDisplay = computed(() => {
-  const source = confirmedPeriod.value ?? coalesceModel.value;
+  const source = confirmedPeriod.value;
   return !!(source.start && source.end);
 });
 
-/*const mobileDateRange = computed({
-  get() {
-    if (!dateRange.value.length) return null;
-    if (dateRange.value.length === 1) return [dateRange.value[0], null];
-    return [...dateRange.value];
-  },
-  set(v: Date[] | Date | null) {
-    if (!v) {
-      dateRange.value = [];
-      return;
-    }
-    if (Array.isArray(v)) {
-      const next = v
-        .filter(Boolean)
-        .map((d) => normalizeDate(d))
-        .filter(Boolean) as Date[];
-      dateRange.value = next;
-      removeValidation();
-      return;
-    }
-    applyStartDate(v);
-  },
-});*/
-
 watch(
-  coalesceModel,
+  confirmedPeriod,
   (v) => {
     syncInFromModel(v);
-    if (v.start && v.end) {
-      confirmedPeriod.value = { ...v };
-    }
   },
   { immediate: true, deep: true },
 );
-
-watch(
-  () => dateRange.value[0],
-  (d) => {
-    if (!startDateFocused.value) {
-      startCalendarDate.value = jsDateToCalendarDate(d ?? null);
-    }
-    startPickerDate.value = normalizeDate(d);
-  },
-  { immediate: true },
-);
-
-watch(
-  () => dateRange.value[1] ?? dateRange.value[0],
-  (d) => {
-    if (!endDateFocused.value) {
-      endCalendarDate.value = jsDateToCalendarDate(d ?? null);
-    }
-    endPickerDate.value = normalizeDate(d);
-  },
-  { immediate: true },
-);
-
-watch(startCalendarDate, (val) => {
-  if (!startDateFocused.value || !isCompleteCalendarDate(val)) return;
-  applyStartDate(calendarDateToJsDate(val));
-});
-
-watch(endCalendarDate, (val) => {
-  if (!endDateFocused.value || !isCompleteCalendarDate(val)) return;
-  applyEndDate(calendarDateToJsDate(val));
-});
-
-watch(startPickerDate, (d) => {
-  if (!d) return;
-  const normalized = normalizeDate(d);
-  const current = normalizeDate(dateRange.value[0]);
-  if (!normalized || (current && current.getTime() === normalized.getTime())) {
-    return;
-  }
-  applyStartDate(normalized);
-  openPopover.value = null;
-});
-
-watch(endPickerDate, (d) => {
-  if (!d) return;
-  const normalized = normalizeDate(d);
-  const current = normalizeDate(dateRange.value[1] ?? dateRange.value[0]);
-  if (!normalized || (current && current.getTime() === normalized.getTime())) {
-    return;
-  }
-  applyEndDate(normalized);
-  openPopover.value = null;
-});
-
-watch(isOpen, (open) => {
-  emit("update:open", open);
-  if (!open) openPopover.value = null;
-});
 
 function toggleOpen() {
   if (isOpen.value) {
     closeAndReset();
   } else {
     isOpen.value = true;
-    syncInFromModel(coalesceModel.value);
+    syncInFromModel(confirmedPeriod.value);
   }
 }
-
-function isCompleteCalendarDate(
-  val: { year?: number; month?: number; day?: number } | null,
-) {
-  return !!(val?.year && val?.month && val?.day && val.year >= 1000);
-}
-
-function normalizeDate(value: unknown): Date | null {
-  if (!value) return null;
-  const d = value instanceof Date ? value : new Date(value as string | number);
-  if (Number.isNaN(d.getTime())) return null;
-  const result = new Date(d);
-  result.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
-  result.setHours(0, 0, 0, 0);
-  return result;
-}
-
-function applyStartDate(d: Date | null) {
-  const normalized = normalizeDate(d);
-  if (!normalized) return;
-  const next = [...dateRange.value];
-  next[0] = normalized;
-  if (!next[1]) next[1] = normalized;
-  dateRange.value = next;
-  startCalendarDate.value = jsDateToCalendarDate(normalized);
-  removeValidation();
-}
-
-function applyEndDate(d: Date | null) {
-  const normalized = normalizeDate(d);
-  if (!normalized) return;
-  const next = [...dateRange.value];
-  if (!next[0]) next[0] = normalized;
-  next[1] = normalized;
-  dateRange.value = next;
-  endCalendarDate.value = jsDateToCalendarDate(normalized);
-  removeValidation();
-}
-
-/*function onBarScrollerHour(side: "start" | "end", hour: number) {
-  const current =
-    side === "start" ? timeRange.value.start : timeRange.value.end;
-  applyTime(side, hour, current?.minutes ?? 0);
-}*/
-
-/*function onBarScrollerMinute(side: "start" | "end", minute: number) {
-  const current =
-    side === "start" ? timeRange.value.start : timeRange.value.end;
-  applyTime(side, current?.hours ?? nowHour.value, minute);
-}*/
-
-/*function applyTime(side: "start" | "end", hours: number, minutes: number) {
-  if (side === "start") {
-    timeRange.value.start = { hours, minutes };
-    setDefaultEndTime();
-  } else {
-    endTimeAutoSet.value = false;
-    timeRange.value.end = { hours, minutes };
-    removeValidation();
-  }
-}*/
 
 function setPeriodToNow() {
   const now = new Date();
@@ -669,50 +526,13 @@ function setPeriodToNow() {
 
   if (!endDate.value) endDate.value = now;
 }
-function setPeriodDateFromNow(slot: "start" | "end", addedDays: number) {
-  const now = new Date();
-
-  if (slot === "start") {
-    startDate.value = addToDate(now, addedDays);
-  }
-  if (slot === "end") {
-    endDate.value = addToDate(now, addedDays);
-  }
-}
-
-function setPeriodTimeFromNow(slot: "start" | "end", addedMinuted: number) {
-  const now = new Date();
-
-  if (slot === "start") {
-    startTime.value = addToTime(
-      { hours: now.getHours(), minutes: now.getMinutes() },
-      addedMinuted,
-    );
-  }
-  if (slot === "end") {
-    if (
-      !startTime.value ||
-      !startTime.value.hours ||
-      !startTime.value.minutes
-    ) {
-      endTime.value = addToTime(
-        { hours: now.getHours(), minutes: now.getMinutes() },
-        addedMinuted,
-      );
-    }
-    endTime.value = addToTime(startTime.value, addedMinuted);
-  }
-}
 
 function syncInFromModel(v: TimePeriod) {
   if (!v || (!v.start && !v.end)) {
     dateRange.value = [];
     timeRange.value = { start: null, end: null };
-    endTimeAutoSet.value = false; //toDo - Weg damit?!
     return;
   }
-
-  endTimeAutoSet.value = false; //toDo - Weg damit?!
 
   const start = v.start ? new Date(v.start) : null;
   const end = v.end ? new Date(v.end) : null;
@@ -739,12 +559,18 @@ function buildTimestampsFromState(): TimePeriod {
   const baseEndDate = d1 ?? d0 ?? null;
 
   const startTs =
-    d0 && timeRange.value.start
+    d0 &&
+    timeRange.value.start &&
+    timeRange.value.start.hours !== null &&
+    timeRange.value.start.minutes !== null
       ? dateToTimestampWithTime(d0, timeRange.value.start)
       : null;
 
   const endTs =
-    baseEndDate && timeRange.value.end
+    baseEndDate &&
+    timeRange.value.end &&
+    timeRange.value.end.hours !== null &&
+    timeRange.value.end.minutes !== null
       ? dateToTimestampWithTime(baseEndDate, timeRange.value.end)
       : null;
 
@@ -769,18 +595,21 @@ function formatDate(dateStr: string | number | Date) {
   return `${day}.${month}.${year}`;
 }
 
-function formatTime(timeObj: { hours: number; minutes: number } | null) {
-  if (!timeObj) return "";
+function formatTime(
+  timeObj: { hours: number | null; minutes: number | null } | null,
+) {
+  if (!timeObj || timeObj.hours === null || timeObj.minutes === null) return "";
   const hours = String(timeObj.hours).padStart(2, "0");
   const minutes = String(timeObj.minutes).padStart(2, "0");
   return `${hours}:${minutes}`;
 }
 
+// format for display in SearchBar
 function formatDateTimeRange(
   dates: Date[],
   times: { start: TimeHM; end: TimeHM },
 ) {
-  const source = confirmedPeriod.value ?? coalesceModel.value;
+  const source = confirmedPeriod.value;
   if (source.start && source.end) {
     const start = new Date(source.start);
     const end = new Date(source.end);
@@ -818,6 +647,7 @@ function formatDateTimeRange(
   return `${startDate} ${startTime} - ${endDate} ${endTime}`;
 }
 
+//format for quick access buttons
 function formatDurationLabel(minutes: number) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
@@ -834,15 +664,10 @@ function closeAndReset() {
   startTime.value = { hours: null, minutes: null };
   endTime.value = { hours: null, minutes: null };
 
-  syncInFromModel(coalesceModel.value);
+  syncInFromModel(confirmedPeriod.value);
   missingValues.value = [];
 }
 
-function addToDate(date: Date, addedDays: number) {
-  const result = new Date(date);
-  result.setDate(result.getDate() + addedDays);
-  return result;
-}
 function addToTime(time: TimeHM, addedMinutes: number): TimeHM {
   let totalMinutes = 0;
   if (!time || time.hours === null || time.minutes === null) {
@@ -892,7 +717,6 @@ function useValidation() {
 function onSelect() {
   const start = startDate.value;
   const end = endDate.value;
-  console.log("Datum - Start - Ende: ", start, end);
 
   if (start && end) {
     dateRange.value = [start, end];
@@ -915,11 +739,8 @@ function onSelect() {
   if (invalidTimeslot.value || invalidDateSlot.value) return;
 
   const result = buildTimestampsFromState();
-  confirmedPeriod.value = result;
   isOpen.value = false;
-  openPopover.value = null;
   emit("update:timePeriod", result);
-  emit("update:modelValue", result);
   emit("selectDate", result);
 }
 
@@ -927,8 +748,6 @@ function onDeleteTimePeriod() {
   dateRange.value = [];
   timeRange.value = { start: null, end: null };
   missingValues.value = [];
-  endTimeAutoSet.value = false; //toDo - weg damit???
-  confirmedPeriod.value = null; //toDo - weg damit???
   isOpen.value = false;
 
   startDate.value = null;
@@ -938,7 +757,6 @@ function onDeleteTimePeriod() {
 
   const cleared: TimePeriod = { start: null, end: null };
   emit("update:timePeriod", cleared);
-  emit("update:modelValue", cleared);
   emit("removeDate");
 }
 </script>
