@@ -8,7 +8,7 @@
       :class="[
         'w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-md bg-white dark:bg-gray-700 hover:bg-transparent',
         compact ? 'py-1 px-2 text-sm' : 'py-2 px-3',
-        isOpen ? 'ring-1 ring-primary/40' : '',
+        isOpen ? 'md:ring-1 md:ring-primary/40' : '',
       ]"
       :ui="{
         leadingIcon: compact
