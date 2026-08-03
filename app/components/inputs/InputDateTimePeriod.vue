@@ -1,45 +1,86 @@
 <template>
   <div class="flex justify-between w-full bg-white dark:bg-gray-700">
-    <UModal
-      v-model:open="isOpen"
-      title="Zeitraum auswählen"
-      :overlay="false"
-      description="Wählen Sie den gewünschten Zeitraum aus."
+    <UButton
+      :size="compact ? 'sm' : 'lg'"
+      color="neutral"
+      variant="ghost"
+      icon="i-lucide-calendar-clock"
+      :class="[
+        'w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-md bg-white dark:bg-gray-700 hover:bg-transparent',
+        compact ? 'py-1 px-2 text-sm' : 'py-2 px-3',
+        isOpen ? 'md:ring-1 md:ring-primary/40' : '',
+      ]"
       :ui="{
-        content: 'bg-transparent divide-y-0 flex flex-col focus:outline-none',
+        leadingIcon: compact
+          ? 'text-[13px] dark:text-gray-200 mr-1'
+          : 'text-[16px] dark:text-gray-200 mr-1',
       }"
+      @click="toggleOpen"
     >
-      <UButton
-        :size="compact ? 'sm' : 'lg'"
-        color="neutral"
-        variant="ghost"
-        icon="i-lucide-calendar-clock"
-        :class="[
-          'w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-md bg-white dark:bg-gray-700 hover:bg-transparent',
-          compact ? 'py-1 px-2 text-sm' : 'py-2 px-3',
-        ]"
-        :ui="{
-          leadingIcon: compact
-            ? 'text-[13px] dark:text-gray-200 mr-1'
-            : 'text-[16px] dark:text-gray-200 mr-1',
-        }"
-      >
-        <template v-if="dateRange[0]">
-          <div class="flex justify-between w-full">
-            <div class="text-black dark:text-white">
-              {{ formatDateTimeRange(dateRange, timeRange) }}
-            </div>
+      <template v-if="hasConfirmedDisplay">
+        <div class="flex justify-between w-full">
+          <div class="text-black dark:text-white">
+            {{ formatDateTimeRange(dateRange, timeRange) }}
           </div>
-        </template>
-        <template v-else> Zeitraum </template>
-      </UButton>
+        </div>
+      </template>
+      <template v-else> Zeitraum </template>
+    </UButton>
 
-      <template #content>
-        <UCard variant="soft" class="w-90vw glass max-h-screen overflow-y-auto">
-          <div class="flex justify-between items-center">
-            <p class="text-lg font-bold my-5">Zeitraum auswählen</p>
-            <div>
-              <UTooltip text="Schließen">
+    <ClearButton :show-clear-button="hasAnyValue" @clear="onDeleteTimePeriod" />
+
+    <!-- Desktop / large: strip below SearchBar -->
+    <Teleport v-if="variant === 'bar' && panelHostEl" :to="panelHostEl">
+      <div
+        v-if="isOpen"
+        class="glass rounded-b-lg shadow-lg border border-default bg-white dark:bg-gray-700 px-2.5 py-2 z-50"
+      >
+        <div class="flex justify-between gap-x-2 gap-y-1.5">
+          <div class="flex justify-center w-full gap-x-2">
+            <div
+              class="text-xs font-semibold text-muted shrink-0 w-12 h-10 flex items-center"
+            >
+              Beginn
+            </div>
+            <div class="flex flex-col gap-1">
+              <div class="flex gap-1">
+                <div class="w-36 shrink-0">
+                  <PeriodField
+                    v-model="startDate"
+                    version="date"
+                    :class="
+                      missingValues.includes('date') || invalidDateSlot
+                        ? 'border-2 border-red-500'
+                        : ''
+                    "
+                  >
+                    <input
+                      v-model="startDateInput"
+                      type="date"
+                      class="inputFieldClass"
+                    />
+                  </PeriodField>
+                </div>
+
+                <div class="w-26 shrink-0">
+                  <PeriodField
+                    v-model="startTime"
+                    version="time"
+                    :class="
+                      missingValues.includes('startTime') || invalidTimeslot
+                        ? 'border-2 border-red-500'
+                        : ''
+                    "
+                  >
+                    <input
+                      v-model="startTimeInput"
+                      type="time"
+                      class="inputFieldClass"
+                    />
+                  </PeriodField>
+                </div>
+              </div>
+              <div>
                 <UButton
                   color="neutral"
                   variant="ghost"
@@ -51,125 +92,192 @@
             </div>
           </div>
 
-          <DatePicker v-model="dateRange" class="date-picker-container" />
-          <p v-if="missingValues.includes('date')" class="text-red-500 text-sm">
-            (Bitte wählen Sie einen Tag aus, an dem Sie buchen möchten.)
-          </p>
+                <div class="w-26 shrink-0">
+                  <PeriodField
+                    v-model="endTime"
+                    version="time"
+                    :class="
+                      missingValues.includes('endTime') || invalidTimeslot
+                        ? 'border-2 border-red-500'
+                        : ''
+                    "
+                  >
+                    <input
+                      v-model="endTimeInput"
+                      type="time"
+                      class="inputFieldClass"
+                    />
+                  </PeriodField>
+                </div>
+              </div>
+              <div class="flex gap-1">
+                <UButton
+                  v-for="mins in durationPresets"
+                  :key="mins"
+                  :label="'+' + formatDurationLabel(mins)"
+                  color="primary"
+                  variant="soft"
+                  size="xs"
+                  :disabled="!startTime"
+                  @click="addToStartTime(mins)"
+                />
+              </div>
+            </div>
+          </div>
 
-          <div class="py-3 w-full">
-            <div class="flex items-center space-x-2 mb-2">
-              <p
-                class="px-1 font-semibold"
-                :class="
-                  missingValues.includes('startTime') ? 'text-red-500' : ''
-                "
-              >
-                Startuhrzeit
-              </p>
+          <div class="flex flex-col gap-1 items-end justify-between">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-x"
+              size="sm"
+              @click="closeAndReset"
+            />
+            <UButton label="OK" size="xs" class="" @click="onSelect" />
+          </div>
+        </div>
+
+        <div class="text-center">
+          <p
+            v-if="missingValues.includes('date')"
+            class="text-red-500 text-sm mt-2"
+          >
+            Bitte wählen Sie ein Datum für den Beginn.
+          </p>
+          <p
+            v-if="missingValues.includes('startTime')"
+            class="text-red-500 text-sm mt-2"
+          >
+            Bitte geben Sie eine Startuhrzeit an.
+          </p>
+          <p
+            v-if="missingValues.includes('endTime')"
+            class="text-red-500 text-sm mt-2"
+          >
+            Bitte geben Sie eine Enduhrzeit an.
+          </p>
+          <p
+            v-if="invalidTimeslot || invalidDateSlot"
+            class="text-red-500 text-sm mt-2"
+          >
+            Die Endzeit muss nach der Startzeit liegen.
+          </p>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Small screens: Slideover from bottom -->
+    <USlideover
+      v-if="variant === 'modal'"
+      v-model:open="isOpen"
+      side="bottom"
+      inset
+      title="Zeitraum auswählen"
+      description="Beginn und Ende der Buchung festlegen."
+      :ui="{
+        overlay: 'bg-black/60',
+        content: 'w-[94vw] mx-auto rounded-t-2xl shadow-lg max-h-[85vh] pb-2',
+        header: 'min-h-0 py-3 px-4',
+        body: 'px-4 py-2 overflow-y-auto',
+        footer: 'px-4 py-3 border-t border-default',
+      }"
+    >
+      <template #header>
+        <div class="flex items-center justify-between w-full gap-2">
+          <p class="text-base font-semibold">Zeitraum auswählen</p>
+          <UButton
+            color="neutral"
+            variant="ghost"
+            icon="i-lucide-x"
+            size="sm"
+            class="rounded-xl"
+            @click="closeAndReset"
+          />
+        </div>
+      </template>
+
+      <template #body>
+        <div class="space-y-1 pb-2">
+          <!-- BEGIN -->
+          <PeriodFieldCompact
+            v-model:date="startDate"
+            v-model:time="startTime"
+            label="Beginn"
+            :missing-values="missingValues"
+          >
+            <template #quickAccessButtons>
               <UButton
                 label="Jetzt"
-                color="neutral"
+                color="primary"
                 variant="soft"
-                @click="
-                  () =>
-                    (timeRange.start = {
-                      hours: new Date().getHours(),
-                      minutes: new Date().getMinutes(),
-                    })
-                "
+                size="xs"
+                @click="setPeriodToNow"
               />
-            </div>
-            <div class="flex items-center space-x-2">
-              <InputTime
-                v-model="timeRange.start"
-                v-model:date="startInputDate"
-                show-date
-                class="w-full"
-                @update:model-value="setDefaultEndTime"
-              />
-            </div>
+            </template>
+          </PeriodFieldCompact>
 
-            <p
-              v-if="missingValues.includes('startTime')"
-              class="text-red-500 text-sm"
-            >
-              (Bitte geben Sie eine Uhrzeit für den Beginn Ihrer Buchung an.)
-            </p>
-          </div>
-
-          <div class="py-3 w-full">
-            <div class="flex items-center space-x-2 mb-2">
-              <p
-                class="px-1 font-semibold"
-                :class="missingValues.includes('endTime') ? 'text-red-500' : ''"
-              >
-                Enduhrzeit
-              </p>
-
+          <USeparator />
+          <!-- END -->
+          <PeriodFieldCompact
+            v-model:date="endDate"
+            v-model:time="endTime"
+            label="Ende"
+            :missing-values="missingValues"
+          >
+            <template #quickAccessButtons>
               <UButton
-                label="0:30h"
-                color="neutral"
+                v-for="mins in durationPresets"
+                :key="mins"
+                :label="'+' + formatDurationLabel(mins)"
+                color="primary"
                 variant="soft"
-                :disabled="!timeRange.start"
-                @click="addToStartTime(30)"
+                size="xs"
+                :disabled="!startTime"
+                @click="addToStartTime(mins)"
               />
-              <UButton
-                label="1:00h"
-                color="neutral"
-                variant="soft"
-                :disabled="!timeRange.start"
-                @click="addToStartTime(60)"
-              />
-              <UButton
-                label="2:00h"
-                color="neutral"
-                variant="soft"
-                :disabled="!timeRange.start"
-                @click="addToStartTime(120)"
-              />
-              <UButton
-                label="4:00h"
-                color="neutral"
-                variant="soft"
-                :disabled="!timeRange.start"
-                @click="addToStartTime(240)"
-              />
-            </div>
+            </template>
+          </PeriodFieldCompact>
 
-            <div class="flex items-center space-x-2">
-              <InputTime
-                v-model="timeRange.end"
-                v-model:date="endInputDate"
-                show-date
-                :disabled="!timeRange.start"
-                class="w-full"
-                @update:model-value="onEndTimeManualChange"
-              />
-            </div>
-            <p
-              v-if="missingValues.includes('endTime')"
-              class="text-red-500 text-sm"
-            >
-              (Bitte geben Sie eine Uhrzeit für das Ende Ihrer Buchung an.)
-            </p>
-            <p v-if="invalidTimeslot" class="text-red-500 text-sm">
-              (Die Endzeit muss nach der Startzeit liegen.)
-            </p>
-          </div>
-
-          <div class="flex justify-end">
-            <UButton
-              label="OK"
-              variant="ghost"
-              class="dark:text-light text-dark"
-              @click="onSelectDate"
-            />
-          </div>
-        </UCard>
+          <p
+            v-if="missingValues.includes('date')"
+            class="text-red-500 text-sm mt-2"
+          >
+            Bitte wählen Sie ein Datum für den Beginn.
+          </p>
+          <p
+            v-if="missingValues.includes('startTime')"
+            class="text-red-500 text-sm mt-2"
+          >
+            Bitte geben Sie eine Startuhrzeit an.
+          </p>
+          <p
+            v-if="missingValues.includes('endTime')"
+            class="text-red-500 text-sm mt-2"
+          >
+            Bitte geben Sie eine Enduhrzeit an.
+          </p>
+          <p
+            v-if="invalidTimeslot || invalidDateSlot"
+            class="text-red-500 text-sm mt-2"
+          >
+            Die Endzeit muss nach der Startzeit liegen.
+          </p>
+        </div>
       </template>
-    </UModal>
 
-    <ClearButton :show-clear-button="hasAnyValue" @clear="onDeleteTimePeriod" />
+      <template #footer>
+        <div class="flex gap-2 w-full">
+          <UButton
+            label="Abbrechen"
+            color="neutral"
+            variant="soft"
+            class="flex-1 justify-center"
+            @click="closeAndReset"
+          />
+          <UButton label="OK" class="flex-1 justify-center" @click="onSelect" />
+        </div>
+      </template>
+    </USlideover>
   </div>
 </template>
 
@@ -177,6 +285,8 @@
 import DatePicker from "./DatePicker.vue";
 import InputTime from "./InputTime.vue";
 import ClearButton from "~/components/inputs/ClearButton.vue";
+import PeriodFieldCompact from "~/components/inputs/PeriodFieldCompact.vue";
+import PeriodField from "~/components/inputs/PeriodField.vue";
 
 /**
  * Public API:
@@ -187,38 +297,167 @@ type TimePeriod = {
   end: number | null;
 };
 
-type TimeHM = { hours: number; minutes: number } | null;
+type TimeHM = { hours: number | null; minutes: number | null } | null;
 
 const props = defineProps<{
-  modelValue?: TimePeriod; // alias falls du v-model ohne arg möchtest
-  timePeriod?: TimePeriod; // unterstützt beide Varianten
+  timePeriod?: TimePeriod;
   compact?: boolean;
+  variant?: "bar" | "modal";
 }>();
 
 const emit = defineEmits<{
   (e: "update:modelValue", v: TimePeriod): void;
   (e: "update:timePeriod", v: TimePeriod): void;
-  (e: "selectDate", v: TimePeriod): void; // optional zusätzliches Event
+  (e: "selectDate", v: TimePeriod): void;
   (e: "removeDate"): void;
+  (e: "update:open", v: boolean): void;
 }>();
 
-// interne States
-const dateRange = ref<Date[]>([]); // [startDate, endDate]
+const variant = computed(() => props.variant ?? "bar");
+const panelHost = inject("searchBarDatetimePanelHost", null);
+const panelHostEl = computed(() => {
+  if (!panelHost) return null;
+  return unref(panelHost);
+});
+
+const dateRange = ref<Date[]>([]);
 const timeRange = ref<{ start: TimeHM; end: TimeHM }>({
   start: null,
   end: null,
 });
 const isOpen = ref(false);
+
+const startDate = ref<Date | null>(null);
+const startDateInput = computed({
+  get() {
+    if (!startDate.value) {
+      return null;
+    }
+    return startDate.value.toISOString().split("T")[0];
+  },
+  set(v: string | null) {
+    if (!v) {
+      startDate.value = null;
+      return;
+    }
+    startDate.value = new Date(v);
+  },
+});
+watch(startDate, () => {
+  if (!endDate.value) {
+    setTimeout(() => (endDate.value = startDate.value), 600);
+  }
+});
+
+const startTime = ref<TimeHM | null>({ hours: null, minutes: null });
+const startTimeInput = computed({
+  get() {
+    if (
+      !startTime.value ||
+      startTime.value.hours === null ||
+      startTime.value.minutes === null
+    ) {
+      return "";
+    }
+
+    const hh = startTime.value.hours.toString().padStart(2, "0");
+    const mm = startTime.value.minutes.toString().padStart(2, "0");
+
+    return `${hh}:${mm}`;
+  },
+  set(v: string | null) {
+    if (!v) {
+      startTime.value = null;
+      return;
+    }
+
+    const parts = v.split(":");
+
+    startTime.value = {
+      hours: Number(parts[0]),
+      minutes: Number(parts[1]),
+    };
+    addToStartTime(60);
+  },
+});
+
+const endDate = ref<Date | null>(null);
+const endDateInput = computed({
+  get() {
+    if (!endDate.value) {
+      return null;
+    }
+    return endDate.value.toISOString().split("T")[0];
+  },
+  set(v: string | null) {
+    if (!v) {
+      endDate.value = null;
+      return;
+    }
+    endDate.value = new Date(v);
+  },
+});
+
+const endTime = ref<TimeHM | null>({ hours: null, minutes: null });
+const endTimeInput = computed({
+  get() {
+    if (
+      !endTime.value ||
+      endTime.value.hours === null ||
+      endTime.value.minutes === null
+    ) {
+      return "";
+    }
+
+    const hh = endTime.value.hours.toString().padStart(2, "0");
+    const mm = endTime.value.minutes.toString().padStart(2, "0");
+
+    return `${hh}:${mm}`;
+  },
+  set(v: string | null) {
+    if (!v) {
+      endTime.value = null;
+      return;
+    }
+
+    const parts = v.split(":");
+
+    endTime.value = {
+      hours: Number(parts[0]),
+      minutes: Number(parts[1]),
+    };
+  },
+});
+
 const missingValues = ref<string[]>([]);
-const endTimeAutoSet = ref(false);
-const isUpdatingEndAutomatically = ref(false);
+const durationPresets = [60, 120, 240];
+
+const now = computed(() => new Date());
+
+const invalidDateSlot = computed(() => {
+  if (
+    dateRange.value.length === 0 ||
+    (dateRange.value[0] && !dateRange.value[1])
+  ) {
+    return false;
+  } else if (!dateRange.value[0] && dateRange.value[1]) {
+    return true;
+  }
+
+  const start = dateRange.value[0];
+  const end = dateRange.value[1];
+
+  return end < start;
+});
 const invalidTimeslot = computed(() => {
   if (
-    (dateRange.value.length === 2 && dateRange.value[1] !== null) ||
-    !timeRange.value.start ||
-    !timeRange.value.end
-  )
+    !timeRange.value.start?.hours ||
+    !timeRange.value.start?.minutes ||
+    !timeRange.value.end?.hours ||
+    !timeRange.value.end?.minutes
+  ) {
     return false;
+  }
 
   const startTotalMinutes =
     timeRange.value.start.hours * 60 + timeRange.value.start.minutes;
@@ -228,10 +467,9 @@ const invalidTimeslot = computed(() => {
   return endTotalMinutes <= startTotalMinutes;
 });
 
-// Hilfen
-const coalesceModel = computed<TimePeriod>(() => {
-  // bevorzugt v-model:timePeriod; fallback auf modelValue
-  const v = props.timePeriod ?? props.modelValue ?? { start: null, end: null };
+const confirmedPeriod = computed<TimePeriod>(() => {
+  const v = props.timePeriod ?? { start: null, end: null };
+
   return {
     start: typeof v.start === "number" ? v.start : null,
     end: typeof v.end === "number" ? v.end : null,
@@ -239,46 +477,38 @@ const coalesceModel = computed<TimePeriod>(() => {
 });
 
 const hasAnyValue = computed(
-  () =>
-    dateRange.value.length > 0 ||
-    !!timeRange.value.start ||
-    !!timeRange.value.end,
+  () => !!(confirmedPeriod.value.start && confirmedPeriod.value.end),
 );
 
-function normalizeDate(value: unknown): Date | null {
-  if (!value) return null;
-  const d = value instanceof Date ? value : new Date(value as string | number);
-  if (Number.isNaN(d.getTime())) return null;
-  const result = new Date(d);
-  result.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
-  result.setHours(0, 0, 0, 0);
-  return result;
+const hasConfirmedDisplay = computed(() => {
+  const source = confirmedPeriod.value;
+  return !!(source.start && source.end);
+});
+
+watch(
+  confirmedPeriod,
+  (v) => {
+    syncInFromModel(v);
+  },
+  { immediate: true, deep: true },
+);
+
+function toggleOpen() {
+  if (isOpen.value) {
+    closeAndReset();
+  } else {
+    isOpen.value = true;
+    syncInFromModel(confirmedPeriod.value);
+  }
 }
 
-const startInputDate = computed({
-  get: () => normalizeDate(dateRange.value[0]),
-  set: (d: Date | null) => {
-    const normalized = normalizeDate(d);
-    if (!normalized) return;
-    const next = [...dateRange.value];
-    next[0] = normalized;
-    dateRange.value = next;
-    removeValidation();
-  },
-});
+function setPeriodToNow() {
+  const now = new Date();
+  startDate.value = now;
+  startTime.value = { hours: now.getHours(), minutes: now.getMinutes() };
 
-const endInputDate = computed({
-  get: () => normalizeDate(dateRange.value[1] ?? dateRange.value[0]),
-  set: (d: Date | null) => {
-    const normalized = normalizeDate(d);
-    if (!normalized) return;
-    const next = [...dateRange.value];
-    if (!next[0]) next[0] = normalized;
-    next[1] = normalized;
-    dateRange.value = next;
-    removeValidation();
-  },
-});
+  if (!endDate.value) endDate.value = now;
+}
 
 // Mapping eingehender Timestamps -> interne Picker-Modelle
 function syncInFromModel(v: TimePeriod) {
@@ -289,54 +519,43 @@ function syncInFromModel(v: TimePeriod) {
     return;
   }
 
-  endTimeAutoSet.value = false;
+  const start = v.start ? new Date(v.start) : null;
+  const end = v.end ? new Date(v.end) : null;
 
-  // Bestimme Startdate/Enddate und Time aus Timestamps
-  const startDate = v.start ? new Date(v.start) : null;
-  const endDate = v.end ? new Date(v.end) : null;
+  if (start) {
+    startDate.value = start;
+    startTime.value = {
+      hours: start.getHours(),
+      minutes: start.getMinutes(),
+    };
+  }
+  if (end) {
+    endDate.value = end || null;
 
-  // Date range
-  const newRange: Date[] = [];
-  const normalizedStart = normalizeDate(startDate);
-  const normalizedEnd = normalizeDate(endDate);
-  if (normalizedStart) newRange.push(normalizedStart);
-  if (normalizedEnd) newRange.push(normalizedEnd);
-  dateRange.value = newRange;
-
-  // Time range
-  const startTime: TimeHM =
-    startDate != null
-      ? {
-          hours: startDate.getHours(),
-          minutes: startDate.getMinutes(),
-        }
-      : null;
-
-  const endTime: TimeHM =
-    endDate != null
-      ? {
-          hours: endDate.getHours(),
-          minutes: endDate.getMinutes(),
-        }
-      : null;
-
-  timeRange.value = { start: startTime, end: endTime };
+    endTime.value = {
+      hours: end.getHours(),
+      minutes: end.getMinutes(),
+    };
+  }
 }
 
-// Mapping interner Picker-Modelle -> Timestamps
 function buildTimestampsFromState(): TimePeriod {
   const [d0, d1] = dateRange.value;
-
-  // Wenn nur Startdatum da ist und Endzeit gesetzt wurde, Enddatum = Startdatum
   const baseEndDate = d1 ?? d0 ?? null;
 
   const startTs =
-    d0 && timeRange.value.start
+    d0 &&
+    timeRange.value.start &&
+    timeRange.value.start.hours !== null &&
+    timeRange.value.start.minutes !== null
       ? dateToTimestampWithTime(d0, timeRange.value.start)
       : null;
 
   const endTs =
-    baseEndDate && timeRange.value.end
+    baseEndDate &&
+    timeRange.value.end &&
+    timeRange.value.end.hours !== null &&
+    timeRange.value.end.minutes !== null
       ? dateToTimestampWithTime(baseEndDate, timeRange.value.end)
       : null;
 
@@ -352,20 +571,8 @@ function dateToTimestampWithTime(
   return d.getTime();
 }
 
-// Initial + reactive Sync
-watch(
-  coalesceModel,
-  (v) => {
-    syncInFromModel(v);
-  },
-  { immediate: true, deep: true },
-);
-
-// Anzeige-Helper
 function formatDate(dateStr: string | number | Date) {
-  if (!dateStr) {
-    return "";
-  }
+  if (!dateStr) return "";
   const date = new Date(dateStr);
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -373,126 +580,95 @@ function formatDate(dateStr: string | number | Date) {
   return `${day}.${month}.${year}`;
 }
 
-function formatTime(timeObj: object) {
-  if (!timeObj) {
-    return "";
-  }
+function formatTime(
+  timeObj: { hours: number | null; minutes: number | null } | null,
+) {
+  if (!timeObj || timeObj.hours === null || timeObj.minutes === null) return "";
   const hours = String(timeObj.hours).padStart(2, "0");
   const minutes = String(timeObj.minutes).padStart(2, "0");
   return `${hours}:${minutes}`;
 }
 
+// format for display in SearchBar
 function formatDateTimeRange(
-  dates: string[] | number[] | Date[],
-  timeRange: object,
+  dates: Date[],
+  times: { start: TimeHM; end: TimeHM },
 ) {
+  const source = confirmedPeriod.value;
+  if (source.start && source.end) {
+    const start = new Date(source.start);
+    const end = new Date(source.end);
+    const sameDay =
+      start.getFullYear() === end.getFullYear() &&
+      start.getMonth() === end.getMonth() &&
+      start.getDate() === end.getDate();
+    const startDate = formatDate(start);
+    const endDate = formatDate(end);
+    const startTime = formatTime({
+      hours: start.getHours(),
+      minutes: start.getMinutes(),
+    });
+    const endTime = formatTime({
+      hours: end.getHours(),
+      minutes: end.getMinutes(),
+    });
+    if (sameDay) return `${startDate} ${startTime} - ${endTime}`;
+    return `${startDate} ${startTime} - ${endDate} ${endTime}`;
+  }
+
   if (!dates || dates.length !== 2) return "";
-
   const [start, end] = dates;
-
   const d1 = new Date(start);
   const d2 = new Date(end);
-
   const sameDay =
     d1.getFullYear() === d2.getFullYear() &&
     d1.getMonth() === d2.getMonth() &&
     d1.getDate() === d2.getDate();
-
   const startDate = formatDate(start);
   const endDate = formatDate(end);
-
-  const startTime = formatTime(timeRange.start);
-  const endTime = formatTime(timeRange.end);
-
-  if (sameDay) {
-    // dd.mm.yyyy hh:mm - hh:mm
-    return `${startDate} ${startTime} - ${endTime}`;
-  }
-
-  // dd.mm.yyyy hh:mm - dd.mm.yyyy hh:mm
+  const startTime = formatTime(times.start);
+  const endTime = formatTime(times.end);
+  if (sameDay) return `${startDate} ${startTime} - ${endTime}`;
   return `${startDate} ${startTime} - ${endDate} ${endTime}`;
 }
 
-// UI Aktionen
-function closeTimePeriodInput() {
-  isOpen.value = false;
-  dateRange.value = [];
-  timeRange.value = { start: null, end: null };
-  endTimeAutoSet.value = false;
+//format for quick access buttons
+function formatDurationLabel(minutes: number) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `0:${String(m).padStart(2, "0")}h`;
+  if (m === 0) return `${h}:00h`;
+  return `${h}:${String(m).padStart(2, "0")}h`;
 }
 
-type TimeParts = { hours: number; minutes: number };
+function closeAndReset() {
+  isOpen.value = false;
 
-function addToTime(time: TimeParts, addedMinutes: number): TimeParts {
-  const totalMinutes = time.hours * 60 + time.minutes + addedMinutes;
+  startDate.value = null;
+  endDate.value = null;
+  startTime.value = { hours: null, minutes: null };
+  endTime.value = { hours: null, minutes: null };
+
+  syncInFromModel(confirmedPeriod.value);
+  missingValues.value = [];
+}
+
+function addToTime(time: TimeHM, addedMinutes: number): TimeHM {
+  let totalMinutes = 0;
+  if (!time || time.hours === null || time.minutes === null) {
+    totalMinutes =
+      now.value.getHours() * 60 + now.value.getMinutes() + addedMinutes;
+  } else {
+    totalMinutes = time.hours * 60 + time.minutes + addedMinutes;
+  }
   return {
     hours: Math.floor(totalMinutes / 60) % 24,
     minutes: totalMinutes % 60,
   };
 }
 
-function applyEndFromStartPlusMinutes(
-  addedMinutes: number,
-  { autoSet = false }: { autoSet?: boolean } = {},
-) {
-  removeValidation();
-  const startTime = timeRange.value.start;
-  if (!startTime) return;
-
-  const startDate = normalizeDate(dateRange.value[0]);
-
-  if (!startDate) {
-    timeRange.value.end = addToTime(startTime, addedMinutes);
-    if (!autoSet) endTimeAutoSet.value = false;
-    return;
-  }
-
-  const endDateTime = new Date(startDate);
-  endDateTime.setHours(startTime.hours, startTime.minutes, 0, 0);
-  endDateTime.setMinutes(endDateTime.getMinutes() + addedMinutes);
-
-  const next = [...dateRange.value];
-  if (!next[0]) next[0] = startDate;
-  next[1] = normalizeDate(endDateTime)!;
-  dateRange.value = next;
-
-  if (autoSet) {
-    isUpdatingEndAutomatically.value = true;
-    endTimeAutoSet.value = true;
-  } else {
-    endTimeAutoSet.value = false;
-  }
-
-  timeRange.value.end = {
-    hours: endDateTime.getHours(),
-    minutes: endDateTime.getMinutes(),
-  };
-
-  if (autoSet) {
-    nextTick(() => {
-      isUpdatingEndAutomatically.value = false;
-    });
-  }
-}
-
-function setDefaultEndTime() {
-  if (!timeRange.value.start) return;
-
-  if (!timeRange.value.end || endTimeAutoSet.value) {
-    applyEndFromStartPlusMinutes(60, { autoSet: true });
-  } else {
-    removeValidation();
-  }
-}
-
-function onEndTimeManualChange() {
-  removeValidation();
-  if (isUpdatingEndAutomatically.value) return;
-  endTimeAutoSet.value = false;
-}
-
 function addToStartTime(addedMinutes: number) {
-  applyEndFromStartPlusMinutes(addedMinutes);
+  endTime.value = addToTime(startTime.value, addedMinutes);
 }
 
 function removeValidation() {
@@ -507,48 +683,115 @@ function removeValidation() {
   }
 }
 
-// OK-Button -> validieren + emittieren als Timestamps
-function onSelectDate() {
-  removeValidation();
+function useValidation() {
   if (dateRange.value.length === 0) {
-    if (!missingValues.value.includes("date")) {
-      missingValues.value.push("date");
-    }
-    return;
+    if (!missingValues.value.includes("date")) missingValues.value.push("date");
   }
-  if (!timeRange.value.start || !timeRange.value.end) {
-    if (!timeRange.value.start && !missingValues.value.includes("startTime")) {
+
+  if (!timeRange.value.start?.hours || !timeRange.value.start?.minutes) {
+    if (!missingValues.value.includes("startTime"))
       missingValues.value.push("startTime");
-    }
-    if (!timeRange.value.end && !missingValues.value.includes("endTime")) {
+  }
+  if (!timeRange.value.end?.hours || !timeRange.value.start?.minutes) {
+    if (!missingValues.value.includes("endTime")) {
       missingValues.value.push("endTime");
     }
-    return;
+  }
+}
+
+function onSelect() {
+  const start = startDate.value;
+  const end = endDate.value;
+
+  if (start && end) {
+    dateRange.value = [start, end];
+  } else if (start) {
+    dateRange.value = [start, start];
+  } else if (end) {
+    dateRange.value = [end, end];
   }
 
+  timeRange.value = {
+    start: startTime.value,
+    end: endTime.value,
+  };
+
+  // Validation
+  removeValidation();
+  useValidation();
+  if (missingValues.value.length > 0) return;
+
+  if (invalidTimeslot.value || invalidDateSlot.value) return;
+
   const result = buildTimestampsFromState();
-
   isOpen.value = false;
-
   emit("update:timePeriod", result);
-  emit("update:modelValue", result);
-
-  // optional: original "selectDate" beibehalten
   emit("selectDate", result);
 }
 
-// Clear
 function onDeleteTimePeriod() {
   dateRange.value = [];
   timeRange.value = { start: null, end: null };
   missingValues.value = [];
-  endTimeAutoSet.value = false;
+  isOpen.value = false;
+
+  startDate.value = null;
+  startTime.value = { hours: null, minutes: null };
+  endDate.value = null;
+  endTime.value = { hours: null, minutes: null };
 
   const cleared: TimePeriod = { start: null, end: null };
   emit("update:timePeriod", cleared);
-  emit("update:modelValue", cleared);
   emit("removeDate");
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+:deep(.period-date-input),
+:deep(.period-time-input) {
+  font-variant-numeric: tabular-nums;
+}
+
+input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+input[type="date"]::-webkit-input-placeholder {
+  visibility: hidden !important;
+}
+
+.inputFieldClass {
+  width: 100%;
+  min-width: 0;
+  margin: 0.25rem;
+  padding: 0.25rem;
+
+  background-color: #fff;
+  color: #111827;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+
+  cursor: text;
+  text-align: center;
+
+  transition:
+    background-color 150ms,
+    border-color 150ms;
+}
+
+.inputFieldClass:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.inputFieldClass:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.inputFieldClass:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+</style>
