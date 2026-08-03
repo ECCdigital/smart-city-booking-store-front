@@ -28,7 +28,7 @@
       :title="hintText"
       icon="i-lucide-info"
       variant="ghost"
-      class="p-1 text-primary w-full my-2 text-sm flex items-center"
+      class="p-1 text-info w-full my-2 text-sm flex items-center"
     />
 
     <UAlert
@@ -36,7 +36,7 @@
       :title="$t('detailsAvailability.noTimeSelection')"
       icon="i-lucide-info"
       variant="ghost"
-      class="p-1 text-primary w-full my-2 text-sm items-center"
+      class="p-1 text-info w-full my-2 text-sm items-center"
     />
 
     <InputDateTimePeriod
@@ -97,7 +97,7 @@ import InputTimePeriodSlots from "~/components/checkout/InputTimePeriodSlots.vue
 import InputWeekSelection from "~/components/checkout/InputWeekSelection.vue";
 import InputMonthSelection from "~/components/checkout/InputMonthSelection.vue";
 import InputBlockPeriodSelection from "~/components/checkout/InputBlockPeriodSelection.vue";
-import { useBookableBookingMode } from "~/composables/useBookableBookingMode";
+import { useBookableBookingMode } from "~/composables/useBookableBookingMode.ts";
 
 const props = defineProps({
   bookable: {

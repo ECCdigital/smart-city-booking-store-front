@@ -360,6 +360,19 @@
     "selected": "Selected month"
   },
 
+  "bookableDetail": {
+    "bookNow": "Book now",
+    "viewBookingOptions": "View booking options",
+    "book": "Book",
+    "unavailable": "Unavailable",
+    "viewAll": "View all",
+    "descriptionTitle": "Description of {title}",
+    "moreInfo": "More information",
+    "relatedTitle": "You might also like:",
+    "cancellationTitle": "Cancellation policy",
+    "yes": "Yes"
+  },
+
   "detailsAvailability": {
     "title": "Availability",
     "selectPeriodHint": "Select a time period to see availability and prices.",

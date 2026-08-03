@@ -3,7 +3,7 @@ import { ref } from "vue";
 import RegisterCard from "~/components/auth/RegisterCard.vue";
 import { useAuth } from "~/composables/auth/useAuth.js";
 import RegisterSuccessCard from "~/components/auth/RegisterSuccessCard.vue";
-
+import AuthTitleSection from "~/components/auth/AuthTitleSection.vue";
 
 const form = ref({
   firstname: "",
@@ -37,12 +37,12 @@ const handleRegister = async () => {
     if (err.status === 409) {
       notification.error(
         t("notifications.registerErrorEmailExists.message"),
-        t("notifications.registerErrorEmailExists.title")
+        t("notifications.registerErrorEmailExists.title"),
       );
     } else {
       notification.error(
         t("notifications.registerError.message"),
-        t("notifications.registerError.title")
+        t("notifications.registerError.title"),
       );
     }
   } finally {
@@ -53,16 +53,14 @@ const handleRegister = async () => {
 
 <template>
   <PageBackground variant="poly" :vignette="true" intensity="normal">
+    <AuthTitleSection
+      is-large-version
+      class="hidden lg:flex w-3/5 items-center justify-center"
+    />
 
-  <div class="hidden lg:flex w-3/5 items-center justify-center text-white">
-      <div class="max-w-md text-center">
-        <h1 class="text-4xl font-bold mb-4">
-          {{ $t("register.welcome") }}
-        </h1>
-      </div>
-    </div>
+    <div class="flex flex-col w-full lg:w-2/5 items-center justify-center p-6">
+      <AuthTitleSection class="lg:hidden" />
 
-    <div class="flex w-full lg:w-2/5 items-center justify-center p-6">
       <RegisterSuccessCard v-if="success" class="shadow-2xl/50" />
       <RegisterCard
         v-else

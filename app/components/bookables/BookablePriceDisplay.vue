@@ -16,17 +16,14 @@
       <span>
         {{ displayPrice(calculatedPrice.userGrossPriceEur) }}
       </span>
-      <br >
+      <br />
       <span
         v-if="discountPercentLabel"
         class="text-xs font-normal text-emerald-700 dark:text-emerald-300"
       >
         {{ discountPercentLabel }}
       </span>
-      <span
-        v-else
-        class="text-xs font-normal text-gray-600 dark:text-gray-300"
-      >
+      <span v-else class="text-xs font-normal text-gray-600 dark:text-gray-300">
         {{ displayPricePerUnit() }}
       </span>
     </p>
@@ -80,7 +77,9 @@ function toDiscountPercent(value) {
 }
 
 const discountPercentLabel = computed(() => {
-  const percent = toDiscountPercent(props.calculatedPrice?.bookingDiscountPercent);
+  const percent = toDiscountPercent(
+    props.calculatedPrice?.bookingDiscountPercent,
+  );
   if (percent <= 0 || percent >= 100) return null;
   return t("checkout.review.roleDiscountBadge", { percent });
 });
@@ -88,6 +87,9 @@ const discountPercentLabel = computed(() => {
 function getMinPrice() {
   //all prices are free
   if (
+    !props.bookable ||
+    !props.bookable.priceCategories ||
+    !props.bookable.priceCategories.length ||
     props.bookable.priceCategories.every(
       (c) => c.priceEur === 0 || c.priceEur === null,
     )

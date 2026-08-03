@@ -22,28 +22,30 @@
         >{{ suitableCount }} {{ $t("filter.fittingResults") }}</span
       >
       <div class="" style="flex: 1" />
-      <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
+      <div class="grid md:flex space-x-2 space-y-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
+        <div class="flex mb-2 md:my-0">
+          <FilterButton
+            v-if="searchedEvents.length > 0"
+            v-model:is-initailized="searchIsInitialized"
+            :bookables="searchedEvents"
+            :include-non-suitable="query.inclNoSuitable"
+            :categories="query.cat"
+            :cities="query.cities"
+            :distance="query.distance"
+            :price="query.price"
+            :only-public-events="query.pubEv"
+            :only-registration-needed-events="query.regEv"
+            :custom-fields="query.customFields"
+            class="lg:hidden"
+            is-event
+            @filter="setFilterQueryParams"
+          />
+        </div>
         <SortButton
           v-if="searchedEvents.length > 0"
           :sort-mode="query.sortMode"
           is-event
           @sort="setSortedQueryParams"
-        />
-        <FilterButton
-          v-if="searchedEvents.length > 0"
-          v-model:is-initailized="searchIsInitialized"
-          :bookables="searchedEvents"
-          :include-non-suitable="query.inclNoSuitable"
-          :categories="query.cat"
-          :cities="query.cities"
-          :distance="query.distance"
-          :price="query.price"
-          :only-public-events="query.pubEv"
-          :only-registration-needed-events="query.regEv"
-          :custom-fields="query.customFields"
-          class="lg:hidden"
-          is-event
-          @filter="setFilterQueryParams"
         />
       </div>
     </div>
@@ -87,7 +89,7 @@
           v-if="sortedEvents.length > 0"
           :bookables="sortedEvents"
           include-non-bookable
-          include-non-suitable
+          :include-non-suitable="query.inclNoSuitable"
           is-event-list
           class="hidden md:block"
         />
@@ -95,7 +97,7 @@
           v-if="sortedEvents.length > 0"
           :bookables="sortedEvents"
           include-non-bookable
-          include-non-suitable
+          :include-non-suitable="query.inclNoSuitable"
           is-event-grid
           class="md:hidden"
         />

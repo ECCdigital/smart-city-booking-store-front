@@ -1,22 +1,21 @@
 <template>
-  <div class="w-full container-md">
-    <PageHeader
-      title="Einstellungen"
-      description="Verwalten Sie Ihre persönlichen Angaben. Sie haben außerdem die
-      Möglichkeit, Ihr Passwort zu ändern."
-    />
+  <div class="w-full container-md pb-24">
+    <PageHeader title="Einstellungen" class="mb-5" />
 
     <SettingsSection v-if="user" :user="user" />
+
+    <AppearanceSection class="my-5" />
   </div>
 </template>
 <script setup>
 import SettingsSection from "~/components/user/settings/SettingsSection.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import PageHeader from "~/components/PageHeader.vue";
+import AppearanceSection from "~/components/user/settings/AppearanceSection.vue";
 
 definePageMeta({
   layout: "panel",
-  navigation: "settings",
+  navigation: "user",
   requiresAuth: true,
 });
 

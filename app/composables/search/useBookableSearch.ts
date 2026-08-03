@@ -209,7 +209,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
   }
 
   const sortedItems = computed(() => {
-    return filteredItems.value.slice().sort((a, b) => {
+    const temp = filteredItems.value.slice().sort((a, b) => {
       //sort by price
       if (query.sortMode === "priceAscending") {
         return getPrice(a) - getPrice(b);
@@ -247,6 +247,8 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       }
       return 0;
     });
+    console.log("*A*", temp);
+    return temp;
   });
 
   function getBookableMinPrice(bookable: any) {

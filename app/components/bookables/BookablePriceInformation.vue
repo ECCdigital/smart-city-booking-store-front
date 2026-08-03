@@ -91,7 +91,7 @@ function isExternalCategory(category) {
 }
 
 const relevantPriceCategories = computed(() => {
-  if (forFreeHint.value) {
+  if (forFreeHint.value || !props.item.priceCategories) {
     return [];
   }
   return props.item.priceCategories.filter(
@@ -101,6 +101,7 @@ const relevantPriceCategories = computed(() => {
 });
 
 const forFreeHint = computed(() => {
+  if (!props.item.priceCategories) return "";
   const internal = props.item.priceCategories.filter(
     (c) => !isExternalCategory(c),
   );
@@ -122,6 +123,7 @@ const fixedPriceHint = computed(() => {
 });
 
 const holidayHint = computed(() => {
+  if (!props.item.priceCategories) return "";
   if (
     props.item.priceCategories.some(
       (category) =>

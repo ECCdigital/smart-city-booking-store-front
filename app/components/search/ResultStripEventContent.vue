@@ -2,13 +2,15 @@
   <div class="basis-3/4 p-4 flex flex-col">
     <div>
       <!-- Title -->
-      <p
-        class="font-bold"
-        :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'"
-      >
-        {{ event.information.name }}
-      </p>
-      <p>{{ tenantName }}</p>
+      <div class="cursor-pointer" @click="openDetails()">
+        <p
+          class="font-bold"
+          :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'"
+        >
+          {{ event.information.name }}
+        </p>
+        <p>{{ tenantName }}</p>
+      </div>
 
       <!-- Zeitpunkt, Adresse und Entfernung -->
       <div class="w-full my-5">
@@ -52,7 +54,7 @@
             variant="outline"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer' }"
-            @click="goToDetails(event.id, 'event')"
+            @click="openDetails"
           />
           <EventBookingButton
             v-if="!isNotSuitable && event"
@@ -99,7 +101,7 @@ const props = defineProps({
   },
 });
 
-const { goToDetails } = useRedirection();
+const emit = defineEmits(["openDetails"]);
 
 const hasLongTitle = computed(() => {
   return (props.event?.information.name?.length ?? 0) > 60;
@@ -114,6 +116,8 @@ const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.event.tenantId).name;
 });
 
-const { contrastToPrimary } = useContrastColor();
+function openDetails() {
+  emit("openDetails", props.event.id, "event");
+}
 </script>
 <style scoped></style>
