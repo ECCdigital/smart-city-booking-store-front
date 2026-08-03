@@ -8,7 +8,7 @@
       :class="[
         'w-full text-gray-400 dark:text-gray-200/60 font-normal rounded-md bg-white dark:bg-gray-700 hover:bg-transparent',
         compact ? 'py-1 px-2 text-sm' : 'py-2 px-3',
-        isOpen ? 'md:ring-1 md:ring-primary/40' : '',
+        isOpen && !compact ? 'md:ring-1 md:ring-primary/40' : '',
       ]"
       :ui="{
         leadingIcon: compact
@@ -82,15 +82,39 @@
               </div>
               <div>
                 <UButton
-                  color="neutral"
-                  variant="ghost"
-                  icon="i-lucide-x"
-                  class="rounded-xl"
-                  @click="closeTimePeriodInput"
+                  label="Jetzt"
+                  color="primary"
+                  variant="soft"
+                  size="xs"
+                  @click="setPeriodToNow"
                 />
-              </UTooltip>
+              </div>
             </div>
-          </div>
+
+            <span class="text-muted select-none px-0.5 h-10 flex items-center"
+              >→</span
+            >
+
+            <div
+              class="text-xs font-semibold text-muted shrink-0 w-8 h-10 flex items-center"
+            >
+              Ende
+            </div>
+            <div class="flex flex-col gap-1">
+              <div class="flex gap-1">
+                <div class="w-36 shrink-0">
+                  <PeriodField
+                    v-model="endDate"
+                    version="date"
+                    :class="invalidDateSlot ? 'border-2 border-red-500' : ''"
+                  >
+                    <input
+                      v-model="endDateInput"
+                      type="date"
+                      class="inputFieldClass"
+                    />
+                  </PeriodField>
+                </div>
 
                 <div class="w-26 shrink-0">
                   <PeriodField
@@ -282,16 +306,10 @@
 </template>
 
 <script setup lang="ts">
-import DatePicker from "./DatePicker.vue";
-import InputTime from "./InputTime.vue";
 import ClearButton from "~/components/inputs/ClearButton.vue";
 import PeriodFieldCompact from "~/components/inputs/PeriodFieldCompact.vue";
 import PeriodField from "~/components/inputs/PeriodField.vue";
 
-/**
- * Public API:
- * - v-model:timePeriod -> { start: number | null, end: number | null } (timestamps in ms)
- */
 type TimePeriod = {
   start: number | null;
   end: number | null;
@@ -306,7 +324,6 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:modelValue", v: TimePeriod): void;
   (e: "update:timePeriod", v: TimePeriod): void;
   (e: "selectDate", v: TimePeriod): void;
   (e: "removeDate"): void;
@@ -510,12 +527,10 @@ function setPeriodToNow() {
   if (!endDate.value) endDate.value = now;
 }
 
-// Mapping eingehender Timestamps -> interne Picker-Modelle
 function syncInFromModel(v: TimePeriod) {
   if (!v || (!v.start && !v.end)) {
     dateRange.value = [];
     timeRange.value = { start: null, end: null };
-    endTimeAutoSet.value = false;
     return;
   }
 
