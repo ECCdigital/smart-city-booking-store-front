@@ -78,7 +78,9 @@
           @click="navigatePrev"
         >
           <UIcon name="i-lucide-chevron-left" size="14" />
-          <span class="hidden sm:block">{{ $t("scheduleSelection.previousWeek") }}</span>
+          <span class="hidden sm:block">{{
+            $t("scheduleSelection.previousWeek")
+          }}</span>
         </button>
 
         <div class="flex items-center gap-2">
@@ -93,8 +95,14 @@
           class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           @click="navigateNext"
         >
-          <UIcon name="i-lucide-chevron-right" size="14" class="order-1 sm:order-2" />
-          <span class="hidden sm:block sm:order-1">{{ $t("scheduleSelection.nextWeek") }} </span>
+          <UIcon
+            name="i-lucide-chevron-right"
+            size="14"
+            class="order-1 sm:order-2"
+          />
+          <span class="hidden sm:block sm:order-1"
+            >{{ $t("scheduleSelection.nextWeek") }}
+          </span>
         </button>
       </div>
 
@@ -433,10 +441,11 @@ const calendarEvents = computed(() => {
   //handle past times (if selection includes past, mark past part as occupied)
   const now = new Date();
 
-  for (let d = new Date(currentViewStart.value || now);
-       d < (currentViewEnd.value || now);
-       d.setDate(d.getDate() + 1)) {
-
+  for (
+    let d = new Date(currentViewStart.value || now);
+    d < (currentViewEnd.value || now);
+    d.setDate(d.getDate() + 1)
+  ) {
     const dayStart = new Date(d);
     dayStart.setHours(0, 0, 0, 0);
 
@@ -709,8 +718,8 @@ watch(showCalendarPanel, (visible) => {
     if (!api) return;
 
     const selectedDate = startDateInput.value
-        ? parseLocalDate(startDateInput.value)
-        : null;
+      ? parseLocalDate(startDateInput.value)
+      : null;
 
     if (selectedDate) {
       api.gotoDate(selectedDate);
@@ -1007,5 +1016,4 @@ watch(
     );
   }
 }
-
 </style>
