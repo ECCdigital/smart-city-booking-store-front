@@ -68,7 +68,6 @@ export function useBookableDetailContent(itemSource, isEvent) {
   const moreInfoFields = computed(() => fieldsByPosition("moreInfo"));
 
   function customFieldValueText(field) {
-    console.log("*TEST", field);
     if (field.inputType === "select") {
       const option = (field.options || []).find(
         (opt) => String(opt.value) === String(field.value),

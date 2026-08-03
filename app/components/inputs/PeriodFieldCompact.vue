@@ -89,10 +89,6 @@ const date = defineModel<Date | null>("date");
 const time = defineModel<TimeHM | null>("time");
 
 const props = defineProps({
-  label: {
-    type: String,
-    required: true,
-  },
   missingValues: {
     type: Array,
     required: true,
@@ -102,19 +98,10 @@ const props = defineProps({
 const openPopover = ref<PopoverKey>(null);
 
 const missedDateValidation = computed(() => {
-  if (props.label === "Beginn") {
-    return props.missingValues.includes("date");
-  }
-  return false;
+  return props.missingValues.includes("date");
 });
 const missedTimeValidation = computed(() => {
-  if (props.label === "Beginn") {
-    return props.missingValues.includes("startTime");
-  }
-  if (props.label === "Ende") {
-    return props.missingValues.includes("endTime");
-  }
-  return false;
+  return props.missingValues.includes("time");
 });
 
 function formatDate(dateStr: string | number | Date) {

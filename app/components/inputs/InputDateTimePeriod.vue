@@ -42,54 +42,25 @@
             >
               Beginn
             </div>
-            <div class="flex flex-col gap-1">
-              <div class="flex gap-1">
-                <div class="w-36 shrink-0">
-                  <PeriodField
-                    v-model="startDate"
-                    version="date"
-                    :class="
-                      missingValues.includes('date') || invalidDateSlot
-                        ? 'border-2 border-red-500'
-                        : ''
-                    "
-                  >
-                    <input
-                      v-model="startDateInput"
-                      type="date"
-                      class="inputFieldClass"
-                    />
-                  </PeriodField>
+            <InputTime
+              v-model:date="startDate"
+              v-model:time="startTime"
+              :missing-values="missingValues.start"
+              :is-invalid-date="invalidDateSlot"
+              :is-invalid-time="invalidTimeslot"
+            >
+              <template #buttons>
+                <div>
+                  <UButton
+                    label="Jetzt"
+                    color="primary"
+                    variant="soft"
+                    size="xs"
+                    @click="setPeriodToNow"
+                  />
                 </div>
-
-                <div class="w-26 shrink-0">
-                  <PeriodField
-                    v-model="startTime"
-                    version="time"
-                    :class="
-                      missingValues.includes('startTime') || invalidTimeslot
-                        ? 'border-2 border-red-500'
-                        : ''
-                    "
-                  >
-                    <input
-                      v-model="startTimeInput"
-                      type="time"
-                      class="inputFieldClass"
-                    />
-                  </PeriodField>
-                </div>
-              </div>
-              <div>
-                <UButton
-                  label="Jetzt"
-                  color="primary"
-                  variant="soft"
-                  size="xs"
-                  @click="setPeriodToNow"
-                />
-              </div>
-            </div>
+              </template>
+            </InputTime>
 
             <span class="text-muted select-none px-0.5 h-10 flex items-center"
               >→</span
@@ -100,53 +71,28 @@
             >
               Ende
             </div>
-            <div class="flex flex-col gap-1">
-              <div class="flex gap-1">
-                <div class="w-36 shrink-0">
-                  <PeriodField
-                    v-model="endDate"
-                    version="date"
-                    :class="invalidDateSlot ? 'border-2 border-red-500' : ''"
-                  >
-                    <input
-                      v-model="endDateInput"
-                      type="date"
-                      class="inputFieldClass"
-                    />
-                  </PeriodField>
+            <InputTime
+              v-model:date="endDate"
+              v-model:time="endTime"
+              :missing-values="missingValues.end"
+              :is-invalid-date="invalidDateSlot"
+              :is-invalid-time="invalidTimeslot"
+            >
+              <template #buttons>
+                <div class="flex gap-1">
+                  <UButton
+                    v-for="mins in durationPresets"
+                    :key="mins"
+                    :label="'+' + formatDurationLabel(mins)"
+                    color="primary"
+                    variant="soft"
+                    size="xs"
+                    :disabled="!startTime"
+                    @click="addToStartTime(mins)"
+                  />
                 </div>
-
-                <div class="w-26 shrink-0">
-                  <PeriodField
-                    v-model="endTime"
-                    version="time"
-                    :class="
-                      missingValues.includes('endTime') || invalidTimeslot
-                        ? 'border-2 border-red-500'
-                        : ''
-                    "
-                  >
-                    <input
-                      v-model="endTimeInput"
-                      type="time"
-                      class="inputFieldClass"
-                    />
-                  </PeriodField>
-                </div>
-              </div>
-              <div class="flex gap-1">
-                <UButton
-                  v-for="mins in durationPresets"
-                  :key="mins"
-                  :label="'+' + formatDurationLabel(mins)"
-                  color="primary"
-                  variant="soft"
-                  size="xs"
-                  :disabled="!startTime"
-                  @click="addToStartTime(mins)"
-                />
-              </div>
-            </div>
+              </template>
+            </InputTime>
           </div>
 
           <div class="flex flex-col gap-1 items-end justify-between">
@@ -163,19 +109,19 @@
 
         <div class="text-center">
           <p
-            v-if="missingValues.includes('date')"
+            v-if="missingValues.start.includes('date')"
             class="text-red-500 text-sm mt-2"
           >
             Bitte wählen Sie ein Datum für den Beginn.
           </p>
           <p
-            v-if="missingValues.includes('startTime')"
+            v-if="missingValues.start.includes('time')"
             class="text-red-500 text-sm mt-2"
           >
             Bitte geben Sie eine Startuhrzeit an.
           </p>
           <p
-            v-if="missingValues.includes('endTime')"
+            v-if="missingValues.end.includes('time')"
             class="text-red-500 text-sm mt-2"
           >
             Bitte geben Sie eine Enduhrzeit an.
@@ -226,8 +172,7 @@
           <PeriodFieldCompact
             v-model:date="startDate"
             v-model:time="startTime"
-            label="Beginn"
-            :missing-values="missingValues"
+            :missing-values="missingValues.start"
           >
             <template #quickAccessButtons>
               <UButton
@@ -245,8 +190,7 @@
           <PeriodFieldCompact
             v-model:date="endDate"
             v-model:time="endTime"
-            label="Ende"
-            :missing-values="missingValues"
+            :missing-values="missingValues.end"
           >
             <template #quickAccessButtons>
               <UButton
@@ -263,19 +207,22 @@
           </PeriodFieldCompact>
 
           <p
-            v-if="missingValues.includes('date')"
+            v-if="
+              missingValues.start.includes('date') ||
+              missingValues.end.includes('date')
+            "
             class="text-red-500 text-sm mt-2"
           >
             Bitte wählen Sie ein Datum für den Beginn.
           </p>
           <p
-            v-if="missingValues.includes('startTime')"
+            v-if="missingValues.start.includes('time')"
             class="text-red-500 text-sm mt-2"
           >
             Bitte geben Sie eine Startuhrzeit an.
           </p>
           <p
-            v-if="missingValues.includes('endTime')"
+            v-if="missingValues.end.includes('time')"
             class="text-red-500 text-sm mt-2"
           >
             Bitte geben Sie eine Enduhrzeit an.
@@ -309,6 +256,7 @@
 import ClearButton from "~/components/inputs/ClearButton.vue";
 import PeriodFieldCompact from "~/components/inputs/PeriodFieldCompact.vue";
 import PeriodField from "~/components/inputs/PeriodField.vue";
+import InputTime from "~/components/inputs/InputTime.vue";
 
 type TimePeriod = {
   start: number | null;
@@ -316,6 +264,7 @@ type TimePeriod = {
 };
 
 type TimeHM = { hours: number | null; minutes: number | null } | null;
+type MissingValues = { start: string[]; end: string[] };
 
 const props = defineProps<{
   timePeriod?: TimePeriod;
@@ -345,108 +294,23 @@ const timeRange = ref<{ start: TimeHM; end: TimeHM }>({
 const isOpen = ref(false);
 
 const startDate = ref<Date | null>(null);
-const startDateInput = computed({
-  get() {
-    if (!startDate.value) {
-      return null;
-    }
-    return startDate.value.toISOString().split("T")[0];
-  },
-  set(v: string | null) {
-    if (!v) {
-      startDate.value = null;
-      return;
-    }
-    startDate.value = new Date(v);
-  },
-});
+const startTime = ref<TimeHM | null>({ hours: null, minutes: null });
+
 watch(startDate, () => {
   if (!endDate.value) {
     setTimeout(() => (endDate.value = startDate.value), 600);
   }
 });
-
-const startTime = ref<TimeHM | null>({ hours: null, minutes: null });
-const startTimeInput = computed({
-  get() {
-    if (
-      !startTime.value ||
-      startTime.value.hours === null ||
-      startTime.value.minutes === null
-    ) {
-      return "";
-    }
-
-    const hh = startTime.value.hours.toString().padStart(2, "0");
-    const mm = startTime.value.minutes.toString().padStart(2, "0");
-
-    return `${hh}:${mm}`;
-  },
-  set(v: string | null) {
-    if (!v) {
-      startTime.value = null;
-      return;
-    }
-
-    const parts = v.split(":");
-
-    startTime.value = {
-      hours: Number(parts[0]),
-      minutes: Number(parts[1]),
-    };
+watch(startTime, () => {
+  if (!endTime.value || !endTime.value.hours || !endTime.value.minutes) {
     addToStartTime(60);
-  },
+  }
 });
 
 const endDate = ref<Date | null>(null);
-const endDateInput = computed({
-  get() {
-    if (!endDate.value) {
-      return null;
-    }
-    return endDate.value.toISOString().split("T")[0];
-  },
-  set(v: string | null) {
-    if (!v) {
-      endDate.value = null;
-      return;
-    }
-    endDate.value = new Date(v);
-  },
-});
-
 const endTime = ref<TimeHM | null>({ hours: null, minutes: null });
-const endTimeInput = computed({
-  get() {
-    if (
-      !endTime.value ||
-      endTime.value.hours === null ||
-      endTime.value.minutes === null
-    ) {
-      return "";
-    }
 
-    const hh = endTime.value.hours.toString().padStart(2, "0");
-    const mm = endTime.value.minutes.toString().padStart(2, "0");
-
-    return `${hh}:${mm}`;
-  },
-  set(v: string | null) {
-    if (!v) {
-      endTime.value = null;
-      return;
-    }
-
-    const parts = v.split(":");
-
-    endTime.value = {
-      hours: Number(parts[0]),
-      minutes: Number(parts[1]),
-    };
-  },
-});
-
-const missingValues = ref<string[]>([]);
+const missingValues = ref<MissingValues>({ start: [], end: [] });
 const durationPresets = [60, 120, 240];
 
 const now = computed(() => new Date());
@@ -665,7 +529,7 @@ function closeAndReset() {
   endTime.value = { hours: null, minutes: null };
 
   syncInFromModel(confirmedPeriod.value);
-  missingValues.value = [];
+  missingValues.value = { start: [], end: [] };
 }
 
 function addToTime(time: TimeHM, addedMinutes: number): TimeHM {
@@ -688,28 +552,40 @@ function addToStartTime(addedMinutes: number) {
 
 function removeValidation() {
   if (dateRange.value.length > 0) {
-    missingValues.value = missingValues.value.filter((m) => m !== "date");
+    missingValues.value.start = missingValues.value.start.filter(
+      (m) => m !== "date",
+    );
+    missingValues.value.end = missingValues.value.end.filter(
+      (m) => m !== "date",
+    );
   }
   if (timeRange.value.start) {
-    missingValues.value = missingValues.value.filter((m) => m !== "startTime");
+    missingValues.value.start = missingValues.value.start.filter(
+      (m) => m !== "time",
+    );
   }
   if (timeRange.value.end) {
-    missingValues.value = missingValues.value.filter((m) => m !== "endTime");
+    missingValues.value.end = missingValues.value.end.filter(
+      (m) => m !== "time",
+    );
   }
 }
 
 function useValidation() {
   if (dateRange.value.length === 0) {
-    if (!missingValues.value.includes("date")) missingValues.value.push("date");
+    if (!missingValues.value.start.includes("date"))
+      missingValues.value.start.push("date");
+    if (!missingValues.value.end.includes("date"))
+      missingValues.value.end.push("date");
   }
 
   if (!timeRange.value.start?.hours || !timeRange.value.start?.minutes) {
-    if (!missingValues.value.includes("startTime"))
-      missingValues.value.push("startTime");
+    if (!missingValues.value.start.includes("time"))
+      missingValues.value.start.push("time");
   }
-  if (!timeRange.value.end?.hours || !timeRange.value.start?.minutes) {
-    if (!missingValues.value.includes("endTime")) {
-      missingValues.value.push("endTime");
+  if (!timeRange.value.end?.hours || !timeRange.value.end?.minutes) {
+    if (!missingValues.value.end.includes("time")) {
+      missingValues.value.end.push("time");
     }
   }
 }
@@ -734,7 +610,12 @@ function onSelect() {
   // Validation
   removeValidation();
   useValidation();
-  if (missingValues.value.length > 0) return;
+
+  if (
+    missingValues.value.start.length > 0 ||
+    missingValues.value.end.length > 0
+  )
+    return;
 
   if (invalidTimeslot.value || invalidDateSlot.value) return;
 
@@ -747,7 +628,7 @@ function onSelect() {
 function onDeleteTimePeriod() {
   dateRange.value = [];
   timeRange.value = { start: null, end: null };
-  missingValues.value = [];
+  missingValues.value = { start: [], end: [] };
   isOpen.value = false;
 
   startDate.value = null;
@@ -765,48 +646,5 @@ function onDeleteTimePeriod() {
 :deep(.period-date-input),
 :deep(.period-time-input) {
   font-variant-numeric: tabular-nums;
-}
-
-input::-webkit-calendar-picker-indicator {
-  display: none;
-}
-
-input[type="date"]::-webkit-input-placeholder {
-  visibility: hidden !important;
-}
-
-.inputFieldClass {
-  width: 100%;
-  min-width: 0;
-  margin: 0.25rem;
-  padding: 0.25rem;
-
-  background-color: #fff;
-  color: #111827;
-  font-size: 0.875rem;
-  border-radius: 0.375rem;
-
-  cursor: text;
-  text-align: center;
-
-  transition:
-    background-color 150ms,
-    border-color 150ms;
-}
-
-.inputFieldClass:hover {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
-}
-
-.inputFieldClass:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.inputFieldClass:disabled {
-  background-color: #f3f4f6;
-  color: #9ca3af;
-  cursor: not-allowed;
 }
 </style>

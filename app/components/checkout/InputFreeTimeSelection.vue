@@ -1,33 +1,30 @@
 <template>
   <div ref="wrapperRef" class="@container space-y-5">
-    <div class="grid grid-cols-1 @lg:grid-cols-2 gap-4">
-      <div>
+
+    <div class="grid grid-cols-1 @lg:flex gap-4">
+      <div class="md:flex items-center space-x-1">
         <label
-          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 md:mb-1.5"
         >
-          {{ $t("scheduleSelection.startTimePoint") }}
+          {{ $t("scheduleSelection.startTimePoint") }}:
         </label>
         <InputTime
-          v-model="startTime"
-          v-model:date="startInputDate"
-          show-date
-          class="w-full"
-          @update:model-value="onStartTimeChange"
+          v-model:date="startDate"
+          v-model:time="startTime"
           @update:date="onStartTimeChange"
+          @update:time="onStartTimeChange"
         />
       </div>
-      <div>
+      <div class="md:flex items-center space-x-1">
         <label
-          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 md:mb-1.5"
         >
-          {{ $t("scheduleSelection.endTimePoint") }}
+          {{ $t("scheduleSelection.endTimePoint") }}:
         </label>
         <InputTime
-          v-model="endTime"
-          v-model:date="endInputDate"
-          show-date
+          v-model:date="endDate"
+          v-model:time="endTime"
           :disabled="!startTime"
-          class="w-full"
           @update:model-value="onManualInputChange"
           @update:date="onManualInputChange"
         />
@@ -166,7 +163,7 @@
 
     <!-- Hint -->
     <p
-      v-if="showCalendarPanel"
+      v-if="showCalendarPanel && !compact"
       class="text-xs text-gray-400 dark:text-gray-500 italic"
     >
       {{ $t("scheduleSelection.dragHint") }}
@@ -196,6 +193,10 @@ const props = defineProps({
   modelValue: {
     type: Object,
     default: () => ({ start: null, end: null }),
+  },
+  compact: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -606,31 +607,48 @@ function timeToString({ hours, minutes }) {
 }
 
 /* ── InputTime bindings ──────────────────────────────────── */
+const startDate = computed({
+  get() {
+    if (!startDateInput.value) return null;
+    return new Date(startDateInput.value);
+  },
+  set(val) {
+    startDateInput.value = val.toISOString().split("T")[0];
+  },
+});
+const endDate = computed({
+  get() {
+    if (!endDateInput.value) return null;
+    return new Date(endDateInput.value);
+  },
+  set(val) {
+    endDateInput.value = val.toISOString().split("T")[0];
+  },
+});
+
+/*const startDate = computed(() => {
+  if (!startDateInput.value) return null;
+  return new Date(startDateInput.value);
+});*/
+/*const endDate = computed(() => {
+  if (!endDateInput.value) return null;
+  return new Date(endDateInput.value);
+});*/
+
 const startTime = computed({
-  get: () => timeFromString(startTimeInput.value),
+  get() {
+    return timeFromString(startTimeInput.value);
+  },
   set(val) {
     startTimeInput.value = val ? timeToString(val) : "";
   },
 });
-
 const endTime = computed({
-  get: () => timeFromString(endTimeInput.value),
+  get() {
+    return timeFromString(endTimeInput.value);
+  },
   set(val) {
     endTimeInput.value = val ? timeToString(val) : "";
-  },
-});
-
-const startInputDate = computed({
-  get: () => parseLocalDate(startDateInput.value),
-  set(d) {
-    startDateInput.value = d ? localISODate(d) : "";
-  },
-});
-
-const endInputDate = computed({
-  get: () => parseLocalDate(endDateInput.value),
-  set(d) {
-    endDateInput.value = d ? localISODate(d) : "";
   },
 });
 
@@ -656,32 +674,28 @@ function resetTimeSelection() {
   nextTick(() => getApi()?.unselect());
 }
 
-function applyDefaultEndFromStart() {
-  if (!startDateInput.value || !startTimeInput.value) return;
+function applyDefaultEndTimeFromStart() {
+  if (!startTimeInput.value) return null;
+  if (!endTimeInput.value) {
+    const [sh, sm] = startTimeInput.value.split(":").map(Number);
+    setTimeout(() => (endTimeInput.value = `${pad2(sh + 1)}:${pad2(sm)}`), 600);
+  }
+}
 
-  const sd = parseLocalDate(startDateInput.value);
+function applyDefaultEndDateFromStart() {
+  if (!startDateInput.value) return;
+
+  const sd = new Date(startDateInput.value);
   if (!sd) return;
 
-  const [sh, sm] = startTimeInput.value.split(":").map(Number);
-  const start = jsDateWithTime(sd, sh, sm || 0);
-
-  if (endDateInput.value && endTimeInput.value) {
-    const ed = parseLocalDate(endDateInput.value);
-    if (ed) {
-      const [eh, em] = endTimeInput.value.split(":").map(Number);
-      const end = jsDateWithTime(ed, eh, em || 0);
-      if (end > start) return;
-    }
+  if (!endDateInput.value) {
+    setTimeout(() => (endDateInput.value = startDateInput.value), 600);
   }
-
-  const end = new Date(start);
-  end.setHours(end.getHours() + 1);
-  endDateInput.value = localISODate(end);
-  endTimeInput.value = `${pad2(end.getHours())}:${pad2(end.getMinutes())}`;
 }
 
 function onStartTimeChange() {
-  applyDefaultEndFromStart();
+  applyDefaultEndDateFromStart();
+  applyDefaultEndTimeFromStart();
   onManualInputChange();
 }
 
@@ -691,14 +705,13 @@ function allowSelection(selectInfo) {
 
 /* ── manual input change ─────────────────────────────────── */
 function onManualInputChange() {
-  emitValue();
   ensureAvailabilityForInputs();
 
   // Navigate calendar to the start date if it is outside the current view
   if (startDateInput.value) {
     const api = getApi();
     if (api) {
-      const sd = parseLocalDate(startDateInput.value);
+      const sd = new Date(startDateInput.value);
       if (
         sd &&
         currentViewStart.value &&
@@ -709,6 +722,7 @@ function onManualInputChange() {
       }
     }
   }
+  setTimeout(() => emitValue(), 600);
 }
 
 watch(showCalendarPanel, (visible) => {
@@ -764,26 +778,30 @@ const overlapWarning = computed(() => {
 let lastEmittedKey = "";
 
 function emitValue() {
+  console.log("Want to emit...");
+  if (
+    !startDateInput.value ||
+    !startTimeInput.value ||
+    !endDateInput.value ||
+    !endTimeInput.value
+  ) {
+    return;
+  }
   let payload = { start: null, end: null };
 
-  if (
-    startDateInput.value &&
-    startTimeInput.value &&
-    endDateInput.value &&
-    endTimeInput.value
-  ) {
-    const sd = parseLocalDate(startDateInput.value);
-    const ed = parseLocalDate(endDateInput.value);
-    if (sd && ed) {
-      const [sh, sm] = startTimeInput.value.split(":").map(Number);
-      const [eh, em] = endTimeInput.value.split(":").map(Number);
-      const start = jsDateWithTime(sd, sh, sm || 0);
-      const end = jsDateWithTime(ed, eh, em || 0);
-      if (end.getTime() > start.getTime()) {
-        payload = { start: start.getTime(), end: end.getTime() };
-      }
-    }
-  }
+  const sd = new Date(startDateInput.value);
+  const ed = new Date(endDateInput.value);
+
+  const [startHour, startMinute] = startTimeInput.value.split(":").map(Number);
+  const [endHour, endMinute] = endTimeInput.value.split(":").map(Number);
+
+  sd.setHours(startHour, startMinute, 0, 0);
+  ed.setHours(endHour, endMinute, 0, 0);
+
+  payload = {
+    start: sd.getTime(),
+    end: ed.getTime(),
+  };
 
   const key = `${payload.start ?? ""}|${payload.end ?? ""}`;
   if (key === lastEmittedKey) return;

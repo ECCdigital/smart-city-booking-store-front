@@ -13,8 +13,10 @@
           <button
             type="button"
             tabindex="-1"
-            class="cursor-pointer shrink-0 p-1 rounded text-gray-400 flex items-center hover:text-primary transition-colors"
+            class="shrink-0 p-1 rounded text-gray-400 flex items-center hover:text-primary transition-colors"
+            :class="disabled ? 'cursor-not-allowed' : 'cursor-pointer'"
             aria-label="Kalender öffnen"
+            :disabled="disabled"
             @click.stop="onOpenCalender"
           >
             <UIcon name="i-lucide-calendar" class="size-4" />
@@ -25,8 +27,10 @@
           <button
             type="button"
             tabindex="-1"
-            class="cursor-pointer shrink-0 p-1 rounded text-gray-400 hover:text-primary transition-colors"
+            class="shrink-0 p-1 rounded text-gray-400 hover:text-primary transition-colors"
+            :class="disabled ? 'cursor-not-allowed' : 'cursor-pointer'"
             aria-label="Uhrzeit wählen"
+            :disabled="disabled"
             @click.stop="onOpenTimeScroller"
           >
             <UIcon name="i-lucide-clock" class="size-4" />
@@ -69,6 +73,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const isOpen = ref(false);
@@ -80,9 +88,12 @@ const nowMinute = computed(() => {
 });
 
 function onOpenCalender() {
+  if (props.disabled) return;
   isOpen.value = true;
 }
 function onOpenTimeScroller() {
+  if (props.disabled) return;
+
   if (!model.value) {
     model.value = { hours: nowHour.value, minutes: nowMinute.value };
   }
@@ -90,13 +101,11 @@ function onOpenTimeScroller() {
 }
 
 function onBarScrollerHour(hour) {
-  console.log("new hour", hour);
   const current = model.value;
   applyTime(hour, current?.minutes ?? nowMinute);
 }
 
 function onBarScrollerMinute(minute) {
-  console.log("new minute", minute);
   const current = model.value;
   applyTime(current?.hours ?? nowHour.value, minute);
 }

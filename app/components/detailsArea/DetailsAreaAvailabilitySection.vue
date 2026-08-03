@@ -60,6 +60,7 @@
     -->
     <div v-if="isScheduleRelated" class="mt-1 mb-2">
       <InputFreeTimeSelection
+        compact
         :model-value="timePeriod"
         :tenant-id="bookable.tenantId"
         :bookable-id="bookable.id"

@@ -1,4 +1,49 @@
 <template>
+  <div class="flex flex-col gap-1">
+    <div class="flex gap-1">
+      <div class="w-48 md:w-36 shrink-0">
+        <PeriodField
+          v-model="dateModel"
+          version="date"
+          :disabled="disabled"
+          :class="
+            missingValues.includes('date') || isInvalidDate
+              ? 'border-2 border-red-500'
+              : ''
+          "
+        >
+          <input
+            v-model="dateInput"
+            type="date"
+            class="inputFieldClass"
+            :disabled="disabled"
+          />
+        </PeriodField>
+      </div>
+
+      <div class="w-30 md:w-26 shrink-0">
+        <PeriodField
+          v-model="timeModel"
+          version="time"
+          :disabled="disabled"
+          :class="
+            missingValues.includes('time') || isInvalidTime
+              ? 'border-2 border-red-500'
+              : ''
+          "
+        >
+          <input
+            v-model="timeInput"
+            type="time"
+            class="inputFieldClass"
+            :disabled="disabled"
+          />
+        </PeriodField>
+      </div>
+    </div>
+    <slot name="buttons" />
+  </div>
+  <!--
   <UTooltip text="Wählen Sie erst ein Startdatum." :disabled="!disabled">
     <TimePickerDialog
       v-model:open="openTimePickerDialog"
@@ -97,36 +142,88 @@
       </UCard>
     </template>
   </UModal>
+  -->
 </template>
 <script setup lang="ts">
-import { Time, getLocalTimeZone, today } from "@internationalized/date";
-import DatePicker from "~/components/inputs/DatePicker.vue";
-import TimePickerDialog from "~/components/inputs/TimePickerDialog.vue";
 import { useCalendarDateField } from "~/composables/useCalendarDateField.js";
 import { readTimeFromTimeFieldRoot } from "~/utils/localDate.js";
+import PeriodField from "~/components/inputs/PeriodField.vue";
 
-const model = defineModel();
-const dateModel = defineModel("date", { default: null });
+const dateModel = defineModel("date", { type: Date, default: null });
+const timeModel = defineModel("time", {
+  type: Object,
+  default: { hours: null, minutes: null },
+});
 
 const props = defineProps({
   disabled: {
     type: Boolean,
     default: false,
   },
-  enableTimePicker: {
-    type: Boolean,
-    default: true,
-  },
   showDate: {
     type: Boolean,
     default: false,
+  },
+  missingValues: {
+    type: Array,
+    default: () => [],
+  },
+  isInvalidDate: {
+    type: Boolean,
+    default: false,
+  },
+  isInvalidTime: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const dateInput = computed({
+  get() {
+    if (!dateModel.value) return null;
+    return dateModel.value.toISOString().split("T")[0];
+  },
+  set(v: string | null) {
+    if (!v) {
+      dateModel.value = null;
+      return;
+    }
+    dateModel.value = new Date(v);
+  },
+});
+const timeInput = computed({
+  get() {
+    if (
+      !timeModel.value ||
+      timeModel.value.hours === null ||
+      timeModel.value.minutes === null
+    ) {
+      return "";
+    }
+
+    const hh = timeModel.value.hours.toString().padStart(2, "0");
+    const mm = timeModel.value.minutes.toString().padStart(2, "0");
+
+    return `${hh}:${mm}`;
+  },
+  set(v: string | null) {
+    if (!v) {
+      timeModel.value = null;
+      return;
+    }
+
+    const parts = v.split(":");
+
+    timeModel.value = {
+      hours: Number(parts[0]),
+      minutes: Number(parts[1]),
+    };
   },
 });
 
 const openTimePickerDialog = ref(false);
 const openDatePickerDialog = ref(false);
 const pendingDate = ref<Date | null>(null);
-const minCalendarDate = today(getLocalTimeZone());
 const dateFieldRef = ref<{ $el?: HTMLElement } | null>(null);
 const timeFieldRef = ref<{ $el?: HTMLElement } | null>(null);
 
@@ -156,54 +253,6 @@ function handleFieldFocusOut(event) {
   commitCalendarDate();
   syncTimeFromDom();
 }
-
-function openPicker() {
-  if (props.disabled) return;
-  commitCalendarDate();
-  syncTimeFromDom();
-  openTimePickerDialog.value = true;
-}
-
-function openDatePicker() {
-  if (props.disabled) return;
-  pendingDate.value = dateModel.value ? new Date(dateModel.value) : null;
-  openDatePickerDialog.value = true;
-}
-
-function closeDatePicker() {
-  openDatePickerDialog.value = false;
-}
-
-function confirmDateSelection() {
-  if (pendingDate.value) {
-    setCalendarDateFromPicker(pendingDate.value);
-  }
-  closeDatePicker();
-}
-
-const time = computed({
-  get() {
-    const val = model.value;
-    if (!val) return null;
-
-    return new Time(val.hours, val.minutes);
-  },
-  set(val) {
-    if (!val) {
-      model.value = null;
-      return;
-    }
-
-    model.value = {
-      hours: val.hour,
-      minutes: val.minute,
-    };
-  },
-});
-
-function setTime({ hours, minutes }) {
-  model.value = { hours, minutes };
-}
 </script>
 
 <style>
@@ -211,5 +260,47 @@ function setTime({ hours, minutes }) {
   position: absolute;
   inset: 0;
   background: transparent;
+}
+
+input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+input[type="date"]::-webkit-input-placeholder {
+  visibility: hidden !important;
+}
+
+.inputFieldClass {
+  width: 100%;
+  min-width: 0;
+  margin: 0.25rem;
+  padding: 0.25rem;
+
+  background-color: #fff;
+  color: #111827;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+
+  cursor: text;
+  text-align: center;
+
+  transition:
+    background-color 150ms,
+    border-color 150ms;
+}
+
+.inputFieldClass:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.inputFieldClass:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.inputFieldClass:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
 }
 </style>
