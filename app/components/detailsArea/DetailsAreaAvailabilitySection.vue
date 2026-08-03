@@ -133,7 +133,7 @@ const {
   mode,
 } = useBookableBookingMode(() => props.bookable);
 
-const isMdUp = useMediaQuery("(min-width: 1024)");
+const isMdUp = useMediaQuery("(min-width: 1024px)");
 const datetimePanelHost = ref(null);
 provide("searchBarDatetimePanelHost", datetimePanelHost);
 
