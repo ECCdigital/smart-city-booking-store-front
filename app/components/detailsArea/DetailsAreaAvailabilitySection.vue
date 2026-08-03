@@ -43,15 +43,20 @@
       class="p-1 text-info w-full my-2 text-sm items-center"
     />
 
-    <InputDateTimePeriod
-      v-if="isScheduleRelated"
-      :time-period="timePeriod"
-      variant="bar"
-      compact
-      class="border dark:border-gray-600 rounded-md mt-1 mb-2 w-full"
-      @select-date="onPeriodSelected"
-      @remove-date="onPeriodCleared"
-    />
+    <div v-if="isScheduleRelated" class="relative mt-1 mb-2 w-full">
+      <InputDateTimePeriod
+        :time-period="timePeriod"
+        :variant="isMdUp ? 'bar' : 'modal'"
+        compact
+        class="border dark:border-gray-600 rounded-md w-full"
+        @select-date="onPeriodSelected"
+        @remove-date="onPeriodCleared"
+      />
+      <div
+        ref="datetimePanelHost"
+        class="absolute left-0 right-0 top-full z-50"
+      />
+    </div>
 
     <div v-else-if="isTimePeriodRelated" class="mt-1 mb-2">
       <InputTimePeriodSlots
@@ -128,6 +133,10 @@ const {
   isBlockPeriodRelated,
   mode,
 } = useBookableBookingMode(() => props.bookable);
+
+const isMdUp = useMediaQuery("(min-width: 1024)");
+const datetimePanelHost = ref(null);
+provide("searchBarDatetimePanelHost", datetimePanelHost);
 
 const bookableTimePeriods = computed(() => props.bookable?.timePeriods || []);
 
