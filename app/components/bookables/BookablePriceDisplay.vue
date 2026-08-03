@@ -13,6 +13,7 @@
       <span class="text-gray-500 line-through mr-2">
         {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
       </span>
+      <br class="md:hidden" />
       <span>
         {{ displayPrice(calculatedPrice.userGrossPriceEur) }}
       </span>
