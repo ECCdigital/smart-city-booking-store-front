@@ -1,7 +1,11 @@
 <template>
   <div class="details-availability-compact">
-    <h3 class="text-base font-bold">{{ $t("detailsAvailability.title") }}</h3>
+    <h3 class="text-base font-bold">
+      {{ $t("detailsAvailability.title") }}
+    </h3>
 
+
+    <!-- Hint for group bookings -->
     <div
       v-if="bookable.groupBookingAllowed"
       class="my-2 flex flex-col rounded-xl border border-primary-200 bg-primary-50/50 p-4 dark:border-primary-800 dark:bg-primary-950/30 sm:flex-row sm:items-center sm:justify-between"
@@ -41,8 +45,9 @@
 
     <InputDateTimePeriod
       v-if="isScheduleRelated"
-      compact
       :time-period="timePeriod"
+      variant="bar"
+      compact
       class="border dark:border-gray-600 rounded-md mt-1 mb-2 w-full"
       @select-date="onPeriodSelected"
       @remove-date="onPeriodCleared"
