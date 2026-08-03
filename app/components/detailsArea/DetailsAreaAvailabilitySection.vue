@@ -4,7 +4,6 @@
       {{ $t("detailsAvailability.title") }}
     </h3>
 
-
     <!-- Hint for group bookings -->
     <div
       v-if="bookable.groupBookingAllowed"

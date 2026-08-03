@@ -3,7 +3,7 @@
     <!-- Title -->
     <div
       ref="titleBlockRef"
-      class="sticky top-0 pt-4 z-50 px-4 -mx-4 bg-neutral-50"
+      class="md:sticky top-0 pt-4 z-50 px-4 -mx-4 bg-neutral-50"
     >
       <DetailsAreaTitleBlock :tenant-name="tenantName" :title="title">
         <template #actions>
