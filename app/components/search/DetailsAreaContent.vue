@@ -39,12 +39,14 @@
           v-if="!isEvent && isBookable"
           :bookable="item"
           :time-period="timePeriod"
+          :items="items"
           @period-selected="setSearchTimePeriod"
           @period-cleared="removeSearchTimePeriod"
         />
         <DetailsAreaAvailabilityResults
           v-if="!isEvent && isBookable"
           :item="item"
+          :items="items"
         />
 
         <DetailsAreaTicketOptions v-if="isEvent" :item="item" />
@@ -91,6 +93,7 @@ const {
   tenantName,
   badgeFieldLabels,
   timePeriod,
+  items,
   setSearchTimePeriod,
   removeSearchTimePeriod,
 } = useBookableDetailContent(() => props.item, props.isEvent);

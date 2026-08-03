@@ -42,6 +42,7 @@
       class="p-1 text-info w-full my-2 text-sm items-center"
     />
 
+    <!--
     <div v-if="isScheduleRelated" class="relative mt-1 mb-2 w-full">
       <InputDateTimePeriod
         :time-period="timePeriod"
@@ -54,6 +55,15 @@
       <div
         ref="datetimePanelHost"
         class="absolute left-0 right-0 top-full z-50"
+      />
+    </div>
+    -->
+    <div v-if="isScheduleRelated" class="mt-1 mb-2">
+      <InputFreeTimeSelection
+        :model-value="timePeriod"
+        :tenant-id="bookable.tenantId"
+        :bookable-id="bookable.id"
+        @update:model-value="onPeriodSelected"
       />
     </div>
 
@@ -101,12 +111,13 @@
 </template>
 
 <script setup>
-import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
+//import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
 import InputTimePeriodSlots from "~/components/checkout/InputTimePeriodSlots.vue";
 import InputWeekSelection from "~/components/checkout/InputWeekSelection.vue";
 import InputMonthSelection from "~/components/checkout/InputMonthSelection.vue";
 import InputBlockPeriodSelection from "~/components/checkout/InputBlockPeriodSelection.vue";
 import { useBookableBookingMode } from "~/composables/useBookableBookingMode.ts";
+import InputFreeTimeSelection from "~/components/checkout/InputFreeTimeSelection.vue";
 
 const props = defineProps({
   bookable: {
@@ -116,6 +127,10 @@ const props = defineProps({
   timePeriod: {
     type: Object,
     default: () => ({ start: null, end: null }),
+  },
+  items: {
+    type: Array,
+    default: () => [],
   },
 });
 
@@ -133,7 +148,8 @@ const {
   mode,
 } = useBookableBookingMode(() => props.bookable);
 
-const isMdUp = useMediaQuery("(min-width: 1024px)");
+//const isMdUp = useMediaQuery("(min-width: 1024px)");
+
 const datetimePanelHost = ref(null);
 provide("searchBarDatetimePanelHost", datetimePanelHost);
 

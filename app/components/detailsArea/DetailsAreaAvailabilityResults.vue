@@ -45,16 +45,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  items: {
+    type: Array,
+    default: () => [],
+  },
 });
 
-const {
-  item,
-  items,
-  isBookable,
-  showAvailabilityResult,
-  contrastToPrimary,
-  goToCheckout,
-} = useBookableDetailContent(() => props.item);
+const { isBookable, showAvailabilityResult, contrastToPrimary, goToCheckout } =
+  useBookableDetailContent(() => props.item);
 </script>
 
 <style scoped></style>
