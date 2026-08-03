@@ -10,7 +10,7 @@
         calculatedPrice.regularGrossPriceEur > calculatedPrice.userGrossPriceEur
       "
     >
-      <span class="text-gray-500 line-through mr-2">
+      <span class="text-gray-500 line-through md:mr-2">
         {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
       </span>
       <br class="md:hidden" />
@@ -140,6 +140,9 @@ function displayPrice(currentPrice) {
 }
 
 function displayPricePerUnit() {
+  if (props.calculatedPrice) {
+    return "";
+  }
   const minPrice = getMinPrice();
   if (minPrice === null || minPrice === 0) {
     return "";

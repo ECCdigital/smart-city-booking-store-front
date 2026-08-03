@@ -17,7 +17,7 @@
         </div>
       </div>
       <UButton
-        class="text-sm bg-primary text-white px-3 py-1"
+        class="text-sm bg-primary text-white px-2 md:px-3 py-1"
         label="Ansehen"
         @click="goToDetails(item.id, item.type)"
       />
