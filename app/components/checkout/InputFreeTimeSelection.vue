@@ -25,7 +25,7 @@
           v-model:date="endDate"
           v-model:time="endTime"
           :disabled="!startTime"
-          @update:model-value="onManualInputChange"
+          @update:time="onManualInputChange"
           @update:date="onManualInputChange"
         />
       </div>
@@ -675,21 +675,17 @@ function resetTimeSelection() {
 }
 
 function applyDefaultEndTimeFromStart() {
-  if (!startTimeInput.value) return null;
+  if (!startTimeInput.value) return;
   if (!endTimeInput.value) {
     const [sh, sm] = startTimeInput.value.split(":").map(Number);
-    setTimeout(() => (endTimeInput.value = `${pad2(sh + 1)}:${pad2(sm)}`), 600);
+    endTimeInput.value = `${pad2((sh + 1) % 24)}:${pad2(sm || 0)}`;
   }
 }
 
 function applyDefaultEndDateFromStart() {
   if (!startDateInput.value) return;
-
-  const sd = new Date(startDateInput.value);
-  if (!sd) return;
-
   if (!endDateInput.value) {
-    setTimeout(() => (endDateInput.value = startDateInput.value), 600);
+    endDateInput.value = startDateInput.value;
   }
 }
 
@@ -704,10 +700,9 @@ function allowSelection(selectInfo) {
 }
 
 /* ── manual input change ─────────────────────────────────── */
-function onManualInputChange() {
+async function onManualInputChange() {
+  await nextTick();
   ensureAvailabilityForInputs();
-
-  // Navigate calendar to the start date if it is outside the current view
   if (startDateInput.value) {
     const api = getApi();
     if (api) {
@@ -722,7 +717,7 @@ function onManualInputChange() {
       }
     }
   }
-  setTimeout(() => emitValue(), 600);
+  emitValue();
 }
 
 watch(showCalendarPanel, (visible) => {
