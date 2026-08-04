@@ -83,7 +83,6 @@ const formattedTimePeriod = computed(() => {
   return `${formatDate(start)}, ${formatTime(start)} – ${formatDate(end)}, ${formatTime(end)}`;
 });
 
-
 function minAmount(id) {
   if (id === props.leadBookableId) return 1;
   if (props.mandatoryIds.includes(id)) return 1;
@@ -242,13 +241,9 @@ const hasContent = computed(() => {
 
       <div
         v-if="needsTimePeriodSelection"
-        class="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400"
+        class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300"
       >
-        <UIcon
-          name="i-lucide-calendar-clock"
-          size="16"
-          class="flex-shrink-0"
-        />
+        <UIcon name="i-lucide-calendar-clock" size="16" class="flex-shrink-0" />
         <span>{{ $t("checkout.selectTimePeriodTitle") }}</span>
       </div>
 
@@ -284,10 +279,7 @@ const hasContent = computed(() => {
           >
             {{ currentAmount(err.id) }}
           </div>
-          <div
-            v-else
-            class="flex items-center gap-0.5 flex-shrink-0"
-          >
+          <div v-else class="flex items-center gap-0.5 flex-shrink-0">
             <button
               type="button"
               class="w-5 h-5 flex items-center justify-center rounded text-red-400 dark:text-red-500 hover:text-red-600 dark:hover:text-red-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
@@ -305,7 +297,7 @@ const hasContent = computed(() => {
               :aria-label="quantityInputLabel(err.id)"
               class="amount-input w-8 h-6 text-center tabular-nums text-sm font-medium text-red-800 dark:text-red-200 bg-transparent border-b border-red-300 dark:border-red-700 focus:border-red-500 focus:outline-none"
               @change="handleDirectInput(err.id, $event)"
-            >
+            />
             <button
               type="button"
               class="w-5 h-5 flex items-center justify-center rounded text-red-400 dark:text-red-500 hover:text-red-600 dark:hover:text-red-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
@@ -324,7 +316,9 @@ const hasContent = computed(() => {
           :key="item.id"
           class="flex items-center gap-3 text-sm md:text-base text-gray-700 dark:text-gray-200"
         >
-          <span :title="item.label" class="line-clamp-2 flex-1 min-w-0">{{ item.label }}</span>
+          <span :title="item.label" class="line-clamp-2 flex-1 min-w-0">{{
+            item.label
+          }}</span>
 
           <div
             v-if="!item.skipQuantity && isQuantityFixed(item.id)"
@@ -355,7 +349,7 @@ const hasContent = computed(() => {
               :aria-label="quantityInputLabel(item.id)"
               class="amount-input w-8 h-6 text-center tabular-nums text-sm font-medium text-gray-900 dark:text-white bg-transparent border-b border-gray-200 dark:border-gray-700 focus:border-primary focus:outline-none"
               @change="handleDirectInput(item.id, $event)"
-            >
+            />
             <button
               type="button"
               class="w-5 h-5 flex items-center justify-center rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"

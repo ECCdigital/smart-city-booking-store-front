@@ -474,7 +474,7 @@
     "block_period_mismatch": "Für dieses Objekt muss ein vollständiges Buchungszeitfenster gebucht werden.",
     "time_period_mismatch": "Für dieses Objekt muss ein vollständiger Zeitslot gebucht werden.",
     "insufficient_lead_time": "Die Buchung liegt zu kurzfristig. Zwischen Buchung und Beginn muss ausreichend Vorbereitungszeit in den Servicezeiten liegen.",
-    "selectTimePeriodTitle": "Zeitraum auswählen",
+    "selectTimePeriodTitle": "Kein Zeitraum ausgewählt",
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
     "data": {
       "contactSectionTitle": "Kontaktdaten",
