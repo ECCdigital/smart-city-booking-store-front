@@ -36,7 +36,7 @@
         <USeparator class="w-full" :ui="{ border: 'border-gray-300' }" />
 
         <DetailsAreaAvailabilitySection
-          v-if="!isEvent && isBookable"
+          v-if="!isEvent && item.isBookable"
           :bookable="item"
           :time-period="timePeriod"
           :items="items"
@@ -44,7 +44,7 @@
           @period-cleared="removeSearchTimePeriod"
         />
         <DetailsAreaAvailabilityResults
-          v-if="!isEvent && isBookable"
+          v-if="!isEvent && item.isBookable"
           :item="item"
           :items="items"
         />
@@ -88,7 +88,6 @@ const props = defineProps({
 });
 
 const {
-  isBookable,
   title,
   tenantName,
   badgeFieldLabels,

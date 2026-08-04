@@ -122,7 +122,7 @@ export function useBookableDetailContent(itemSource, isEvent) {
 
   const { requiresTimeSelection } = useBookableBookingMode(() => item.value);
 
-  const isBookable = computed(() => {
+  const isBookableAndMatch = computed(() => {
     const entry = items.value[0];
     if (!entry) return false;
     return entry.matchStatus === "match" && entry.isBookable !== false;
@@ -222,7 +222,7 @@ export function useBookableDetailContent(itemSource, isEvent) {
     moreInfoFields,
     customFieldValueText,
     timePeriod,
-    isBookable,
+    isBookableAndMatch,
     showAvailabilityResult,
     contrastToPrimary,
     setSearchTimePeriod,

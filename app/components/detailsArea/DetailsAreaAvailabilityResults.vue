@@ -19,7 +19,7 @@
       />
       <div class="content-center">
         <UButton
-          v-if="isBookable"
+          v-if="isBookableAndMatch"
           :label="$t('bookableDetail.book')"
           class="justify-center px-2 md:px-5"
           :style="{ color: contrastToPrimary }"
@@ -51,8 +51,12 @@ const props = defineProps({
   },
 });
 
-const { isBookable, showAvailabilityResult, contrastToPrimary, goToCheckout } =
-  useBookableDetailContent(() => props.item);
+const {
+  isBookableAndMatch,
+  showAvailabilityResult,
+  contrastToPrimary,
+  goToCheckout,
+} = useBookableDetailContent(() => props.item);
 </script>
 
 <style scoped></style>
