@@ -274,9 +274,15 @@ function ruleSignature(rule) {
 const currentRule = computed(() => buildRuleSnapshot());
 const currentSignature = computed(() => ruleSignature(currentRule.value));
 
+const isInvalidTimeslot = computed(() => {
+  if (seedStartMs.value == null || seedEndMs.value == null) return false;
+  return seedEndMs.value <= seedStartMs.value;
+});
+
 const canGenerate = computed(() => {
   if (seedStartMs.value == null || seedEndMs.value == null) return false;
-  if (seedEndMs.value <= seedStartMs.value) return false;
+  if (isInvalidTimeslot.value) return false;
+
   if (frequency.value === "weekly") {
     if (
       !Array.isArray(weeklyByWeekday.value) ||
@@ -491,6 +497,16 @@ function getWeekDayCardClass(wd) {
           {{ $t("scheduleSelection.resetTime") }}
         </button>
       </div>
+    </div>
+
+    <div
+      v-if="isInvalidTimeslot"
+      class="flex items-center gap-1.5 text-error -mt-2"
+    >
+      <UIcon name="i-lucide-alert-circle" class="shrink-0" size="14" />
+      <span class="text-sm wrap-break-word">
+        {{ $t("groupBooking.fields.invalidTimeslot") }}
+      </span>
     </div>
 
     <!-- Rhythm / interval -->
