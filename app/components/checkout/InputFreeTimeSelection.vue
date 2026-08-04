@@ -625,15 +625,6 @@ const endDate = computed({
   },
 });
 
-/*const startDate = computed(() => {
-  if (!startDateInput.value) return null;
-  return new Date(startDateInput.value);
-});*/
-/*const endDate = computed(() => {
-  if (!endDateInput.value) return null;
-  return new Date(endDateInput.value);
-});*/
-
 const startTime = computed({
   get() {
     return timeFromString(startTimeInput.value);
