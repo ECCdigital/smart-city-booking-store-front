@@ -35,8 +35,8 @@
         v-if="isOpen"
         class="glass rounded-b-lg shadow-lg border border-default bg-white dark:bg-gray-700 px-2.5 py-2 z-50"
       >
-        <div class="flex justify-between gap-x-2 gap-y-1.5">
-          <div class="flex justify-center w-full gap-x-2">
+        <div class="flex justify-between gap-2 p-2">
+          <div class="flex justify-center w-full gap-5">
             <div
               class="text-xs font-semibold text-muted shrink-0 w-12 h-10 flex items-center"
             >
@@ -50,7 +50,7 @@
               :is-invalid-time="invalidTimeslot"
             >
               <template #buttons>
-                <div>
+                <div class="my-2">
                   <UButton
                     label="Jetzt"
                     color="primary"
@@ -79,7 +79,7 @@
               :is-invalid-time="invalidTimeslot"
             >
               <template #buttons>
-                <div class="flex gap-1">
+                <div class="flex gap-1 my-2">
                   <UButton
                     v-for="mins in durationPresets"
                     :key="mins"
@@ -103,7 +103,7 @@
               size="sm"
               @click="closeAndReset"
             />
-            <UButton label="OK" size="xs" class="" @click="onSelect" />
+            <UButton label="OK" size="md" class="" @click="onSelect" />
           </div>
         </div>
 
