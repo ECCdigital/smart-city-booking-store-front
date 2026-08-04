@@ -21,7 +21,7 @@
         </PeriodField>
       </div>
 
-      <div class="w-30 md:w-26 shrink-0">
+      <div class="w-28 md:w-26 shrink-0">
         <PeriodField
           v-model="timeModel"
           version="time"

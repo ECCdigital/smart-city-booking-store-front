@@ -1,6 +1,5 @@
 <template>
   <div ref="wrapperRef" class="@container space-y-5">
-
     <div class="grid grid-cols-1 @lg:flex gap-4">
       <div class="md:flex items-center space-x-1">
         <label
@@ -773,7 +772,6 @@ const overlapWarning = computed(() => {
 let lastEmittedKey = "";
 
 function emitValue() {
-  console.log("Want to emit...");
   if (
     !startDateInput.value ||
     !startTimeInput.value ||
