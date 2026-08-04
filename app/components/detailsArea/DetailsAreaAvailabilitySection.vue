@@ -65,6 +65,7 @@
         :tenant-id="bookable.tenantId"
         :bookable-id="bookable.id"
         @update:model-value="onPeriodSelected"
+        @remove-time-selection="onPeriodCleared"
       />
     </div>
 
@@ -112,7 +113,6 @@
 </template>
 
 <script setup>
-//import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
 import InputTimePeriodSlots from "~/components/checkout/InputTimePeriodSlots.vue";
 import InputWeekSelection from "~/components/checkout/InputWeekSelection.vue";
 import InputMonthSelection from "~/components/checkout/InputMonthSelection.vue";

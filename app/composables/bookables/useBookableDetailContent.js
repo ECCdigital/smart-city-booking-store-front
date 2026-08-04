@@ -88,9 +88,28 @@ export function useBookableDetailContent(itemSource, isEvent) {
     return badgeFields.value.map(customFieldBadgeLabel);
   });
 
-  const timePeriod = ref({
-    start: query.start,
-    end: query.end,
+  const timePeriod = computed({
+    get: () => ({
+      start: query.start ?? null,
+      end: query.end ?? null,
+    }),
+    set: (tp) => {
+      console.log("renew period!");
+      query.start = tp?.start ?? null;
+      query.end = tp?.end ?? null;
+    },
+  });
+
+  const timePeriodDuration = computed(() => {
+    console.log("renew duration");
+    if (!hasValidTimePeriod.value) return null;
+    const diffMs =
+      Number(timePeriod.value.end) - Number(timePeriod.value.start);
+    if (!Number.isFinite(diffMs) || diffMs <= 0) return null;
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
   });
 
   const title = computed(() => {
@@ -131,8 +150,8 @@ export function useBookableDetailContent(itemSource, isEvent) {
   const hasValidTimePeriod = computed(() => {
     const start = timePeriod.value?.start;
     const end = timePeriod.value?.end;
-    if (!start || !end) return false;
-    return new Date(end).getTime() > new Date(start).getTime();
+    if (start == null || end == null) return false;
+    return Number(end) > Number(start);
   });
 
   const showAvailabilityResult = computed(() => {
@@ -222,6 +241,7 @@ export function useBookableDetailContent(itemSource, isEvent) {
     moreInfoFields,
     customFieldValueText,
     timePeriod,
+    timePeriodDuration,
     isBookableAndMatch,
     showAvailabilityResult,
     contrastToPrimary,

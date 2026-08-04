@@ -47,6 +47,7 @@
           v-if="!isEvent && item.isBookable"
           :item="item"
           :items="items"
+          :time-period-duration="timePeriodDuration"
         />
 
         <DetailsAreaTicketOptions v-if="isEvent" :item="item" />
@@ -92,6 +93,7 @@ const {
   tenantName,
   badgeFieldLabels,
   timePeriod,
+  timePeriodDuration,
   items,
   setSearchTimePeriod,
   removeSearchTimePeriod,

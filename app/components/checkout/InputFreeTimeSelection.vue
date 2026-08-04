@@ -199,7 +199,11 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:modelValue", "change"]);
+const emit = defineEmits([
+  "update:modelValue",
+  "change",
+  "removeTimeSelection",
+]);
 const { getBookableAvailability } = useBookables();
 
 /* ── helpers ─────────────────────────────────────────────── */
@@ -661,6 +665,7 @@ function resetTimeSelection() {
   const cleared = { start: null, end: null };
   emit("update:modelValue", cleared);
   emit("change", cleared);
+  emit("removeTimeSelection");
   nextTick(() => getApi()?.unselect());
 }
 

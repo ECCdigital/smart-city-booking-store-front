@@ -40,9 +40,16 @@
     </p>
 
     <!-- regular calculated price -->
-    <p v-else-if="calculatedPrice">
-      {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
-    </p>
+    <div v-else-if="calculatedPrice">
+      <div>{{ displayPrice(calculatedPrice.regularGrossPriceEur) }}</div>
+      <div
+        v-if="duration"
+        class="flex justify-end text-xs font-normal text-gray-600 dark:text-gray-300"
+      >
+        ({{ duration }} <span class="hidden md:block ml-1"> Std.</span
+        ><span class="md:hidden ml-1"> h</span>)
+      </div>
+    </div>
 
     <!-- price without calculation -->
     <p v-else :class="isMapStripe ? '' : 'grid'">
@@ -68,6 +75,10 @@ const props = defineProps({
   isMapStripe: {
     type: Boolean,
     default: false,
+  },
+  duration: {
+    type: String,
+    default: "",
   },
 });
 
