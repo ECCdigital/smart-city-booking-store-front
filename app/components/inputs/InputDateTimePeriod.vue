@@ -255,7 +255,6 @@
 <script setup lang="ts">
 import ClearButton from "~/components/inputs/ClearButton.vue";
 import PeriodFieldCompact from "~/components/inputs/PeriodFieldCompact.vue";
-import PeriodField from "~/components/inputs/PeriodField.vue";
 import InputTime from "~/components/inputs/InputTime.vue";
 
 type TimePeriod = {
@@ -302,6 +301,12 @@ watch(startDate, () => {
   }
 });
 watch(startTime, () => {
+  if (
+    !startTime.value ||
+    startTime.value.hours === null ||
+    startTime.value.minutes === null
+  )
+    return;
   if (!endTime.value || !endTime.value.hours || !endTime.value.minutes) {
     addToStartTime(60);
   }
