@@ -13,10 +13,11 @@
           "
         >
           <input
-            v-model="dateInput"
+            :value="dateInput"
             type="date"
             class="inputFieldClass"
             :disabled="disabled"
+            @change="onDateInputChange"
           />
         </PeriodField>
       </div>
@@ -33,10 +34,11 @@
           "
         >
           <input
-            v-model="timeInput"
+            :value="timeInput"
             type="time"
             class="inputFieldClass"
             :disabled="disabled"
+            @change="onTimeInputChange"
           />
         </PeriodField>
       </div>
@@ -82,80 +84,40 @@ const props = defineProps({
   },
 });
 
-const dateInput = computed({
-  get() {
-    if (!dateModel.value) return null;
-    return dateModel.value.toISOString().split("T")[0];
-  },
-  set(v: string | null) {
-    if (!v) {
-      dateModel.value = null;
-      return;
-    }
-    dateModel.value = new Date(v);
-  },
-});
-const timeInput = computed({
-  get() {
-    if (
-      !timeModel.value ||
-      timeModel.value.hours === null ||
-      timeModel.value.minutes === null
-    ) {
-      return "";
-    }
-
-    const hh = timeModel.value.hours.toString().padStart(2, "0");
-    const mm = timeModel.value.minutes.toString().padStart(2, "0");
-
-    return `${hh}:${mm}`;
-  },
-  set(v: string | null) {
-    if (!v) {
-      timeModel.value = null;
-      return;
-    }
-
-    const parts = v.split(":");
-
-    timeModel.value = {
-      hours: Number(parts[0]),
-      minutes: Number(parts[1]),
-    };
-  },
-});
-
-const openTimePickerDialog = ref(false);
-const openDatePickerDialog = ref(false);
-const pendingDate = ref<Date | null>(null);
-const dateFieldRef = ref<{ $el?: HTMLElement } | null>(null);
-const timeFieldRef = ref<{ $el?: HTMLElement } | null>(null);
-
-function getFieldRoot() {
-  const el = dateFieldRef.value?.$el;
-  return el instanceof HTMLElement ? el : null;
-}
-
-const {
-  internalCalendarDate,
-  onDateFieldFocus,
-  commitCalendarDate,
-  setCalendarDateFromPicker,
-} = useCalendarDateField(dateModel, { getFieldRoot });
-
-function syncTimeFromDom() {
-  const el = timeFieldRef.value?.$el;
-  const root = el instanceof HTMLElement ? el : null;
-  const parsed = readTimeFromTimeFieldRoot(root);
-  if (parsed) {
-    model.value = parsed;
+const dateInput = computed(() =>
+  dateModel.value ? formatLocalDateIso(dateModel.value) : "",
+);
+function onDateInputChange(event: Event) {
+  const v = event.target?.value;
+  if (!v) {
+    dateModel.value = null;
+    return;
   }
+  const parsed = new Date(v);
+  if (!parsed || parsed.getFullYear() < 1000) return;
+  dateModel.value = parsed;
 }
 
-function handleFieldFocusOut(event) {
-  if (event.currentTarget.contains(event.relatedTarget)) return;
-  commitCalendarDate();
-  syncTimeFromDom();
+const timeInput = computed(() => {
+  if (
+    !timeModel.value ||
+    timeModel.value.hours == null ||
+    timeModel.value.minutes == null
+  ) {
+    return "";
+  }
+  const hh = String(timeModel.value.hours).padStart(2, "0");
+  const mm = String(timeModel.value.minutes).padStart(2, "0");
+  return `${hh}:${mm}`;
+});
+function onTimeInputChange(event: Event) {
+  const v = event.target.value;
+  if (!v) {
+    timeModel.value = null;
+    return;
+  }
+  const [h, m] = v.split(":").map(Number);
+  timeModel.value = { hours: h, minutes: m || 0 };
 }
 </script>
 

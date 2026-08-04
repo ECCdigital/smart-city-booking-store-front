@@ -48,6 +48,8 @@
               :missing-values="missingValues.start"
               :is-invalid-date="invalidDateSlot"
               :is-invalid-time="invalidTimeslot"
+              @update:date="applyDefaultEndDateFromStart"
+              @update:time="applyDefaultEndTimeFromStart"
             >
               <template #buttons>
                 <div class="my-2">
@@ -295,23 +297,6 @@ const isOpen = ref(false);
 const startDate = ref<Date | null>(null);
 const startTime = ref<TimeHM | null>({ hours: null, minutes: null });
 
-watch(startDate, () => {
-  if (!endDate.value) {
-    setTimeout(() => (endDate.value = startDate.value), 600);
-  }
-});
-watch(startTime, () => {
-  if (
-    !startTime.value ||
-    startTime.value.hours === null ||
-    startTime.value.minutes === null
-  )
-    return;
-  if (!endTime.value || !endTime.value.hours || !endTime.value.minutes) {
-    addToStartTime(60);
-  }
-});
-
 const endDate = ref<Date | null>(null);
 const endTime = ref<TimeHM | null>({ hours: null, minutes: null });
 
@@ -319,6 +304,29 @@ const missingValues = ref<MissingValues>({ start: [], end: [] });
 const durationPresets = [60, 120, 240];
 
 const now = computed(() => new Date());
+
+function isCompleteTime(t: TimeHM) {
+  return t != null && t.hours != null && t.minutes != null;
+}
+function applyDefaultEndDateFromStart() {
+  if (!startDate.value) return;
+  if (!endDate.value) {
+    endDate.value = startDate.value;
+  }
+}
+function applyDefaultEndTimeFromStart() {
+  if (!isCompleteTime(startTime.value)) return;
+  if (!isCompleteTime(endTime.value)) {
+    addToStartTime(60);
+  }
+}
+// kein setTimeout mehr
+watch(startDate, () => {
+  applyDefaultEndDateFromStart();
+});
+watch(startTime, () => {
+  applyDefaultEndTimeFromStart();
+});
 
 const invalidDateSlot = computed(() => {
   if (
