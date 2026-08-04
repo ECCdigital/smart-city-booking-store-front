@@ -110,14 +110,27 @@ const timeInput = computed(() => {
   const mm = String(timeModel.value.minutes).padStart(2, "0");
   return `${hh}:${mm}`;
 });
+function isCompleteTime(t) {
+  return (
+    t != null &&
+    Number.isInteger(t.hours) &&
+    Number.isInteger(t.minutes) &&
+    t.hours >= 0 &&
+    t.hours <= 23 &&
+    t.minutes >= 0 &&
+    t.minutes <= 59
+  );
+}
 function onTimeInputChange(event: Event) {
-  const v = event.target.value;
+  const v = event.target.value; // "HH:mm" oder ""
   if (!v) {
     timeModel.value = null;
     return;
   }
+  // nur vollständige HH:mm (verhindert 15:1 → 15:01)
+  if (!/^\d{2}:\d{2}$/.test(v)) return;
   const [h, m] = v.split(":").map(Number);
-  timeModel.value = { hours: h, minutes: m || 0 };
+  timeModel.value = { hours: h, minutes: m };
 }
 </script>
 

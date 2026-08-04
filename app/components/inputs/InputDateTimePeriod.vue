@@ -79,6 +79,7 @@
               :missing-values="missingValues.end"
               :is-invalid-date="invalidDateSlot"
               :is-invalid-time="invalidTimeslot"
+              @update:time="onEndTimeManualChange"
             >
               <template #buttons>
                 <div class="flex gap-1 my-2">
@@ -300,6 +301,9 @@ const startTime = ref<TimeHM | null>({ hours: null, minutes: null });
 const endDate = ref<Date | null>(null);
 const endTime = ref<TimeHM | null>({ hours: null, minutes: null });
 
+const endDateAutoSet = ref(false);
+const endTimeAutoSet = ref(false);
+
 const missingValues = ref<MissingValues>({ start: [], end: [] });
 const durationPresets = [60, 120, 240];
 
@@ -308,24 +312,40 @@ const now = computed(() => new Date());
 function isCompleteTime(t: TimeHM) {
   return t != null && t.hours != null && t.minutes != null;
 }
+
 function applyDefaultEndDateFromStart() {
   if (!startDate.value) return;
-  if (!endDate.value) {
+  if (!endDate.value || endDateAutoSet.value) {
     endDate.value = startDate.value;
+    endDateAutoSet.value = true;
   }
 }
 function applyDefaultEndTimeFromStart() {
   if (!isCompleteTime(startTime.value)) return;
-  if (!isCompleteTime(endTime.value)) {
-    addToStartTime(60);
+  if (!isCompleteTime(endTime.value) || endTimeAutoSet.value) {
+    // neues Objekt, keine Referenz auf startTime
+    endTime.value = addToTime(
+      { hours: startTime.value.hours, minutes: startTime.value.minutes },
+      60,
+    );
+    endTimeAutoSet.value = true;
   }
 }
 // kein setTimeout mehr
 watch(startDate, () => {
   applyDefaultEndDateFromStart();
 });
-watch(startTime, () => {
-  applyDefaultEndTimeFromStart();
+watch(startTime, applyDefaultEndTimeFromStart);
+// manueller Edit am Ende-Feld:
+function onEndTimeManualChange() {
+  endTimeAutoSet.value = false;
+}
+
+watch(endDate, () => {
+  endDateAutoSet.value = false;
+});
+watch(endTime, () => {
+  endTimeAutoSet.value = false;
 });
 
 const invalidDateSlot = computed(() => {
@@ -345,10 +365,12 @@ const invalidDateSlot = computed(() => {
 });
 const invalidTimeslot = computed(() => {
   if (
-    !timeRange.value.start?.hours ||
-    !timeRange.value.start?.minutes ||
-    !timeRange.value.end?.hours ||
-    !timeRange.value.end?.minutes
+    !timeRange.value.start ||
+    !timeRange.value.end ||
+    timeRange.value.start.hours === null ||
+    timeRange.value.start.minutes === null ||
+    timeRange.value.end.hours === null ||
+    timeRange.value.end.minutes === null
   ) {
     return false;
   }
@@ -560,7 +582,12 @@ function addToTime(time: TimeHM, addedMinutes: number): TimeHM {
 }
 
 function addToStartTime(addedMinutes: number) {
-  endTime.value = addToTime(startTime.value, addedMinutes);
+  if (!isCompleteTime(startTime.value)) return;
+  endTime.value = addToTime(
+    { hours: startTime.value.hours, minutes: startTime.value.minutes },
+    addedMinutes,
+  );
+  endTimeAutoSet.value = true;
 }
 
 function removeValidation() {
@@ -592,11 +619,17 @@ function useValidation() {
       missingValues.value.end.push("date");
   }
 
-  if (!timeRange.value.start?.hours || !timeRange.value.start?.minutes) {
+  if (
+    timeRange.value.start?.hours === null ||
+    timeRange.value.start?.minutes === null
+  ) {
     if (!missingValues.value.start.includes("time"))
       missingValues.value.start.push("time");
   }
-  if (!timeRange.value.end?.hours || !timeRange.value.end?.minutes) {
+  if (
+    timeRange.value.end?.hours === null ||
+    timeRange.value.end?.minutes === null
+  ) {
     if (!missingValues.value.end.includes("time")) {
       missingValues.value.end.push("time");
     }
