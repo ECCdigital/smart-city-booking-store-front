@@ -27,6 +27,7 @@
           :variant="viewMode === 'map' ? 'subtle' : 'ghost'"
           label="Raumkarte"
           class="p-3 cursor-pointer"
+          disabled
           @click="() => (viewMode = 'map')"
         />
       </div>
