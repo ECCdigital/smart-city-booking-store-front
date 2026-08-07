@@ -31,6 +31,7 @@
 
     <div v-if="showHelpContact" class="mt-3 mx-10 space-y-2 text-sm">
       <UAccordion
+        :ui="{ trailingIcon: 'order-first me-2 ms-0' }"
         :items="
           tenants.map((tenant) => ({
             label: tenant.name,
@@ -39,7 +40,7 @@
         "
       >
         <template #content="{ item }">
-          <div class="space-y-3">
+          <div class="space-y-3 ml-6">
             <template
               v-for="tenant in tenants.filter((t) => t.id === item.value)"
               :key="tenant.id"
