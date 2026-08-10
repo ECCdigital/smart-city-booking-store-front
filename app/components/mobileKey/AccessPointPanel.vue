@@ -49,37 +49,38 @@
       v-model:open="isOpenPopup"
       :ui="{
         overlay: 'bg-black/60',
-        content:
-          'w-[50vw] max-w-[80vw] h-[60vh] p-5 shadow-lg overflow-y-scroll',
+        content: 'w-[50vw] max-w-[80vw] h-[60vh] shadow-lg',
       }"
       :title="accessPoint.label"
       description="Informationen und Status des Schließsystems"
     >
       <AccessPointPanelButton :deny-access="denyAccess" />
       <template #content>
-        <DialogTitle class="sr-only">
-          {{ accessPoint.label }}
-        </DialogTitle>
-        <DialogDescription class="sr-only">
-          Informationen und Status des Schließsystems
-        </DialogDescription>
+        <div class="h-full overflow-y-auto p-5">
+          <DialogTitle class="sr-only">
+            {{ accessPoint.label }}
+          </DialogTitle>
+          <DialogDescription class="sr-only">
+            Informationen und Status des Schließsystems
+          </DialogDescription>
 
-        <AccessPointLoadingSpinner v-if="isLoading" class="my-10" />
-        <div v-else>
-          <AccessPointPanelContentHeader
-            :access-point="accessPoint"
-            :access-point-status="accessPointStatus"
-            @close="onCloseDialog"
-          />
-          <USeparator class="my-5" />
-          <AccessPointPanelContentBody
-            v-model="isVerified"
-            :access-point="accessPoint"
-            :access-point-status="accessPointStatus"
-            :booking-id="bookingId"
-            @status-updated="loadStatus"
-            @close="onCloseDialog"
-          />
+          <AccessPointLoadingSpinner v-if="isLoading" class="my-10" />
+          <div v-else>
+            <AccessPointPanelContentHeader
+              :access-point="accessPoint"
+              :access-point-status="accessPointStatus"
+              @close="onCloseDialog"
+            />
+            <USeparator class="my-5" />
+            <AccessPointPanelContentBody
+              v-model="isVerified"
+              :access-point="accessPoint"
+              :access-point-status="accessPointStatus"
+              :booking-id="bookingId"
+              @status-updated="loadStatus"
+              @close="onCloseDialog"
+            />
+          </div>
         </div>
       </template>
     </UModal>
