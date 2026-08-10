@@ -7,6 +7,8 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ## [Unreleased]
 
+## [1.1.6] — 2026-08-10
+
 ### Fixed
 
 - **DEV-845:** Series booking occurrences are sorted chronologically by start time so weekly multi-weekday series appear in date order in checkout preview and review
@@ -149,6 +151,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 See git tags `v1.0.0-rc.*` for release-candidate history.
 
+[1.1.6]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.2...v1.1.3
