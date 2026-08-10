@@ -25,7 +25,10 @@ export function useAccessPoints() {
       query: cleanQuery(params),
     });
 
-    return unwrapResult(result, "Buchungen mit Schließberechtigung konnten nicht geladen werden.");
+    return unwrapResult(
+      result,
+      "Buchungen mit Schließberechtigung konnten nicht geladen werden.",
+    );
   };
 
   const getBookingsForAccessPoint = async (accessPointId, params = {}) => {
@@ -34,7 +37,10 @@ export function useAccessPoints() {
       { query: cleanQuery(params) },
     );
 
-    return unwrapResult(result, "Buchungen für den Access-Point konnten nicht geladen werden.");
+    return unwrapResult(
+      result,
+      "Buchungen für den Access-Point konnten nicht geladen werden.",
+    );
   };
 
   const getAccessPoints = async (tenant, bookingId) => {
@@ -72,7 +78,10 @@ export function useAccessPoints() {
       { query: cleanQuery({ bookingId }) },
     );
 
-    return unwrapResult(result, "Access-Point konnte nicht geschlossen werden.");
+    return unwrapResult(
+      result,
+      "Access-Point konnte nicht geschlossen werden.",
+    );
   };
 
   const getStatus = async (tenant, accessPointId, bookingId) => {

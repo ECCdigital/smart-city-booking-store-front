@@ -32,6 +32,7 @@
 
         <div v-else class="pb-5 h-[60vh]">
           <AccessPointPanelContentBody
+            v-model="isVerified"
             :access-point="accessPoint"
             :access-point-status="accessPointStatus"
             :booking-id="bookingId"
@@ -139,6 +140,7 @@ async function loadStatus() {
       props.accessPoint.id,
       props.bookingId,
     );
+
     console.log("Access Point Status Response:", response);
     accessPointStatus.value = response.success ? response.data : {};
   } catch (e) {
