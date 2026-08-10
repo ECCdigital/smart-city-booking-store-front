@@ -158,7 +158,7 @@ export function useBookableDetailContent(itemSource, isEvent) {
     if (!requiresTimeSelection.value) {
       return items.value.length > 0;
     }
-    return hasValidTimePeriod.value;
+    return true; //hasValidTimePeriod.value;
   });
 
   const { contrastToPrimary } = useContrastColor();
