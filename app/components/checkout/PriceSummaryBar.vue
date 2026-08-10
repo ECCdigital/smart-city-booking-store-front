@@ -12,6 +12,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isActiveGroupBooking: {
+    type: Boolean,
+    default: false,
+  },
   isValidating: {
     type: Boolean,
     default: false,
@@ -234,16 +238,23 @@ const hasContent = computed(() => {
         <UIcon
           name="i-lucide-calendar"
           size="16"
-          class="text-primary flex-shrink-0"
+          class="text-primary shrink-0"
         />
         <span>{{ formattedTimePeriod }}</span>
       </div>
 
       <div
-        v-if="needsTimePeriodSelection"
+        v-if="isActiveGroupBooking && needsTimePeriodSelection"
         class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300"
       >
-        <UIcon name="i-lucide-calendar-clock" size="16" class="flex-shrink-0" />
+        <UIcon name="i-lucide-list-x" size="16" class="shrink-0" />
+        <span>{{ $t("checkout.generateGroupBooking") }}</span>
+      </div>
+      <div
+        v-else-if="needsTimePeriodSelection"
+        class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300"
+      >
+        <UIcon name="i-lucide-calendar-clock" size="16" class="shrink-0" />
         <span>{{ $t("checkout.selectTimePeriodTitle") }}</span>
       </div>
 
@@ -255,7 +266,7 @@ const hasContent = computed(() => {
         >
           <UIcon
             name="i-lucide-alert-circle"
-            class="text-red-600 dark:text-red-400 flex-shrink-0"
+            class="text-red-600 dark:text-red-400 shrink-0"
             size="16"
           />
 

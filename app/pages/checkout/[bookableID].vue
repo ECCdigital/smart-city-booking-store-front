@@ -2657,6 +2657,7 @@ function onReviewEdit(section) {
             :summary="summary"
             :selected-time-period="selectedTimePeriod"
             :needs-time-period-selection="needsTimePeriodSelection"
+            :is-active-group-booking="isGroupBookingActive"
             :is-validating="isValidating"
             :amounts="amounts"
             :max-amounts="maxAmounts"
