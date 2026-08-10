@@ -111,12 +111,16 @@ const loadBookings = async () => {
     lastResponse.value = response;
 
     bookings.value = (responsePayload(response) || []).sort((a, b) => {
-      const now = Date.now();
+      const now = new Date();
 
       const statusRank = (booking) => {
-        if (booking.timeBegin && now < booking.timeBegin - 60 * 60 * 1000)
+        if (
+          booking.timeBegin &&
+          now.getTime() < booking.timeBegin - 60 * 60 * 1000
+        )
           return 1; // kommend (mit 60 Min Puffer)
-        if (booking.timeEnd && now > booking.timeEnd + 60 * 60 * 1000) return 2; // vergangen (mit 60 Min Puffer)
+        if (booking.timeEnd && now.getTime() > booking.timeEnd + 60 * 60 * 1000)
+          return 2; // vergangen (mit 60 Min Puffer)
         return 0; // aktiv (inkl. Puffer)
       };
 

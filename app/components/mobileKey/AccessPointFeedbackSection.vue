@@ -126,7 +126,7 @@ const errorDescription = computed(() => {
 
 const nextStepButtonLabel = computed(() => {
   if (props.isSuccess) {
-    return "Fertig";
+    return "Zur Schlüsselliste";
   }
   return "Erneut versuchen";
 });
