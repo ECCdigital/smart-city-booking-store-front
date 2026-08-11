@@ -88,10 +88,15 @@
     >
       Status aktualisieren
     </UButton>
-    <USeparator v-if="accessPoint.provider === 'ifbs'" class="mb-5" />
 
-    <!-- help section -->
+    <USeparator
+      v-if="accessPoint.provider === 'ifbs' && !disableHelpSection"
+      class="mb-5"
+    />
+
+    <!-- help section-->
     <ProviderHelpSection
+      v-if="!disableHelpSection"
       :provider-id="accessPoint.provider"
       :tenant-id="accessPoint.tenant"
       :booking-id="bookingId"
@@ -121,6 +126,10 @@ const props = defineProps({
   bookingId: {
     type: String,
     required: true,
+  },
+  disableHelpSection: {
+    type: Boolean,
+    default: false,
   },
 });
 const emit = defineEmits(["close", "status-updated"]);

@@ -6,6 +6,7 @@
       :is-locked="accessPointStatus?.locked"
     />
     <UButton
+      v-if="!disableCloseButton"
       trailing-icon="i-lucide-x"
       variant="ghost"
       color="primary"
@@ -25,6 +26,10 @@ const props = defineProps({
   accessPointStatus: {
     type: Object,
     required: true,
+  },
+  disableCloseButton: {
+    type: Boolean,
+    default: false,
   },
 });
 const emit = defineEmits(["close"]);
