@@ -193,6 +193,9 @@ const pickBestMatch = (bookings, id) => {
   const now = Date.now();
   const candidates = [];
   for (const booking of bookings) {
+    if (!booking.isCommitted || !booking.isPayed) {
+      continue;
+    }
     if (!bookingHasAccessPoint(booking, id)) {
       continue;
     }
