@@ -48,7 +48,7 @@
 
     <!-- Open Active Access Points -->
     <UCard
-      v-if="matchStatus === 'active' && accessPoint"
+      v-if="matchStatus === 'active' && accessPoint && accessPointStatus"
       class="w-full md:w-[60%] rounded-lg mb-5"
     >
       <AccessPointLoadingSpinner v-if="isStatusLoading" class="my-10" />
@@ -101,7 +101,7 @@ definePageMeta({
 });
 
 const ACTIVE_BUFFER_MS = 15 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
 
 const { getAccessBookings, getStatus } = useAccessPoints();
 const { formatDate } = useFormatting();
@@ -175,10 +175,10 @@ const classifyBooking = (booking, now) => {
   if (now >= activeFrom && now <= activeTo) {
     return "active";
   }
-  if (now < activeFrom && timeBegin <= now + DAY_MS) {
+  if (now < activeFrom && timeBegin <= now + HOUR_MS) {
     return "upcoming";
   }
-  if (now > activeTo && timeEnd >= now - DAY_MS) {
+  if (now > activeTo && timeEnd >= now - HOUR_MS) {
     return "past";
   }
   return null;
@@ -227,6 +227,15 @@ const bookingStatusFeedback = computed(() => {
 
   const booking = matchedBooking.value;
   switch (matchStatus.value) {
+    case "active":
+      return {
+        color: "success",
+        icon: "i-lucide-check-circle",
+        title: "Buchung aktiv",
+        description: booking?.timeEnd
+          ? `Ihre Buchung für diesen Zugangspunkt ist bis ${formatDate(booking.timeEnd)} gültig.`
+          : "Ihre Buchung für diesen Zugangspunkt ist aktiv.",
+      };
     case "upcoming":
       return {
         color: "warning",

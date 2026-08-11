@@ -142,7 +142,6 @@ async function loadStatus() {
       props.bookingId,
     );
 
-    console.log("Access Point Status Response:", response);
     accessPointStatus.value = response.success ? response.data : {};
   } catch (e) {
     console.error("Error fetching access point status:", e);

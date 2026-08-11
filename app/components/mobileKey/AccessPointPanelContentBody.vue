@@ -36,10 +36,7 @@
     </div>
 
     <!-- close when open -->
-    <div
-      v-else-if="!isVerified && accessPointStatus?.open && !hasResultState"
-      class="py-10"
-    >
+    <div v-else-if="accessPointStatus?.open && !hasResultState" class="py-10">
       <AccessPointControlButton
         variant="close"
         :access-point-label="accessPoint.label"
