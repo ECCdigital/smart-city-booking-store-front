@@ -14,6 +14,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const isPublicPage = publicPaths.some((p) => to.path.startsWith(p));
 
   if (to.meta.requiresAuth && !authStore.isLoggedIn && !isPublicPage) {
-    return navigateTo(`/login?redirect=${to.fullPath}`);
+    // Encoded so deep links survive intact - a scanned door URL is the whole
+    // point of the redirect and must not be cut off at its first query char.
+    return navigateTo(`/login?redirect=${encodeURIComponent(to.fullPath)}`);
   }
 });

@@ -4,6 +4,8 @@ export default defineEventHandler(async (event) => {
   const tenant = getRouterParam(event, "tenant");
   const accessPointId = getRouterParam(event, "accessPointId");
   const { bookingId } = getQuery(event);
+  // Carries `evidence` and `channel` for access points with validation rules.
+  const body = await readBody(event).catch(() => null);
 
   const { data, error } = await serverFetch(
     event,
@@ -11,6 +13,7 @@ export default defineEventHandler(async (event) => {
     {
       method: "POST",
       query: { bookingId },
+      body: body ?? {},
     },
   );
 

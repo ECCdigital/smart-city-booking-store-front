@@ -51,10 +51,28 @@ export function useAccessPoints() {
     return unwrapResult(result, "Access-Points konnten nicht geladen werden.");
   };
 
-  const open = async (tenant, accessPointId, bookingId) => {
+  const resolveScan = async (tenant, scanCode) => {
+    const result = await api.get(
+      `/api/access/${pathPart(tenant)}/resolve-scan/${pathPart(scanCode)}`,
+    );
+
+    return unwrapResult(result, "Der Code konnte nicht aufgelöst werden.");
+  };
+
+  /**
+   * Opens an access point. `evidence` and `channel` are only needed where the
+   * access point demands proof of presence (e.g. a `qrScan` validation rule);
+   * omitting them is a valid request everywhere else.
+   */
+  const open = async (
+    tenant,
+    accessPointId,
+    bookingId,
+    { evidence, channel } = {},
+  ) => {
     const result = await api.post(
       `/api/access/${pathPart(tenant)}/${pathPart(accessPointId)}/open`,
-      null,
+      { evidence, channel },
       { query: cleanQuery({ bookingId }) },
     );
 
@@ -141,6 +159,7 @@ export function useAccessPoints() {
     getAccessBookings,
     getBookingsForAccessPoint,
     getAccessPoints,
+    resolveScan,
     open,
     unlatch,
     close,
