@@ -108,6 +108,7 @@ import AccessPointControlButton from "~/components/mobileKey/AccessPointControlB
 import AccessPointLoadingSpinner from "~/components/mobileKey/AccessPointLoadingSpinner.vue";
 import AccessPointFeedbackSection from "~/components/mobileKey/AccessPointFeedbackSection.vue";
 import ProviderHelpSection from "~/components/mobileKey/ProviderHelpSection.vue";
+import { formatBlockingReasonMessage } from "~/composables/utils/useAccessBlockingReasons.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 
 const isVerified = defineModel({ type: Boolean, default: false });
@@ -199,6 +200,16 @@ function closeDialog() {
   }
 }
 
+const OPEN_ERROR_MESSAGE = "Die Tür konnte nicht geöffnet werden.";
+
+function handleOpenRefusal(response) {
+  errorKey.value = "open";
+  errorMessage.value = formatBlockingReasonMessage(
+    response?.data?.blockingReasons,
+    OPEN_ERROR_MESSAGE,
+  );
+}
+
 async function onOpenDoor() {
   isLoading.value = true;
   resetState();
@@ -229,10 +240,16 @@ async function openNuki() {
     props.bookingId,
   );
 
-  if (response.data.state === "open") {
+  if (response.success === false) {
+    handleOpenRefusal(response);
+    return;
+  }
+
+  if (response.data?.state === "open") {
     successKey.value = "open";
   } else {
     errorKey.value = "open";
+    errorMessage.value = OPEN_ERROR_MESSAGE;
   }
 }
 
@@ -245,17 +262,18 @@ async function openIfbs() {
     props.bookingId,
   );
 
+  if (response.success === false) {
+    handleOpenRefusal(response);
+    return;
+  }
+
   const payload = response?.data ?? response;
 
   if (payload?.openProcessId) {
     openProcessIds.value = payload.openProcessId;
   }
 
-  if (response.success) {
-    successKey.value = "open";
-  } else {
-    errorKey.value = "open";
-  }
+  successKey.value = "open";
 }
 async function onLockDoor() {
   console.log("\u{1F513} Locking access point...");

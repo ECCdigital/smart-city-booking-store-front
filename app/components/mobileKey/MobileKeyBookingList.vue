@@ -135,6 +135,7 @@
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import AccessPointLabel from "~/components/mobileKey/AccessPointLabel.vue";
+import { ACCESS_BLOCKING_REASON_LABELS } from "~/composables/utils/useAccessBlockingReasons.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import AccessPointPanel from "~/components/mobileKey/AccessPointPanel.vue";
 
@@ -149,16 +150,7 @@ const { getTenantName } = useTenant();
 const { formatDate } = useFormatting();
 const { getStatus } = useAccessPoints();
 
-const blockingReasonLabels = {
-  rejected: "Abgelehnt",
-  not_committed: "Noch nicht bestätigt",
-  payment_required: "Zahlung ausstehend",
-  authorization_revoked: "Berechtigung widerrufen",
-  outside_access_window: "Außerhalb des Zeitfensters",
-  not_provisioned: "Noch nicht freigegeben",
-  locker_not_ready: "Schließfach nicht bereit",
-  no_remote_access: "Keine Fernsteuerung",
-};
+const blockingReasonLabels = ACCESS_BLOCKING_REASON_LABELS;
 
 const bookingStatus = (booking) => {
   const now = Date.now();
