@@ -1,14 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  SCAN_ERRORS,
-  buildScanOpenRequest,
+  ACCESS_ERRORS,
   decideBookingOutcome,
   mapBlockingReason,
-  readOpenConfirmation,
-  readOpenOutcome,
   readScanResolution,
-} from "~/utils/scanLandingFlow.js";
+} from "~/utils/accessOpenFlow.js";
 
 const NOW = Date.UTC(2026, 7, 12, 18, 30);
 const MINUTE = 60 * 1000;
@@ -82,7 +79,7 @@ describe("readScanResolution", () => {
         success: false,
         data: { reason: "stale_scan_code", accessPointId: ACCESS_POINT_ID },
       }),
-    ).toEqual({ accessPoint: null, error: SCAN_ERRORS.STALE_SCAN_CODE });
+    ).toEqual({ accessPoint: null, error: ACCESS_ERRORS.STALE_SCAN_CODE });
   });
 
   it("reports an unknown code", () => {
@@ -91,23 +88,23 @@ describe("readScanResolution", () => {
         success: false,
         data: { reason: "unknown_scan_code", accessPointId: null },
       }),
-    ).toEqual({ accessPoint: null, error: SCAN_ERRORS.UNKNOWN_SCAN_CODE });
+    ).toEqual({ accessPoint: null, error: ACCESS_ERRORS.UNKNOWN_SCAN_CODE });
   });
 
   it("falls back to a generic error instead of trusting an unknown reason", () => {
     expect(
       readScanResolution({ success: false, data: { reason: "wat" } }),
-    ).toEqual({ accessPoint: null, error: SCAN_ERRORS.GENERIC });
+    ).toEqual({ accessPoint: null, error: ACCESS_ERRORS.GENERIC });
   });
 
   it("does not read a missing envelope as success", () => {
     expect(readScanResolution(null)).toEqual({
       accessPoint: null,
-      error: SCAN_ERRORS.GENERIC,
+      error: ACCESS_ERRORS.GENERIC,
     });
     expect(readScanResolution({ success: true })).toEqual({
       accessPoint: null,
-      error: SCAN_ERRORS.GENERIC,
+      error: ACCESS_ERRORS.GENERIC,
     });
   });
 });
@@ -154,7 +151,7 @@ describe("decideBookingOutcome", () => {
 
     expect(decide({ activeBookings: [foreign] })).toEqual({
       screen: "error",
-      error: SCAN_ERRORS.NO_BOOKING,
+      error: ACCESS_ERRORS.NO_BOOKING,
       booking: null,
       blockingReason: null,
     });
@@ -172,7 +169,7 @@ describe("decideBookingOutcome", () => {
 
     expect(decide({ activeBookings: [elsewhere] })).toEqual({
       screen: "error",
-      error: SCAN_ERRORS.NO_BOOKING,
+      error: ACCESS_ERRORS.NO_BOOKING,
       booking: null,
       blockingReason: null,
     });
@@ -183,7 +180,7 @@ describe("decideBookingOutcome", () => {
 
     expect(decide({ activeBookings: [unpaid] })).toEqual({
       screen: "error",
-      error: SCAN_ERRORS.PAYMENT_REQUIRED,
+      error: ACCESS_ERRORS.PAYMENT_REQUIRED,
       booking: unpaid,
       blockingReason: "payment_required",
     });
@@ -201,12 +198,12 @@ describe("decideBookingOutcome", () => {
 
     expect(decide({ activeBookings: [notYet] })).toMatchObject({
       screen: "error",
-      error: SCAN_ERRORS.TOO_EARLY,
+      error: ACCESS_ERRORS.TOO_EARLY,
       booking: notYet,
     });
     expect(decide({ activeBookings: [over] })).toMatchObject({
       screen: "error",
-      error: SCAN_ERRORS.TOO_LATE,
+      error: ACCESS_ERRORS.TOO_LATE,
       booking: over,
     });
   });
@@ -219,7 +216,7 @@ describe("decideBookingOutcome", () => {
 
     expect(decide({ activeBookings: [timeless] })).toMatchObject({
       screen: "error",
-      error: SCAN_ERRORS.GENERIC,
+      error: ACCESS_ERRORS.GENERIC,
       blockingReason: "outside_access_window",
     });
   });
@@ -242,7 +239,7 @@ describe("decideBookingOutcome", () => {
 
     expect(decide({ activeBookings: [revoked] })).toEqual({
       screen: "error",
-      error: SCAN_ERRORS.GENERIC,
+      error: ACCESS_ERRORS.GENERIC,
       booking: revoked,
       blockingReason: "authorization_revoked",
     });
@@ -259,7 +256,7 @@ describe("decideBookingOutcome", () => {
 
     expect(decide({ activeBookings: [noReason] })).toEqual({
       screen: "error",
-      error: SCAN_ERRORS.GENERIC,
+      error: ACCESS_ERRORS.GENERIC,
       booking: noReason,
       blockingReason: null,
     });
@@ -270,7 +267,7 @@ describe("decideBookingOutcome", () => {
     const unpaid = blocked("payment_required", { id: "B-1043" });
 
     expect(decide({ activeBookings: [opaque, unpaid] })).toMatchObject({
-      error: SCAN_ERRORS.PAYMENT_REQUIRED,
+      error: ACCESS_ERRORS.PAYMENT_REQUIRED,
       booking: unpaid,
     });
   });
@@ -289,7 +286,7 @@ describe("decideBookingOutcome", () => {
 
     expect(decide({ otherBookings: [evenLater, later] })).toEqual({
       screen: "error",
-      error: SCAN_ERRORS.TOO_EARLY,
+      error: ACCESS_ERRORS.TOO_EARLY,
       booking: later,
       blockingReason: null,
     });
@@ -309,7 +306,7 @@ describe("decideBookingOutcome", () => {
 
     expect(decide({ otherBookings: [older, recent] })).toEqual({
       screen: "error",
-      error: SCAN_ERRORS.TOO_LATE,
+      error: ACCESS_ERRORS.TOO_LATE,
       booking: recent,
       blockingReason: null,
     });
@@ -328,7 +325,7 @@ describe("decideBookingOutcome", () => {
     });
 
     expect(decide({ otherBookings: [past, future] })).toMatchObject({
-      error: SCAN_ERRORS.TOO_EARLY,
+      error: ACCESS_ERRORS.TOO_EARLY,
       booking: future,
     });
   });
@@ -347,7 +344,7 @@ describe("decideBookingOutcome", () => {
     });
 
     expect(decide({ otherBookings: [unpaidUpcoming] })).toMatchObject({
-      error: SCAN_ERRORS.TOO_EARLY,
+      error: ACCESS_ERRORS.TOO_EARLY,
       booking: unpaidUpcoming,
     });
   });
@@ -367,7 +364,7 @@ describe("decideBookingOutcome", () => {
     });
 
     expect(decide({ otherBookings: [rejected, uncommitted] })).toMatchObject({
-      error: SCAN_ERRORS.NO_BOOKING,
+      error: ACCESS_ERRORS.NO_BOOKING,
       booking: null,
     });
   });
@@ -375,134 +372,23 @@ describe("decideBookingOutcome", () => {
   it("reports no booking at all when nothing matches", () => {
     expect(decide()).toEqual({
       screen: "error",
-      error: SCAN_ERRORS.NO_BOOKING,
+      error: ACCESS_ERRORS.NO_BOOKING,
       booking: null,
       blockingReason: null,
     });
   });
 });
 
-describe("buildScanOpenRequest", () => {
-  it("carries the scan as evidence and marks the channel", () => {
-    expect(buildScanOpenRequest("k7f3xyz")).toEqual({
-      evidence: [{ type: "qrScan", scanCode: "k7f3xyz" }],
-      channel: "qrScan",
-    });
-  });
-});
-
-describe("readOpenOutcome", () => {
-  it("treats the success envelope as opened", () => {
-    expect(readOpenOutcome({ success: true, data: { state: "open" } })).toEqual({
-      opened: true,
-      pendingProcessId: null,
-      error: null,
-      blockingReason: null,
-    });
-  });
-
-  it("does not call an unconfirmed open process opened", () => {
-    expect(
-      readOpenOutcome({
-        success: true,
-        data: { processId: "P-1", openProcessId: "OP-9" },
-      }),
-    ).toEqual({
-      opened: false,
-      pendingProcessId: "OP-9",
-      error: null,
-      blockingReason: null,
-    });
-  });
-
-  it("names the closed window when the booking ran out while the screen was open", () => {
-    const expired = { timeBegin: NOW - 3 * HOUR, timeEnd: NOW - HOUR };
-    const notYet = { timeBegin: NOW + HOUR, timeEnd: NOW + 2 * HOUR };
-    const refusal = {
-      success: false,
-      data: { blockingReasons: ["outside_access_window"] },
-    };
-
-    expect(readOpenOutcome(refusal, { booking: expired, now: NOW })).toMatchObject(
-      { error: SCAN_ERRORS.TOO_LATE },
-    );
-    expect(readOpenOutcome(refusal, { booking: notYet, now: NOW })).toMatchObject(
-      { error: SCAN_ERRORS.TOO_EARLY },
-    );
-  });
-
-  it("maps a refusal to its screen", () => {
-    expect(
-      readOpenOutcome({
-        success: false,
-        data: { blockingReasons: ["evidence_invalid", "evidence_missing"] },
-      }),
-    ).toEqual({
-      opened: false,
-      pendingProcessId: null,
-      error: SCAN_ERRORS.EVIDENCE_INVALID,
-      blockingReason: "evidence_invalid",
-    });
-  });
-
-  it("does not read an unknown refusal as success", () => {
-    expect(
-      readOpenOutcome({ success: false, data: { blockingReasons: ["wat"] } }),
-    ).toMatchObject({
-      opened: false,
-      error: SCAN_ERRORS.GENERIC,
-      blockingReason: "wat",
-    });
-    expect(readOpenOutcome({ success: false, data: {} })).toMatchObject({
-      opened: false,
-      error: SCAN_ERRORS.GENERIC,
-      blockingReason: null,
-    });
-  });
-
-  it("does not read a missing envelope as success", () => {
-    expect(readOpenOutcome(undefined)).toMatchObject({
-      opened: false,
-      error: SCAN_ERRORS.GENERIC,
-      blockingReason: null,
-    });
-  });
-});
-
-describe("readOpenConfirmation", () => {
-  it("opens only once the provider confirms", () => {
-    expect(readOpenConfirmation({ data: { confirmed: true } })).toEqual({
-      opened: true,
-      error: null,
-    });
-  });
-
-  it("treats a reported error as an unreachable door", () => {
-    expect(
-      readOpenConfirmation({ data: { errorCode: "BOX_BUSY" } }),
-    ).toEqual({ opened: false, error: SCAN_ERRORS.DOOR_UNREACHABLE });
-  });
-
-  it("treats an exhausted poll as an unreachable door rather than success", () => {
-    expect(readOpenConfirmation({ data: {} })).toEqual({
-      opened: false,
-      error: SCAN_ERRORS.DOOR_UNREACHABLE,
-    });
-    expect(readOpenConfirmation(null)).toEqual({
-      opened: false,
-      error: SCAN_ERRORS.DOOR_UNREACHABLE,
-    });
-  });
-});
-
 describe("mapBlockingReason", () => {
   it("leaves the time window generic without a booking to compare against", () => {
-    expect(mapBlockingReason("outside_access_window")).toBe(SCAN_ERRORS.GENERIC);
+    expect(mapBlockingReason("outside_access_window")).toBe(
+      ACCESS_ERRORS.GENERIC,
+    );
   });
 
   it("maps the evidence reasons one to one", () => {
     expect(mapBlockingReason("evidence_missing")).toBe(
-      SCAN_ERRORS.EVIDENCE_MISSING,
+      ACCESS_ERRORS.EVIDENCE_MISSING,
     );
   });
 });

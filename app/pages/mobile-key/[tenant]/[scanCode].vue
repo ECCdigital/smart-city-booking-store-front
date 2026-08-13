@@ -129,13 +129,13 @@ import ScanStatusScreen from "~/components/mobileKey/ScanStatusScreen.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import {
-  SCAN_ERRORS,
-  buildScanOpenRequest,
+  ACCESS_ERRORS,
+  buildOpenRequest,
   decideBookingOutcome,
   readOpenConfirmation,
   readOpenOutcome,
   readScanResolution,
-} from "~/utils/scanLandingFlow.js";
+} from "~/utils/accessOpenFlow.js";
 
 definePageMeta({
   requiresAuth: true,
@@ -157,7 +157,7 @@ const tenantId = computed(() => String(route.params.tenant));
 const scanCode = computed(() => String(route.params.scanCode));
 
 const stage = ref("loading");
-const errorKind = ref(SCAN_ERRORS.GENERIC);
+const errorKind = ref(ACCESS_ERRORS.GENERIC);
 const blockingReason = ref(null);
 
 const accessPoint = ref(null);
@@ -201,7 +201,7 @@ async function start() {
     await resolveBooking();
   } catch (error) {
     console.error("Scan konnte nicht aufgelöst werden:", error);
-    fail(SCAN_ERRORS.GENERIC);
+    fail(ACCESS_ERRORS.GENERIC);
   }
 }
 
@@ -230,7 +230,7 @@ async function resolveBooking() {
 
   let outcome = decideBookingOutcome(context);
 
-  if (outcome.error === SCAN_ERRORS.NO_BOOKING) {
+  if (outcome.error === ACCESS_ERRORS.NO_BOOKING) {
     context.otherBookings =
       responsePayload(
         await getBookingsForAccessPoint(accessPoint.value.id, {
@@ -275,7 +275,7 @@ function chooseBooking(candidate) {
  */
 async function openDoor() {
   if (!accessPoint.value || !booking.value) {
-    fail(SCAN_ERRORS.GENERIC);
+    fail(ACCESS_ERRORS.GENERIC);
     return;
   }
 
@@ -287,7 +287,9 @@ async function openDoor() {
         tenantId.value,
         accessPoint.value.id,
         String(booking.value.id),
-        buildScanOpenRequest(scanCode.value),
+        buildOpenRequest({
+          evidence: [{ type: "qrScan", scanCode: scanCode.value }],
+        }),
       ),
       { booking: booking.value, now: Date.now() },
     );
@@ -305,7 +307,7 @@ async function openDoor() {
     fail(outcome.error, outcome.blockingReason);
   } catch (error) {
     console.error("Tür konnte nicht geöffnet werden:", error);
-    fail(SCAN_ERRORS.DOOR_UNREACHABLE);
+    fail(ACCESS_ERRORS.DOOR_UNREACHABLE);
   }
 }
 
@@ -341,9 +343,9 @@ const showProviderHelp = computed(
     Boolean(accessPoint.value?.provider) &&
     Boolean(booking.value?.id) &&
     [
-      SCAN_ERRORS.DOOR_UNREACHABLE,
-      SCAN_ERRORS.EVIDENCE_RULE_UNAVAILABLE,
-      SCAN_ERRORS.GENERIC,
+      ACCESS_ERRORS.DOOR_UNREACHABLE,
+      ACCESS_ERRORS.EVIDENCE_RULE_UNAVAILABLE,
+      ACCESS_ERRORS.GENERIC,
     ].includes(errorKind.value),
 );
 

@@ -31,10 +31,10 @@
 import ScanStatusScreen from "~/components/mobileKey/ScanStatusScreen.vue";
 import { formatBlockingReasonMessage } from "~/composables/utils/useAccessBlockingReasons.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
-import { SCAN_ERRORS } from "~/utils/scanLandingFlow.js";
+import { ACCESS_ERRORS } from "~/utils/accessOpenFlow.js";
 
 const props = defineProps({
-  /** A {@link SCAN_ERRORS} value. */
+  /** An {@link ACCESS_ERRORS} value. */
   kind: {
     type: String,
     required: true,
@@ -75,21 +75,21 @@ const rebookPath = computed(() => {
  * which still names the reason rather than pretending nothing happened.
  */
 const screens = computed(() => ({
-  [SCAN_ERRORS.STALE_SCAN_CODE]: {
+  [ACCESS_ERRORS.STALE_SCAN_CODE]: {
     icon: "i-lucide-tag",
     color: "warning",
     title: "Aufkleber veraltet",
     description:
       "Dieser QR-Code wurde ersetzt und ist nicht mehr gültig. Bitte informieren Sie die Verwaltung, damit der Aufkleber an der Tür erneuert wird.",
   },
-  [SCAN_ERRORS.UNKNOWN_SCAN_CODE]: {
+  [ACCESS_ERRORS.UNKNOWN_SCAN_CODE]: {
     icon: "i-lucide-circle-help",
     color: "error",
     title: "Code unbekannt",
     description:
       "Dieser QR-Code gehört zu keiner Tür dieses Mandanten. Möglicherweise ist der Link unvollständig.",
   },
-  [SCAN_ERRORS.NO_BOOKING]: {
+  [ACCESS_ERRORS.NO_BOOKING]: {
     icon: "i-lucide-search-x",
     color: "error",
     title: "Keine passende Buchung",
@@ -97,7 +97,7 @@ const screens = computed(() => ({
       "Für Sie wurde keine Buchung gefunden, die zu dieser Tür gehört.",
     cta: { label: "Jetzt buchen", to: bookablesPath.value },
   },
-  [SCAN_ERRORS.PAYMENT_REQUIRED]: {
+  [ACCESS_ERRORS.PAYMENT_REQUIRED]: {
     icon: "i-lucide-credit-card",
     color: "error",
     title: "Buchung noch nicht bezahlt",
@@ -108,7 +108,7 @@ const screens = computed(() => ({
       to: `/account/bookings/${props.booking?.id}`,
     },
   },
-  [SCAN_ERRORS.TOO_EARLY]: {
+  [ACCESS_ERRORS.TOO_EARLY]: {
     icon: "i-lucide-hourglass",
     color: "warning",
     title: "Noch nicht so weit",
@@ -116,7 +116,7 @@ const screens = computed(() => ({
       ? `Ihre Buchung beginnt am ${formatDate(props.booking.timeBegin)}. Ab dann können Sie die Tür hier öffnen.`
       : "Ihre Buchung hat noch nicht begonnen.",
   },
-  [SCAN_ERRORS.TOO_LATE]: {
+  [ACCESS_ERRORS.TOO_LATE]: {
     icon: "i-lucide-moon",
     color: "neutral",
     title: "Buchung beendet",
@@ -124,7 +124,7 @@ const screens = computed(() => ({
       "Ihre Buchung ist bereits abgelaufen. Die Tür lässt sich damit nicht mehr öffnen.",
     cta: { label: "Erneut buchen", to: rebookPath.value },
   },
-  [SCAN_ERRORS.DOOR_UNREACHABLE]: {
+  [ACCESS_ERRORS.DOOR_UNREACHABLE]: {
     icon: "i-lucide-antenna",
     color: "error",
     title: "Tür nicht erreichbar",
@@ -132,28 +132,28 @@ const screens = computed(() => ({
       "Das Schloss antwortet gerade nicht. Das kann an der Verbindung vor Ort liegen.",
     retry: true,
   },
-  [SCAN_ERRORS.EVIDENCE_RULE_UNAVAILABLE]: {
+  [ACCESS_ERRORS.EVIDENCE_RULE_UNAVAILABLE]: {
     icon: "i-lucide-wrench",
     color: "error",
     title: "Öffnen zurzeit nicht möglich",
     description:
       "Diese Tür ist fehlerhaft konfiguriert. Bitte kontaktieren Sie die Verwaltung – Ihre Buchung bleibt gültig.",
   },
-  [SCAN_ERRORS.EVIDENCE_INVALID]: {
+  [ACCESS_ERRORS.EVIDENCE_INVALID]: {
     icon: "i-lucide-tag",
     color: "warning",
     title: "Aufkleber prüfen",
     description:
       "Der gescannte Code gehört nicht mehr zu dieser Tür. Bitte prüfen Sie den Aufkleber und informieren Sie die Verwaltung.",
   },
-  [SCAN_ERRORS.EVIDENCE_MISSING]: {
+  [ACCESS_ERRORS.EVIDENCE_MISSING]: {
     icon: "i-lucide-scan-line",
     color: "warning",
     title: "Vor Ort scannen",
     description:
       "Diese Tür lässt sich nur öffnen, wenn Sie den QR-Code direkt an der Tür scannen.",
   },
-  [SCAN_ERRORS.GENERIC]: {
+  [ACCESS_ERRORS.GENERIC]: {
     icon: "i-lucide-triangle-alert",
     color: "error",
     title: "Öffnen nicht möglich",
@@ -165,6 +165,6 @@ const screens = computed(() => ({
 }));
 
 const screen = computed(
-  () => screens.value[props.kind] || screens.value[SCAN_ERRORS.GENERIC],
+  () => screens.value[props.kind] || screens.value[ACCESS_ERRORS.GENERIC],
 );
 </script>

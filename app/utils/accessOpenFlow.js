@@ -1,18 +1,20 @@
 /**
- * The decision layer of the scan landing page (`/mobile-key/:tenant/:scanCode`).
+ * The decision layer of both ways to a door: the scan landing page
+ * (`/mobile-key/:tenant/:scanCode`), which reads it today, and the key list
+ * (`/mobile-key`), which joins once its panel runs on the same flow.
  *
  * Everything here is pure: it turns server answers into the screen the person
- * in front of the door should see. The page component owns the wording, the
- * calls and the navigation; this module owns *which* screen, so the rules can
- * be read and tested without a browser.
+ * in front of the door should see. The components own the wording, the calls
+ * and the navigation; this module owns *which* screen, so the rules can be
+ * read and tested without a browser.
  *
  * The screens speak the same vocabulary as the access audit
  * (`ACCESS_BLOCKING_REASONS` in the backend). A reason this module does not
  * know maps to a generic error - never to a silent success.
  */
 
-/** The situations the landing page can end up in. */
-export const SCAN_ERRORS = Object.freeze({
+/** The situations either way can end up in. */
+export const ACCESS_ERRORS = Object.freeze({
   STALE_SCAN_CODE: "stale_scan_code",
   UNKNOWN_SCAN_CODE: "unknown_scan_code",
   NO_BOOKING: "no_booking",
@@ -20,6 +22,9 @@ export const SCAN_ERRORS = Object.freeze({
   TOO_EARLY: "too_early",
   TOO_LATE: "too_late",
   DOOR_UNREACHABLE: "door_unreachable",
+  OPEN_UNCONFIRMED: "open_unconfirmed",
+  CLOSE_FAILED: "close_failed",
+  STATUS_UNAVAILABLE: "status_unavailable",
   EVIDENCE_RULE_UNAVAILABLE: "evidence_rule_unavailable",
   EVIDENCE_INVALID: "evidence_invalid",
   EVIDENCE_MISSING: "evidence_missing",
@@ -28,16 +33,16 @@ export const SCAN_ERRORS = Object.freeze({
 
 /** The only scan-resolution reasons the page acts on. */
 const RESOLUTION_SCREENS = Object.freeze({
-  stale_scan_code: SCAN_ERRORS.STALE_SCAN_CODE,
-  unknown_scan_code: SCAN_ERRORS.UNKNOWN_SCAN_CODE,
+  stale_scan_code: ACCESS_ERRORS.STALE_SCAN_CODE,
+  unknown_scan_code: ACCESS_ERRORS.UNKNOWN_SCAN_CODE,
 });
 
 /** Blocking reasons that have a screen of their own, one to one. */
 const REASON_SCREENS = Object.freeze({
-  payment_required: SCAN_ERRORS.PAYMENT_REQUIRED,
-  evidence_rule_unavailable: SCAN_ERRORS.EVIDENCE_RULE_UNAVAILABLE,
-  evidence_invalid: SCAN_ERRORS.EVIDENCE_INVALID,
-  evidence_missing: SCAN_ERRORS.EVIDENCE_MISSING,
+  payment_required: ACCESS_ERRORS.PAYMENT_REQUIRED,
+  evidence_rule_unavailable: ACCESS_ERRORS.EVIDENCE_RULE_UNAVAILABLE,
+  evidence_invalid: ACCESS_ERRORS.EVIDENCE_INVALID,
+  evidence_missing: ACCESS_ERRORS.EVIDENCE_MISSING,
 });
 
 /**
@@ -46,10 +51,10 @@ const REASON_SCREENS = Object.freeze({
  * see {@link decideBookingOutcome}.
  *
  * @param {string|null|undefined} reason A backend `ACCESS_BLOCKING_REASONS` value
- * @returns {string} A {@link SCAN_ERRORS} value
+ * @returns {string} An {@link ACCESS_ERRORS} value
  */
 export function mapBlockingReason(reason) {
-  return REASON_SCREENS[reason] || SCAN_ERRORS.GENERIC;
+  return REASON_SCREENS[reason] || ACCESS_ERRORS.GENERIC;
 }
 
 /**
@@ -68,7 +73,7 @@ export function readScanResolution(response) {
 
   return {
     accessPoint: null,
-    error: RESOLUTION_SCREENS[response?.data?.reason] || SCAN_ERRORS.GENERIC,
+    error: RESOLUTION_SCREENS[response?.data?.reason] || ACCESS_ERRORS.GENERIC,
   };
 }
 
@@ -120,7 +125,8 @@ export function decideBookingOutcome({
     // Several blocked bookings can sit on the same door at once. Prefer the
     // one the page has a real answer for over the first one in the list.
     const speaking = candidates.find(
-      (candidate) => blockedOutcome(candidate, now).error !== SCAN_ERRORS.GENERIC,
+      (candidate) =>
+        blockedOutcome(candidate, now).error !== ACCESS_ERRORS.GENERIC,
     );
     return blockedOutcome(speaking ?? candidates[0], now);
   }
@@ -153,9 +159,11 @@ function blockedOutcome(booking, now) {
  */
 function windowError(booking, now) {
   if (!booking?.timeBegin || !booking?.timeEnd) {
-    return SCAN_ERRORS.GENERIC;
+    return ACCESS_ERRORS.GENERIC;
   }
-  return now < booking.timeBegin ? SCAN_ERRORS.TOO_EARLY : SCAN_ERRORS.TOO_LATE;
+  return now < booking.timeBegin
+    ? ACCESS_ERRORS.TOO_EARLY
+    : ACCESS_ERRORS.TOO_LATE;
 }
 
 /**
@@ -179,7 +187,7 @@ function outOfWindowOutcome(bookings, now) {
   if (upcoming.length) {
     return {
       screen: "error",
-      error: SCAN_ERRORS.TOO_EARLY,
+      error: ACCESS_ERRORS.TOO_EARLY,
       booking: upcoming[0],
       blockingReason: null,
     };
@@ -190,7 +198,7 @@ function outOfWindowOutcome(bookings, now) {
   if (past.length) {
     return {
       screen: "error",
-      error: SCAN_ERRORS.TOO_LATE,
+      error: ACCESS_ERRORS.TOO_LATE,
       booking: past[0],
       blockingReason: null,
     };
@@ -198,23 +206,30 @@ function outOfWindowOutcome(bookings, now) {
 
   return {
     screen: "error",
-    error: SCAN_ERRORS.NO_BOOKING,
+    error: ACCESS_ERRORS.NO_BOOKING,
     booking: null,
     blockingReason: null,
   };
 }
 
 /**
- * The body of the open request: the scan itself is the presence evidence, and
- * `channel` records for the audit how the person got to this button.
+ * The body of the open request: the evidence travels along as the proof of
+ * presence, and `channel` records for the audit that a QR scan is what stands
+ * behind it. The scan page takes its evidence from the URL, the list from the
+ * scanner in the panel - the request looks the same either way, which is why
+ * the evidence comes in rather than a scan code.
  *
- * @param {string} scanCode The code from the scanned URL
- * @returns {{ evidence: Object[], channel: string }}
+ * Without evidence the field stays out of the body entirely: an empty array is
+ * still a claim, and this module makes none.
+ *
+ * @param {Object} [params]
+ * @param {Object[]} [params.evidence] What proves presence at the door
+ * @returns {{ channel: string, evidence?: Object[] }}
  */
-export function buildScanOpenRequest(scanCode) {
+export function buildOpenRequest({ evidence = [] } = {}) {
   return {
-    evidence: [{ type: "qrScan", scanCode }],
     channel: "qrScan",
+    ...(evidence.length ? { evidence } : {}),
   };
 }
 
@@ -271,5 +286,5 @@ export function readOpenConfirmation(response) {
 
   return status?.confirmed
     ? { opened: true, error: null }
-    : { opened: false, error: SCAN_ERRORS.DOOR_UNREACHABLE };
+    : { opened: false, error: ACCESS_ERRORS.DOOR_UNREACHABLE };
 }
