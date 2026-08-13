@@ -9,6 +9,7 @@ import {
   readCloseOutcome,
   readOpenConfirmation,
   readOpenOutcome,
+  readScannedCode,
   readStatus,
 } from "~/utils/accessOpenFlow.js";
 
@@ -313,6 +314,56 @@ describe("readOpenConfirmation", () => {
     expect(readOpenConfirmation("Gateway Timeout")).toMatchObject({
       opened: false,
     });
+  });
+});
+
+describe("readScannedCode", () => {
+  it("reads tenant and code out of the sticker's own URL", () => {
+    expect(
+      readScannedCode("https://buchen.orka-mv.de/mobile-key/rostock/SC-7F3K9Q"),
+    ).toEqual({
+      tenant: "rostock",
+      scanCode: "SC-7F3K9Q",
+      path: "/mobile-key/rostock/SC-7F3K9Q",
+    });
+  });
+
+  it("reads a sticker that carries the path alone", () => {
+    expect(readScannedCode("/mobile-key/rostock/SC-7F3K9Q")).toMatchObject({
+      tenant: "rostock",
+      scanCode: "SC-7F3K9Q",
+    });
+  });
+
+  it("leaves query and hash out of the code - a campaign parameter is not part of it", () => {
+    expect(
+      readScannedCode(
+        "https://buchen.orka-mv.de/mobile-key/rostock/SC-7F3K9Q/?utm=sticker#top",
+      ),
+    ).toEqual({
+      tenant: "rostock",
+      scanCode: "SC-7F3K9Q",
+      path: "/mobile-key/rostock/SC-7F3K9Q",
+    });
+  });
+
+  it("reads a sticker printed with another host of this app - the tenant's own domain prints the same sticker", () => {
+    expect(
+      readScannedCode("https://schliessen.rostock.de/mobile-key/rostock/SC-1"),
+    ).toMatchObject({ tenant: "rostock", scanCode: "SC-1" });
+  });
+
+  it("reads no sticker out of a code that is none - anything else is not ours to resolve", () => {
+    expect(readScannedCode("WIFI:S:Gastnetz;T:WPA;P:hunter2;;")).toBeNull();
+    expect(readScannedCode("https://example.com/kein-aufkleber")).toBeNull();
+    expect(readScannedCode("https://buchen.orka-mv.de/mobile-key/rostock"))
+      .toBeNull();
+    expect(
+      readScannedCode("https://buchen.orka-mv.de/mobile-key/rostock/SC-1/tuer"),
+    ).toBeNull();
+    expect(readScannedCode("")).toBeNull();
+    expect(readScannedCode(null)).toBeNull();
+    expect(readScannedCode(undefined)).toBeNull();
   });
 });
 

@@ -486,10 +486,13 @@
       "step_open": "Tür öffnen",
       "hint": "Scannen Sie den QR-Code an {label}.",
       "fallback_link": "Kamera nicht möglich? Mit der Kamera-App scannen",
+      "back_to_camera": "Zurück zur Kamera",
+      "torch": "Taschenlampe",
       "wrong_door": {
         "title": "Anderer Zugang",
         "description": "Der gescannte Code gehört zu {scanned}, nicht zu {label}.",
-        "action": "Zu {scanned} wechseln"
+        "action": "Zu {scanned} wechseln",
+        "unnamed": "einem anderen Zugang"
       },
       "wrong_tenant": {
         "title": "Anderer Anbieter",

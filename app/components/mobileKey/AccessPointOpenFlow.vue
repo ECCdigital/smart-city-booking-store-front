@@ -21,22 +21,19 @@
       </p>
     </div>
 
-    <!--
-      U08 hands the evidence stage the old verify component, fake timeout and
-      all. U09 puts the real scanner here.
-    -->
-    <AccessPointVerifyLocation
+    <!-- the proof, collected where the person stands -->
+    <AccessPointScanEvidence
       v-else-if="view.stage === 'evidence'"
-      v-model:verified="evidenceCollectedHere"
+      :tenant-id="tenantId"
       :access-point="accessPoint"
-      :booking-id="bookingId"
+      @scanned="(evidence) => (evidenceCollectedHere = evidence)"
     />
 
     <div v-else-if="view.stage === 'can_open'" class="py-10">
       <AccessPointControlButton
         variant="open"
         :title="
-          evidenceCollectedHere
+          evidenceCollectedHere.length
             ? t('mobileKey.stages.can_open.evidence_confirmed')
             : ''
         "
@@ -155,9 +152,9 @@ import AccessPointCard from "~/components/mobileKey/AccessPointCard.vue";
 import AccessPointControlButton from "~/components/mobileKey/AccessPointControlButton.vue";
 import AccessPointErrorScreen from "~/components/mobileKey/AccessPointErrorScreen.vue";
 import AccessPointLoadingSpinner from "~/components/mobileKey/AccessPointLoadingSpinner.vue";
+import AccessPointScanEvidence from "~/components/mobileKey/AccessPointScanEvidence.vue";
 import AccessPointStatusScreen from "~/components/mobileKey/AccessPointStatusScreen.vue";
 import AccessPointStepper from "~/components/mobileKey/AccessPointStepper.vue";
-import AccessPointVerifyLocation from "~/components/mobileKey/AccessPointVerifyLocation.vue";
 import ProviderHelpSection from "~/components/mobileKey/ProviderHelpSection.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { ACCESS_ERROR_SCREENS } from "~/utils/accessErrorScreens.js";
@@ -212,39 +209,26 @@ const result = ref(null);
 const lastAction = ref(null);
 
 /**
- * Whether the proof was collected in *this* session - the one thing about
+ * The proof the scanner collected in *this* session - the one thing about
  * evidence that is the component's business and not `decideStage`'s. It is
- * what puts "proof provided" on the button, and it stays false where the proof
+ * what puts "proof provided" on the button, and it stays empty where the proof
  * came from the URL or where none was demanded.
  */
-const evidenceCollectedHere = ref(false);
+const evidenceCollectedHere = ref([]);
 
 const bookingId = computed(() => String(props.booking.id));
 const accessPointLabel = computed(() => props.accessPoint.label || "Der Zugang");
 
 /**
- * What the old verify component hands up in place of a scan. U08 is a
- * transition: that component announces a proof it never collected, and this is
- * the shape of the announcement. U09 replaces it with the scanner's real
- * `[{ type: "qrScan", scanCode }]`, and this constant goes with the fake.
+ * The proof in hand, wherever it came from - the scan URL (#3) or the scanner
+ * on the evidence stage. `decideStage` is told the fact and never the origin
+ * (§ 4.5 a); which of the two it was stays with `evidenceCollectedHere`, for
+ * the button alone.
  */
-const PRETENDED_SCAN = Object.freeze([{ type: "qrScan" }]);
-
-/**
- * The proof in hand, wherever it came from - the scan URL (#3) or the evidence
- * stage. `decideStage` is told the fact and never the origin (§ 4.5 a); which
- * of the two it was stays with `evidenceCollectedHere`, for the button alone.
- *
- * The pretended scan may move the stage on - that is exactly what the list way
- * does today - but it never reaches the wire: the open request is built from
- * `props.evidence`, which is empty on the list way, so the command goes out
- * without evidence and the server refuses it as it does today.
- */
-const evidenceInHand = computed(() =>
-  evidenceCollectedHere.value && !props.evidence.length
-    ? PRETENDED_SCAN
-    : props.evidence,
-);
+const evidenceInHand = computed(() => [
+  ...props.evidence,
+  ...evidenceCollectedHere.value,
+]);
 
 const view = computed(() =>
   decideStage({
@@ -296,7 +280,12 @@ const stepper = computed(() =>
     ? view.value.steps.map((step) => ({
         value: step,
         label: t(`mobileKey.evidence.${STEP_WORDING[step]}`),
-        description: "",
+        // What to do stands under the step that is due; the open step says it
+        // on the button itself and needs no second line above it.
+        description:
+          step === "verify"
+            ? t("mobileKey.evidence.hint", { label: accessPointLabel.value })
+            : "",
       }))
     : [],
 );
@@ -345,7 +334,7 @@ async function openDoor() {
         props.tenantId,
         props.accessPoint.id,
         bookingId.value,
-        buildOpenRequest({ evidence: props.evidence }),
+        buildOpenRequest({ evidence: evidenceInHand.value }),
       ),
       { booking: props.booking },
     );

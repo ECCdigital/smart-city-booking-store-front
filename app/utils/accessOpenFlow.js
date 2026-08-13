@@ -419,6 +419,44 @@ function isStated(value) {
 }
 
 /**
+ * What a sticker carries (#5): the landing page's own URL, tenant and scan code
+ * in its path. Nothing else on it is part of the code - a campaign parameter
+ * appended to the printed link must not change what gets resolved.
+ */
+const SCAN_URL = /\/mobile-key\/([^/?#]+)\/([^/?#]+)\/?(?:[?#]|$)/;
+
+/**
+ * Reads a decoded QR code back into the two things the scanner needs: **which
+ * tenant to resolve against** - the scanned one, never the panel's own, or a
+ * foreign sticker could never be told apart from an unreadable one - and the
+ * code to resolve.
+ *
+ * `path` is the way out of a wrong door: the sticker's own path, so the jump to
+ * the scanned door lands on the landing page, which resolves the booking for it
+ * (#18). It travels along because the component may not take a scan apart.
+ *
+ * A code without that path is no code at all here: resolving anything a camera
+ * happened to see would ask the server about wifi credentials. **The host is
+ * deliberately not checked** - the store front answers under a tenant's own
+ * domain as well as under the shared one, and a sticker printed with the other
+ * one is still the same sticker. Nothing foreign is reached either way: the
+ * code is resolved against this app's own API, and the jump stays in-app.
+ *
+ * @param {string|null|undefined} rawValue The string as the decoder read it
+ * @returns {{ tenant: string, scanCode: string, path: string }|null}
+ */
+export function readScannedCode(rawValue) {
+  const match = SCAN_URL.exec(rawValue || "");
+  if (!match) {
+    return null;
+  }
+
+  const [, tenant, scanCode] = match;
+
+  return { tenant, scanCode, path: `/mobile-key/${tenant}/${scanCode}` };
+}
+
+/**
  * The three ways a scan can fail to be the proof, kept apart because their ways
  * out differ - not {@link ACCESS_ERRORS} values: all three stay inside the
  * evidence stage, where the scanner keeps running.
