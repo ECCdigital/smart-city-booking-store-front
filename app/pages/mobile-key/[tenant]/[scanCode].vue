@@ -344,6 +344,7 @@ const showProviderHelp = computed(
     Boolean(booking.value?.id) &&
     [
       ACCESS_ERRORS.DOOR_UNREACHABLE,
+      ACCESS_ERRORS.OPEN_UNCONFIRMED,
       ACCESS_ERRORS.EVIDENCE_RULE_UNAVAILABLE,
       ACCESS_ERRORS.GENERIC,
     ].includes(errorKind.value),

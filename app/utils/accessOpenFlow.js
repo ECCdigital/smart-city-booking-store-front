@@ -213,6 +213,104 @@ function outOfWindowOutcome(bookings, now) {
 }
 
 /**
+ * The one place in the frontend that assumes anything about an access-point
+ * payload the backend does not send yet (see the payload contract): a door that
+ * does not say what it demands behaves exactly as it does today - it demands a
+ * scan and it can do all three actions.
+ *
+ * An empty list is *not* a missing one. `[]` is what a bypass and a locker
+ * look like, and it has to survive: it is the fact that lets the flow skip the
+ * evidence stage. Hence the check for `undefined` rather than for emptiness.
+ *
+ * `tenant` becomes `tenantId` and the old key goes: the field exists so the
+ * scanner can compare tenants, never as the place to read the tenant from -
+ * every caller passes it explicitly.
+ *
+ * @param {Object|null|undefined} raw An access point as the server sent it
+ * @returns {{ id: string, label: string, type: string, mode: string,
+ *   provider: string, tenantId: string|null, validationRuleTypes: string[],
+ *   capabilities: string[] }}
+ */
+export function readAccessPoint(raw) {
+  const { tenant, tenantId, validationRuleTypes, capabilities, ...rest } =
+    raw ?? {};
+
+  return {
+    ...rest,
+    tenantId: tenantId ?? tenant ?? null,
+    validationRuleTypes:
+      validationRuleTypes === undefined ? ["qrScan"] : validationRuleTypes,
+    capabilities:
+      capabilities === undefined
+        ? ["open", "close", "getStatus"]
+        : capabilities,
+  };
+}
+
+/** The four fields a status answer is allowed to consist of. */
+const STATUS_FIELDS = Object.freeze([
+  "open",
+  "locked",
+  "doorOpen",
+  "statusSource",
+]);
+
+/**
+ * Reads the status answer down to its four named fields.
+ *
+ * `null` per field is not `false`: "the provider says nothing about it" is a
+ * fact of its own. Provider-owned keys are dropped rather than passed on - as
+ * long as they slip through, a template can branch on them again, which is the
+ * disease this flow cures.
+ *
+ * An answer that carries none of the four fields, or none at all, is no status
+ * either - and no status is never "closed".
+ *
+ * @param {{ success?: boolean, data?: Object }|Object|null|undefined} response
+ * @returns {{ open: boolean|null, locked: boolean|null, doorOpen: boolean|null,
+ *   statusSource: string|null }|null}
+ */
+export function readStatus(response) {
+  if (response?.success === false) {
+    return null;
+  }
+
+  const status = response?.data ?? response;
+  if (!status || typeof status !== "object") {
+    return null;
+  }
+  if (!STATUS_FIELDS.some((field) => field in status)) {
+    return null;
+  }
+
+  return {
+    open: status.open ?? null,
+    locked: status.locked ?? null,
+    doorOpen: status.doorOpen ?? null,
+    statusSource: status.statusSource ?? null,
+  };
+}
+
+/**
+ * Reads the answer to a close. The status that comes back with it is the state
+ * *after* closing, which the flow reports onwards - one roundtrip saved.
+ *
+ * Anything short of an explicit success is a close that did not happen: a
+ * missing answer must never pass for a locked door.
+ *
+ * @param {{ success?: boolean, data?: Object }|null|undefined} response
+ * @returns {{ closed: boolean, error: string|null,
+ *   status: ReturnType<typeof readStatus> }} `status` as {@link readStatus} reads it
+ */
+export function readCloseOutcome(response) {
+  return {
+    closed: response?.success === true,
+    error: response?.success === true ? null : ACCESS_ERRORS.CLOSE_FAILED,
+    status: readStatus(response),
+  };
+}
+
+/**
  * The body of the open request: the evidence travels along as the proof of
  * presence, and `channel` records for the audit that a QR scan is what stands
  * behind it. The scan page takes its evidence from the URL, the list from the
@@ -274,9 +372,17 @@ export function readOpenOutcome(response, { booking = null, now } = {}) {
 }
 
 /**
- * Reads the result of polling an asynchronous open. Anything short of an
- * explicit confirmation - a reported error, or a poll that ran out of
- * attempts - counts as a door that did not open.
+ * Reads the result of polling an asynchronous open. Nothing short of an
+ * explicit confirmation opens the door, but the two ways of not being
+ * confirmed are told apart, because they lead somewhere different:
+ *
+ * - the provider reported an error -> the door is unreachable, try again
+ * - the poll ran out with nothing reported -> the open is *unconfirmed*; the
+ *   box may well have sprung open, so the way out is "check the status", not
+ *   a second open command
+ *
+ * `pollOpenStatus` stops the moment `confirmed`, `errorCode` or `errorMessage`
+ * is set, so its last answer carries that distinction by itself.
  *
  * @param {{ data?: Object }|null|undefined} response Last poll answer
  * @returns {{ opened: boolean, error: string|null }}
@@ -284,7 +390,24 @@ export function readOpenOutcome(response, { booking = null, now } = {}) {
 export function readOpenConfirmation(response) {
   const status = response?.data ?? response;
 
-  return status?.confirmed
-    ? { opened: true, error: null }
-    : { opened: false, error: ACCESS_ERRORS.DOOR_UNREACHABLE };
+  if (status?.confirmed) {
+    return { opened: true, error: null };
+  }
+
+  return {
+    opened: false,
+    error:
+      isReported(status?.errorCode) || isReported(status?.errorMessage)
+        ? ACCESS_ERRORS.DOOR_UNREACHABLE
+        : ACCESS_ERRORS.OPEN_UNCONFIRMED,
+  };
+}
+
+/**
+ * @private
+ * "Reported" for a field the provider may send as `null`, may leave out and may
+ * fill with an empty string - none of which is a reported error.
+ */
+function isReported(value) {
+  return value !== null && value !== undefined && value !== "";
 }

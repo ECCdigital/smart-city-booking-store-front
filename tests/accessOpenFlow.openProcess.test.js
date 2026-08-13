@@ -3,12 +3,177 @@ import { describe, expect, it } from "vitest";
 import {
   ACCESS_ERRORS,
   buildOpenRequest,
+  readAccessPoint,
+  readCloseOutcome,
   readOpenConfirmation,
   readOpenOutcome,
+  readStatus,
 } from "~/utils/accessOpenFlow.js";
 
 const NOW = Date.UTC(2026, 7, 12, 18, 30);
 const HOUR = 60 * 60 * 1000;
+
+describe("readAccessPoint", () => {
+  it("lets a payload that answers for itself through unchanged", () => {
+    const raw = {
+      id: "ap-7f3a",
+      tenantId: "rostock",
+      type: "door",
+      provider: "nuki",
+      label: "Werkstatt Nord",
+      mode: "remote",
+      validationRuleTypes: ["qrScan"],
+      capabilities: ["open", "getStatus"],
+    };
+
+    expect(readAccessPoint(raw)).toEqual(raw);
+  });
+
+  it("assumes a scan is demanded where the payload does not say", () => {
+    expect(readAccessPoint({ id: "ap-7f3a", label: "Werkstatt Nord" })).toEqual({
+      id: "ap-7f3a",
+      label: "Werkstatt Nord",
+      tenantId: null,
+      validationRuleTypes: ["qrScan"],
+      capabilities: ["open", "close", "getStatus"],
+    });
+  });
+
+  it("keeps an empty list empty - a bypass is not a missing field", () => {
+    expect(
+      readAccessPoint({
+        id: "42",
+        type: "locker",
+        validationRuleTypes: [],
+        capabilities: [],
+      }),
+    ).toMatchObject({ validationRuleTypes: [], capabilities: [] });
+  });
+
+  it("carries the tenant over as tenantId and leaves nothing to read it from", () => {
+    const point = readAccessPoint({ id: "ap-7f3a", tenant: "rostock" });
+
+    expect(point.tenantId).toBe("rostock");
+    expect(point).not.toHaveProperty("tenant");
+  });
+});
+
+describe("readStatus", () => {
+  it("reads the four fields of the status answer", () => {
+    expect(
+      readStatus({
+        success: true,
+        data: {
+          open: false,
+          locked: true,
+          doorOpen: null,
+          statusSource: "provider_status",
+        },
+      }),
+    ).toEqual({
+      open: false,
+      locked: true,
+      doorOpen: null,
+      statusSource: "provider_status",
+    });
+  });
+
+  it("keeps 'the provider says nothing' apart from 'no'", () => {
+    expect(
+      readStatus({ data: { open: null, statusSource: "provider_status" } }),
+    ).toEqual({
+      open: null,
+      locked: null,
+      doorOpen: null,
+      statusSource: "provider_status",
+    });
+  });
+
+  it("ignores provider-owned keys instead of passing them on", () => {
+    expect(
+      readStatus({
+        success: true,
+        data: {
+          open: true,
+          locked: false,
+          doorOpen: true,
+          statusSource: "provider_status",
+          batteryCritical: true,
+          nukiState: 3,
+        },
+      }),
+    ).toEqual({
+      open: true,
+      locked: false,
+      doorOpen: true,
+      statusSource: "provider_status",
+    });
+  });
+
+  it("reads a missing or unreadable answer as no status, never as closed", () => {
+    expect(readStatus(undefined)).toBeNull();
+    expect(readStatus(null)).toBeNull();
+    expect(
+      readStatus({ success: false, data: { reason: "provider_down" } }),
+    ).toBeNull();
+    expect(readStatus({ success: true, data: {} })).toBeNull();
+    expect(readStatus("Bad Gateway")).toBeNull();
+  });
+});
+
+describe("readCloseOutcome", () => {
+  it("reports the close together with the status behind it", () => {
+    expect(
+      readCloseOutcome({
+        success: true,
+        data: {
+          open: false,
+          locked: true,
+          doorOpen: false,
+          statusSource: "provider_status",
+        },
+      }),
+    ).toEqual({
+      closed: true,
+      error: null,
+      status: {
+        open: false,
+        locked: true,
+        doorOpen: false,
+        statusSource: "provider_status",
+      },
+    });
+  });
+
+  it("confirms a close the provider cannot describe", () => {
+    expect(readCloseOutcome({ success: true, data: {} })).toEqual({
+      closed: true,
+      error: null,
+      status: null,
+    });
+  });
+
+  it("does not call an unconfirmed close closed", () => {
+    expect(
+      readCloseOutcome({
+        success: false,
+        data: { blockingReasons: ["no_remote_access"] },
+      }),
+    ).toEqual({
+      closed: false,
+      error: ACCESS_ERRORS.CLOSE_FAILED,
+      status: null,
+    });
+  });
+
+  it("reads a missing answer as a failed close, never as silent success", () => {
+    expect(readCloseOutcome(undefined)).toEqual({
+      closed: false,
+      error: ACCESS_ERRORS.CLOSE_FAILED,
+      status: null,
+    });
+  });
+});
 
 describe("buildOpenRequest", () => {
   it("carries the evidence and marks the channel", () => {
@@ -117,16 +282,34 @@ describe("readOpenConfirmation", () => {
       opened: false,
       error: ACCESS_ERRORS.DOOR_UNREACHABLE,
     });
-  });
-
-  it("treats an exhausted poll as an unreachable door rather than success", () => {
-    expect(readOpenConfirmation({ data: {} })).toEqual({
+    expect(
+      readOpenConfirmation({ data: { errorMessage: "lock offline" } }),
+    ).toEqual({
       opened: false,
       error: ACCESS_ERRORS.DOOR_UNREACHABLE,
     });
-    expect(readOpenConfirmation(null)).toEqual({
+  });
+
+  it("calls a poll that ran out silent, not unreachable - the box may well have sprung open", () => {
+    expect(readOpenConfirmation({ data: {} })).toEqual({
       opened: false,
-      error: ACCESS_ERRORS.DOOR_UNREACHABLE,
+      error: ACCESS_ERRORS.OPEN_UNCONFIRMED,
+    });
+    expect(
+      readOpenConfirmation({
+        data: { confirmed: null, errorCode: null, errorMessage: null },
+      }),
+    ).toEqual({
+      opened: false,
+      error: ACCESS_ERRORS.OPEN_UNCONFIRMED,
+    });
+  });
+
+  it("does not read a missing or unreadable answer as an open door", () => {
+    expect(readOpenConfirmation(null)).toMatchObject({ opened: false });
+    expect(readOpenConfirmation(undefined)).toMatchObject({ opened: false });
+    expect(readOpenConfirmation("Gateway Timeout")).toMatchObject({
+      opened: false,
     });
   });
 });
