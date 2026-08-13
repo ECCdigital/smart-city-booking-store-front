@@ -402,7 +402,7 @@ export function readOpenConfirmation(response) {
   return {
     opened: false,
     error:
-      isReported(status?.errorCode) || isReported(status?.errorMessage)
+      isStated(status?.errorCode) || isStated(status?.errorMessage)
         ? ACCESS_ERRORS.DOOR_UNREACHABLE
         : ACCESS_ERRORS.OPEN_UNCONFIRMED,
   };
@@ -410,11 +410,114 @@ export function readOpenConfirmation(response) {
 
 /**
  * @private
- * "Reported" for a field the provider may send as `null`, may leave out and may
- * fill with an empty string - none of which is a reported error.
+ * A field the sender may leave out, may send as `null` and may fill with an
+ * empty string states nothing in all three cases - neither a reported error nor
+ * a tenant to compare against.
  */
-function isReported(value) {
+function isStated(value) {
   return value !== null && value !== undefined && value !== "";
+}
+
+/**
+ * The three ways a scan can fail to be the proof, kept apart because their ways
+ * out differ - not {@link ACCESS_ERRORS} values: all three stay inside the
+ * evidence stage, where the scanner keeps running.
+ */
+const SCAN_MISMATCHES = Object.freeze({
+  WRONG_DOOR: "wrong_door",
+  WRONG_TENANT: "wrong_tenant",
+  UNREADABLE: "unreadable",
+});
+
+/**
+ * The comparison the scanner in the panel hangs from: does the code just
+ * scanned belong to the door the panel currently has open?
+ *
+ * The scanner resolves the decoded code against the server and hands the answer
+ * here; **a door's `scanCode` never reaches the client** - would it, the proof
+ * would be void, because then the phone could compare against something it was
+ * given rather than against something it read at the door.
+ *
+ * The comparison lives here rather than in the scanner component for the same
+ * reason everything else in this module does: "deliver a picture" and "decode a
+ * picture" are separate jobs, and this one only ever sees the decoded string.
+ *
+ * The wrong door offers a jump to the scanned one - hence `scannedLabel`, which
+ * names it - a foreign tenant offers nothing, because a jump there would be an
+ * arrival at a stranger's tenant, and an unreadable answer is no answer at all.
+ * The tenant therefore outranks the door: both are misses, but only one of them
+ * may be jumped to.
+ *
+ * **A payload that names no tenant is not compared against one.** Today's
+ * `resolve-scan` does not send `tenantId` yet (see the payload contract), and
+ * flagging its absence would turn every scan into a mismatch. Until it does,
+ * `wrong_tenant` only comes up where the answer names a tenant, and the door id
+ * decides the rest - exactly as it does today. This is the one assumption
+ * outside {@link readAccessPoint}; U11 retires it along with the others.
+ *
+ * @param {{ success?: boolean, data?: Object }|null|undefined} response
+ *   The answer to `GET /api/:tenant/access/resolve-scan/:scanCode`
+ * @param {Object} expectation
+ * @param {string} [expectation.expectedAccessPointId] The door standing open in the panel
+ * @param {string} [expectation.expectedTenantId] The tenant that panel belongs to
+ * @param {string} [expectation.scanCode] The code as it was decoded from the sticker
+ * @returns {{ matched: boolean, evidence: Object[],
+ *   mismatch: null|"wrong_door"|"wrong_tenant"|"unreadable",
+ *   scannedLabel: string|null }}
+ */
+export function decideScanMatch(
+  response,
+  { expectedAccessPointId, expectedTenantId, scanCode } = {},
+) {
+  // Nothing decoded means nothing to hand upwards as proof, and evidence
+  // without a code is precisely the fake this flow exists to remove.
+  if (!isStated(scanCode)) {
+    return noMatch(SCAN_MISMATCHES.UNREADABLE, null);
+  }
+
+  const { accessPoint } = readScanResolution(response);
+  if (!accessPoint) {
+    return noMatch(SCAN_MISMATCHES.UNREADABLE, null);
+  }
+
+  const scanned = readAccessPoint(accessPoint);
+  const label = scanned.label ?? null;
+
+  if (
+    isStated(scanned.tenantId) &&
+    !sameId(scanned.tenantId, expectedTenantId)
+  ) {
+    return noMatch(SCAN_MISMATCHES.WRONG_TENANT, label);
+  }
+  if (!sameId(scanned.id, expectedAccessPointId)) {
+    return noMatch(SCAN_MISMATCHES.WRONG_DOOR, label);
+  }
+
+  return {
+    matched: true,
+    evidence: [{ type: "qrScan", scanCode }],
+    mismatch: null,
+    scannedLabel: label,
+  };
+}
+
+/**
+ * @private
+ * No match means no evidence: an empty list is the only honest answer, since
+ * anything in it would be a claim of proof this comparison just refused.
+ */
+function noMatch(mismatch, scannedLabel) {
+  return { matched: false, evidence: [], mismatch, scannedLabel };
+}
+
+/**
+ * @private
+ * Ids travel as strings on one side and as numbers on the other; a missing one
+ * is never equal to anything, not even to another missing one - a comparison
+ * nobody can make is a miss, never a match.
+ */
+function sameId(a, b) {
+  return isStated(a) && isStated(b) && String(a) === String(b);
 }
 
 /**

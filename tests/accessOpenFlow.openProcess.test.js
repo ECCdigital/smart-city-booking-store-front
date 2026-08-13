@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   ACCESS_ERRORS,
   buildOpenRequest,
+  decideScanMatch,
   decideStage,
   readAccessPoint,
   readCloseOutcome,
@@ -311,6 +312,120 @@ describe("readOpenConfirmation", () => {
     expect(readOpenConfirmation(undefined)).toMatchObject({ opened: false });
     expect(readOpenConfirmation("Gateway Timeout")).toMatchObject({
       opened: false,
+    });
+  });
+});
+
+describe("decideScanMatch", () => {
+  const PANEL = {
+    expectedAccessPointId: "ap-7f3a",
+    expectedTenantId: "rostock",
+  };
+  const resolved = (point) => ({ success: true, data: point });
+
+  const HAUPTEINGANG = {
+    id: "ap-7f3a",
+    label: "Haupteingang",
+    tenantId: "rostock",
+    type: "door",
+  };
+  const NEBENEINGANG = {
+    id: "ap-2m8x",
+    label: "Nebeneingang Ost",
+    tenantId: "rostock",
+    type: "door",
+  };
+
+  it("takes the scan as the proof once the code resolves to the door in front of the person", () => {
+    expect(
+      decideScanMatch(resolved(HAUPTEINGANG), {
+        ...PANEL,
+        scanCode: "SC-7F3K9Q",
+      }),
+    ).toEqual({
+      matched: true,
+      evidence: [{ type: "qrScan", scanCode: "SC-7F3K9Q" }],
+      mismatch: null,
+      scannedLabel: "Haupteingang",
+    });
+  });
+
+  it("names the scanned door when the sticker belongs to another one - the way out has to say where it leads", () => {
+    expect(
+      decideScanMatch(resolved(NEBENEINGANG), {
+        ...PANEL,
+        scanCode: "SC-2M8XPT",
+      }),
+    ).toEqual({
+      matched: false,
+      evidence: [],
+      mismatch: "wrong_door",
+      scannedLabel: "Nebeneingang Ost",
+    });
+  });
+
+  it("keeps a foreign tenant apart from a wrong door - only one of the two has a way out", () => {
+    expect(
+      decideScanMatch(
+        resolved({ ...NEBENEINGANG, tenantId: "stadtwerke" }),
+        { ...PANEL, scanCode: "SC-4B1LZR" },
+      ),
+    ).toMatchObject({ matched: false, mismatch: "wrong_tenant", evidence: [] });
+  });
+
+  it("does not let an unreadable answer pass for a match", () => {
+    const noMatch = {
+      matched: false,
+      evidence: [],
+      mismatch: "unreadable",
+      scannedLabel: null,
+    };
+    const scanned = (response) =>
+      decideScanMatch(response, { ...PANEL, scanCode: "SC-7F3K9Q" });
+
+    expect(scanned(undefined)).toEqual(noMatch);
+    expect(scanned(null)).toEqual(noMatch);
+    expect(scanned({ success: false, data: { reason: "unknown_scan_code" } }))
+      .toEqual(noMatch);
+    expect(scanned({ success: true, data: {} })).toEqual(noMatch);
+    expect(scanned("Gateway Timeout")).toEqual(noMatch);
+  });
+
+  it("compares no tenant where the answer names none - today's resolve-scan sends none, and every scan would be a miss", () => {
+    const withoutTenant = { ...HAUPTEINGANG, tenantId: undefined };
+
+    expect(
+      decideScanMatch(resolved(withoutTenant), {
+        ...PANEL,
+        scanCode: "SC-7F3K9Q",
+      }),
+    ).toMatchObject({ matched: true, mismatch: null });
+  });
+
+  it("confirms no tenant the panel leaves unnamed - an unverifiable side is a miss, not a pass", () => {
+    expect(
+      decideScanMatch(resolved(HAUPTEINGANG), {
+        expectedAccessPointId: "ap-7f3a",
+        scanCode: "SC-7F3K9Q",
+      }),
+    ).toMatchObject({ matched: false, mismatch: "wrong_tenant" });
+  });
+
+  it("does not match a door the panel cannot name either", () => {
+    expect(
+      decideScanMatch(resolved(HAUPTEINGANG), {
+        expectedTenantId: "rostock",
+        scanCode: "SC-7F3K9Q",
+      }),
+    ).toMatchObject({ matched: false, mismatch: "wrong_door" });
+  });
+
+  it("invents no proof where nothing was decoded - evidence without a scan code is the fake this flow removes", () => {
+    expect(decideScanMatch(resolved(HAUPTEINGANG), PANEL)).toEqual({
+      matched: false,
+      evidence: [],
+      mismatch: "unreadable",
+      scannedLabel: null,
     });
   });
 });
