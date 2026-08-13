@@ -6,12 +6,14 @@
       class="mb-5"
     />
 
-    <!-- the door, once known: one card above the stages, not one per stage -->
+    <!--
+      The door, once known. On the way to the flow only - inside it, the flow
+      puts the card above its own stages.
+    -->
     <AccessPointCard
-      v-if="accessPoint"
+      v-if="accessPoint && stage !== 'flow'"
       :access-point="accessPoint"
       :booking="booking"
-      :is-open="stage === 'opened'"
       class="mb-5"
     />
 
@@ -50,55 +52,29 @@
       </UButton>
     </div>
 
-    <!-- ready: opening happens on an explicit tap, never automatically -->
-    <div v-else-if="stage === 'ready'" class="space-y-5">
-      <AccessPointStatusScreen
-        icon="i-lucide-key-round"
-        color="neutral"
-        title="Bereit zum Öffnen"
-        description="Ihre Buchung ist aktiv. Der Scan gilt als Nachweis, dass Sie vor der Tür stehen."
-      />
-      <UButton
-        size="xl"
-        block
-        icon="i-lucide-lock-open"
-        class="py-4 shadow-lg cursor-pointer"
-        @click="openDoor"
-      >
-        Tür öffnen
-      </UButton>
-    </div>
+    <!--
+      From here on the page runs the very same flow as the panel: status,
+      proof, open, close - the scan from the URL travels in as the evidence.
+    -->
+    <AccessPointOpenFlow
+      v-else-if="stage === 'flow'"
+      :tenant-id="tenantId"
+      :access-point="accessPoint"
+      :booking="booking"
+      :evidence="scanEvidence"
+    >
+      <template #exit>
+        <UButton variant="ghost" block to="/mobile-key" class="cursor-pointer">
+          Zur Schlüsselliste
+        </UButton>
+      </template>
+    </AccessPointOpenFlow>
 
-    <!-- the open request is on its way -->
-    <div v-else-if="stage === 'opening'" class="py-10">
-      <AccessPointLoadingSpinner />
-      <p class="text-center text-neutral-500 mt-4">Tür wird geöffnet …</p>
-    </div>
-
-    <!-- opened -->
-    <div v-else-if="stage === 'opened'" class="space-y-5">
-      <AccessPointStatusScreen
-        icon="i-lucide-unlock"
-        color="success"
-        :title="t('mobileKey.stages.opened.title')"
-        :description="
-          t('mobileKey.stages.opened.description', { label: accessPointLabel })
-        "
-      />
-      <UButton
-        variant="outline"
-        block
-        class="py-3 cursor-pointer"
-        @click="openDoor"
-      >
-        {{ t("mobileKey.actions.open_again") }}
-      </UButton>
-      <UButton variant="ghost" block to="/mobile-key" class="cursor-pointer">
-        Zur Schlüsselliste
-      </UButton>
-    </div>
-
-    <!-- everything that did not work out -->
+    <!--
+      The sticker or the booking did not work out; the door was never reached.
+      None of these cases carries a `retry` of its own - what failed here is the
+      resolution, and repeating it means starting over, whichever half it was.
+    -->
     <div v-else class="space-y-5">
       <AccessPointErrorScreen
         :kind="errorKind"
@@ -106,7 +82,7 @@
         :booking="booking"
         :tenant-id="tenantId"
         :blocking-reason="blockingReason"
-        @retry="retryFailure"
+        @retry="start"
       />
 
       <ProviderHelpSection
@@ -127,17 +103,15 @@
 import AccessPointCard from "~/components/mobileKey/AccessPointCard.vue";
 import AccessPointErrorScreen from "~/components/mobileKey/AccessPointErrorScreen.vue";
 import AccessPointLoadingSpinner from "~/components/mobileKey/AccessPointLoadingSpinner.vue";
-import AccessPointStatusScreen from "~/components/mobileKey/AccessPointStatusScreen.vue";
+import AccessPointOpenFlow from "~/components/mobileKey/AccessPointOpenFlow.vue";
 import ProviderHelpSection from "~/components/mobileKey/ProviderHelpSection.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { ACCESS_ERROR_SCREENS } from "~/utils/accessErrorScreens.js";
 import {
   ACCESS_ERRORS,
-  buildOpenRequest,
   decideBookingOutcome,
-  readOpenConfirmation,
-  readOpenOutcome,
+  readAccessPoint,
   readScanResolution,
 } from "~/utils/accessOpenFlow.js";
 
@@ -153,14 +127,17 @@ definePageMeta({
 });
 
 const route = useRoute();
-const { resolveScan, getBookingsForAccessPoint, open, pollOpenStatus } =
-  useAccessPoints();
+const { resolveScan, getBookingsForAccessPoint } = useAccessPoints();
 const { formatDateRange } = useFormatting();
-const { t } = useI18n();
 
 const tenantId = computed(() => String(route.params.tenant));
 const scanCode = computed(() => String(route.params.scanCode));
 
+/**
+ * What this page decides on its own: resolving the sticker and the booking
+ * behind it (#18). `flow` is where it hands over to the shared flow, which
+ * carries every stage from there to an open door.
+ */
 const stage = ref("loading");
 const errorKind = ref(ACCESS_ERRORS.GENERIC);
 const blockingReason = ref(null);
@@ -202,7 +179,7 @@ async function start() {
       return;
     }
 
-    accessPoint.value = resolution.accessPoint;
+    accessPoint.value = readAccessPoint(resolution.accessPoint);
     await resolveBooking();
   } catch (error) {
     console.error("Scan konnte nicht aufgelöst werden:", error);
@@ -257,7 +234,7 @@ function applyOutcome(outcome) {
   booking.value = outcome.booking ?? null;
 
   if (outcome.screen === "ready") {
-    stage.value = "ready";
+    stage.value = "flow";
     return;
   }
   if (outcome.screen === "select") {
@@ -271,87 +248,16 @@ function applyOutcome(outcome) {
 
 function chooseBooking(candidate) {
   booking.value = candidate;
-  stage.value = "ready";
+  stage.value = "flow";
 }
 
 /**
- * The tap on the button is the intent: the scan travels along as evidence and
- * `channel` records for the audit that this open came from a QR scan.
+ * The sticker was read at the door, so the scan *is* the proof of presence -
+ * which is why this page never shows the evidence stage (#3).
  */
-async function openDoor() {
-  if (!accessPoint.value || !booking.value) {
-    fail(ACCESS_ERRORS.GENERIC);
-    return;
-  }
-
-  stage.value = "opening";
-
-  try {
-    const outcome = readOpenOutcome(
-      await open(
-        tenantId.value,
-        accessPoint.value.id,
-        String(booking.value.id),
-        buildOpenRequest({
-          evidence: [{ type: "qrScan", scanCode: scanCode.value }],
-        }),
-      ),
-      { booking: booking.value, now: Date.now() },
-    );
-
-    if (outcome.pendingProcessId) {
-      await confirmOpen(outcome.pendingProcessId);
-      return;
-    }
-
-    if (outcome.opened) {
-      stage.value = "opened";
-      return;
-    }
-
-    fail(outcome.error, outcome.blockingReason);
-  } catch (error) {
-    console.error("Tür konnte nicht geöffnet werden:", error);
-    fail(ACCESS_ERRORS.DOOR_UNREACHABLE);
-  }
-}
-
-/**
- * Some providers only acknowledge the open and report the outcome later. The
- * success screen waits for that confirmation rather than assuming it.
- */
-async function confirmOpen(openProcessId) {
-  const confirmation = readOpenConfirmation(
-    await pollOpenStatus(
-      tenantId.value,
-      accessPoint.value.id,
-      String(booking.value.id),
-      openProcessId,
-    ),
-  );
-
-  if (confirmation.opened) {
-    stage.value = "opened";
-    return;
-  }
-
-  fail(confirmation.error);
-}
-
-/**
- * The way out of a failure says what to repeat: `"action"` runs the open
- * again, `"status"` only re-reads. Never the other way round - a second open
- * command can latch an open door shut again. Reading the door's own status
- * arrives with the shared flow; until then re-reading means starting over.
- */
-function retryFailure(repeat) {
-  if (repeat === "status") {
-    start();
-    return;
-  }
-
-  openDoor();
-}
+const scanEvidence = computed(() => [
+  { type: "qrScan", scanCode: scanCode.value },
+]);
 
 const bookingTimeRange = (candidate) =>
   formatDateRange(candidate?.timeBegin, candidate?.timeEnd) ||

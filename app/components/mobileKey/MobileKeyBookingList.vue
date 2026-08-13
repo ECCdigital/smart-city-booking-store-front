@@ -112,11 +112,19 @@
         />
 
         <div class="flex-1" />
+        <!--
+          The flow reports every status it learns; there is nothing left to
+          ask the server for once the panel closes.
+        -->
         <AccessPointPanel
+          :tenant-id="String(booking.tenantId)"
           :access-point="accessPoint"
-          :booking-id="booking.id"
+          :booking="booking"
           :deny-access="!canOperate(accessPoint, booking)"
-          @closed="loadStatus(booking.tenantId, accessPoint.id, booking.id)"
+          @status="
+            (status) =>
+              (accessPointStatuses[`${booking.id}-${accessPoint.id}`] = status)
+          "
         />
       </div>
       <USeparator
@@ -137,6 +145,7 @@ import { useFormatting } from "~/composables/utils/useFormatting.js";
 import AccessPointLabel from "~/components/mobileKey/AccessPointLabel.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import AccessPointPanel from "~/components/mobileKey/AccessPointPanel.vue";
+import { readStatus } from "~/utils/accessOpenFlow.js";
 
 const props = defineProps({
   bookings: {
@@ -213,12 +222,17 @@ const bookingStatus = (booking) => {
 };
 
 const accessPointStatuses = ref({});
+
+/**
+ * Read the same way the flow reads it, so both writers of this map put the
+ * same four fields in it and no provider-owned key survives in half of them.
+ */
 const loadStatus = async (tenantId, accessPointId, bookingId) => {
   const key = `${bookingId}-${accessPointId}`;
 
-  const response = await getStatus(tenantId, accessPointId, bookingId);
-
-  accessPointStatuses.value[key] = response.success ? response.data : null;
+  accessPointStatuses.value[key] = readStatus(
+    await getStatus(tenantId, accessPointId, bookingId),
+  );
 };
 const loadAllStatuses = async () => {
   const requests = [];
