@@ -143,13 +143,21 @@ function blockedOutcome(booking, now) {
 
   return {
     screen: "error",
-    error:
-      reason === "outside_access_window"
-        ? windowError(booking, now)
-        : mapBlockingReason(reason),
+    error: reasonError(reason, booking, now),
     booking,
     blockingReason: reason,
   };
+}
+
+/**
+ * @private
+ * The screen a blocking reason leads to, booking in hand: every reason but
+ * `outside_access_window` can be read on its own.
+ */
+function reasonError(reason, booking, now) {
+  return reason === "outside_access_window"
+    ? windowError(booking, now)
+    : mapBlockingReason(reason);
 }
 
 /**
@@ -363,10 +371,7 @@ export function readOpenOutcome(response, { booking = null, now } = {}) {
   return {
     opened: false,
     pendingProcessId: null,
-    error:
-      blockingReason === "outside_access_window"
-        ? windowError(booking, now ?? Date.now())
-        : mapBlockingReason(blockingReason),
+    error: reasonError(blockingReason, booking, now ?? Date.now()),
     blockingReason,
   };
 }
@@ -410,4 +415,144 @@ export function readOpenConfirmation(response) {
  */
 function isReported(value) {
   return value !== null && value !== undefined && value !== "";
+}
+
+/**
+ * @private
+ * "Standing open" for the purpose of the control button: the lock, not the
+ * door contact. `doorOpen` says someone left it ajar, which is a fact for the
+ * status screen and not a reason to offer locking from a phone.
+ */
+function isUnlocked(status) {
+  return status?.open === true || status?.locked === false;
+}
+
+/** The nine situations either way can stand in, flat and complete. */
+const STAGES = Object.freeze({
+  LOADING: "loading",
+  EVIDENCE: "evidence",
+  CAN_OPEN: "can_open",
+  CAN_CLOSE: "can_close",
+  OPENING: "opening",
+  CLOSING: "closing",
+  OPENED: "opened",
+  CLOSED: "closed",
+  ERROR: "error",
+});
+
+/** The stepper's two ways, as the ids the wording in `de.json` hangs from. */
+const SCAN_STEPS = Object.freeze(["verify", "open"]);
+const OPEN_STEP = Object.freeze(["open"]);
+
+/**
+ * The one function that turns the facts of an open process into the stage in
+ * front of the person at the door - the whole `v-if` chain of the old panel
+ * body, on one axis instead of four.
+ *
+ * Two distinctions carry it:
+ *
+ * - **`status: undefined` is not `status: null`.** Undefined means nobody has
+ *   read a status yet, which is a spinner; `null` is what {@link readStatus}
+ *   returns when it read one and there was none, which is an error with a way
+ *   out. Neither is an endless `loading`.
+ * - **An error beats every other stage** - a booking that may not operate, or
+ *   an action that came back refused, is an error and never `opening`. Only a
+ *   confirmed open or close outranks it: the door is then open, whatever else
+ *   is true.
+ *
+ * Where the evidence came from is none of its business: evidence from the scan
+ * URL and evidence from the scanner in the panel are the same fact here. Only
+ * the flow component knows whether it collected it itself, and only it needs
+ * to - that is what the "proof provided" line on the button hangs from.
+ *
+ * `provider` is deliberately not a parameter: `capabilities` say what a door
+ * can do and `type` says what to call it, which is all a provider stood for.
+ *
+ * @param {Object} facts
+ * @param {ReturnType<typeof readStatus>|undefined} [facts.status] `undefined`
+ *   while unread, `null` when unreadable
+ * @param {Object[]} [facts.evidence] Proof of presence already in hand
+ * @param {string[]} [facts.validationRuleTypes] What the door demands as proof
+ * @param {string[]} [facts.capabilities] `open` / `close` / `getStatus`
+ * @param {"open"|"close"|null} [facts.action] The action in flight
+ * @param {Object|null} [facts.result] What {@link readOpenOutcome},
+ *   {@link readOpenConfirmation} or {@link readCloseOutcome} made of its answer
+ * @param {Object|null} [facts.booking] The booking behind the attempt
+ * @param {number} [facts.now]
+ * @returns {{ stage: "loading"|"evidence"|"can_open"|"can_close"|"opening"
+ *   |"closing"|"opened"|"closed"|"error", steps: string[], currentStep: number,
+ *   error: string|null, blockingReason: string|null }}
+ */
+export function decideStage({
+  status,
+  evidence,
+  validationRuleTypes,
+  capabilities,
+  action = null,
+  result = null,
+  booking = null,
+  now = Date.now(),
+} = {}) {
+  const able = capabilities || [];
+  const demandsScan = (validationRuleTypes || []).includes("qrScan");
+  // A demand is met by proof of its own kind - anything else is no answer to
+  // the question the door asked.
+  const evidenceMissing =
+    demandsScan && !(evidence || []).some((item) => item?.type === "qrScan");
+
+  // The stepper is a property of the way, not of the stage: a door that wants
+  // a scan is a two-step affair from the first spinner on, and the step that
+  // is due is the one still owing its evidence.
+  const steps = demandsScan ? SCAN_STEPS : OPEN_STEP;
+  const view = (stage, error = null, blockingReason = null) => ({
+    stage,
+    steps,
+    currentStep: evidenceMissing ? 0 : steps.length - 1,
+    error,
+    blockingReason,
+  });
+
+  if (result?.error) {
+    return view(STAGES.ERROR, result.error, result.blockingReason ?? null);
+  }
+  if (result?.opened) {
+    return view(STAGES.OPENED);
+  }
+  if (result?.closed) {
+    return view(STAGES.CLOSED);
+  }
+
+  // The server's eligibility is the authority on whether this booking may
+  // operate at all - and it outranks a running action, because a spinner that
+  // can only end in this very error is a spinner shown for nothing.
+  if (booking?.accessEligibility?.canOperate === false) {
+    const reason = booking.accessEligibility.primaryBlockingReason ?? null;
+    return view(STAGES.ERROR, reasonError(reason, booking, now), reason);
+  }
+
+  if (action === "open") {
+    return view(STAGES.OPENING);
+  }
+  if (action === "close") {
+    return view(STAGES.CLOSING);
+  }
+
+  // A door that cannot report its state is not waited for; the button below
+  // offers the only thing that stays honest without a status.
+  if (able.includes("getStatus")) {
+    if (status === undefined) {
+      return view(STAGES.LOADING);
+    }
+    if (status === null) {
+      return view(STAGES.ERROR, ACCESS_ERRORS.STATUS_UNAVAILABLE);
+    }
+  }
+
+  if (isUnlocked(status)) {
+    // An open door a provider cannot close is a result, not a control: the
+    // status screen says so and offers opening again, never locking.
+    return view(able.includes("close") ? STAGES.CAN_CLOSE : STAGES.OPENED);
+  }
+
+  return view(evidenceMissing ? STAGES.EVIDENCE : STAGES.CAN_OPEN);
 }

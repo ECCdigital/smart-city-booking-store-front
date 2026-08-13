@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   ACCESS_ERRORS,
   buildOpenRequest,
+  decideStage,
   readAccessPoint,
   readCloseOutcome,
   readOpenConfirmation,
@@ -310,6 +311,325 @@ describe("readOpenConfirmation", () => {
     expect(readOpenConfirmation(undefined)).toMatchObject({ opened: false });
     expect(readOpenConfirmation("Gateway Timeout")).toMatchObject({
       opened: false,
+    });
+  });
+});
+
+const EVERY_CAPABILITY = ["open", "close", "getStatus"];
+const LOCKED = {
+  open: false,
+  locked: true,
+  doorOpen: false,
+  statusSource: "provider_status",
+};
+const UNLOCKED = {
+  open: true,
+  locked: false,
+  doorOpen: false,
+  statusSource: "provider_status",
+};
+const SCANNED = [{ type: "qrScan", scanCode: "k7f3xyz" }];
+
+/** A door as it stands today: it demands a scan and can do all three actions. */
+const scanDoor = (facts) => ({
+  capabilities: EVERY_CAPABILITY,
+  validationRuleTypes: ["qrScan"],
+  evidence: SCANNED,
+  ...facts,
+});
+
+/** A locker on a bypass: no proof demanded, so no evidence stage. */
+const bypass = (facts) => ({
+  capabilities: EVERY_CAPABILITY,
+  validationRuleTypes: [],
+  ...facts,
+});
+
+describe("decideStage", () => {
+  // "Comes up" is what this table says; *why* is what the named cases below
+  // say. Every stage needs a row here, and the count case keeps it that way.
+  const STAGE_ROWS = [
+    {
+      name: "nobody has read a status yet",
+      facts: bypass({}),
+      stage: "loading",
+    },
+    {
+      name: "the door demands a scan and none is in hand",
+      facts: scanDoor({ status: LOCKED, evidence: [] }),
+      stage: "evidence",
+    },
+    {
+      name: "locked, and the proof is in hand",
+      facts: scanDoor({ status: LOCKED }),
+      stage: "can_open",
+    },
+    {
+      name: "standing open, and this door can lock",
+      facts: bypass({ status: UNLOCKED }),
+      stage: "can_close",
+    },
+    {
+      name: "the open command is on its way",
+      facts: scanDoor({ status: LOCKED, action: "open" }),
+      stage: "opening",
+    },
+    {
+      name: "the close command is on its way",
+      facts: bypass({ status: UNLOCKED, action: "close" }),
+      stage: "closing",
+    },
+    {
+      name: "the provider confirmed the open",
+      facts: scanDoor({
+        action: "open",
+        result: { opened: true, error: null },
+      }),
+      stage: "opened",
+    },
+    {
+      name: "the close came back confirmed",
+      facts: bypass({ action: "close", result: { closed: true, error: null } }),
+      stage: "closed",
+    },
+    {
+      name: "the status was read and there was none",
+      facts: bypass({ status: null }),
+      stage: "error",
+    },
+  ];
+
+  it.each(STAGE_ROWS)("$stage: $name", ({ facts, stage }) => {
+    expect(decideStage(facts).stage).toBe(stage);
+  });
+
+  it("reaches all nine stages - the table is the proof, not a promise", () => {
+    expect(new Set(STAGE_ROWS.map((row) => row.stage)).size).toBe(9);
+  });
+
+  it("sends whoever demands a scan and has none through the evidence stage", () => {
+    expect(
+      decideStage(scanDoor({ status: LOCKED, evidence: [] })),
+    ).toMatchObject({ stage: "evidence", error: null });
+    // Proof of another kind is no answer to the question this door asked.
+    expect(
+      decideStage(
+        scanDoor({ status: LOCKED, evidence: [{ type: "geofence" }] }),
+      ).stage,
+    ).toBe("evidence");
+  });
+
+  it("skips the evidence stage for evidence from the scan URL - that scan already happened at the door", () => {
+    expect(decideStage(scanDoor({ status: LOCKED })).stage).toBe("can_open");
+  });
+
+  it("skips the evidence stage where nothing is demanded - a bypass and a locker say so with an empty list", () => {
+    expect(decideStage(bypass({ status: LOCKED })).stage).toBe("can_open");
+  });
+
+  it("offers no lock a door cannot perform - an open one without the capability is a result, not a control", () => {
+    expect(decideStage(bypass({ status: UNLOCKED })).stage).toBe("can_close");
+    expect(
+      decideStage(
+        bypass({ status: UNLOCKED, capabilities: ["open", "getStatus"] }),
+      ).stage,
+    ).toBe("opened");
+  });
+
+  it("lets an error beat a running action, never the other way round", () => {
+    expect(
+      decideStage(
+        scanDoor({
+          status: LOCKED,
+          action: "open",
+          result: {
+            opened: false,
+            error: ACCESS_ERRORS.DOOR_UNREACHABLE,
+            blockingReason: null,
+          },
+        }),
+      ),
+    ).toMatchObject({ stage: "error", error: ACCESS_ERRORS.DOOR_UNREACHABLE });
+    // A spinner that can only end in this very error is shown for nothing.
+    expect(
+      decideStage(
+        scanDoor({
+          status: LOCKED,
+          action: "open",
+          booking: {
+            accessEligibility: {
+              canOperate: false,
+              primaryBlockingReason: "authorization_revoked",
+            },
+          },
+        }),
+      ),
+    ).toMatchObject({
+      stage: "error",
+      blockingReason: "authorization_revoked",
+    });
+  });
+
+  it("waits for the open it sent and reports the one that came back", () => {
+    expect(
+      decideStage(scanDoor({ status: LOCKED, action: "open" })).stage,
+    ).toBe("opening");
+    expect(
+      decideStage(
+        scanDoor({
+          status: LOCKED,
+          action: "open",
+          result: readOpenConfirmation({ data: { confirmed: true } }),
+        }),
+      ).stage,
+    ).toBe("opened");
+  });
+
+  it("waits for the close it sent and reports the one that came back", () => {
+    expect(
+      decideStage(bypass({ status: UNLOCKED, action: "close" })).stage,
+    ).toBe("closing");
+    expect(
+      decideStage(
+        bypass({
+          status: UNLOCKED,
+          action: "close",
+          result: readCloseOutcome({ success: true, data: LOCKED }),
+        }),
+      ).stage,
+    ).toBe("closed");
+  });
+
+  it("calls an unreadable status an error with a way out, not an endless spinner", () => {
+    expect(decideStage(bypass({ status: null }))).toMatchObject({
+      stage: "error",
+      error: ACCESS_ERRORS.STATUS_UNAVAILABLE,
+      blockingReason: null,
+    });
+  });
+
+  it("does not wait for a status a door cannot report", () => {
+    expect(decideStage(bypass({ capabilities: ["open", "close"] })).stage).toBe(
+      "can_open",
+    );
+  });
+
+  it("takes the blocking reason from the eligibility and keeps naming it", () => {
+    const blocked = (reason, booking = {}) =>
+      decideStage(
+        scanDoor({
+          status: LOCKED,
+          booking: {
+            ...booking,
+            accessEligibility: {
+              canOperate: false,
+              primaryBlockingReason: reason,
+            },
+          },
+          now: NOW,
+        }),
+      );
+
+    expect(blocked("payment_required")).toMatchObject({
+      stage: "error",
+      error: ACCESS_ERRORS.PAYMENT_REQUIRED,
+    });
+    // The six mute reasons share the generic screen - which still names them.
+    expect(blocked("locker_not_ready")).toMatchObject({
+      stage: "error",
+      error: ACCESS_ERRORS.GENERIC,
+      blockingReason: "locker_not_ready",
+    });
+    expect(
+      blocked("outside_access_window", {
+        timeBegin: NOW + HOUR,
+        timeEnd: NOW + 2 * HOUR,
+      }),
+    ).toMatchObject({ stage: "error", error: ACCESS_ERRORS.TOO_EARLY });
+    expect(
+      blocked("outside_access_window", {
+        timeBegin: NOW - 3 * HOUR,
+        timeEnd: NOW - HOUR,
+      }),
+    ).toMatchObject({ stage: "error", error: ACCESS_ERRORS.TOO_LATE });
+  });
+
+  it("describes a two-step way from the first spinner on and moves on once the proof is in", () => {
+    expect(
+      decideStage(scanDoor({ status: LOCKED, evidence: [] })),
+    ).toMatchObject({ steps: ["verify", "open"], currentStep: 0 });
+    expect(decideStage(scanDoor({ status: LOCKED }))).toMatchObject({
+      steps: ["verify", "open"],
+      currentStep: 1,
+    });
+    // One step is a stepper that hides itself.
+    expect(decideStage(bypass({ status: LOCKED })).steps).toEqual(["open"]);
+  });
+
+  // What the panel decides in its template today lands here. Named, because
+  // otherwise nobody can tell afterwards what was carried over and what was
+  // lost on the way.
+  describe("what the list way does today", () => {
+    it("offers opening for a locked door", () => {
+      expect(decideStage(scanDoor({ status: LOCKED })).stage).toBe("can_open");
+    });
+
+    it("offers locking for an open one", () => {
+      expect(decideStage(scanDoor({ status: UNLOCKED })).stage).toBe(
+        "can_close",
+      );
+    });
+
+    it("shows the spinner while the status is being loaded", () => {
+      expect(decideStage(scanDoor({})).stage).toBe("loading");
+    });
+
+    it("reports the door as opened once the open is confirmed", () => {
+      expect(
+        decideStage(
+          scanDoor({
+            action: "open",
+            result: readOpenOutcome({ success: true, data: { state: "open" } }),
+          }),
+        ).stage,
+      ).toBe("opened");
+    });
+  });
+
+  describe("the three deliberate departures from today", () => {
+    it("demands the proof instead of faking it, as the panel does today behind a three-second timeout", () => {
+      expect(
+        decideStage(scanDoor({ status: LOCKED, evidence: [] })).stage,
+      ).toBe("evidence");
+    });
+
+    it("knows no provider - the box that used to skip both the status and the proof now walks the same way as every door", () => {
+      const locker = {
+        type: "locker",
+        capabilities: EVERY_CAPABILITY,
+        validationRuleTypes: ["qrScan"],
+        evidence: [],
+      };
+
+      expect(decideStage(locker).stage).toBe("loading");
+      expect(decideStage({ ...locker, status: LOCKED }).stage).toBe("evidence");
+      expect(decideStage({ ...locker, status: UNLOCKED }).stage).toBe(
+        "can_close",
+      );
+    });
+
+    it("has no refresh-status button - a fresh status follows every action, and an unreadable one is a case of its own", () => {
+      expect(decideStage(bypass({ status: null })).error).toBe(
+        ACCESS_ERRORS.STATUS_UNAVAILABLE,
+      );
+      expect(
+        decideStage(
+          bypass({
+            action: "close",
+            result: readCloseOutcome({ success: true, data: LOCKED }),
+          }),
+        ).stage,
+      ).toBe("closed");
     });
   });
 });
