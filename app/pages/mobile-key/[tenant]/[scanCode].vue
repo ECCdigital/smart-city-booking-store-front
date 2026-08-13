@@ -6,6 +6,15 @@
       class="mb-5"
     />
 
+    <!-- the door, once known: one card above the stages, not one per stage -->
+    <AccessPointCard
+      v-if="accessPoint"
+      :access-point="accessPoint"
+      :booking="booking"
+      :is-open="stage === 'opened'"
+      class="mb-5"
+    />
+
     <!-- resolving the sticker and the matching booking -->
     <div v-if="stage === 'loading'" class="py-10">
       <AccessPointLoadingSpinner />
@@ -16,7 +25,6 @@
 
     <!-- more than one booking is active right now -->
     <div v-else-if="stage === 'select'" class="space-y-4">
-      <ScanDoorCard :access-point="accessPoint" />
       <div>
         <h2 class="text-lg font-semibold">Welche Buchung?</h2>
         <p class="text-sm text-neutral-500">
@@ -44,13 +52,12 @@
 
     <!-- ready: opening happens on an explicit tap, never automatically -->
     <div v-else-if="stage === 'ready'" class="space-y-5">
-      <ScanStatusScreen
+      <AccessPointStatusScreen
         icon="i-lucide-key-round"
         color="neutral"
         title="Bereit zum Öffnen"
         description="Ihre Buchung ist aktiv. Der Scan gilt als Nachweis, dass Sie vor der Tür stehen."
       />
-      <ScanDoorCard :access-point="accessPoint" :booking="booking" />
       <UButton
         size="xl"
         block
@@ -70,20 +77,21 @@
 
     <!-- opened -->
     <div v-else-if="stage === 'opened'" class="space-y-5">
-      <ScanStatusScreen
+      <AccessPointStatusScreen
         icon="i-lucide-unlock"
         color="success"
-        title="Tür ist offen"
-        :description="`Viel Erfolg im ${accessPoint?.label || 'Raum'}!`"
+        :title="t('mobileKey.stages.opened.title')"
+        :description="
+          t('mobileKey.stages.opened.description', { label: accessPointLabel })
+        "
       />
-      <ScanDoorCard :access-point="accessPoint" :booking="booking" />
       <UButton
         variant="outline"
         block
         class="py-3 cursor-pointer"
         @click="openDoor"
       >
-        Erneut öffnen
+        {{ t("mobileKey.actions.open_again") }}
       </UButton>
       <UButton variant="ghost" block to="/mobile-key" class="cursor-pointer">
         Zur Schlüsselliste
@@ -92,18 +100,13 @@
 
     <!-- everything that did not work out -->
     <div v-else class="space-y-5">
-      <ScanErrorScreen
+      <AccessPointErrorScreen
         :kind="errorKind"
+        :access-point-label="accessPointLabel"
         :booking="booking"
         :tenant-id="tenantId"
         :blocking-reason="blockingReason"
-        @retry="openDoor"
-      />
-
-      <ScanDoorCard
-        v-if="accessPoint"
-        :access-point="accessPoint"
-        :booking="booking"
+        @retry="retryFailure"
       />
 
       <ProviderHelpSection
@@ -121,13 +124,14 @@
 </template>
 
 <script setup>
+import AccessPointCard from "~/components/mobileKey/AccessPointCard.vue";
+import AccessPointErrorScreen from "~/components/mobileKey/AccessPointErrorScreen.vue";
 import AccessPointLoadingSpinner from "~/components/mobileKey/AccessPointLoadingSpinner.vue";
+import AccessPointStatusScreen from "~/components/mobileKey/AccessPointStatusScreen.vue";
 import ProviderHelpSection from "~/components/mobileKey/ProviderHelpSection.vue";
-import ScanDoorCard from "~/components/mobileKey/ScanDoorCard.vue";
-import ScanErrorScreen from "~/components/mobileKey/ScanErrorScreen.vue";
-import ScanStatusScreen from "~/components/mobileKey/ScanStatusScreen.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+import { ACCESS_ERROR_SCREENS } from "~/utils/accessErrorScreens.js";
 import {
   ACCESS_ERRORS,
   buildOpenRequest,
@@ -152,6 +156,7 @@ const route = useRoute();
 const { resolveScan, getBookingsForAccessPoint, open, pollOpenStatus } =
   useAccessPoints();
 const { formatDateRange } = useFormatting();
+const { t } = useI18n();
 
 const tenantId = computed(() => String(route.params.tenant));
 const scanCode = computed(() => String(route.params.scanCode));
@@ -333,21 +338,40 @@ async function confirmOpen(openProcessId) {
   fail(confirmation.error);
 }
 
+/**
+ * The way out of a failure says what to repeat: `"action"` runs the open
+ * again, `"status"` only re-reads. Never the other way round - a second open
+ * command can latch an open door shut again. Reading the door's own status
+ * arrives with the shared flow; until then re-reading means starting over.
+ */
+function retryFailure(repeat) {
+  if (repeat === "status") {
+    start();
+    return;
+  }
+
+  openDoor();
+}
+
 const bookingTimeRange = (candidate) =>
   formatDateRange(candidate?.timeBegin, candidate?.timeEnd) ||
   `Buchung #${candidate?.id}`;
 
+/**
+ * The door by name - the wording never says "the door", it says which one.
+ * Until the sticker resolves there is no name to say.
+ */
+const accessPointLabel = computed(
+  () => accessPoint.value?.label || "Der Zugang",
+);
+
+/** Which failures the provider's help can speak to is the case's own trait. */
 const showProviderHelp = computed(
   () =>
     stage.value === "error" &&
     Boolean(accessPoint.value?.provider) &&
     Boolean(booking.value?.id) &&
-    [
-      ACCESS_ERRORS.DOOR_UNREACHABLE,
-      ACCESS_ERRORS.OPEN_UNCONFIRMED,
-      ACCESS_ERRORS.EVIDENCE_RULE_UNAVAILABLE,
-      ACCESS_ERRORS.GENERIC,
-    ].includes(errorKind.value),
+    Boolean(ACCESS_ERROR_SCREENS[errorKind.value]?.help),
 );
 
 watch([tenantId, scanCode], () => {

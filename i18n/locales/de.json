@@ -371,5 +371,137 @@
   },
   "checkout": {
     "noBookable": "Keine passenden Ressourcen gefunden"
+  },
+  "mobileKey": {
+    "stages": {
+      "loading": {
+        "title": "Status wird geprüft …"
+      },
+      "opening": {
+        "title": "{label} wird geöffnet …"
+      },
+      "closing": {
+        "title": "{label} wird geschlossen …"
+      },
+      "can_open": {
+        "title": "Tippen Sie zum Öffnen von {label}",
+        "evidence_confirmed": "✓ Nachweis erbracht"
+      },
+      "can_close": {
+        "title": "{label} ist geöffnet",
+        "description": "Tippen Sie zum Abschließen von {label}"
+      },
+      "opened": {
+        "title": "Geöffnet",
+        "description": "{label} wurde geöffnet."
+      },
+      "closed": {
+        "title": "Abgeschlossen",
+        "description": "{label} wurde abgeschlossen."
+      }
+    },
+    "errors": {
+      "stale_scan_code": {
+        "title": "Aufkleber veraltet",
+        "description": "Dieser QR-Code wurde ersetzt und ist nicht mehr gültig. Bitte informieren Sie die Verwaltung, damit der Aufkleber erneuert wird."
+      },
+      "unknown_scan_code": {
+        "title": "Code unbekannt",
+        "description": "Dieser QR-Code gehört zu keinem Zugang dieses Mandanten. Möglicherweise ist der Link unvollständig."
+      },
+      "no_booking": {
+        "title": "Keine passende Buchung",
+        "description": "Für Sie wurde keine Buchung gefunden, die zu {label} gehört."
+      },
+      "payment_required": {
+        "title": "Buchung noch nicht bezahlt",
+        "description": "Erst nach Zahlungseingang lässt sich {label} öffnen."
+      },
+      "too_early": {
+        "title": "Noch nicht so weit",
+        "description": "Ihre Buchung beginnt am {date}. Ab dann können Sie {label} hier öffnen.",
+        "description_undated": "Ihre Buchung hat noch nicht begonnen."
+      },
+      "too_late": {
+        "title": "Buchung beendet",
+        "description": "Ihre Buchung ist abgelaufen. {label} lässt sich damit nicht mehr öffnen."
+      },
+      "door_unreachable": {
+        "title": "{label} nicht erreichbar",
+        "description": "Das Schloss antwortet gerade nicht. Das kann an der Verbindung vor Ort liegen."
+      },
+      "open_unconfirmed": {
+        "title": "Öffnen nicht bestätigt",
+        "description": "Der Befehl wurde übermittelt, {label} hat sich aber nicht zurückgemeldet. Bitte prüfen Sie vor Ort, ob offen ist."
+      },
+      "close_failed": {
+        "title": "Abschließen fehlgeschlagen",
+        "description": "{label} konnte nicht abgeschlossen werden. Bitte prüfen Sie vor Ort, ob noch offen ist."
+      },
+      "status_unavailable": {
+        "title": "Status unbekannt",
+        "description": "Der Zustand von {label} lässt sich gerade nicht abrufen."
+      },
+      "evidence_rule_unavailable": {
+        "title": "Öffnen zurzeit nicht möglich",
+        "description": "{label} ist fehlerhaft konfiguriert. Bitte kontaktieren Sie die Verwaltung – Ihre Buchung bleibt gültig."
+      },
+      "evidence_invalid": {
+        "title": "Aufkleber prüfen",
+        "description": "Der gescannte Code gehört nicht zu {label}. Bitte prüfen Sie den Aufkleber und informieren Sie die Verwaltung."
+      },
+      "evidence_missing": {
+        "title": "Vor Ort scannen",
+        "description": "{label} lässt sich nur öffnen, wenn Sie den QR-Code direkt davor scannen."
+      },
+      "generic": {
+        "title": "Öffnen nicht möglich",
+        "description": "{label} konnte nicht geöffnet werden. Bitte versuchen Sie es später erneut."
+      }
+    },
+    "blocking_reasons": {
+      "rejected": "Ihre Buchung wurde abgelehnt.",
+      "not_committed": "Ihre Buchung ist noch nicht bestätigt.",
+      "payment_required": "Die Zahlung steht noch aus.",
+      "authorization_revoked": "Ihre Berechtigung für diesen Zugang wurde widerrufen.",
+      "outside_access_window": "Der Zugang liegt außerhalb des gebuchten Zeitfensters.",
+      "not_provisioned": "Der Zugang ist noch nicht freigegeben.",
+      "locker_not_ready": "Das Schließfach ist noch nicht bereit.",
+      "no_remote_access": "Dieser Zugang lässt sich nicht aus der Ferne öffnen.",
+      "evidence_missing": "Der Nachweis fehlt – bitte vor Ort den QR-Code scannen.",
+      "evidence_invalid": "Der Nachweis ist ungültig – bitte den Aufkleber prüfen.",
+      "evidence_rule_unavailable": "Der Zugang ist zurzeit nicht prüfbar – bitte die Verwaltung kontaktieren."
+    },
+    "actions": {
+      "retry": "Erneut versuchen",
+      "check_status": "Status prüfen",
+      "pay_now": "Jetzt bezahlen",
+      "rebook": "Erneut buchen",
+      "book_now": "Jetzt buchen",
+      "open_again": "Erneut öffnen",
+      "close_now": "Abschließen"
+    },
+    "evidence": {
+      "step_verify": "Vor Ort nachweisen",
+      "step_open": "Tür öffnen",
+      "hint": "Scannen Sie den QR-Code an {label}.",
+      "fallback_link": "Kamera nicht möglich? Mit der Kamera-App scannen",
+      "wrong_door": {
+        "title": "Anderer Zugang",
+        "description": "Der gescannte Code gehört zu {scanned}, nicht zu {label}.",
+        "action": "Zu {scanned} wechseln"
+      },
+      "wrong_tenant": {
+        "title": "Anderer Anbieter",
+        "description": "Dieser QR-Code gehört zu einem anderen Anbieter."
+      },
+      "camera": {
+        "description": "Öffnen Sie den QR-Code an {label} mit der Kamera-App Ihres Telefons — der Aufkleber führt Sie direkt hierher zurück.",
+        "unsupported": "Kamera hier nicht verfügbar",
+        "denied": "Kamerazugriff verweigert",
+        "not_found": "Keine Kamera gefunden",
+        "not_readable": "Kamera wird bereits benutzt"
+      }
+    }
   }
 }

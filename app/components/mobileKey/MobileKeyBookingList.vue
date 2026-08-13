@@ -135,7 +135,6 @@
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import AccessPointLabel from "~/components/mobileKey/AccessPointLabel.vue";
-import { ACCESS_BLOCKING_REASON_LABELS } from "~/composables/utils/useAccessBlockingReasons.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import AccessPointPanel from "~/components/mobileKey/AccessPointPanel.vue";
 
@@ -150,7 +149,26 @@ const { getTenantName } = useTenant();
 const { formatDate } = useFormatting();
 const { getStatus } = useAccessPoints();
 
-const blockingReasonLabels = ACCESS_BLOCKING_REASON_LABELS;
+/**
+ * The badge on a booking, in as many words as a badge holds. The full
+ * sentences for the same reasons live in `de.json`
+ * (`mobileKey.blocking_reasons`) and belong to the error screen; a badge with
+ * a whole sentence in it is not an option, so the two stay apart and the list
+ * stays outside the translation keys.
+ */
+const blockingReasonLabels = Object.freeze({
+  rejected: "Abgelehnt",
+  not_committed: "Noch nicht bestätigt",
+  payment_required: "Zahlung ausstehend",
+  authorization_revoked: "Berechtigung widerrufen",
+  outside_access_window: "Außerhalb des Zeitfensters",
+  not_provisioned: "Noch nicht freigegeben",
+  locker_not_ready: "Schließfach nicht bereit",
+  no_remote_access: "Keine Fernsteuerung",
+  evidence_missing: "Nachweis fehlt",
+  evidence_invalid: "Nachweis ungültig",
+  evidence_rule_unavailable: "Zugang nicht prüfbar",
+});
 
 const bookingStatus = (booking) => {
   const now = Date.now();

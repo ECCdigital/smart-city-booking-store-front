@@ -26,6 +26,9 @@
     >
       <AccessPointControlButton
         variant="open"
+        :title="
+          isVerified ? t('mobileKey.stages.can_open.evidence_confirmed') : ''
+        "
         :access-point-label="
           accessPoint.provider === 'ifbs'
             ? `Fahrradbox #${accessPoint.id}`
@@ -39,6 +42,9 @@
     <div v-else-if="accessPointStatus?.open && !hasResultState" class="py-10">
       <AccessPointControlButton
         variant="close"
+        :title="
+          t('mobileKey.stages.can_close.title', { label: accessPoint.label })
+        "
         :access-point-label="accessPoint.label"
         @lock="onLockDoor"
       />
@@ -108,7 +114,7 @@ import AccessPointControlButton from "~/components/mobileKey/AccessPointControlB
 import AccessPointLoadingSpinner from "~/components/mobileKey/AccessPointLoadingSpinner.vue";
 import AccessPointFeedbackSection from "~/components/mobileKey/AccessPointFeedbackSection.vue";
 import ProviderHelpSection from "~/components/mobileKey/ProviderHelpSection.vue";
-import { formatBlockingReasonMessage } from "~/composables/utils/useAccessBlockingReasons.js";
+import { formatBlockingReasonMessage } from "~/utils/accessErrorScreens.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 
 const isVerified = defineModel({ type: Boolean, default: false });
@@ -132,6 +138,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["close", "status-updated"]);
 const { open, close } = useAccessPoints();
+const { t } = useI18n();
 
 //State
 const isLoading = ref(false);
@@ -206,6 +213,7 @@ function handleOpenRefusal(response) {
   errorKey.value = "open";
   errorMessage.value = formatBlockingReasonMessage(
     response?.data?.blockingReasons,
+    t,
     OPEN_ERROR_MESSAGE,
   );
 }

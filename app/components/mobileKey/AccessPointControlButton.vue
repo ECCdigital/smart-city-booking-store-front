@@ -16,7 +16,7 @@
 
   </div>
   <div class="text-center text-sm">
-  <p class="mb-1">{{ title }}</p>
+  <p v-if="title" class="mb-1">{{ title }}</p>
   {{ subtitle }}
   <span class="font-semibold"> {{ accessPointLabel }} </span>
 </div>
@@ -28,6 +28,15 @@ const props = defineProps({
     required: true,
   },
   accessPointLabel: {
+    type: String,
+    default: "",
+  },
+  /**
+   * The line above the caption. A prop rather than a switch because the
+   * wording now lives in `de.json` - and because the flow, not the button,
+   * knows whether evidence was collected in this very session.
+   */
+  title: {
     type: String,
     default: "",
   },
@@ -56,16 +65,6 @@ const icon = computed(() => {
 });
 
 
-const title = computed(() => {
-  switch (props.variant) {
-    case "open":
-      return "✓ Verifiziert";
-    case "close":
-      return "Tür ist geöffnet.";
-    default:
-      return "";
-  }
-});
 const subtitle = computed(() => {
   switch (props.variant) {
     case "open":

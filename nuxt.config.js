@@ -70,6 +70,7 @@ export default defineNuxtConfig({
     ],
     customRoutes: "page",
     defaultLocale: "de",
+    // The vue-i18n fallback lives in i18n/i18n.config.ts - see the comment there.
     strategy: "prefix_except_default",
     lazy: true,
     langDir: "locales/",
