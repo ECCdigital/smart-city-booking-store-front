@@ -10,6 +10,14 @@ export default defineNuxtConfig({
 
   pages: true,
 
+  vite: {
+    server: {
+      // Dev-Tunnel (cloudflared/trycloudflare) fuer HTTPS-Tests am Handy:
+      // Vite blockt sonst fremde Host-Header mit "Blocked request".
+      allowedHosts: [".trycloudflare.com"],
+    },
+  },
+
   runtimeConfig: {
     adminBaseUrl: "",
     apiBaseUrl: "",

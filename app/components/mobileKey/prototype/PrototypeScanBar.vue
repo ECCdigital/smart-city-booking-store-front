@@ -108,6 +108,7 @@ const VARIANTS = {
   A: "Sucher ist die Bühne",
   B: "Gestapelt, Kamera auf Tippen",
   C: "Ein Bildschirm, der sich freischaltet",
+  D: "★ Entscheidung: B-Optik, Kamera sofort, echter Knopf",
 };
 
 const props = defineProps({

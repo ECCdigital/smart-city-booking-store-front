@@ -135,6 +135,7 @@ import PrototypeScanBar from "~/components/mobileKey/prototype/PrototypeScanBar.
 import PrototypeScanVariantA from "~/components/mobileKey/prototype/PrototypeScanVariantA.vue";
 import PrototypeScanVariantB from "~/components/mobileKey/prototype/PrototypeScanVariantB.vue";
 import PrototypeScanVariantC from "~/components/mobileKey/prototype/PrototypeScanVariantC.vue";
+import PrototypeScanVariantD from "~/components/mobileKey/prototype/PrototypeScanVariantD.vue";
 import {
   CURRENT_ACCESS_POINT,
 } from "~/components/mobileKey/prototype/prototypeScanStubs.js";
@@ -145,13 +146,14 @@ const VARIANT_COMPONENTS = {
   A: PrototypeScanVariantA,
   B: PrototypeScanVariantB,
   C: PrototypeScanVariantC,
+  D: PrototypeScanVariantD,
 };
 
 const route = useRoute();
 const router = useRouter();
 
 const current = computed({
-  get: () => (VARIANT_COMPONENTS[route.query.variant] ? route.query.variant : "A"),
+  get: () => (VARIANT_COMPONENTS[route.query.variant] ? route.query.variant : "D"),
   set: (value) =>
     router.replace({ query: { ...route.query, variant: value } }),
 });
