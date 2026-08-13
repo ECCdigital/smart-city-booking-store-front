@@ -83,7 +83,14 @@ export default defineNuxtConfig({
     headers: {
       contentSecurityPolicy: {
         "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://www.orka-mv.de"],
-        "script-src": ["'self'", "https:", "'unsafe-inline'"],
+        // PROTOTYP 05: 'wasm-unsafe-eval' ist Pflicht, sonst verweigert der Browser die
+        // WebAssembly-Kompilierung des zxing-Decoders (Recherche 01, Abschnitt A).
+        "script-src": ["'self'", "https:", "'unsafe-inline'", "'wasm-unsafe-eval'"],
+      },
+      // PROTOTYP 05: nuxt-security setzt per Default `camera=()` und sperrt getUserMedia
+      // damit auch für die eigene Herkunft (Recherche 01, Abschnitt A).
+      permissionsPolicy: {
+        camera: ["self"],
       },
     },
     nonce: true,
