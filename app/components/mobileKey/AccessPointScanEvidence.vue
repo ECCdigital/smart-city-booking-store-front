@@ -34,7 +34,7 @@
       <ClientOnly v-else>
         <QrcodeStream
           :formats="['qr_code']"
-          :paused="resolving"
+          :paused="resolving || hit"
           :torch="torchOn"
           class="!w-full !h-full [&>video]:!object-cover"
           @detect="onDetect"
@@ -51,6 +51,24 @@
           </div>
         </template>
       </ClientOnly>
+
+      <!--
+        The hit, said in the square that caught it: the picture holds, the
+        frame turns green and a check stands in it. It is drawn over the
+        viewfinder rather than on it - an inset ring takes no room, so nothing
+        moves by a pixel in the moment everything else is meant to.
+
+        How long it is seen is not decided here: this component is taken off
+        the stage in the same tick, and it is the flow's leave transition that
+        holds it while it fades (`.scan-hit-leave-active` in
+        `AccessPointOpenFlow.vue`).
+      -->
+      <div
+        v-if="hit"
+        class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-green-500/25 inset-ring-4 inset-ring-green-500"
+      >
+        <UIcon name="i-lucide-check" class="size-16 text-white drop-shadow-lg" />
+      </div>
 
       <!-- Only where the camera reports one - iOS has none. -->
       <UButton
@@ -230,6 +248,14 @@ const lastMiss = ref(null);
 const resolving = ref(false);
 
 /**
+ * That the code was read, and read as *this* door's. Only a hit sets it; the
+ * three misses have their own, staying word in the alert below and must not
+ * light up with it. It is never taken back, because the stage it belongs to
+ * ends with it.
+ */
+const hit = ref(false);
+
+/**
  * The code the last answer belongs to. A sticker in front of a running camera
  * is decoded over and over; without this, every frame would ask the server the
  * same question again.
@@ -291,7 +317,7 @@ async function onDetect(codes) {
 
   resolving.value = true;
   try {
-    applyScanOutcome(
+    await applyScanOutcome(
       decideScanMatch(await resolveScan(scanned.tenant, scanned.scanCode), {
         expectedAccessPointId: props.accessPoint.id,
         expectedTenantId: props.tenantId,
@@ -314,8 +340,11 @@ async function onDetect(codes) {
  * What the comparison decided. A hit goes up as the proof and the stage moves
  * on without a step in between (§ 5.2); an unreadable answer says nothing,
  * because there is nothing about it the person could do differently.
+ *
+ * The hit is shown and handed on in the same breath - the green is not a step
+ * before the emit, only the same moment seen from the square.
  */
-function applyScanOutcome(outcome, scanned) {
+async function applyScanOutcome(outcome, scanned) {
   lastMiss.value =
     outcome.matched || outcome.mismatch === "unreadable"
       ? null
@@ -326,6 +355,13 @@ function applyScanOutcome(outcome, scanned) {
         };
 
   if (outcome.matched) {
+    hit.value = true;
+    // The green has to stand in the DOM before the stage takes this component
+    // off it. The flow renders before its child does - parent first, always -
+    // and an unmount drops whatever the child still had pending, so without
+    // this tick what leaves would be the plain picture. It costs a frame, not
+    // a wait: the proof goes up in the same breath.
+    await nextTick();
     emit("scanned", outcome.evidence);
   }
 }

@@ -13,105 +13,126 @@
       :current-step="view.currentStep"
     />
 
-    <!-- one chain, one axis: the nine stages of accessOpenFlow -->
-    <div v-if="view.stage === 'loading'" class="py-10">
-      <AccessPointLoadingSpinner />
-      <p class="text-center text-neutral-500 mt-4">
-        {{ t("mobileKey.stages.loading.title") }}
-      </p>
-    </div>
-
-    <!-- the proof, collected where the person stands -->
-    <AccessPointScanEvidence
-      v-else-if="view.stage === 'evidence'"
-      :tenant-id="tenantId"
-      :access-point="accessPoint"
-      @scanned="(evidence) => (evidenceCollectedHere = evidence)"
-    />
-
-    <div v-else-if="view.stage === 'can_open'" class="py-10">
-      <AccessPointControlButton
-        variant="open"
-        :title="
-          evidenceCollectedHere.length
-            ? t('mobileKey.stages.can_open.evidence_confirmed')
-            : ''
-        "
-        :access-point-label="accessPointLabel"
-        @open="openDoor"
-      />
-    </div>
-
-    <div v-else-if="view.stage === 'can_close'" class="py-10">
-      <AccessPointControlButton
-        variant="close"
-        :title="
-          t('mobileKey.stages.can_close.title', { label: accessPointLabel })
-        "
-        :access-point-label="accessPointLabel"
-        @lock="closeDoor"
-      />
-    </div>
-
-    <div
-      v-else-if="view.stage === 'opening' || view.stage === 'closing'"
-      class="py-10"
-    >
-      <AccessPointLoadingSpinner />
-      <p class="text-center text-neutral-500 mt-4">
-        {{
-          t(`mobileKey.stages.${view.stage}.title`, { label: accessPointLabel })
-        }}
-      </p>
-    </div>
-
     <!--
-      A result is passed through, not lived in: it stands for a moment and then
-      hands the stage back to the one control button, which by then points the
-      other way. The stage itself has a second life, though - `opened` is where
-      an open door rests when no provider can close it, and that one needs a
-      way on of its own.
+      One chain, one axis: the nine stages of accessOpenFlow - and one frame
+      around it, so the stage that is going can be lifted out of the flow while
+      the one that comes already stands in place.
     -->
-    <div v-else-if="view.stage === 'opened'" class="space-y-5">
-      <AccessPointStatusScreen
-        icon="i-lucide-unlock"
-        color="success"
-        :prominent="Boolean(result)"
-        :title="t('mobileKey.stages.opened.title')"
-        :description="
-          t('mobileKey.stages.opened.description', { label: accessPointLabel })
-        "
-      />
-      <div v-if="!result" class="pt-4">
+    <div class="relative">
+      <!--
+        The proof, collected where the person stands - and the only stage held
+        outside the chain. A read sticker is answered by this very leave: the
+        stage flips at once, and the square fades out green over the button
+        that has already taken its place. The scanner cannot bring that leave
+        itself, because it is not the one that removes it.
+      -->
+      <Transition name="scan-hit">
+        <AccessPointScanEvidence
+          v-if="view.stage === 'evidence'"
+          :tenant-id="tenantId"
+          :access-point="accessPoint"
+          @scanned="(evidence) => (evidenceCollectedHere = evidence)"
+        />
+      </Transition>
+
+      <div v-if="view.stage === 'loading'" class="py-10">
+        <AccessPointLoadingSpinner />
+        <p class="text-center text-neutral-500 mt-4">
+          {{ t("mobileKey.stages.loading.title") }}
+        </p>
+      </div>
+
+      <div v-else-if="view.stage === 'can_open'" class="py-10">
         <AccessPointControlButton
           variant="open"
-          :title="t('mobileKey.actions.open_again')"
+          :title="
+            evidenceCollectedHere.length
+              ? t('mobileKey.stages.can_open.evidence_confirmed')
+              : ''
+          "
           :access-point-label="accessPointLabel"
           @open="openDoor"
         />
       </div>
+
+      <div v-else-if="view.stage === 'can_close'" class="py-10">
+        <AccessPointControlButton
+          variant="close"
+          :title="
+            t('mobileKey.stages.can_close.title', { label: accessPointLabel })
+          "
+          :access-point-label="accessPointLabel"
+          @lock="closeDoor"
+        />
+      </div>
+
+      <div
+        v-else-if="view.stage === 'opening' || view.stage === 'closing'"
+        class="py-10"
+      >
+        <AccessPointLoadingSpinner />
+        <p class="text-center text-neutral-500 mt-4">
+          {{
+            t(`mobileKey.stages.${view.stage}.title`, {
+              label: accessPointLabel,
+            })
+          }}
+        </p>
+      </div>
+
+      <!--
+        A result is passed through, not lived in: it stands for a moment and
+        then hands the stage back to the one control button, which by then
+        points the other way. The stage itself has a second life, though -
+        `opened` is where an open door rests when no provider can close it, and
+        that one needs a way on of its own.
+      -->
+      <div v-else-if="view.stage === 'opened'" class="space-y-5">
+        <AccessPointStatusScreen
+          icon="i-lucide-unlock"
+          color="success"
+          :prominent="Boolean(result)"
+          :title="t('mobileKey.stages.opened.title')"
+          :description="
+            t('mobileKey.stages.opened.description', { label: accessPointLabel })
+          "
+        />
+        <div v-if="!result" class="pt-4">
+          <AccessPointControlButton
+            variant="open"
+            :title="t('mobileKey.actions.open_again')"
+            :access-point-label="accessPointLabel"
+            @open="openDoor"
+          />
+        </div>
+      </div>
+
+      <AccessPointStatusScreen
+        v-else-if="view.stage === 'closed'"
+        icon="i-lucide-lock"
+        color="success"
+        prominent
+        :title="t('mobileKey.stages.closed.title')"
+        :description="
+          t('mobileKey.stages.closed.description', { label: accessPointLabel })
+        "
+      />
+
+      <!--
+        Still the chain's last word - it catches every stage the branches above
+        did not name. Only the scanner is excepted, and only because it now
+        hangs beside the chain rather than in it.
+      -->
+      <AccessPointErrorScreen
+        v-else-if="view.stage !== 'evidence'"
+        :kind="view.error ?? ACCESS_ERRORS.GENERIC"
+        :access-point-label="accessPointLabel"
+        :booking="booking"
+        :tenant-id="tenantId"
+        :blocking-reason="view.blockingReason"
+        @retry="retryFailure"
+      />
     </div>
-
-    <AccessPointStatusScreen
-      v-else-if="view.stage === 'closed'"
-      icon="i-lucide-lock"
-      color="success"
-      prominent
-      :title="t('mobileKey.stages.closed.title')"
-      :description="
-        t('mobileKey.stages.closed.description', { label: accessPointLabel })
-      "
-    />
-
-    <AccessPointErrorScreen
-      v-else
-      :kind="view.error ?? ACCESS_ERRORS.GENERIC"
-      :access-point-label="accessPointLabel"
-      :booking="booking"
-      :tenant-id="tenantId"
-      :blocking-reason="view.blockingReason"
-      @retry="retryFailure"
-    />
 
     <!--
       What a passed failure leaves behind: its name, quietly, under the button
@@ -576,4 +597,37 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+/*
+  The read sticker, given the moment it needs. The square is lifted out of the
+  flow for it, so the stage underneath is already the one that follows: nothing
+  waits for this fade, it only happens to cover it. The green itself is the
+  scanner's own (`hit` there) - all that is decided here is how long what it
+  painted stays to be seen.
+*/
+.scan-hit-leave-active {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  transition:
+    opacity 300ms ease-out 140ms,
+    transform 440ms ease-out;
+}
+.scan-hit-leave-to {
+  opacity: 0;
+  transform: scale(1.03);
+}
+
+/* The motion goes, the answer stays: the check still has its moment, it just
+   does not grow while it fades. */
+@media (prefers-reduced-motion: reduce) {
+  .scan-hit-leave-active {
+    transition: opacity 200ms ease-out 200ms;
+  }
+  .scan-hit-leave-to {
+    transform: none;
+  }
+}
+</style>
