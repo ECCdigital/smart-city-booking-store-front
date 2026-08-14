@@ -323,6 +323,30 @@ export function readCloseOutcome(response) {
 }
 
 /**
+ * The state a succeeded command leaves behind, for the doors that cannot be
+ * asked. `readCloseOutcome` already hands back the status that travelled with
+ * the close answer; this is the same knowledge for every other case - a door
+ * without `getStatus`, or one whose status read failed - where the command's
+ * own success is the only thing anyone knows about the door.
+ *
+ * It claims the one field the command proves and no more: `locked` and
+ * `doorOpen` are the provider's to report, and a command that opened a door
+ * says nothing about a bolt or a hinge. `statusSource` says where this came
+ * from, so nobody downstream mistakes it for a reading.
+ *
+ * @param {{ open: boolean }} params What the command established
+ * @returns {ReturnType<typeof readStatus>}
+ */
+export function buildCommandStatus({ open }) {
+  return {
+    open,
+    locked: null,
+    doorOpen: null,
+    statusSource: "command_result",
+  };
+}
+
+/**
  * The body of the open request: the evidence travels along as the proof of
  * presence, and `channel` records for the audit that a QR scan is what stands
  * behind it. The scan page takes its evidence from the URL, the list from the
@@ -568,8 +592,30 @@ function sameId(a, b) {
  * door contact. `doorOpen` says someone left it ajar, which is a fact for the
  * status screen and not a reason to offer locking from a phone.
  */
-function isUnlocked(status) {
-  return status?.open === true || status?.locked === false;
+/**
+ * Whether a status reads as an open door. Exported because the flow has to ask
+ * the same question outside `decideStage` - whether a reading agrees with the
+ * command that was just given - and two places answering it their own way is
+ * how a button ends up pointing one way while the stage points the other.
+ *
+ * **`open` outranks `locked`.** It is the lock's answer to this very question -
+ * "does the lock grant access" - while `locked` is the narrower fact of a bolt
+ * being thrown, and only stands in where `open` says nothing. Reading them as
+ * equals made every turning lock report an open door: a Nuki sets `locked` from
+ * `lockStateCode === 1` alone, so *locking* (code 4) answers `locked: false`
+ * just as *unlocking* (code 2) does. Openings survived that by luck - the
+ * mid-turn reading matched where they were headed - and closings did not: the
+ * button came back saying "close" for a door that was closing.
+ *
+ * @param {ReturnType<typeof readStatus>} status
+ * @returns {boolean}
+ */
+export function isUnlocked(status) {
+  if (typeof status?.open === "boolean") {
+    return status.open;
+  }
+
+  return status?.locked === false;
 }
 
 /** The nine situations either way can stand in, flat and complete. */

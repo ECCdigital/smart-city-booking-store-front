@@ -64,7 +64,11 @@ const props = defineProps({
   },
 });
 
-/** Carries `"action"` or `"status"`: what the caller should repeat. */
+/**
+ * Carries `"status"`: what the caller should re-read. The table's other value,
+ * `"action"`, never travels this way - those rows show no button of their own,
+ * because the control button under the screen is their repeat.
+ */
 const emit = defineEmits(["retry"]);
 
 const { t } = useI18n();

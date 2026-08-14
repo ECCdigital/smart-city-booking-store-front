@@ -5,6 +5,7 @@ import {
   ACCESS_ERROR_SCREENS,
   BLOCKING_REASONS,
   buildErrorScreen,
+  failureMayPass,
   formatBlockingReasonMessage,
 } from "~/utils/accessErrorScreens.js";
 import { ACCESS_ERRORS } from "~/utils/accessOpenFlow.js";
@@ -133,6 +134,39 @@ describe("der Ausweg, der unter dem Bildschirm steht", () => {
 
       expect(screen.exit).toBeNull();
       expect(screen.title).toBeTruthy();
+    },
+  );
+});
+
+describe("failureMayPass", () => {
+  it("nennt genau die zwei Zeilen, deren Bildschirm vergehen darf", () => {
+    expect(KINDS.filter(failureMayPass).sort()).toEqual(
+      [ACCESS_ERRORS.DOOR_UNREACHABLE, ACCESS_ERRORS.CLOSE_FAILED].sort(),
+    );
+  });
+
+  it.each([ACCESS_ERRORS.OPEN_UNCONFIRMED, ACCESS_ERRORS.STATUS_UNAVAILABLE])(
+    "lässt %s stehen, weil hier Wissen fehlt und keine Aktion scheiterte",
+    (kind) => {
+      expect(failureMayPass(kind)).toBe(false);
+    },
+  );
+
+  it("lässt einen unbekannten Fall stehen, statt ihn vergehen zu lassen", () => {
+    expect(failureMayPass("kennt_niemand")).toBe(false);
+    expect(failureMayPass(undefined)).toBe(false);
+  });
+
+  it.each(KINDS)(
+    "gibt bei %s den Knopf nur dort zurück, wo die Zeile keinen eigenen zeigt",
+    (kind) => {
+      if (!failureMayPass(kind)) {
+        return;
+      }
+
+      // Sonst stünden zwei Knöpfe für denselben Befehl da - der eigene auf dem
+      // Bildschirm und der große, den das Vergehen freigibt.
+      expect(buildErrorScreen(kind, { t, label: LABEL }).exit).toBeNull();
     },
   );
 });

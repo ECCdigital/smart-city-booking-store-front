@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   ACCESS_ERRORS,
+  buildCommandStatus,
   buildOpenRequest,
+  isUnlocked,
   decideScanMatch,
   decideStage,
   readAccessPoint,
@@ -195,6 +197,84 @@ describe("readCloseOutcome", () => {
       error: ACCESS_ERRORS.CLOSE_FAILED,
       status: null,
     });
+  });
+});
+
+describe("buildCommandStatus", () => {
+  it("says a door a command opened is open", () => {
+    expect(buildCommandStatus({ open: true })).toEqual({
+      open: true,
+      locked: null,
+      doorOpen: null,
+      statusSource: "command_result",
+    });
+  });
+
+  it("says a door a command closed is not open", () => {
+    expect(buildCommandStatus({ open: false }).open).toBe(false);
+  });
+
+  it("claims nothing about the bolt or the hinge, which no command reports", () => {
+    const opened = buildCommandStatus({ open: true });
+
+    expect(opened.locked).toBeNull();
+    expect(opened.doorOpen).toBeNull();
+  });
+
+  it("marks where it came from, so nobody takes it for a reading", () => {
+    expect(buildCommandStatus({ open: true }).statusSource).toBe(
+      "command_result",
+    );
+  });
+
+  it("stands where a door reports no status of its own", () => {
+    // The button would otherwise come back saying "open" right after opening.
+    const afterOpening = decideStage({
+      status: buildCommandStatus({ open: true }),
+      evidence: [],
+      validationRuleTypes: [],
+      capabilities: ["open", "close"],
+    });
+
+    expect(afterOpening.stage).toBe("can_close");
+    expect(
+      decideStage({
+        status: buildCommandStatus({ open: false }),
+        evidence: [],
+        validationRuleTypes: [],
+        capabilities: ["open", "close"],
+      }).stage,
+    ).toBe("can_open");
+  });
+});
+
+describe("isUnlocked", () => {
+  it("reads either field as an open door", () => {
+    expect(isUnlocked({ open: true, locked: null })).toBe(true);
+    expect(isUnlocked({ open: null, locked: false })).toBe(true);
+  });
+
+  it("reads a door nobody could report on as not open", () => {
+    expect(isUnlocked({ open: null, locked: null })).toBe(false);
+    expect(isUnlocked(null)).toBe(false);
+    expect(isUnlocked(undefined)).toBe(false);
+  });
+
+  it("reads a locked door as not open", () => {
+    expect(isUnlocked({ open: false, locked: true })).toBe(false);
+  });
+
+  it("lets 'open' outrank 'locked', so a lock mid-turn is no open door", () => {
+    // A Nuki sets `locked` from `lockStateCode === 1` alone, so every state but
+    // "locked" answers `locked: false` - *locking* (code 4) included. Reading
+    // that as an open door left the close button standing after a close.
+    expect(isUnlocked({ open: false, locked: false })).toBe(false);
+    expect(isUnlocked({ open: true, locked: true })).toBe(true);
+  });
+
+  it("agrees with the status a command builds, which is what lets the flow compare them", () => {
+    expect(isUnlocked(buildCommandStatus({ open: true }))).toBe(true);
+    expect(isUnlocked(buildCommandStatus({ open: false }))).toBe(false);
   });
 });
 

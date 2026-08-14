@@ -128,6 +128,23 @@ export const ACCESS_ERROR_SCREENS = Object.freeze({
 });
 
 /**
+ * Whether this failure's screen may pass by itself and hand the control button
+ * back, instead of standing until someone acts on it.
+ *
+ * It is the same trait `retry: "action"` already names - the command provably
+ * did not go through, so the button underneath repeats it - read out under a
+ * name, so the flow can ask the table rather than branch on its contents. The
+ * opposite case, `retry: "status"`, is knowledge that is missing: its screen
+ * stays, because its way out is a *different* command than the button gives.
+ *
+ * @param {string} kind An {@link ACCESS_ERRORS} value
+ * @returns {boolean}
+ */
+export function failureMayPass(kind) {
+  return ACCESS_ERROR_SCREENS[kind]?.retry === "action";
+}
+
+/**
  * The backend reasons that have a sentence of their own. A reason that is not
  * listed keeps its silence rather than reaching a raw identifier through to
  * the screen.

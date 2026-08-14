@@ -62,14 +62,14 @@
             :booking="booking"
             @status="(status) => emit('status', status)"
           >
-            <template #exit="{ stage }">
+            <template #exit>
               <UButton
                 variant="ghost"
                 block
                 class="cursor-pointer"
                 @click="onCloseDialog"
               >
-                {{ exitLabel(stage) }}
+                Schließen
               </UButton>
             </template>
           </AccessPointOpenFlow>
@@ -137,14 +137,14 @@
             :booking="booking"
             @status="(status) => emit('status', status)"
           >
-            <template #exit="{ stage }">
+            <template #exit>
               <UButton
                 variant="ghost"
                 block
                 class="cursor-pointer"
                 @click="onCloseDialog"
               >
-                {{ exitLabel(stage) }}
+                Schließen
               </UButton>
             </template>
           </AccessPointOpenFlow>
@@ -209,10 +209,6 @@ const door = computed(() => readAccessPoint(props.accessPoint));
  * error screen says which door it is talking about or it says nothing useful.
  */
 const accessPointLabel = computed(() => props.accessPoint.label || "Der Zugang");
-
-/** The result stages are done with; everything before them can be abandoned. */
-const exitLabel = (stage) =>
-  ["opened", "closed"].includes(stage) ? "Fertig" : "Abbrechen";
 
 function onCloseDialog() {
   isOpenSlideover.value = false;

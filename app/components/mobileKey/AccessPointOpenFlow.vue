@@ -65,7 +65,13 @@
       </p>
     </div>
 
-    <!-- the result belongs in the flow: opening again is a way on, not a way out -->
+    <!--
+      A result is passed through, not lived in: it stands for a moment and then
+      hands the stage back to the one control button, which by then points the
+      other way. The stage itself has a second life, though - `opened` is where
+      an open door rests when no provider can close it, and that one needs a
+      way on of its own.
+    -->
     <div v-else-if="view.stage === 'opened'" class="space-y-5">
       <AccessPointStatusScreen
         icon="i-lucide-unlock"
@@ -75,61 +81,56 @@
           t('mobileKey.stages.opened.description', { label: accessPointLabel })
         "
       />
-      <UButton
-        v-if="canClose"
-        block
-        icon="i-lucide-lock"
-        class="py-3 shadow-lg cursor-pointer"
-        @click="closeDoor"
-      >
-        {{ t("mobileKey.actions.close_now") }}
-      </UButton>
-      <UButton
-        variant="outline"
-        block
-        class="py-3 cursor-pointer"
-        @click="openDoor"
-      >
-        {{ t("mobileKey.actions.open_again") }}
-      </UButton>
+      <div v-if="!result" class="pt-4">
+        <AccessPointControlButton
+          variant="open"
+          :title="t('mobileKey.actions.open_again')"
+          :access-point-label="accessPointLabel"
+          @open="openDoor"
+        />
+      </div>
     </div>
 
-    <div v-else-if="view.stage === 'closed'" class="space-y-5">
-      <AccessPointStatusScreen
-        icon="i-lucide-lock"
-        color="success"
-        :title="t('mobileKey.stages.closed.title')"
-        :description="
-          t('mobileKey.stages.closed.description', { label: accessPointLabel })
-        "
-      />
-      <UButton
-        variant="outline"
-        block
-        class="py-3 cursor-pointer"
-        @click="openDoor"
-      >
-        {{ t("mobileKey.actions.open_again") }}
-      </UButton>
-    </div>
+    <AccessPointStatusScreen
+      v-else-if="view.stage === 'closed'"
+      icon="i-lucide-lock"
+      color="success"
+      :title="t('mobileKey.stages.closed.title')"
+      :description="
+        t('mobileKey.stages.closed.description', { label: accessPointLabel })
+      "
+    />
 
-    <div v-else class="space-y-5">
-      <AccessPointErrorScreen
-        :kind="view.error ?? ACCESS_ERRORS.GENERIC"
-        :access-point-label="accessPointLabel"
-        :booking="booking"
-        :tenant-id="tenantId"
-        :blocking-reason="view.blockingReason"
-        @retry="retryFailure"
-      />
+    <AccessPointErrorScreen
+      v-else
+      :kind="view.error ?? ACCESS_ERRORS.GENERIC"
+      :access-point-label="accessPointLabel"
+      :booking="booking"
+      :tenant-id="tenantId"
+      :blocking-reason="view.blockingReason"
+      @retry="retryFailure"
+    />
 
-      <ProviderHelpSection
-        v-if="showProviderHelp"
-        :provider-id="accessPoint.provider"
-        :tenant-id="tenantId"
-        :booking-id="bookingId"
-      />
-    </div>
+    <!--
+      What a passed failure leaves behind: its name, quietly, under the button
+      that repeats it. The help sits with it rather than inside the error stage,
+      because the offer is the same whether the screen still stands or has just
+      gone.
+    -->
+    <p
+      v-if="passedFailure"
+      class="flex items-center justify-center gap-2 text-sm text-neutral-500"
+    >
+      <UIcon :name="passedFailure.icon" class="shrink-0" />
+      <span>{{ passedFailure.title }}</span>
+    </p>
+
+    <ProviderHelpSection
+      v-if="showProviderHelp"
+      :provider-id="accessPoint.provider"
+      :tenant-id="tenantId"
+      :booking-id="bookingId"
+    />
 
     <!-- the way out of the context, rendered by whoever put the flow here -->
     <slot name="exit" :stage="view.stage" :status="status" />
@@ -157,11 +158,17 @@ import AccessPointStatusScreen from "~/components/mobileKey/AccessPointStatusScr
 import AccessPointStepper from "~/components/mobileKey/AccessPointStepper.vue";
 import ProviderHelpSection from "~/components/mobileKey/ProviderHelpSection.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
-import { ACCESS_ERROR_SCREENS } from "~/utils/accessErrorScreens.js";
+import {
+  ACCESS_ERROR_SCREENS,
+  buildErrorScreen,
+  failureMayPass,
+} from "~/utils/accessErrorScreens.js";
 import {
   ACCESS_ERRORS,
+  buildCommandStatus,
   buildOpenRequest,
   decideStage,
+  isUnlocked,
   readCloseOutcome,
   readOpenConfirmation,
   readOpenOutcome,
@@ -203,10 +210,44 @@ const action = ref(null);
 const result = ref(null);
 
 /**
- * What failed, for the retry that follows: by the time the error screen stands,
- * the action is over and `action` is back to `null`.
+ * How long a result stands before it gives the button back. The only piece of
+ * time in this flow, and it stays here: `decideStage` decides stages, never
+ * durations (#7), which is why its nine stages and their tests are untouched
+ * by any of this - `opened` is now entered briefly rather than lived in.
  */
-const lastAction = ref(null);
+const RESULT_VISIBLE_MS = 2500;
+
+/**
+ * How long the lock is given to finish turning before it is asked again.
+ *
+ * A status read the instant a command returns catches the lock mid-turn and
+ * still reports the state it is coming from - the backend reads it that early
+ * itself (`_readStatusAfterClose` in `access-service.js`, whose own comment
+ * says "a lock takes its time to turn"), and so does `refreshStatus`. Nothing
+ * in the payload tells a turning lock from an unknown one, because
+ * `_resolveOpen` maps every state it does not know to `null`. So the flow
+ * waits instead, and asks a second time.
+ */
+const STATUS_SETTLE_MS = 1200;
+
+/** Timers still owed a callback, so an unmount can call them off. */
+const pendingWaits = new Set();
+
+/**
+ * Bumped whenever an action starts or the component goes away. A pass in
+ * flight compares against it after every await and drops out rather than
+ * writing over whatever came after it.
+ */
+let passRun = 0;
+
+/** Plain, not reactive: nothing renders from these two. */
+let mounted = true;
+
+/**
+ * The failure whose screen has already passed, still named under the button
+ * that repeats it - until the next action begins.
+ */
+const passedFailureKind = ref(null);
 
 /**
  * The proof the scanner collected in *this* session - the one thing about
@@ -242,22 +283,37 @@ const view = computed(() =>
   }),
 );
 
-const canClose = computed(() =>
-  props.accessPoint.capabilities.includes("close"),
-);
-
 /** The card's icon follows the stage, so card and stage read the door alike. */
 const isOpen = computed(() =>
   ["can_close", "opened"].includes(view.value.stage),
 );
 
+/**
+ * The failure the person is looking at, whether it still fills the stage or
+ * has passed and left its line behind. Both are the same failure to everything
+ * that speaks about one.
+ */
+const failureInTheRoom = computed(() =>
+  view.value.stage === "error" ? view.value.error : passedFailureKind.value,
+);
+
 /** Which failures the provider's help can speak to is the case's own trait. */
 const showProviderHelp = computed(
   () =>
-    view.value.stage === "error" &&
+    Boolean(failureInTheRoom.value) &&
     Boolean(props.accessPoint.provider) &&
     Boolean(props.booking?.id) &&
-    Boolean(ACCESS_ERROR_SCREENS[view.value.error]?.help),
+    Boolean(ACCESS_ERROR_SCREENS[failureInTheRoom.value]?.help),
+);
+
+/** The passed failure by name and sign, in the table's own words. */
+const passedFailure = computed(() =>
+  passedFailureKind.value
+    ? buildErrorScreen(passedFailureKind.value, {
+        t,
+        label: accessPointLabel.value,
+      })
+    : null,
 );
 
 /**
@@ -317,6 +373,107 @@ async function refreshStatus() {
   }
 }
 
+/** A wait an unmount or a fresh action can call off. */
+function wait(ms) {
+  return new Promise((resolve) => {
+    const id = setTimeout(() => {
+      pendingWaits.delete(id);
+      resolve();
+    }, ms);
+
+    pendingWaits.add(id);
+  });
+}
+
+/** Calls off everything a pass still has pending. */
+function stopPass() {
+  passRun += 1;
+  pendingWaits.forEach(clearTimeout);
+  pendingWaits.clear();
+}
+
+/** Every action starts on a clean slate: no old result, no old failure line. */
+function beginAction(kind) {
+  stopPass();
+  action.value = kind;
+  result.value = null;
+  passedFailureKind.value = null;
+}
+
+/**
+ * The command's own word about the door, put in place of a status that cannot
+ * be had - or of one that contradicts it, which right after a command means a
+ * lock caught mid-turn far more often than a door that disobeyed. It stands in
+ * only until `confirmStatus` gets a reading the lock had time to make.
+ */
+function applyCommandStatus(nowOpen) {
+  const unreadable = status.value === undefined || status.value === null;
+
+  if (unreadable || isUnlocked(status.value) !== nowOpen) {
+    applyStatus(buildCommandStatus({ open: nowOpen }));
+  }
+}
+
+/**
+ * The second look, once the lock has had time to finish turning - and the one
+ * that decides. A door that did not move says so here, which is why this
+ * reading outranks the command's word rather than merely confirming it.
+ */
+async function confirmStatus(nowOpen, ours) {
+  await wait(STATUS_SETTLE_MS);
+  if (!ours()) {
+    return;
+  }
+
+  await refreshStatus();
+  if (!ours()) {
+    return;
+  }
+
+  // Still nothing readable: the command's word is all anyone has.
+  if (status.value === undefined || status.value === null) {
+    applyStatus(buildCommandStatus({ open: nowOpen }));
+  }
+}
+
+/**
+ * Lets the result stand for a moment and then hands the stage back to the
+ * control button. A failure that may pass leaves its name behind (→
+ * `failureMayPass`); one that may not is never timed and keeps its screen
+ * until someone acts on it.
+ *
+ * The result never passes before the door has been asked a second time, so the
+ * button that comes back is decided by the best reading there is - and that
+ * wait costs nothing, because the result is on screen for it anyway.
+ *
+ * @param {boolean|null} nowOpen What the command established about the door;
+ *   `null` where it established nothing, a failure being no news about a lock.
+ */
+async function letResultPass(nowOpen) {
+  const failure = result.value?.error ?? null;
+
+  // Whoever closed the panel mid-request is owed no timer: this runs after
+  // awaits, so the unmount may already be behind us.
+  if (!mounted || (failure && !failureMayPass(failure))) {
+    return;
+  }
+
+  const run = ++passRun;
+  const ours = () => mounted && run === passRun;
+
+  await Promise.all([
+    wait(RESULT_VISIBLE_MS),
+    nowOpen === null ? Promise.resolve() : confirmStatus(nowOpen, ours),
+  ]);
+
+  if (!ours()) {
+    return;
+  }
+
+  passedFailureKind.value = failure;
+  result.value = null;
+}
+
 /**
  * The tap is the intent: the proof travels along and `channel` records for the
  * audit that a QR scan stands behind the open. A provider that only
@@ -324,9 +481,7 @@ async function refreshStatus() {
  * door.
  */
 async function openDoor() {
-  action.value = "open";
-  lastAction.value = "open";
-  result.value = null;
+  beginAction("open");
 
   try {
     const outcome = readOpenOutcome(
@@ -355,13 +510,18 @@ async function openDoor() {
   } finally {
     action.value = null;
     await refreshStatus();
+
+    const opened = result.value?.opened === true;
+    if (opened) {
+      applyCommandStatus(true);
+    }
+
+    letResultPass(opened ? true : null);
   }
 }
 
 async function closeDoor() {
-  action.value = "close";
-  lastAction.value = "close";
-  result.value = null;
+  beginAction("close");
 
   // The close answer carries the state after closing - one roundtrip saved.
   let stateAfterClosing = null;
@@ -383,32 +543,35 @@ async function closeDoor() {
     } else {
       await refreshStatus();
     }
+
+    const closed = result.value?.closed === true;
+    if (closed) {
+      applyCommandStatus(false);
+    }
+
+    letResultPass(closed ? false : null);
   }
 }
 
 /**
- * The way out of a failure says what to repeat: `"action"` runs the command
- * that failed again, `"status"` only re-reads the door. Never the other way
- * round - a second open command can latch an open door shut again.
+ * The way out of a failure that stands: re-read the door, nothing else. The
+ * other way out - run the failed command again - is no longer a button of its
+ * own. Those cases carry `retry: "action"`, their screen passes, and the
+ * control button they hand back *is* the repeat; so only `"status"` ever
+ * reaches here. Which was always the safe half: a second open command can
+ * latch an open door shut again.
  */
-function retryFailure(repeat) {
+function retryFailure() {
   result.value = null;
-
-  if (repeat === "status") {
-    status.value = undefined;
-    refreshStatus();
-    return;
-  }
-
-  if (lastAction.value === "close") {
-    closeDoor();
-    return;
-  }
-
-  openDoor();
+  status.value = undefined;
+  refreshStatus();
 }
 
 onMounted(refreshStatus);
+onUnmounted(() => {
+  mounted = false;
+  stopPass();
+});
 </script>
 
 <style scoped></style>
