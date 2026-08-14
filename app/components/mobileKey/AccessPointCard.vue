@@ -1,6 +1,15 @@
 <template>
-  <UCard class="rounded-lg">
-    <div class="flex items-start gap-3">
+  <!--
+    Two shapes, one door. The full card is what a page puts above the flow; the
+    compact one is what the panel puts in its header, where a slideover has
+    400 px to spend on a phone and the address and the booking number already
+    stand in the list row the panel was opened from.
+  -->
+  <component
+    :is="compact ? 'div' : 'UCard'"
+    :class="compact ? 'w-full min-w-0' : 'rounded-lg'"
+  >
+    <div class="flex gap-3" :class="compact ? 'items-center' : 'items-start'">
       <div
         class="flex shrink-0 items-center justify-center rounded-lg w-9 h-9"
         :class="isOpen ? 'bg-green-600/10' : 'bg-primary/10'"
@@ -13,11 +22,14 @@
       </div>
 
       <div class="min-w-0">
-        <p class="font-semibold line-clamp-2">
+        <p
+          class="font-semibold line-clamp-2"
+          :class="compact ? 'text-sm leading-tight' : ''"
+        >
           {{ title }}
         </p>
 
-        <p v-if="showMode" class="text-sm text-neutral-500 mt-1">
+        <p v-if="showMode && !compact" class="text-sm text-neutral-500 mt-1">
           <span
             class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
             :class="mode.color"
@@ -27,11 +39,18 @@
           </span>
         </p>
 
-        <p v-if="locationLine" class="text-sm text-neutral-500 line-clamp-2">
+        <p
+          v-if="locationLine && !compact"
+          class="text-sm text-neutral-500 line-clamp-2"
+        >
           {{ locationLine }}
         </p>
 
-        <p v-if="booking" class="text-sm mt-2">
+        <p v-if="booking && compact" class="text-xs text-primary font-semibold truncate">
+          {{ timeRange }}
+        </p>
+
+        <p v-else-if="booking" class="text-sm mt-2">
           <span class="text-neutral-500"
             >Buchung #{{ booking.id }} &middot;
           </span>
@@ -39,7 +58,7 @@
         </p>
       </div>
     </div>
-  </UCard>
+  </component>
 </template>
 
 <script setup>
@@ -64,6 +83,15 @@ const props = defineProps({
     default: false,
   },
   showMode: {
+    type: Boolean,
+    default: false,
+  },
+  /**
+   * The one-line shape for a panel header: no shell, no address, no booking
+   * number - the door and when it is yours, and nothing that costs a second
+   * line. Everything it leaves out stands in the list row behind the panel.
+   */
+  compact: {
     type: Boolean,
     default: false,
   },

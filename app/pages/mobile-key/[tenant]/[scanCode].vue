@@ -7,11 +7,13 @@
     />
 
     <!--
-      The door, once known. On the way to the flow only - inside it, the flow
-      puts the card above its own stages.
+      The door, once known - and it stays once the flow takes over, because the
+      flow no longer carries it. Each host names the door in the shape it has
+      room for: the panel one line in its header, this page the full card, the
+      page having no 60vh to fit the stage into.
     -->
     <AccessPointCard
-      v-if="accessPoint && stage !== 'flow'"
+      v-if="accessPoint"
       :access-point="accessPoint"
       :booking="booking"
       class="mb-5"

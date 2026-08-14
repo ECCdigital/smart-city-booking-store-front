@@ -21,12 +21,24 @@
           Informationen und Status des Schließsystems
         </DialogDescription>
 
-        <div class="flex w-full justify-end">
+        <!--
+          The header already held the way out; it now holds the door as well,
+          in one line, so the stage below it does not have to spend 188 px
+          saying which door this is.
+        -->
+        <div class="flex w-full items-center gap-2">
+          <AccessPointCard
+            compact
+            :access-point="accessPoint"
+            :booking="booking"
+            :is-open="isOpen"
+          />
           <UButton
             trailing-icon="i-lucide-x"
             variant="ghost"
             color="primary"
             size="md"
+            class="shrink-0"
             @click="onCloseDialog"
           />
         </div>
@@ -60,7 +72,7 @@
             :tenant-id="tenantId"
             :access-point="door"
             :booking="booking"
-            @status="(status) => emit('status', status)"
+            @status="onStatus"
           >
             <template #exit>
               <UButton
@@ -98,12 +110,20 @@
             Informationen und Status des Schließsystems
           </DialogDescription>
 
-          <div class="flex w-full justify-end">
+          <!-- the same header as on the phone: the door beside the way out -->
+          <div class="flex w-full items-center gap-2">
+            <AccessPointCard
+              compact
+              :access-point="accessPoint"
+              :booking="booking"
+              :is-open="isOpen"
+            />
             <UButton
               trailing-icon="i-lucide-x"
               variant="ghost"
               color="primary"
               size="md"
+              class="shrink-0"
               @click="onCloseDialog"
             />
           </div>
@@ -135,7 +155,7 @@
             :tenant-id="tenantId"
             :access-point="door"
             :booking="booking"
-            @status="(status) => emit('status', status)"
+            @status="onStatus"
           >
             <template #exit>
               <UButton
@@ -164,10 +184,15 @@
  */
 import { DialogTitle, DialogDescription } from "reka-ui";
 
+import AccessPointCard from "~/components/mobileKey/AccessPointCard.vue";
 import AccessPointErrorScreen from "~/components/mobileKey/AccessPointErrorScreen.vue";
 import AccessPointOpenFlow from "~/components/mobileKey/AccessPointOpenFlow.vue";
 import AccessPointPanelButton from "~/components/mobileKey/AccessPointPanelButton.vue";
-import { ACCESS_ERRORS, readAccessPoint } from "~/utils/accessOpenFlow.js";
+import {
+  ACCESS_ERRORS,
+  isUnlocked,
+  readAccessPoint,
+} from "~/utils/accessOpenFlow.js";
 
 const props = defineProps({
   /** Always explicit, never read off the access point (#21). */
@@ -209,6 +234,25 @@ const door = computed(() => readAccessPoint(props.accessPoint));
  * error screen says which door it is talking about or it says nothing useful.
  */
 const accessPointLabel = computed(() => props.accessPoint.label || "Der Zugang");
+
+/**
+ * The last status the flow reported. It was passed straight on before; the
+ * panel now keeps it as well, because the door in its header has to say lock
+ * or unlock - the reading the flow used to make for the card it carried.
+ */
+const status = ref(undefined);
+
+function onStatus(next) {
+  status.value = next;
+  emit("status", next);
+}
+
+/**
+ * Read with `isUnlocked` rather than off the stage, so the door in the header
+ * and the door in the list row behind it answer to the same rule - `open`
+ * ahead of `locked`, as ticket 07 settled it.
+ */
+const isOpen = computed(() => isUnlocked(status.value) === true);
 
 function onCloseDialog() {
   isOpenSlideover.value = false;

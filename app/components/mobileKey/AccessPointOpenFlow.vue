@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-5">
-    <!-- the door, once above the stages - not once per stage -->
-    <AccessPointCard
-      :access-point="accessPoint"
-      :booking="booking"
-      :is-open="isOpen"
-    />
-
+    <!--
+      The door is named by whoever put the flow here, not by the flow: the
+      panel carries it in its header, the scan page in the card above. The rule
+      it replaces - the door once above the stages, not once per stage - still
+      holds; it is the host that now keeps it, and on a phone that buys the
+      stage the 188 px the card was spending inside it.
+    -->
     <AccessPointStepper
       v-if="stepper.length > 1"
       :steps="stepper"
@@ -172,7 +172,6 @@
  * stays here is the order of the awaits, the timing of the poll, one emit and
  * one slot.
  */
-import AccessPointCard from "~/components/mobileKey/AccessPointCard.vue";
 import AccessPointControlButton from "~/components/mobileKey/AccessPointControlButton.vue";
 import AccessPointErrorScreen from "~/components/mobileKey/AccessPointErrorScreen.vue";
 import AccessPointLoadingSpinner from "~/components/mobileKey/AccessPointLoadingSpinner.vue";
@@ -304,11 +303,6 @@ const view = computed(() =>
     result: result.value,
     booking: props.booking,
   }),
-);
-
-/** The card's icon follows the stage, so card and stage read the door alike. */
-const isOpen = computed(() =>
-  ["can_close", "opened"].includes(view.value.stage),
 );
 
 /**
