@@ -16,6 +16,7 @@
       v-if="accessPoint"
       :access-point="accessPoint"
       :booking="booking"
+      :is-open="isOpen"
       class="mb-5"
     />
 
@@ -64,6 +65,7 @@
       :access-point="accessPoint"
       :booking="booking"
       :evidence="scanEvidence"
+      @status="(next) => (status = next)"
     >
       <template #exit>
         <UButton variant="ghost" block to="/mobile-key" class="cursor-pointer">
@@ -113,6 +115,7 @@ import { ACCESS_ERROR_SCREENS } from "~/utils/accessErrorScreens.js";
 import {
   ACCESS_ERRORS,
   decideBookingOutcome,
+  isUnlocked,
   readAccessPoint,
   readScanResolution,
 } from "~/utils/accessOpenFlow.js";
@@ -149,6 +152,15 @@ const booking = ref(null);
 const candidates = ref([]);
 
 /**
+ * The last status the flow reported. The card stands above the flow now rather
+ * than only on the way to it, so it has to follow the door instead of claiming
+ * "locked" for as long as the page is open - the very thing ticket 06 took out
+ * of the key list. Read with `isUnlocked`, like the list row and the panel.
+ */
+const status = ref(undefined);
+const isOpen = computed(() => isUnlocked(status.value) === true);
+
+/**
  * The door by the name the sticker resolved to, kept apart from the door
  * itself: the payload can be refused while its label is perfectly good, and
  * that is the case where the error screen needs a name most.
@@ -178,6 +190,7 @@ async function start() {
   scannedLabel.value = null;
   booking.value = null;
   candidates.value = [];
+  status.value = undefined;
 
   try {
     const resolution = readScanResolution(
