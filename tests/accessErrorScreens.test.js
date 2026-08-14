@@ -31,6 +31,12 @@ const ROWS = Object.entries(ACCESS_ERROR_SCREENS);
 
 const LABEL = "Haupteingang";
 
+/**
+ * `retry: "action"` hands the repeat to the control button under the screen,
+ * so such a row shows none of its own - and needs no label for one.
+ */
+const showsOwnButton = (row) => Boolean(row.to) || row.retry === "status";
+
 describe("die Tabelle deckt sich mit ACCESS_ERRORS", () => {
   it.each(KINDS)("hat für %s genau eine Zeile", (kind) => {
     expect(ACCESS_ERROR_SCREENS[kind]).toBeDefined();
@@ -82,7 +88,7 @@ describe("der Ausweg eines Falls", () => {
   });
 
   it.each(ROWS)("ist bei %s über mobileKey.actions beschriftet", (_kind, row) => {
-    if (!row.retry && !row.to) {
+    if (!showsOwnButton(row)) {
       expect(row.action).toBeUndefined();
       return;
     }
@@ -96,6 +102,39 @@ describe("der Ausweg eines Falls", () => {
       "status",
     );
   });
+});
+
+describe("der Ausweg, der unter dem Bildschirm steht", () => {
+  it("liegt bei genau zwei Zeilen im Aktionsknopf", () => {
+    const handedToButton = ROWS.filter(
+      ([, row]) => row.retry === "action",
+    ).map(([kind]) => kind);
+
+    expect(handedToButton.sort()).toEqual(
+      [ACCESS_ERRORS.DOOR_UNREACHABLE, ACCESS_ERRORS.CLOSE_FAILED].sort(),
+    );
+  });
+
+  it.each(ROWS)("schließt bei %s den eigenen Ausweg aus", (_kind, row) => {
+    if (row.retry !== "action") {
+      return;
+    }
+
+    // Der große Knopf gibt denselben Befehl - ein zweiter daneben wäre er noch
+    // einmal.
+    expect(row.action).toBeUndefined();
+    expect(row.to).toBeUndefined();
+  });
+
+  it.each([ACCESS_ERRORS.DOOR_UNREACHABLE, ACCESS_ERRORS.CLOSE_FAILED])(
+    "lässt %s ohne eigenen Knopf stehen",
+    (kind) => {
+      const screen = buildErrorScreen(kind, { t, label: LABEL });
+
+      expect(screen.exit).toBeNull();
+      expect(screen.title).toBeTruthy();
+    },
+  );
 });
 
 describe("buildErrorScreen", () => {
@@ -150,7 +189,7 @@ describe("buildErrorScreen", () => {
   });
 
   it("lässt „Erneut versuchen“ wissen, was zu wiederholen ist", () => {
-    const screen = buildErrorScreen(ACCESS_ERRORS.DOOR_UNREACHABLE, {
+    const screen = buildErrorScreen(ACCESS_ERRORS.STATUS_UNAVAILABLE, {
       t,
       label: LABEL,
     });
@@ -158,7 +197,7 @@ describe("buildErrorScreen", () => {
     expect(screen.exit).toEqual({
       label: de.mobileKey.actions.retry,
       to: null,
-      retry: "action",
+      retry: "status",
     });
   });
 

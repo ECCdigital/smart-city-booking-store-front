@@ -12,7 +12,9 @@
  * Guiding rule: a case earns a screen of its own through a way out of its own,
  * not through a reason of its own. That is why the six mute backend reasons
  * share `generic` - which still names them - and why every row carries at most
- * one way out.
+ * one way out. A way out need not be a button on the screen: where repeating
+ * the failed command is the answer, the control button under the screen is
+ * already that button, and the row shows none of its own.
  */
 
 import { ACCESS_ERRORS } from "~/utils/accessOpenFlow.js";
@@ -24,10 +26,18 @@ const bookablesPath = (tenantId) => `/t/${tenantId}/bookables`;
  *
  * - `icon` / `color` go straight to `AccessPointStatusScreen`.
  * - `help` blends in `ProviderHelpSection`.
- * - `action` names the button under `mobileKey.actions`.
+ * - `action` names the button under `mobileKey.actions`, and only rows that
+ *   show a button of their own carry one.
  * - `retry` re-runs what failed (`"action"`) or just re-reads the status
  *   (`"status"`); `to` navigates instead. Never both - the way out of a case
  *   is one button, next to the context exit the caller renders.
+ *
+ * `retry: "action"` is the one that shows no button here. Saying it means the
+ * command provably did not go through, so giving it again is harmless - which
+ * is exactly what the control button under the screen does. That is also why
+ * the two rows holding it are the two whose screen may pass and hand the
+ * button back; `retry: "status"` marks the opposite case, where what is
+ * missing is knowledge and the way out is a *different* command.
  */
 export const ACCESS_ERROR_SCREENS = Object.freeze({
   [ACCESS_ERRORS.STALE_SCAN_CODE]: {
@@ -69,7 +79,8 @@ export const ACCESS_ERROR_SCREENS = Object.freeze({
   [ACCESS_ERRORS.DOOR_UNREACHABLE]: {
     icon: "i-lucide-antenna",
     color: "error",
-    action: "retry",
+    // No button of its own: the command never reached the door, so repeating
+    // it is harmless - and the control button under this screen is that repeat.
     retry: "action",
     help: true,
   },
@@ -84,7 +95,8 @@ export const ACCESS_ERROR_SCREENS = Object.freeze({
   [ACCESS_ERRORS.CLOSE_FAILED]: {
     icon: "i-lucide-unlock",
     color: "error",
-    action: "retry",
+    // No button of its own, for the same reason: the door stayed open, so
+    // closing it again is the very command the control button gives.
     retry: "action",
     help: true,
   },
@@ -165,7 +177,9 @@ export function formatBlockingReasonMessage(
  *
  * A way out without a destination - `payment_required` on a booking with no
  * id, `too_late` with no lead bookable - drops its button; the context exit
- * the caller renders carries the screen alone.
+ * the caller renders carries the screen alone. So does a way out that is not
+ * on this screen at all: the two `retry: "action"` rows name no `action`, and
+ * `exit` stays null for them.
  *
  * @param {string} kind An {@link ACCESS_ERRORS} value; anything else is generic
  * @param {Object} context
