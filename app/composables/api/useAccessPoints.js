@@ -79,16 +79,6 @@ export function useAccessPoints() {
     return unwrapResult(result, "Access-Point konnte nicht geöffnet werden.");
   };
 
-  const unlatch = async (tenant, accessPointId, bookingId) => {
-    const result = await api.post(
-      `/api/access/${pathPart(tenant)}/${pathPart(accessPointId)}/unlatch`,
-      null,
-      { query: cleanQuery({ bookingId }) },
-    );
-
-    return unwrapResult(result, "Access-Point konnte nicht entriegelt werden.");
-  };
-
   const close = async (tenant, accessPointId, bookingId) => {
     const result = await api.post(
       `/api/access/${pathPart(tenant)}/${pathPart(accessPointId)}/close`,
@@ -161,7 +151,6 @@ export function useAccessPoints() {
     getAccessPoints,
     resolveScan,
     open,
-    unlatch,
     close,
     getStatus,
     getOpenStatus,

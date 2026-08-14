@@ -100,16 +100,38 @@
 
     <div v-for="accessPoint in booking.accessPoints" :key="accessPoint.id">
       <div class="flex items-center gap-2 my-2">
-        <AccessPointLabel
-          :access-point="accessPoint"
-          :is-open="
-            accessPointStatuses[`${booking.id}-${accessPoint.id}`]?.open
-          "
-          :is-locked="
-            accessPointStatuses[`${booking.id}-${accessPoint.id}`]?.locked
-          "
-          show-mode
-        />
+        <div
+          class="flex shrink-0 items-center justify-center rounded-lg w-8 h-8"
+          :class="isOpen(accessPoint, booking) ? 'bg-green-600/10' : 'bg-primary/10'"
+        >
+          <UIcon
+            :name="
+              isOpen(accessPoint, booking) ? 'i-lucide-unlock' : 'i-lucide-lock'
+            "
+            class="w-5 h-5 font-bold"
+            :class="
+              isOpen(accessPoint, booking) ? 'text-green-600' : 'text-primary'
+            "
+          />
+        </div>
+
+        <div class="lg:flex lg:gap-2 lg:items-center basis-6/7">
+          <div class="text-md font-semibold line-clamp-2">
+            {{ accessPointTitle(accessPoint) }}
+          </div>
+          <div class="text-sm text-neutral-500">
+            <span
+              class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+              :class="accessPointMode(accessPoint).color"
+            >
+              <UIcon
+                :name="accessPointMode(accessPoint).icon"
+                class="w-3.5 h-3.5"
+              />
+              {{ accessPointMode(accessPoint).label }}
+            </span>
+          </div>
+        </div>
 
         <div class="flex-1" />
         <!--
@@ -123,7 +145,8 @@
           :deny-access="!canOperate(accessPoint, booking)"
           @status="
             (status) =>
-              (accessPointStatuses[`${booking.id}-${accessPoint.id}`] = status)
+              (accessPointStatuses[statusKey(booking.id, accessPoint.id)] =
+                status)
           "
         />
       </div>
@@ -142,7 +165,6 @@
 </template>
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";
-import AccessPointLabel from "~/components/mobileKey/AccessPointLabel.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import AccessPointPanel from "~/components/mobileKey/AccessPointPanel.vue";
 import { readStatus } from "~/utils/accessOpenFlow.js";
@@ -157,6 +179,44 @@ const props = defineProps({
 const { getTenantName } = useTenant();
 const { formatDate } = useFormatting();
 const { getStatus } = useAccessPoints();
+
+/**
+ * The row label, moved here from the deleted `AccessPointLabel.vue` - the list
+ * was its last reader. It says the same things `AccessPointCard` says inside
+ * the flow, in the width a row has: which door, and how it opens.
+ */
+const MODES = Object.freeze({
+  remote: {
+    label: "Per Knopf",
+    color: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
+    icon: "i-lucide-lock-open",
+  },
+  code: {
+    label: "Code an der Tür",
+    color: "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100",
+    icon: "i-lucide-key-round",
+  },
+});
+
+const UNKNOWN_MODE = Object.freeze({
+  label: "Unbekannter Modus",
+  color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100",
+  icon: "i-lucide-alert-triangle",
+});
+
+/**
+ * A locker has no name a person would recognise, so it is named by the
+ * booking behind it. Which kind it is comes from `type` (#13, #15) - the
+ * provider does not decide how a thing is called, and a door from a provider
+ * nobody listed still gets a name here instead of an empty row.
+ */
+const accessPointTitle = (accessPoint) =>
+  accessPoint?.type === "locker"
+    ? `Fahrradbox #${accessPoint.externalBookingId}`
+    : accessPoint?.label || "Unbekannte Tür";
+
+const accessPointMode = (accessPoint) =>
+  MODES[accessPoint?.mode] || UNKNOWN_MODE;
 
 /**
  * The badge on a booking, in as many words as a badge holds. The full
@@ -223,14 +283,15 @@ const bookingStatus = (booking) => {
 
 const accessPointStatuses = ref({});
 
+/** The one place the key of that map is spelled - it is built in three. */
+const statusKey = (bookingId, accessPointId) => `${bookingId}-${accessPointId}`;
+
 /**
  * Read the same way the flow reads it, so both writers of this map put the
  * same four fields in it and no provider-owned key survives in half of them.
  */
 const loadStatus = async (tenantId, accessPointId, bookingId) => {
-  const key = `${bookingId}-${accessPointId}`;
-
-  accessPointStatuses.value[key] = readStatus(
+  accessPointStatuses.value[statusKey(bookingId, accessPointId)] = readStatus(
     await getStatus(tenantId, accessPointId, bookingId),
   );
 };
@@ -248,26 +309,19 @@ const loadAllStatuses = async () => {
 
 onMounted(loadAllStatuses);
 
-const canOperate = (accessPoint, booking) => {
-  if (booking.accessEligibility) {
-    return (
-      booking.accessEligibility.operableAccessPointIds?.includes(
-        String(accessPoint.id),
-      ) ?? false
-    );
-  }
+const isOpen = (accessPoint, booking) =>
+  accessPointStatuses.value[statusKey(booking.id, accessPoint.id)]?.open ===
+  true;
 
-  if (!accessPoint.accessFrom || !accessPoint.accessTo) {
-    if (booking.timeBegin && booking.timeEnd) {
-      const now = Date.now();
-      return now >= booking.timeBegin && now <= booking.timeEnd;
-    }
-    return true;
-  }
-
-  const now = Date.now();
-  return now >= accessPoint.accessFrom && now <= accessPoint.accessTo;
-};
+/**
+ * The server-side eligibility is the authority (#18). A second, hand-rolled
+ * sum in the client can only ever disagree with it - so where the server
+ * names no operable access point, none is operable.
+ */
+const canOperate = (accessPoint, booking) =>
+  booking.accessEligibility?.operableAccessPointIds?.includes(
+    String(accessPoint.id),
+  ) ?? false;
 
 function getTimeRange(startTimestamp, endTimestamp) {
   const begin = new Date(startTimestamp);
