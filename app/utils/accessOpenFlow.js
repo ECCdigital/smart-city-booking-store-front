@@ -221,14 +221,18 @@ function outOfWindowOutcome(bookings, now) {
 }
 
 /**
- * The one place in the frontend that assumes anything about an access-point
- * payload the backend does not send yet (see the payload contract): a door that
- * does not say what it demands behaves exactly as it does today - it demands a
- * scan and it can do all three actions.
+ * The one place an access-point payload enters the flow, and the place a future
+ * change of its form lands.
+ *
+ * **What a door demands and what it can do are read, never guessed.** A payload
+ * missing either is refused rather than normalised: a door read as demanding
+ * nothing is a door opened without the proof it asked for, which is the one
+ * failure this flow may not have. The callers turn the refusal into an error
+ * screen - the person in front of the door is told, not waved through.
  *
  * An empty list is *not* a missing one. `[]` is what a bypass and a locker
  * look like, and it has to survive: it is the fact that lets the flow skip the
- * evidence stage. Hence the check for `undefined` rather than for emptiness.
+ * evidence stage. Hence the check for a list rather than for content.
  *
  * `tenant` becomes `tenantId` and the old key goes: the field exists so the
  * scanner can compare tenants, never as the place to read the tenant from -
@@ -237,21 +241,21 @@ function outOfWindowOutcome(bookings, now) {
  * @param {Object|null|undefined} raw An access point as the server sent it
  * @returns {{ id: string, label: string, type: string, mode: string,
  *   provider: string, tenantId: string|null, validationRuleTypes: string[],
- *   capabilities: string[] }}
+ *   capabilities: string[] }|null} `null` where the payload is no access point
  */
 export function readAccessPoint(raw) {
   const { tenant, tenantId, validationRuleTypes, capabilities, ...rest } =
     raw ?? {};
 
+  if (!Array.isArray(validationRuleTypes) || !Array.isArray(capabilities)) {
+    return null;
+  }
+
   return {
     ...rest,
     tenantId: tenantId ?? tenant ?? null,
-    validationRuleTypes:
-      validationRuleTypes === undefined ? ["qrScan"] : validationRuleTypes,
-    capabilities:
-      capabilities === undefined
-        ? ["open", "close", "getStatus"]
-        : capabilities,
+    validationRuleTypes,
+    capabilities,
   };
 }
 
@@ -486,12 +490,11 @@ const SCAN_MISMATCHES = Object.freeze({
  * The tenant therefore outranks the door: both are misses, but only one of them
  * may be jumped to.
  *
- * **A payload that names no tenant is not compared against one.** Today's
- * `resolve-scan` does not send `tenantId` yet (see the payload contract), and
- * flagging its absence would turn every scan into a mismatch. Until it does,
- * `wrong_tenant` only comes up where the answer names a tenant, and the door id
- * decides the rest - exactly as it does today. This is the one assumption
- * outside {@link readAccessPoint}; U11 retires it along with the others.
+ * **Both sides have to name their tenant.** `resolve-scan` sends `tenantId`,
+ * so an answer without one is a broken answer, not a comparison to be waived:
+ * a side nobody can name is a miss. Anything short of a readable payload never
+ * gets that far - {@link readAccessPoint} refuses it, and a refusal is
+ * `unreadable`, which is what an answer this module cannot read is.
  *
  * @param {{ success?: boolean, data?: Object }|null|undefined} response
  *   The answer to `GET /api/:tenant/access/resolve-scan/:scanCode`
@@ -519,12 +522,13 @@ export function decideScanMatch(
   }
 
   const scanned = readAccessPoint(accessPoint);
+  if (!scanned) {
+    return noMatch(SCAN_MISMATCHES.UNREADABLE, null);
+  }
+
   const label = scanned.label ?? null;
 
-  if (
-    isStated(scanned.tenantId) &&
-    !sameId(scanned.tenantId, expectedTenantId)
-  ) {
+  if (!sameId(scanned.tenantId, expectedTenantId)) {
     return noMatch(SCAN_MISMATCHES.WRONG_TENANT, label);
   }
   if (!sameId(scanned.id, expectedAccessPointId)) {
@@ -613,8 +617,9 @@ const OPEN_STEP = Object.freeze(["open"]);
  * @param {ReturnType<typeof readStatus>|undefined} [facts.status] `undefined`
  *   while unread, `null` when unreadable
  * @param {Object[]} [facts.evidence] Proof of presence already in hand
- * @param {string[]} [facts.validationRuleTypes] What the door demands as proof
- * @param {string[]} [facts.capabilities] `open` / `close` / `getStatus`
+ * @param {string[]} facts.validationRuleTypes What the door demands as proof -
+ *   anything but a list is an error, never a door that demands nothing
+ * @param {string[]} facts.capabilities `open` / `close` / `getStatus`
  * @param {"open"|"close"|null} [facts.action] The action in flight
  * @param {Object|null} [facts.result] What {@link readOpenOutcome},
  *   {@link readOpenConfirmation} or {@link readCloseOutcome} made of its answer
@@ -634,8 +639,22 @@ export function decideStage({
   booking = null,
   now = Date.now(),
 } = {}) {
-  const able = capabilities || [];
-  const demandsScan = (validationRuleTypes || []).includes("qrScan");
+  // Both lists are facts, never defaults: one nobody stated is not a door
+  // demanding nothing. `readAccessPoint` refuses such a payload at the
+  // boundary - this is the same refusal for anyone who reaches the stage
+  // decision by another road, so the rule lives here and not in a template.
+  if (!Array.isArray(validationRuleTypes) || !Array.isArray(capabilities)) {
+    return {
+      stage: STAGES.ERROR,
+      steps: OPEN_STEP,
+      currentStep: 0,
+      error: ACCESS_ERRORS.GENERIC,
+      blockingReason: null,
+    };
+  }
+
+  const able = capabilities;
+  const demandsScan = validationRuleTypes.includes("qrScan");
   // A demand is met by proof of its own kind - anything else is no answer to
   // the question the door asked.
   const evidenceMissing =

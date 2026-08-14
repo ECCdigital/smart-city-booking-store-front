@@ -32,14 +32,29 @@ describe("readAccessPoint", () => {
     expect(readAccessPoint(raw)).toEqual(raw);
   });
 
-  it("assumes a scan is demanded where the payload does not say", () => {
-    expect(readAccessPoint({ id: "ap-7f3a", label: "Werkstatt Nord" })).toEqual({
-      id: "ap-7f3a",
-      label: "Werkstatt Nord",
-      tenantId: null,
-      validationRuleTypes: ["qrScan"],
-      capabilities: ["open", "close", "getStatus"],
-    });
+  it("refuses a payload that does not say what it demands - a door that names no rule is not a door without one", () => {
+    expect(
+      readAccessPoint({
+        id: "ap-7f3a",
+        label: "Werkstatt Nord",
+        capabilities: ["open", "close", "getStatus"],
+      }),
+    ).toBeNull();
+  });
+
+  it("refuses a payload that does not say what it can do", () => {
+    expect(
+      readAccessPoint({
+        id: "ap-7f3a",
+        label: "Werkstatt Nord",
+        validationRuleTypes: ["qrScan"],
+      }),
+    ).toBeNull();
+  });
+
+  it("refuses what is no access point at all", () => {
+    expect(readAccessPoint(null)).toBeNull();
+    expect(readAccessPoint(undefined)).toBeNull();
   });
 
   it("keeps an empty list empty - a bypass is not a missing field", () => {
@@ -54,7 +69,12 @@ describe("readAccessPoint", () => {
   });
 
   it("carries the tenant over as tenantId and leaves nothing to read it from", () => {
-    const point = readAccessPoint({ id: "ap-7f3a", tenant: "rostock" });
+    const point = readAccessPoint({
+      id: "ap-7f3a",
+      tenant: "rostock",
+      validationRuleTypes: ["qrScan"],
+      capabilities: ["open", "close", "getStatus"],
+    });
 
     expect(point.tenantId).toBe("rostock");
     expect(point).not.toHaveProperty("tenant");
@@ -374,17 +394,22 @@ describe("decideScanMatch", () => {
   };
   const resolved = (point) => ({ success: true, data: point });
 
+  /** A resolved scan as the payload contract has it: the core fields, no booking. */
   const HAUPTEINGANG = {
     id: "ap-7f3a",
     label: "Haupteingang",
     tenantId: "rostock",
     type: "door",
+    validationRuleTypes: ["qrScan"],
+    capabilities: ["open", "close", "getStatus"],
   };
   const NEBENEINGANG = {
     id: "ap-2m8x",
     label: "Nebeneingang Ost",
     tenantId: "rostock",
     type: "door",
+    validationRuleTypes: ["qrScan"],
+    capabilities: ["open", "close", "getStatus"],
   };
 
   it("takes the scan as the proof once the code resolves to the door in front of the person", () => {
@@ -442,7 +467,7 @@ describe("decideScanMatch", () => {
     expect(scanned("Gateway Timeout")).toEqual(noMatch);
   });
 
-  it("compares no tenant where the answer names none - today's resolve-scan sends none, and every scan would be a miss", () => {
+  it("confirms no tenant the answer leaves unnamed - an unverifiable side is a miss, not a comparison waived", () => {
     const withoutTenant = { ...HAUPTEINGANG, tenantId: undefined };
 
     expect(
@@ -450,7 +475,23 @@ describe("decideScanMatch", () => {
         ...PANEL,
         scanCode: "SC-7F3K9Q",
       }),
-    ).toMatchObject({ matched: true, mismatch: null });
+    ).toMatchObject({ matched: false, mismatch: "wrong_tenant", evidence: [] });
+  });
+
+  it("does not read an answer that is not the shape the contract promises", () => {
+    const withoutRules = { ...HAUPTEINGANG, validationRuleTypes: undefined };
+
+    expect(
+      decideScanMatch(resolved(withoutRules), {
+        ...PANEL,
+        scanCode: "SC-7F3K9Q",
+      }),
+    ).toEqual({
+      matched: false,
+      evidence: [],
+      mismatch: "unreadable",
+      scannedLabel: null,
+    });
   });
 
   it("confirms no tenant the panel leaves unnamed - an unverifiable side is a miss, not a pass", () => {
@@ -571,6 +612,20 @@ describe("decideStage", () => {
 
   it("reaches all nine stages - the table is the proof, not a promise", () => {
     expect(new Set(STAGE_ROWS.map((row) => row.stage)).size).toBe(9);
+  });
+
+  it("decides nothing where the door named neither its rules nor its abilities - a list nobody stated is not a door demanding nothing", () => {
+    const noRules = { capabilities: EVERY_CAPABILITY, status: LOCKED };
+    const noAbilities = { validationRuleTypes: [], status: LOCKED };
+
+    expect(decideStage(noRules)).toMatchObject({
+      stage: "error",
+      error: ACCESS_ERRORS.GENERIC,
+    });
+    expect(decideStage(noAbilities)).toMatchObject({
+      stage: "error",
+      error: ACCESS_ERRORS.GENERIC,
+    });
   });
 
   it("sends whoever demands a scan and has none through the evidence stage", () => {

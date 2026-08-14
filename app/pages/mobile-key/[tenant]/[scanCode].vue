@@ -146,6 +146,13 @@ const accessPoint = ref(null);
 const booking = ref(null);
 const candidates = ref([]);
 
+/**
+ * The door by the name the sticker resolved to, kept apart from the door
+ * itself: the payload can be refused while its label is perfectly good, and
+ * that is the case where the error screen needs a name most.
+ */
+const scannedLabel = ref(null);
+
 const responsePayload = (response) => response?.data ?? response;
 
 const BOOKING_QUERY = {
@@ -166,6 +173,7 @@ function fail(kind, reason = null) {
 async function start() {
   stage.value = "loading";
   accessPoint.value = null;
+  scannedLabel.value = null;
   booking.value = null;
   candidates.value = [];
 
@@ -179,7 +187,16 @@ async function start() {
       return;
     }
 
+    scannedLabel.value = resolution.accessPoint.label ?? null;
     accessPoint.value = readAccessPoint(resolution.accessPoint);
+
+    // A door that does not say what it demands, or what it can do, is not
+    // opened on a guess - and the sticker is named all the same.
+    if (!accessPoint.value) {
+      fail(ACCESS_ERRORS.GENERIC);
+      return;
+    }
+
     await resolveBooking();
   } catch (error) {
     console.error("Scan konnte nicht aufgelöst werden:", error);
@@ -267,9 +284,7 @@ const bookingTimeRange = (candidate) =>
  * The door by name - the wording never says "the door", it says which one.
  * Until the sticker resolves there is no name to say.
  */
-const accessPointLabel = computed(
-  () => accessPoint.value?.label || "Der Zugang",
-);
+const accessPointLabel = computed(() => scannedLabel.value || "Der Zugang");
 
 /** Which failures the provider's help can speak to is the case's own trait. */
 const showProviderHelp = computed(
