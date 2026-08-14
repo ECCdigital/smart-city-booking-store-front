@@ -44,25 +44,10 @@
 
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";
-
-const MODES = Object.freeze({
-  remote: {
-    label: "Per Knopf",
-    color: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
-    icon: "i-lucide-lock-open",
-  },
-  code: {
-    label: "Code an der Tür",
-    color: "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100",
-    icon: "i-lucide-key-round",
-  },
-});
-
-const UNKNOWN_MODE = Object.freeze({
-  label: "Unbekannter Modus",
-  color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100",
-  icon: "i-lucide-alert-triangle",
-});
+import {
+  accessPointMode,
+  accessPointTitle,
+} from "~/utils/accessPointDisplay.js";
 
 const props = defineProps({
   accessPoint: {
@@ -86,20 +71,9 @@ const props = defineProps({
 
 const { formatDateRange } = useFormatting();
 
-/**
- * A locker has no name a person would recognise, so it is named by the
- * booking behind it. Which kind it is comes from `type` - the provider does
- * not decide how a thing is called.
- */
-const title = computed(() => {
-  if (props.accessPoint?.type === "locker") {
-    return `Fahrradbox #${props.accessPoint.externalBookingId}`;
-  }
+const title = computed(() => accessPointTitle(props.accessPoint));
 
-  return props.accessPoint?.label || "Unbekannte Tür";
-});
-
-const mode = computed(() => MODES[props.accessPoint?.mode] || UNKNOWN_MODE);
+const mode = computed(() => accessPointMode(props.accessPoint));
 
 const locationLine = computed(
   () => props.booking?.leadBookable?.location?.display_address || "",

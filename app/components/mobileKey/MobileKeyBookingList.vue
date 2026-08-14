@@ -168,6 +168,10 @@ import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import AccessPointPanel from "~/components/mobileKey/AccessPointPanel.vue";
 import { readStatus } from "~/utils/accessOpenFlow.js";
+import {
+  accessPointMode,
+  accessPointTitle,
+} from "~/utils/accessPointDisplay.js";
 
 const props = defineProps({
   bookings: {
@@ -179,44 +183,6 @@ const props = defineProps({
 const { getTenantName } = useTenant();
 const { formatDate } = useFormatting();
 const { getStatus } = useAccessPoints();
-
-/**
- * The row label, moved here from the deleted `AccessPointLabel.vue` - the list
- * was its last reader. It says the same things `AccessPointCard` says inside
- * the flow, in the width a row has: which door, and how it opens.
- */
-const MODES = Object.freeze({
-  remote: {
-    label: "Per Knopf",
-    color: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
-    icon: "i-lucide-lock-open",
-  },
-  code: {
-    label: "Code an der Tür",
-    color: "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100",
-    icon: "i-lucide-key-round",
-  },
-});
-
-const UNKNOWN_MODE = Object.freeze({
-  label: "Unbekannter Modus",
-  color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100",
-  icon: "i-lucide-alert-triangle",
-});
-
-/**
- * A locker has no name a person would recognise, so it is named by the
- * booking behind it. Which kind it is comes from `type` (#13, #15) - the
- * provider does not decide how a thing is called, and a door from a provider
- * nobody listed still gets a name here instead of an empty row.
- */
-const accessPointTitle = (accessPoint) =>
-  accessPoint?.type === "locker"
-    ? `Fahrradbox #${accessPoint.externalBookingId}`
-    : accessPoint?.label || "Unbekannte Tür";
-
-const accessPointMode = (accessPoint) =>
-  MODES[accessPoint?.mode] || UNKNOWN_MODE;
 
 /**
  * The badge on a booking, in as many words as a badge holds. The full
