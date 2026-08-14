@@ -1,10 +1,9 @@
 <template>
   <div class="relative flex items-center justify-center mb-12">
     <div
-      class="absolute w-28 h-28 rounded-full animate-ping [animation-duration:2.5s]"
+      class="absolute w-28 h-28 rounded-full border-[12px] animate-ping [animation-duration:2.5s]"
       :class="buttonColor"
     />
-    <div class="absolute w-38 h-38 rounded-full bg-white" />
     <div
       class="controlButton rounded-full flex flex-col items-center justify-center shadow-lg"
       :class="buttonClass"
@@ -79,9 +78,9 @@ const subtitle = computed(() => {
 const buttonColor = computed(() => {
   switch (props.variant) {
     case "open":
-      return "bg-primary/30";
+      return "border-primary/30";
     case "close":
-      return "bg-error/30";
+      return "border-error/30";
     default:
       return "";
   }
