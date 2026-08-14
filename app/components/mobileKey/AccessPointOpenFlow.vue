@@ -76,6 +76,7 @@
       <AccessPointStatusScreen
         icon="i-lucide-unlock"
         color="success"
+        :prominent="Boolean(result)"
         :title="t('mobileKey.stages.opened.title')"
         :description="
           t('mobileKey.stages.opened.description', { label: accessPointLabel })
@@ -95,6 +96,7 @@
       v-else-if="view.stage === 'closed'"
       icon="i-lucide-lock"
       color="success"
+      prominent
       :title="t('mobileKey.stages.closed.title')"
       :description="
         t('mobileKey.stages.closed.description', { label: accessPointLabel })
