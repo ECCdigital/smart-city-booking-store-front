@@ -44,7 +44,16 @@
     </div>
 
     <div v-if="viewMode === 'list'" class="space-y-3 mb-15">
-      <MobileKeyBookingList :bookings="bookings" />
+      <!--
+        `loadingKey` and `errorMessage` were already kept up to date by
+        `withLoading`; they just had no way into the template. The list is the
+        one place that decides between skeleton, failure, emptiness and content.
+      -->
+      <MobileKeyBookingList
+        :bookings="bookings"
+        :loading="loadingKey === 'bookings'"
+        :error="errorMessage"
+      />
     </div>
     <div v-if="viewMode === 'map'">
       <USkeleton class="h-64 w-full rounded-lg" />
@@ -94,7 +103,13 @@ const accessPointsByBooking = ref({});
 
 const lastResponse = ref(null);
 const errorMessage = ref("");
-const loadingKey = ref("");
+/**
+ * Already loading on the first paint: `onMounted` below fetches unconditionally,
+ * so the fetch is a fact before it starts. Starting empty would let the list
+ * say "Keine Schlüssel gefunden" for the tick between render and mount - the
+ * very sentence this is here to prevent.
+ */
+const loadingKey = ref("bookings");
 
 const responsePayload = (response) => response?.data ?? response;
 
