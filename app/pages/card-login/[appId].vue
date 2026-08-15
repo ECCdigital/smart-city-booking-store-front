@@ -8,6 +8,7 @@ definePageMeta({ layout: "default" });
 
 const route = useRoute();
 const { t } = useI18n();
+usePageTitle(() => t("meta.pages.cardLogin"));
 const notification = useNotification();
 const authStore = useAuthStore();
 const { getCardAuthMethods } = useAuth();

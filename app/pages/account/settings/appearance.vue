@@ -18,6 +18,9 @@ definePageMeta({
   navigation: "settings",
   requiresAuth: true,
 });
+
+const { t } = useI18n();
+usePageTitle(() => t("meta.pages.accountAppearance"));
 </script>
 <style scoped>
 

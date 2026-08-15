@@ -4,12 +4,14 @@ import { useAuth } from "~/composables/auth/useAuth";
 import LoginCard from "~/components/auth/LoginCard.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useInstanceStore } from "~~/stores/instance";
+import { getSafeRedirectPath } from "~/utils/safeRedirect";
 
 definePageMeta({
   layout: "default",
 });
 
 const t = useI18n().t;
+usePageTitle(() => t("meta.pages.login"));
 const route = useRoute();
 
 const form = ref({ id: "", password: "" });
@@ -29,16 +31,13 @@ const handleLogin = async () => {
   loading.value = true;
   try {
     await login(form.value);
+    await authStore.validateAuth(true);
     notification.success(
         t("notifications.loginSuccess.message") + ", " + userName.value + "!",
         t("notifications.loginSuccess.title")
     );
-    const redirect = route.query.redirect;
-    if (redirect && typeof redirect === "string") {
-      await navigateTo(redirect);
-    } else {
-      await navigateTo("/");
-    }
+    const redirect = getSafeRedirectPath(route.query.redirect);
+    await navigateTo(redirect);
   } catch (err) {
     notification.error(
         t("notifications.loginError.message"),

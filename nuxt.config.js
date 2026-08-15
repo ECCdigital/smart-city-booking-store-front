@@ -90,6 +90,9 @@ export default defineNuxtConfig({
       },
     },
     headers: {
+      // HSTS + upgrade-insecure-requests break local HTTP dev in Safari (forces https://localhost).
+      strictTransportSecurity:
+        process.env.NODE_ENV === "development" ? false : undefined,
       contentSecurityPolicy: {
         "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://www.orka-mv.de"],
         // Mobile Key / QR-Scan: ohne 'wasm-unsafe-eval' verweigert der Browser die
@@ -97,6 +100,8 @@ export default defineNuxtConfig({
         // nicht — es gibt keine Fehlermeldung, nur ein leeres Bild. Die Decoder-Datei
         // selbst liegt unter public/wasm/ und ist versionsgekoppelt (siehe README.md).
         "script-src": ["'self'", "https:", "'unsafe-inline'", "'wasm-unsafe-eval'"],
+        "upgrade-insecure-requests":
+          process.env.NODE_ENV === "development" ? false : true,
       },
       // Mobile Key / QR-Scan: nuxt-security setzt per Default `camera=()` und sperrt
       // getUserMedia damit auch für die eigene Herkunft. Der Scanner braucht

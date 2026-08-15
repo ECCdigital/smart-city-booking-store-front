@@ -1,15 +1,14 @@
 <template>
   <div class="px-2 pb-[50px]">
     <DetailsAreaImages :item="item" :is-event="props.isEvent" />
-
     <div class="my-5 flex w-full items-center justify-between">
       <BackButton />
       <UDropdownMenu :items="dropdownItems">
         <UButton
-            icon="i-lucide-ellipsis-vertical"
-            size="lg"
-            aria-label="Aktionen"
-            :style="{ color: contrastToPrimary, cursor: 'pointer' }"
+          icon="i-lucide-ellipsis-vertical"
+          size="lg"
+          aria-label="Aktionen"
+          :style="{ color: contrastToPrimary, cursor: 'pointer' }"
         />
       </UDropdownMenu>
     </div>
@@ -38,6 +37,8 @@ const props = defineProps({
   },
 });
 
+const route = useRoute();
+
 const { contrastToPrimary } = useContrastColor();
 const { downloadEventIcal } = useIcalDownload();
 const notification = useNotification();
@@ -45,8 +46,8 @@ const notification = useNotification();
 async function share() {
   await navigator.clipboard.writeText(window.location.href);
   notification.success(
-      "Der Link zur aktuellen Suche wurde in Ihre Zwischenablage kopiert.",
-      "Link erfolgreich kopiert!",
+    "Der Link zur aktuellen Suche wurde in Ihre Zwischenablage kopiert.",
+    "Link erfolgreich kopiert!",
   );
 }
 

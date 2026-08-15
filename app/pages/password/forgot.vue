@@ -13,6 +13,7 @@ const success = ref(false);
 const { forgotPassword } = useAuth();
 const notification = useNotification();
 const { t } = useI18n();
+usePageTitle(() => t("meta.pages.forgotPassword"));
 const config = useRuntimeConfig();
 const localePath = useLocalePath();
 

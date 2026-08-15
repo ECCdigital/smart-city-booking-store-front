@@ -2,7 +2,7 @@
   <div v-if="!fetchedCoordinates && !hasBounds">
     <USkeleton class="w-full lg:w-[70vw] h-[80vh] m-2 rounded" />
   </div>
-  <div v-else class="flex">
+  <div v-else class="flex w-full">
     <div
       class="w-full lg:w-[70vw] h-[80vh] z-10 m-2 mr-0.5 rounded overflow-hidden"
     >
@@ -24,106 +24,67 @@
             name="Light  OpenStreetMap"
           />
 
-          <div v-for="bookable in bookables" :key="bookable.item.id">
+          <div
+            v-for="group in groupedBookables"
+            :key="group.coordinates.join('_')"
+          >
             <LMarker
-              v-if="hasCoordinates(bookable.item)"
-              :lat-lng="getCoordinatesForBookable(bookable.item)"
+              :lat-lng="group.coordinates"
               :z-index-offset="
-                bookable.item.id === currentBookable?.item.id
+                getMarkerStatus(group) === 'active'
                   ? 1000
-                  : bookable.matchStatus === 'match'
+                  : getMarkerStatus(group) === 'match'
                     ? 500
                     : 0
               "
-              @click="openBookableDetails(bookable)"
+              @click="openGroup(group)"
             >
-              <LIcon :icon-anchor="[20, 40]">
-                <UIcon
-                  :name="iconMapPin"
-                  :class="
-                    bookable.item.id === currentBookable?.item.id
-                      ? 'activeIconPin size-11'
-                      : bookable.matchStatus === 'match'
-                        ? 'matchingIconPin size-10'
-                        : 'nonMatchingIconPin size-10'
-                  "
-                />
-              </LIcon>
+              <ResultsMapMarkerIcon
+                :group="group"
+                :current-bookable="currentBookable"
+                :marker-status="getMarkerStatus(group)"
+              />
 
-              <LTooltip
-                class="hidden md:block"
-                :options="{ className: 'clean-tooltip' }"
-              >
-                <div class="overflow-hidden rounded-2xl shadow-2xl">
-                  <ResultCard
-                    :item="bookable.item"
-                    :is-not-bookable="!bookable.isBookable"
-                    :calculated-price="bookable.calculatedPrice"
-                    entry-page-mode
-                    class="w-[300px] break-normal"
-                  />
-                </div>
-              </LTooltip>
+              <ResultsMapMarkerPopup
+                :group="group"
+                @open-details="openBookableDetails"
+                @close-group="closeGroup"
+              />
+
+              <ResultsMapMarkerTooltip :group="group" />
             </LMarker>
           </div>
         </LMap>
       </ClientOnly>
 
       <!-- Mobile Detail Popup -->
-      <Transition name="fade-up">
-        <div
-          v-if="showCurrentBookable && currentBookable"
-          class="fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
-          @click="closeBookableDetails"
-        >
-          <div
-            class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
-            @click.stop="openBookableDetails(currentBookable, true)"
-          >
-            <ResultCard
-              :item="currentBookable.item"
-              :is-not-bookable="!currentBookable.isBookable"
-              :calculated-price="currentBookable.calculatedPrice"
-              entry-page-mode
-              map-detail-mode
-            />
-          </div>
-        </div>
-      </Transition>
+      <ResultsMapMobilePopup
+        :current-bookable="currentBookable"
+        :current-group="currentMultiPinGroup"
+        :show-current-bookable="showCurrentBookable"
+        :show-current-group="showMultiPinItems"
+        @open-details="openBookableDetails"
+        @close-details="closeBookableDetails"
+      />
     </div>
 
     <!-- List of visible bookables -->
-    <div
-      class="bg-auto w-[25%] h-[80vh] z-20 m-2 overflow-auto p-2 border border-gray-200 rounded"
-    >
-      <TransitionGroup name="list" tag="div" class="space-y-1 ">
-        <div
-          v-for="bookable in visibleBookables"
-          :key="bookable.item.id"
-          @mouseenter="currentBookable = bookable"
-          @mouseleave="currentBookable = null"
-        >
-          <ResultStrip
-              class="cursor-pointer"
-            :item="bookable.item"
-            :is-not-suitable="bookable.matchStatus !== 'match'"
-            map-mode
-            @click="openBookableDetails(bookable, true)"
-          />
-        </div>
-        <div v-if="visibleBookables.length === 0">
-          <p class="text-center text-gray-500 mt-10">Keine Ergebnisse in diesem Bereich.</p>
-        </div>
-      </TransitionGroup>
-    </div>
+    <ResultsMapList
+      v-model="currentBookable"
+      :bookables="visibleBookables"
+      @open-details="openBookableDetails"
+    />
   </div>
 </template>
 <script setup>
-import ResultCard from "~/components/search/ResultCard.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 import { nextTick } from "vue";
-import ResultStrip from "~/components/search/ResultStrip.vue";
+import ResultsMapMarkerIcon from "~/components/search/ResultsMapMarkerIcon.vue";
+import ResultsMapMarkerPopup from "~/components/search/ResultsMapMarkerPopup.vue";
+import ResultsMapMarkerTooltip from "~/components/search/ResultsMapMarkerTooltip.vue";
+import ResultsMapMobilePopup from "~/components/search/ResultsMapMobilePopup.vue";
+import ResultsMapList from "~/components/search/ResultsMapList.vue";
 
 const props = defineProps({
   bookables: {
@@ -132,7 +93,6 @@ const props = defineProps({
   },
 });
 
-const { iconMapPin } = useBookableMap();
 const { goToDetailsNewTab } = useRedirection();
 const { searchAddress } = useBookableSearch({
   isEvent: false,
@@ -145,12 +105,43 @@ const mapReady = ref(false);
 
 const fetchedCoordinates = ref(false);
 
-const currentCenter = ref([53.5, 10.0]);
+const showMultiPinItems = ref(false);
+const currentMultiPinGroup = ref(null);
+const groupedBookables = computed(() => {
+  const groups = new Map();
+
+  props.bookables.forEach((bookable) => {
+    if (!hasCoordinates(bookable.item)) return;
+
+    const [lat, lng] = getCoordinatesForBookable(bookable.item);
+
+    // Falls die Koordinaten minimal unterschiedlich sein können:
+    const key = `${lat.toFixed(6)}_${lng.toFixed(6)}`;
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        coordinates: [lat, lng],
+        bookables: [],
+      });
+    }
+
+    groups.get(key).bookables.push(bookable);
+    groups.get(key).bookables.sort((a, b) => {
+      const aIsMatch = a.matchStatus === "match" ? 0 : 1;
+      const bIsMatch = b.matchStatus === "match" ? 0 : 1;
+      return aIsMatch - bIsMatch;
+    });
+  });
+
+  return [...groups.values()];
+});
 
 const initialBounds = computed(() => {
-  const coords = props.bookables
-    .filter((b) => hasCoordinates(b.item))
-    .map((b) => getCoordinatesForBookable(b.item));
+  const withCoords = props.bookables.filter((b) => hasCoordinates(b.item));
+  const matches = withCoords.filter((b) => b.matchStatus === "match");
+  const coords = (matches.length ? matches : withCoords).map((b) =>
+    getCoordinatesForBookable(b.item),
+  );
 
   if (!coords.length) return null;
 
@@ -183,20 +174,37 @@ const currentBookable = ref(null);
 const visibleBookables = computed(() => {
   if (!currentBounds.value) return props.bookables;
 
-  return props.bookables.filter((b) => {
-    if (!hasCoordinates(b.item)) return false;
+  return props.bookables
+    .filter((b) => {
+      if (!hasCoordinates(b.item)) return false;
 
-    const [lat, lng] = getCoordinatesForBookable(b.item);
+      const [lat, lng] = getCoordinatesForBookable(b.item);
 
-    return (
-      lat >= currentBounds.value[0][0] &&
-      lat <= currentBounds.value[1][0] &&
-      lng >= currentBounds.value[0][1] &&
-      lng <= currentBounds.value[1][1]
-    );
-  });
+      return (
+        lat >= currentBounds.value[0][0] &&
+        lat <= currentBounds.value[1][0] &&
+        lng >= currentBounds.value[0][1] &&
+        lng <= currentBounds.value[1][1]
+      );
+    })
+    .sort((a, b) => {
+      const aIsMatch = a.matchStatus === "match" ? 0 : 1;
+      const bIsMatch = b.matchStatus === "match" ? 0 : 1;
+      return aIsMatch - bIsMatch;
+    });
 });
 
+function getMarkerStatus(group) {
+  if (
+    currentBookable.value &&
+    group.bookables.some((b) => b.item.id === currentBookable.value.item.id)
+  ) {
+    return "active";
+  } else if (group.bookables.some((b) => b.matchStatus === "match")) {
+    return "match";
+  }
+  return "nomatch";
+}
 function hasCoordinates(bookable) {
   return (
     !!bookable.location &&
@@ -253,6 +261,32 @@ function updateMapBounds() {
     [mapBounds.getNorth(), mapBounds.getEast()],
   ];
 }
+function updateMapCenter(coordinates, southOffset = 0.05) {
+  const map = mapRef.value?.leafletObject;
+
+  if (map) {
+    const currentZoom = map.getZoom();
+    map.setView([coordinates[0] - southOffset, coordinates[1]], currentZoom, {
+      animate: false,
+    });
+  }
+}
+
+function openGroup(group) {
+  if (group.bookables.length === 1) {
+    openBookableDetails(group.bookables[0]);
+    return;
+  }
+
+  currentMultiPinGroup.value = group;
+  currentBookable.value = group.bookables[0];
+  showMultiPinItems.value = true;
+
+  // Only recenter on mobile
+  if (!window.matchMedia("(min-width: 768px)").matches) {
+    updateMapCenter(group.coordinates);
+  }
+}
 
 function openBookableDetails(bookable, handleCardClickOnMobile = false) {
   if (!bookable) return;
@@ -264,17 +298,22 @@ function openBookableDetails(bookable, handleCardClickOnMobile = false) {
     goToDetailsNewTab(bookable.item.id, bookable.item.type);
   } else {
     showCurrentBookable.value = true;
-    currentCenter.value = getCoordinatesForBookable(bookable.item);
     currentBookable.value = bookable;
 
-    document
-      .querySelector(".leaflet-container")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    updateMapCenter(getCoordinatesForBookable(bookable.item));
   }
+}
+function closeGroup() {
+  showMultiPinItems.value = false;
+  currentMultiPinGroup.value = null;
+  currentBookable.value = null;
 }
 function closeBookableDetails() {
   showCurrentBookable.value = false;
   currentBookable.value = null;
+
+  showMultiPinItems.value = false;
+  currentMultiPinGroup.value = null;
 }
 
 function onMapReady() {
@@ -349,55 +388,4 @@ watch(
 );
 </script>
 
-<style>
-/*map icons*/
-.leaflet-tooltip.clean-tooltip {
-  background: transparent;
-  border: none;
-  border-radius: 50px;
-  box-shadow: 5px;
-  padding: 0;
-  color: #000;
-}
-
-.leaflet-tooltip.clean-tooltip::before {
-  display: none;
-}
-
-.leaflet-div-icon {
-  background: transparent;
-  border: transparent;
-}
-
-.activeIconPin {
-  color: var(--color-secondary);
-  z-index: 999;
-}
-
-.matchingIconPin {
-  z-index: 500;
-}
-
-.nonMatchingIconPin {
-  color: #cccdcf;
-  opacity: 0.7;
-  z-index: 50;
-}
-
-/*list transition*/
-.list-move, /* apply transition to moving elements */
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.5s ease;
-}
-
-.list-enter-from,
-.list-leave-to {
-  opacity: 0;
-  transform: translateX(30px);
-}
-
-.list-leave-active {
-  position: absolute;
-}
-</style>
+<style></style>

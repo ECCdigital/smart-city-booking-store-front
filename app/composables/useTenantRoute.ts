@@ -1,5 +1,6 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
+import { isCheckoutPath, stripCheckoutQuery } from "~/utils/checkoutQuery";
 import { useTenant } from "./useTenant";
 
 export const useTenantRoute = () => {
@@ -28,13 +29,43 @@ export const useTenantRoute = () => {
     return `/t/${tenantID.value}${cleaned}`;
   }
 
+  function resolveTargetPath(to: string | Record<string, any>): string {
+    if (typeof to === "string") return to;
+    if (typeof to.path === "string") return to.path;
+    return "";
+  }
+
+  function queryForNavigation(
+    to: string | Record<string, any>,
+  ): Record<string, string | string[]> {
+    const targetPath = resolveTargetPath(to);
+    const canResolveTargetPath = targetPath.length > 0;
+    const leavingCheckout =
+      canResolveTargetPath &&
+      isCheckoutPath(route.path) &&
+      !isCheckoutPath(tenantPath(targetPath));
+
+    const baseQuery = leavingCheckout
+      ? stripCheckoutQuery(route.query as Record<string, unknown>)
+      : (route.query as Record<string, string | string[]>);
+
+    if (typeof to === "string") {
+      return baseQuery;
+    }
+
+    return {
+      ...baseQuery,
+      ...((to.query as Record<string, string | string[]>) || {}),
+    };
+  }
+
   function tenantTo(to: string | Record<string, any>) {
-    const currentQuery = route.query;
+    const navigationQuery = queryForNavigation(to);
 
     if (typeof to === "string") {
       return {
         path: tenantPath(to),
-        query: currentQuery,
+        query: navigationQuery,
       };
     }
 
@@ -52,20 +83,28 @@ export const useTenantRoute = () => {
       };
     }
 
-    clone.query = { ...currentQuery, ...(to.query || {}) };
+    clone.query = navigationQuery;
 
     return clone;
   }
 
-  function isActivePath(path: string) {
-    let targetPath = tenantPath(path);
+  function normalizePath(p: string) {
+    const withoutQuery = p.split("?")[0].split("#")[0];
+    return withoutQuery.length > 1
+      ? withoutQuery.replace(/\/+$/, "")
+      : withoutQuery;
+  }
 
-    if (itemID.value) {
-      targetPath += `/${itemID.value}`;
-    } else if (bookingID.value) {
-      targetPath += `/${bookingID.value}`;
+  function isActivePath(path: string) {
+    let targetPath = normalizePath(tenantPath(path));
+    const currentPath = normalizePath(route.path);
+
+    const suffix = itemID.value || bookingID.value;
+    if (suffix && !targetPath.endsWith(`/${suffix}`)) {
+      targetPath += `/${suffix}`;
     }
-    return route.path === targetPath;
+
+    return currentPath === targetPath;
   }
 
   return {

@@ -18,6 +18,9 @@ definePageMeta({
   navigation: "user",
   requiresAuth: true,
 });
+
+const { t } = useI18n();
+usePageTitle(() => t("meta.pages.accountInvoices"));
 </script>
 
 <style scoped></style>

@@ -5,9 +5,11 @@ import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
 definePageMeta({ layout: "default" });
 
 const { t } = useI18n();
+usePageTitle(() => t("meta.pages.ssoRegister"));
 const notification = useNotification();
 const loading = ref(false);
 const authStore = useAuthStore();
+const pendingRedirect = useCookie("kc-pending-redirect");
 
 const {
   documents: legalDocuments,
@@ -37,7 +39,9 @@ const handleRegister = async () => {
       authStore.authChecked = true;
 
       notification.success(t("notifications.registerSuccess.message"));
-      await navigateTo("/");
+      const redirect = pendingRedirect.value || "/";
+      pendingRedirect.value = null;
+      await navigateTo(redirect);
     }
   } catch (err) {
     notification.error(t("notifications.registerError.message"));

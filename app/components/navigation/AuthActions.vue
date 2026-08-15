@@ -7,13 +7,13 @@
         variant="ghost"
         class="block px-2"
         :style="{ color: contrastToSecondary }"
-        to="/login"
+        :to="loginTo"
       />
       <UButton
         v-if="isGreaterThanSm"
         label="Registrieren"
         class="hidden sm:block px-4 text-black dark:text-white bg-white dark:bg-black"
-        to="/register"
+        :to="registerTo"
       />
     </template>
     <UserDropdown v-else />
@@ -29,5 +29,13 @@ import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 const { contrastToSecondary } = useContrastColor();
 const { isGreaterThanSm } = useBreakpointCheck();
 const authStore = useAuthStore();
+const route = useRoute();
 const isAuthenticated = computed(() => authStore.isLoggedIn);
+
+const loginTo = computed(
+  () => `/login?redirect=${encodeURIComponent(route.fullPath)}`,
+);
+const registerTo = computed(
+  () => `/register?redirect=${encodeURIComponent(route.fullPath)}`,
+);
 </script>

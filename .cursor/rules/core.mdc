@@ -1,0 +1,20 @@
+---
+description: Core project context for Smart City Booking Storefront
+alwaysApply: true
+---
+
+# Smart City Booking Storefront
+
+Follow `AGENTS.md` at the repo root. Key points:
+
+- Nuxt 4 / Vue 3 public booking UI, Nitro BFF proxying v4.x backend API
+- Backend → github.com/ECCdigital/smart-city-booking-backend, Admin UI → github.com/ECCdigital/smart-city-booking-vue-app
+- Client logic in `app/composables/`, state in `stores/`, BFF in `server/api/`
+- English for code, comments, commits, PRs, and changelog entries
+- User-facing text via i18n (`i18n/locales/de.json` + `en.json`)
+- DRY: reuse existing composables/stores/server routes; extract only on real duplication
+- Run `npm run lint:check` before finishing
+- Minimal diffs, no drive-by refactors, no commits unless asked
+- Never commit secrets (`.env`), never expose auth tokens to client JS
+
+Detailed guides: `docs/agents/`

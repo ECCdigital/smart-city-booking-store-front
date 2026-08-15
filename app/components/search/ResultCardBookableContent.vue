@@ -1,7 +1,8 @@
 <template>
   <div
     id="body"
-    class="flex flex-wrap content-between h-full p-2 text-gray-800 dark:text-gray-100"
+    class="p-2 text-gray-800 dark:text-gray-100"
+    :class="mapDetailMode? '': 'flex flex-wrap content-between h-full'"
   >
     <div class="w-full max-w-full min-w-0 overflow-hidden break-all">
       <!--<div :class="mapMode ? 'w-full max-w-full bg-blue-500 break-words overflow-hidden':'w-full'">-->

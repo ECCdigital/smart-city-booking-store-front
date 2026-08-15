@@ -17,6 +17,7 @@ const form = ref({
 const notification = useNotification();
 
 const t = useI18n().t;
+usePageTitle(() => t("meta.pages.register"));
 
 const loading = ref(false);
 const { register } = useAuth();

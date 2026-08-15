@@ -23,7 +23,9 @@ export function useRedirection() {
           ? tenantTo(`/bookables/${id}`)
           : null;
     if (url) {
-      window.open(url.path, "_blank");
+        const router = useRouter();
+        const routeData = router.resolve({path: url.path, query: url.query});
+        window.open(routeData.href, "_blank");
     }
   }
 

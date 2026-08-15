@@ -49,7 +49,7 @@
         <div class="w-full mt-2 flex justify-end content-end gap-2">
           <UButton
             label="Details ansehen"
-            variant="ghost"
+            variant="outline"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer' }"
             @click="goToDetails(event.id, 'event')"

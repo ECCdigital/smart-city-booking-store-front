@@ -454,12 +454,9 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     filterResetKey.value++;
   }
 
-  async function enrichItems(
-    itemsToSearch: () => any[],
-    searchCriteria: object,
-  ) {
+  async function enrichItems(itemsToSearch: () => any[]) {
     //add status to items based on bookable and event criteria
-    let result: object[] = toValue(itemsToSearch).map((item: any) => {
+    const result: object[] = toValue(itemsToSearch).map((item: any) => {
       if (isEvent) {
         return { item, isBookable: true, matchStatus: MatchStatus.MATCH };
       }
@@ -472,48 +469,6 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
       return { item, isBookable: false, matchStatus: MatchStatus.MATCH };
     });
 
-    //add location coordinates to events without coordinates for better location search and distance calculation
-    if (isEvent && typeof searchCriteria.location === "object") {
-      result = await Promise.all(
-        result.map(async (item) => {
-          const location = item.item.location;
-
-          const hasCoordinates =
-            location &&
-            location.coordinates &&
-            location.coordinates.points &&
-            location.coordinates.points[0] != null &&
-            location.coordinates.points[1] != null;
-
-          if (hasCoordinates) {
-            return item;
-          }
-
-          const addressString = location?.display_address || "";
-
-          let addressCoordinates: number[] = [];
-          if (addressString) {
-            addressCoordinates = await searchAddress(addressString);
-          }
-
-          return {
-            ...item,
-            item: {
-              ...item.item,
-              location: {
-                ...location,
-                display_address: addressString,
-                coordinates: addressCoordinates
-                  ? {
-                      points: addressCoordinates,
-                    }
-                  : location?.coordinates || null,
-              },
-            },
-          };
-        }),
-      );
-    }
     return result;
   }
 
@@ -720,7 +675,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
               timePeriod.start!,
               timePeriod.end!,
             )
-          : await useBookables().getBookableAvailability(
+          : await useBookables().getBookableOccupancy(
               item.item.tenantId,
               item.item.id,
               timePeriod.start!,
@@ -882,7 +837,7 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
                 ticket.id,
               );
               const ticketAvailability =
-                await useBookables().getBookableAvailability(
+                await useBookables().getBookableOccupancy(
                   event.item.tenantId,
                   ticket.id,
                 );
@@ -912,20 +867,43 @@ export function useBookableSearch<TItem extends { isBookable: boolean }>(
     () => isSearchActive.value || isFilterActive.value,
   );
 
+  function getSourceItemIds(items: unknown[] | null | undefined) {
+    if (!Array.isArray(items)) return "";
+    return items
+      .map((item: { id?: string }) => item?.id ?? "")
+      .filter(Boolean)
+      .sort()
+      .join(",");
+  }
+
   watch(
     () => toValue(sourceItems),
-    (val) => {
+    async (val, oldVal) => {
       if (!val || val.length === 0) {
         updatedItems.value = [];
         return;
       }
 
-      const hasStatus = updatedItems.value.some((b) => b?.matchStatus);
-      if (hasStatus) return;
+      const newIds = getSourceItemIds(val);
+      const oldIds = getSourceItemIds(oldVal);
+      if (newIds === oldIds && updatedItems.value.length > 0) {
+        return;
+      }
+
+      if (searchIsInitialized.value && isMounted.value) {
+        await runSearch({
+          term: query.term,
+          location: query.location,
+          distance: query.distance,
+          timeStart: query.start,
+          timeEnd: query.end,
+        });
+        return;
+      }
 
       initializeResults();
     },
-    { immediate: true, deep: true },
+    { immediate: true },
   );
 
   onMounted(async () => {

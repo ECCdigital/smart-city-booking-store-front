@@ -1,5 +1,8 @@
 <script setup>
 import NavigationBar from "~/components/navigation/NavigationBar.vue";
+import { useCatalogAuthReload } from "~/composables/useCatalogAuthReload";
+
+useCatalogAuthReload();
 
 const catalogTabs = [
   {

@@ -10,7 +10,7 @@
       </div>
       <div class="grid content-center">
         <UButton
-            v-if="item.isBookable"
+          v-if="item.isBookable"
           label="Jetzt buchen"
           icon="i-lucide-shopping-cart"
           class="justify-center px-5 mt-5 md:my-0"
@@ -18,13 +18,13 @@
           @click="goToCheckout()"
         />
         <UButton
-          v-else-if="item.relatedBookableIds.length >0"
+          v-else-if="item.relatedBookableIds.length > 0"
           label="Buchungsoptionen ansehen"
           icon="i-lucide-list"
           class="justify-center px-5 mt-5 md:my-0"
           :style="{ color: contrastToPrimary, cursor: 'pointer' }"
           @click="goToRelatedItems()"
-          />
+        />
       </div>
     </div>
 
@@ -101,32 +101,20 @@
         />
 
         <!-- Availability -->
-        <div>
-          <h3 class="text-xl font-bold">Verfügbarkeit</h3>
-          <UAlert
-            v-if="!timePeriod || (!timePeriod.start && !timePeriod.end)"
-            title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
-            icon="i-lucide-info"
-            variant="ghost"
-            class="p-2 text-info w-full"
-          />
-          <InputDateTimePeriod
-            :time-period="timePeriod"
-            class="border dark:border-gray-600 rounded-lg mt-2 mb-5 w-full"
-            @select-date="setSearchTimePeriod"
-            @remove-date="removeSearchTimePeriod"
-          />
-        </div>
+        <DetailsAvailabilitySection
+          :bookable="item"
+          :time-period="timePeriod"
+          @period-selected="setSearchTimePeriod"
+          @period-cleared="removeSearchTimePeriod"
+        />
         <div
-          v-if="timePeriod && timePeriod.start && timePeriod.end"
+          v-if="showAvailabilityResult"
           class="bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-500 shadow-sm rounded-lg p-3 mb-2 md:flex justify-between content-center"
         >
           <div class="font-bold mr-1 content-center line-clamp-2">
             {{ item?.title }}
           </div>
-          <div
-            class="flex justify-end mt-3 md:mt-0 ml-2"
-          >
+          <div class="flex justify-end mt-3 md:mt-0 ml-2">
             <BookablePriceDisplay
               v-if="items.length > 0"
               :bookable="items[0].item"
@@ -135,25 +123,28 @@
             />
             <div class="content-center">
               <UButton
-                  v-if="isBookable"
-                  label="Buchen"
-                  class="justify-center px-5"
-                  :style="{ color: contrastToPrimary }"
-                  @click="goToCheckout()"
+                v-if="isBookable"
+                label="Buchen"
+                class="justify-center px-5"
+                :style="{ color: contrastToPrimary }"
+                @click="goToCheckout()"
               />
               <UButton
-                  v-else
-                  label="Nicht verfügbar"
-                  variant="soft"
-                  class="justify-center px-5"
-                  :style="{ color: contrastToPrimary }"
+                v-else
+                label="Nicht verfügbar"
+                variant="soft"
+                class="justify-center px-5"
+                :style="{ color: contrastToPrimary }"
               />
             </div>
           </div>
         </div>
 
         <!-- Related Bookables -->
-        <div v-if="item.relatedBookables && item.relatedBookables.length" id="relatedBookables">
+        <div
+          v-if="item.relatedBookables && item.relatedBookables.length"
+          id="relatedBookables"
+        >
           <h3 class="text-xl font-bold">Könnte Sie auch interessieren:</h3>
         </div>
         <BookableRelatedItems :related-bookables="item.relatedBookables" />
@@ -177,7 +168,9 @@
           v-if="moreInfoFields.length"
           class="bg-gray-200 dark:bg-gray-700 rounded-md p-3"
         >
-          <h3 class="font-bold mr-1 content-center line-clamp-2">Weitere Informationen</h3>
+          <h3 class="font-bold mr-1 content-center line-clamp-2">
+            Weitere Informationen
+          </h3>
           <dl class="space-y-2">
             <div
               v-for="field in moreInfoFields"
@@ -197,11 +190,10 @@
   </div>
 </template>
 <script setup>
-import { useTenantStore } from "~~/stores/tenant.js";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
-import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
+import { useBookableBookingMode } from "~/composables/useBookableBookingMode";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
@@ -209,6 +201,7 @@ import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import AddressInformationArea from "~/components/AddressInformationArea.vue";
 import PriceInformationArea from "~/components/PriceInformationArea.vue";
 import BookableRelatedItems from "~/components/bookables/BookableRelatedItems.vue";
+import DetailsAvailabilitySection from "~/components/search/DetailsAvailabilitySection.vue";
 
 const props = defineProps({
   item: {
@@ -242,7 +235,9 @@ const detailFields = computed(() => {
     if (field.inputType === "boolean") {
       return field.value === true || field.value === "true";
     }
-    return field.value !== null && field.value !== undefined && field.value !== "";
+    return (
+      field.value !== null && field.value !== undefined && field.value !== ""
+    );
   });
 });
 
@@ -253,10 +248,14 @@ function fieldsByPosition(position) {
 }
 
 const badgeFields = computed(() => fieldsByPosition("badge"));
-const belowDescriptionFields = computed(() => fieldsByPosition("belowDescription"));
+const belowDescriptionFields = computed(() =>
+  fieldsByPosition("belowDescription"),
+);
 const moreInfoFields = computed(() => fieldsByPosition("moreInfo"));
 
-const badgeFieldLabels = computed(() => badgeFields.value.map(customFieldBadgeLabel));
+const badgeFieldLabels = computed(() =>
+  badgeFields.value.map(customFieldBadgeLabel),
+);
 
 function customFieldValueText(field) {
   if (field.inputType === "select") {
@@ -280,13 +279,26 @@ const timePeriod = ref({
   end: query.end,
 });
 
+const { requiresTimeSelection } = useBookableBookingMode(() => props.item);
+
 const isBookable = computed(() => {
-  if (items.value.length === 1 && items.value[0].status === "bookable") {
-    return true;
-  } else if (items.value.length === 1 && items.value[0].status === "suitable") {
-    return true;
+  const entry = items.value[0];
+  if (!entry) return false;
+  return entry.matchStatus === "match" && entry.isBookable !== false;
+});
+
+const hasValidTimePeriod = computed(() => {
+  const start = timePeriod.value?.start;
+  const end = timePeriod.value?.end;
+  if (!start || !end) return false;
+  return new Date(end).getTime() > new Date(start).getTime();
+});
+
+const showAvailabilityResult = computed(() => {
+  if (!requiresTimeSelection.value) {
+    return items.value.length > 0;
   }
-  return false;
+  return hasValidTimePeriod.value;
 });
 
 const { contrastToPrimary } = useContrastColor();
@@ -298,21 +310,30 @@ async function setSearchTimePeriod(tp) {
     location: "",
     timeStart: timePeriod.value.start,
     timeEnd: timePeriod.value.end,
-    isEvent: false,
   });
 }
 function removeSearchTimePeriod() {
-  timePeriod.value = null;
+  timePeriod.value = { start: null, end: null };
   resetResults();
 }
+
 onMounted(async () => {
-  if (timePeriod.value.start && timePeriod.value.end) {
+  if (hasValidTimePeriod.value) {
     await runSearch({
       term: "",
       location: "",
       timeStart: timePeriod.value.start,
       timeEnd: timePeriod.value.end,
-      isEvent: false,
+    });
+    return;
+  }
+
+  if (!requiresTimeSelection.value) {
+    await runSearch({
+      term: "",
+      location: "",
+      timeStart: null,
+      timeEnd: null,
     });
   }
 });
@@ -325,8 +346,11 @@ function goToCheckout(checkoutData) {
     useCheckoutRedirect().redirectToCheckout({
       id: props.item.id,
       tenantId: props.item.tenantId,
-      start: route.query.start,
-      end: route.query.end,
+      start: hasValidTimePeriod.value
+        ? timePeriod.value.start
+        : route.query.start,
+      end: hasValidTimePeriod.value ? timePeriod.value.end : route.query.end,
+      url: props.item.checkoutUrl,
     });
   }
 }

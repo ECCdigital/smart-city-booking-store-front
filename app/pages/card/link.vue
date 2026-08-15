@@ -17,6 +17,9 @@ const { verifyCardLink } = useAuth();
 const token = route.query.token || "";
 const id = route.query.id || "";
 
+const { t } = useI18n();
+usePageTitle(() => t("meta.pages.cardLink"));
+
 const verificationStatus = ref("actionRequired");
 const errorType = ref(null);
 
