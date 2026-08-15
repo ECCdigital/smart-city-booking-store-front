@@ -2,6 +2,8 @@
   <div>
     <div class="flex justify-between mt-5 md:mt-0" style="max-width: 800px">
       <BackButton />
+      <!--
+      toDo - später Routing zu Schlüsseln ergänzen!
       <OpenIfbsKeyButton
         v-if="hasIfbsLockerInfo"
         :locker-info="booking.lockerInfo"
@@ -9,6 +11,7 @@
         :tenant-id="booking.tenantId"
         :is-active="isActive"
       />
+      -->
     </div>
     <PageHeader title="Buchungsdetails" class="my-5" />
     <EmergencyHelpAccordion
@@ -26,7 +29,6 @@
 import { useBookingStore } from "~~/stores/bookings.js";
 import BookingDetailsSection from "~/components/user/BookingDetailsSection.vue";
 import BackButton from "~/components/BackButton.vue";
-import OpenIfbsKeyButton from "~/components/mobileKey/OpenIfbsKeyButton.vue";
 import EmergencyHelpAccordion from "~/components/mobileKey/EmergencyHelpAccordion.vue";
 
 definePageMeta({

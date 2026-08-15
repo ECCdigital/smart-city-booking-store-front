@@ -4,7 +4,7 @@
     <div class="md:flex justify-between">
       <div>
         <p class="text-sm font-bold text-primary">
-          {{ tenantName }}
+          {{ getTenantName(item.tenantId) }}
         </p>
         <h2 class="text-2xl font-bold">{{ item?.title }}</h2>
       </div>
@@ -190,7 +190,6 @@
   </div>
 </template>
 <script setup>
-import { useTenantStore } from "~~/stores/tenant.js";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
@@ -217,6 +216,8 @@ const {
   runSearch,
   resetResults,
 } = useBookableSearch({ isEvent: false, sourceItems: [props.item] });
+
+const { getTenantName } = useTenant();
 
 const { sanitizeHtml } = useSanitizeHtml();
 const htmlDescription = computed(() => {
@@ -276,10 +277,6 @@ function customFieldBadgeLabel(field) {
 const timePeriod = ref({
   start: query.start,
   end: query.end,
-});
-
-const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.item.tenantId).name;
 });
 
 const { requiresTimeSelection } = useBookableBookingMode(() => props.item);

@@ -280,6 +280,34 @@ Published GitHub releases trigger the Docker build workflow (`.github/workflows/
 
 ---
 
+## QR Scanner WASM (`public/wasm/zxing_reader.wasm`)
+
+The mobile-key QR scanner (`vue-qrcode-reader` → `barcode-detector` → `zxing-wasm`) fetches its decoder
+from `fastly.jsdelivr.net` by default. Unacceptable for unlocking a door, so the file is checked into
+`public/wasm/` and loaded from there via `setZXingModuleOverrides({ locateFile })`.
+
+**The file is coupled to an exact package version.** The JS glue code is baked into `zxing-wasm` and only
+works with the `.wasm` shipped alongside it. A mismatch breaks the decoder **at runtime**, not at build
+time — nothing in CI catches it. That is why `vue-qrcode-reader` and `zxing-wasm` are pinned **without a
+caret** in `package.json`. `npm overrides` does not help: it can force the version in the tree, but it
+cannot swap this file.
+
+Both steps belong together when bumping the version:
+
+```bash
+# 1. re-pin vue-qrcode-reader / zxing-wasm in package.json (still without a caret), then:
+cp node_modules/zxing-wasm/dist/reader/zxing_reader.wasm public/wasm/
+
+# 2. confirm the two are identical
+shasum -a 256 public/wasm/zxing_reader.wasm node_modules/zxing-wasm/dist/reader/zxing_reader.wasm
+```
+
+Current state (`zxing-wasm@1.1.3`, pinned transitively by `barcode-detector@2.2.2`):
+`e1ad175faf7f043076b5b1154efaf0004830a3466b4e7ac726833e2d4b55e34c`
+
+Two related settings in `nuxt.config.js` are load-bearing for the scanner and documented at their
+definition: `'wasm-unsafe-eval'` in `script-src`, and `permissionsPolicy.camera`.
+
 ## Server-Side Cache
 
 The Nitro server proxy routes (`/api/catalog/...`, `/api/theme/...`) use `createConditionalCachedHandler` to optionally keep responses in an SWR cache:

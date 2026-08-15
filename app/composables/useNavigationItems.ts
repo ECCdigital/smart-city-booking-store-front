@@ -7,7 +7,7 @@ export const navigationPresets = {
       disabled: false,
     },
     {
-      value: "/account/keys",
+      value: "/mobile-key",
       label: "Schlüssel",
       icon: "i-lucide-key-round",
       disabled: false,

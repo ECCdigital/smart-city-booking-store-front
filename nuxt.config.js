@@ -10,6 +10,14 @@ export default defineNuxtConfig({
 
   pages: true,
 
+  vite: {
+    server: {
+      // Dev-Tunnel (cloudflared/trycloudflare) fuer HTTPS-Tests am Handy:
+      // Vite blockt sonst fremde Host-Header mit "Blocked request".
+      allowedHosts: [".trycloudflare.com"],
+    },
+  },
+
   runtimeConfig: {
     adminBaseUrl: "",
     apiBaseUrl: "",
@@ -62,6 +70,7 @@ export default defineNuxtConfig({
     ],
     customRoutes: "page",
     defaultLocale: "de",
+    // The vue-i18n fallback lives in i18n/i18n.config.ts - see the comment there.
     strategy: "prefix_except_default",
     lazy: true,
     langDir: "locales/",
@@ -86,9 +95,19 @@ export default defineNuxtConfig({
         process.env.NODE_ENV === "development" ? false : undefined,
       contentSecurityPolicy: {
         "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://www.orka-mv.de"],
-        "script-src": ["'self'", "https:", "'unsafe-inline'"],
+        // Mobile Key / QR-Scan: ohne 'wasm-unsafe-eval' verweigert der Browser die
+        // WebAssembly-Kompilierung des zxing-Decoders. Der Scanner startet dann stumm
+        // nicht — es gibt keine Fehlermeldung, nur ein leeres Bild. Die Decoder-Datei
+        // selbst liegt unter public/wasm/ und ist versionsgekoppelt (siehe README.md).
+        "script-src": ["'self'", "https:", "'unsafe-inline'", "'wasm-unsafe-eval'"],
         "upgrade-insecure-requests":
           process.env.NODE_ENV === "development" ? false : true,
+      },
+      // Mobile Key / QR-Scan: nuxt-security setzt per Default `camera=()` und sperrt
+      // getUserMedia damit auch für die eigene Herkunft. Der Scanner braucht
+      // ausdrücklich `camera=(self)`.
+      permissionsPolicy: {
+        camera: ["self"],
       },
     },
     nonce: true,

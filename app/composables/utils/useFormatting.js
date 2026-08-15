@@ -8,6 +8,12 @@ export function useFormatting() {
             minute: "2-digit",
         });
     }
+    function formatDateRange(from, to) {
+        if (!from || !to) {
+            return "";
+        }
+        return `${formatDate(from)} – ${formatDate(to)}`;
+    }
     function formateDateToTimestamp(date, time="00:00") {
         const isoString = `${date}T${time}:00`;
         const isoDate = new Date(isoString);
@@ -21,5 +27,5 @@ export function useFormatting() {
         }).format(price);
     }
 
-    return { formatDate, formatPrice,formateDateToTimestamp };
+    return { formatDate, formatDateRange, formatPrice,formateDateToTimestamp };
 }
