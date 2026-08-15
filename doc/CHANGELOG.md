@@ -7,6 +7,10 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ## [Unreleased]
 
+### Fixed
+
+- Form fields on phones (below the `sm` breakpoint) use at least 16px font-size so iOS Safari no longer zooms into a focused field and leaves the page zoomed in
+
 ## [1.1.6] — 2026-08-10
 
 ### Fixed
