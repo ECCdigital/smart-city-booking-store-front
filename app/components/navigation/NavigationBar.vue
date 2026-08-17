@@ -37,5 +37,22 @@ defineProps({
   },
 });
 
-const barClass = computed(() => ["bg-[var(--color-secondary)]"]);
+// Below `sm` (the width the app treats as "phone") the bar stays pinned to the
+// top edge while the page scrolls under it; from `sm` up it flows as before.
+//
+// `z-10` matches the app's existing sticky elements (checkout stepper, price bar)
+// and keeps the bar above page content, whose stacking stays at `z-0`/auto. It
+// cannot swallow Nuxt UI overlays: `UApp` renders as `<div class="isolate">`, and
+// modals, tooltips and toasts are teleported next to that element rather than
+// into it, so any z-index in the app is confined below them.
+//
+// iOS 26 also samples this bar to paint the area behind the status bar, which is
+// why the app no longer looks grey up there. WebKit only does that for a
+// sticky/fixed element at the top edge that is at least 90% wide, taller than
+// 10px, opaque and free of `backdrop-filter` — so adding `.glass`, a blur or an
+// alpha-bearing background colour here would silently turn that colouring off.
+const barClass = computed(() => [
+  "bg-[var(--color-secondary)]",
+  "sticky top-0 z-10 sm:static",
+]);
 </script>

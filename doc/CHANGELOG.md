@@ -7,6 +7,10 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ## [Unreleased]
 
+### Changed
+
+- The navigation bar sticks to the top of the screen on phones (below the `sm` breakpoint) so it stays reachable while scrolling; tablet and desktop are unchanged
+
 ### Fixed
 
 - Form fields on phones (below the `sm` breakpoint) use at least 16px font-size so iOS Safari no longer zooms into a focused field and leaves the page zoomed in
