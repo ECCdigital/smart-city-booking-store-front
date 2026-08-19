@@ -9,20 +9,20 @@
         :is-not-bookable="!b.isBookable"
         :calculated-price="b.calculatedPrice"
         :entry-page-mode="entryPageMode"
-        class="m-2"
+        class="my-2"
       />
     </UPageList>
 
     <!-- Nicht passende Ergebnisse -->
     <div v-if="includeNonSuitable && nonSuitableBookables.length > 0">
-      <h2 class="text-2xl font-bold m-4 mt-7">Nicht passende Objekte</h2>
+      <h2 class="text-2xl font-bold my-4 mt-7">Nicht passende Objekte</h2>
       <UPageList>
         <ResultStrip
           v-for="(b, i) in nonSuitableBookables"
           :key="i"
           :item="b.item"
           is-not-suitable
-          class="m-2"
+          class="my-2"
         />
       </UPageList>
     </div>

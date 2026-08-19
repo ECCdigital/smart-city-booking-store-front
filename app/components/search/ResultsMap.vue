@@ -1,10 +1,10 @@
 <template>
   <div v-if="!fetchedCoordinates && !hasBounds">
-    <USkeleton class="w-full lg:w-[70vw] h-[80vh] m-2 rounded" />
+    <USkeleton class="w-full h-[80vh] my-2 rounded" />
   </div>
   <div v-else class="flex w-full">
     <div
-      class="w-full lg:w-[70vw] h-[80vh] z-10 m-2 mr-0.5 rounded overflow-hidden"
+      class="w-full lg:flex-1 lg:min-w-0 h-[80vh] z-10 my-2 mr-0.5 rounded overflow-hidden"
     >
       <ClientOnly>
         <LMap

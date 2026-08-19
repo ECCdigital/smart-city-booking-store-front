@@ -37,3 +37,19 @@ body {
     padding-left: 20px;
     padding-right: 20px;
 }
+
+/*
+ * Pulls the outer padding of a full-bleed area out to the .container edge, so its
+ * content lines up with the rest of the page while the surface itself stays edge to
+ * edge. For split layouts that cannot sit inside .container, such as the checkout.
+ * The percentage resolves against the containing block, not the viewport, so a
+ * classic scrollbar is already excluded — the same width .container itself sees.
+ * Only use this on an element whose containing block spans the full page width.
+ */
+.container-edge-left {
+    padding-left: max(20px, calc((100% - 1400px) / 2 + 20px));
+}
+
+.container-edge-right {
+    padding-right: max(20px, calc((100% - 1400px) / 2 + 20px));
+}

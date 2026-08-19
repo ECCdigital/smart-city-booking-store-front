@@ -1,6 +1,6 @@
 <template>
   <div ref="wrapperRef" class="@container space-y-5">
-    <div class="grid grid-cols-1 @lg:flex gap-4">
+    <div class="grid grid-cols-1 @lg:flex @lg:flex-wrap gap-4">
       <div class="md:flex items-center space-x-1">
         <label
           class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 md:mb-1.5"

@@ -71,6 +71,11 @@
     "backToLogin": "Zurück zur Anmeldung",
     "retry": "Erneut versuchen"
   },
+  "colorMode": {
+    "toggle": "Farbmodus",
+    "switchToDark": "Dunkles Design",
+    "switchToLight": "Helles Design"
+  },
   "navigation": {
     "home": "Startseite",
     "dashboard": "Dashboard",
@@ -80,6 +85,11 @@
     "reports": "Berichte",
     "admin": "Admin-Bereich",
     "settings": "Einstellungen"
+  },
+  "footer": {
+    "legalNotice": "Impressum",
+    "dataProtection": "Datenschutz",
+    "termsAndConditions": "AGB"
   },
   "login": {
     "title": "Melden Sie sich in Ihrem Konto an",

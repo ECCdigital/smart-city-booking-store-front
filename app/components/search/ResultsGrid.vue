@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Passende Ergebnisse & Default Anzeige -->
-    <UPageList v-if="suitableBookables.length > 0" class="m-2 md:m-5 space-y-5">
+    <UPageList v-if="suitableBookables.length > 0" class="my-2 md:my-5 space-y-5">
       <ResultCard
           v-for="(b, i) in suitableBookables"
           :key="i"
@@ -14,10 +14,10 @@
 
     <!-- Nicht passende Ergebnisse -->
     <div v-if="nonSuitableBookables.length > 0" >
-      <h2 v-if="includeNonSuitable" class="text-2xl font-bold m-5 mt-7">
+      <h2 v-if="includeNonSuitable" class="text-2xl font-bold my-5 mt-7">
         Nicht passende Objekte
       </h2>
-      <UPageList class="m-5">
+      <UPageList class="my-5">
         <ResultCard
             v-for="(b, i) in nonSuitableBookables"
             :key="i"

@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width: 90vw; margin: auto; padding: 50px 0">
+  <div style="padding: 50px 0">
     <div class="flex items-end mb-5">
       <h2 class="text-2xl font-bold mt-7">Anstehende Veranstaltungen</h2>
       <div class="flex-1" />

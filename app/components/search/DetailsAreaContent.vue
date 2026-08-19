@@ -3,9 +3,12 @@
     <!-- Title -->
     <div
       ref="titleBlockRef"
-      class="md:sticky top-0 pt-4 z-50 px-4 -mx-4 bg-neutral-50"
+      class="md:sticky top-0 pt-4 pb-3 z-50 px-4 -mx-4 bg-neutral-50 dark:bg-gray-950"
     >
       <DetailsAreaTitleBlock :tenant-name="tenantName" :title="title">
+        <template #back>
+          <BackButton />
+        </template>
         <template #actions>
           <DetailsAreaButtonBooking :item="item" :is-event="isEvent" />
           <DetailsAreaButtonMoreActions :item="item" :is-event="isEvent" />
