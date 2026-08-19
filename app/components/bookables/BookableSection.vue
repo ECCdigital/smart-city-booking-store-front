@@ -23,7 +23,7 @@
           >{{ suitableCount }} {{ $t("filter.fittingResults") }}</span
         >
         <div class="" style="flex: 1" />
-        <div class="grid md:flex space-x-2 space-y-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
+        <div class="grid md:flex gap-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
           <div class="flex mb-2 md:my-0">
             <ResultViewButton
               v-model="currentView"

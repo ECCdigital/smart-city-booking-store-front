@@ -41,7 +41,7 @@ const subtitle = computed(
             :src="`/api/theme/logo`"
             alt="logo"
             class="max-h-[5vh] dark:invert dark:hue-rotate-180"
-          />
+          >
         </div>
         <div class="grid content-center max-w-220px text-center md:text-left">
           <p class="text-primary font-bold" :class="config.titleClass">
@@ -60,7 +60,7 @@ const subtitle = computed(
             :src="`/api/theme/logo`"
             alt="logo"
             class="max-h-[7vh] hidden md:block dark:invert dark:hue-rotate-180"
-          />
+          >
         </div>
       </div>
     </div>

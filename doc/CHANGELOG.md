@@ -22,6 +22,8 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 - Forgot-password page stacks the mobile title and the card instead of placing them side by side, matching login and register; the card was squeezed to ~130px at 375px
 - Checkout summary and contact step no longer wrap the booking date, the object name, the discount-code row or the guest-checkout button onto a second line
 - Back button is translated instead of hard-coded German: it uses the existing `common.back` key, so it now reads "Back" in English on the detail, booking and mobile-key pages
+- Legal document links only follow `http:` and `https:` URLs; a `javascript:` or `data:` value configured on the instance is dropped instead of rendered as a footer link. Relative paths keep working
+- Sort button on the bookable and event lists is no longer 8px lower than the view and filter controls next to it: the toolbar uses `gap-2` instead of `space-x-2 space-y-2`, whose vertical margin also applied once the row became a flex row at `md`
 
 ### Changed
 
