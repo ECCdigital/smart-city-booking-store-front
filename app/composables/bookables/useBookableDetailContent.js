@@ -31,10 +31,9 @@ export function useBookableDetailContent(itemSource, isEvent) {
 
   const { sanitizeHtml } = useSanitizeHtml();
   const htmlDescription = computed(() => {
-    if (isEvent && item.value.information.description) {
-      return sanitizeHtml(item.value.information.description);
-    } else if (isEvent) {
-      return sanitizeHtml(item.value.information.teaserText || "");
+    if (isEvent) {
+      const info = item.value?.information;
+      return sanitizeHtml(info?.description || info?.teaserText || "");
     }
     return sanitizeHtml(item.value?.description || "");
   });
@@ -114,9 +113,9 @@ export function useBookableDetailContent(itemSource, isEvent) {
 
   const title = computed(() => {
     if (isEvent) {
-      return item.value.information.name;
+      return item.value?.information?.name;
     }
-    return item.value.title;
+    return item.value?.title;
   });
 
   const tenantName = computed(() => {
@@ -127,14 +126,14 @@ export function useBookableDetailContent(itemSource, isEvent) {
 
   const flags = computed(() => {
     if (isEvent) {
-      return item.value.information.tags;
+      return item.value?.information?.tags;
     }
-    return item.value.flags;
+    return item.value?.flags;
   });
 
   const tickets = computed(() => {
     if (isEvent) {
-      return item.value.tickets;
+      return item.value?.tickets;
     }
     return [];
   });

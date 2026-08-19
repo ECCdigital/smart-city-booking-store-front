@@ -146,7 +146,7 @@ const { downloadBookingIcal } = useIcalDownload();
 const actionOptions = computed(() => {
   const options = [];
 
-  if (props.booking.lockerInfo.length > 0) {
+  if (props.booking.lockerInfo?.length > 0) {
     options.push({
       label: "Schlüssel anzeigen",
       icon: "i-lucide-lock",
@@ -230,7 +230,7 @@ const bookingTimeSlot = computed(() => {
 
 //events
 const isEvent = computed(() => {
-  return props.booking.bookableItems[0]?._bookableUsed.eventId || false;
+  return props.booking.bookableItems?.[0]?._bookableUsed?.eventId || false;
 });
 
 const bookingCardClasses =

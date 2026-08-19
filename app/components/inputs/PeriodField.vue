@@ -102,7 +102,7 @@ function onOpenTimeScroller() {
 
 function onBarScrollerHour(hour) {
   const current = model.value;
-  applyTime(hour, current?.minutes ?? nowMinute);
+  applyTime(hour, current?.minutes ?? nowMinute.value);
 }
 
 function onBarScrollerMinute(minute) {
