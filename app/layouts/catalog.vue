@@ -19,15 +19,18 @@ const catalogTabs = [
 </script>
 
 <template>
-  <div class="bg-neutral-50 dark:bg-gray-950">
+  <!-- Column layout so the footer sticks to the bottom of short pages -->
+  <div class="flex min-h-screen flex-col bg-neutral-50 dark:bg-gray-950">
     <NavigationBar :tabs="catalogTabs">
       <template #actions>
-        <TenantSwitcher class="mr-2" />
+        <TenantSwitcher />
       </template>
     </NavigationBar>
 
     <HeroSection />
 
     <NuxtPage />
+
+    <AppFooter class="mt-auto" />
   </div>
 </template>

@@ -1,9 +1,5 @@
 <template>
-  <div class="px-2 pb-[50px]">
-    <div class="my-5 flex items-center gap-3">
-      <BackButton />
-    </div>
-
+  <div class="pb-[50px]">
     <DetailsAreaContent :item="props.item" :is-event="isEvent" />
   </div>
 </template>

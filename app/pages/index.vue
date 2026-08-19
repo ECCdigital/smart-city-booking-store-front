@@ -1,25 +1,26 @@
 <template>
-  <div class="container bg-neutral-50 dark:bg-gray-950">
-    <div class="relative h-0 bg-transparent">
-      <div class="flex justify-center mt-12 md:mt-0">
-        <SearchBar
-          :location="query.location"
-          :distance="query.distance"
-          :term="query.term"
-          :time-end="query.end"
-          :time-start="query.start"
-          entry-page-mode
-          @search="goToListview"
-        />
+  <!-- Surface is full-bleed, content sits inside the page container -->
+  <div class="bg-neutral-50 dark:bg-gray-950">
+    <div class="container">
+      <div class="relative h-0 bg-transparent">
+        <div class="flex justify-center mt-12 md:mt-0">
+          <SearchBar
+            :location="query.location"
+            :distance="query.distance"
+            :term="query.term"
+            :time-end="query.end"
+            :time-start="query.start"
+            entry-page-mode
+            @search="goToListview"
+          />
+        </div>
       </div>
-    </div>
 
-    <!-- Main Categories -->
-    <div class="pt-20 sm:pt-25 md:pt-10 bg-neutral-50 dark:bg-gray-950">
-      <MainCategoryArea />
-    </div>
+      <!-- Main Categories -->
+      <div class="pt-20 sm:pt-25 md:pt-10">
+        <MainCategoryArea />
+      </div>
 
-    <div class="bg-neutral-50 dark:bg-gray-950">
       <LatestEventsArea v-if="allEvents.length > 0" :items="allEvents" />
     </div>
   </div>

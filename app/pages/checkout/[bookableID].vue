@@ -2641,7 +2641,9 @@ function onReviewEdit(section) {
     <!-- Main Layout -->
     <div v-else class="flex flex-col lg:flex-row min-h-screen">
       <!-- LEFT: Bookable Overview + Prices -->
-      <div class="flex-1 p-4 md:p-6 lg:p-10 lg:shrink-0 flex flex-col">
+      <div
+        class="flex-1 container-edge-left py-4 md:py-6 lg:py-10 pr-5 lg:pr-10 lg:shrink-0 flex flex-col"
+      >
         <CheckoutBookableSidebar
           :lead-bookable="leadBookable"
           :tenant="tenant"
@@ -2668,7 +2670,9 @@ function onReviewEdit(section) {
         </div>
       </div>
       <!-- RIGHT: Checkout Flow -->
-      <main class="flex-3 min-w-0 bg-white dark:bg-gray-900 p-6 md:p-8 lg:p-10">
+      <main
+        class="flex-3 min-w-0 bg-white dark:bg-gray-900 container-edge-right py-6 md:py-8 lg:py-10 pl-5 lg:pl-10"
+      >
         <CheckoutBookingNotes :bookables="bookablesInCheckout" class="mb-6" />
 
         <UAlert

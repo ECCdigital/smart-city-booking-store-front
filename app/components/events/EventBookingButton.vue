@@ -8,7 +8,7 @@
       <div class="h-full">
         <UButton
           :class="[
-            isDirectConnection ? 'px-5 mt-5 md:my-0' : 'px-10',
+            isDirectConnection ? 'px-5' : 'px-10',
             bookingDisabled
               ? 'bg-primary/60 cursor-not-allowed'
               : 'cursor-pointer',
@@ -31,7 +31,10 @@
       text="Dieses Event ist öffentlich und kann ohne Anmeldung besucht werden."
     >
       <UButton
-        class="justify-center px-3 bg-primary/60 mt-5 md:my-0"
+        :class="[
+          'justify-center px-3 bg-primary/60',
+          isDirectConnection ? '' : 'mt-5 md:my-0',
+        ]"
         color=""
         disabled
         label="Keine Anmeldung nötig"

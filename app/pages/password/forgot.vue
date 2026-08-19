@@ -42,7 +42,7 @@ const handleForgotPassword = async () => {
       class="hidden lg:flex w-3/5 items-center justify-center"
     />
 
-    <div class="flex w-full lg:w-2/5 items-center justify-center p-6">
+    <div class="flex flex-col w-full lg:w-2/5 items-center justify-center p-6">
       <AuthTitleSection class="lg:hidden" />
 
       <ForgotPasswordSuccessCard v-if="success" class="shadow-2xl/50" />

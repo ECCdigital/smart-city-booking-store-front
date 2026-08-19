@@ -2,7 +2,7 @@
   <div>
     <UButton
       v-if="canGoBack"
-      label="Zurück"
+      :label="$t('common.back')"
       icon="i-lucide-arrow-left"
       class="justify-center px-5 bg-gray-300 text-black"
       :style="{ cursor: 'pointer' }"

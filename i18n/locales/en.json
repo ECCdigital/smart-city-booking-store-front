@@ -67,6 +67,16 @@
     "zipCode": "Postal code",
     "city": "City"
   },
+  "footer": {
+    "legalNotice": "Legal notice",
+    "dataProtection": "Privacy policy",
+    "termsAndConditions": "Terms and conditions"
+  },
+  "colorMode": {
+    "toggle": "Colour mode",
+    "switchToDark": "Dark theme",
+    "switchToLight": "Light theme"
+  },
   "checkout": {
     "noBookable": "No matching resources found",
     "additionalObjects": "Additional Objects",

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center">
+  <div class="flex items-center gap-2 sm:gap-3">
     <template v-if="!isAuthenticated">
       <UButton
         :label="isGreaterThanSm ? 'Anmelden' : ' '"
@@ -16,7 +16,7 @@
         :to="registerTo"
       />
     </template>
-    <div v-else class="flex">
+    <div v-else class="flex gap-2 sm:gap-3">
       <BookingsDropdown />
       <UserDropdown />
     </div>
