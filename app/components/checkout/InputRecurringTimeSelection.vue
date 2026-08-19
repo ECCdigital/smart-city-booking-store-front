@@ -1,7 +1,6 @@
 <script setup>
 import { computed, watch, ref } from "vue";
 import InputTime from "~/components/inputs/InputTime.vue";
-import InputDate from "~/components/inputs/InputDate.vue";
 import {
   generateBookingAttempts,
   ORDINAL_OPTIONS,
@@ -48,32 +47,26 @@ const { t, locale } = useI18n();
 
 const intlLocale = computed(() => (locale.value === "de" ? "de-DE" : "en-GB"));
 
-const pad2 = (n) => String(n).padStart(2, "0");
+const startDate = ref(null);
+const startTime = ref({ hours: null, minutes: null });
+const endDate = ref(null);
+const endTime = ref({ hours: null, minutes: null });
+const hasStartTime = computed(
+  () => startTime.value?.hours != null && startTime.value?.minutes != null,
+);
+const hasTimeSelection = computed(
+  () =>
+    !!(
+      startDate.value ||
+      startTime.value.hours ||
+      startTime.value.minutes ||
+      endDate.value ||
+      endTime.value.hours ||
+      endTime.value.minutes
+    ),
+);
 
-const localISODate = formatLocalDateIso;
-const parseLocalDate = parseLocalDateIso;
-
-const timeFromString = (str) => {
-  if (!str) return null;
-  const [h, m] = str.split(":").map(Number);
-  return { hours: h || 0, minutes: m || 0 };
-};
-
-const timeToString = (val) =>
-  val ? `${pad2(val.hours)}:${pad2(val.minutes || 0)}` : "";
-
-const startDateInput = ref("");
-const startTimeInput = ref("");
-const endDateInput = ref("");
-const endTimeInput = ref("");
-const untilDateInput = ref("");
-
-const untilInputDate = computed({
-  get: () => parseLocalDate(untilDateInput.value),
-  set: (d) => {
-    untilDateInput.value = d ? localISODate(d) : "";
-  },
-});
+const untilDate = ref(null);
 
 const frequency = ref("weekly");
 const interval = ref(1);
@@ -83,71 +76,33 @@ const monthlyDayOfMonth = ref(null);
 const monthlyWeekday = ref(null);
 const monthlyWeekdayOrdinal = ref(1);
 
-const startInputDate = computed({
-  get: () => parseLocalDate(startDateInput.value),
-  set: (d) => {
-    startDateInput.value = d ? localISODate(d) : "";
-  },
-});
-
-const endInputDate = computed({
-  get: () => parseLocalDate(endDateInput.value),
-  set: (d) => {
-    endDateInput.value = d ? localISODate(d) : "";
-  },
-});
-
-const startTime = computed({
-  get: () => timeFromString(startTimeInput.value),
-  set: (val) => {
-    startTimeInput.value = val ? timeToString(val) : "";
-  },
-});
-
-const endTime = computed({
-  get: () => timeFromString(endTimeInput.value),
-  set: (val) => {
-    endTimeInput.value = val ? timeToString(val) : "";
-  },
-});
-
-const hasTimeSelection = computed(
-  () =>
-    !!(
-      startDateInput.value ||
-      startTimeInput.value ||
-      endDateInput.value ||
-      endTimeInput.value
-    ),
-);
-
 function resetTimeSelection() {
-  startDateInput.value = "";
-  startTimeInput.value = "";
-  endDateInput.value = "";
-  endTimeInput.value = "";
+  startDate.value = null;
+  startTime.value = { hours: null, minutes: null };
+  endDate.value = null;
+  endTime.value = { hours: null, minutes: null };
 }
 
 function applyDefaultEndFromStart() {
-  if (!startDateInput.value || !startTimeInput.value) return;
-  const sd = parseLocalDate(startDateInput.value);
-  if (!sd) return;
-  const [sh, sm] = startTimeInput.value.split(":").map(Number);
-  const start = jsDateWithTime(sd, sh, sm || 0);
-
-  if (endDateInput.value && endTimeInput.value) {
-    const ed = parseLocalDate(endDateInput.value);
-    if (ed) {
-      const [eh, em] = endTimeInput.value.split(":").map(Number);
-      const end = jsDateWithTime(ed, eh, em || 0);
-      if (end > start) return;
-    }
+  if (!startDate.value || !hasStartTime.value) return;
+  const start = jsDateWithTime(
+    startDate.value,
+    startTime.value.hours,
+    startTime.value.minutes || 0,
+  );
+  if (endDate.value && endTime.value?.hours != null) {
+    const end = jsDateWithTime(
+      endDate.value,
+      endTime.value.hours,
+      endTime.value.minutes || 0,
+    );
+    if (end > start) return;
   }
-
-  const end = new Date(start);
-  end.setHours(end.getHours() + 1);
-  endDateInput.value = localISODate(end);
-  endTimeInput.value = `${pad2(end.getHours())}:${pad2(end.getMinutes())}`;
+  endDate.value = startDate.value;
+  endTime.value = {
+    hours: startTime.value.hours + 1,
+    minutes: startTime.value.minutes,
+  };
 }
 
 function sameSortedWeekdays(a, b) {
@@ -162,7 +117,7 @@ function sameSortedWeekdays(a, b) {
 }
 
 function applyFrequencyDefaults() {
-  const sd = parseLocalDate(startDateInput.value);
+  const sd = startDate.value;
   if (!sd) return;
   if (frequency.value === "weekly") {
     if (
@@ -188,33 +143,36 @@ function applyFrequencyDefaults() {
   }
 }
 
-watch(startDateInput, applyFrequencyDefaults);
+watch(startDate, applyFrequencyDefaults);
+
 watch(frequency, applyFrequencyDefaults);
 watch(monthlyMode, applyFrequencyDefaults);
 
 function onStartChange() {
   applyDefaultEndFromStart();
+  applyFrequencyDefaults();
 }
 
 const seedStartMs = computed(() => {
-  if (!startDateInput.value || !startTimeInput.value) return null;
-  const sd = parseLocalDate(startDateInput.value);
-  if (!sd) return null;
-  const [h, m] = startTimeInput.value.split(":").map(Number);
-  return jsDateWithTime(sd, h, m || 0).getTime();
+  if (!startDate.value || !hasStartTime.value) return null;
+  return jsDateWithTime(
+    startDate.value,
+    startTime.value.hours,
+    startTime.value.minutes || 0,
+  ).getTime();
 });
-
 const seedEndMs = computed(() => {
-  if (!endDateInput.value || !endTimeInput.value) return null;
-  const ed = parseLocalDate(endDateInput.value);
-  if (!ed) return null;
-  const [h, m] = endTimeInput.value.split(":").map(Number);
-  return jsDateWithTime(ed, h, m || 0).getTime();
+  if (!endDate.value || endTime.value?.hours === null) return null;
+  return jsDateWithTime(
+    endDate.value,
+    endTime.value.hours,
+    endTime.value.minutes || 0,
+  ).getTime();
 });
 
 const untilMs = computed(() => {
-  if (!untilDateInput.value) return null;
-  const d = parseLocalDate(untilDateInput.value);
+  if (!untilDate.value) return null;
+  const d = new Date(untilDate.value);
   if (!d) return null;
   return d.getTime();
 });
@@ -222,20 +180,20 @@ const untilMs = computed(() => {
 watch(
   () => props.modelValue,
   (v) => {
+    console.log("watched modelValue", v);
     if (!v) return;
     if (v.seedStart && v.seedStart !== seedStartMs.value) {
       const d = new Date(v.seedStart);
-      startDateInput.value = localISODate(d);
-      startTimeInput.value = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+      startDate.value = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      startTime.value = { hours: d.getHours(), minutes: d.getMinutes() };
     }
     if (v.seedEnd && v.seedEnd !== seedEndMs.value) {
       const d = new Date(v.seedEnd);
-      endDateInput.value = localISODate(d);
-      endTimeInput.value = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+      endDate.value = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      endTime.value = { hours: d.getHours(), minutes: d.getMinutes() };
     }
     if (v.until && v.until !== untilMs.value) {
-      const d = new Date(v.until);
-      untilDateInput.value = localISODate(d);
+      untilDate.value = new Date(v.until);
     }
     if (
       (v.frequency === "weekly" || v.frequency === "monthly") &&
@@ -316,9 +274,15 @@ function ruleSignature(rule) {
 const currentRule = computed(() => buildRuleSnapshot());
 const currentSignature = computed(() => ruleSignature(currentRule.value));
 
+const isInvalidTimeslot = computed(() => {
+  if (seedStartMs.value == null || seedEndMs.value == null) return false;
+  return seedEndMs.value <= seedStartMs.value;
+});
+
 const canGenerate = computed(() => {
   if (seedStartMs.value == null || seedEndMs.value == null) return false;
-  if (seedEndMs.value <= seedStartMs.value) return false;
+  if (isInvalidTimeslot.value) return false;
+
   if (frequency.value === "weekly") {
     if (
       !Array.isArray(weeklyByWeekday.value) ||
@@ -426,6 +390,7 @@ const weekdayLongLabel = (jsDay) => {
   return tmp.toLocaleDateString(intlLocale.value, { weekday: "long" });
 };
 
+//Format date for generates bookings
 const formatAttempt = (start, end) => {
   const s = new Date(start);
   const e = new Date(end);
@@ -495,7 +460,8 @@ function getWeekDayCardClass(wd) {
     <p class="font-semibold text-gray-500 dark:text-gray-400">
       {{ $t("groupBooking.fields.timeExplanation") }}
     </p>
-    <div class="grid grid-cols-1 @lg:grid-cols-2 gap-4">
+
+    <div class="grid grid-cols-1 @lg:flex gap-4">
       <div>
         <label
           class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
@@ -503,12 +469,10 @@ function getWeekDayCardClass(wd) {
           {{ $t("groupBooking.fields.firstStart") }}
         </label>
         <InputTime
-          v-model="startTime"
-          v-model:date="startInputDate"
-          show-date
-          class="w-full"
-          @update:model-value="onStartChange"
+          v-model:date="startDate"
+          v-model:time="startTime"
           @update:date="onStartChange"
+          @update:time="onStartChange"
         />
       </div>
       <div>
@@ -518,24 +482,31 @@ function getWeekDayCardClass(wd) {
           {{ $t("groupBooking.fields.firstEnd") }}
         </label>
         <InputTime
-          v-model="endTime"
-          v-model:date="endInputDate"
-          show-date
-          :disabled="!startTime"
-          class="w-full"
+          v-model:date="endDate"
+          v-model:time="endTime"
+          :disabled="!hasStartTime"
         />
+      </div>
+      <div v-if="hasTimeSelection" class="flex items-end -mt-2">
+        <button
+          type="button"
+          class="inline-flex items-center gap-1 px-1 py-0.5 text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+          @click="resetTimeSelection"
+        >
+          <UIcon name="i-lucide-rotate-ccw" class="size-3.5 shrink-0" />
+          {{ $t("scheduleSelection.resetTime") }}
+        </button>
       </div>
     </div>
 
-    <div v-if="hasTimeSelection" class="flex justify-end -mt-2">
-      <button
-        type="button"
-        class="inline-flex items-center gap-1 px-1 py-0.5 text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
-        @click="resetTimeSelection"
-      >
-        <UIcon name="i-lucide-rotate-ccw" class="size-3.5 shrink-0" />
-        {{ $t("scheduleSelection.resetTime") }}
-      </button>
+    <div
+      v-if="isInvalidTimeslot"
+      class="flex items-center gap-1.5 text-error -mt-2"
+    >
+      <UIcon name="i-lucide-alert-circle" class="shrink-0" size="14" />
+      <span class="text-sm wrap-break-word">
+        {{ $t("groupBooking.fields.invalidTimeslot") }}
+      </span>
     </div>
 
     <!-- Rhythm / interval -->
@@ -601,7 +572,7 @@ function getWeekDayCardClass(wd) {
               type="radio"
               value="day-of-month"
               class="accent-primary"
-            >
+            />
             {{ $t("groupBooking.fields.monthlyByDay") }}
           </label>
           <label class="inline-flex items-center gap-2 text-sm">
@@ -610,7 +581,7 @@ function getWeekDayCardClass(wd) {
               type="radio"
               value="weekday-of-month"
               class="accent-primary"
-            >
+            />
             {{ $t("groupBooking.fields.monthlyByWeekday") }}
           </label>
         </div>
@@ -653,8 +624,8 @@ function getWeekDayCardClass(wd) {
         </div>
       </div>
     </div>
-    <!-- until  -->
 
+    <!-- until  -->
     <p class="font-semibold text-gray-500 dark:text-gray-400 mt-10">
       {{ $t("groupBooking.fields.untilExplanation") }}
     </p>
@@ -664,13 +635,7 @@ function getWeekDayCardClass(wd) {
       >
         {{ $t("groupBooking.fields.until") }}
       </label>
-      <InputDate
-        v-model="untilInputDate"
-        disable-past
-        :dialog-title="$t('groupBooking.fields.untilDialogTitle')"
-        :dialog-description="$t('groupBooking.fields.untilDialogDescription')"
-        class="w-full"
-      />
+      <InputTime v-model:date="untilDate" disable-time />
     </div>
 
     <!-- Generate trigger -->

@@ -1,9 +1,9 @@
 <template>
   <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
     <template #header>
-      <h2 class="text-center text-2xl font-semibold">
+      <h1 class="text-center text-2xl font-semibold">
         {{ $t("register.title") }}
-      </h2>
+      </h1>
     </template>
 
     <UForm :state="userData" class="flex flex-col gap-2" @submit="submitForm">
@@ -62,10 +62,7 @@
         input-style-classes="w-full"
       />
 
-      <div
-        v-if="legalDocuments.length"
-        class="mt-2 flex flex-col gap-2"
-      >
+      <div v-if="legalDocuments.length" class="mt-2 flex flex-col gap-2">
         <UCheckbox
           v-for="doc in legalDocuments"
           :key="doc.key"

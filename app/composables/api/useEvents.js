@@ -10,7 +10,22 @@ export function useEvents() {
 
     return data;
   };
+  const fetchEventById = async (tenantID, eventID) => {
+    const api = useApiClient();
+
+    const { data, error } = await api.get(
+      `/api/events/${tenantID}/event/${eventID}`,
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  };
+
   return {
     fetchEvents,
+    fetchEventById,
   };
 }

@@ -40,10 +40,10 @@
         :class="bookable.matchStatus !== 'match' ? 'opacity-70' : ''"
       >
         <div class="basis-1/8 flex items-center">
-          <BookablesBookableTypeBadge :type="bookable.item?.type" icon-only />
+          <BookableTypeBadge :type="bookable.item?.type" icon-only />
         </div>
         <div class="basis-7/8 flex items-center">
-          <div class="font-semibold break-words whitespace-normal">
+          <div class="font-semibold wrap-break-word whitespace-normal">
             {{ bookable.item?.title }}
           </div>
         </div>
@@ -56,6 +56,7 @@
 <script setup>
 import ResultStrip from "~/components/search/ResultStrip.vue";
 import ResultCard from "~/components/search/ResultCard.vue";
+import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 
 defineProps({
   group: {

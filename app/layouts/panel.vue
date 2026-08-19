@@ -10,7 +10,7 @@ const route = useRoute();
 const navItems = computed(
   () =>
     navigationPresets[route.meta.navigation as NavigationPreset] ??
-    navigationPresets.user
+    navigationPresets.user,
 );
 </script>
 
@@ -21,7 +21,7 @@ const navItems = computed(
     <div
       class="sm:container-md md:container md:flex h-min-[60vh] w-full md:mx-auto pt-2 md:pt-7"
     >
-      <SideNavigation :items="navItems" />
+      <SideNavigation :items="navItems" class="md:basis-1/4" />
       <div class="px-2 md:px-5 md:basis-5/6">
         <slot />
       </div>

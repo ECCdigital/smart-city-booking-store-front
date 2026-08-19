@@ -1,34 +1,30 @@
 <template>
   <div ref="wrapperRef" class="@container space-y-5">
-    <div class="grid grid-cols-1 @lg:grid-cols-2 gap-4">
-      <div>
+    <div class="grid grid-cols-1 @lg:flex gap-4">
+      <div class="md:flex items-center space-x-1">
         <label
-          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 md:mb-1.5"
         >
-          {{ $t("scheduleSelection.startTimePoint") }}
+          {{ $t("scheduleSelection.startTimePoint") }}:
         </label>
         <InputTime
-          v-model="startTime"
-          v-model:date="startInputDate"
-          show-date
-          class="w-full"
-          @update:model-value="onStartTimeChange"
+          v-model:date="startDate"
+          v-model:time="startTime"
           @update:date="onStartTimeChange"
+          @update:time="onStartTimeChange"
         />
       </div>
-      <div>
+      <div class="md:flex items-center space-x-1">
         <label
-          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 mb-1.5"
+          class="block text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 md:mb-1.5"
         >
-          {{ $t("scheduleSelection.endTimePoint") }}
+          {{ $t("scheduleSelection.endTimePoint") }}:
         </label>
         <InputTime
-          v-model="endTime"
-          v-model:date="endInputDate"
-          show-date
+          v-model:date="endDate"
+          v-model:time="endTime"
           :disabled="!startTime"
-          class="w-full"
-          @update:model-value="onManualInputChange"
+          @update:time="onManualInputChange"
           @update:date="onManualInputChange"
         />
       </div>
@@ -78,7 +74,9 @@
           @click="navigatePrev"
         >
           <UIcon name="i-lucide-chevron-left" size="14" />
-          <span class="hidden sm:block">{{ $t("scheduleSelection.previousWeek") }}</span>
+          <span class="hidden sm:block">{{
+            $t("scheduleSelection.previousWeek")
+          }}</span>
         </button>
 
         <div class="flex items-center gap-2">
@@ -93,8 +91,14 @@
           class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           @click="navigateNext"
         >
-          <UIcon name="i-lucide-chevron-right" size="14" class="order-1 sm:order-2" />
-          <span class="hidden sm:block sm:order-1">{{ $t("scheduleSelection.nextWeek") }} </span>
+          <UIcon
+            name="i-lucide-chevron-right"
+            size="14"
+            class="order-1 sm:order-2"
+          />
+          <span class="hidden sm:block sm:order-1"
+            >{{ $t("scheduleSelection.nextWeek") }}
+          </span>
         </button>
       </div>
 
@@ -158,7 +162,7 @@
 
     <!-- Hint -->
     <p
-      v-if="showCalendarPanel"
+      v-if="showCalendarPanel && !compact"
       class="text-xs text-gray-400 dark:text-gray-500 italic"
     >
       {{ $t("scheduleSelection.dragHint") }}
@@ -189,9 +193,17 @@ const props = defineProps({
     type: Object,
     default: () => ({ start: null, end: null }),
   },
+  compact: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const emit = defineEmits(["update:modelValue", "change"]);
+const emit = defineEmits([
+  "update:modelValue",
+  "change",
+  "removeTimeSelection",
+]);
 const { getBookableAvailability } = useBookables();
 
 /* ── helpers ─────────────────────────────────────────────── */
@@ -433,10 +445,11 @@ const calendarEvents = computed(() => {
   //handle past times (if selection includes past, mark past part as occupied)
   const now = new Date();
 
-  for (let d = new Date(currentViewStart.value || now);
-       d < (currentViewEnd.value || now);
-       d.setDate(d.getDate() + 1)) {
-
+  for (
+    let d = new Date(currentViewStart.value || now);
+    d < (currentViewEnd.value || now);
+    d.setDate(d.getDate() + 1)
+  ) {
     const dayStart = new Date(d);
     dayStart.setHours(0, 0, 0, 0);
 
@@ -597,31 +610,39 @@ function timeToString({ hours, minutes }) {
 }
 
 /* ── InputTime bindings ──────────────────────────────────── */
+const startDate = computed({
+  get() {
+    if (!startDateInput.value) return null;
+    return new Date(startDateInput.value);
+  },
+  set(val) {
+    startDateInput.value = val.toISOString().split("T")[0];
+  },
+});
+const endDate = computed({
+  get() {
+    if (!endDateInput.value) return null;
+    return new Date(endDateInput.value);
+  },
+  set(val) {
+    endDateInput.value = val.toISOString().split("T")[0];
+  },
+});
+
 const startTime = computed({
-  get: () => timeFromString(startTimeInput.value),
+  get() {
+    return timeFromString(startTimeInput.value);
+  },
   set(val) {
     startTimeInput.value = val ? timeToString(val) : "";
   },
 });
-
 const endTime = computed({
-  get: () => timeFromString(endTimeInput.value),
+  get() {
+    return timeFromString(endTimeInput.value);
+  },
   set(val) {
     endTimeInput.value = val ? timeToString(val) : "";
-  },
-});
-
-const startInputDate = computed({
-  get: () => parseLocalDate(startDateInput.value),
-  set(d) {
-    startDateInput.value = d ? localISODate(d) : "";
-  },
-});
-
-const endInputDate = computed({
-  get: () => parseLocalDate(endDateInput.value),
-  set(d) {
-    endDateInput.value = d ? localISODate(d) : "";
   },
 });
 
@@ -644,35 +665,28 @@ function resetTimeSelection() {
   const cleared = { start: null, end: null };
   emit("update:modelValue", cleared);
   emit("change", cleared);
+  emit("removeTimeSelection");
   nextTick(() => getApi()?.unselect());
 }
 
-function applyDefaultEndFromStart() {
-  if (!startDateInput.value || !startTimeInput.value) return;
-
-  const sd = parseLocalDate(startDateInput.value);
-  if (!sd) return;
-
-  const [sh, sm] = startTimeInput.value.split(":").map(Number);
-  const start = jsDateWithTime(sd, sh, sm || 0);
-
-  if (endDateInput.value && endTimeInput.value) {
-    const ed = parseLocalDate(endDateInput.value);
-    if (ed) {
-      const [eh, em] = endTimeInput.value.split(":").map(Number);
-      const end = jsDateWithTime(ed, eh, em || 0);
-      if (end > start) return;
-    }
+function applyDefaultEndTimeFromStart() {
+  if (!startTimeInput.value) return;
+  if (!endTimeInput.value) {
+    const [sh, sm] = startTimeInput.value.split(":").map(Number);
+    endTimeInput.value = `${pad2((sh + 1) % 24)}:${pad2(sm || 0)}`;
   }
+}
 
-  const end = new Date(start);
-  end.setHours(end.getHours() + 1);
-  endDateInput.value = localISODate(end);
-  endTimeInput.value = `${pad2(end.getHours())}:${pad2(end.getMinutes())}`;
+function applyDefaultEndDateFromStart() {
+  if (!startDateInput.value) return;
+  if (!endDateInput.value) {
+    endDateInput.value = startDateInput.value;
+  }
 }
 
 function onStartTimeChange() {
-  applyDefaultEndFromStart();
+  applyDefaultEndDateFromStart();
+  applyDefaultEndTimeFromStart();
   onManualInputChange();
 }
 
@@ -681,15 +695,13 @@ function allowSelection(selectInfo) {
 }
 
 /* ── manual input change ─────────────────────────────────── */
-function onManualInputChange() {
-  emitValue();
+async function onManualInputChange() {
+  await nextTick();
   ensureAvailabilityForInputs();
-
-  // Navigate calendar to the start date if it is outside the current view
   if (startDateInput.value) {
     const api = getApi();
     if (api) {
-      const sd = parseLocalDate(startDateInput.value);
+      const sd = new Date(startDateInput.value);
       if (
         sd &&
         currentViewStart.value &&
@@ -700,6 +712,7 @@ function onManualInputChange() {
       }
     }
   }
+  emitValue();
 }
 
 watch(showCalendarPanel, (visible) => {
@@ -709,8 +722,8 @@ watch(showCalendarPanel, (visible) => {
     if (!api) return;
 
     const selectedDate = startDateInput.value
-        ? parseLocalDate(startDateInput.value)
-        : null;
+      ? parseLocalDate(startDateInput.value)
+      : null;
 
     if (selectedDate) {
       api.gotoDate(selectedDate);
@@ -755,26 +768,29 @@ const overlapWarning = computed(() => {
 let lastEmittedKey = "";
 
 function emitValue() {
+  if (
+    !startDateInput.value ||
+    !startTimeInput.value ||
+    !endDateInput.value ||
+    !endTimeInput.value
+  ) {
+    return;
+  }
   let payload = { start: null, end: null };
 
-  if (
-    startDateInput.value &&
-    startTimeInput.value &&
-    endDateInput.value &&
-    endTimeInput.value
-  ) {
-    const sd = parseLocalDate(startDateInput.value);
-    const ed = parseLocalDate(endDateInput.value);
-    if (sd && ed) {
-      const [sh, sm] = startTimeInput.value.split(":").map(Number);
-      const [eh, em] = endTimeInput.value.split(":").map(Number);
-      const start = jsDateWithTime(sd, sh, sm || 0);
-      const end = jsDateWithTime(ed, eh, em || 0);
-      if (end.getTime() > start.getTime()) {
-        payload = { start: start.getTime(), end: end.getTime() };
-      }
-    }
-  }
+  const sd = new Date(startDateInput.value);
+  const ed = new Date(endDateInput.value);
+
+  const [startHour, startMinute] = startTimeInput.value.split(":").map(Number);
+  const [endHour, endMinute] = endTimeInput.value.split(":").map(Number);
+
+  sd.setHours(startHour, startMinute, 0, 0);
+  ed.setHours(endHour, endMinute, 0, 0);
+
+  payload = {
+    start: sd.getTime(),
+    end: ed.getTime(),
+  };
 
   const key = `${payload.start ?? ""}|${payload.end ?? ""}`;
   if (key === lastEmittedKey) return;
@@ -1007,5 +1023,4 @@ watch(
     );
   }
 }
-
 </style>

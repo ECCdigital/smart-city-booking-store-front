@@ -1,7 +1,10 @@
 <template>
   <div class="details-availability-compact">
-    <h3 class="text-base font-bold">{{ $t("detailsAvailability.title") }}</h3>
+    <h3 class="text-base font-bold">
+      {{ $t("detailsAvailability.title") }}
+    </h3>
 
+    <!-- Hint for group bookings -->
     <div
       v-if="bookable.groupBookingAllowed"
       class="my-2 flex flex-col rounded-xl border border-primary-200 bg-primary-50/50 p-4 dark:border-primary-800 dark:bg-primary-950/30 sm:flex-row sm:items-center sm:justify-between"
@@ -28,7 +31,7 @@
       :title="hintText"
       icon="i-lucide-info"
       variant="ghost"
-      class="p-1 text-primary w-full my-2 text-sm flex items-center"
+      class="p-1 text-info w-full my-2 text-sm flex items-center"
     />
 
     <UAlert
@@ -36,17 +39,35 @@
       :title="$t('detailsAvailability.noTimeSelection')"
       icon="i-lucide-info"
       variant="ghost"
-      class="p-1 text-primary w-full my-2 text-sm items-center"
+      class="p-1 text-info w-full my-2 text-sm items-center"
     />
 
-    <InputDateTimePeriod
-      v-if="isScheduleRelated"
-      compact
-      :time-period="timePeriod"
-      class="border dark:border-gray-600 rounded-md mt-1 mb-2 w-full"
-      @select-date="onPeriodSelected"
-      @remove-date="onPeriodCleared"
-    />
+    <!--
+    <div v-if="isScheduleRelated" class="relative mt-1 mb-2 w-full">
+      <InputDateTimePeriod
+        :time-period="timePeriod"
+        :variant="isMdUp ? 'bar' : 'modal'"
+        compact
+        class="border dark:border-gray-600 rounded-md w-full"
+        @select-date="onPeriodSelected"
+        @remove-date="onPeriodCleared"
+      />
+      <div
+        ref="datetimePanelHost"
+        class="absolute left-0 right-0 top-full z-50"
+      />
+    </div>
+    -->
+    <div v-if="isScheduleRelated" class="mt-1 mb-2">
+      <InputFreeTimeSelection
+        compact
+        :model-value="timePeriod"
+        :tenant-id="bookable.tenantId"
+        :bookable-id="bookable.id"
+        @update:model-value="onPeriodSelected"
+        @remove-time-selection="onPeriodCleared"
+      />
+    </div>
 
     <div v-else-if="isTimePeriodRelated" class="mt-1 mb-2">
       <InputTimePeriodSlots
@@ -92,12 +113,12 @@
 </template>
 
 <script setup>
-import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
 import InputTimePeriodSlots from "~/components/checkout/InputTimePeriodSlots.vue";
 import InputWeekSelection from "~/components/checkout/InputWeekSelection.vue";
 import InputMonthSelection from "~/components/checkout/InputMonthSelection.vue";
 import InputBlockPeriodSelection from "~/components/checkout/InputBlockPeriodSelection.vue";
-import { useBookableBookingMode } from "~/composables/useBookableBookingMode";
+import { useBookableBookingMode } from "~/composables/useBookableBookingMode.ts";
+import InputFreeTimeSelection from "~/components/checkout/InputFreeTimeSelection.vue";
 
 const props = defineProps({
   bookable: {
@@ -107,6 +128,10 @@ const props = defineProps({
   timePeriod: {
     type: Object,
     default: () => ({ start: null, end: null }),
+  },
+  items: {
+    type: Array,
+    default: () => [],
   },
 });
 
@@ -123,6 +148,11 @@ const {
   isBlockPeriodRelated,
   mode,
 } = useBookableBookingMode(() => props.bookable);
+
+//const isMdUp = useMediaQuery("(min-width: 1024px)");
+
+const datetimePanelHost = ref(null);
+provide("searchBarDatetimePanelHost", datetimePanelHost);
 
 const bookableTimePeriods = computed(() => props.bookable?.timePeriods || []);
 

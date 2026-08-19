@@ -62,7 +62,7 @@ watch(filters, (newFilter) => {
   } else {
     let filtered = props.bookings;
 
-    filtered = filterForActiveBookings(filtered);
+    filtered = filterForBookingPeriod(filtered);
 
     filtered = filterForPaymentStatus(filtered);
 
@@ -78,15 +78,60 @@ function setFilter(filter) {
   filters.value = filter;
 }
 
-function filterForActiveBookings(bookings) {
-  if (!filters.value || !filters.value.activeBookings) {
+function filterForBookingPeriod(bookings) {
+  if (!filters.value || !filters.value.periodFilter) {
     return bookings;
   }
-  const currentTime = new Date().getTime();
 
-  return bookings.filter(
-    (b) => b.timeBegin < currentTime && b.timeEnd > currentTime,
-  );
+  const currentTime = new Date().getTime();
+  const oneHourInMs = 60 * 60 * 1000;
+
+  const getBeginTime = (booking) => {
+    if (booking.timeBegin) {
+      return booking.timeBegin;
+    } else if (booking.eventBegin) {
+      return booking.eventBegin;
+    } else {
+      return null;
+    }
+  };
+  const getEndTime = (booking) => {
+    if (booking.timeEnd) {
+      return booking.timeEnd;
+    } else if (booking.eventEnd) {
+      return booking.eventEnd;
+    } else {
+      return null;
+    }
+  };
+
+  if (filters.value.periodFilter === "all") {
+    return bookings;
+  } else if (filters.value.periodFilter === "upcoming") {
+    return bookings.filter((b) => {
+      const beginTime = getBeginTime(b);
+
+      return beginTime != null && beginTime > currentTime;
+    });
+  } else if (filters.value.periodFilter === "past") {
+    return bookings.filter((b) => {
+      const endTime = getEndTime(b);
+      return endTime != null && endTime < currentTime;
+    });
+  } else if (filters.value.periodFilter === "active") {
+    return bookings.filter((b) => {
+      const beginTime = getBeginTime(b);
+      const endTime = getEndTime(b);
+      return (
+        beginTime != null &&
+        endTime != null &&
+        beginTime < currentTime + oneHourInMs &&
+        endTime > currentTime - oneHourInMs
+      );
+    });
+  }
+
+  return bookings;
 }
 
 function filterForPaymentStatus(bookings) {

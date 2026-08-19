@@ -390,7 +390,10 @@ function prunePersistedCheckoutStateForGuest() {
     delete parsed.validationErrors;
     delete parsed.bookingDiscountEligibility;
 
-    sessionStorage.setItem(checkoutStateStorageKey.value, JSON.stringify(parsed));
+    sessionStorage.setItem(
+      checkoutStateStorageKey.value,
+      JSON.stringify(parsed),
+    );
   } catch (err) {
     console.warn("Failed to prune checkout state after logout", err);
   }
@@ -1188,7 +1191,9 @@ async function validateFixedCouponApplicabilityForAttempts({
       };
     }
 
-    const attempts = Array.isArray(res?.data?.attempts) ? res.data.attempts : [];
+    const attempts = Array.isArray(res?.data?.attempts)
+      ? res.data.attempts
+      : [];
     const failed = attempts.find((attempt) => !attempt?.success);
     if (failed) {
       const apiError = failed.error || {};
@@ -1388,10 +1393,7 @@ async function validateAll() {
       const lineGrossAmount = userGrossPriceEur;
 
       let originalAmountEur = null;
-      if (
-        regularPriceEur != null &&
-        lineNetAmount < regularPriceEur - 0.005
-      ) {
+      if (regularPriceEur != null && lineNetAmount < regularPriceEur - 0.005) {
         originalAmountEur = regularPriceEur;
       }
 
@@ -1408,7 +1410,8 @@ async function validateAll() {
     }
 
     if (!couponApplicability.valid) {
-      const leadLabel = leadBookable.value?.title || t("checkout.review.bookingLabel");
+      const leadLabel =
+        leadBookable.value?.title || t("checkout.review.bookingLabel");
       errorMap[bookableID] = {
         reason: couponApplicability.reason,
         params: couponApplicability.params,
@@ -1432,8 +1435,7 @@ async function validateAll() {
       total,
       taxAmount,
       errors,
-      canApply:
-        couponApplicability.valid && items.length === targets.length,
+      canApply: couponApplicability.valid && items.length === targets.length,
     });
     total = fixedCouponTotals.total;
     taxAmount = fixedCouponTotals.taxAmount;
@@ -2655,6 +2657,7 @@ function onReviewEdit(section) {
             :summary="summary"
             :selected-time-period="selectedTimePeriod"
             :needs-time-period-selection="needsTimePeriodSelection"
+            :is-active-group-booking="isGroupBookingActive"
             :is-validating="isValidating"
             :amounts="amounts"
             :max-amounts="maxAmounts"

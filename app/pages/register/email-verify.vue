@@ -5,6 +5,7 @@ import FailedEmailVerificationCard from "~/components/auth/email-verification/Fa
 import { useAuth } from "~/composables/auth/useAuth.js";
 import AlreadyVerifiedEmailCard from "~/components/auth/email-verification/AlreadyVerifiedEmailCard.vue";
 import EmailVerificationActionCard from "~/components/auth/email-verification/EmailVerificationActionCard.vue";
+import AuthTitleSection from "~/components/auth/AuthTitleSection.vue";
 
 const { verifyEmail } = useAuth();
 const { t } = useI18n();
@@ -54,12 +55,16 @@ onMounted(() => {
 <template>
   <PageBackground variant="poly" :vignette="true" intensity="normal">
     <div class="hidden lg:flex w-3/5 items-center justify-center text-white">
+      <AuthTitleSection class="" />
+
       <div class="max-w-md text-center">
         <h1 class="text-4xl font-bold mb-4" />
       </div>
     </div>
 
-    <div class="flex w-full lg:w-2/5 items-center justify-center p-6">
+    <div class="flex flex-col w-full lg:w-2/5 items-center justify-center p-6">
+      <AuthTitleSection class="lg:hidden" />
+
       <EmailVerificationActionCard
         v-if="verificationStatus === 'actionRequired'"
         :email="id"

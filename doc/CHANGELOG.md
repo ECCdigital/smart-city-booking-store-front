@@ -11,6 +11,9 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ### Fixed
 
+- Time scroller hour change no longer writes a ComputedRef into minutes when the current time has no minutes set yet (`PeriodField`)
+- Booking card actions tolerate missing `lockerInfo` / `bookableItems` without throwing
+- Bookable/event detail content guards nullish item and `information` during render
 - **DEV-845:** Series booking occurrences are sorted chronologically by start time so weekly multi-weekday series appear in date order in checkout preview and review
 - **DEV-846:** Checkout quantity controls respect bookable max availability (`amount`); Plus/input are capped (and locked when max is 1) instead of failing only after validate
 - **DEV-847:** After choosing "Log out and continue as guest" in checkout, pricing is recalculated in guest context so role-based free booking discounts from the previous authenticated session are no longer reused; guest reset also clears coupon/payment prefs and invalidates in-flight validation

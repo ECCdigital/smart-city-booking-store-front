@@ -63,30 +63,6 @@ const items = computed(() => {
         class: "font-bold cursor-default hover:bg-transparent",
       },
       {
-        label: "Buchungen",
-        icon: "i-lucide-book-marked",
-        onSelect: () => goTo("/account/bookings"),
-      },
-      {
-        label: "Schlüssel",
-        icon: "i-lucide-key-round",
-        onSelect: () => goTo("/account/keys"),
-      },
-      {
-        label: "Rechnungen",
-        icon: "i-lucide-wallet-cards",
-        onSelect: () => goTo("/account/invoices"),
-        disabled: true,
-      },
-      {
-        label: "Favoriten",
-        icon: "i-lucide-book-heart",
-        onSelect: () => goTo("/account/favorites"),
-        disabled: true,
-      },
-    ],
-    [
-      {
         label: t("navigation.settings"),
         icon: "i-lucide-settings",
         onSelect: () => goTo("/account/settings"),
@@ -110,12 +86,12 @@ async function logout() {
     await authStore.logout();
     notification.success(
       t("notifications.logoutSuccess.message"),
-      t("notifications.logoutSuccess.title")
+      t("notifications.logoutSuccess.title"),
     );
   } catch {
     notification.error(
       t("login.logoutErrorMessage.message"),
-      t("login.logoutErrorMessage.title")
+      t("login.logoutErrorMessage.title"),
     );
   }
 }
@@ -130,6 +106,7 @@ async function logout() {
       itemLeadingIcon: 'mt-1',
       item: 'before:bg-transparent data-highlighted:before:bg-transparent',
     }"
+    class="pr-0 md:pr-1"
   >
     <UButton
       variant="ghost"

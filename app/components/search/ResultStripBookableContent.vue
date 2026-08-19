@@ -5,13 +5,15 @@
   >
     <div>
       <!-- Title -->
-      <p
-        class="font-bold"
-        :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'"
-      >
-        {{ bookable?.title }}
-      </p>
-      <p>{{ tenantName }}</p>
+      <div class="cursor-pointer" @click="openDetails()">
+        <p
+          class="font-bold"
+          :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'"
+        >
+          {{ bookable?.title }}
+        </p>
+        <p>{{ tenantName }}</p>
+      </div>
 
       <!-- Adresse und Entfernung -->
       <BookableAdressInformation
@@ -57,7 +59,7 @@
             variant="outline"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer' }"
-            @click="goToDetails(bookable.id, bookable.type)"
+            @click="openDetails"
           />
           <UTooltip
             :show="isNotBookable"
@@ -87,7 +89,7 @@
             variant="solid"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer', color: contrastToPrimary }"
-            @click="goToDetails(bookable.id, bookable.type)"
+            @click="openDetails"
           />
         </div>
       </div>
@@ -101,7 +103,6 @@ import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue"
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
-import { useRedirection } from "~/composables/utils/useRedirection.js";
 
 const props = defineProps({
   bookable: {
@@ -134,6 +135,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(["openDetails"]);
+
 const hasLongTitle = computed(() => {
   return (props.bookable?.title?.length ?? 0) > 60;
 });
@@ -142,9 +145,11 @@ const tenantName = computed(() => {
   return useTenantStore().getTenantById(props.bookable.tenantId).name;
 });
 
-const { goToDetails } = useRedirection();
-
 const { contrastToPrimary } = useContrastColor();
+
+function openDetails() {
+  emit("openDetails", props.bookable.id, props.bookable.type);
+}
 
 function goToCheckout() {
   const route = useRoute();

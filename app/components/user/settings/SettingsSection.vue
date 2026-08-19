@@ -1,18 +1,10 @@
 <template>
   <div>
-    <div>
-      <!-- Personal Information Section -->
+    <div :key="formVersion">
+      <!-- Contact Information Section -->
       <div class="mb-10 space-y-5">
         <div class="flex justify-between md:justify-normal mb-2 md:mb-5">
-          <h3 class="text-xl font-bold">Persönliche Angaben</h3>
-          <UButton
-            v-if="!enableEditingPersonalInfo"
-            icon="i-lucide-edit"
-            label="Bearbeiten"
-            color="neutral"
-            variant="soft"
-            @click="() => (enableEditingPersonalInfo = true)"
-          />
+          <h3 class="text-xl font-bold">Kontaktdaten</h3>
         </div>
         <div class="md:flex space-y-2 md:space-y-0">
           <SettingsInputField
@@ -20,7 +12,6 @@
             label="Vorname"
             :value="currentUser.firstName"
             icon="i-lucide-user"
-            :is-disabled="!enableEditingPersonalInfo"
             class="basis-1/2"
             @update="updateUser"
           />
@@ -29,45 +20,8 @@
             label="Nachname"
             :value="currentUser.lastName"
             icon="i-lucide-user"
-            :is-disabled="!enableEditingPersonalInfo"
             class="basis-1/2"
             @update="updateUser"
-          />
-        </div>
-        <!--
-        <div class="md:flex space-y-2 md:space-y-0 my-3">
-          <SettingsInputField
-            field-id="created"
-            label="Beigetreten am"
-            :value="formatDate(user.created)"
-            icon="i-lucide-user"
-            is-disabled
-            class="basis-1/2"
-          />
-        </div>
-        -->
-        <UButton
-          v-if="enableEditingPersonalInfo"
-          icon="i-lucide-save"
-          label="Änderungen speichern"
-          color="primary"
-          variant="solid"
-          class="mt-2 md:mt-5"
-          @click="saveUpdatedUser()"
-        />
-      </div>
-
-      <!-- Contact Information Section -->
-      <div class="mb-10 space-y-5">
-        <div class="flex justify-between md:justify-normal mb-2 md:mb-5">
-          <h3 class="text-xl font-bold">Kontaktdaten</h3>
-          <UButton
-            v-if="!enableEditingContactInfo"
-            icon="i-lucide-edit"
-            label="Bearbeiten"
-            color="neutral"
-            variant="soft"
-            @click="() => (enableEditingContactInfo = true)"
           />
         </div>
         <div class="md:flex space-y-2 md:space-y-0 my-3">
@@ -76,7 +30,6 @@
             label="Firma"
             :value="currentUser.company"
             icon="i-lucide-building-2"
-            :is-disabled="!enableEditingContactInfo"
             class="basis-1/2"
             @update="updateUser"
           />
@@ -95,7 +48,6 @@
             label="Telefonnummer"
             :value="currentUser.phone"
             icon="i-lucide-phone"
-            :is-disabled="!enableEditingContactInfo"
             class="basis-1/2"
             @update="updateUser"
           />
@@ -106,7 +58,6 @@
             label="Straße und Hausnummer"
             :value="currentUser.address"
             icon="i-lucide-house"
-            :is-disabled="!enableEditingContactInfo"
             class="basis-1/2"
             @update="updateUser"
           />
@@ -117,7 +68,6 @@
             label="PLZ"
             :value="currentUser.zipCode"
             icon="i-lucide-house"
-            :is-disabled="!enableEditingContactInfo"
             class="basis-1/2"
             @update="updateUser"
           />
@@ -126,37 +76,18 @@
             label="Stadt"
             :value="currentUser.city"
             icon="i-lucide-house"
-            :is-disabled="!enableEditingContactInfo"
             class="basis-1/2"
             @update="updateUser"
           />
         </div>
-        <UButton
-          v-if="enableEditingContactInfo"
-          icon="i-lucide-save"
-          label="Änderungen speichern"
-          color="primary"
-          variant="solid"
-          class="mt-2 md:mt-5"
-          @click="saveUpdatedUser()"
-        />
       </div>
 
       <!-- Security Information Section -->
       <div class="mb-10 space-y-5">
         <div class="flex justify-between md:justify-normal mb-2 md:mb-5">
           <h3 class="text-xl font-bold">Sicherheit</h3>
-          <UButton
-            v-if="!enableEditingPassword"
-            icon="i-lucide-edit"
-            label="Passwort ändern"
-            color="neutral"
-            variant="soft"
-            class="ml-2"
-            @click="() => (enableEditingPassword = true)"
-          />
         </div>
-        <div class="flex basis-1/2 mb-5 md:mb-2">
+        <div class="flex basis-1/2 mb-5">
           Account verifiziert?
           <UIcon
             v-if="currentUser.isVerified"
@@ -169,6 +100,17 @@
             class="ml-2 mt-1 text-red-600 dark:text-red-500"
           />
         </div>
+        <div class="flex items-center basis-1/2 mb-5 md:mb-2">
+          Passwort:
+          <UButton
+            v-if="!enableEditingPassword"
+            icon="i-lucide-edit"
+            label="Passwort ändern"
+            class="ml-2"
+            @click="() => (enableEditingPassword = true)"
+          />
+        </div>
+
         <div
           v-if="enableEditingPassword"
           class="md:flex space-y-2 md:space-y-0 my-3"
@@ -202,6 +144,33 @@
         />
       </div>
     </div>
+
+    <div
+      v-if="hasUnsavedChanges"
+      class="fixed inset-x-0 bottom-0 m-2 rounded-xl z-50 border border-gray-200 bg-white/95 px-4 py-3 shadow-lg backdrop-blur dark:border-gray-800 dark:bg-gray-800/95"
+    >
+      <div
+        class="mx-auto flex w-full max-w-5xl items-center justify-between gap-3"
+      >
+        <span class="text-sm">Sie haben nicht gespeicherte Änderungen.</span>
+        <div class="flex items-center gap-2">
+          <UButton
+            icon="i-lucide-save"
+            label="Speichern"
+            color="primary"
+            variant="solid"
+            @click="saveUpdatedUser()"
+          />
+          <UButton
+            icon="i-lucide-rotate-ccw"
+            label="Zurücksetzen"
+            color="neutral"
+            variant="soft"
+            @click="resetUserChanges()"
+          />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script setup>
@@ -220,12 +189,35 @@ const props = defineProps({
 const authStore = useAuthStore();
 const notification = useNotification();
 
-const currentUser = ref(JSON.parse(JSON.stringify(props.user)));
+function cloneUser(user) {
+  return JSON.parse(JSON.stringify(user));
+}
+
+const originalUser = ref(cloneUser(props.user));
+const currentUser = ref(cloneUser(props.user));
+const formVersion = ref(0);
+
+const hasUnsavedChanges = computed(
+  () =>
+    JSON.stringify(currentUser.value) !== JSON.stringify(originalUser.value),
+);
+
+onBeforeRouteLeave(() => {
+  if (!hasUnsavedChanges.value) {
+    return true;
+  }
+
+  notification.error(
+    "Sie haben nicht gespeicherte Änderungen. Bitte speichern oder verwerfen Sie diese, bevor Sie die Seite verlassen.",
+    "Nicht gespeicherte Änderungen",
+  );
+
+  return false;
+});
 
 const newPassword = ref("");
 const repeatedPassword = ref("");
 
-const enableEditingPersonalInfo = ref(false);
 const enableEditingContactInfo = ref(false);
 const enableEditingPassword = ref(false);
 
@@ -234,14 +226,22 @@ function updateUser({ updatedField, updatedValue }) {
 }
 async function saveUpdatedUser() {
   await authStore.updateUser(currentUser.value);
+  originalUser.value = cloneUser(currentUser.value);
+  currentUser.value = cloneUser(currentUser.value);
+  formVersion.value += 1;
   notification.success(
     "Ihre Änderungen wurden erfolgreich gespeichert.",
     "Änderungen gespeichert",
   );
 
-  enableEditingPersonalInfo.value = false;
   enableEditingContactInfo.value = false;
 }
+
+function resetUserChanges() {
+  currentUser.value = cloneUser(originalUser.value);
+  formVersion.value += 1;
+}
+
 function changePassword() {
   if (newPassword.value !== repeatedPassword.value) {
     notification.error(

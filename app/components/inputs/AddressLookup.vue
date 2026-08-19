@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full group content-center dark:bg-gray-700">
-    <div class="flex justify-between">
+  <div class="w-full rounded-md group content-center dark:bg-gray-700">
+    <div class="flex justify-between bg-transparent">
       <UInputMenu
         v-model="model"
         v-model:search-term="searchTerm"
@@ -11,9 +11,9 @@
         size="lg"
         variant="ghost"
         placeholder="Adresse"
-        class="w-full bg-white dark:bg-gray-700"
+        class="w-full rounded-md dark:bg-gray-700"
         :ui="{
-          base: 'w-full pr-1 placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent rounded-none rounded-l-md',
+          base: 'w-full pr-1 placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent focus:bg-transparent rounded-none rounded-l-md',
           leadingIcon: 'text-gray-400 dark:text-gray-200',
           content: 'glass w-full',
         }"

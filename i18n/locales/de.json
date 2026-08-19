@@ -317,6 +317,19 @@
     "noEvents": "Keine Veranstaltungen gefunden",
     "noEvent": "Keine Veranstaltung gefunden"
   },
+  "bookableDetail": {
+    "bookNow": "Jetzt buchen",
+    "viewBookingOptions": "Buchungsoptionen ansehen",
+    "book": "Buchen",
+    "unavailable": "Nicht verfügbar",
+    "viewAll": "Alles ansehen",
+    "descriptionTitle": "Beschreibung von {title}",
+    "moreInfo": "Weitere Informationen",
+    "relatedTitle": "Könnte Sie auch interessieren:",
+    "cancellationTitle": "Stornierungsbedingungen",
+    "yes": "Ja"
+  },
+
   "resources": {
     "resources": "Ressourcen",
     "resource": "Ressource",
@@ -461,7 +474,8 @@
     "block_period_mismatch": "Für dieses Objekt muss ein vollständiges Buchungszeitfenster gebucht werden.",
     "time_period_mismatch": "Für dieses Objekt muss ein vollständiger Zeitslot gebucht werden.",
     "insufficient_lead_time": "Die Buchung liegt zu kurzfristig. Zwischen Buchung und Beginn muss ausreichend Vorbereitungszeit in den Servicezeiten liegen.",
-    "selectTimePeriodTitle": "Zeitraum auswählen",
+    "generateGroupBooking": "Keine Seriebuchung erzeugt",
+    "selectTimePeriodTitle": "Kein Zeitraum ausgewählt",
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
     "data": {
       "contactSectionTitle": "Kontaktdaten",
@@ -821,6 +835,7 @@
       "timeExplanation": "Legen Sie die Start- und Endzeit Ihrer ersten Buchung fest. Diese Uhrzeiten bilden die Grundlage für die Berechnung der weiteren Termine in der Serie.",
       "firstStart": "Erster Startzeitpunkt",
       "firstEnd": "Erster Endzeitpunkt",
+      "invalidTimeslot": "Die Endzeit muss nach der Startzeit liegen.",
       "rhythmExplanation": "Wählen Sie das Intervall, in dem die Termine wiederholt werden sollen.",
       "rhythmExample": "Zum Beispiel „Alle 2 Wochen“ oder „Alle 3 Monate“.",
       "each": "Alle",

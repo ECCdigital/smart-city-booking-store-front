@@ -1,9 +1,9 @@
 <template>
   <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
     <template #header>
-      <h2 class="text-2xl font-semibold text-center">
+      <h1 class="text-2xl font-semibold text-center">
         {{ $t("login.title") }}
-      </h2>
+      </h1>
     </template>
 
     <UAlert
@@ -15,7 +15,7 @@
       class="mb-4"
     />
 
-    <UForm :state="userData" @submit="submitForm" class="flex flex-col gap-2">
+    <UForm :state="userData" class="flex flex-col gap-2" @submit="submitForm">
       <UFormField :label="$t('common.email')" required>
         <UInput
           v-model="userData.id"
