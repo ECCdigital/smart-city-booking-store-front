@@ -2,7 +2,7 @@
   "name": "smart-city-booking-store-front",
   "type": "module",
   "private": true,
-  "version": "1.1.6",
+  "version": "1.1.7",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",

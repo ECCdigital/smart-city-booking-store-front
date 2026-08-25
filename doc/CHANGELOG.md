@@ -7,6 +7,8 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ## [Unreleased]
 
+## [1.1.7] — 2026-08-25
+
 ### Added
 
 - Site footer (`AppFooter`) in the `catalog`, `panel` and `checkout` layouts: copyright line plus the legal documents configured on the instance (legal notice, data protection, terms), each hidden when unconfigured. The surface stays full-bleed while its content sits on the container edges, and it is pushed to the bottom of the window on short pages. Not shown on the `default` layout (login, SSO, card login)
@@ -185,6 +187,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 See git tags `v1.0.0-rc.*` for release-candidate history.
 
+[1.1.7]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.3...v1.1.4
