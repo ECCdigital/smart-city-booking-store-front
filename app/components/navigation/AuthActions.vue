@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center">
+  <div class="flex items-center gap-2 sm:gap-3">
     <template v-if="!isAuthenticated">
       <UButton
         :label="isGreaterThanSm ? 'Anmelden' : ' '"
@@ -16,7 +16,10 @@
         :to="registerTo"
       />
     </template>
-    <UserDropdown v-else />
+    <div v-else class="flex gap-2 sm:gap-3">
+      <BookingsDropdown />
+      <UserDropdown />
+    </div>
   </div>
 </template>
 
@@ -25,6 +28,7 @@ import UserDropdown from "~/components/UserDropdown.vue";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import BookingsDropdown from "~/components/BookingsDropdown.vue";
 
 const { contrastToSecondary } = useContrastColor();
 const { isGreaterThanSm } = useBreakpointCheck();

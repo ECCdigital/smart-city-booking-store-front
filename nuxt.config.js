@@ -32,7 +32,9 @@ export default defineNuxtConfig({
     },
   },
   routeRules: {
-    "/catalog/**": { ssr: true, isr: 300 },
+    // Colour mode is now in the SSR HTML (cookie + html class). A shared ISR
+    // cache would serve one visitor's mode to the next for 300s.
+    "/catalog/**": { ssr: true },
   },
 
   modules: [
@@ -54,6 +56,7 @@ export default defineNuxtConfig({
     classSuffix: "",
     preference: "system",
     fallback: "light",
+    storage: "cookie",
   },
   i18n: {
     locales: [

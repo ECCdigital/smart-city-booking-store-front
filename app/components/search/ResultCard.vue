@@ -10,7 +10,7 @@
     <div
       id="header"
       class=""
-      :class="mapDetailMode ? 'h-28' : 'flex flex-col h-36'"
+      :class="mapDetailMode ? 'h-28' : 'flex flex-col h-48 shrink-0'"
     >
       <div class="flex h-9/10 relative">
         <BookableTypeBadge
@@ -24,7 +24,7 @@
           alt="Bild des Buchungsobjekts"
           class="w-full object-cover rounded-t-xl"
           @error="onImageError"
-        >
+        />
         <img
           v-else-if="
             isEvent && item?.information?.teaserImage && !showImageErrorHint
@@ -35,7 +35,7 @@
           alt=""
           class="w-full object-cover rounded-t-xl"
           @error="onImageError"
-        >
+        />
         <ClientOnly v-else>
           <div
             class="w-full h-full rounded-t-xl flex flex-col items-center justify-center gap-2"
@@ -135,9 +135,12 @@ function onImageError() {
 }
 
 // Reset image error state when item changes
-watch(() => props.item.id, () => {
-  showImageErrorHint.value = false;
-});
+watch(
+  () => props.item.id,
+  () => {
+    showImageErrorHint.value = false;
+  },
+);
 </script>
 
 <style scoped></style>

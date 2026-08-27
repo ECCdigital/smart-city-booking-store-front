@@ -2,13 +2,15 @@
   <div class="basis-3/4 p-4 flex flex-col">
     <div>
       <!-- Title -->
-      <p
-        class="font-bold"
-        :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'"
-      >
-        {{ event.information.name }}
-      </p>
-      <p>{{ getTenantName(event.tenantId) }}</p>
+      <div class="cursor-pointer" @click="openDetails()">
+        <p
+          class="font-bold"
+          :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'"
+        >
+          {{ event.information.name }}
+        </p>
+        <p>{{ getTenantName(event.tenantId) }}</p>
+      </div>
 
       <!-- Zeitpunkt, Adresse und Entfernung -->
       <div class="w-full my-5">
@@ -52,7 +54,7 @@
             variant="outline"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer' }"
-            @click="goToDetails(event.id, 'event')"
+            @click="openDetails"
           />
           <EventBookingButton
             v-if="!isNotSuitable && event"
@@ -73,8 +75,6 @@ import EventAdressInformation from "~/components/events/EventAdressInformation.v
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import { useTenantStore } from "~~/stores/tenant.js";
 import EventBookingButton from "~/components/events/EventBookingButton.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
-import { useRedirection } from "~/composables/utils/useRedirection.js";
 
 const props = defineProps({
   event: {
@@ -99,7 +99,8 @@ const props = defineProps({
   },
 });
 
-const { goToDetails } = useRedirection();
+const emit = defineEmits(["openDetails"]);
+
 const { getTenantName } = useTenant();
 
 const hasLongTitle = computed(() => {
@@ -111,6 +112,8 @@ const htmlTeaserText = computed(() => {
   return sanitizeHtml(props.event.information.teaserText || "");
 });
 
-const { contrastToPrimary } = useContrastColor();
+function openDetails() {
+  emit("openDetails", props.event.id, "event");
+}
 </script>
 <style scoped></style>

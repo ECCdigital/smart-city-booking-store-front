@@ -1,25 +1,26 @@
 <template>
-  <div class="container bg-neutral-50 dark:bg-gray-950">
-    <div class="relative h-0 bg-transparent">
-      <div class="flex justify-center">
-        <SearchBar
-          :location="query.location"
-          :distance="query.distance"
-          :term="query.term"
-          :time-end="query.end"
-          :time-start="query.start"
-          entry-page-mode
-          @search="goToListview"
-        />
+  <!-- Surface is full-bleed, content sits inside the page container -->
+  <div class="bg-neutral-50 dark:bg-gray-950">
+    <div class="container">
+      <div class="relative h-0 bg-transparent">
+        <div class="flex justify-center mt-12 md:mt-0">
+          <SearchBar
+            :location="query.location"
+            :distance="query.distance"
+            :term="query.term"
+            :time-end="query.end"
+            :time-start="query.start"
+            entry-page-mode
+            @search="goToListview"
+          />
+        </div>
       </div>
-    </div>
 
-    <!-- Main Categories -->
-    <div class="pt-20 sm:pt-25 md:pt-10 bg-neutral-50 dark:bg-gray-950">
-      <MainCategoryArea />
-    </div>
+      <!-- Main Categories -->
+      <div class="pt-20 sm:pt-25 md:pt-10">
+        <MainCategoryArea />
+      </div>
 
-    <div class="bg-neutral-50 dark:bg-gray-950">
       <LatestEventsArea v-if="allEvents.length > 0" :items="allEvents" />
     </div>
   </div>
@@ -36,9 +37,9 @@ definePageMeta({
   layout: "catalog",
   middleware: ["catalog-auth", "catalog-guard"],
   hero: {
-    height: "xl",
+    height: "lg",
     titleClass: "text-2xl",
-    subtitleClass: "text-5xl",
+    subtitleClass: "text-xl md:text-5xl",
     showOnMobile: true,
   },
 });
@@ -53,7 +54,7 @@ const eventStore = useEventStore();
 const catalogSlug = computed(() => route.params.catalogSlug || null);
 
 const { error } = useLazyAsyncData("catalog-bundle-home", () =>
-    loadBundle({ slug: catalogSlug.value, include: ["events"] })
+  loadBundle({ slug: catalogSlug.value, include: ["events"] }),
 );
 
 if (error.value) {
@@ -73,12 +74,14 @@ async function goToListview(searchParams) {
   if (searchParams.timeEnd) query.end = searchParams.timeEnd;
   if (searchParams.location && typeof searchParams.location === "object") {
     query.loc = searchParams.location.display_address;
-  } else if (searchParams.location && typeof searchParams.location === "string") {
+  } else if (
+    searchParams.location &&
+    typeof searchParams.location === "string"
+  ) {
     query.loc = searchParams.location;
   }
 
-  const path =
-      searchParams.searchType === "events" ? "events" : "bookables";
+  const path = searchParams.searchType === "events" ? "events" : "bookables";
 
   await router.push({
     ...tenantTo(path),

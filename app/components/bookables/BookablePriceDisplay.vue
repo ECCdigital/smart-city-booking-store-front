@@ -10,23 +10,21 @@
         calculatedPrice.regularGrossPriceEur > calculatedPrice.userGrossPriceEur
       "
     >
-      <span class="text-gray-500 line-through mr-2">
+      <span class="text-gray-500 line-through md:mr-2">
         {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
       </span>
+      <br class="md:hidden" />
       <span>
         {{ displayPrice(calculatedPrice.userGrossPriceEur) }}
       </span>
-      <br >
+      <br />
       <span
         v-if="discountPercentLabel"
         class="text-xs font-normal text-emerald-700 dark:text-emerald-300"
       >
         {{ discountPercentLabel }}
       </span>
-      <span
-        v-else
-        class="text-xs font-normal text-gray-600 dark:text-gray-300"
-      >
+      <span v-else class="text-xs font-normal text-gray-600 dark:text-gray-300">
         {{ displayPricePerUnit() }}
       </span>
     </p>
@@ -42,9 +40,16 @@
     </p>
 
     <!-- regular calculated price -->
-    <p v-else-if="calculatedPrice">
-      {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
-    </p>
+    <div v-else-if="calculatedPrice">
+      <div>{{ displayPrice(calculatedPrice.regularGrossPriceEur) }}</div>
+      <div
+        v-if="duration"
+        class="flex justify-end text-xs font-normal text-gray-600 dark:text-gray-300"
+      >
+        ({{ duration }} <span class="hidden md:block ml-1"> Std.</span
+        ><span class="md:hidden ml-1"> h</span>)
+      </div>
+    </div>
 
     <!-- price without calculation -->
     <p v-else :class="isMapStripe ? '' : 'grid'">
@@ -71,6 +76,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  duration: {
+    type: String,
+    default: "",
+  },
 });
 
 function toDiscountPercent(value) {
@@ -80,7 +89,9 @@ function toDiscountPercent(value) {
 }
 
 const discountPercentLabel = computed(() => {
-  const percent = toDiscountPercent(props.calculatedPrice?.bookingDiscountPercent);
+  const percent = toDiscountPercent(
+    props.calculatedPrice?.bookingDiscountPercent,
+  );
   if (percent <= 0 || percent >= 100) return null;
   return t("checkout.review.roleDiscountBadge", { percent });
 });
@@ -88,6 +99,9 @@ const discountPercentLabel = computed(() => {
 function getMinPrice() {
   //all prices are free
   if (
+    !props.bookable ||
+    !props.bookable.priceCategories ||
+    !props.bookable.priceCategories.length ||
     props.bookable.priceCategories.every(
       (c) => c.priceEur === 0 || c.priceEur === null,
     )
@@ -137,6 +151,9 @@ function displayPrice(currentPrice) {
 }
 
 function displayPricePerUnit() {
+  if (props.calculatedPrice) {
+    return "";
+  }
   const minPrice = getMinPrice();
   if (minPrice === null || minPrice === 0) {
     return "";

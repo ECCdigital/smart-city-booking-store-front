@@ -25,6 +25,8 @@ const { loadDetail } = useCatalogBundle();
 const event = computed(() => eventStore.getEventById(eventID.value));
 
 async function refreshEventDetail({ force = false } = {}) {
+  return;
+  //TODO: rework
   if (import.meta.client) {
     await authStore.validateAuth(true);
   }

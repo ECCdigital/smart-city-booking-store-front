@@ -17,7 +17,7 @@ const subtitle = computed(() => props.tenant?.name || "");
 </script>
 
 <template>
-  <aside class="w-full lg:w-[440px] xl:w-[480px] lg:flex-shrink-0">
+  <aside class="w-full lg:w-[360px] lg:flex-shrink-0">
     <div class="lg:sticky lg:top-8 space-y-6">
       <!-- Header: Subtitle / Title -->
       <div>

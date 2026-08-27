@@ -5,7 +5,7 @@
     size="md"
     :label="iconOnly ? '' : category.label"
     :icon="category.icon"
-    :class="iconOnly? 'pl-2' : ''"
+    :class="iconOnly ? 'pl-2' : ''"
   />
 </template>
 <script setup>

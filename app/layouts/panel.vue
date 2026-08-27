@@ -10,21 +10,24 @@ const route = useRoute();
 const navItems = computed(
   () =>
     navigationPresets[route.meta.navigation as NavigationPreset] ??
-    navigationPresets.user
+    navigationPresets.user,
 );
 </script>
 
 <template>
-  <div class="bg-neutral-50 dark:bg-gray-950">
+  <!-- Column layout so the footer sticks to the bottom of short pages -->
+  <div class="flex min-h-screen flex-col bg-neutral-50 dark:bg-gray-950">
     <NavigationBar />
 
     <div
-      class="sm:container-md md:container md:flex h-min-[60vh] w-full md:mx-auto pt-2 md:pt-7"
+      class="container md:flex h-min-[60vh] w-full pt-2 md:pt-7"
     >
-      <SideNavigation :items="navItems" />
+      <SideNavigation :items="navItems" class="md:basis-1/4" />
       <div class="px-2 md:px-5 md:basis-5/6">
         <slot />
       </div>
     </div>
+
+    <AppFooter class="mt-auto" />
   </div>
 </template>

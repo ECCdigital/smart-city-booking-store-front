@@ -1,6 +1,6 @@
 <template>
   <div
-      class="bg-auto w-[25%] h-[80vh] z-20 m-2 overflow-auto p-2 border border-gray-200 rounded hidden lg:block"
+      class="bg-auto w-[280px] shrink-0 h-[80vh] z-20 my-2 ml-2 overflow-auto p-2 border border-gray-200 rounded hidden lg:block"
   >
     <TransitionGroup name="list" tag="div" class="space-y-1">
       <div

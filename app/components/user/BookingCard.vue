@@ -1,12 +1,13 @@
 <template>
   <div
-    class="flex flex-col"
+    class="flex flex-col cursor-pointer"
     :class="[
       bookingCardClasses,
       isActive
         ? 'border-2 border-primary/60 shadow-primary/20'
         : 'border border-gray-200 dark:border-gray-700',
     ]"
+    @click="openDetails()"
   >
     <!-- title and booking-id -->
     <div class="mb-3 h-1/3">
@@ -24,24 +25,27 @@
             Aktiv
           </div>
         </div>
-        <UDropdownMenu
-          :items="actionOptions"
-          :content="{
-            align: 'end'
-          }"
-          :ui="{
-            content: 'w-48 ring-0 shadow-lg glass',
-            itemLeadingIcon: 'mt-1',
-            item: 'before:bg-transparent data-highlighted:before:bg-transparent',
-          }"
-        >
-          <UButton
+        <div @click.stop>
+          <UDropdownMenu
+            v-if="actionOptions && actionOptions.length"
+            :items="actionOptions"
+            :content="{
+              align: 'end',
+            }"
+            :ui="{
+              content: 'w-48 ring-0 shadow-lg glass',
+              itemLeadingIcon: 'mt-1',
+              item: 'before:bg-transparent data-highlighted:before:bg-transparent',
+            }"
+          >
+            <UButton
               icon="i-lucide-ellipsis-vertical"
-            class="rounded-3xl"
-            variant="soft"
-            color="neutral"
-          />
-        </UDropdownMenu>
+              class="rounded-3xl"
+              variant="soft"
+              color="neutral"
+            />
+          </UDropdownMenu>
+        </div>
       </div>
 
       <h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2">
@@ -49,47 +53,39 @@
       </h3>
     </div>
 
-    <div class="flex flex-col h-2/3">
-      <!-- time -->
-      <div class="h-1/3 mb-3">
-        <div
-          v-if="bookingTimeSlot || event"
-          class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-1"
-        >
-          <UIcon name="i-lucide-clock" class="w-4 h-4 mr-1" />
-          <span v-if="event && !bookingTimeSlot">Veranstaltungszeit</span>
-          <span v-else>Zeitraum</span>
-        </div>
-        <div v-else class="h-[44px]" />
-        <div v-if="bookingTimeSlot" class="text-sm font-medium">
-          {{ bookingTimeSlot[0] }} - {{ bookingTimeSlot[1] }}
-        </div>
-        <EventTimeInformation
-          v-else-if="eventId && event"
-          :event="event"
-          :use-icon="false"
-          class="text-sm font-medium -mx-3"
-        />
+    <div class="flex flex-col flex-1 justify-between md:mb-2">
+      <!-- Zeitraum -->
+      <div
+        v-if="bookingTimeSlot"
+        class="flex items-center text-xs text-gray-500 dark:text-gray-400"
+      >
+        <UIcon name="i-lucide-clock" class="w-4 h-4 mr-1" />
+        <span v-if="isEvent && !booking.timeBegin && !booking.timeEnd">
+          Veranstaltungszeit
+        </span>
+        <span v-else> Zeitraum </span>
+      </div>
+      <div class="text-lg text-primary font-semibold leading-tight h-14">
+        {{ bookingTimeSlot }}
       </div>
 
-      <!-- price -->
-      <div class="mb-4">
-        <div class="text-2xl font-bold text-primary">
-          {{ bookingPrice }}
-        </div>
+      <!-- Status -->
+      <div class="flex flex-wrap gap-2 mb-3">
+        <BookingStatusChip :booking="booking" />
+        <BookingPayedChip v-if="!isFree" :booking="booking" />
       </div>
 
-      <!-- Status Badges -->
+      <!-- Zusatzinformationen -->
+      <div class="space-y-1">
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          Preis:
+          <span class="font-medium text-gray-700 dark:text-gray-200">
+            {{ bookingPrice }}
+          </span>
+        </div>
 
-      <div class="mb-2">
-        <div class="text-sm text-medium text-gray-500 dark:text-gray-400 mb-1">
+        <div class="text-sm text-gray-500 dark:text-gray-400">
           Gebucht am: {{ booking.displayBookingDate }}
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <!-- status -->
-          <BookingStatusChip :booking="booking" />
-
-          <BookingPayedChip v-if="!isFree" :booking="booking" />
         </div>
       </div>
     </div>
@@ -97,8 +93,6 @@
 </template>
 
 <script setup>
-import { useEventStore } from "~~/stores/event.js";
-import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
@@ -131,12 +125,11 @@ const bookingPrice = computed(() => {
   return formatPrice(props.booking.priceEur);
 });
 
-const eventStore = useEventStore();
-const { formatDate, formatPrice, formateDateToTimestamp } = useFormatting();
+const { formatDate, formatPrice } = useFormatting();
 
 const currentTime = ref(new Date().getTime());
 const isActive = computed(() => {
-  if(props.booking.isRejected) {
+  if (props.booking.isRejected) {
     return false;
   }
   if (props.booking.timeBegin && props.booking.timeEnd) {
@@ -145,31 +138,13 @@ const isActive = computed(() => {
       currentTime.value <= props.booking.timeEnd
     );
   }
-  if (event.value) {
-    const startTimestamp = formateDateToTimestamp(
-      event.value.information.startDate,
-      event.value.information.startTime,
-    );
-    const endTimestamp = formateDateToTimestamp(
-      event.value.information.endDate,
-      event.value.information.endTime,
-    );
-    return (
-      currentTime.value >= startTimestamp && currentTime.value <= endTimestamp
-    );
-  }
+
   return false;
 });
 
 const { downloadBookingIcal } = useIcalDownload();
 const actionOptions = computed(() => {
-  const options = [
-    {
-      label: "Details anzeigen",
-      icon: "i-lucide-eye",
-      onSelect: openDetails,
-    },
-  ];
+  const options = [];
 
   /*if(props.booking.lockerInfo.length > 0){
     options.push({
@@ -179,7 +154,7 @@ const actionOptions = computed(() => {
     });
   }*/
 
-  if (eventId.value || (props.booking.timeBegin && props.booking.timeEnd)) {
+  if (isEvent.value || (props.booking.timeBegin && props.booking.timeEnd)) {
     options.push({
       label: "Termin herunterladen",
       icon: "i-lucide-calendar-arrow-down",
@@ -199,24 +174,63 @@ const bookingTitle = computed(() => {
   return props.booking.objectName;
 });
 
+const sameDayBookingDateFormatter = new Intl.DateTimeFormat("de-DE", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "2-digit",
+});
+
+const sameDayBookingTimeFormatter = new Intl.DateTimeFormat("de-DE", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+function isSameCalendarDay(startDate, endDate) {
+  return (
+    startDate.getFullYear() === endDate.getFullYear() &&
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getDate() === endDate.getDate()
+  );
+}
+
 const bookingTimeSlot = computed(() => {
-  if (props.booking.timeBegin && props.booking.timeEnd) {
-    const beginn = formatDate(props.booking.timeBegin);
-    const end = formatDate(props.booking.timeEnd);
-    return [beginn, end];
+  const startTime =
+    props.booking.timeBegin && props.booking.timeEnd
+      ? props.booking.timeBegin
+      : props.booking.eventBegin && props.booking.eventEnd
+        ? props.booking.eventBegin
+        : null;
+
+  const endTime =
+    props.booking.timeBegin && props.booking.timeEnd
+      ? props.booking.timeEnd
+      : props.booking.eventBegin && props.booking.eventEnd
+        ? props.booking.eventEnd
+        : null;
+
+  if (startTime && endTime) {
+    const startDate = new Date(startTime);
+    const endDate = new Date(endTime);
+
+    if (isSameCalendarDay(startDate, endDate)) {
+      return (
+        sameDayBookingDateFormatter.format(startDate) +
+        ", " +
+        sameDayBookingTimeFormatter.format(startDate) +
+        " - " +
+        sameDayBookingTimeFormatter.format(endDate)
+      );
+    }
+
+    return formatDate(startTime) + " - " + formatDate(endTime);
   }
+
   return null;
 });
 
 //events
-const eventId = computed(() => {
-  return props.booking.bookableItems[0]?._bookableUsed.eventId || null;
-});
-const event = computed(() => {
-  if (!eventId.value) {
-    return null;
-  }
-  return eventStore.getEventById(eventId.value);
+const isEvent = computed(() => {
+  return props.booking.bookableItems?.[0]?._bookableUsed?.eventId || false;
 });
 
 const bookingCardClasses =

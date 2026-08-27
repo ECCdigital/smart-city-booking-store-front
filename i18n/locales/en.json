@@ -67,6 +67,16 @@
     "zipCode": "Postal code",
     "city": "City"
   },
+  "footer": {
+    "legalNotice": "Legal notice",
+    "dataProtection": "Privacy policy",
+    "termsAndConditions": "Terms and conditions"
+  },
+  "colorMode": {
+    "toggle": "Colour mode",
+    "switchToDark": "Dark theme",
+    "switchToLight": "Light theme"
+  },
   "checkout": {
     "noBookable": "No matching resources found",
     "additionalObjects": "Additional Objects",
@@ -358,6 +368,19 @@
     "occupied": "Occupied",
     "past": "Past",
     "selected": "Selected month"
+  },
+
+  "bookableDetail": {
+    "bookNow": "Book now",
+    "viewBookingOptions": "View booking options",
+    "book": "Book",
+    "unavailable": "Unavailable",
+    "viewAll": "View all",
+    "descriptionTitle": "Description of {title}",
+    "moreInfo": "More information",
+    "relatedTitle": "You might also like:",
+    "cancellationTitle": "Cancellation policy",
+    "yes": "Yes"
   },
 
   "detailsAvailability": {

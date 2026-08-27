@@ -1,104 +1,108 @@
 <template>
   <div class="bg-neutral-50 dark:bg-gray-950">
-    <div class="flex justify-center">
-      <SearchBar
-        v-model:is-initailized="searchIsInitialized"
-        v-model:filter-reset-key="filterResetKey"
-        search-type="events"
-        :term="query.term"
-        :location="query.location"
-        :distance="query.distance"
-        :time-start="query.start"
-        :time-end="query.end"
-        @search="runSearch"
-        @reset="resetResults"
-      />
-    </div>
-
-    <div class="m-10 lg:m-5 sm:flex items-center">
-      <span
-        v-if="searchIsInitialized"
-        class="text-black dark:text-white lg:font-bold"
-        >{{ suitableCount }} {{ $t("filter.fittingResults") }}</span
-      >
-      <div class="" style="flex: 1" />
-      <div class="flex space-x-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
-        <SortButton
-          v-if="searchedEvents.length > 0"
-          :sort-mode="query.sortMode"
-          is-event
-          @sort="setSortedQueryParams"
-        />
-        <FilterButton
-          v-if="searchedEvents.length > 0"
+    <div class="container">
+      <div class="flex justify-center">
+        <SearchBar
           v-model:is-initailized="searchIsInitialized"
-          :bookables="searchedEvents"
-          :include-non-suitable="query.inclNoSuitable"
-          :categories="query.cat"
-          :cities="query.cities"
+          v-model:filter-reset-key="filterResetKey"
+          search-type="events"
+          :term="query.term"
+          :location="query.location"
           :distance="query.distance"
-          :price="query.price"
-          :only-public-events="query.pubEv"
-          :only-registration-needed-events="query.regEv"
-          :custom-fields="query.customFields"
-          class="lg:hidden"
-          is-event
-          @filter="setFilterQueryParams"
-        />
-      </div>
-    </div>
-
-    <div class="flex flex-row lg:my-5 m-5">
-      <div
-        v-if="searchedEvents.length > 0"
-        class="lg:basis-1/4 hidden lg:block"
-      >
-        <FilterArea
-          :key="filterResetKey"
-          v-model:is-initailized="searchIsInitialized"
-          :include-non-suitable="query.inclNoSuitable"
-          :cities="query.cities"
-          :distance="query.distance"
-          :price="query.price"
-          :categories="query.cat"
-          is-event
-          :only-public-events="query.pubEv"
-          :only-registration-needed-events="query.regEv"
-          :custom-fields="query.customFields"
-          :bookables="searchedEvents"
-          @filter="setFilterQueryParams"
+          :time-start="query.start"
+          :time-end="query.end"
+          @search="runSearch"
+          @reset="resetResults"
         />
       </div>
 
-      <div
-        :class="
-          searchedEvents.length > 0 ? 'basis-full lg:basis-3/4' : 'basis-full'
-        "
-      >
-        <div v-if="!sortedEvents.length" class="text-center mt-10 lg:mt-25">
-          <UIcon
-            size="48"
-            name="i-lucide-calendar-off"
-            class="text-gray-400 mb-4"
+      <div class="my-10 lg:my-5 sm:flex items-center">
+        <span
+          v-if="searchIsInitialized"
+          class="text-black dark:text-white lg:font-bold"
+          >{{ suitableCount }} {{ $t("filter.fittingResults") }}</span
+        >
+        <div class="" style="flex: 1" />
+        <div class="grid md:flex gap-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
+          <div class="flex mb-2 md:my-0">
+            <FilterButton
+              v-if="searchedEvents.length > 0"
+              v-model:is-initailized="searchIsInitialized"
+              :bookables="searchedEvents"
+              :include-non-suitable="query.inclNoSuitable"
+              :categories="query.cat"
+              :cities="query.cities"
+              :distance="query.distance"
+              :price="query.price"
+              :only-public-events="query.pubEv"
+              :only-registration-needed-events="query.regEv"
+              :custom-fields="query.customFields"
+              class="lg:hidden"
+              is-event
+              @filter="setFilterQueryParams"
+            />
+          </div>
+          <SortButton
+            v-if="searchedEvents.length > 0"
+            :sort-mode="query.sortMode"
+            is-event
+            @sort="setSortedQueryParams"
           />
-          <p class="text-gray-500">{{ $t("events.noEvents") }}</p>
         </div>
-        <ResultsList
-          v-if="sortedEvents.length > 0"
-          :bookables="sortedEvents"
-          include-non-bookable
-          include-non-suitable
-          is-event-list
-          class="hidden md:block"
-        />
-        <ResultsGrid
-          v-if="sortedEvents.length > 0"
-          :bookables="sortedEvents"
-          include-non-bookable
-          include-non-suitable
-          is-event-grid
-          class="md:hidden"
-        />
+      </div>
+
+      <div class="flex flex-row my-5 gap-5">
+        <div
+          v-if="searchedEvents.length > 0"
+          class="lg:basis-1/4 hidden lg:block"
+        >
+          <FilterArea
+            :key="filterResetKey"
+            v-model:is-initailized="searchIsInitialized"
+            :include-non-suitable="query.inclNoSuitable"
+            :cities="query.cities"
+            :distance="query.distance"
+            :price="query.price"
+            :categories="query.cat"
+            is-event
+            :only-public-events="query.pubEv"
+            :only-registration-needed-events="query.regEv"
+            :custom-fields="query.customFields"
+            :bookables="searchedEvents"
+            @filter="setFilterQueryParams"
+          />
+        </div>
+
+        <div
+          :class="
+            searchedEvents.length > 0 ? 'basis-full lg:basis-3/4' : 'basis-full'
+          "
+        >
+          <div v-if="!sortedEvents.length" class="text-center mt-10 lg:mt-25">
+            <UIcon
+              size="48"
+              name="i-lucide-calendar-off"
+              class="text-gray-400 mb-4"
+            />
+            <p class="text-gray-500">{{ $t("events.noEvents") }}</p>
+          </div>
+          <ResultsList
+            v-if="sortedEvents.length > 0"
+            :bookables="sortedEvents"
+            include-non-bookable
+            :include-non-suitable="query.inclNoSuitable"
+            is-event-list
+            class="hidden md:block"
+          />
+          <ResultsGrid
+            v-if="sortedEvents.length > 0"
+            :bookables="sortedEvents"
+            include-non-bookable
+            :include-non-suitable="query.inclNoSuitable"
+            is-event-grid
+            class="md:hidden"
+          />
+        </div>
       </div>
     </div>
   </div>

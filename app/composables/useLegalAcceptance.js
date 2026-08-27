@@ -1,24 +1,10 @@
-import { useInstanceStore } from "~~/stores/instance.js";
+import { useLegalDocuments } from "~/composables/useLegalDocuments.js";
 
-const isPresent = (doc) =>
-  !!(doc && typeof doc.url === "string" && doc.url.trim() !== "");
+// Only these two need consent at registration -- the legal notice is informational.
+const ACCEPTANCE_KEYS = ["dataProtection", "termsAndConditions"];
 
 export function useLegalAcceptance() {
-  const instanceStore = useInstanceStore();
-
-  const documents = computed(() => {
-    const instance = instanceStore.instance ?? {};
-    const result = [];
-
-    if (isPresent(instance.dataProtection)) {
-      result.push({ key: "dataProtection", ...instance.dataProtection });
-    }
-    if (isPresent(instance.termsAndConditions)) {
-      result.push({ key: "termsAndConditions", ...instance.termsAndConditions });
-    }
-
-    return result;
-  });
+  const documents = useLegalDocuments(ACCEPTANCE_KEYS);
 
   const accepted = reactive({});
 

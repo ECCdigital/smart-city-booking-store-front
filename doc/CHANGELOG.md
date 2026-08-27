@@ -15,10 +15,46 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 - Form fields on phones (below the `sm` breakpoint) use at least 16px font-size so iOS Safari no longer zooms into a focused field and leaves the page zoomed in
 
+## [1.1.7] — 2026-08-25
+
+### Added
+
+- Site footer (`AppFooter`) in the `catalog`, `panel` and `checkout` layouts: copyright line plus the legal documents configured on the instance (legal notice, data protection, terms), each hidden when unconfigured. The surface stays full-bleed while its content sits on the container edges, and it is pushed to the bottom of the window on short pages. Not shown on the `default` layout (login, SSO, card login)
+- `useLegalDocuments()` reads the instance's legal documents in a fixed order; `useLegalAcceptance()` now builds on it with the two documents that need consent at registration
+- Colour-mode icon button in the navigation bar (sun/moon, all breakpoints). It writes the same `colorMode.preference` as the existing appearance switch in account settings; the settings switch is unchanged. The right-hand cluster (tenant, colour mode, sign-in / bookings / user) uses a consistent gap so the extra control does not sit flush against its neighbours
+
+### Fixed
+
+- Colour mode no longer flashes light on the first paint after a visitor has chosen dark: the preference is stored in a cookie (migrated from `localStorage` on the next visit) so SSR can emit the matching `html` class and `colorMode.value`. Shared ISR for `/catalog/**` is dropped, because a cached page would otherwise serve one visitor's mode to the next
+- Colour-mode toggle on the navigation bar no longer paints a light hover surface in light mode; the hover wash follows the icon colour so it stays readable on the tenant-coloured bar
+- Checkout start/end time fields no longer clip out of the step column: the date/time row wraps once the container query column is too narrow for both groups
+- Map view result list keeps a fixed 280px width instead of 25% of the (now narrower) container, so prices and addresses are no longer cut off
+- Forgot-password page stacks the mobile title and the card instead of placing them side by side, matching login and register; the card was squeezed to ~130px at 375px
+- Checkout summary and contact step no longer wrap the booking date, the object name, the discount-code row or the guest-checkout button onto a second line
+- Back button is translated instead of hard-coded German: it uses the existing `common.back` key, so it now reads "Back" in English on the detail, booking and mobile-key pages
+- Legal document links only follow `http:` and `https:` URLs; a `javascript:` or `data:` value configured on the instance is dropped instead of rendered as a footer link. Relative paths keep working
+- Sort button on the bookable and event lists is no longer 8px lower than the view and filter controls next to it: the toolbar uses `gap-2` instead of `space-x-2 space-y-2`, whose vertical margin also applied once the row became a flex row at `md`
+
+### Changed
+
+- Content container stays at 1400px (`.container`); it was narrowed to 1200px while the container rule was rolled out and widened back after reviewing the checkout. `container-md` (900) and `container-sm` (600) are unchanged
+- Panel layout uses the app's own `.container` instead of Tailwind's built-in `container` utility, which it hit accidentally via `md:container` (content ran up to 1536px); the never-generated `sm:container-md` variant is dropped
+- Navigation bar content is held to the container edges while the coloured bar itself stays full-bleed; the `md:mr-5` stopgap on the right-hand group is replaced by the container's own padding
+- Start page follows the same rule: the hero surface and the page background stay full-bleed while hero text, tenant logo, search bar, category tiles and the latest-events row all sit on the container edges. The hero's `px-10`, the search bar's `80vw`/`mx-5`, the events row's `90vw` and the category row's centring plus per-tile `p-5` are replaced by that one container
+- Bookable and event lists, detail pages, the checkout and the booking status page follow the same rule: the page surface stays full-bleed while search bar, result header, filter column and results sit on the container edges. `SearchBar` no longer carries any width of its own (`70vw`/`80vw` dropped), the result map fills the container instead of `70vw`, and the horizontal margins inside `ResultsGrid`, `ResultsList`, `ResultsMap`, `ResultsMapList` and `DetailsArea` are dropped in favour of the container's padding
+- Checkout keeps its two full-bleed panes but aligns their outer content with the container edge, via the new `.container-edge-left` / `.container-edge-right` helpers in `main.css`. They measure the containing block rather than the viewport, so a classic scrollbar is excluded and the line matches `.container` exactly
+- Checkout object column narrowed from 480px to 360px so the step column keeps its working width once the container bounds the page: at 1920px it holds 920px instead of 800px, and the `lg`/`xl` steps are collapsed into one value so the column is no longer wider at 1024px than at 1920px
+- Booking status page uses `.container` instead of its own `max-w-6xl`
+- Result list keeps a 20px gap between the filter column and the result cards, which the container work had removed along with the per-strip margins
+- Bookable and event detail pages lead with the tenant name and the object title; the back button moves below them onto one row with the booking actions (back on the left, *book* and *more* on the right). The row is part of the sticky title block, so the booking action stays reachable while scrolling, and it wraps to a second line when it does not fit. The booking button drops its full-width mobile styling accordingly
+
 ## [1.1.6] — 2026-08-10
 
 ### Fixed
 
+- Time scroller hour change no longer writes a ComputedRef into minutes when the current time has no minutes set yet (`PeriodField`)
+- Booking card actions tolerate missing `lockerInfo` / `bookableItems` without throwing
+- Bookable/event detail content guards nullish item and `information` during render
 - **DEV-845:** Series booking occurrences are sorted chronologically by start time so weekly multi-weekday series appear in date order in checkout preview and review
 - **DEV-846:** Checkout quantity controls respect bookable max availability (`amount`); Plus/input are capped (and locked when max is 1) instead of failing only after validate
 - **DEV-847:** After choosing "Log out and continue as guest" in checkout, pricing is recalculated in guest context so role-based free booking discounts from the previous authenticated session are no longer reused; guest reset also clears coupon/payment prefs and invalidates in-flight validation
@@ -159,6 +195,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 See git tags `v1.0.0-rc.*` for release-candidate history.
 
+[1.1.7]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/ECCdigital/smart-city-booking-store-front/compare/v1.1.3...v1.1.4

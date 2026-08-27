@@ -3,6 +3,7 @@ import { ref } from "vue";
 import ForgotPasswordCard from "~/components/auth/ForgotPasswordCard.vue";
 import ForgotPasswordSuccessCard from "~/components/auth/ForgotPasswordSuccessCard.vue";
 import { useAuth } from "~/composables/auth/useAuth";
+import AuthTitleSection from "~/components/auth/AuthTitleSection.vue";
 
 const form = ref({
   email: "",
@@ -36,19 +37,15 @@ const handleForgotPassword = async () => {
 
 <template>
   <PageBackground variant="poly" :vignette="true" intensity="normal">
-    <div class="hidden lg:flex w-3/5 items-center justify-center text-white">
-      <div class="max-w-md text-center">
-        <h1 class="text-4xl font-bold mb-4">
-          {{ $t("forgotPassword.headline") }}
-        </h1>
-      </div>
-    </div>
+    <AuthTitleSection
+      is-large-version
+      class="hidden lg:flex w-3/5 items-center justify-center"
+    />
 
-    <div class="flex w-full lg:w-2/5 items-center justify-center p-6">
-      <ForgotPasswordSuccessCard
-        v-if="success"
-        class="shadow-2xl/50"
-      />
+    <div class="flex flex-col w-full lg:w-2/5 items-center justify-center p-6">
+      <AuthTitleSection class="lg:hidden" />
+
+      <ForgotPasswordSuccessCard v-if="success" class="shadow-2xl/50" />
       <ForgotPasswordCard
         v-else
         v-model:user-data="form"

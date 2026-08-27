@@ -1,11 +1,11 @@
 <template>
-<div>
-  <h1 class="text-2xl font-bold">{{ props.title }}</h1>
+  <div>
+    <h1 class="text-2xl font-bold">{{ props.title }}</h1>
 
-  <p v-if="description" class="mt-2 mb-5">
-    {{ description }}
-  </p>
-</div>
+    <p v-if="description" class="mt-2 mb-5">
+      {{ description }}
+    </p>
+  </div>
 </template>
 <script setup>
 const props = defineProps({
@@ -20,7 +20,4 @@ const props = defineProps({
 });
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>

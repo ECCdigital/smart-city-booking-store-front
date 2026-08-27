@@ -31,4 +31,4 @@ logs
 # Codex: local-only agent overrides (not committed)
 AGENTS.override.md
 
-.scratch
+.scratch/*
