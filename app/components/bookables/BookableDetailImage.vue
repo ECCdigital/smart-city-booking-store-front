@@ -21,7 +21,9 @@
               name="i-lucide-image-off"
               :class="iconOnly ? 'w-8 h-8' : 'w-4 h-4'"
             />
-            <p v-if="!iconOnly" class="text-xs">Nicht gefunden</p>
+            <p v-if="!iconOnly" class="text-xs">
+              {{ $t("common.imageNotFound") }}
+            </p>
           </div>
         </div>
       </ClientOnly>
@@ -53,7 +55,6 @@
           v-bind="thumbnailOf(image)"
           alt=""
           loading="lazy"
-          decoding="async"
           class="w-full h-full object-cover"
         />
       </button>
@@ -80,7 +81,7 @@ const props = defineProps({
   },
 });
 
-const { imageSource } = useMediaImage();
+const { coverImageOf, imageSource } = useMediaImage();
 
 /**
  * The images to offer, in the order the backend exports them — position 0 is
@@ -91,17 +92,18 @@ const { imageSource } = useMediaImage();
  * is not read here.
  */
 const images = computed(() => {
-  if (props.isEvent) {
-    const teaser = props.item?.information?.teaserImage;
-    return teaser ? [teaser] : [];
-  }
+  const list = props.isEvent
+    ? []
+    : Array.isArray(props.item?.images)
+      ? props.item.images
+      : [];
 
-  const list = Array.isArray(props.item?.images) ? props.item.images : [];
   if (list.length > 0) return list;
 
-  // A bookable the media import has not touched yet only has its legacy
-  // single image, exported as `imgUrl`.
-  return props.item?.imgUrl ? [props.item.imgUrl] : [];
+  // An event, or a bookable the media import has not touched yet: only the
+  // single cover image.
+  const cover = coverImageOf(props.item, props.isEvent);
+  return cover ? [cover] : [];
 });
 
 const activeIndex = ref(0);

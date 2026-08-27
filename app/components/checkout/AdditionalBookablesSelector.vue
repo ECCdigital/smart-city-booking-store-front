@@ -147,7 +147,6 @@ function getErrorForItem(itemId) {
               v-bind="miniImage(entry.item)"
               :alt="entry.item.title"
               loading="lazy"
-              decoding="async"
               class="w-8 h-8 object-cover rounded"
             />
             <UIcon

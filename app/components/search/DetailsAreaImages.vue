@@ -38,15 +38,10 @@ const props = defineProps({
   },
 });
 
-const { imageSource } = useMediaImage();
+const { coverImageOf, imageSource } = useMediaImage();
 
 const image = computed(() =>
-  imageSource(
-    props.isEvent
-      ? props.item?.information?.teaserImage
-      : props.item?.imgUrl,
-    "panel",
-  ),
+  imageSource(coverImageOf(props.item, props.isEvent), "panel"),
 );
 </script>
 

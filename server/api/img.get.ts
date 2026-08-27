@@ -63,6 +63,11 @@ async function assertSafeHost(hostname: string) {
   }
 }
 
+// A foreign host is checked before we call it, so its redirects have to be
+// checked too — otherwise an open redirect there walks us straight into the
+// private network the check exists to keep us out of.
+const MAX_REDIRECTS = 3;
+
 /**
  * Resolves what was asked for into an absolute address.
  *
@@ -119,12 +124,36 @@ export default eventHandler(async (event) => {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-    const res = await fetch(target.toString(), {
-      redirect: "follow",
-      headers,
-      signal: controller.signal,
-    })
+    // Redirects are followed by hand so every hop passes the same host check
+    // as the first one. The backend is trusted for its whole chain.
+    const res = await (async () => {
+      let current = target;
+
+      for (let hop = 0; ; hop++) {
+        const response = await fetch(current.toString(), {
+          redirect: isBackend ? "follow" : "manual",
+          headers,
+          signal: controller.signal,
+        });
+
+        const location = response.headers.get("location");
+        if (response.status < 300 || response.status >= 400 || !location) {
+          return response;
+        }
+
+        if (hop >= MAX_REDIRECTS) {
+          throw new H3Error("Too many redirects");
+        }
+
+        current = new URL(location, current);
+        if (current.protocol !== "http:" && current.protocol !== "https:") {
+          throw new H3Error("Only http/https allowed");
+        }
+        await assertSafeHost(current.hostname);
+      }
+    })()
       .catch((e) => {
+        if (e instanceof H3Error) throw e;
         throw new H3Error("Fetch failed: " + String(e));
       })
       .finally(() => clearTimeout(timer));

@@ -79,13 +79,15 @@ const IMAGE_CONTEXTS = {
 export type ImageContext = keyof typeof IMAGE_CONTEXTS;
 
 /**
- * A reference site as the backend exports it: either an enriched reference
- * object, or one of the derived plain-URL fields (`imgUrl`, `teaserImage`)
- * that resolve a reference to its address.
+ * A reference site as the backend exports it: either a reference object from
+ * an entity's image list, or one of the derived plain-URL fields (`imgUrl`,
+ * `teaserImage`) that already resolve a reference to its address. Only the
+ * resolved address is read — the reference carries more, but nothing here
+ * needs it.
  */
 export type MediaReferenceLike =
   | string
-  | { source?: string; mediaId?: string | null; url?: string | null }
+  | { url?: string | null }
   | null
   | undefined;
 
@@ -93,6 +95,13 @@ export interface ImageSource {
   src: string;
   srcset?: string;
   sizes?: string;
+}
+
+/** As much of a bookable or an event as the cover image lookup needs. */
+export interface ImageBearingItem {
+  imgUrl?: string | null;
+  images?: MediaReferenceLike[];
+  information?: { teaserImage?: MediaReferenceLike } | null;
 }
 
 /**
@@ -114,10 +123,25 @@ function proxied(url: string): string {
 }
 
 function withPreset(url: string, preset: ImagePreset): string {
-  return `${url}?size=${preset}`;
+  return `${url}${url.includes("?") ? "&" : "?"}size=${preset}`;
 }
 
 export function useMediaImage() {
+  /**
+   * The cover image of a bookable or an event.
+   *
+   * The two carry it in different places — a bookable exports the address of
+   * its first image as `imgUrl`, an event has a single `teaserImage` — and
+   * every list and card in the storefront has to ask the same question, so it
+   * is answered once here rather than at each call site.
+   */
+  function coverImageOf(
+    item: ImageBearingItem | null | undefined,
+    isEvent = false,
+  ): MediaReferenceLike {
+    return isEvent ? item?.information?.teaserImage : item?.imgUrl;
+  }
+
   /**
    * The `<img>` attributes for a reference site in a given display context.
    *
@@ -151,5 +175,5 @@ export function useMediaImage() {
     };
   }
 
-  return { imageSource };
+  return { coverImageOf, imageSource };
 }

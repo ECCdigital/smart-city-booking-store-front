@@ -65,7 +65,8 @@
     "phone": "Phone",
     "address": "Street and number",
     "zipCode": "Postal code",
-    "city": "City"
+    "city": "City",
+    "imageNotFound": "Image not found"
   },
   "footer": {
     "legalNotice": "Legal notice",

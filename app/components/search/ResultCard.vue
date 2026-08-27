@@ -22,8 +22,7 @@
           v-if="image && !showImageErrorHint"
           v-bind="image"
           :alt="altText"
-          loading="lazy"
-          decoding="async"
+          :loading="eager ? 'eager' : 'lazy'"
           class="w-full object-cover rounded-t-xl"
           @error="onImageError"
         />
@@ -75,7 +74,7 @@ import { useRedirection } from "~/composables/utils/useRedirection.js";
 import { useMediaImage } from "~/composables/utils/useMediaImage";
 
 const colorMode = useColorMode();
-const { imageSource } = useMediaImage();
+const { coverImageOf, imageSource } = useMediaImage();
 const { goToDetails } = useRedirection();
 
 const theme = computed(() => {
@@ -109,16 +108,19 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // The first card of a list is above the fold and is usually the LCP
+  // element, so its image must not be deferred.
+  eager: {
+    type: Boolean,
+    default: false,
+  },
 });
 const isEvent = computed(() => {
   return props.item.type === "event";
 });
 
 const image = computed(() =>
-  imageSource(
-    isEvent.value ? props.item?.information?.teaserImage : props.item?.imgUrl,
-    "card",
-  ),
+  imageSource(coverImageOf(props.item, isEvent.value), "card"),
 );
 const altText = computed(
   () =>

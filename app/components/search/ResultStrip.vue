@@ -24,8 +24,7 @@
           v-if="image && !showImageErrorHint"
           v-bind="image"
           alt=""
-          loading="lazy"
-          decoding="async"
+          :loading="eager ? 'eager' : 'lazy'"
           class="w-full h-full object-cover rounded-l-sm"
           @error="onImageError"
         />
@@ -84,7 +83,7 @@ import { useRedirection } from "~/composables/utils/useRedirection.js";
 import { useMediaImage } from "~/composables/utils/useMediaImage";
 
 const colorMode = useColorMode();
-const { imageSource } = useMediaImage();
+const { coverImageOf, imageSource } = useMediaImage();
 
 const theme = computed(() => {
   if (colorMode.value === "dark") return "dark";
@@ -121,6 +120,12 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // The first strip of a list is above the fold and is usually the LCP
+  // element, so its image must not be deferred.
+  eager: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const { goToDetails } = useRedirection();
@@ -130,10 +135,7 @@ const isEvent = computed(() => {
 });
 
 const image = computed(() =>
-  imageSource(
-    isEvent.value ? props.item?.information?.teaserImage : props.item?.imgUrl,
-    "strip",
-  ),
+  imageSource(coverImageOf(props.item, isEvent.value), "strip"),
 );
 
 const price = computed(() => {
