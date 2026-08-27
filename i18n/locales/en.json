@@ -380,7 +380,11 @@
     "moreInfo": "More information",
     "relatedTitle": "You might also like:",
     "cancellationTitle": "Cancellation policy",
-    "yes": "Yes"
+    "yes": "Yes",
+    "gallery": {
+      "label": "More images",
+      "showImage": "Show image {index}"
+    }
   },
 
   "detailsAvailability": {

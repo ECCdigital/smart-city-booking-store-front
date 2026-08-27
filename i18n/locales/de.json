@@ -337,7 +337,11 @@
     "moreInfo": "Weitere Informationen",
     "relatedTitle": "Könnte Sie auch interessieren:",
     "cancellationTitle": "Stornierungsbedingungen",
-    "yes": "Ja"
+    "yes": "Ja",
+    "gallery": {
+      "label": "Weitere Bilder",
+      "showImage": "Bild {index} anzeigen"
+    }
   },
 
   "resources": {

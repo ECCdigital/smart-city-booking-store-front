@@ -19,20 +19,11 @@
           class="absolute top-2 left-2"
         />
         <img
-          v-if="!isEvent && item?.imgUrl && !showImageErrorHint"
-          :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"
-          alt="Bild des Buchungsobjekts"
-          class="w-full object-cover rounded-t-xl"
-          @error="onImageError"
-        />
-        <img
-          v-else-if="
-            isEvent && item?.information?.teaserImage && !showImageErrorHint
-          "
-          :src="`/api/img?url=${encodeURIComponent(
-            item.information.teaserImage,
-          )}`"
-          alt=""
+          v-if="image && !showImageErrorHint"
+          v-bind="image"
+          :alt="altText"
+          loading="lazy"
+          decoding="async"
           class="w-full object-cover rounded-t-xl"
           @error="onImageError"
         />
@@ -81,8 +72,10 @@ import ResultCardEventContent from "~/components/search/ResultCardEventContent.v
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
+import { useMediaImage } from "~/composables/utils/useMediaImage";
 
 const colorMode = useColorMode();
+const { imageSource } = useMediaImage();
 const { goToDetails } = useRedirection();
 
 const theme = computed(() => {
@@ -120,6 +113,17 @@ const props = defineProps({
 const isEvent = computed(() => {
   return props.item.type === "event";
 });
+
+const image = computed(() =>
+  imageSource(
+    isEvent.value ? props.item?.information?.teaserImage : props.item?.imgUrl,
+    "card",
+  ),
+);
+const altText = computed(
+  () =>
+    (isEvent.value ? props.item?.information?.name : props.item?.title) || "",
+);
 
 const openEventTicketOptions = ref(false);
 const showImageErrorHint = ref(false);

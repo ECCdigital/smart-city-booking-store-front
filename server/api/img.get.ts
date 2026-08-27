@@ -1,16 +1,42 @@
+/**
+ * The image proxy. Every image the storefront renders comes through here, so
+ * the page stays same-origin and its `img-src` policy stays `'self'`.
+ *
+ * It is deliberately dumb: it never resizes, re-encodes or otherwise inspects
+ * an image. Sizing is the backend's job (`?size=` presets), and choosing among
+ * those presets is the client's (`useMediaImage`). All this route does is
+ * fetch, guard and forward.
+ */
 import {
   eventHandler,
   getQuery,
+  getRequestHeader,
   setHeader,
+  setResponseStatus,
   sendError,
   createError,
   H3Error,
 } from "h3";
 import dns from "node:dns/promises";
 import net from "node:net";
+import { isMediaFilePath } from "~~/shared/utils/mediaUrl";
 
 const MAX_BYTES = 10 * 1024 * 1024; // 10MB Limit
 const TIMEOUT_MS = 8000;
+
+// Cache policy for anything that is not ours: we know nothing about how a
+// foreign host versions its images, so we pick a modest lifetime ourselves.
+const EXTERNAL_CACHE_CONTROL = "public, max-age=3600, s-maxage=86400";
+
+// Headers a media response carries from the backend. Its cache policy is part
+// of the media contract — an immutable original, a revalidatable preset, a
+// booking document that must not be stored — so it is passed on unchanged
+// instead of being overwritten here.
+const PASSTHROUGH_HEADERS = ["cache-control", "etag", "last-modified"];
+
+// Conditional-request headers we hand upstream, so a revalidating browser gets
+// the backend's own 304 instead of a full image re-fetch.
+const CONDITIONAL_HEADERS = ["if-none-match", "if-modified-since"];
 
 function isPrivateIp(ip: string) {
   if (!net.isIP(ip)) return false;
@@ -29,17 +55,31 @@ function isPrivateIp(ip: string) {
 async function assertSafeHost(hostname: string) {
   if (!hostname) throw new H3Error("Invalid hostname");
 
-  const isDev = process.env.NODE_ENV === "development";
-  if (isDev && (hostname === "localhost" || hostname === "127.0.0.1")) {
-    return;
-  }
-
   const addrs = await dns.lookup(hostname, { all: true });
   for (const a of addrs) {
     if (isPrivateIp(a.address)) {
       throw new H3Error("Blocked private IP");
     }
   }
+}
+
+/**
+ * Resolves what was asked for into an absolute address.
+ *
+ * Media URLs arrive relative — the backend exports them that way so the same
+ * response works behind any host — and are resolved against the configured
+ * backend. External references arrive absolute and are taken as they are.
+ */
+function resolveTarget(rawUrl: string, apiBaseUrl: string) {
+  if (rawUrl.startsWith("/")) {
+    if (!apiBaseUrl) {
+      throw new H3Error("Backend base URL is not configured");
+    }
+
+    return new URL(rawUrl, apiBaseUrl);
+  }
+
+  return new URL(rawUrl);
 }
 
 export default eventHandler(async (event) => {
@@ -49,23 +89,64 @@ export default eventHandler(async (event) => {
       throw new H3Error("Missing url parameter");
     }
 
-    const u = new URL(rawUrl);
-    if (u.protocol !== "http:" && u.protocol !== "https:") {
+    const { apiBaseUrl } = useRuntimeConfig(event);
+    const target = resolveTarget(rawUrl, apiBaseUrl);
+
+    if (target.protocol !== "http:" && target.protocol !== "https:") {
       throw new H3Error("Only http/https allowed");
     }
 
-    await assertSafeHost(u.hostname);
+    // The backend is the one private address we are allowed to reach: it is
+    // configured by the operator, and in a container network it almost always
+    // resolves to a private IP. Nothing else gets an exception.
+    const isBackend =
+      Boolean(apiBaseUrl) && target.origin === new URL(apiBaseUrl).origin;
+
+    if (!isBackend) {
+      await assertSafeHost(target.hostname);
+    }
+
+    const isMediaFile = isBackend && isMediaFilePath(target.pathname);
+
+    const headers: Record<string, string> = {};
+    if (isMediaFile) {
+      for (const name of CONDITIONAL_HEADERS) {
+        const value = getRequestHeader(event, name);
+        if (value) headers[name] = value;
+      }
+    }
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-    const res = await fetch(u.toString(), {
+    const res = await fetch(target.toString(), {
       redirect: "follow",
+      headers,
       signal: controller.signal,
-    }).catch((e) => {
-      throw new H3Error("Fetch failed: " + String(e));
-    });
-    clearTimeout(timer);
+    })
+      .catch((e) => {
+        throw new H3Error("Fetch failed: " + String(e));
+      })
+      .finally(() => clearTimeout(timer));
+
+    const forwardHeaders = () => {
+      if (!isMediaFile) {
+        setHeader(event, "Cache-Control", EXTERNAL_CACHE_CONTROL);
+        return;
+      }
+
+      for (const name of PASSTHROUGH_HEADERS) {
+        const value = res.headers.get(name);
+        if (value) setHeader(event, name, value);
+      }
+    };
+
+    // The backend says the copy the browser already holds is still good.
+    if (res.status === 304) {
+      forwardHeaders();
+      setResponseStatus(event, 304);
+      return null;
+    }
 
     if (!res.ok) {
       throw new H3Error(`Upstream ${res.status}`);
@@ -93,11 +174,8 @@ export default eventHandler(async (event) => {
     }
     const buf = Buffer.concat(chunks);
 
-    // Optional: Transform mit sharp (strip metadata, resize etc.)
-    // const processed = await sharp(buf).rotate().withMetadata({}).toBuffer()
-
     setHeader(event, "Content-Type", ct);
-    setHeader(event, "Cache-Control", "public, max-age=3600, s-maxage=86400");
+    forwardHeaders();
     return buf;
   } catch (err: unknown) {
     if (err instanceof H3Error) {

@@ -1,4 +1,6 @@
 <script setup>
+import { useMediaImage } from "~/composables/utils/useMediaImage";
+
 const props = defineProps({
   items: {
     type: Array,
@@ -15,6 +17,12 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["update:modelValue"]);
+
+const { imageSource } = useMediaImage();
+
+function miniImage(item) {
+  return imageSource(item?.imgUrl, "mini");
+}
 
 const selected = computed({
   get: () => props.modelValue,
@@ -135,9 +143,11 @@ function getErrorForItem(itemId) {
             "
           >
             <img
-              v-if="entry.item.imgUrl"
-              :src="`/api/img?url=${encodeURIComponent(entry.item.imgUrl)}`"
+              v-if="miniImage(entry.item)"
+              v-bind="miniImage(entry.item)"
               :alt="entry.item.title"
+              loading="lazy"
+              decoding="async"
               class="w-8 h-8 object-cover rounded"
             />
             <UIcon

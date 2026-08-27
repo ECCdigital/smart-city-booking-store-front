@@ -21,20 +21,11 @@
         />
 
         <img
-          v-if="!isEvent && item?.imgUrl && !showImageErrorHint"
-          :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
+          v-if="image && !showImageErrorHint"
+          v-bind="image"
           alt=""
-          class="w-full h-full object-cover rounded-l-sm"
-          @error="onImageError"
-        />
-        <img
-          v-else-if="
-            isEvent && item?.information?.teaserImage && !showImageErrorHint
-          "
-          :src="`/api/img?url=${encodeURIComponent(
-            item.information.teaserImage,
-          )}`"
-          alt=""
+          loading="lazy"
+          decoding="async"
           class="w-full h-full object-cover rounded-l-sm"
           @error="onImageError"
         />
@@ -90,8 +81,10 @@ import ResultStripBookableContent from "~/components/search/ResultStripBookableC
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
+import { useMediaImage } from "~/composables/utils/useMediaImage";
 
 const colorMode = useColorMode();
+const { imageSource } = useMediaImage();
 
 const theme = computed(() => {
   if (colorMode.value === "dark") return "dark";
@@ -135,6 +128,13 @@ const { goToDetails } = useRedirection();
 const isEvent = computed(() => {
   return props.item.type === "event";
 });
+
+const image = computed(() =>
+  imageSource(
+    isEvent.value ? props.item?.information?.teaserImage : props.item?.imgUrl,
+    "strip",
+  ),
+);
 
 const price = computed(() => {
   if (props.entryPageMode) {
