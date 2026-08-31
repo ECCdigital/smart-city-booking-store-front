@@ -6,8 +6,8 @@
  */
 
 /**
- * The delivery route of the backend's media library: relative, scoped to a
- * tenant or to the instance (`/api/v2/instance/...`).
+ * The delivery route of the backend's media library, scoped to a tenant or to
+ * the instance (`/api/v2/instance/...`).
  */
 const MEDIA_FILE_PATH = /^\/api\/v2\/[^/]+\/media\/[^/]+\/file$/;
 
@@ -22,11 +22,22 @@ export function isMediaFilePath(pathname: string): boolean {
 }
 
 /**
- * The same question for a URL that may still carry a query string.
+ * The same question for a full URL. The backend exports media addresses
+ * relative on most routes and absolute on the embed interfaces the storefront
+ * reads (`/json/...`), so both forms have to be recognized — the route's path
+ * shape is the stable part of the contract, not the host.
  *
- * @param url - A relative media URL as the backend exports it.
+ * @param url - A media URL as the backend exports it, relative or absolute,
+ *   with or without a query string.
  */
 export function isMediaFileUrl(url: string): boolean {
-  const [pathname] = url.split("?");
-  return isMediaFilePath(pathname ?? "");
+  let pathname: string;
+
+  try {
+    pathname = new URL(url, "http://relative.invalid").pathname;
+  } catch {
+    return false;
+  }
+
+  return isMediaFilePath(pathname);
 }

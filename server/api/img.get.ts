@@ -71,9 +71,10 @@ const MAX_REDIRECTS = 3;
 /**
  * Resolves what was asked for into an absolute address.
  *
- * Media URLs arrive relative — the backend exports them that way so the same
- * response works behind any host — and are resolved against the configured
- * backend. External references arrive absolute and are taken as they are.
+ * Relative media URLs are resolved against the configured backend; the embed
+ * interfaces export media URLs absolute, and those — like external references —
+ * are taken as they are. Whether an absolute URL is the backend's own is
+ * decided below by comparing origins, never here.
  */
 function resolveTarget(rawUrl: string, apiBaseUrl: string) {
   if (rawUrl.startsWith("/")) {

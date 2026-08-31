@@ -84,25 +84,25 @@ const props = defineProps({
 const { coverImageOf, imageSource } = useMediaImage();
 
 /**
- * The images to offer, in the order the backend exports them — position 0 is
- * the cover image.
- *
- * Only bookables carry a typed image list. An event has a single teaser image;
- * its `images` field is a legacy array the media library has not typed, so it
- * is not read here.
+ * The images to offer. A bookable's list carries its cover at position 0; an
+ * event's cover is its teaser image and `images` is a separate gallery, so the
+ * teaser is put in front. Empty positions drop out — the backend keeps them to
+ * preserve list indices.
  */
 const images = computed(() => {
-  const list = props.isEvent
-    ? []
-    : Array.isArray(props.item?.images)
-      ? props.item.images
-      : [];
+  const list = (
+    Array.isArray(props.item?.images) ? props.item.images : []
+  ).filter((image) => (typeof image === "object" ? image?.url : image));
+
+  if (props.isEvent) {
+    const cover = coverImageOf(props.item, true);
+    return cover ? [cover, ...list] : list;
+  }
 
   if (list.length > 0) return list;
 
-  // An event, or a bookable the media import has not touched yet: only the
-  // single cover image.
-  const cover = coverImageOf(props.item, props.isEvent);
+  // A bookable the media import has not touched yet: only the single cover.
+  const cover = coverImageOf(props.item, false);
   return cover ? [cover] : [];
 });
 

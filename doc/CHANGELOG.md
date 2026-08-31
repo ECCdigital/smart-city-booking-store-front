@@ -11,6 +11,11 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 - Images are loaded at the size they are rendered at: `useMediaImage()` builds `src`/`srcset`/`sizes` from the backend's media presets (`thumb`, `sm`, `md`, `lg`) per display context — result cards, result strips, the detail hero, the checkout sidebar and the checkout add-on icons. It replaces the nine places that assembled a proxy URL by hand. External image references have no presets and go through the proxy unchanged. `thumb` is a square centre crop rather than a scaled-down original, so it is offered only where the box is a small square (checkout add-on icons, gallery thumbnails) and never mixed into a `srcset` with the other three — which means the smallest image a result strip can load is `sm`
 - Detail page shows the bookable's full image list, cover image first, as a thumbnail row under the main image
+- The event detail page shows the event's image gallery, teaser image first — the list was skipped as untyped legacy, but the backend exports it typed since the media library
+
+### Fixed
+
+- A media URL is recognized by its path no matter whether it arrives relative or absolute: the backend's embed interface (`/json/...`) exports absolute media URLs now, which fell through the relative-only check — those images silently loaded the full-size original without any `?size=` preset
 
 ### Changed
 
