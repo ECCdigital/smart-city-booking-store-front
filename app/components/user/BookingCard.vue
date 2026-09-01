@@ -39,7 +39,7 @@
             }"
           >
             <UButton
-              icon="i-lucide-ellipsis"
+              icon="i-lucide-ellipsis-vertical"
               class="rounded-3xl"
               variant="soft"
               color="neutral"
@@ -146,13 +146,13 @@ const { downloadBookingIcal } = useIcalDownload();
 const actionOptions = computed(() => {
   const options = [];
 
-  if (props.booking.lockerInfo?.length > 0) {
+  /*if(props.booking.lockerInfo.length > 0){
     options.push({
       label: "Schlüssel anzeigen",
       icon: "i-lucide-lock",
       onSelect: openMobileKey,
     });
-  }
+  }*/
 
   if (isEvent.value || (props.booking.timeBegin && props.booking.timeEnd)) {
     options.push({

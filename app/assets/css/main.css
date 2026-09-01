@@ -9,6 +9,22 @@ body {
     background-color: #020617; /* bg-gray-950 */
 }
 
+/*
+ * iOS Safari zooms into a focused form field whose font-size is below 16px.
+ * Nuxt UI's default field size (`md`) is `text-sm` = 14px, so every input on a
+ * phone triggered that zoom and left the page zoomed in afterwards.
+ * Below Tailwind's `sm` breakpoint (the width the app treats as "phone") all
+ * fields get at least 16px. Deliberately unlayered: it must beat the utility
+ * classes Nuxt UI puts on the field. Desktop is untouched.
+ */
+@media (width < 40rem) {
+    input,
+    textarea,
+    select {
+        font-size: max(16px, 1em);
+    }
+}
+
 .glass {
   @apply bg-slate-50/60 dark:bg-gray-900/80 backdrop-blur-lg;
 }
@@ -36,6 +52,14 @@ body {
     margin: auto;
     padding-left: 20px;
     padding-right: 20px;
+}
+
+@keyframes ping-soft {
+    75%,
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
 }
 
 /*

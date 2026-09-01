@@ -11,8 +11,8 @@ export const navigationPresets = {
       disabled: false,
     },
     {
-      value: "/account/keys",
-      label: "Digitale Schlüssel",
+      value: "/mobile-key",
+      label: "Schlüssel",
       icon: "i-lucide-key-round",
       disabled: false,
     },

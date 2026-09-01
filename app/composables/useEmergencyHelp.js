@@ -1,20 +1,16 @@
 import { useMobileKey } from "~/composables/api/useMobileKey.js";
 
-export function useEmergencyHelp(tenantId, bookingId, lockerInfo) {
+export function useEmergencyHelp(tenantId, bookingId, providerId) {
     const { customerService } = useMobileKey();
     const serviceInfo = ref(null);
 
-    const ifbsLockerInfo = computed(() =>
-        lockerInfo.value?.find((info) => info.lockerSystem === "ifbs"),
-    );
-
     async function fetchCustomerServiceInfo() {
-        if (!ifbsLockerInfo.value) return;
+        if (!providerId) return;
         try {
             const data = await customerService(
                 unref(tenantId),
                 unref(bookingId),
-                ifbsLockerInfo.value.lockerSystem,
+                providerId,
             );
             serviceInfo.value = data;
         } catch (e) {
@@ -22,5 +18,5 @@ export function useEmergencyHelp(tenantId, bookingId, lockerInfo) {
         }
     }
 
-    return { serviceInfo, ifbsLockerInfo, fetchCustomerServiceInfo };
+    return { serviceInfo, fetchCustomerServiceInfo };
 }

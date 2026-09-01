@@ -9,7 +9,7 @@
         icon="i-lucide-key-round"
         title="Digitale Schlüssel"
         description="Öffnen Sie Türen, Schließfächer oder Fahrradboxen mit Ihrem Smartphone."
-        to="/account/keys"
+        to="/mobile-key"
       />
 
       <QuickAccessCard
@@ -27,6 +27,8 @@
       />
     </div>
 
+    <!--
+    toDo - bisher nur IFBS! Später noch für weitere Access Points erweitern
     <div v-if="activeBookingsWithLocking?.length">
       <h2 class="text-xl font-bold">
         Aktuelle Buchungen mit Schließberechtigung
@@ -36,6 +38,7 @@
         :use-pagination="activeBookingsWithLocking.length > 10"
       />
     </div>
+    -->
     <div class="md:flex justify-between items-center w-full mb-4">
       <h2 class="mt-5 text-xl font-bold">Meine Buchungen</h2>
       <BookingSearchFilterArea
@@ -177,6 +180,8 @@ function setFilteredBookings(newBookings) {
   filteredBookings.value = newBookings.map((b) => ({ ...b }));
 }
 
+//    toDo - bisher nur IFBS! Später noch für weitere Access Points erweitern
+/*
 const activeBookingsWithLocking = computed(() => {
   const withLockerInfo = sortedBookings.value.filter(
     (booking) =>
@@ -193,7 +198,8 @@ const activeBookingsWithLocking = computed(() => {
       b.timeEnd + twoHoursMs > currentTime &&
       b.isRejected === false,
   );
-});
+})
+ */
 </script>
 
 <style scoped></style>

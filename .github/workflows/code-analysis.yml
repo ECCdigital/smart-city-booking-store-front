@@ -8,7 +8,12 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        # 18.x dropped, not overlooked: nuxt 4.2.1 and @oxc-parser's native
+        # bindings both require node "^20.19.0 || >=22.12.0", so `npm ci`
+        # cannot complete there. If this matrix grows a second entry, add
+        # `fail-fast: false` too, or a lint failure on one line will cancel
+        # the other before its tests run.
+        node-version: [20.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -17,6 +22,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
+        id: install
         run: npm ci
       - name: Run ESLint
         run: npm run lint:check
+      # Runs even when ESLint fails: the repo carries pre-existing lint errors,
+      # and a test step gated on a green lint would stay silent for exactly as
+      # long as those errors exist. Still skipped when the install failed —
+      # without node_modules the run would only mask the real cause.
+      - name: Run tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm test

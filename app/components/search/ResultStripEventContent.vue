@@ -9,7 +9,7 @@
         >
           {{ event.information.name }}
         </p>
-        <p>{{ tenantName }}</p>
+        <p>{{ getTenantName(event.tenantId) }}</p>
       </div>
 
       <!-- Zeitpunkt, Adresse und Entfernung -->
@@ -75,8 +75,6 @@ import EventAdressInformation from "~/components/events/EventAdressInformation.v
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import { useTenantStore } from "~~/stores/tenant.js";
 import EventBookingButton from "~/components/events/EventBookingButton.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
-import { useRedirection } from "~/composables/utils/useRedirection.js";
 
 const props = defineProps({
   event: {
@@ -103,6 +101,8 @@ const props = defineProps({
 
 const emit = defineEmits(["openDetails"]);
 
+const { getTenantName } = useTenant();
+
 const hasLongTitle = computed(() => {
   return (props.event?.information.name?.length ?? 0) > 60;
 });
@@ -110,10 +110,6 @@ const hasLongTitle = computed(() => {
 const { sanitizeHtml } = useSanitizeHtml();
 const htmlTeaserText = computed(() => {
   return sanitizeHtml(props.event.information.teaserText || "");
-});
-
-const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.event.tenantId).name;
 });
 
 function openDetails() {

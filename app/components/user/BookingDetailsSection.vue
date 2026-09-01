@@ -14,7 +14,7 @@
     <div class="flex mb-5">
       <div class="basis-1/2">
         <p class="font-medium">Mandant</p>
-        <p>{{ tenantName }}</p>
+        <p>{{ getTenantName(booking.tenantId) }}</p>
       </div>
       <div class="">
         <p class="font-medium">Status</p>
@@ -153,15 +153,7 @@ const eventStore = useEventStore();
 
 const { formatDate, formatPrice } = useFormatting();
 const { downloadBookingIcal } = useIcalDownload();
-
-const tenantsStore = useTenantStore();
-const tenantName = computed(() => {
-  const tenant = tenantsStore.getTenantById(props.booking.tenantId);
-  if (tenant) {
-    return tenant.name;
-  }
-  return "Unbekannt";
-});
+const { getTenantName } = useTenant();
 
 const eventIds = computed(() => {
   return props.booking.bookableItems

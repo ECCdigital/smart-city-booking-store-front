@@ -12,7 +12,7 @@
         >
           {{ bookable?.title }}
         </p>
-        <p>{{ tenantName }}</p>
+        <p>{{ getTenantName(bookable.tenantId) }}</p>
       </div>
 
       <!-- Adresse und Entfernung -->
@@ -141,9 +141,7 @@ const hasLongTitle = computed(() => {
   return (props.bookable?.title?.length ?? 0) > 60;
 });
 
-const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.bookable.tenantId).name;
-});
+const { getTenantName } = useTenant();
 
 const { contrastToPrimary } = useContrastColor();
 
