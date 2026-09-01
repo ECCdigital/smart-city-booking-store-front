@@ -9,6 +9,7 @@
           :is-not-bookable="!b.isBookable"
           :calculated-price="b.calculatedPrice"
           :entry-page-mode="entryPageMode"
+          :eager="i === 0"
       />
     </UPageList>
 
