@@ -20,6 +20,7 @@
         <ResultCard
           :item="b"
           :calculated-price="b.calculatedPrice"
+          :eager="i === 0"
           entry-page-mode
           class="flex flex-col h-full w-full"
         />

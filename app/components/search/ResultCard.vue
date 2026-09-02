@@ -19,20 +19,10 @@
           class="absolute top-2 left-2"
         />
         <img
-          v-if="!isEvent && item?.imgUrl && !showImageErrorHint"
-          :src="`/api/img?url=${encodeURIComponent(item?.imgUrl)}`"
-          alt="Bild des Buchungsobjekts"
-          class="w-full object-cover rounded-t-xl"
-          @error="onImageError"
-        />
-        <img
-          v-else-if="
-            isEvent && item?.information?.teaserImage && !showImageErrorHint
-          "
-          :src="`/api/img?url=${encodeURIComponent(
-            item.information.teaserImage,
-          )}`"
-          alt=""
+          v-if="image && !showImageErrorHint"
+          v-bind="image"
+          :alt="altText"
+          :loading="eager ? 'eager' : 'lazy'"
           class="w-full object-cover rounded-t-xl"
           @error="onImageError"
         />
@@ -81,8 +71,10 @@ import ResultCardEventContent from "~/components/search/ResultCardEventContent.v
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
+import { useMediaImage } from "~/composables/utils/useMediaImage";
 
 const colorMode = useColorMode();
+const { coverImageOf, imageSource } = useMediaImage();
 const { goToDetails } = useRedirection();
 
 const theme = computed(() => {
@@ -116,10 +108,24 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // The first card of a list is above the fold and is usually the LCP
+  // element, so its image must not be deferred.
+  eager: {
+    type: Boolean,
+    default: false,
+  },
 });
 const isEvent = computed(() => {
   return props.item.type === "event";
 });
+
+const image = computed(() =>
+  imageSource(coverImageOf(props.item, isEvent.value), "card"),
+);
+const altText = computed(
+  () =>
+    (isEvent.value ? props.item?.information?.name : props.item?.title) || "",
+);
 
 const openEventTicketOptions = ref(false);
 const showImageErrorHint = ref(false);

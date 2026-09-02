@@ -5,16 +5,8 @@
       style="max-width: 800px; aspect-ratio: 16/9"
     >
       <img
-        v-if="!props.isEvent && item?.imgUrl"
-        :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
-        alt=""
-        class="w-full h-full object-contain rounded-l-xl"
-      />
-      <img
-        v-else-if="props.isEvent && item?.information?.teaserImage"
-        :src="`/api/img?url=${encodeURIComponent(
-          item.information.teaserImage,
-        )}`"
+        v-if="image"
+        v-bind="image"
         alt=""
         class="w-full h-full object-contain rounded-l-xl"
       />
@@ -31,6 +23,7 @@
 </template>
 <script setup>
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
+import { useMediaImage } from "~/composables/utils/useMediaImage";
 
 const colorMode = useColorMode();
 
@@ -44,6 +37,12 @@ const props = defineProps({
     default: false,
   },
 });
+
+const { coverImageOf, imageSource } = useMediaImage();
+
+const image = computed(() =>
+  imageSource(coverImageOf(props.item, props.isEvent), "panel"),
+);
 </script>
 
 <style scoped></style>

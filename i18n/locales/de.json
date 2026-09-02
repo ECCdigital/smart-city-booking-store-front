@@ -69,7 +69,8 @@
     "city": "Stadt",
     "clear": "Löschen",
     "backToLogin": "Zurück zur Anmeldung",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "imageNotFound": "Bild nicht gefunden"
   },
   "colorMode": {
     "toggle": "Farbmodus",
@@ -337,7 +338,11 @@
     "moreInfo": "Weitere Informationen",
     "relatedTitle": "Könnte Sie auch interessieren:",
     "cancellationTitle": "Stornierungsbedingungen",
-    "yes": "Ja"
+    "yes": "Ja",
+    "gallery": {
+      "label": "Weitere Bilder",
+      "showImage": "Bild {index} anzeigen"
+    }
   },
 
   "resources": {
