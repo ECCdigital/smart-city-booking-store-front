@@ -3,7 +3,7 @@ import { isUnlocked } from "~/utils/accessOpenFlow.js";
 /**
  * How an access point is shown, wherever it is shown: what it is called, and
  * the badge that says how it opens. Two places render this - the row in
- * `MobileKeyBookingList.vue` and the card in `AccessPointCard.vue` - in two
+ * `AccessPointListRow.vue` and the card in `AccessPointCard.vue` - in two
  * different shapes, but they must never disagree about the words.
  *
  * The lock symbol below belongs to the row alone. The card draws its own from

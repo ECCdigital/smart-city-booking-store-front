@@ -127,17 +127,21 @@
       <p>{{ booking.comment }}</p>
     </div>
 
-    <!-- access points
-    <div class="bg-pink-200 text-xs">
-      accessPoints:
-      <pre class="bg-pink-400">
-        {{ accessPoints }}
-      </pre>
-    </div>-->
+    <!-- keys / access points  -->
+    <div v-if="accessPoints.length > 0" class="mb-5">
+      <p class="font-medium">Schlüssel</p>
+      <AccessPointListRow
+        v-for="(accessPoint, i) in accessPoints"
+        :key="accessPoint.id"
+        :access-point="accessPoint"
+        :booking="booking"
+        :show-separator="i < accessPoints.length - 1"
+        class="bg-gray-200 dark:bg-gray-800 p-2 rounded-sm"
+      />
+    </div>
   </div>
 </template>
 <script setup>
-import { useTenantStore } from "~~/stores/tenant.js";
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
 import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
@@ -148,6 +152,7 @@ import { useEventStore } from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
+import AccessPointListRow from "~/components/mobileKey/AccessPointListRow.vue";
 
 const { t } = useI18n();
 
@@ -165,7 +170,7 @@ const { downloadBookingIcal } = useIcalDownload();
 const { getTenantName } = useTenant();
 
 const { getAccessPoints } = useAccessPoints();
-const accessPoints = ref(null);
+const accessPoints = ref([]);
 
 const eventIds = computed(() => {
   return props.booking.bookableItems
@@ -288,17 +293,21 @@ async function downloadAppointment() {
 }
 
 async function loadAccessPoints() {
-  await getAccessPoints(props.booking.tenantId, props.booking.id)
-    .then((response) => {
-      accessPoints.value = response.data;
-    })
-    .catch((error) => {
-      console.error("Error fetching access points:", error);
-    });
+  try {
+    const response = await getAccessPoints(
+      props.booking.tenantId,
+      props.booking.id,
+    );
+    const list = response?.data ?? response;
+    accessPoints.value = Array.isArray(list) ? list : [];
+  } catch (error) {
+    console.error("Error fetching access points:", error);
+    accessPoints.value = [];
+  }
 }
 
-onMounted(() => {
-  loadAccessPoints();
+watch(() => [props.booking.tenantId, props.booking.id], loadAccessPoints, {
+  immediate: true,
 });
 </script>
 
