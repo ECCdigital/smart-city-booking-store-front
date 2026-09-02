@@ -126,6 +126,14 @@
       <p class="font-medium">Ihr Kommentar</p>
       <p>{{ booking.comment }}</p>
     </div>
+
+    <!-- access points
+    <div class="bg-pink-200 text-xs">
+      accessPoints:
+      <pre class="bg-pink-400">
+        {{ accessPoints }}
+      </pre>
+    </div>-->
   </div>
 </template>
 <script setup>
@@ -139,6 +147,7 @@ import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { useEventStore } from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
+import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 
 const { t } = useI18n();
 
@@ -154,6 +163,9 @@ const eventStore = useEventStore();
 const { formatDate, formatPrice } = useFormatting();
 const { downloadBookingIcal } = useIcalDownload();
 const { getTenantName } = useTenant();
+
+const { getAccessPoints } = useAccessPoints();
+const accessPoints = ref(null);
 
 const eventIds = computed(() => {
   return props.booking.bookableItems
@@ -274,6 +286,20 @@ const bookableTitles = computed(() => {
 async function downloadAppointment() {
   await downloadBookingIcal(props.booking.id, props.booking.tenantId);
 }
+
+async function loadAccessPoints() {
+  await getAccessPoints(props.booking.tenantId, props.booking.id)
+    .then((response) => {
+      accessPoints.value = response.data;
+    })
+    .catch((error) => {
+      console.error("Error fetching access points:", error);
+    });
+}
+
+onMounted(() => {
+  loadAccessPoints();
+});
 </script>
 
 <style scoped></style>
