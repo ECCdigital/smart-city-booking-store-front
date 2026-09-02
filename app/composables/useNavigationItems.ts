@@ -23,12 +23,12 @@ export const navigationPresets = {
       icon: "i-lucide-book-heart",
       disabled: true,
     },*/
-    /*{
+    {
       value: "/account/invoices",
       label: "Rechnungen",
       icon: "i-lucide-wallet-cards",
-      disabled: true,
-    },*/
+      disabled: false,
+    },
     {
       value: null,
       label: "Benutzerkonto",

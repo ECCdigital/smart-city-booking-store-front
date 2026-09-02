@@ -72,12 +72,11 @@ const items = computed(() => {
         icon: "i-lucide-key-round",
         onSelect: () => goTo("/mobile-key"),
       },
-      /*{
+      {
         label: "Rechnungen",
         icon: "i-lucide-wallet-cards",
         onSelect: () => goTo("/account/invoices"),
-        disabled: true,
-      },*/
+      },
       /*{
         label: "Favoriten",
         icon: "i-lucide-book-heart",

@@ -807,6 +807,28 @@
     }
   },
 
+  "account": {
+    "invoices": {
+      "title": "Ihre Rechnungen und Zahlungsbelege",
+      "emptyTitle": "Keine Rechnungen vorhanden",
+      "emptyDescription": "Aktuell sind für Ihr Konto keine Rechnungen verfügbar. Sobald Rechnungen erstellt wurden, werden diese hier angezeigt.",
+      "unknownBookable": "Unbekanntes Buchungsobjekt",
+      "columns": {
+        "createdAt": "Erstelldatum",
+        "title": "Titel",
+        "type": "Dokumenttyp",
+        "bookingId": "Buchungs-ID",
+        "bookables": "Buchungsobjekte",
+        "paid": "Bezahlt"
+      },
+      "types": {
+        "invoice": "Rechnung",
+        "receipt": "Zahlungsbeleg",
+        "unknown": "Unbekannt"
+      }
+    }
+  },
+
   "booking_status": {
     "missing_parameters": "Es fehlen erforderliche Angaben.",
     "internal_error": "Es ist ein technischer Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
