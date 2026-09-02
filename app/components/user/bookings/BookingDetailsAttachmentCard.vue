@@ -96,7 +96,10 @@ function getBookableTitle(bookableId) {
   if (!props.bookables || props.bookables.length === 0) {
     return "Unbekanntes Buchungsobjekt";
   }
-  return props.bookables.find((bookable) => bookable.id === bookableId).title;
+  return (
+    props.bookables.find((bookable) => bookable.id === bookableId)?.title ||
+    "Unbekanntes Buchungsobjekt"
+  );
 }
 
 async function downloadAttachment() {
@@ -110,13 +113,13 @@ async function downloadAttachment() {
       blob = await useBookings().getBookingReceipt(
         props.tenantId,
         props.bookingId,
-        props.attachment.name
+        props.attachment.name,
       );
     } else if (props.attachment.type === "invoice") {
       blob = await useBookings().getBookingInvoice(
         props.tenantId,
         props.bookingId,
-        props.attachment.name
+        props.attachment.name,
       );
     }
 
@@ -128,7 +131,7 @@ async function downloadAttachment() {
     link.href = url;
     link.setAttribute(
       "download",
-      props.attachment.title ? props.attachment.title : props.attachment.name
+      props.attachment.title ? props.attachment.title : props.attachment.name,
     );
     document.body.appendChild(link);
     link.click();
@@ -136,7 +139,7 @@ async function downloadAttachment() {
     const notification = useNotification();
     notification.error(
       "Das Dokument konnte nicht heruntergeladen werden.",
-      "Download fehlgeschlagen"
+      "Download fehlgeschlagen",
     );
   }
 }
