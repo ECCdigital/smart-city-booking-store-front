@@ -17,18 +17,18 @@ export const navigationPresets = {
       disabled: false,
     },
 
-    {
+    /*{
       value: "/account/favorites",
       label: "Favoriten",
       icon: "i-lucide-book-heart",
       disabled: true,
-    },
-    {
+    },*/
+    /*{
       value: "/account/invoices",
       label: "Rechnungen",
       icon: "i-lucide-wallet-cards",
       disabled: true,
-    },
+    },*/
     {
       value: null,
       label: "Benutzerkonto",
