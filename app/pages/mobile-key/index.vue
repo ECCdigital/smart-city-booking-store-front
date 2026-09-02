@@ -22,6 +22,7 @@
           class="p-3 cursor-pointer"
           @click="() => (viewMode = 'list')"
         />
+        <!--
         <UButton
           icon="i-lucide-map"
           :variant="viewMode === 'map' ? 'subtle' : 'ghost'"
@@ -30,6 +31,7 @@
           disabled
           @click="() => (viewMode = 'map')"
         />
+        -->
       </div>
       <USelect
         v-model="bookingFilter"
