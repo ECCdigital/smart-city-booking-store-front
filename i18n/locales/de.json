@@ -809,6 +809,14 @@
       "free": "Kostenfrei",
       "paid": "Bezahlt",
       "unpaid": "Nicht bezahlt"
+    },
+    "status": {
+      "requested": "Ausstehend",
+      "requestedTooltip": "Die Buchung muss noch vom Anbieter freigegeben werden.",
+      "payment_due": "Bestätigt",
+      "confirmed": "Bestätigt",
+      "rejected": "Abgelehnt",
+      "cancelled": "Storniert"
     }
   },
 

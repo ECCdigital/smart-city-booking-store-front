@@ -431,6 +431,14 @@
       "free": "Free of charge",
       "paid": "Paid",
       "unpaid": "Unpaid"
+    },
+    "status": {
+      "requested": "Pending",
+      "requestedTooltip": "The booking still has to be approved by the provider.",
+      "payment_due": "Confirmed",
+      "confirmed": "Confirmed",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
     }
   },
 

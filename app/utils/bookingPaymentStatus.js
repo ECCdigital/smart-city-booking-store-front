@@ -1,3 +1,11 @@
+import { isSettledBooking } from "~/utils/bookingStatus.js";
+
+/**
+ * The slice of a booking the payment display reads: `status` first, the
+ * flags only where a payload carries no status.
+ * @typedef {{ status?: string, isPayed?: boolean, priceEur?: number | string | null, cancellationRefund?: { cancelledFrom?: string } }} PaymentStatusBooking
+ */
+
 export const PAYMENT_DISPLAY_STATUS = {
   FREE: "free",
   PAID: "paid",
@@ -23,21 +31,24 @@ export function isFreeBooking(booking) {
 }
 
 /**
- * @param {{ isPayed?: boolean, priceEur?: number | string | null }} booking
+ * Whether the booking is free, paid, or still owes something - read off
+ * `booking.status` through `isSettledBooking`; the price is checked first so
+ * a free booking reads as free in every state.
+ * @param {PaymentStatusBooking} booking
  * @returns {typeof PAYMENT_DISPLAY_STATUS[keyof typeof PAYMENT_DISPLAY_STATUS]}
  */
 export function resolvePaymentDisplayStatus(booking) {
   if (isFreeBooking(booking)) {
     return PAYMENT_DISPLAY_STATUS.FREE;
   }
-  if (booking?.isPayed === true) {
+  if (isSettledBooking(booking)) {
     return PAYMENT_DISPLAY_STATUS.PAID;
   }
   return PAYMENT_DISPLAY_STATUS.UNPAID;
 }
 
 /**
- * @param {{ isPayed?: boolean, priceEur?: number | string | null }} booking
+ * @param {PaymentStatusBooking} booking
  * @returns {boolean}
  */
 export function isPaidBooking(booking) {
@@ -45,7 +56,7 @@ export function isPaidBooking(booking) {
 }
 
 /**
- * @param {{ isPayed?: boolean, priceEur?: number | string | null }} booking
+ * @param {PaymentStatusBooking} booking
  * @returns {boolean}
  */
 export function isUnpaidBooking(booking) {
@@ -89,7 +100,7 @@ const CHECKOUT_PAYMENT_LABEL_KEY = {
 };
 
 /**
- * @param {{ isPayed?: boolean, priceEur?: number | string | null }} booking
+ * @param {PaymentStatusBooking} booking
  * @param {(key: string) => string} t
  * @returns {{ status: string, label: string, classes: string, icon: string }}
  */
@@ -106,7 +117,7 @@ export function resolveBookingPaymentChip(booking, t) {
 }
 
 /**
- * @param {{ isPayed?: boolean, priceEur?: number | string | null }} booking
+ * @param {PaymentStatusBooking} booking
  * @param {(key: string) => string} t
  * @returns {{ status: string, label: string, labelKey: string, className: string }}
  */
@@ -123,7 +134,7 @@ export function resolveCheckoutPaymentState(booking, t) {
 }
 
 /**
- * @param {{ isPayed?: boolean, priceEur?: number | string | null }} booking
+ * @param {PaymentStatusBooking} booking
  * @param {(key: string) => string} t
  * @returns {string}
  */
