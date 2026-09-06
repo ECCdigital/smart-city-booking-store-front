@@ -10,10 +10,38 @@ import {
 } from "~/utils/accessPointDisplay.js";
 
 describe("accessPointTitle", () => {
-  it("names a locker by the booking behind it", () => {
+  it("names a bike box by the number written on it", () => {
+    // `compartment` is what the person looks for at the site; the provider's
+    // booking id is not on the box.
     expect(
-      accessPointTitle({ type: "locker", externalBookingId: 4711 }),
+      accessPointTitle({
+        type: "locker",
+        compartment: "12",
+        externalBookingId: 4711,
+      }),
+    ).toBe("Fahrradbox Nr. 12");
+  });
+
+  it("falls back to the booking behind a box the provider did not number", () => {
+    expect(
+      accessPointTitle({
+        type: "locker",
+        compartment: null,
+        externalBookingId: 4711,
+      }),
     ).toBe("Fahrradbox #4711");
+  });
+
+  it("names a box on hold plainly rather than by a null", () => {
+    // Before the grant - an unpaid booking - the provider knows neither a
+    // number nor a booking id; `#null` is not a name.
+    expect(
+      accessPointTitle({
+        type: "locker",
+        compartment: null,
+        externalBookingId: null,
+      }),
+    ).toBe("Fahrradbox");
   });
 
   it("lets type decide, not provider", () => {
@@ -46,6 +74,26 @@ describe("accessPointMode", () => {
       ACCESS_POINT_MODES.remote,
     );
     expect(accessPointMode({ mode: "code" })).toBe(ACCESS_POINT_MODES.code);
+  });
+
+  it("names a code door by what the backend calls it", () => {
+    // `authorization` is the backend's word for a door that takes a code or a
+    // card; `code` was never sent by any backend and stays as an alias.
+    expect(accessPointMode({ mode: "authorization" }).label).toBe(
+      "Code an der Tür",
+    );
+    expect(accessPointMode({ mode: "code" }).label).toBe("Code an der Tür");
+  });
+
+  it("gives a door that takes both ways a badge of its own", () => {
+    const badge = accessPointMode({ mode: "both" });
+
+    expect(badge).not.toBe(UNKNOWN_MODE);
+    expect(badge.label).toBe("Per Knopf oder Code");
+    expect(badge).toMatchObject({
+      color: expect.any(String),
+      icon: expect.stringMatching(/^i-lucide-/),
+    });
   });
 
   it("says unknown out loud rather than leaving the badge blank", () => {

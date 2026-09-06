@@ -20,6 +20,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ### Changed
 
+- `locker_not_ready` is gone from the mobile key's blocking reasons (backend 4.3 never raises it; a compartment without a grant reads `not_provisioned`); access points in `authorization` and `both` mode carry a badge of their own instead of "Unbekannter Modus"; a bike box is named by its box number (`compartment`) and no longer by the provider's booking id; the key list asks only doors that can report a status, and one door's failed status read no longer discards the others
 - The navigation bar sticks to the top of the screen on phones (below the `sm` breakpoint) so it stays reachable while scrolling; tablet and desktop are unchanged
 - `/api/img` resolves relative media URLs against the configured backend and passes the backend's `Cache-Control`, `ETag` and `Last-Modified` on to the browser instead of overwriting them, so a media preset revalidates with a 304 instead of a full re-fetch. External images keep the proxy's own cache lifetime. The proxy still does no image work of its own
 - The proxy's SSRF exception is now the configured backend host rather than any `localhost` address in development

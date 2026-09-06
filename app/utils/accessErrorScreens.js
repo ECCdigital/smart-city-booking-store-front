@@ -156,7 +156,6 @@ export const BLOCKING_REASONS = Object.freeze([
   "authorization_revoked",
   "outside_access_window",
   "not_provisioned",
-  "locker_not_ready",
   "no_remote_access",
   "evidence_missing",
   "evidence_invalid",

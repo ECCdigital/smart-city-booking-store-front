@@ -244,7 +244,6 @@ const blockingReasonLabels = Object.freeze({
   authorization_revoked: "Berechtigung widerrufen",
   outside_access_window: "Außerhalb des Zeitfensters",
   not_provisioned: "Noch nicht freigegeben",
-  locker_not_ready: "Schließfach nicht bereit",
   no_remote_access: "Keine Fernsteuerung",
   evidence_missing: "Nachweis fehlt",
   evidence_invalid: "Nachweis ungültig",
@@ -307,16 +306,26 @@ const loadStatus = async (tenantId, accessPointId, bookingId) => {
     await getStatus(tenantId, accessPointId, bookingId),
   );
 };
+/**
+ * Asks only the doors that can answer, as the flow does (`refreshStatus`): a
+ * locker at rest declares no `getStatus` and would return four nulls for the
+ * request. One door's refusal is its own affair - the others keep the answers
+ * they got, which is why the requests are settled rather than raced.
+ */
 const loadAllStatuses = async () => {
   const requests = [];
 
   for (const booking of props.bookings) {
     for (const accessPoint of booking.accessPoints) {
+      if (!accessPoint.capabilities?.includes("getStatus")) {
+        continue;
+      }
+
       requests.push(loadStatus(booking.tenantId, accessPoint.id, booking.id));
     }
   }
 
-  await Promise.all(requests);
+  await Promise.allSettled(requests);
 };
 
 onMounted(loadAllStatuses);

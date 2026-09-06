@@ -1008,7 +1008,6 @@
       "authorization_revoked": "Ihre Berechtigung für diesen Zugang wurde widerrufen.",
       "outside_access_window": "Der Zugang liegt außerhalb des gebuchten Zeitfensters.",
       "not_provisioned": "Der Zugang ist noch nicht freigegeben.",
-      "locker_not_ready": "Das Schließfach ist noch nicht bereit.",
       "no_remote_access": "Dieser Zugang lässt sich nicht aus der Ferne öffnen.",
       "evidence_missing": "Der Nachweis fehlt – bitte vor Ort den QR-Code scannen.",
       "evidence_invalid": "Der Nachweis ist ungültig – bitte den Aufkleber prüfen.",
