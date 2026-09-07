@@ -14,9 +14,10 @@ describe("resolveCheckoutErrorKey", () => {
   });
 
   it("does not read a compartment shortage off `params` behind a generic reason", () => {
-    // A backend without B1 sends the shortage as `checkout.unknown` with the
-    // capacity counters in `params`; the storefront keeps the generic reason
-    // instead of guessing the cause from `params`.
+    // A backend that does not yet name the shortage sends it as
+    // `checkout.unknown` with the capacity counters in `params`; the
+    // storefront keeps the generic reason instead of guessing the cause
+    // from `params`.
     expect(
       resolveCheckoutErrorKey({
         reason: "checkout.unknown",

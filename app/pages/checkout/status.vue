@@ -7,11 +7,10 @@ import {
   BOOKING_STATUS_REASONS,
   isCommittedBooking,
   isLiveBooking,
-  isSettledBooking,
   resolveBookingStatus,
 } from "~/utils/bookingStatus.js";
 import {
-  isPaidBooking,
+  PAYMENT_DISPLAY_STATUS,
   resolveCheckoutPaymentState,
 } from "~/utils/bookingPaymentStatus.js";
 import { useTenants } from "~/composables/api/useTenants.js";
@@ -472,8 +471,8 @@ const showPaymentDetails = computed(() => {
   return (
     row.priceEur != null &&
     row.priceEur > 0 &&
-    (row.status === BOOKING_STATUS.PAYMENT_DUE ||
-      isSettledBooking(row) ||
+    (isCommittedBooking(row) ||
+      row.paymentDisplayStatus === PAYMENT_DISPLAY_STATUS.PAID ||
       row.paymentLabel)
   );
 });
@@ -492,8 +491,9 @@ const summaryStats = computed(() => [
   {
     key: "paid",
     label: t("checkout.status.summaryPaidLabel"),
-    value: bookingsFromApi.value.filter((booking) => isPaidBooking(booking))
-      .length,
+    value: bookingRows.value.filter(
+      (row) => row.paymentDisplayStatus === PAYMENT_DISPLAY_STATUS.PAID
+    ).length,
   },
 ]);
 
