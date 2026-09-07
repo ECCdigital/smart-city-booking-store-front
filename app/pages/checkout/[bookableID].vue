@@ -16,6 +16,10 @@ import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useNotification } from "~/composables/useNotification.js";
 import { resolveCheckoutErrorKey } from "~/utils/checkoutErrors.js";
+import {
+  BOOKING_STATUS,
+  resolveBookingStatus,
+} from "~/utils/bookingStatus.js";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 
@@ -2488,8 +2492,9 @@ async function handleFinish() {
       return;
     }
 
+    const bookingStatus = resolveBookingStatus(booking);
     const goPayment =
-      booking?.isCommitted === true &&
+      bookingStatus === BOOKING_STATUS.PAYMENT_DUE &&
       payment &&
       typeof payment === "object" &&
       isExternalPaymentLinkProvider(payment.provider);
@@ -2511,7 +2516,7 @@ async function handleFinish() {
       bookableId: String(bookableID ?? ""),
       bookingId: bookingIds,
     };
-    if (booking?.isCommitted === false) {
+    if (bookingStatus === BOOKING_STATUS.REQUESTED) {
       statusQuery.pending = "1";
     }
     await router.push({ path: "/checkout/status", query: statusQuery });

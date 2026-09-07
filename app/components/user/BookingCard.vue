@@ -97,7 +97,7 @@ import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue"
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
-import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
+import { isFreeBooking, isLiveBooking } from "~/utils/bookingStatus.js";
 
 const { t } = useI18n();
 
@@ -129,7 +129,7 @@ const { formatDate, formatPrice } = useFormatting();
 
 const currentTime = ref(new Date().getTime());
 const isActive = computed(() => {
-  if (props.booking.isRejected) {
+  if (!isLiveBooking(props.booking)) {
     return false;
   }
   if (props.booking.timeBegin && props.booking.timeEnd) {
