@@ -303,6 +303,7 @@ const view = computed(() =>
     action: action.value,
     result: result.value,
     booking: props.booking,
+    accessPointId: props.accessPoint.id,
   }),
 );
 

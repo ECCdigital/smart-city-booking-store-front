@@ -189,7 +189,11 @@
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import AccessPointPanel from "~/components/mobileKey/AccessPointPanel.vue";
-import { canReportStatus, readStatus } from "~/utils/accessOpenFlow.js";
+import {
+  canReportStatus,
+  readStatus,
+  remoteOperable,
+} from "~/utils/accessOpenFlow.js";
 import {
   accessPointLock,
   accessPointMode,
@@ -352,12 +356,11 @@ const lockState = (accessPoint, booking) =>
 /**
  * The server-side eligibility is the authority (#18). A second, hand-rolled
  * sum in the client can only ever disagree with it - so where the server
- * names no operable access point, none is operable.
+ * names no remote-operable access point, none gets the button: a code door is
+ * operable and still refuses the open (backend 4.3), and its badge says why.
  */
 const canOperate = (accessPoint, booking) =>
-  booking.accessEligibility?.operableAccessPointIds?.includes(
-    String(accessPoint.id),
-  ) ?? false;
+  remoteOperable(booking, accessPoint.id);
 
 function getTimeRange(startTimestamp, endTimestamp) {
   const begin = new Date(startTimestamp);
