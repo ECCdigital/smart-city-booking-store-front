@@ -70,15 +70,15 @@ export function compartmentsOf(booking) {
  *   compartment: string|null }|null}
  */
 export function decideEmergencyHelp(tenant, booking) {
-  for (const compartment of compartmentsOf(booking)) {
-    if (!compartment.isConfirmed) continue;
-    const serviceInfo = customerServiceOf(tenant, compartment.provider);
+  for (const candidate of compartmentsOf(booking)) {
+    if (!candidate.isConfirmed) continue;
+    const serviceInfo = customerServiceOf(tenant, candidate.provider);
     if (!serviceInfo) continue;
     return {
-      providerId: compartment.provider,
+      providerId: candidate.provider,
       serviceInfo,
-      processId: compartment.authorizationId,
-      compartment: compartment.compartment,
+      processId: candidate.authorizationId,
+      compartment: candidate.compartment,
     };
   }
   return null;
