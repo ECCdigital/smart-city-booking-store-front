@@ -83,6 +83,11 @@ describe("resolvePaymentDisplayStatus", () => {
         "free",
       );
     });
+
+    it("shows a booking without a price as unpaid - the price is unknown, not zero", () => {
+      expect(resolvePaymentDisplayStatus({})).toBe("unpaid");
+      expect(resolvePaymentDisplayStatus({ isCommitted: true })).toBe("unpaid");
+    });
   });
 });
 

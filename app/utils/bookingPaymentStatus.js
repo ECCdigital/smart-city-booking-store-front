@@ -1,4 +1,11 @@
-import { isSettledBooking } from "~/utils/bookingStatus.js";
+import { isFreeBooking, isSettledBooking } from "~/utils/bookingStatus.js";
+
+/**
+ * The price question lives with the status facade, so the state and the
+ * payment display read a missing price the same way; callers keep importing
+ * it from here.
+ */
+export { isFreeBooking };
 
 /**
  * The slice of a booking the payment display reads: `status` first, the
@@ -11,24 +18,6 @@ export const PAYMENT_DISPLAY_STATUS = {
   PAID: "paid",
   UNPAID: "unpaid",
 };
-
-/**
- * @param {{ priceEur?: number | string | null }} booking
- * @returns {boolean}
- */
-export function isFreeBooking(booking) {
-  const rawPriceEur = booking?.priceEur;
-  if (
-    rawPriceEur === null ||
-    rawPriceEur === undefined ||
-    (typeof rawPriceEur === "string" && rawPriceEur.trim() === "")
-  ) {
-    return false;
-  }
-
-  const priceEur = Number(rawPriceEur);
-  return Number.isFinite(priceEur) && priceEur <= 0;
-}
 
 /**
  * Whether the booking is free, paid, or still owes something - read off

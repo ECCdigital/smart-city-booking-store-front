@@ -129,6 +129,14 @@ describe("resolveBookingStatusKey", () => {
     );
   });
 
+  it("reads a booking without a price as priced, like isFreeBooking - the flag reader read it as free", () => {
+    // The price is unknown, not zero; every payload the storefront reads
+    // carries priceEur, so this is the one price question answered once.
+    expect(resolveBookingStatusKey({ isCommitted: true, isPayed: true })).toBe(
+      "status.paid_completed",
+    );
+  });
+
   describe("read off the flags (payloads without a status)", () => {
     // Characterization of the flag reading the storefront had before
     // `booking.status`: the i18n key must not change for any of these.
@@ -259,6 +267,12 @@ describe("isSettledBooking", () => {
     for (const status of Object.values(BOOKING_STATUS)) {
       expect(isSettledBooking({ status, priceEur: 0 })).toBe(true);
     }
+  });
+
+  it("reads a missing price the way isFreeBooking does: unknown is not free", () => {
+    expect(isSettledBooking({})).toBe(false);
+    expect(isSettledBooking({ status: "payment_due" })).toBe(false);
+    expect(isSettledBooking({ status: "confirmed" })).toBe(true);
   });
 
   describe("a cancelled priced booking", () => {

@@ -35,8 +35,41 @@ export const BOOKING_STATUS_REASONS = {
   BOOKING_NOT_FOUND: "booking_status.booking_not_found",
 };
 
-function isPriced(priceEur) {
-  return (Number(priceEur) || 0) > 0;
+/**
+ * The slice of a booking the status facade reads: `status` first, the
+ * derived flags only where a payload carries no status, the price and the
+ * refund record for the payment question.
+ * @typedef {{ status?: string, isCommitted?: boolean, isPayed?: boolean, isRejected?: boolean, priceEur?: number | string | null, cancellationRefund?: { cancelledFrom?: string } }} StatusBooking
+ */
+
+/**
+ * A booking that costs nothing. A missing or blank price is not free: the
+ * price is unknown, not zero.
+ * @param {{ priceEur?: number | string | null }} booking
+ * @returns {boolean}
+ */
+export function isFreeBooking(booking) {
+  const rawPriceEur = booking?.priceEur;
+  if (
+    rawPriceEur === null ||
+    rawPriceEur === undefined ||
+    (typeof rawPriceEur === "string" && rawPriceEur.trim() === "")
+  ) {
+    return false;
+  }
+
+  const priceEur = Number(rawPriceEur);
+  return Number.isFinite(priceEur) && priceEur <= 0;
+}
+
+/**
+ * The one price question, asked the other way round, so a booking with an
+ * unknown price counts as priced everywhere.
+ * @param {{ priceEur?: number | string | null }} booking
+ * @returns {boolean}
+ */
+function isPriced(booking) {
+  return !isFreeBooking(booking);
 }
 
 /**
@@ -45,14 +78,14 @@ function isPriced(priceEur) {
  * payload the same way. The impossible combination "paid but never
  * committed" of a priced booking reads as confirmed: the payment is the
  * stronger statement.
- * @param {{ isCommitted?: boolean, isPayed?: boolean, isRejected?: boolean, priceEur?: number | string | null }} booking
+ * @param {StatusBooking} booking
  * @returns {string} One of BOOKING_STATUS
  */
 function statusFromFlags(booking) {
   const isCommitted = Boolean(booking?.isCommitted);
   const isPayed = Boolean(booking?.isPayed);
   const isRejected = Boolean(booking?.isRejected);
-  const priced = isPriced(booking?.priceEur);
+  const priced = isPriced(booking);
 
   if (isRejected) {
     return isCommitted ? BOOKING_STATUS.CANCELLED : BOOKING_STATUS.REJECTED;
@@ -73,7 +106,7 @@ function statusFromFlags(booking) {
  * The booking state, read off `booking.status`. A payload that carries no
  * status (the v2 booking-status answer) or one this storefront does not know
  * is read off its flags instead.
- * @param {{ status?: string, isCommitted?: boolean, isPayed?: boolean, isRejected?: boolean, priceEur?: number | string | null }} booking
+ * @param {StatusBooking} booking
  * @returns {string} One of BOOKING_STATUS
  */
 export function resolveBookingStatus(booking) {
@@ -114,11 +147,11 @@ export function isCommittedBooking(booking) {
  * paid state. Only a cancelled booking needs more than `status` to tell -
  * `cancellationRefund.cancelledFrom`, or the paid flag where a payload has
  * no refund record.
- * @param {{ status?: string, priceEur?: number | string | null, isPayed?: boolean, cancellationRefund?: { cancelledFrom?: string } }} booking
+ * @param {StatusBooking} booking
  * @returns {boolean}
  */
 export function isSettledBooking(booking) {
-  if (!isPriced(booking?.priceEur)) {
+  if (!isPriced(booking)) {
     return true;
   }
   switch (resolveBookingStatus(booking)) {
@@ -139,7 +172,7 @@ export function isSettledBooking(booking) {
  * Maps a booking entity to a frontend i18n status key, read off
  * `booking.status` - the same table as the backend's `resolveBookingStatusKey`
  * (booking-status-keys.js).
- * @param {{ status?: string, isCommitted?: boolean, isPayed?: boolean, isRejected?: boolean, priceEur?: number | string | null }} booking
+ * @param {StatusBooking} booking
  * @returns {string}
  */
 export function resolveBookingStatusKey(booking) {
@@ -152,7 +185,7 @@ export function resolveBookingStatusKey(booking) {
     case BOOKING_STATUS.PAYMENT_DUE:
       return BOOKING_STATUS_I18N.PAYMENT_EXPECTED;
     default:
-      return isPriced(booking?.priceEur)
+      return isPriced(booking)
         ? BOOKING_STATUS_I18N.PAID_COMPLETED
         : BOOKING_STATUS_I18N.CONFIRMED_WITHOUT_PAYMENT;
   }
