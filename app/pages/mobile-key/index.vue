@@ -63,6 +63,7 @@
 
 <script setup>
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
+import { useTenantStore } from "~~/stores/tenant.js";
 import GeneralHelpSection from "~/components/mobileKey/GeneralHelpSection.vue";
 import MobileKeyBookingList from "~/components/mobileKey/MobileKeyBookingList.vue";
 
@@ -78,6 +79,7 @@ definePageMeta({
 });
 
 const { getAccessBookings } = useAccessPoints();
+const tenantStore = useTenantStore();
 
 const viewMode = ref("list");
 
@@ -156,6 +158,9 @@ const loadBookings = async () => {
 };
 
 onMounted(() => {
+  // Nothing else fills the tenant store on a direct visit; the help section
+  // and the provider contacts read from it.
+  tenantStore.fetchTenants();
   loadBookings();
 });
 

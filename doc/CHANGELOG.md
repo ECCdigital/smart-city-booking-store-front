@@ -20,6 +20,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ### Changed
 
+- The provider's emergency contact (`ProviderHelpSection`) comes from the public tenant projection (`GET /api/tenants/public` → `accessApps[].customerService`, backend 4.3) instead of the removed `/locker/:provider/customer-service-info`; the key list loads the tenants on its own, so tenant contacts are there on a direct visit too
 - The open button is offered only at access points the backend names remote-operable (`accessEligibility.remoteOperableAccessPointIds`, backend 4.3); a door that only takes a code is refused in the client with `no_remote_access` before the tap, in the key list, the panel and on the scan page alike
 - Access points in `authorization` and `both` mode carry a badge of their own ("Code an der Tür", "Per Knopf oder Code") instead of "Unbekannter Modus"
 - A bike box is named by its box number (`compartment`, backend 4.3) and no longer by the provider's booking id; a box on hold reads "Fahrradbox" rather than "#null"
