@@ -97,8 +97,7 @@ import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue"
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
-import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
-import { isLiveBooking } from "~/utils/bookingStatus.js";
+import { isFreeBooking, isLiveBooking } from "~/utils/bookingStatus.js";
 
 const { t } = useI18n();
 

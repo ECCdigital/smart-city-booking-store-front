@@ -116,7 +116,7 @@ export function resolveBookingStatus(booking) {
 
 /**
  * A living booking: neither rejected nor cancelled.
- * @param {Record<string, unknown>} booking
+ * @param {StatusBooking} booking
  * @returns {boolean}
  */
 export function isLiveBooking(booking) {
@@ -132,7 +132,7 @@ export function isLiveBooking(booking) {
  * A living booking the provider has approved - with or without a payment
  * still outstanding. A cancelled booking keeps `isCommitted: true` in its
  * flags, so this is not the flag.
- * @param {Record<string, unknown>} booking
+ * @param {StatusBooking} booking
  * @returns {boolean}
  */
 export function isCommittedBooking(booking) {
@@ -241,7 +241,7 @@ const STATUS_PRESENTATION = {
 };
 
 /**
- * @param {Record<string, unknown>} booking
+ * @param {StatusBooking} booking
  * @param {(key: string) => string} t
  * @returns {{ status: string, label: string, color: string, icon: string, tooltip: string | null }}
  */
@@ -259,7 +259,7 @@ export function resolveBookingStatusChip(booking, t) {
 }
 
 /**
- * @param {Record<string, unknown>} booking
+ * @param {StatusBooking} booking
  * @param {(key: string) => string} t
  * @returns {string}
  */

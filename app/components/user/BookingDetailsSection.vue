@@ -138,9 +138,9 @@ import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { useEventStore } from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
-import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
 import {
   BOOKING_STATUS,
+  isFreeBooking,
   isLiveBooking,
   isSettledBooking,
   resolveBookingStatus,

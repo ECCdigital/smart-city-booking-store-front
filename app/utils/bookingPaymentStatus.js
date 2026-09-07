@@ -1,16 +1,9 @@
 import { isFreeBooking, isSettledBooking } from "~/utils/bookingStatus.js";
 
 /**
- * The price question lives with the status facade, so the state and the
- * payment display read a missing price the same way; callers keep importing
- * it from here.
- */
-export { isFreeBooking };
-
-/**
- * The slice of a booking the payment display reads: `status` first, the
- * flags only where a payload carries no status.
- * @typedef {{ status?: string, isPayed?: boolean, priceEur?: number | string | null, cancellationRefund?: { cancelledFrom?: string } }} PaymentStatusBooking
+ * The payment display reads the same slice of a booking as the status
+ * facade: `status` first, the flags only where a payload carries no status.
+ * @typedef {import("~/utils/bookingStatus.js").StatusBooking} PaymentStatusBooking
  */
 
 export const PAYMENT_DISPLAY_STATUS = {
