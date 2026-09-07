@@ -24,3 +24,62 @@ export function customerServiceOf(tenant, providerId) {
   const app = tenant?.accessApps?.find((entry) => entry.id === providerId);
   return app?.customerService ?? null;
 }
+
+/**
+ * The compartments a booking holds, read from its `accessInfo` entries of
+ * type `locker` (backend 4.3), in the entries' order. A compartment is
+ * confirmed once the provider granted it and nobody revoked the grant - the
+ * rule `deriveLockerInfo` used for `lockerInfo.isConfirmed`. The grant's
+ * `authorizationId` is the "booking id" a person reads to the hotline; the
+ * grant's secret is not read and never leaves this function.
+ *
+ * @param {Object|undefined} booking A booking as `/api/bookings/assigned`
+ *   sends it
+ * @returns {Array<{ accessPointId: string, provider: string|null,
+ *   authorizationId: string|null, compartment: string|null,
+ *   isConfirmed: boolean }>}
+ */
+export function compartmentsOf(booking) {
+  return (booking?.accessInfo ?? [])
+    .filter((entry) => entry.accessPointType === "locker")
+    .map((entry) => {
+      const authorizationId = entry.grant?.authorizationId ?? null;
+      return {
+        accessPointId: entry.accessPointId,
+        provider: entry.provider ?? null,
+        authorizationId:
+          authorizationId === null ? null : String(authorizationId),
+        compartment: entry.compartment ?? null,
+        isConfirmed: authorizationId !== null && !entry.revokedAt,
+      };
+    });
+}
+
+/**
+ * What the emergency help has to show for a booking: the first confirmed
+ * compartment whose provider has a contact at the tenant, with the contact
+ * and the compartment's booking id (glossary "bestätigtes Fach"). A
+ * compartment on hold, a revoked one, or one of a provider the tenant names
+ * no contact for (Pareva mails on its own) yields nothing - the accordion
+ * then stays away rather than showing a contact with nothing to say.
+ *
+ * @param {Object|undefined} tenant A tenant from the store
+ * @param {Object|undefined} booking A booking as `/api/bookings/assigned`
+ *   sends it
+ * @returns {{ providerId: string, serviceInfo: Object, processId: string,
+ *   compartment: string|null }|null}
+ */
+export function decideEmergencyHelp(tenant, booking) {
+  for (const compartment of compartmentsOf(booking)) {
+    if (!compartment.isConfirmed) continue;
+    const serviceInfo = customerServiceOf(tenant, compartment.provider);
+    if (!serviceInfo) continue;
+    return {
+      providerId: compartment.provider,
+      serviceInfo,
+      processId: compartment.authorizationId,
+      compartment: compartment.compartment,
+    };
+  }
+  return null;
+}

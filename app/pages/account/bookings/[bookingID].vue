@@ -15,10 +15,9 @@
     </div>
     <PageHeader title="Buchungsdetails" class="my-5" />
     <EmergencyHelpAccordion
-      v-if="hasIfbsLockerInfo"
+      v-if="booking"
       :tenant-id="booking.tenantId"
-      :locker-info="booking.lockerInfo"
-      :booking-id="booking.id"
+      :booking="booking"
       class="mb-5"
       style="max-width: 800px"
     />
@@ -57,13 +56,6 @@ usePageTitle(() => {
   return itemTitle
     ? t("meta.pages.bookableDetail", { title: itemTitle })
     : t("meta.pages.accountBookingDetail");
-});
-
-const hasIfbsLockerInfo = computed(() => {
-  if (!booking.value) {
-    return false;
-  }
-  return booking.value.lockerInfo.some((info) => info.lockerSystem === "ifbs");
 });
 
 const currentTime = ref(new Date().getTime());

@@ -15,6 +15,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ### Fixed
 
+- The emergency-help accordion on the booking detail page renders again — it had been calling `useEmergencyHelp` with a signature that no longer existed; it now reads the booking's compartments from `accessInfo` (backend 4.3) behind `decideEmergencyHelp` and shows the provider contact from the tenant projection together with the compartment's booking id. The page's own `lockerSystem === "ifbs"` check moved into that decision: help is offered for a confirmed compartment whose provider has a contact at the tenant, and `lockerInfo` is no longer read
 - A media URL is recognized by its path no matter whether it arrives relative or absolute: the backend's embed interface (`/json/...`) exports absolute media URLs now, which fell through the relative-only check — those images silently loaded the full-size original without any `?size=` preset
 - Form fields on phones (below the `sm` breakpoint) use at least 16px font-size so iOS Safari no longer zooms into a focused field and leaves the page zoomed in
 
