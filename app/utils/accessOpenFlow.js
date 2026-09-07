@@ -80,6 +80,64 @@ export function readScanResolution(response) {
 }
 
 /**
+ * @private
+ * Whether a list of access point ids names this door. Ids travel as strings
+ * on one side and as numbers on the other; a list nobody sent names nothing.
+ */
+function namesDoor(ids, accessPointId) {
+  return (ids || []).some((id) => String(id) === String(accessPointId));
+}
+
+/**
+ * Whether this booking may open this door through the API right now - the set
+ * `open` is checked against in the backend (`remoteOperableAccessPointIds`,
+ * backend 4.3). A door that only takes a code is *operable* (close, status)
+ * but not this, and the button that would only fail is not offered for it.
+ *
+ * **Fail-closed:** an eligibility that names no remote-operable list at all
+ * makes nothing remote-operable. Reading the wider `operableAccessPointIds`
+ * in its place would be the dual support this storefront does not carry.
+ *
+ * @param {Object|null|undefined} booking A booking with its `accessEligibility`
+ * @param {string|number} accessPointId The door
+ * @returns {boolean}
+ */
+export function remoteOperable(booking, accessPointId) {
+  return namesDoor(
+    booking?.accessEligibility?.remoteOperableAccessPointIds,
+    accessPointId,
+  );
+}
+
+/**
+ * The reason against opening *this* door, where the booking's
+ * `primaryBlockingReason` speaks for the booking as a whole. Same rule as the
+ * backend's `open` (`_openGuarded`): a door that is not operable is blocked
+ * for the booking's own reason; one that is operable but not remote-operable
+ * is a code door, and the reason is `no_remote_access`.
+ *
+ * @param {Object|null|undefined} booking A booking with its `accessEligibility`
+ * @param {string|number} accessPointId The door
+ * @returns {string|null} A backend `ACCESS_BLOCKING_REASONS` value, `null`
+ *   where nothing speaks against opening - or where there is no eligibility
+ *   to read one from
+ */
+export function doorBlockingReason(booking, accessPointId) {
+  const eligibility = booking?.accessEligibility;
+  if (!eligibility) {
+    return null;
+  }
+  if (!namesDoor(eligibility.operableAccessPointIds, accessPointId)) {
+    return eligibility.primaryBlockingReason ?? null;
+  }
+  if (!remoteOperable(booking, accessPointId)) {
+    return "no_remote_access";
+  }
+
+  return null;
+}
+
+/**
  * Picks the booking the door should be opened with.
  *
  * `activeBookings` are the ones the server considers active right now
@@ -111,10 +169,10 @@ export function decideBookingOutcome({
     );
 
   const candidates = activeBookings.filter(belongsHere);
+  // Openable through the API, not merely operable: a code door with a grant
+  // is operable and would still refuse the open - see `remoteOperable`.
   const openable = candidates.filter((booking) =>
-    (booking.accessEligibility?.operableAccessPointIds || []).some(
-      (id) => String(id) === String(accessPointId),
-    ),
+    remoteOperable(booking, accessPointId),
   );
 
   if (openable.length === 1) {
@@ -128,9 +186,10 @@ export function decideBookingOutcome({
     // one the page has a real answer for over the first one in the list.
     const speaking = candidates.find(
       (candidate) =>
-        blockedOutcome(candidate, now).error !== ACCESS_ERRORS.GENERIC,
+        blockedOutcome(candidate, accessPointId, now).error !==
+        ACCESS_ERRORS.GENERIC,
     );
-    return blockedOutcome(speaking ?? candidates[0], now);
+    return blockedOutcome(speaking ?? candidates[0], accessPointId, now);
   }
 
   return outOfWindowOutcome(otherBookings.filter(belongsHere), now);
@@ -138,10 +197,12 @@ export function decideBookingOutcome({
 
 /**
  * @private
- * The screen for an active booking that may not open this door.
+ * The screen for an active booking that may not open this door - for the
+ * door's own reason, which for a code door is `no_remote_access` rather than
+ * anything the booking as a whole says.
  */
-function blockedOutcome(booking, now) {
-  const reason = booking.accessEligibility?.primaryBlockingReason ?? null;
+function blockedOutcome(booking, accessPointId, now) {
+  const reason = doorBlockingReason(booking, accessPointId);
 
   return {
     screen: "error",
@@ -238,6 +299,13 @@ function outOfWindowOutcome(bookings, now) {
  * scanner can compare tenants, never as the place to read the tenant from -
  * every caller passes it explicitly.
  *
+ * `validationRuleTypes` stays the one source of what a door demands. Backend
+ * 4.3 also puts `demandedEvidence[id]` and `evidenceWaived` on the booking's
+ * eligibility, but the projection already is that lookup - the same values,
+ * and for a waived person an empty list - and the scan page has no booking to
+ * read them from. A second reader would be a duplicate with one road that
+ * lacks it, so neither field is read here.
+ *
  * @param {Object|null|undefined} raw An access point as the server sent it
  * @returns {{ id: string, label: string, type: string, mode: string,
  *   provider: string, tenantId: string|null, validationRuleTypes: string[],
@@ -257,6 +325,19 @@ export function readAccessPoint(raw) {
     validationRuleTypes,
     capabilities,
   };
+}
+
+/**
+ * Whether a door can be asked for its state. The one place the `getStatus`
+ * capability is spelled: the flow, the list and {@link decideStage} all skip
+ * the same doors - a locker at rest declares `open` alone and would answer a
+ * status request with four nulls.
+ *
+ * @param {{ capabilities?: string[] }|null|undefined} accessPoint
+ * @returns {boolean}
+ */
+export function canReportStatus(accessPoint) {
+  return Boolean(accessPoint?.capabilities?.includes("getStatus"));
 }
 
 /** The four fields a status answer is allowed to consist of. */
@@ -670,6 +751,11 @@ const OPEN_STEP = Object.freeze(["open"]);
  * @param {Object|null} [facts.result] What {@link readOpenOutcome},
  *   {@link readOpenConfirmation} or {@link readCloseOutcome} made of its answer
  * @param {Object|null} [facts.booking] The booking behind the attempt
+ * @param {string|number} [facts.accessPointId] The door in front of the
+ *   person, so the eligibility can be read for *this* door (backend 4.3 names
+ *   the remote-operable ones): a code door stands on `error` with
+ *   `no_remote_access` before any button. Without it the booking-level
+ *   `canOperate` is all there is to read
  * @param {number} [facts.now]
  * @returns {{ stage: "loading"|"evidence"|"can_open"|"can_close"|"opening"
  *   |"closing"|"opened"|"closed"|"error", steps: string[], currentStep: number,
@@ -683,6 +769,7 @@ export function decideStage({
   action = null,
   result = null,
   booking = null,
+  accessPointId,
   now = Date.now(),
 } = {}) {
   // Both lists are facts, never defaults: one nobody stated is not a door
@@ -730,10 +817,21 @@ export function decideStage({
 
   // The server's eligibility is the authority on whether this booking may
   // operate at all - and it outranks a running action, because a spinner that
-  // can only end in this very error is a spinner shown for nothing.
-  if (booking?.accessEligibility?.canOperate === false) {
-    const reason = booking.accessEligibility.primaryBlockingReason ?? null;
-    return view(STAGES.ERROR, reasonError(reason, booking, now), reason);
+  // can only end in this very error is a spinner shown for nothing. Given the
+  // door, the eligibility is read for that door: a code door is operable and
+  // still refuses the open, and the button it would get could only fail. The
+  // gate is the list, not the reason: a door in neither list is an error even
+  // where the booking names no reason for it - fail-closed, like the backend.
+  if (booking?.accessEligibility) {
+    if (isStated(accessPointId)) {
+      if (!remoteOperable(booking, accessPointId)) {
+        const reason = doorBlockingReason(booking, accessPointId);
+        return view(STAGES.ERROR, reasonError(reason, booking, now), reason);
+      }
+    } else if (booking.accessEligibility.canOperate === false) {
+      const reason = booking.accessEligibility.primaryBlockingReason ?? null;
+      return view(STAGES.ERROR, reasonError(reason, booking, now), reason);
+    }
   }
 
   if (action === "open") {
@@ -745,7 +843,7 @@ export function decideStage({
 
   // A door that cannot report its state is not waited for; the button below
   // offers the only thing that stays honest without a status.
-  if (able.includes("getStatus")) {
+  if (canReportStatus({ capabilities })) {
     if (status === undefined) {
       return view(STAGES.LOADING);
     }

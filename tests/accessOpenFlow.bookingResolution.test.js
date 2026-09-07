@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   ACCESS_ERRORS,
   decideBookingOutcome,
+  doorBlockingReason,
   mapBlockingReason,
   readScanResolution,
+  remoteOperable,
 } from "~/utils/accessOpenFlow.js";
 
 const NOW = Date.UTC(2026, 7, 12, 18, 30);
@@ -24,9 +26,22 @@ const booking = (overrides = {}) => ({
     blockingReasons: [],
     primaryBlockingReason: null,
     operableAccessPointIds: [ACCESS_POINT_ID],
+    remoteOperableAccessPointIds: [ACCESS_POINT_ID],
   },
   ...overrides,
 });
+
+/** A booking at a door that only takes a code: operable, not through the API. */
+const codeDoor = (overrides = {}) =>
+  booking({
+    accessEligibility: {
+      blockingReasons: [],
+      primaryBlockingReason: null,
+      operableAccessPointIds: [ACCESS_POINT_ID],
+      remoteOperableAccessPointIds: [],
+    },
+    ...overrides,
+  });
 
 const blocked = (reason, overrides = {}) =>
   booking({
@@ -34,6 +49,7 @@ const blocked = (reason, overrides = {}) =>
       blockingReasons: [reason],
       primaryBlockingReason: reason,
       operableAccessPointIds: [],
+      remoteOperableAccessPointIds: [],
     },
     ...overrides,
   });
@@ -56,6 +72,127 @@ const decide = (overrides = {}) =>
     now: NOW,
     ...overrides,
   });
+
+describe("remoteOperable", () => {
+  const eligibility = (fields) => ({
+    accessEligibility: {
+      blockingReasons: [],
+      primaryBlockingReason: null,
+      ...fields,
+    },
+  });
+
+  it("is true for a door the backend names in both lists", () => {
+    expect(
+      remoteOperable(
+        eligibility({
+          operableAccessPointIds: [ACCESS_POINT_ID],
+          remoteOperableAccessPointIds: [ACCESS_POINT_ID],
+        }),
+        ACCESS_POINT_ID,
+      ),
+    ).toBe(true);
+  });
+
+  it("is false for a door that is operable but takes no open through the API", () => {
+    expect(
+      remoteOperable(
+        eligibility({
+          operableAccessPointIds: [ACCESS_POINT_ID],
+          remoteOperableAccessPointIds: [],
+        }),
+        ACCESS_POINT_ID,
+      ),
+    ).toBe(false);
+  });
+
+  it("is false where the eligibility names no remote-operable list at all - fail-closed, no dual support", () => {
+    expect(
+      remoteOperable(
+        eligibility({ operableAccessPointIds: [ACCESS_POINT_ID] }),
+        ACCESS_POINT_ID,
+      ),
+    ).toBe(false);
+    expect(remoteOperable({}, ACCESS_POINT_ID)).toBe(false);
+    expect(remoteOperable(null, ACCESS_POINT_ID)).toBe(false);
+  });
+
+  it("compares ids as strings - a number on one side is the same door", () => {
+    expect(
+      remoteOperable(
+        eligibility({
+          operableAccessPointIds: ["42"],
+          remoteOperableAccessPointIds: ["42"],
+        }),
+        42,
+      ),
+    ).toBe(true);
+    expect(
+      remoteOperable(
+        eligibility({
+          operableAccessPointIds: [42],
+          remoteOperableAccessPointIds: [42],
+        }),
+        "42",
+      ),
+    ).toBe(true);
+  });
+});
+
+describe("doorBlockingReason", () => {
+  const eligibility = (fields) => ({
+    accessEligibility: {
+      blockingReasons: [],
+      primaryBlockingReason: null,
+      ...fields,
+    },
+  });
+
+  it("names the booking's primary reason for a door that is not operable", () => {
+    expect(
+      doorBlockingReason(
+        eligibility({
+          blockingReasons: ["authorization_revoked"],
+          primaryBlockingReason: "authorization_revoked",
+          operableAccessPointIds: [],
+          remoteOperableAccessPointIds: [],
+        }),
+        ACCESS_POINT_ID,
+      ),
+    ).toBe("authorization_revoked");
+  });
+
+  it("names no_remote_access for a door that is operable but not through the API - the rule the backend's open applies", () => {
+    expect(
+      doorBlockingReason(
+        eligibility({
+          operableAccessPointIds: [ACCESS_POINT_ID],
+          remoteOperableAccessPointIds: [],
+        }),
+        ACCESS_POINT_ID,
+      ),
+    ).toBe("no_remote_access");
+  });
+
+  it("names nothing against a remote-operable door", () => {
+    expect(
+      doorBlockingReason(
+        eligibility({
+          blockingReasons: ["not_provisioned"],
+          primaryBlockingReason: "not_provisioned",
+          operableAccessPointIds: [ACCESS_POINT_ID],
+          remoteOperableAccessPointIds: [ACCESS_POINT_ID],
+        }),
+        ACCESS_POINT_ID,
+      ),
+    ).toBeNull();
+  });
+
+  it("names nothing where there is no eligibility to read", () => {
+    expect(doorBlockingReason({}, ACCESS_POINT_ID)).toBeNull();
+    expect(doorBlockingReason(null, ACCESS_POINT_ID)).toBeNull();
+  });
+});
 
 describe("readScanResolution", () => {
   it("reads the access point out of the success envelope", () => {
@@ -137,12 +274,34 @@ describe("decideBookingOutcome", () => {
         blockingReasons: [],
         primaryBlockingReason: null,
         operableAccessPointIds: ["ap-other"],
+        remoteOperableAccessPointIds: ["ap-other"],
       },
     });
 
     expect(decide({ activeBookings: [openable, other] })).toEqual({
       screen: "ready",
       booking: openable,
+    });
+  });
+
+  it("refuses a code door with no_remote_access before the tap - the backend's open would refuse it the same way", () => {
+    const granted = codeDoor();
+
+    expect(decide({ activeBookings: [granted] })).toEqual({
+      screen: "error",
+      error: ACCESS_ERRORS.GENERIC,
+      booking: granted,
+      blockingReason: "no_remote_access",
+    });
+  });
+
+  it("offers the booking that may open through the API and not the one that may only use its code", () => {
+    const remote = booking({ id: "B-1042" });
+    const code = codeDoor({ id: "B-1043" });
+
+    expect(decide({ activeBookings: [code, remote] })).toEqual({
+      screen: "ready",
+      booking: remote,
     });
   });
 
@@ -164,6 +323,7 @@ describe("decideBookingOutcome", () => {
         blockingReasons: [],
         primaryBlockingReason: null,
         operableAccessPointIds: ["ap-other"],
+        remoteOperableAccessPointIds: ["ap-other"],
       },
     });
 
@@ -251,6 +411,7 @@ describe("decideBookingOutcome", () => {
         blockingReasons: [],
         primaryBlockingReason: null,
         operableAccessPointIds: [],
+        remoteOperableAccessPointIds: [],
       },
     });
 
@@ -340,6 +501,7 @@ describe("decideBookingOutcome", () => {
         blockingReasons: ["payment_required"],
         primaryBlockingReason: "payment_required",
         operableAccessPointIds: [],
+        remoteOperableAccessPointIds: [],
       },
     });
 
