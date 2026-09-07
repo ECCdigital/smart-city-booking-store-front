@@ -3,7 +3,12 @@ import { useBookings } from "~/composables/api/useBookings.js";
 import { useCheckout } from "~/composables/api/useCheckout.js";
 import {
   effectiveBookingStatusI18nKey,
+  BOOKING_STATUS,
   BOOKING_STATUS_REASONS,
+  isCommittedBooking,
+  isLiveBooking,
+  isSettledBooking,
+  resolveBookingStatus,
 } from "~/utils/bookingStatus.js";
 import {
   isPaidBooking,
@@ -158,9 +163,7 @@ function isAutoPollingCandidate(booking) {
   const paymentProvider = normalizePaymentProviderId(booking?.paymentProvider);
 
   return (
-    booking?.isCommitted === true &&
-    booking?.isPayed === false &&
-    booking?.isRejected === false &&
+    resolveBookingStatus(booking) === BOOKING_STATUS.PAYMENT_DUE &&
     Number.isFinite(priceEur) &&
     priceEur > 0 &&
     paymentProvider !== "invoice"
@@ -183,9 +186,7 @@ const hasPaidAutoPollBookings = computed(() =>
     );
 
     return (
-      booking?.isCommitted === true &&
-      booking?.isRejected === false &&
-      booking?.isPayed === true &&
+      resolveBookingStatus(booking) === BOOKING_STATUS.CONFIRMED &&
       Number.isFinite(priceEur) &&
       priceEur > 0 &&
       paymentProvider !== "invoice"
@@ -429,9 +430,7 @@ function rowForBooking(booking) {
     success,
     errorMessage,
     priceEur,
-    isCommitted: booking?.isCommitted === true,
-    isPayed: booking?.isPayed === true,
-    isRejected: booking?.isRejected === true,
+    status: resolveBookingStatus(booking),
     paymentProvider,
     paymentLabel: paymentProviderLabel(booking.paymentProvider),
     isInvoicePayment: paymentProvider === "invoice",
@@ -458,13 +457,13 @@ const isAwaitingApproval = computed(
 
 const showThankYouBanner = computed(() => {
   const row = singleBookingRow.value;
-  return row != null && !row.isRejected;
+  return row != null && isLiveBooking(row);
 });
 
 const showInvoiceMailHint = computed(() => {
   const row = singleBookingRow.value;
   if (!row) return false;
-  return row.isCommitted && row.isInvoicePayment;
+  return isCommittedBooking(row) && row.isInvoicePayment;
 });
 
 const showPaymentDetails = computed(() => {
@@ -473,7 +472,9 @@ const showPaymentDetails = computed(() => {
   return (
     row.priceEur != null &&
     row.priceEur > 0 &&
-    (row.isCommitted || row.isPayed || row.paymentLabel)
+    (row.status === BOOKING_STATUS.PAYMENT_DUE ||
+      isSettledBooking(row) ||
+      row.paymentLabel)
   );
 });
 
@@ -491,7 +492,8 @@ const summaryStats = computed(() => [
   {
     key: "paid",
     label: t("checkout.status.summaryPaidLabel"),
-    value: bookingRows.value.filter((row) => isPaidBooking(row)).length,
+    value: bookingsFromApi.value.filter((booking) => isPaidBooking(booking))
+      .length,
   },
 ]);
 
