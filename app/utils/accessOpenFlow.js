@@ -819,7 +819,9 @@ export function decideStage({
   // operate at all - and it outranks a running action, because a spinner that
   // can only end in this very error is a spinner shown for nothing. Given the
   // door, the eligibility is read for that door: a code door is operable and
-  // still refuses the open, and the button it would get could only fail.
+  // still refuses the open, and the button it would get could only fail. The
+  // gate is the list, not the reason: a door in neither list is an error even
+  // where the booking names no reason for it - fail-closed, like the backend.
   if (booking?.accessEligibility) {
     if (isStated(accessPointId)) {
       if (!remoteOperable(booking, accessPointId)) {

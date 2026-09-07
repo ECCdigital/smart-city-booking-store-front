@@ -886,6 +886,25 @@ describe("decideStage", () => {
     });
   });
 
+  it("stands on error for a door named in neither list even where the booking gives no reason - a button that would be refused is no button", () => {
+    expect(
+      decideStage(
+        scanDoor({
+          status: LOCKED,
+          accessPointId: DOOR_ID,
+          booking: eligibleAt({
+            operableAccessPointIds: [],
+            remoteOperableAccessPointIds: [],
+          }),
+        }),
+      ),
+    ).toMatchObject({
+      stage: "error",
+      error: ACCESS_ERRORS.GENERIC,
+      blockingReason: null,
+    });
+  });
+
   it("offers the button for a remote-operable door as before", () => {
     expect(
       decideStage(
