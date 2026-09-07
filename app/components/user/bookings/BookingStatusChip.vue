@@ -10,6 +10,10 @@
   </UTooltip>
 </template>
 <script setup>
+import { resolveBookingStatusChip } from "~/utils/bookingStatus.js";
+
+const { t } = useI18n();
+
 const props = defineProps({
   booking: {
     type: Object,
@@ -17,32 +21,9 @@ const props = defineProps({
   },
 });
 
-const bookingStatus = computed(() => {
-  if (props.booking.isRejected) {
-    return {
-      label: "Storniert",
-      color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-      icon: "i-lucide-x",
-      tooltip: null,
-    };
-  } else if (props.booking.isCommitted) {
-    return {
-      label: "Bestätigt",
-      color:
-        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      icon: "i-lucide-check",
-      tooltip: null,
-    };
-  }
-  //toDo - abgeschlossen??
-
-  return {
-    label: "Ausstehend",
-    color: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-    icon: "i-lucide-hourglass",
-    tooltip: "Die Buchung muss noch vom Anbieter freigegeben werden.",
-  };
-});
+const bookingStatus = computed(() =>
+  resolveBookingStatusChip(props.booking, t),
+);
 </script>
 
 <style scoped></style>

@@ -531,6 +531,39 @@ describe("decideBookingOutcome", () => {
     });
   });
 
+  describe("read off `status` (backend 4.3) without any flags", () => {
+    /** A booking as the 4.3 fallback query returns it: `status`, no flags. */
+    const upcomingWithStatus = (status) =>
+      booking({
+        id: "B-3000",
+        timeBegin: NOW + HOUR,
+        timeEnd: NOW + 2 * HOUR,
+        status,
+        accessEligibility: undefined,
+      });
+
+    it("points at a booking with payment outstanding", () => {
+      const payable = upcomingWithStatus("payment_due");
+
+      expect(decide({ otherBookings: [payable] })).toMatchObject({
+        error: ACCESS_ERRORS.TOO_EARLY,
+        booking: payable,
+      });
+    });
+
+    it("does not offer a request the provider has not approved yet", () => {
+      expect(
+        decide({ otherBookings: [upcomingWithStatus("requested")] }),
+      ).toMatchObject({ error: ACCESS_ERRORS.NO_BOOKING, booking: null });
+    });
+
+    it("does not offer a cancelled booking", () => {
+      expect(
+        decide({ otherBookings: [upcomingWithStatus("cancelled")] }),
+      ).toMatchObject({ error: ACCESS_ERRORS.NO_BOOKING, booking: null });
+    });
+  });
+
   it("reports no booking at all when nothing matches", () => {
     expect(decide()).toEqual({
       screen: "error",

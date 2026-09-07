@@ -13,6 +13,8 @@
  * know maps to a generic error - never to a silent success.
  */
 
+import { isCommittedBooking } from "~/utils/bookingStatus.js";
+
 /** The situations either way can end up in. */
 export const ACCESS_ERRORS = Object.freeze({
   STALE_SCAN_CODE: "stale_scan_code",
@@ -246,9 +248,7 @@ function windowError(booking, now) {
  * has one and still has time to pay for it.
  */
 function outOfWindowOutcome(bookings, now) {
-  const usable = bookings.filter(
-    (booking) => booking.isCommitted !== false && booking.isRejected !== true,
-  );
+  const usable = bookings.filter(isCommittedBooking);
 
   const upcoming = usable
     .filter((booking) => booking.timeBegin > now)

@@ -12,6 +12,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 - Images are loaded at the size they are rendered at: `useMediaImage()` builds `src`/`srcset`/`sizes` from the backend's media presets (`thumb`, `sm`, `md`, `lg`) per display context — result cards, result strips, the detail hero, the checkout sidebar and the checkout add-on icons. It replaces the nine places that assembled a proxy URL by hand. External image references have no presets and go through the proxy unchanged. `thumb` is a square centre crop rather than a scaled-down original, so it is offered only where the box is a small square (checkout add-on icons, gallery thumbnails) and never mixed into a `srcset` with the other three — which means the smallest image a result strip can load is `sm`
 - Detail page shows the bookable's full image list, cover image first, as a thumbnail row under the main image
 - The event detail page shows the event's image gallery, teaser image first — the list was skipped as untyped legacy, but the backend exports it typed since the media library
+- Checkout names a compartment shortage (`checkout.compartments_unavailable`, backend 4.3) instead of the generic error
 
 ### Fixed
 
@@ -26,6 +27,9 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 - Access points in `authorization` and `both` mode carry a badge of their own ("Code an der Tür", "Per Knopf oder Code") instead of "Unbekannter Modus"
 - A bike box is named by its box number (`compartment`, backend 4.3) and no longer by the provider's booking id; a box on hold reads "Fahrradbox" rather than "#null"
 - The key list asks only doors that can report a status, and one door's failed status read no longer discards the others
+- Booking state is read from `booking.status` (`requested | payment_due | confirmed | rejected | cancelled`, backend 4.3) through `bookingStatus.js` and `bookingPaymentStatus.js`; the derived flags `isCommitted`/`isPayed`/`isRejected` are only read where a payload carries no `status`. Display is unchanged
+- Account bookings tell a rejected request (`rejected`) from a cancelled booking (`cancelled`) in the status chip, the search label and the reason heading; the status filter keeps one checkbox covering both
+- Checkout hands the customer to the payment page when the booking lands in `payment_due` and to the status page otherwise, decided on `booking.status`; the status page reads the same state for polling and the confirmation copy
 - The navigation bar sticks to the top of the screen on phones (below the `sm` breakpoint) so it stays reachable while scrolling; tablet and desktop are unchanged
 - `/api/img` resolves relative media URLs against the configured backend and passes the backend's `Cache-Control`, `ETag` and `Last-Modified` on to the browser instead of overwriting them, so a media preset revalidates with a 304 instead of a full re-fetch. External images keep the proxy's own cache lifetime. The proxy still does no image work of its own
 - The proxy's SSRF exception is now the configured backend host rather than any `localhost` address in development
