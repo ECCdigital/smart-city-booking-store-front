@@ -483,6 +483,7 @@
     "payment_failed": "Die Zahlung konnte nicht gestartet werden. Bitte versuchen Sie es erneut oder wählen Sie eine andere Zahlungsart.",
     "payment_provider_unavailable": "Die gewählte Zahlungsart ist derzeit nicht verfügbar.",
     "locker_unavailable": "Die Buchung konnte nicht abgeschlossen werden (Schließfach-Reservierung). Bitte Zeitraum oder Auswahl prüfen.",
+    "compartments_unavailable": "Für den gewählten Zeitraum ist kein Fach mehr frei. Bitte wählen Sie einen anderen Zeitraum.",
     "invoice_payment_not_permitted": "Zahlung auf Rechnung ist für Ihr Konto nicht freigeschaltet.",
     "capacity_exceeded": "Die maximale Kapazität für dieses Objekt wurde erreicht.",
     "time_conflict": "Für dieses Objekt besteht ein Zeitkonflikt mit einer anderen Buchung.",
