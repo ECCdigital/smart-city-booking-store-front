@@ -4,6 +4,7 @@ import {
   ACCESS_ERRORS,
   buildCommandStatus,
   buildOpenRequest,
+  canReportStatus,
   isUnlocked,
   decideScanMatch,
   decideStage,
@@ -80,6 +81,24 @@ describe("readAccessPoint", () => {
 
     expect(point.tenantId).toBe("rostock");
     expect(point).not.toHaveProperty("tenant");
+  });
+});
+
+describe("canReportStatus", () => {
+  it("says a door with `getStatus` among its capabilities can be asked", () => {
+    expect(
+      canReportStatus({ id: "ap-7f3a", capabilities: ["open", "getStatus"] }),
+    ).toBe(true);
+  });
+
+  it("says a locker at rest cannot - it declares `open` alone", () => {
+    expect(canReportStatus({ id: "42", capabilities: ["open"] })).toBe(false);
+  });
+
+  it("asks nothing whose abilities nobody stated", () => {
+    expect(canReportStatus({ id: "ap-7f3a" })).toBe(false);
+    expect(canReportStatus(null)).toBe(false);
+    expect(canReportStatus(undefined)).toBe(false);
   });
 });
 
@@ -835,11 +854,11 @@ describe("decideStage", () => {
       stage: "error",
       error: ACCESS_ERRORS.PAYMENT_REQUIRED,
     });
-    // The six mute reasons share the generic screen - which still names them.
-    expect(blocked("locker_not_ready")).toMatchObject({
+    // The five mute reasons share the generic screen - which still names them.
+    expect(blocked("authorization_revoked")).toMatchObject({
       stage: "error",
       error: ACCESS_ERRORS.GENERIC,
-      blockingReason: "locker_not_ready",
+      blockingReason: "authorization_revoked",
     });
     expect(
       blocked("outside_access_window", {

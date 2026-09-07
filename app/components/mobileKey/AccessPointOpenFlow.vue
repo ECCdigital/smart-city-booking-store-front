@@ -189,6 +189,7 @@ import {
   ACCESS_ERRORS,
   buildCommandStatus,
   buildOpenRequest,
+  canReportStatus,
   decideStage,
   isUnlocked,
   readCloseOutcome,
@@ -374,7 +375,7 @@ function applyStatus(next) {
  * will never come.
  */
 async function refreshStatus() {
-  if (!props.accessPoint.capabilities.includes("getStatus")) {
+  if (!canReportStatus(props.accessPoint)) {
     return;
   }
 

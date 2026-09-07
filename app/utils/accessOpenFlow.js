@@ -259,6 +259,19 @@ export function readAccessPoint(raw) {
   };
 }
 
+/**
+ * Whether a door can be asked for its state. The one place the `getStatus`
+ * capability is spelled: the flow, the list and {@link decideStage} all skip
+ * the same doors - a locker at rest declares `open` alone and would answer a
+ * status request with four nulls.
+ *
+ * @param {{ capabilities?: string[] }|null|undefined} accessPoint
+ * @returns {boolean}
+ */
+export function canReportStatus(accessPoint) {
+  return Boolean(accessPoint?.capabilities?.includes("getStatus"));
+}
+
 /** The four fields a status answer is allowed to consist of. */
 const STATUS_FIELDS = Object.freeze([
   "open",
@@ -745,7 +758,7 @@ export function decideStage({
 
   // A door that cannot report its state is not waited for; the button below
   // offers the only thing that stays honest without a status.
-  if (able.includes("getStatus")) {
+  if (canReportStatus({ capabilities })) {
     if (status === undefined) {
       return view(STAGES.LOADING);
     }

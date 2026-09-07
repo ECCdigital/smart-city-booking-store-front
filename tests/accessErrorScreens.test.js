@@ -280,7 +280,7 @@ describe("formatBlockingReasonMessage", () => {
   });
 
   it("kennt den gestrichenen Blockgrund locker_not_ready nicht mehr", () => {
-    // Backend 4.3 nennt ihn nie; ein Fach ohne Grant heißt `not_provisioned`.
+    // Backend 4.3 never raises it; a compartment without a grant reads `not_provisioned`.
     expect(
       formatBlockingReasonMessage(["locker_not_ready"], t, "Fallback"),
     ).toBe("Fallback");

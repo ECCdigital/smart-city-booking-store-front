@@ -19,6 +19,12 @@ import { isUnlocked } from "~/utils/accessOpenFlow.js";
  * rest of the list does - see the note on `blockingReasonLabels`.
  */
 
+const REMOTE_DOOR = Object.freeze({
+  label: "Per Knopf",
+  color: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
+  icon: "i-lucide-lock-open",
+});
+
 const CODE_DOOR = Object.freeze({
   label: "Code an der Tür",
   color: "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100",
@@ -31,19 +37,11 @@ const CODE_DOOR = Object.freeze({
  * wrong by `authorization` - it stays as an alias.
  */
 export const ACCESS_POINT_MODES = Object.freeze({
-  remote: Object.freeze({
-    label: "Per Knopf",
-    color: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
-    icon: "i-lucide-lock-open",
-  }),
+  remote: REMOTE_DOOR,
   authorization: CODE_DOOR,
   code: CODE_DOOR,
   // The button works here as well, so it wears the button's colours.
-  both: Object.freeze({
-    label: "Per Knopf oder Code",
-    color: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
-    icon: "i-lucide-lock-open",
-  }),
+  both: Object.freeze({ ...REMOTE_DOOR, label: "Per Knopf oder Code" }),
 });
 
 export const UNKNOWN_MODE = Object.freeze({

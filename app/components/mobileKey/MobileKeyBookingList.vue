@@ -189,7 +189,7 @@
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import AccessPointPanel from "~/components/mobileKey/AccessPointPanel.vue";
-import { readStatus } from "~/utils/accessOpenFlow.js";
+import { canReportStatus, readStatus } from "~/utils/accessOpenFlow.js";
 import {
   accessPointLock,
   accessPointMode,
@@ -306,18 +306,19 @@ const loadStatus = async (tenantId, accessPointId, bookingId) => {
     await getStatus(tenantId, accessPointId, bookingId),
   );
 };
+
 /**
  * Asks only the doors that can answer, as the flow does (`refreshStatus`): a
  * locker at rest declares no `getStatus` and would return four nulls for the
  * request. One door's refusal is its own affair - the others keep the answers
- * they got, which is why the requests are settled rather than raced.
+ * they got, which is why the requests are settled rather than all-or-nothing.
  */
 const loadAllStatuses = async () => {
   const requests = [];
 
   for (const booking of props.bookings) {
     for (const accessPoint of booking.accessPoints) {
-      if (!accessPoint.capabilities?.includes("getStatus")) {
+      if (!canReportStatus(accessPoint)) {
         continue;
       }
 
