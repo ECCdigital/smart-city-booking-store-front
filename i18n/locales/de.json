@@ -820,6 +820,13 @@
     }
   },
 
+  "account": {
+    "bookingDetails": {
+      "rejectionReason": "Ablehnungsgrund",
+      "cancellationReason": "Stornierungsgrund"
+    }
+  },
+
   "booking_status": {
     "missing_parameters": "Es fehlen erforderliche Angaben.",
     "internal_error": "Es ist ein technischer Fehler aufgetreten. Bitte versuchen Sie es später erneut.",

@@ -442,6 +442,13 @@
     }
   },
 
+  "account": {
+    "bookingDetails": {
+      "rejectionReason": "Reason for rejection",
+      "cancellationReason": "Reason for cancellation"
+    }
+  },
+
   "booking_status": {
     "missing_parameters": "Required information is missing.",
     "internal_error": "A technical error occurred. Please try again later.",

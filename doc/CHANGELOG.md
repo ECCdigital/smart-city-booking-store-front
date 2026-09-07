@@ -21,6 +21,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 ### Changed
 
 - Booking state is read from `booking.status` (`requested | payment_due | confirmed | rejected | cancelled`, backend 4.3) through `bookingStatus.js` and `bookingPaymentStatus.js`; the derived flags `isCommitted`/`isPayed`/`isRejected` are only read where a payload carries no `status`. Display is unchanged
+- Account bookings tell a rejected request (`rejected`) from a cancelled booking (`cancelled`) in the status chip, the search label and the reason heading; the status filter keeps one checkbox covering both
 - The navigation bar sticks to the top of the screen on phones (below the `sm` breakpoint) so it stays reachable while scrolling; tablet and desktop are unchanged
 - `/api/img` resolves relative media URLs against the configured backend and passes the backend's `Cache-Control`, `ETag` and `Last-Modified` on to the browser instead of overwriting them, so a media preset revalidates with a 304 instead of a full re-fetch. External images keep the proxy's own cache lifetime. The proxy still does no image work of its own
 - The proxy's SSRF exception is now the configured backend host rather than any `localhost` address in development

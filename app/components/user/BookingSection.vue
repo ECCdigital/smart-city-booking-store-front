@@ -32,6 +32,7 @@ import BookingCard from "~/components/user/BookingCard.vue";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import { resolveBookingPaymentSearchLabel } from "~/utils/bookingPaymentStatus.js";
+import { resolveBookingStatusSearchLabel } from "~/utils/bookingStatus.js";
 
 const { t } = useI18n();
 
@@ -57,11 +58,7 @@ const allBookings = computed(() =>
       hour: "2-digit",
       minute: "2-digit",
     }),
-    statusLabel: b.isRejected
-      ? "Storniert"
-      : b.isCommitted
-        ? "Bestätigt"
-        : "Ausstehend",
+    statusLabel: resolveBookingStatusSearchLabel(b, t),
     payedLabel: resolveBookingPaymentSearchLabel(b, t),
   })),
 );
