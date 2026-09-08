@@ -59,6 +59,33 @@ const items = computed(() => {
     ...adminSection,
     [
       {
+        label: "Aktivitäten",
+        class: "font-bold cursor-default hover:bg-transparent",
+      },
+      {
+        label: "Buchungen",
+        icon: "i-lucide-book-marked",
+        onSelect: () => goTo("/account/bookings"),
+      },
+      {
+        label: "Digitale Schlüssel",
+        icon: "i-lucide-key-round",
+        onSelect: () => goTo("/mobile-key"),
+      },
+      {
+        label: "Rechnungen",
+        icon: "i-lucide-wallet-cards",
+        onSelect: () => goTo("/account/invoices"),
+      },
+      /*{
+        label: "Favoriten",
+        icon: "i-lucide-book-heart",
+        onSelect: () => goTo("/account/favorites"),
+        disabled: true,
+      },*/
+    ],
+    [
+      {
         label: "Benutzerkonto",
         class: "font-bold cursor-default hover:bg-transparent",
       },

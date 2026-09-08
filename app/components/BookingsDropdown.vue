@@ -1,33 +1,23 @@
 <template>
-  <UDropdownMenu
-    size="lg"
-    :items="items"
-    :ui="{
-      content: 'ring-0 shadow-lg glass',
-      itemLeadingIcon: 'mt-1',
-      item: 'before:bg-transparent data-highlighted:before:bg-transparent',
-    }"
-    class="pr-0 md:pr-1"
+  <UButton
+    variant="ghost"
+    class="flex items-center gap-2 outline-none cursor-pointer"
+    @click="() => goTo('/account/bookings')"
   >
-    <UButton
-      variant="ghost"
-      class="flex items-center gap-2 outline-none cursor-pointer"
-    >
-      <UUser
-        name="Meine Buchungen"
-        :avatar="{
-          icon: 'i-lucide-handbag',
-        }"
-        :ui="{
-          base: 'transition-none',
-          avatar: {
-            size: 'h-8 w-8',
-          },
-          name: nameColor,
-        }"
-      />
-    </UButton>
-  </UDropdownMenu>
+    <UUser
+      name="Meine Buchungen"
+      :avatar="{
+        icon: 'i-lucide-handbag',
+      }"
+      :ui="{
+        base: 'transition-none',
+        avatar: {
+          size: 'h-8 w-8',
+        },
+        name: nameColor,
+      }"
+    />
+  </UButton>
 </template>
 <script setup>
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";

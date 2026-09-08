@@ -122,85 +122,21 @@
         </div>
       </template>
 
-      <div v-for="accessPoint in booking.accessPoints" :key="accessPoint.id">
-        <div class="flex items-center gap-2 my-2">
-          <div
-            class="flex shrink-0 items-center justify-center rounded-lg w-8 h-8"
-            :class="lockState(accessPoint, booking).background"
-            :title="lockState(accessPoint, booking).label"
-          >
-            <UIcon
-              :name="lockState(accessPoint, booking).icon"
-              class="w-5 h-5 font-bold"
-              :class="lockState(accessPoint, booking).color"
-            />
-          </div>
-
-          <div class="lg:flex lg:gap-2 lg:items-center basis-6/7">
-            <div class="text-md font-semibold line-clamp-2">
-              {{ accessPointTitle(accessPoint) }}
-            </div>
-            <div class="text-sm text-neutral-500">
-              <span
-                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                :class="accessPointMode(accessPoint).color"
-              >
-                <UIcon
-                  :name="accessPointMode(accessPoint).icon"
-                  class="w-3.5 h-3.5"
-                />
-                {{ accessPointMode(accessPoint).label }}
-              </span>
-            </div>
-          </div>
-
-          <div class="flex-1" />
-          <!--
-            The flow reports every status it learns; there is nothing left to
-            ask the server for once the panel closes.
-          -->
-          <AccessPointPanel
-            :tenant-id="String(booking.tenantId)"
-            :access-point="accessPoint"
-            :booking="booking"
-            :deny-access="!canOperate(accessPoint, booking)"
-            @status="
-              (status) =>
-                (accessPointStatuses[statusKey(booking.id, accessPoint.id)] =
-                  status)
-            "
-          />
-        </div>
-        <USeparator
-          v-if="
-            booking.accessPoints[booking.accessPoints.length - 1]?.id !==
-            accessPoint.id
-          "
-          color="primary"
-          type="solid"
-          size="xs"
-          class="w-full my-1"
-        />
-      </div>
+      <AccessPointListRow
+        v-for="(accessPoint, i) in booking.accessPoints"
+        :key="accessPoint.id"
+        :access-point="accessPoint"
+        :booking="booking"
+        :show-separator="i < booking.accessPoints.length - 1"
+      />
     </UCard>
   </template>
 </template>
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";
-import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
-import AccessPointPanel from "~/components/mobileKey/AccessPointPanel.vue";
-import {
-  canReportStatus,
-  readStatus,
-  remoteOperable,
-} from "~/utils/accessOpenFlow.js";
-import {
-  accessPointLock,
-  accessPointMode,
-  accessPointTitle,
-} from "~/utils/accessPointDisplay.js";
+import AccessPointListRow from "~/components/mobileKey/AccessPointListRow.vue";
 
-const props = defineProps({
+defineProps({
   bookings: {
     type: Array,
     required: true,
@@ -232,7 +168,6 @@ const SKELETON_CARDS = 2;
 
 const { getTenantName } = useTenant();
 const { formatDate } = useFormatting();
-const { getStatus } = useAccessPoints();
 
 /**
  * The badge on a booking, in as many words as a badge holds. The full
@@ -295,72 +230,6 @@ const bookingStatus = (booking) => {
     icon: "i-lucide-check",
   };
 };
-
-const accessPointStatuses = ref({});
-
-/** The one place the key of that map is spelled - it is built in three. */
-const statusKey = (bookingId, accessPointId) => `${bookingId}-${accessPointId}`;
-
-/**
- * Read the same way the flow reads it, so both writers of this map put the
- * same four fields in it and no provider-owned key survives in half of them.
- */
-const loadStatus = async (tenantId, accessPointId, bookingId) => {
-  accessPointStatuses.value[statusKey(bookingId, accessPointId)] = readStatus(
-    await getStatus(tenantId, accessPointId, bookingId),
-  );
-};
-
-/**
- * Asks only the doors that can answer, as the flow does (`refreshStatus`): a
- * locker at rest declares no `getStatus` and would return four nulls for the
- * request. One door's refusal is its own affair - the others keep the answers
- * they got, which is why the requests are settled rather than all-or-nothing.
- */
-const loadAllStatuses = async () => {
-  const requests = [];
-
-  for (const booking of props.bookings) {
-    for (const accessPoint of booking.accessPoints) {
-      if (!canReportStatus(accessPoint)) {
-        continue;
-      }
-
-      requests.push(loadStatus(booking.tenantId, accessPoint.id, booking.id));
-    }
-  }
-
-  await Promise.allSettled(requests);
-};
-
-onMounted(loadAllStatuses);
-
-/**
- * The mount above finds an empty list: the page fetches its bookings after
- * mounting this, and every later filter fetches again. Without this, no door
- * was ever asked - which the old two-state symbol hid by drawing a padlock for
- * an answer it never got.
- */
-watch(() => props.bookings, loadAllStatuses);
-
-/**
- * How this door's lock is drawn. A key missing from the map is a door nobody
- * has asked about, which `accessPointLock` tells apart from an answer - the
- * `?.open === true` this replaces could not, and read both as "closed".
- */
-const lockState = (accessPoint, booking) =>
-  accessPointLock(
-    accessPointStatuses.value[statusKey(booking.id, accessPoint.id)],
-  );
-
-/**
- * The server-side eligibility is the authority (#18). A second, hand-rolled
- * sum in the client can only ever disagree with it - so where the server
- * names no remote-operable access point, none gets the button: a code door is
- * operable and still refuses the open (backend 4.3), and its badge says why.
- */
-const canOperate = (accessPoint, booking) =>
-  remoteOperable(booking, accessPoint.id);
 
 function getTimeRange(startTimestamp, endTimestamp) {
   const begin = new Date(startTimestamp);

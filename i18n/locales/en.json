@@ -450,6 +450,28 @@
     }
   },
 
+  "account": {
+    "invoices": {
+      "title": "Your invoices and receipts",
+      "emptyTitle": "No invoices available",
+      "emptyDescription": "There are currently no invoices for your account. Once invoices have been created, they will appear here.",
+      "unknownBookable": "Unknown bookable",
+      "columns": {
+        "createdAt": "Created",
+        "title": "Title",
+        "type": "Document type",
+        "bookingId": "Booking ID",
+        "bookables": "Bookables",
+        "paid": "Paid"
+      },
+      "types": {
+        "invoice": "Invoice",
+        "receipt": "Receipt",
+        "unknown": "Unknown"
+      }
+    }
+  },
+
   "booking_status": {
     "missing_parameters": "Required information is missing.",
     "internal_error": "A technical error occurred. Please try again later.",

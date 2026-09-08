@@ -12,12 +12,14 @@
         to="/mobile-key"
       />
 
+      <!--
       <QuickAccessCard
         icon="i-lucide-book-heart"
         title="Favoriten"
         description="Häufig genutzte und gemerkte Buchungsobjekte schnell wieder buchen."
         to="/account/favorites"
       />
+      -->
 
       <QuickAccessCard
         icon="i-lucide-wallet-cards"
