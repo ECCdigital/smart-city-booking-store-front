@@ -91,6 +91,7 @@
     "payment_failed": "Payment could not be started. Please try again or choose another payment method.",
     "payment_provider_unavailable": "The selected payment method is not available right now.",
     "locker_unavailable": "The booking could not be completed (locker reservation). Please check the time slot or your selection.",
+    "compartments_unavailable": "No compartment is left for the selected period. Please choose another period.",
     "invoice_payment_not_permitted": "Invoice payment is not enabled for your account.",
     "capacity_exceeded": "The maximum capacity for this object has been reached.",
     "time_conflict": "There is a time conflict with another booking for this object.",
@@ -431,6 +432,21 @@
       "free": "Free of charge",
       "paid": "Paid",
       "unpaid": "Unpaid"
+    },
+    "status": {
+      "requested": "Pending",
+      "requestedTooltip": "The booking still has to be approved by the provider.",
+      "payment_due": "Confirmed",
+      "confirmed": "Confirmed",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    }
+  },
+
+  "account": {
+    "bookingDetails": {
+      "rejectionReason": "Reason for rejection",
+      "cancellationReason": "Reason for cancellation"
     }
   },
 

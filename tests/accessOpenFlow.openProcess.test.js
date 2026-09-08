@@ -4,6 +4,7 @@ import {
   ACCESS_ERRORS,
   buildCommandStatus,
   buildOpenRequest,
+  canReportStatus,
   isUnlocked,
   decideScanMatch,
   decideStage,
@@ -80,6 +81,24 @@ describe("readAccessPoint", () => {
 
     expect(point.tenantId).toBe("rostock");
     expect(point).not.toHaveProperty("tenant");
+  });
+});
+
+describe("canReportStatus", () => {
+  it("says a door with `getStatus` among its capabilities can be asked", () => {
+    expect(
+      canReportStatus({ id: "ap-7f3a", capabilities: ["open", "getStatus"] }),
+    ).toBe(true);
+  });
+
+  it("says a locker at rest cannot - it declares `open` alone", () => {
+    expect(canReportStatus({ id: "42", capabilities: ["open"] })).toBe(false);
+  });
+
+  it("asks nothing whose abilities nobody stated", () => {
+    expect(canReportStatus({ id: "ap-7f3a" })).toBe(false);
+    expect(canReportStatus(null)).toBe(false);
+    expect(canReportStatus(undefined)).toBe(false);
   });
 });
 
@@ -617,6 +636,20 @@ const UNLOCKED = {
 };
 const SCANNED = [{ type: "qrScan", scanCode: "k7f3xyz" }];
 
+const DOOR_ID = "ap-7f3a";
+
+/** An eligibility for the door in the panel: operable, and remote-operable unless said otherwise. */
+const eligibleAt = (fields = {}) => ({
+  accessEligibility: {
+    canOperate: true,
+    blockingReasons: [],
+    primaryBlockingReason: null,
+    operableAccessPointIds: [DOOR_ID],
+    remoteOperableAccessPointIds: [DOOR_ID],
+    ...fields,
+  },
+});
+
 /** A door as it stands today: it demands a scan and can do all three actions. */
 const scanDoor = (facts) => ({
   capabilities: EVERY_CAPABILITY,
@@ -815,6 +848,86 @@ describe("decideStage", () => {
     );
   });
 
+  it("stands on error for a door that takes no open through the API, before any button - whatever the status says", () => {
+    const codeDoor = scanDoor({
+      status: LOCKED,
+      accessPointId: DOOR_ID,
+      booking: eligibleAt({ remoteOperableAccessPointIds: [] }),
+    });
+
+    expect(decideStage(codeDoor)).toMatchObject({
+      stage: "error",
+      error: ACCESS_ERRORS.GENERIC,
+      blockingReason: "no_remote_access",
+    });
+    expect(decideStage({ ...codeDoor, status: undefined }).stage).toBe(
+      "error",
+    );
+    expect(decideStage({ ...codeDoor, action: "open" }).stage).toBe("error");
+  });
+
+  it("names the booking's own reason for a door that is not operable at all, given the door", () => {
+    expect(
+      decideStage(
+        scanDoor({
+          status: LOCKED,
+          accessPointId: DOOR_ID,
+          booking: eligibleAt({
+            canOperate: false,
+            primaryBlockingReason: "authorization_revoked",
+            operableAccessPointIds: [],
+            remoteOperableAccessPointIds: [],
+          }),
+        }),
+      ),
+    ).toMatchObject({
+      stage: "error",
+      blockingReason: "authorization_revoked",
+    });
+  });
+
+  it("stands on error for a door named in neither list even where the booking gives no reason - a button that would be refused is no button", () => {
+    expect(
+      decideStage(
+        scanDoor({
+          status: LOCKED,
+          accessPointId: DOOR_ID,
+          booking: eligibleAt({
+            operableAccessPointIds: [],
+            remoteOperableAccessPointIds: [],
+          }),
+        }),
+      ),
+    ).toMatchObject({
+      stage: "error",
+      error: ACCESS_ERRORS.GENERIC,
+      blockingReason: null,
+    });
+  });
+
+  it("offers the button for a remote-operable door as before", () => {
+    expect(
+      decideStage(
+        scanDoor({
+          status: LOCKED,
+          accessPointId: DOOR_ID,
+          booking: eligibleAt(),
+        }),
+      ).stage,
+    ).toBe("can_open");
+  });
+
+  it("reads the eligibility the old way where nobody named the door - a list it cannot look up is no reason", () => {
+    expect(
+      decideStage(
+        scanDoor({
+          status: LOCKED,
+          booking: eligibleAt({ remoteOperableAccessPointIds: [] }),
+        }),
+      ).stage,
+    ).toBe("can_open");
+  });
+
   it("takes the blocking reason from the eligibility and keeps naming it", () => {
     const blocked = (reason, booking = {}) =>
       decideStage(
@@ -835,11 +948,11 @@ describe("decideStage", () => {
       stage: "error",
       error: ACCESS_ERRORS.PAYMENT_REQUIRED,
     });
-    // The six mute reasons share the generic screen - which still names them.
-    expect(blocked("locker_not_ready")).toMatchObject({
+    // The five mute reasons share the generic screen - which still names them.
+    expect(blocked("authorization_revoked")).toMatchObject({
       stage: "error",
       error: ACCESS_ERRORS.GENERIC,
-      blockingReason: "locker_not_ready",
+      blockingReason: "authorization_revoked",
     });
     expect(
       blocked("outside_access_window", {
@@ -897,7 +1010,7 @@ describe("decideStage", () => {
     });
   });
 
-  describe("the three deliberate departures from today", () => {
+  describe("the four deliberate departures from today", () => {
     it("demands the proof instead of faking it, as the panel does today behind a three-second timeout", () => {
       expect(
         decideStage(scanDoor({ status: LOCKED, evidence: [] })).stage,
@@ -931,6 +1044,18 @@ describe("decideStage", () => {
           }),
         ).stage,
       ).toBe("closed");
+    });
+
+    it("offers no button at a code door that could only fail - the backend refuses that open with no_remote_access", () => {
+      expect(
+        decideStage(
+          scanDoor({
+            status: LOCKED,
+            accessPointId: DOOR_ID,
+            booking: eligibleAt({ remoteOperableAccessPointIds: [] }),
+          }),
+        ),
+      ).toMatchObject({ stage: "error", blockingReason: "no_remote_access" });
     });
   });
 });

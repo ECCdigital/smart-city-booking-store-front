@@ -21,8 +21,8 @@
         <BookingStatusChip :booking="booking" />
       </div>
     </div>
-    <div v-if="booking.isRejected" class="mb-5">
-      <p class="font-medium">Ablehnungsgrund</p>
+    <div v-if="!isLive" class="mb-5">
+      <p class="font-medium">{{ reasonHeading }}</p>
       <p>{{ booking.rejectionReason }}</p>
     </div>
 
@@ -150,7 +150,13 @@ import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { useEventStore } from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
-import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
+import {
+  BOOKING_STATUS,
+  isFreeBooking,
+  isLiveBooking,
+  isSettledBooking,
+  resolveBookingStatus,
+} from "~/utils/bookingStatus.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import AccessPointListRow from "~/components/mobileKey/AccessPointListRow.vue";
 
@@ -199,6 +205,17 @@ watch(
   { immediate: true },
 );
 
+const isLive = computed(() => isLiveBooking(props.booking));
+
+// The backend writes rejectionReason for both states; a booking the
+// customer cancelled themselves is not "rejected", so the heading follows
+// the state.
+const reasonHeading = computed(() =>
+  resolveBookingStatus(props.booking) === BOOKING_STATUS.REJECTED
+    ? t("account.bookingDetails.rejectionReason")
+    : t("account.bookingDetails.cancellationReason"),
+);
+
 const bookingTimeSlot = computed(() => {
   if (props.booking.timeBegin && props.booking.timeEnd) {
     const beginn = formatDate(props.booking.timeBegin);
@@ -221,7 +238,7 @@ const paymentMethod = computed(() => {
   if (isFree.value) {
     return "–";
   }
-  if (!props.booking.isPayed) {
+  if (!isSettledBooking(props.booking)) {
     switch (props.booking.paymentProvider) {
       case "invoice": {
         return "Rechnung";

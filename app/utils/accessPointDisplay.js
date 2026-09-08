@@ -19,17 +19,29 @@ import { isUnlocked } from "~/utils/accessOpenFlow.js";
  * rest of the list does - see the note on `blockingReasonLabels`.
  */
 
+const REMOTE_DOOR = Object.freeze({
+  label: "Per Knopf",
+  color: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
+  icon: "i-lucide-lock-open",
+});
+
+const CODE_DOOR = Object.freeze({
+  label: "Code an der Tür",
+  color: "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100",
+  icon: "i-lucide-key-round",
+});
+
+/**
+ * Keyed by the backend's `mode` (`remote | authorization | both`). `code`
+ * never came from any backend, but the key costs nothing and is not made
+ * wrong by `authorization` - it stays as an alias.
+ */
 export const ACCESS_POINT_MODES = Object.freeze({
-  remote: Object.freeze({
-    label: "Per Knopf",
-    color: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
-    icon: "i-lucide-lock-open",
-  }),
-  code: Object.freeze({
-    label: "Code an der Tür",
-    color: "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100",
-    icon: "i-lucide-key-round",
-  }),
+  remote: REMOTE_DOOR,
+  authorization: CODE_DOOR,
+  code: CODE_DOOR,
+  // The button works here as well, so it wears the button's colours.
+  both: Object.freeze({ ...REMOTE_DOOR, label: "Per Knopf oder Code" }),
 });
 
 export const UNKNOWN_MODE = Object.freeze({
@@ -39,14 +51,25 @@ export const UNKNOWN_MODE = Object.freeze({
 });
 
 /**
- * A locker has no name a person would recognise, so it is named by the booking
- * behind it. Which kind it is comes from `type` (#13, #15) - the provider does
+ * A locker has no label of its own, so it is named by the number on the box
+ * (`compartment`, backend 4.3) - the one the person looks for at the site -
+ * and only where the provider names none by the booking behind it. Before the
+ * grant an unpaid booking knows neither, and a box on hold is still a box, not
+ * a `#null`. Which kind it is comes from `type` (#13, #15) - the provider does
  * not decide how a thing is called. A door from a provider nobody enumerated
  * still gets a name, rather than the empty row the old label left behind.
  */
 export function accessPointTitle(accessPoint) {
   if (accessPoint?.type === "locker") {
-    return `Fahrradbox #${accessPoint.externalBookingId}`;
+    if (accessPoint.compartment) {
+      return `Fahrradbox Nr. ${accessPoint.compartment}`;
+    }
+
+    if (accessPoint.externalBookingId) {
+      return `Fahrradbox #${accessPoint.externalBookingId}`;
+    }
+
+    return "Fahrradbox";
   }
 
   return accessPoint?.label || "Unbekannte Tür";

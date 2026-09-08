@@ -56,7 +56,11 @@
 <script setup>
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import AccessPointPanel from "~/components/mobileKey/AccessPointPanel.vue";
-import { readStatus } from "~/utils/accessOpenFlow.js";
+import {
+  canReportStatus,
+  readStatus,
+  remoteOperable,
+} from "~/utils/accessOpenFlow.js";
 import {
   accessPointLock,
   accessPointMode,
@@ -83,25 +87,42 @@ const status = ref(undefined);
 
 const lock = computed(() => accessPointLock(status.value));
 
-const canOperate = computed(
-  () =>
-    props.booking.accessEligibility?.operableAccessPointIds?.includes(
-      String(props.accessPoint.id),
-    ) ?? false,
+/**
+ * The server-side eligibility is the authority (#18). A second, hand-rolled
+ * sum in the client can only ever disagree with it - so where the server
+ * names no remote-operable access point, none gets the button: a code door is
+ * operable and still refuses the open (backend 4.3), and its badge says why.
+ */
+const canOperate = computed(() =>
+  remoteOperable(props.booking, props.accessPoint.id),
 );
 
 function onStatus(next) {
   status.value = next;
 }
 
+/**
+ * Asks only the doors that can answer, as the flow does (`refreshStatus`): a
+ * locker at rest declares no `getStatus` and would return four nulls for the
+ * request. One door's refusal is its own affair - this row keeps the answer it
+ * has (or none) rather than letting the rejection escape the watcher.
+ */
 async function loadLockStatus() {
-  status.value = readStatus(
-    await getStatus(
-      props.booking.tenantId,
-      props.accessPoint.id,
-      props.booking.id,
-    ),
-  );
+  if (!canReportStatus(props.accessPoint)) {
+    return;
+  }
+
+  try {
+    status.value = readStatus(
+      await getStatus(
+        props.booking.tenantId,
+        props.accessPoint.id,
+        props.booking.id,
+      ),
+    );
+  } catch {
+    // A door that refuses to answer stays "not asked" in the lock symbol.
+  }
 }
 
 watch(

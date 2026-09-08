@@ -43,7 +43,7 @@ const props = defineProps({
 });
 
 const { serviceInfo, fetchCustomerServiceInfo } = useEmergencyHelp(
-  props.tenantId, props.bookingId, props.providerId,
+  props.tenantId, props.providerId,
 );
 
 await fetchCustomerServiceInfo();

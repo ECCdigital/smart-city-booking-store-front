@@ -12,20 +12,34 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 - Images are loaded at the size they are rendered at: `useMediaImage()` builds `src`/`srcset`/`sizes` from the backend's media presets (`thumb`, `sm`, `md`, `lg`) per display context — result cards, result strips, the detail hero, the checkout sidebar and the checkout add-on icons. It replaces the nine places that assembled a proxy URL by hand. External image references have no presets and go through the proxy unchanged. `thumb` is a square centre crop rather than a scaled-down original, so it is offered only where the box is a small square (checkout add-on icons, gallery thumbnails) and never mixed into a `srcset` with the other three — which means the smallest image a result strip can load is `sm`
 - Detail page shows the bookable's full image list, cover image first, as a thumbnail row under the main image
 - The event detail page shows the event's image gallery, teaser image first — the list was skipped as untyped legacy, but the backend exports it typed since the media library
+- Checkout names a compartment shortage (`checkout.compartments_unavailable`, backend 4.3) instead of the generic error
 
 ### Fixed
 
+- The emergency-help accordion on the booking detail page renders again — it had been calling `useEmergencyHelp` with a signature that no longer existed; it now reads the booking's compartments from `accessInfo` (backend 4.3) and shows the provider contact from the tenant projection together with the compartment's booking id. The page's `lockerSystem === "ifbs"` check moved into `decideEmergencyHelp`; `lockerInfo` is no longer read
 - A media URL is recognized by its path no matter whether it arrives relative or absolute: the backend's embed interface (`/json/...`) exports absolute media URLs now, which fell through the relative-only check — those images silently loaded the full-size original without any `?size=` preset
 - Form fields on phones (below the `sm` breakpoint) use at least 16px font-size so iOS Safari no longer zooms into a focused field and leaves the page zoomed in
 
 ### Changed
 
+- The provider's emergency contact (`ProviderHelpSection`) comes from the public tenant projection (`GET /api/tenants/public` → `accessApps[].customerService`, backend 4.3) instead of the removed `/locker/:provider/customer-service-info`; the key list loads the tenants on its own, so tenant contacts are there on a direct visit too
+- The open button is offered only at access points the backend names remote-operable (`accessEligibility.remoteOperableAccessPointIds`, backend 4.3); a door that only takes a code is refused in the client with `no_remote_access` before the tap, in the key list, the panel and on the scan page alike
+- Access points in `authorization` and `both` mode carry a badge of their own ("Code an der Tür", "Per Knopf oder Code") instead of "Unbekannter Modus"
+- A bike box is named by its box number (`compartment`, backend 4.3) and no longer by the provider's booking id; a box on hold reads "Fahrradbox" rather than "#null"
+- The key list asks only doors that can report a status, and one door's failed status read no longer discards the others
+- Booking state is read from `booking.status` (`requested | payment_due | confirmed | rejected | cancelled`, backend 4.3) through `bookingStatus.js` and `bookingPaymentStatus.js`; the derived flags `isCommitted`/`isPayed`/`isRejected` are only read where a payload carries no `status`. Display is unchanged
+- Account bookings tell a rejected request (`rejected`) from a cancelled booking (`cancelled`) in the status chip, the search label and the reason heading; the status filter keeps one checkbox covering both
+- Checkout hands the customer to the payment page when the booking lands in `payment_due` and to the status page otherwise, decided on `booking.status`; the status page reads the same state for polling and the confirmation copy
 - The navigation bar sticks to the top of the screen on phones (below the `sm` breakpoint) so it stays reachable while scrolling; tablet and desktop are unchanged
 - `/api/img` resolves relative media URLs against the configured backend and passes the backend's `Cache-Control`, `ETag` and `Last-Modified` on to the browser instead of overwriting them, so a media preset revalidates with a 304 instead of a full re-fetch. External images keep the proxy's own cache lifetime. The proxy still does no image work of its own
 - The proxy's SSRF exception is now the configured backend host rather than any `localhost` address in development
 - Result cards, result strips, checkout add-on icons and gallery thumbnails load lazily — except the first card or strip of a list, which is above the fold and usually the largest paint
 - `/api/img` validates every hop of a redirect chain against the same host check as the first request, not just the first one
 - Removed `@nuxt/image`; the storefront never rendered a `<NuxtImg>`
+
+### Removed
+
+- `locker_not_ready` from the mobile key's blocking reasons (sentence, badge and screen table): backend 4.3 never raises it, a compartment without a grant reads `not_provisioned`
 
 ## [1.1.7] — 2026-08-25
 

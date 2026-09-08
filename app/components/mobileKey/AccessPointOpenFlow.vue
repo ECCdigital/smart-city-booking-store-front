@@ -189,6 +189,7 @@ import {
   ACCESS_ERRORS,
   buildCommandStatus,
   buildOpenRequest,
+  canReportStatus,
   decideStage,
   isUnlocked,
   readCloseOutcome,
@@ -302,6 +303,7 @@ const view = computed(() =>
     action: action.value,
     result: result.value,
     booking: props.booking,
+    accessPointId: props.accessPoint.id,
   }),
 );
 
@@ -374,7 +376,7 @@ function applyStatus(next) {
  * will never come.
  */
 async function refreshStatus() {
-  if (!props.accessPoint.capabilities.includes("getStatus")) {
+  if (!canReportStatus(props.accessPoint)) {
     return;
   }
 

@@ -483,6 +483,7 @@
     "payment_failed": "Die Zahlung konnte nicht gestartet werden. Bitte versuchen Sie es erneut oder wählen Sie eine andere Zahlungsart.",
     "payment_provider_unavailable": "Die gewählte Zahlungsart ist derzeit nicht verfügbar.",
     "locker_unavailable": "Die Buchung konnte nicht abgeschlossen werden (Schließfach-Reservierung). Bitte Zeitraum oder Auswahl prüfen.",
+    "compartments_unavailable": "Für den gewählten Zeitraum ist kein Fach mehr frei. Bitte wählen Sie einen anderen Zeitraum.",
     "invoice_payment_not_permitted": "Zahlung auf Rechnung ist für Ihr Konto nicht freigeschaltet.",
     "capacity_exceeded": "Die maximale Kapazität für dieses Objekt wurde erreicht.",
     "time_conflict": "Für dieses Objekt besteht ein Zeitkonflikt mit einer anderen Buchung.",
@@ -809,6 +810,21 @@
       "free": "Kostenfrei",
       "paid": "Bezahlt",
       "unpaid": "Nicht bezahlt"
+    },
+    "status": {
+      "requested": "Ausstehend",
+      "requestedTooltip": "Die Buchung muss noch vom Anbieter freigegeben werden.",
+      "payment_due": "Bestätigt",
+      "confirmed": "Bestätigt",
+      "rejected": "Abgelehnt",
+      "cancelled": "Storniert"
+    }
+  },
+
+  "account": {
+    "bookingDetails": {
+      "rejectionReason": "Ablehnungsgrund",
+      "cancellationReason": "Stornierungsgrund"
     }
   },
 
@@ -1030,7 +1046,6 @@
       "authorization_revoked": "Ihre Berechtigung für diesen Zugang wurde widerrufen.",
       "outside_access_window": "Der Zugang liegt außerhalb des gebuchten Zeitfensters.",
       "not_provisioned": "Der Zugang ist noch nicht freigegeben.",
-      "locker_not_ready": "Das Schließfach ist noch nicht bereit.",
       "no_remote_access": "Dieser Zugang lässt sich nicht aus der Ferne öffnen.",
       "evidence_missing": "Der Nachweis fehlt – bitte vor Ort den QR-Code scannen.",
       "evidence_invalid": "Der Nachweis ist ungültig – bitte den Aufkleber prüfen.",

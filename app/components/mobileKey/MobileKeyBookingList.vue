@@ -183,7 +183,6 @@ const blockingReasonLabels = Object.freeze({
   authorization_revoked: "Berechtigung widerrufen",
   outside_access_window: "Außerhalb des Zeitfensters",
   not_provisioned: "Noch nicht freigegeben",
-  locker_not_ready: "Schließfach nicht bereit",
   no_remote_access: "Keine Fernsteuerung",
   evidence_missing: "Nachweis fehlt",
   evidence_invalid: "Nachweis ungültig",
