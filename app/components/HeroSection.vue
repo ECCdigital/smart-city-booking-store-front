@@ -26,14 +26,22 @@ const heroPresets = {
 // The mobile Hero is short in both modes; only the desktop height follows it.
 const mobileHeight = "sm";
 
+const heightClasses = {
+  sm: "h-48",
+  md: "h-64",
+  lg: "h-96",
+  xl: "h-[32rem]",
+};
+
+const route = useRoute();
+const { data: theme } = await useThemeBundle(route.params.catalogSlug);
 const { data: hero } = await useFetch("/api/theme/hero");
-const colorMode = useColorMode();
 const mode = useHeroMode();
 const { isGreaterThanMd } = useBreakpointCheck();
 
 const preset = computed(() => heroPresets[mode.value]);
-const height = computed(() =>
-  isGreaterThanMd.value ? preset.value.height : mobileHeight,
+const heightClass = computed(
+  () => heightClasses[isGreaterThanMd.value ? preset.value.height : mobileHeight],
 );
 
 const title = computed(() => hero.value?.title);
@@ -41,15 +49,14 @@ const subtitle = computed(() => hero.value?.subtitle);
 </script>
 
 <template>
-  <HeroBackground
-    variant="poly"
-    :theme="colorMode.value === 'dark' ? 'dark' : 'light'"
-    :height="height"
-    :fade-bottom="false"
-    class="py-10 md:py-15 justify-between z-0 pb-30 lg:pb-15"
+  <div
+    class="relative w-full overflow-hidden z-0 py-10 md:py-15 pb-30 lg:pb-15"
+    :class="heightClass"
   >
+    <BackgroundLayers :background="theme?.background" />
+
     <!-- Surface is full-bleed, content sits inside the page container -->
-    <div class="container h-full">
+    <div class="container relative z-10 h-full">
       <div class="md:flex justify-between md:h-full">
         <div class="md:hidden mb-5 flex justify-center">
           <img
@@ -79,5 +86,5 @@ const subtitle = computed(() => hero.value?.subtitle);
         </div>
       </div>
     </div>
-  </HeroBackground>
+  </div>
 </template>

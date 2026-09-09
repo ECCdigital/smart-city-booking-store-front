@@ -10,6 +10,59 @@ body {
 }
 
 /*
+ * The Background palette BackgroundLayers.vue paints its Variants with. It
+ * lives here, under :root and .dark, so the colour mode is decided by the
+ * `.dark` class in the SSR HTML — on <html> from the colour-mode cookie, or on
+ * any wrapper that forces dark — and never by JavaScript after mount. The
+ * three channel triplets are space-separated so a layer can add its own alpha.
+ */
+:root {
+    --bg-gradient-from: #f9fafb; /* gray-50 */
+    --bg-gradient-via: #ffffff;
+    --bg-gradient-to: #f3f4f6; /* gray-100 */
+    --bg-primary-from: #a5b4fc;
+    --bg-primary-to: #c4b5fd;
+    --bg-secondary-from: #93c5fd;
+    --bg-secondary-to: #67e8f9;
+    --bg-tertiary-from: #c4b5fd;
+    --bg-tertiary-to: #f9a8d4;
+    --bg-quaternary-from: #6ee7b7;
+    --bg-quaternary-to: #93c5fd;
+    --bg-accent: 99 102 241;
+    --bg-base: 100 116 139;
+    --bg-line: 71 85 105;
+    --bg-poly-opacity: 0.6;
+    --bg-orb-opacity: 0.25;
+    --bg-grid-opacity: 0.1;
+    --bg-noise-opacity: 0.025;
+    --bg-vignette-opacity: 0.1;
+    /* Scaled by BackgroundLayers' intensity classes; 1 keeps every calc() valid outside them. */
+    --bg-intensity: 1;
+}
+
+.dark {
+    --bg-gradient-from: #101828; /* gray-900 */
+    --bg-gradient-via: #030712; /* gray-950 */
+    --bg-gradient-to: #000000;
+    --bg-primary-from: #6366f1;
+    --bg-primary-to: #8b5cf6;
+    --bg-secondary-from: #3b82f6;
+    --bg-secondary-to: #06b6d4;
+    --bg-tertiary-from: #8b5cf6;
+    --bg-tertiary-to: #ec4899;
+    --bg-quaternary-from: #10b981;
+    --bg-quaternary-to: #3b82f6;
+    --bg-accent: 99 102 241;
+    --bg-base: 255 255 255;
+    --bg-line: 255 255 255;
+    --bg-poly-opacity: 0.4;
+    --bg-orb-opacity: 0.15;
+    --bg-grid-opacity: 0.05;
+    --bg-noise-opacity: 0.015;
+    --bg-vignette-opacity: 0.4;
+}
+
+/*
  * iOS Safari zooms into a focused form field whose font-size is below 16px.
  * Nuxt UI's default field size (`md`) is `text-sm` = 14px, so every input on a
  * phone triggered that zoom and left the page zoomed in afterwards.
