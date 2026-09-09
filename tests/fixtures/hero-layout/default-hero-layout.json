@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "height": "lg",
+  "mobileHeight": "lg",
+  "compactHeight": "sm",
+  "blocks": [
+    {
+      "id": "default-logo",
+      "type": "image",
+      "zone": "middle-right",
+      "outerSpacing": "none",
+      "innerSpacing": "none",
+      "width": "auto",
+      "panel": "none",
+      "homeOnly": false,
+      "hideOnMobile": false,
+      "image": { "source": "media", "mediaId": "66f1c2000000000000000001" },
+      "alt": { "de": "Marktplatz" },
+      "maxHeight": "sm",
+      "invertInDarkMode": true
+    },
+    {
+      "id": "default-title",
+      "type": "text",
+      "zone": "middle-left",
+      "outerSpacing": "none",
+      "innerSpacing": "none",
+      "width": "auto",
+      "panel": "none",
+      "homeOnly": false,
+      "hideOnMobile": false,
+      "text": { "de": "Marktplatz" },
+      "size": "lg",
+      "color": "primary",
+      "weight": "bold",
+      "shadow": false
+    },
+    {
+      "id": "default-subtitle",
+      "type": "text",
+      "zone": "middle-left",
+      "outerSpacing": "none",
+      "innerSpacing": "none",
+      "width": "auto",
+      "panel": "none",
+      "homeOnly": false,
+      "hideOnMobile": false,
+      "text": { "de": "Entdecken Sie unsere Angebote", "en": "Discover our offers" },
+      "size": "2xl",
+      "color": "default",
+      "weight": "bold",
+      "shadow": false
+    }
+  ]
+}

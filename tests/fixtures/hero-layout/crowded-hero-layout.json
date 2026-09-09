@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "height": "xl",
+  "mobileHeight": "lg",
+  "compactHeight": "sm",
+  "blocks": [
+    {
+      "id": "k3Qm7aZp",
+      "type": "richtext",
+      "zone": "bottom-center",
+      "outerSpacing": "md",
+      "innerSpacing": "sm",
+      "width": "md",
+      "panel": "translucent",
+      "homeOnly": true,
+      "hideOnMobile": false,
+      "html": {
+        "de": "<p><strong>Öffnungszeiten:</strong> Mo–Fr 8–18 Uhr. <a href=\"mailto:info@example.org\">Kontakt</a></p>",
+        "en": "<p><strong>Opening hours:</strong> Mon–Fri 8am–6pm. <a href=\"mailto:info@example.org\">Contact</a></p>"
+      },
+      "color": "white",
+      "shadow": true
+    },
+    {
+      "id": "headline",
+      "type": "text",
+      "zone": "top-left",
+      "outerSpacing": "lg",
+      "innerSpacing": "xs",
+      "width": "lg",
+      "panel": "translucent",
+      "homeOnly": false,
+      "hideOnMobile": true,
+      "text": { "de": "Willkommen", "en": "Welcome" },
+      "size": "2xl",
+      "color": "#ff8800",
+      "weight": "bold",
+      "shadow": true
+    },
+    {
+      "id": "unmeasured-logo",
+      "type": "image",
+      "zone": "top-right",
+      "outerSpacing": "none",
+      "innerSpacing": "none",
+      "width": "auto",
+      "panel": "none",
+      "homeOnly": false,
+      "hideOnMobile": false,
+      "image": {
+        "source": "media",
+        "mediaId": "66f1c2000000000000000002",
+        "url": "/api/v2/instance/media/66f1c2000000000000000002/file"
+      },
+      "alt": { "de": "Logo", "en": "" },
+      "maxHeight": "md",
+      "invertInDarkMode": false
+    }
+  ]
+}

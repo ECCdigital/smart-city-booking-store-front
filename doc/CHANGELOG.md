@@ -13,6 +13,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 - Detail page shows the bookable's full image list, cover image first, as a thumbnail row under the main image
 - The event detail page shows the event's image gallery, teaser image first — the list was skipped as untyped legacy, but the backend exports it typed since the media library
 - Checkout names a compartment shortage (`checkout.compartments_unavailable`, backend 4.3) instead of the generic error
+- Hero Layout contract (schema v1) in the storefront: shared types for the layout, its Blocks and the Background, hand-written guards that answer with `null` and the failing JSON path instead of letting an invalid layout reach the renderer, and a server-side DOMPurify sanitiser for rich-text Blocks. Nothing renders from it yet
 
 ### Fixed
 
