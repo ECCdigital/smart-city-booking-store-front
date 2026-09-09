@@ -32,3 +32,7 @@ logs
 AGENTS.override.md
 
 .scratch/*
+
+# Claude Code: local settings and agent worktrees stay out of the repo
+.claude/settings.local.json
+.claude/worktrees/
