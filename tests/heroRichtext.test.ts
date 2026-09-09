@@ -3,10 +3,8 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import {
-  HERO_RICHTEXT_ALLOWLIST,
-  sanitizeHeroRichtext,
-} from "~~/server/utils/heroRichtext";
+import { sanitizeHeroRichtext } from "~~/server/utils/heroRichtext";
+import { HERO_RICHTEXT_ALLOWLIST } from "~~/shared/utils/heroRichtextAllowlist";
 
 import crowdedHeroLayout from "./fixtures/hero-layout/crowded-hero-layout.json";
 

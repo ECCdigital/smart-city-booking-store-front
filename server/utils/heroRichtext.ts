@@ -10,38 +10,14 @@
  * **Server-side only.** It pulls in jsdom, which must never reach the client
  * bundle, so nothing under `app/` or `shared/` may import it. The Live Preview
  * sanitises Drafts in the browser instead, with DOMPurify's browser build
- * behind a lazy import.
+ * behind a lazy import — against the same allowlist, which is why the
+ * allowlist lives in `shared/utils/heroRichtextAllowlist.ts` and not here.
  */
 
 import createDOMPurify, { type DOMPurify, type WindowLike } from "dompurify";
 import { JSDOM } from "jsdom";
 
-/**
- * The frozen allowlist of the Shared contract, copied verbatim. Never passed
- * through `setConfig()`, never extended with hooks, never used `IN_PLACE`:
- * the same nine tags and three attributes are what the backend allows, and
- * the two copies are only trustworthy while they are identical. Cross-
- * reference: `.scratch/hero-layout/spec.md`, "Rich-text allowlist v1", and the
- * same block in the backend and admin specs.
- *
- * Relative URLs are rejected on purpose — a Hero link points at an external
- * page or an address, and internal navigation is not something an instance
- * admin should be able to smuggle into rich text.
- *
- * One consequence worth knowing before rendering a link: `target` and `rel`
- * are listed here but do not survive sanitising. DOMPurify matches every
- * attribute value against `ALLOWED_URI_REGEXP` unless the attribute is one of
- * its own `URI_SAFE_ATTRIBUTES`, and neither of these is; `_blank` and
- * `noopener` are not URIs. Hero links therefore open in the same tab.
- */
-export const HERO_RICHTEXT_ALLOWLIST = Object.freeze({
-  ALLOWED_TAGS: ["p", "br", "strong", "em", "u", "a", "ul", "ol", "li"],
-  ALLOWED_ATTR: ["href", "target", "rel"],
-  ALLOWED_URI_REGEXP: /^(?:https?|mailto):/i,
-  ALLOW_DATA_ATTR: false,
-  ALLOW_ARIA_ATTR: false,
-  KEEP_CONTENT: true,
-});
+import { HERO_RICHTEXT_ALLOWLIST } from "~~/shared/utils/heroRichtextAllowlist";
 
 /**
  * One jsdom window per process. Building it costs a few milliseconds and the

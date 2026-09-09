@@ -16,8 +16,9 @@ import { localizedText } from "~/utils/heroBlocks";
  * Text and rich-text Blocks render here; image Blocks render through the one
  * logo element. Rich text goes into the page through `v-html`: the markup
  * comes from the Theme View, where the BFF has already run it through the
- * frozen allowlist (`server/utils/heroRichtext.ts`), and the client never
- * sanitises or receives anything that has not been sanitised.
+ * frozen allowlist (`server/utils/heroRichtext.ts`) — or, on the Live
+ * Preview alone, from a Draft the bridge sanitised in the browser against
+ * the same allowlist. Nothing unsanitised reaches this component.
  */
 const props = defineProps({
   block: { type: Object, required: true },

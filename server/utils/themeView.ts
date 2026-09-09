@@ -15,14 +15,10 @@ import {
   parseBackground,
   parseHeroLayout,
   parseHeroMediaReference,
-  type HeroParseIssue,
   type HeroParseOptions,
 } from "~~/shared/utils/heroLayout";
-import {
-  HERO_RICHTEXT_MAX_LENGTH,
-  type HeroLayout,
-  type ThemeView,
-} from "~~/shared/types/hero";
+import { sanitizeHeroLayoutRichtext } from "~~/shared/utils/heroRichtextAllowlist";
+import type { ThemeView } from "~~/shared/types/hero";
 import type { ThemeBundle } from "~~/shared/types/api";
 import { sanitizeHeroRichtext } from "./heroRichtext";
 
@@ -51,43 +47,6 @@ export function defaultThemeView(): ThemeView {
 }
 
 /**
- * Sanitises every rich-text Block in place.
- *
- * The contract caps rich text twice: 50 000 characters raw, which the guard
- * already enforced, and {@link HERO_RICHTEXT_MAX_LENGTH} after sanitising,
- * which only this side of the wire can measure. Over the cap the whole layout
- * is rejected, the same verdict the backend reaches on save, so the Fallback
- * Hero Layout takes over instead of a Hero built around one runaway Block.
- *
- * @returns The layout, or `null` when a sanitised value is over the cap.
- */
-function sanitizeLayout(
-  layout: HeroLayout,
-  report: (issue: HeroParseIssue) => void,
-): HeroLayout | null {
-  for (const [index, block] of layout.blocks.entries()) {
-    if (block.type !== "richtext") continue;
-
-    for (const locale of ["de", "en"] as const) {
-      const html = block.html[locale];
-      if (html === undefined) continue;
-
-      const sanitised = sanitizeHeroRichtext(html);
-      if (sanitised.length > HERO_RICHTEXT_MAX_LENGTH) {
-        report({
-          path: `heroLayout.blocks[${index}].html.${locale}`,
-          code: "max_length",
-        });
-        return null;
-      }
-      block.html[locale] = sanitised;
-    }
-  }
-
-  return layout;
-}
-
-/**
  * Builds the Theme View of one bundle.
  *
  * A field that fails its guard becomes `null` on its own: a broken Background
@@ -108,8 +67,15 @@ export function buildThemeView(
   return {
     etag,
     name: typeof bundle.name === "string" ? bundle.name : "",
+    // The cap on sanitised rich text is the one rule only this side of the
+    // wire can measure; over it the whole layout is rejected, the same
+    // verdict the backend reaches on save.
     heroLayout: layout
-      ? sanitizeLayout(layout, report ?? (() => {}))
+      ? sanitizeHeroLayoutRichtext(
+          layout,
+          sanitizeHeroRichtext,
+          report ?? (() => {}),
+        )
       : null,
     background: parseBackground(bundle.background, options),
     logo:

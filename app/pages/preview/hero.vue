@@ -72,32 +72,41 @@ const bookables = computed(() =>
 </script>
 
 <template>
-  <!--
-    `inert` takes the content out of the tab order and the accessibility tree
-    and swallows its clicks; `pointer-events-none` keeps the cursor honest.
-  -->
-  <div inert class="pointer-events-none select-none">
+  <div>
     <!--
-      Mirrors the start page (`pages/index.vue`): the search bar overlaps the
-      Hero, then the categories. The wrappers are copied on purpose — the
-      preview exists to show that overlap exactly as the start page does, so
-      a change there is a change here.
+      The bridge to the admin: it receives every Draft and writes it into the
+      override above. Outside the inert wrapper, because the next ticket gives
+      it a clickable overlay.
     -->
-    <div v-if="mode === 'home'" class="bg-neutral-50 dark:bg-gray-950">
-      <div class="container">
-        <div class="relative h-0 bg-transparent">
-          <div class="flex justify-center mt-12 md:mt-0">
-            <SearchBar entry-page-mode />
+    <HeroPreviewBridge />
+
+    <!--
+      `inert` takes the content out of the tab order and the accessibility tree
+      and swallows its clicks; `pointer-events-none` keeps the cursor honest.
+    -->
+    <div inert class="pointer-events-none select-none">
+      <!--
+        Mirrors the start page (`pages/index.vue`): the search bar overlaps the
+        Hero, then the categories. The wrappers are copied on purpose — the
+        preview exists to show that overlap exactly as the start page does, so
+        a change there is a change here.
+      -->
+      <div v-if="mode === 'home'" class="bg-neutral-50 dark:bg-gray-950">
+        <div class="container">
+          <div class="relative h-0 bg-transparent">
+            <div class="flex justify-center mt-12 md:mt-0">
+              <SearchBar entry-page-mode />
+            </div>
+          </div>
+
+          <div class="pt-20 sm:pt-25 md:pt-10">
+            <MainCategoryArea />
           </div>
         </div>
-
-        <div class="pt-20 sm:pt-25 md:pt-10">
-          <MainCategoryArea />
-        </div>
       </div>
-    </div>
 
-    <!-- Mirrors the bookables page: search bar and results list -->
-    <BookableSection v-else :bookables="bookables" />
+      <!-- Mirrors the bookables page: search bar and results list -->
+      <BookableSection v-else :bookables="bookables" />
+    </div>
   </div>
 </template>
