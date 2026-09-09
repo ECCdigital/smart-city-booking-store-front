@@ -77,6 +77,17 @@ const IMAGE_CONTEXTS = {
     fallback: "lg",
     sizes: "100vw",
   },
+  /**
+   * The Hero's image Blocks and the logo above the auth forms. One candidate
+   * at 480px, the contract's choice for v1: a logo never needs more, and the
+   * preset is what makes an SVG an image at all (the original is served as a
+   * download). A wide image Block at the largest height step can outgrow it.
+   */
+  logo: {
+    presets: ["sm"],
+    fallback: "sm",
+    sizes: "480px",
+  },
   /** Checkout add-on icon — a 32px square. */
   mini: {
     presets: ["thumb"],

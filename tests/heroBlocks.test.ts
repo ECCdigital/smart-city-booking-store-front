@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   blocksInZone,
   fallbackHeroLayout,
+  firstImageBlockId,
   heroHeightSteps,
   localizedText,
   mobileRows,
@@ -133,6 +134,30 @@ describe("the Blocks of a Hero Layout", () => {
 
     const shown = mobileRows(crowded.blocks).flatMap((row) => row.blocks);
     expect(shown.some((block) => block.hideOnMobile)).toBe(false);
+  });
+});
+
+describe("firstImageBlockId", () => {
+  it("names the first image Block in array order — the one that fetches first", () => {
+    const layout = defaultHeroLayout as HeroLayout;
+    expect(firstImageBlockId(layout.blocks)).toBe("default-logo");
+
+    // A text Block ahead of two images: the first image wins, not the first Block.
+    const [firstLogo, title] = layout.blocks;
+    const secondLogo = { ...firstLogo!, id: "second-logo" };
+    expect(firstImageBlockId([title!, firstLogo!, secondLogo])).toBe(
+      "default-logo",
+    );
+    expect(firstImageBlockId([title!, secondLogo, firstLogo!])).toBe(
+      "second-logo",
+    );
+  });
+
+  it("answers null when no image Block is shown", () => {
+    const layout = defaultHeroLayout as HeroLayout;
+    const textOnly = layout.blocks.filter((block) => block.type !== "image");
+    expect(firstImageBlockId(textOnly)).toBeNull();
+    expect(firstImageBlockId([])).toBeNull();
   });
 });
 

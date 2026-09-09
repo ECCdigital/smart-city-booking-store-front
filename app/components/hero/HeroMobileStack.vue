@@ -1,12 +1,16 @@
 <script setup>
 import { HERO_ROW_JUSTIFY_CLASSES } from "./heroClasses";
-import { mobileRows } from "~/utils/heroBlocks";
+import { firstImageBlockId, mobileRows } from "~/utils/heroBlocks";
 
 /**
  * The mobile tree: the Blocks grouped by the row of their Zone — top at the
  * top, middle centred in the remaining space, bottom at the bottom — in
  * array order inside a row and all horizontally centred, whatever their
  * Zone's column. Blocks marked hide-on-mobile are not here at all.
+ *
+ * The first image Block this tree shows fetches at high priority — its
+ * own first, since the desktop tree's may be hidden here; no Block gets a
+ * preload hint.
  */
 const props = defineProps({
   blocks: { type: Array, required: true },
@@ -14,6 +18,9 @@ const props = defineProps({
 });
 
 const rows = computed(() => mobileRows(props.blocks));
+const priorityBlockId = computed(() =>
+  firstImageBlockId(rows.value.flatMap((row) => row.blocks)),
+);
 </script>
 
 <template>
@@ -29,6 +36,7 @@ const rows = computed(() => mobileRows(props.blocks));
         :key="block.id"
         :block="block"
         :mode="mode"
+        :priority="block.id === priorityBlockId"
       />
     </div>
   </div>

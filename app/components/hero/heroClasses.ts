@@ -18,6 +18,8 @@ import type {
   HeroBlockWidth,
   HeroColorToken,
   HeroHeight,
+  HeroImageBlock,
+  HeroImageMaxHeight,
   HeroSpacing,
   HeroTextBlock,
   HeroTextSize,
@@ -138,6 +140,27 @@ export const HERO_TEXT_SIZE_CLASSES: Record<
   },
 };
 
+/** Image max height: 2 / 3.5 / 6 / 10 / 16 rem — the cap for a measured image. */
+export const HERO_IMAGE_MAX_HEIGHT_CLASSES: Record<HeroImageMaxHeight, string> = {
+  xs: "max-h-8",
+  sm: "max-h-14",
+  md: "max-h-24",
+  lg: "max-h-40",
+  xl: "max-h-64",
+};
+
+/**
+ * The same steps as a fixed height — what an image without dimensions
+ * reserves, since a cap alone reserves nothing before the image arrives.
+ */
+export const HERO_IMAGE_HEIGHT_CLASSES: Record<HeroImageMaxHeight, string> = {
+  xs: "h-8",
+  sm: "h-14",
+  md: "h-24",
+  lg: "h-40",
+  xl: "h-64",
+};
+
 /**
  * The named colours. `primary` and `secondary` are the theme's colours from
  * the stylesheet route; a hex colour is the one text value that goes inline.
@@ -190,4 +213,56 @@ export function textBlockStyle(
   block: HeroTextBlock,
 ): Record<string, string> | undefined {
   return isHeroColorToken(block.color) ? undefined : { color: block.color };
+}
+
+/** What an image is rendered from: its reference, its height step and the dark-mode toggle. */
+export type HeroImageOptions = Pick<
+  HeroImageBlock,
+  "image" | "maxHeight" | "invertInDarkMode"
+>;
+
+/** A dark logo on a dark page: inverted, with the hue turned back. */
+const INVERT_CLASSES = "dark:invert dark:hue-rotate-180";
+
+/** Whether the reference carries the medium's dimensions — what the box is reserved from. */
+function isMeasured(image: HeroImageOptions["image"]): boolean {
+  return Boolean(image.width && image.height);
+}
+
+/**
+ * The classes of an image element — the Hero's image Blocks and the logo on
+ * the auth pages alike. The width always follows the aspect ratio; a wider
+ * image than its container is shown whole rather than stretched.
+ *
+ * A measured image is capped at its height step and reserves its box from
+ * its own dimensions (see {@link imageStyle}). An unmeasured one has no
+ * ratio to reserve from, so it takes the step as a fixed height and accepts
+ * that its width settles when the image arrives.
+ */
+export function imageClasses(options: HeroImageOptions): string[] {
+  const classes = [
+    "w-auto max-w-full object-contain",
+    isMeasured(options.image)
+      ? HERO_IMAGE_MAX_HEIGHT_CLASSES[options.maxHeight]
+      : HERO_IMAGE_HEIGHT_CLASSES[options.maxHeight],
+  ];
+  if (options.invertInDarkMode) classes.push(INVERT_CLASSES);
+  return classes;
+}
+
+/**
+ * The inline style of an image: its own height, or nothing at all.
+ *
+ * The `height` attribute alone would reserve the box, but Tailwind's
+ * preflight sets `height: auto` on every image and so throws the attribute
+ * away — with both axes auto, a pending image is 0 × 0 until it arrives.
+ * Restating the height inline keeps the box definite: `max-h` caps it and
+ * the width follows the ratio the `width`/`height` attributes declare.
+ */
+export function imageStyle(
+  options: HeroImageOptions,
+): Record<string, string> | undefined {
+  return isMeasured(options.image)
+    ? { height: `${options.image.height}px` }
+    : undefined;
 }

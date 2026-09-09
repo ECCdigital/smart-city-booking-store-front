@@ -1,6 +1,6 @@
 <script setup>
 import { HERO_ANCHOR_CLASSES, HERO_COLUMN_ALIGN_CLASSES } from "./heroClasses";
-import { blocksInZone, zoneColumn } from "~/utils/heroBlocks";
+import { blocksInZone, firstImageBlockId, zoneColumn } from "~/utils/heroBlocks";
 import { HERO_ZONES } from "~~/shared/types/hero";
 
 /**
@@ -12,11 +12,16 @@ import { HERO_ZONES } from "~~/shared/types/hero";
  * The anchors span the full content width and let pointer events through,
  * so a later Zone's box never shadows a link in an earlier one; the Blocks
  * take the events back.
+ *
+ * The first image Block of this tree fetches at high priority; no Block
+ * gets a preload hint.
  */
 const props = defineProps({
   blocks: { type: Array, required: true },
   mode: { type: String, required: true },
 });
+
+const priorityBlockId = computed(() => firstImageBlockId(props.blocks));
 
 const zones = computed(() =>
   HERO_ZONES.map((zone) => ({
@@ -42,6 +47,7 @@ const zones = computed(() =>
         :key="block.id"
         :block="block"
         :mode="mode"
+        :priority="block.id === priorityBlockId"
       />
     </div>
   </div>

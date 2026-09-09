@@ -122,6 +122,15 @@ export function visibleBlocks(layout: HeroLayout, mode: HeroMode): HeroBlock[] {
   return layout.blocks.filter((block) => !block.homeOnly);
 }
 
+/**
+ * The image Block whose fetch goes first: the first one in array order among
+ * the shown Blocks. It gets a high fetch priority; no Block gets a preload
+ * hint. `null` when none is shown.
+ */
+export function firstImageBlockId(blocks: readonly HeroBlock[]): string | null {
+  return blocks.find((block) => block.type === "image")?.id ?? null;
+}
+
 /** A Zone is a row and a column: `top-left` is the `top` row, `left` column. */
 export type HeroZoneRow = "top" | "middle" | "bottom";
 

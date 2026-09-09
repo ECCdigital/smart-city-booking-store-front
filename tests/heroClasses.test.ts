@@ -7,23 +7,29 @@ import {
   HERO_COLUMN_ALIGN_CLASSES,
   HERO_DESKTOP_HEIGHT_CLASSES,
   HERO_HEIGHT_LENGTHS,
+  HERO_IMAGE_HEIGHT_CLASSES,
+  HERO_IMAGE_MAX_HEIGHT_CLASSES,
   HERO_INNER_SPACING_CLASSES,
   HERO_MOBILE_HEIGHT_CLASSES,
   HERO_OUTER_SPACING_CLASSES,
   HERO_ROW_JUSTIFY_CLASSES,
   HERO_TEXT_SIZE_CLASSES,
   HERO_WIDTH_CLASSES,
+  imageClasses,
+  imageStyle,
   textBlockClasses,
   textBlockStyle,
 } from "~/components/hero/heroClasses";
 import {
   HERO_COLOR_TOKENS,
   HERO_HEIGHTS,
+  HERO_IMAGE_MAX_HEIGHTS,
   HERO_SPACINGS,
   HERO_TEXT_SIZES,
   HERO_ZONES,
   HERO_BLOCK_WIDTHS,
   type HeroBlock,
+  type HeroImageBlock,
   type HeroLayout,
   type HeroTextBlock,
 } from "~~/shared/types/hero";
@@ -47,6 +53,8 @@ describe("the Hero class tables", () => {
       [HERO_TEXT_SIZES, HERO_TEXT_SIZE_CLASSES.home],
       [HERO_TEXT_SIZES, HERO_TEXT_SIZE_CLASSES.compact],
       [HERO_COLOR_TOKENS, HERO_COLOR_CLASSES],
+      [HERO_IMAGE_MAX_HEIGHTS, HERO_IMAGE_MAX_HEIGHT_CLASSES],
+      [HERO_IMAGE_MAX_HEIGHTS, HERO_IMAGE_HEIGHT_CLASSES],
       [["left", "center", "right"], HERO_COLUMN_ALIGN_CLASSES],
       [["top", "middle", "bottom"], HERO_ROW_JUSTIFY_CLASSES],
     ];
@@ -130,6 +138,23 @@ describe("the Hero class tables", () => {
       md: "w-[32rem]",
       lg: "w-[48rem]",
       full: "w-full",
+    });
+  });
+
+  it("caps an image at 2 / 3.5 / 6 / 10 / 16 rem, or reserves exactly that height", () => {
+    expect(HERO_IMAGE_MAX_HEIGHT_CLASSES).toEqual({
+      xs: "max-h-8",
+      sm: "max-h-14",
+      md: "max-h-24",
+      lg: "max-h-40",
+      xl: "max-h-64",
+    });
+    expect(HERO_IMAGE_HEIGHT_CLASSES).toEqual({
+      xs: "h-8",
+      sm: "h-14",
+      md: "h-24",
+      lg: "h-40",
+      xl: "h-64",
     });
   });
 
@@ -217,5 +242,49 @@ describe("a text Block", () => {
     expect(classes.some((entry) => entry.includes("text-shadow"))).toBe(true);
     expect(classes.some((entry) => entry.includes("#b91c1c"))).toBe(false);
     expect(textBlockStyle(badge)).toEqual({ color: "#b91c1c" });
+  });
+});
+
+describe("an image", () => {
+  const logo = (defaultHeroLayout as HeroLayout).blocks.find(
+    (block) => block.id === "default-logo",
+  ) as HeroImageBlock;
+  const measured: HeroImageBlock = {
+    ...logo,
+    image: { ...logo.image, width: 320, height: 80 },
+  };
+
+  it("with dimensions is capped at its maximum height and keeps its own height inline", () => {
+    // Tailwind's preflight sets `height: auto` on every image, which throws
+    // away the `height` attribute the browser would size the box from before
+    // the image arrives; restated inline, the box is reserved and `max-h`
+    // caps it, the width following the aspect ratio.
+    expect(imageClasses(measured)).toEqual([
+      "w-auto max-w-full object-contain",
+      "max-h-14",
+      "dark:invert dark:hue-rotate-180",
+    ]);
+    expect(imageStyle(measured)).toEqual({ height: "80px" });
+  });
+
+  it("without dimensions reserves its height only", () => {
+    expect(imageClasses(logo)).toEqual([
+      "w-auto max-w-full object-contain",
+      "h-14",
+      "dark:invert dark:hue-rotate-180",
+    ]);
+    expect(imageStyle(logo)).toBeUndefined();
+  });
+
+  it("inverts in dark mode only when asked to", () => {
+    const plain: HeroImageBlock = {
+      ...measured,
+      maxHeight: "xl",
+      invertInDarkMode: false,
+    };
+    expect(imageClasses(plain)).toEqual([
+      "w-auto max-w-full object-contain",
+      "max-h-64",
+    ]);
   });
 });
