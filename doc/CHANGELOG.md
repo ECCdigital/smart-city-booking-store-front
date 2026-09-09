@@ -36,6 +36,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 - Result cards, result strips, checkout add-on icons and gallery thumbnails load lazily — except the first card or strip of a list, which is above the fold and usually the largest paint
 - `/api/img` validates every hop of a redirect chain against the same host check as the first request, not just the first one
 - Removed `@nuxt/image`; the storefront never rendered a `<NuxtImg>`
+- A page declares which Hero it wants — `definePageMeta({ hero: "home" })`, compact everywhere else — instead of the Hero's height and text classes; `useHeroConfig` becomes `useHeroMode()`. The Mobile Key pages, which never showed a Hero, get a browser title instead of their unrendered `staticSubtitle`. Every page renders as before
 
 ### Removed
 

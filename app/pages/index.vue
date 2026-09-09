@@ -36,12 +36,7 @@ import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.
 definePageMeta({
   layout: "catalog",
   middleware: ["catalog-auth", "catalog-guard"],
-  hero: {
-    height: "lg",
-    titleClass: "text-2xl",
-    subtitleClass: "text-xl md:text-5xl",
-    showOnMobile: true,
-  },
+  hero: "home",
 });
 
 usePageTitle();

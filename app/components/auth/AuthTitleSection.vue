@@ -11,7 +11,7 @@
             alt="logo"
             class="max-h-[7vh] mx-auto dark:invert dark:hue-rotate-180"
           />
-          <p class="text-primary font-bold text-xl" :class="config.titleClass">
+          <p class="text-primary font-bold text-xl">
             {{ title }}
           </p>
         </div>
@@ -24,17 +24,13 @@
         alt="logo"
         class="max-h-[7vh] mb-6 dark:invert dark:hue-rotate-180"
       />
-      <p
-        class="text-primary font-bold text-xl text-center mb-6"
-        :class="config.titleClass"
-      >
+      <p class="text-primary font-bold text-xl text-center mb-6">
         {{ title }}
       </p>
     </div>
   </div>
 </template>
 <script setup>
-import { useHeroConfig } from "~/composables/useHeroConfig.ts";
 import { computed } from "vue";
 
 const props = defineProps({
@@ -46,8 +42,7 @@ const props = defineProps({
 
 const { data: hero } = await useFetch("/api/theme/hero");
 
-const config = useHeroConfig();
-const title = computed(() => config.value.staticTitle ?? hero.value?.title);
+const title = computed(() => hero.value?.title);
 </script>
 
 <style scoped></style>
