@@ -26,11 +26,13 @@ const heroPresets = {
 // The mobile Hero is short in both modes; only the desktop height follows it.
 const mobileHeight = "sm";
 
-const heightClasses = {
-  sm: "h-48",
-  md: "h-64",
-  lg: "h-96",
-  xl: "h-[32rem]",
+// Each step as the class that sets it and as the length the image
+// Background's `sizes` value is computed from.
+const heightSteps = {
+  sm: { class: "h-48", length: "12rem" },
+  md: { class: "h-64", length: "16rem" },
+  lg: { class: "h-96", length: "24rem" },
+  xl: { class: "h-[32rem]", length: "32rem" },
 };
 
 const route = useRoute();
@@ -41,8 +43,18 @@ const { isGreaterThanMd } = useBreakpointCheck();
 
 const preset = computed(() => heroPresets[mode.value]);
 const heightClass = computed(
-  () => heightClasses[isGreaterThanMd.value ? preset.value.height : mobileHeight],
+  () =>
+    heightSteps[isGreaterThanMd.value ? preset.value.height : mobileHeight]
+      .class,
 );
+// Both heights, so the image's `sizes` is right on every viewport from the server.
+const boxHeights = computed(() => [
+  {
+    media: "(min-width: 768px)",
+    height: heightSteps[preset.value.height].length,
+  },
+  { height: heightSteps[mobileHeight].length },
+]);
 
 const title = computed(() => hero.value?.title);
 const subtitle = computed(() => hero.value?.subtitle);
@@ -53,7 +65,7 @@ const subtitle = computed(() => hero.value?.subtitle);
     class="relative w-full overflow-hidden z-0 py-10 md:py-15 pb-30 lg:pb-15"
     :class="heightClass"
   >
-    <BackgroundLayers :background="theme?.background" />
+    <BackgroundLayers :background="theme?.background" :box-heights="boxHeights" />
 
     <!-- Surface is full-bleed, content sits inside the page container -->
     <div class="container relative z-10 h-full">

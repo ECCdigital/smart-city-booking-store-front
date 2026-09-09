@@ -1,6 +1,7 @@
 <script setup>
 import {
   backgroundRootStyle,
+  imageLayer,
   resolveBackground,
 } from "~/utils/backgroundLayers";
 
@@ -13,11 +14,18 @@ import {
  * Every mode-dependent value comes from the `.dark` class through the custom
  * properties in `main.css`, never from JavaScript after mount — the server
  * already paints the right mode. The only inline values are the flat colour's
- * two custom properties.
+ * two custom properties, the image overlay's colour and opacity per mode, and
+ * the focal point.
  */
 const props = defineProps({
   /** The Theme View's Background; `null` paints the default. */
   background: { type: Object, default: null },
+  /**
+   * The height of the box an image Background covers, as CSS lengths under
+   * media conditions (most specific first) — what its `sizes` value is
+   * computed from. The viewport height, unless the caller is the Hero.
+   */
+  boxHeights: { type: Array, default: () => [{ height: "100vh" }] },
 });
 
 const resolved = computed(() => resolveBackground(props.background));
@@ -44,6 +52,37 @@ const orbs = computed(
     Boolean(variantBackground.value?.orbs) &&
     variantBackground.value.variant !== "minimal",
 );
+
+/**
+ * The image family. The `<img>` is a real element, never a CSS background, so
+ * the preload scanner finds it in the HTML; the preload hint repeats its
+ * candidate list and `sizes` byte for byte and omits `href`, so a browser
+ * without `imagesrcset` falls through to the element rather than fetching a
+ * second file. The placeholder under it is the current mode's overlay colour
+ * at full opacity, so the box is never white; the image is never faded in.
+ */
+const cover = computed(() =>
+  resolved.value.type === "image"
+    ? imageLayer(resolved.value, props.boxHeights)
+    : null,
+);
+
+useHead({
+  link: computed(() =>
+    cover.value?.srcset
+      ? [
+          {
+            rel: "preload",
+            as: "image",
+            fetchpriority: "high",
+            imagesrcset: cover.value.srcset,
+            imagesizes: cover.value.sizes,
+            tagPriority: "critical",
+          },
+        ]
+      : [],
+  ),
+});
 </script>
 
 <template>
@@ -126,7 +165,23 @@ const orbs = computed(
 
     <div v-else-if="resolved.type === 'color'" class="absolute inset-0 flat" />
 
-    <!-- The image family lands with its preload and placeholder; until then it paints nothing. -->
+    <template v-else-if="resolved.type === 'image'">
+      <div class="absolute inset-0 placeholder" />
+      <img
+        v-if="cover"
+        :src="cover.src"
+        :srcset="cover.srcset"
+        :sizes="cover.sizes"
+        :width="cover.width"
+        :height="cover.height"
+        :style="{ objectPosition: cover.objectPosition }"
+        alt=""
+        fetchpriority="high"
+        decoding="async"
+        class="absolute inset-0 w-full h-full object-cover"
+      >
+      <div class="absolute inset-0 overlay" />
+    </template>
   </div>
 </template>
 
@@ -162,6 +217,25 @@ const orbs = computed(
 
 .dark .flat {
   background-color: var(--bg-dark);
+}
+
+/* Image: the placeholder is the overlay colour at full opacity, the overlay itself a layer above the image */
+.placeholder {
+  background-color: var(--bg-overlay-light);
+}
+
+.overlay {
+  background-color: var(--bg-overlay-light);
+  opacity: var(--bg-overlay-light-opacity);
+}
+
+.dark .placeholder {
+  background-color: var(--bg-overlay-dark);
+}
+
+.dark .overlay {
+  background-color: var(--bg-overlay-dark);
+  opacity: var(--bg-overlay-dark-opacity);
 }
 
 /* Mesh: four soft gradient blobs */

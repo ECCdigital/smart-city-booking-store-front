@@ -65,6 +65,18 @@ const IMAGE_CONTEXTS = {
     fallback: "thumb",
     sizes: "80px",
   },
+  /**
+   * The image Background behind the Hero and the auth pages — a full-bleed
+   * `object-cover` box. `100vw` is the floor for an unmeasured medium: with
+   * dimensions, `coverImageSizes` replaces it with the larger of the viewport
+   * width and the box height times the aspect ratio, because a box taller
+   * than the image is tall needs more pixels than it is wide.
+   */
+  banner: {
+    presets: ["sm", "md", "lg"],
+    fallback: "lg",
+    sizes: "100vw",
+  },
   /** Checkout add-on icon — a 32px square. */
   mini: {
     presets: ["thumb"],
