@@ -21,6 +21,11 @@ export default defineNuxtConfig({
 
   pages: true,
 
+  // Agent worktrees (Claude Code, Cursor) live under .claude/ inside the
+  // project and bring their own node_modules; the dev watcher would otherwise
+  // pick them up and run out of file descriptors (EMFILE on macOS).
+  ignore: [".claude/**"],
+
   vite: {
     server: {
       // Dev-Tunnel (cloudflared/trycloudflare) fuer HTTPS-Tests am Handy:
