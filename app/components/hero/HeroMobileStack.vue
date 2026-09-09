@@ -6,7 +6,9 @@ import { firstImageBlockId, mobileRows } from "~/utils/heroBlocks";
  * The mobile tree: the Blocks grouped by the row of their Zone — top at the
  * top, middle centred in the remaining space, bottom at the bottom — in
  * array order inside a row and all horizontally centred, whatever their
- * Zone's column. Blocks marked hide-on-mobile are not here at all.
+ * Zone's column. Blocks marked hide-on-mobile are not here at all. Like
+ * the desktop tree it lets pointer events through and the Blocks take them
+ * back, so the Live Preview's Zone overlay beneath is reachable.
  *
  * The first image Block this tree shows fetches at high priority — its
  * own first, since the desktop tree's may be hidden here; no Block gets a
@@ -29,7 +31,7 @@ const priorityBlockId = computed(() =>
 </script>
 
 <template>
-  <div class="grid h-full grid-cols-1 grid-rows-[auto_1fr_auto]">
+  <div class="pointer-events-none grid h-full grid-cols-1 grid-rows-[auto_1fr_auto]">
     <div
       v-for="{ row, blocks: rowBlocks } in rows"
       :key="row"

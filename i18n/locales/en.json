@@ -1,7 +1,21 @@
 {
   "welcome": "Welcome!",
   "hero": {
-    "fallbackSubtitle": "Discover our offers"
+    "fallbackSubtitle": "Discover our offers",
+    "preview": {
+      "moveToZone": "Move the selected Block to “{zone}”",
+      "zones": {
+        "top-left": "top left",
+        "top-center": "top centre",
+        "top-right": "top right",
+        "middle-left": "middle left",
+        "middle-center": "centre",
+        "middle-right": "middle right",
+        "bottom-left": "bottom left",
+        "bottom-center": "bottom centre",
+        "bottom-right": "bottom right"
+      }
+    }
   },
   "meta": {
     "siteNameFallback": "Smart City Booking",

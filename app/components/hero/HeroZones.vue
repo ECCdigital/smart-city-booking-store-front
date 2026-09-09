@@ -9,9 +9,10 @@ import { HERO_ZONES } from "~~/shared/types/hero";
  * column; Blocks from different Zones may overlap — that is an editor
  * warning, never a renderer constraint.
  *
- * The anchors span the full content width and let pointer events through,
- * so a later Zone's box never shadows a link in an earlier one; the Blocks
- * take the events back.
+ * The tree and its anchors let pointer events through — a later Zone's box
+ * never shadows a link in an earlier one, and the Live Preview's Zone
+ * overlay beneath receives what the Blocks leave; the Blocks take the
+ * events back.
  *
  * The first image Block of this tree fetches at high priority; no Block
  * gets a preload hint.
@@ -32,7 +33,7 @@ const zones = computed(() =>
 </script>
 
 <template>
-  <div class="relative h-full">
+  <div class="pointer-events-none relative h-full">
     <div
       v-for="{ zone, blocks: zoneBlocks } in zones"
       :key="zone"

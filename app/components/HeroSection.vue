@@ -68,8 +68,12 @@ const blocks = computed(() => visibleBlocks(layout.value, mode.value));
   >
     <BackgroundLayers :background="theme?.background" :box-heights="boxHeights" />
 
-    <!-- Surface is full-bleed, content sits inside the page container -->
-    <div class="container relative z-10 h-full">
+    <!--
+      Surface is full-bleed, content sits inside the page container. Its
+      content box is the content area; the Live Preview measures against it
+      and lays its Zone overlay into it, which is all the attribute is for.
+    -->
+    <div data-hero-content class="container relative z-10 h-full">
       <HeroMobileStack :blocks="blocks" :mode="mode" class="md:hidden" />
       <HeroZones :blocks="blocks" :mode="mode" class="hidden md:block" />
     </div>

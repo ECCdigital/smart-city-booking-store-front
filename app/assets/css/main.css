@@ -140,6 +140,17 @@ body {
     text-underline-offset: 0.15em;
 }
 
+/*
+ * The Block the admin's Hero Editor has selected, on the Live Preview. The
+ * bridge marks it with an attribute rather than a class: Vue rewrites a
+ * Block's class list when a Draft changes its box, and would drop a class
+ * it did not put there.
+ */
+[data-hero-selected] {
+    outline: 2px solid var(--ui-primary);
+    outline-offset: 2px;
+}
+
 
 .container {
     max-width: 1400px;

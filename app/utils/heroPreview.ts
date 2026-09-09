@@ -5,6 +5,9 @@ import {
   HERO_PREVIEW_PROTOCOL_VERSION,
   type HeroMediaReference,
   type HeroPreviewDraftMessage,
+  type HeroPreviewViewport,
+  type HeroPreviewWarning,
+  type HeroZone,
 } from "~~/shared/types/hero";
 import {
   parseBackground,
@@ -152,4 +155,89 @@ export function buildHeroPreviewSnapshot(
     colorMode,
     selectedBlockId: selectedBlockId ?? null,
   };
+}
+
+/** A box in the frame's own CSS pixels, as `getBoundingClientRect()` answers. */
+export interface HeroPreviewBox {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+/** One rendered Block as the Preview Report sees it: its id, its Zone and its box. */
+export interface HeroPreviewMeasuredBlock {
+  id: string;
+  zone: HeroZone;
+  box: HeroPreviewBox;
+}
+
+/**
+ * How far a box may reach past an edge and still count as on it. Boxes are
+ * measured in the browser's fractional pixels, and a Block flush with the
+ * content area — `width: full`, say — rounds to a hair past it now and then.
+ */
+const EDGE_TOLERANCE_PX = 0.5;
+
+/** Whether two boxes share more than an edge. */
+function intersects(a: HeroPreviewBox, b: HeroPreviewBox): boolean {
+  return (
+    a.left < b.right - EDGE_TOLERANCE_PX &&
+    b.left < a.right - EDGE_TOLERANCE_PX &&
+    a.top < b.bottom - EDGE_TOLERANCE_PX &&
+    b.top < a.bottom - EDGE_TOLERANCE_PX
+  );
+}
+
+/** Whether a box has any extent — the tree the breakpoint hides answers all zeros. */
+function hasExtent(box: HeroPreviewBox): boolean {
+  return box.right > box.left && box.bottom > box.top;
+}
+
+/**
+ * The warnings of one rendered Draft: the Blocks whose box leaves the content
+ * area in any direction, then the pairs of Blocks from different Zones whose
+ * boxes intersect, each pair once, both in the order the Blocks are given.
+ * Stacking inside one Zone is intended and never reported.
+ *
+ * On mobile only the outside warning is reported: the rows stack there, so
+ * where a Block lands is not the editor's choice and an intersection is not
+ * something the editor can fix. A Block without a box is not measured — that
+ * is what the hidden tree answers for every Block it holds.
+ *
+ * @param area - The content area: the height step minus the reserved inset.
+ * @param blocks - The rendered Blocks in array order, measured in the
+ *   frame's own CSS pixels.
+ * @param viewport - Which tree is showing.
+ */
+export function measureHeroPreview(
+  area: HeroPreviewBox,
+  blocks: readonly HeroPreviewMeasuredBlock[],
+  viewport: HeroPreviewViewport,
+): HeroPreviewWarning[] {
+  const warnings: HeroPreviewWarning[] = [];
+  const measured = blocks.filter(({ box }) => hasExtent(box));
+
+  for (const { id, box } of measured) {
+    if (
+      box.left < area.left - EDGE_TOLERANCE_PX ||
+      box.top < area.top - EDGE_TOLERANCE_PX ||
+      box.right > area.right + EDGE_TOLERANCE_PX ||
+      box.bottom > area.bottom + EDGE_TOLERANCE_PX
+    ) {
+      warnings.push({ code: "outside-content-area", blockIds: [id] });
+    }
+  }
+
+  if (viewport === "mobile") return warnings;
+
+  measured.forEach((a, index) => {
+    for (const b of measured.slice(index + 1)) {
+      if (a.zone !== b.zone && intersects(a.box, b.box)) {
+        warnings.push({ code: "overlap", blockIds: [a.id, b.id] });
+      }
+    }
+  });
+
+  return warnings;
 }

@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildHeroPreviewSnapshot,
+  measureHeroPreview,
   parseHeroPreviewMessage,
   previewHeroMode,
   type HeroPreviewDraftEnvelope,
+  type HeroPreviewMeasuredBlock,
 } from "~/utils/heroPreview";
 import type { HeroParseIssue } from "~~/shared/utils/heroLayout";
-import type { HeroRichtextBlock } from "~~/shared/types/hero";
+import type { HeroRichtextBlock, HeroZone } from "~~/shared/types/hero";
 
 import defaultHeroLayout from "./fixtures/hero-layout/default-hero-layout.json";
 import crowdedHeroLayout from "./fixtures/hero-layout/crowded-hero-layout.json";
@@ -232,5 +234,116 @@ describe("buildHeroPreviewSnapshot", () => {
       snapshot: null,
       issues: [{ path: "selectedBlockId", code: "invalid_format" }],
     });
+  });
+});
+
+describe("measureHeroPreview", () => {
+  const area = { left: 20, top: 40, right: 1220, bottom: 280 };
+
+  function block(
+    id: string,
+    zone: HeroZone,
+    box: { left: number; top: number; right: number; bottom: number },
+  ): HeroPreviewMeasuredBlock {
+    return { id, zone, box };
+  }
+
+  it("reports nothing for a Block inside the content area", () => {
+    const blocks = [block("a", "top-left", { left: 20, top: 40, right: 400, bottom: 100 })];
+
+    expect(measureHeroPreview(area, blocks, "desktop")).toEqual([]);
+  });
+
+  it("reports a Block whose box leaves the content area in any direction", () => {
+    const inside = { left: 100, top: 100, right: 300, bottom: 200 };
+
+    for (const box of [
+      { ...inside, left: 19 },
+      { ...inside, top: 39 },
+      { ...inside, right: 1221 },
+      { ...inside, bottom: 281 },
+    ]) {
+      expect(
+        measureHeroPreview(area, [block("a", "top-left", box)], "desktop"),
+      ).toEqual([{ code: "outside-content-area", blockIds: ["a"] }]);
+    }
+  });
+
+  it("lets a Block sit on the edge, sub-pixel rounding included", () => {
+    // A `width: full` Block ends exactly where the content area ends; the
+    // browser's rounding may put it a fraction of a pixel past it.
+    const flush = { left: 20, top: 40, right: 1220, bottom: 280 };
+    const rounded = { left: 19.7, top: 39.6, right: 1220.4, bottom: 280.3 };
+
+    expect(measureHeroPreview(area, [block("a", "top-left", flush)], "desktop")).toEqual([]);
+    expect(measureHeroPreview(area, [block("a", "top-left", rounded)], "desktop")).toEqual([]);
+  });
+
+  it("reports two Blocks from different Zones whose boxes intersect, in array order", () => {
+    const blocks = [
+      block("title", "top-left", { left: 20, top: 40, right: 500, bottom: 160 }),
+      block("logo", "middle-left", { left: 20, top: 120, right: 200, bottom: 200 }),
+    ];
+
+    expect(measureHeroPreview(area, blocks, "desktop")).toEqual([
+      { code: "overlap", blockIds: ["title", "logo"] },
+    ]);
+  });
+
+  it("never reports Blocks stacked inside one Zone", () => {
+    const blocks = [
+      block("title", "middle-left", { left: 20, top: 100, right: 500, bottom: 160 }),
+      block("subtitle", "middle-left", { left: 20, top: 150, right: 500, bottom: 200 }),
+    ];
+
+    expect(measureHeroPreview(area, blocks, "desktop")).toEqual([]);
+  });
+
+  it("does not count touching edges as an overlap", () => {
+    const blocks = [
+      block("a", "top-left", { left: 20, top: 40, right: 500, bottom: 160 }),
+      block("b", "middle-left", { left: 20, top: 160.3, right: 500, bottom: 200 }),
+      block("c", "top-right", { left: 500, top: 40, right: 800, bottom: 160 }),
+    ];
+
+    expect(measureHeroPreview(area, blocks, "desktop")).toEqual([]);
+  });
+
+  it("reports every intersecting pair once", () => {
+    const box = { left: 100, top: 100, right: 300, bottom: 200 };
+    const blocks = [
+      block("a", "top-left", box),
+      block("b", "middle-center", box),
+      block("c", "bottom-right", box),
+    ];
+
+    expect(measureHeroPreview(area, blocks, "desktop")).toEqual([
+      { code: "overlap", blockIds: ["a", "b"] },
+      { code: "overlap", blockIds: ["a", "c"] },
+      { code: "overlap", blockIds: ["b", "c"] },
+    ]);
+  });
+
+  it("reports only the outside warning on mobile", () => {
+    // Mobile stacks the rows; where Blocks land there is not the editor's
+    // choice, so an intersection is not something the editor can fix.
+    const blocks = [
+      block("a", "top-left", { left: 0, top: 40, right: 300, bottom: 160 }),
+      block("b", "middle-left", { left: 20, top: 120, right: 200, bottom: 200 }),
+    ];
+
+    expect(measureHeroPreview(area, blocks, "mobile")).toEqual([
+      { code: "outside-content-area", blockIds: ["a"] },
+    ]);
+  });
+
+  it("does not measure a Block without a box", () => {
+    // The tree the breakpoint hides answers an all-zero box for every Block.
+    const blocks = [
+      block("a", "top-left", { left: 0, top: 0, right: 0, bottom: 0 }),
+      block("b", "middle-left", { left: 0, top: 0, right: 0, bottom: 0 }),
+    ];
+
+    expect(measureHeroPreview(area, blocks, "desktop")).toEqual([]);
   });
 });
