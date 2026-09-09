@@ -132,6 +132,7 @@ Server-side config from environment variables (see `.env.example`):
 | `apiBaseUrl` | `NUXT_API_BASE_URL` | Backend API base URL |
 | `userBaseUrl` | `NUXT_USER_BASE_URL` | Storefront public URL |
 | `adminBaseUrl` | `NUXT_ADMIN_BASE_URL` | Admin portal URL |
+| `public.adminBaseUrl` | `NUXT_PUBLIC_ADMIN_BASE_URL` | Admin portal link; its origin (`shared/utils/adminOrigin.ts`) is the only one allowed to frame the Hero's Live Preview (`/preview/hero`) — see `server/plugins/hero-preview-headers.ts` |
 | `cacheEnabled` | `NUXT_CACHE_ENABLED` | Server-side SWR cache |
 
 Access via `useRuntimeConfig()` in server handlers, `useRuntimeConfig().public` for client-safe values.

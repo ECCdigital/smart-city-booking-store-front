@@ -111,7 +111,7 @@ Nuxt maps `runtimeConfig` fields to `NUXT_*` environment variables. Values with 
 | `NUXT_USER_BASE_URL` | **Yes** | Public URL of this storefront (auth emails, server-side) | `https://booking.example.com` |
 | `NUXT_PUBLIC_USER_BASE_URL` | **Yes** | Same URL for client-side redirects (e.g. password reset) | `https://booking.example.com` |
 | `NUXT_ADMIN_BASE_URL` | No | Admin portal URL (server-side) | `https://admin.booking.example.com` |
-| `NUXT_PUBLIC_ADMIN_BASE_URL` | No | Admin portal link in navigation (users with memberships) | `https://admin.booking.example.com` |
+| `NUXT_PUBLIC_ADMIN_BASE_URL` | No | Admin portal link in navigation (users with memberships); needed for the Live Preview of the Hero, which only this origin may frame (`/preview/hero` answers 404 without it) | `https://admin.booking.example.com` |
 | `NUXT_PUBLIC_SILENT_SSO_ENABLED` | No | `true` enables automatic SSO check on page load (Keycloak) | `false` |
 | `NUXT_CACHE_ENABLED` | No | `false` disables the server-side SWR cache (recommended for local dev) | `false` |
 | `LOG_LEVEL` | No | Pino log level: `trace`, `debug`, `info`, `warn`, `error`, `fatal` | `info` |
