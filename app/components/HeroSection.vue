@@ -1,102 +1,77 @@
 <script setup>
+import {
+  HERO_DESKTOP_HEIGHT_CLASSES,
+  HERO_HEIGHT_LENGTHS,
+  HERO_MOBILE_HEIGHT_CLASSES,
+} from "~/components/hero/heroClasses";
+import {
+  fallbackHeroLayout,
+  heroHeightSteps,
+  visibleBlocks,
+} from "~/utils/heroBlocks";
 import { useHeroMode } from "~/composables/useHeroMode";
-import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
-
-useHead({
-  link: [{ rel: "preload", href: "/api/theme/logo", as: "image" }],
-});
 
 /**
- * The two Heroes the storefront knows. A page names the mode, never the sizes -
- * the numbers here are the ones the pages used to carry one by one.
+ * The Hero: the Background under the Hero Layout's Blocks, at the height the
+ * layout reserves for the current Hero mode.
+ *
+ * Both the desktop and the mobile tree are in the server-rendered HTML and
+ * are switched by CSS alone — a breakpoint decided in JavaScript would
+ * render the desktop tree on the server and hydrate wrong. The height, too,
+ * is a class per viewport, so it is reserved before anything loads.
+ *
+ * When no Theme Bundle could be read or the layout it carried failed the
+ * guards, the Fallback Hero Layout renders from translations; the Hero keeps
+ * its full height either way.
  */
-const heroPresets = {
-  home: {
-    height: "lg",
-    titleClass: "text-2xl",
-    subtitleClass: "text-xl md:text-5xl",
-  },
-  compact: {
-    height: "sm",
-    titleClass: "text-sm md:text-md",
-    subtitleClass: "text-xl md:text-3xl",
-  },
-};
-
-// The mobile Hero is short in both modes; only the desktop height follows it.
-const mobileHeight = "sm";
-
-// Each step as the class that sets it and as the length the image
-// Background's `sizes` value is computed from.
-const heightSteps = {
-  sm: { class: "h-48", length: "12rem" },
-  md: { class: "h-64", length: "16rem" },
-  lg: { class: "h-96", length: "24rem" },
-  xl: { class: "h-[32rem]", length: "32rem" },
-};
-
 const route = useRoute();
+const { t } = useI18n();
 const { data: theme } = await useThemeBundle(route.params.catalogSlug);
-const { data: hero } = await useFetch("/api/theme/hero");
 const mode = useHeroMode();
-const { isGreaterThanMd } = useBreakpointCheck();
 
-const preset = computed(() => heroPresets[mode.value]);
-const heightClass = computed(
+const layout = computed(
   () =>
-    heightSteps[isGreaterThanMd.value ? preset.value.height : mobileHeight]
-      .class,
+    theme.value?.heroLayout ??
+    fallbackHeroLayout({
+      title: t("meta.siteNameFallback"),
+      subtitle: t("hero.fallbackSubtitle"),
+      logo: theme.value?.logo ?? null,
+    }),
 );
-// Both heights, so the image's `sizes` is right on every viewport from the server.
+
+const heights = computed(() => heroHeightSteps(layout.value, mode.value));
+const heightClasses = computed(() => [
+  HERO_MOBILE_HEIGHT_CLASSES[heights.value.mobile],
+  HERO_DESKTOP_HEIGHT_CLASSES[heights.value.desktop],
+]);
+// Both heights, so an image Background's `sizes` is right on every viewport.
 const boxHeights = computed(() => [
   {
     media: "(min-width: 768px)",
-    height: heightSteps[preset.value.height].length,
+    height: HERO_HEIGHT_LENGTHS[heights.value.desktop],
   },
-  { height: heightSteps[mobileHeight].length },
+  { height: HERO_HEIGHT_LENGTHS[heights.value.mobile] },
 ]);
 
-const title = computed(() => hero.value?.title);
-const subtitle = computed(() => hero.value?.subtitle);
+const blocks = computed(() => visibleBlocks(layout.value, mode.value));
 </script>
 
 <template>
+  <!--
+    The padding is the reserved inset: the search bar overlaps the lower edge
+    on home and sub-pages, so the content area is the height step minus it.
+    The Hero clips rather than grows.
+  -->
   <div
     class="relative w-full overflow-hidden z-0 py-10 md:py-15 pb-30 lg:pb-15"
-    :class="heightClass"
+    :class="heightClasses"
   >
     <BackgroundLayers :background="theme?.background" :box-heights="boxHeights" />
 
     <!-- Surface is full-bleed, content sits inside the page container -->
     <div class="container relative z-10 h-full">
-      <div class="md:flex justify-between md:h-full">
-        <div class="md:hidden mb-5 flex justify-center">
-          <img
-            :src="`/api/theme/logo`"
-            alt="logo"
-            class="max-h-[5vh] dark:invert dark:hue-rotate-180"
-          >
-        </div>
-        <div class="grid content-center max-w-220px text-center md:text-left">
-          <p class="text-primary font-bold" :class="preset.titleClass">
-            {{ title }}
-          </p>
-          <p
-            class="text-black dark:text-white font-bold"
-            :class="preset.subtitleClass"
-          >
-            {{ subtitle }}
-          </p>
-        </div>
-        <div class="hidden md:block" style="flex: 1; min-width: 15vw" />
-        <div class="grid content-center">
-          <img
-            :src="`/api/theme/logo`"
-            alt="logo"
-            class="max-h-[7vh] hidden md:block dark:invert dark:hue-rotate-180"
-          >
-        </div>
-      </div>
+      <HeroMobileStack :blocks="blocks" :mode="mode" class="md:hidden" />
+      <HeroZones :blocks="blocks" :mode="mode" class="hidden md:block" />
     </div>
   </div>
 </template>

@@ -1,5 +1,8 @@
 {
   "welcome": "Willkommen",
+  "hero": {
+    "fallbackSubtitle": "Entdecken Sie unsere Angebote"
+  },
   "meta": {
     "siteNameFallback": "Smart City Booking",
     "pages": {

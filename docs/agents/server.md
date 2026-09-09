@@ -12,7 +12,7 @@ server/
     bookables/         # Bookable data, availability, pricing, occupancy
     events/            # Event listing, iCal export
     tenants/           # Tenant info, payment providers, user roles
-    theme/             # Tenant theming (CSS, logo, hero, favicon)
+    theme/             # Tenant theming (bundle, CSS, logo, favicon)
     instance/          # Global instance config
     memberships/       # User memberships
     user/              # User profile updates

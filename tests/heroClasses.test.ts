@@ -1,0 +1,221 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  blockBoxClasses,
+  HERO_ANCHOR_CLASSES,
+  HERO_COLOR_CLASSES,
+  HERO_COLUMN_ALIGN_CLASSES,
+  HERO_DESKTOP_HEIGHT_CLASSES,
+  HERO_HEIGHT_LENGTHS,
+  HERO_INNER_SPACING_CLASSES,
+  HERO_MOBILE_HEIGHT_CLASSES,
+  HERO_OUTER_SPACING_CLASSES,
+  HERO_ROW_JUSTIFY_CLASSES,
+  HERO_TEXT_SIZE_CLASSES,
+  HERO_WIDTH_CLASSES,
+  textBlockClasses,
+  textBlockStyle,
+} from "~/components/hero/heroClasses";
+import {
+  HERO_COLOR_TOKENS,
+  HERO_HEIGHTS,
+  HERO_SPACINGS,
+  HERO_TEXT_SIZES,
+  HERO_ZONES,
+  HERO_BLOCK_WIDTHS,
+  type HeroBlock,
+  type HeroLayout,
+  type HeroTextBlock,
+} from "~~/shared/types/hero";
+
+import defaultHeroLayout from "./fixtures/hero-layout/default-hero-layout.json";
+
+/** A Tailwind class list is a literal: no template holes, no empty tokens. */
+function isClassLiteral(value: string): boolean {
+  return !/[{}$]/.test(value) && !/\s{2,}/.test(value) && value === value.trim();
+}
+
+describe("the Hero class tables", () => {
+  it("cover every member of every scale of the contract with a class literal", () => {
+    const tables: [readonly string[], Record<string, string>][] = [
+      [HERO_ZONES, HERO_ANCHOR_CLASSES],
+      [HERO_HEIGHTS, HERO_DESKTOP_HEIGHT_CLASSES],
+      [HERO_HEIGHTS, HERO_MOBILE_HEIGHT_CLASSES],
+      [HERO_SPACINGS, HERO_OUTER_SPACING_CLASSES],
+      [HERO_SPACINGS, HERO_INNER_SPACING_CLASSES],
+      [HERO_BLOCK_WIDTHS, HERO_WIDTH_CLASSES],
+      [HERO_TEXT_SIZES, HERO_TEXT_SIZE_CLASSES.home],
+      [HERO_TEXT_SIZES, HERO_TEXT_SIZE_CLASSES.compact],
+      [HERO_COLOR_TOKENS, HERO_COLOR_CLASSES],
+      [["left", "center", "right"], HERO_COLUMN_ALIGN_CLASSES],
+      [["top", "middle", "bottom"], HERO_ROW_JUSTIFY_CLASSES],
+    ];
+
+    for (const [members, table] of tables) {
+      expect(Object.keys(table).sort()).toEqual([...members].sort());
+      for (const value of Object.values(table)) {
+        expect(typeof value).toBe("string");
+        expect(isClassLiteral(value)).toBe(true);
+      }
+    }
+  });
+
+  it("reserves the four height steps of the contract on desktop and on mobile", () => {
+    // 12 / 16 / 24 / 32 rem — the outer height, as today.
+    expect(HERO_DESKTOP_HEIGHT_CLASSES).toEqual({
+      sm: "md:h-48",
+      md: "md:h-64",
+      lg: "md:h-96",
+      xl: "md:h-[32rem]",
+    });
+    expect(HERO_MOBILE_HEIGHT_CLASSES).toEqual({
+      sm: "h-48",
+      md: "h-64",
+      lg: "h-96",
+      xl: "h-[32rem]",
+    });
+    // The lengths an image Background's `sizes` value is computed from.
+    expect(HERO_HEIGHT_LENGTHS).toEqual({
+      sm: "12rem",
+      md: "16rem",
+      lg: "24rem",
+      xl: "32rem",
+    });
+  });
+
+  it("renders the text scale of the contract, mobile / desktop", () => {
+    expect(HERO_TEXT_SIZE_CLASSES.home).toEqual({
+      xs: "text-xs md:text-sm",
+      sm: "text-sm md:text-base",
+      md: "text-base md:text-lg",
+      lg: "text-lg md:text-2xl",
+      xl: "text-xl md:text-3xl",
+      "2xl": "text-2xl md:text-5xl",
+    });
+  });
+
+  it("renders every text size one step down in the Compact Hero", () => {
+    const { home, compact } = HERO_TEXT_SIZE_CLASSES;
+    for (let index = 1; index < HERO_TEXT_SIZES.length; index++) {
+      const size = HERO_TEXT_SIZES[index]!;
+      const oneDown = HERO_TEXT_SIZES[index - 1]!;
+      expect(compact[size]).toBe(home[oneDown]);
+    }
+    // The smallest step has nowhere to go and stays the smallest size.
+    expect(compact.xs).toBe("text-xs");
+  });
+
+  it("maps the spacing and width scales 1:1 to the contract's rem values", () => {
+    // 0 / 0.5 / 1 / 1.5 / 2 / 3 rem — Tailwind's unit is 0.25 rem.
+    expect(HERO_OUTER_SPACING_CLASSES).toEqual({
+      none: "m-0",
+      xs: "m-2",
+      sm: "m-4",
+      md: "m-6",
+      lg: "m-8",
+      xl: "m-12",
+    });
+    expect(HERO_INNER_SPACING_CLASSES).toEqual({
+      none: "p-0",
+      xs: "p-2",
+      sm: "p-4",
+      md: "p-6",
+      lg: "p-8",
+      xl: "p-12",
+    });
+    // auto / 20 / 32 / 48 rem / the whole content width.
+    expect(HERO_WIDTH_CLASSES).toEqual({
+      auto: "w-auto",
+      sm: "w-80",
+      md: "w-[32rem]",
+      lg: "w-[48rem]",
+      full: "w-full",
+    });
+  });
+
+  it("anchors every Zone to its row and column of the content area", () => {
+    expect(HERO_ANCHOR_CLASSES["top-left"]).toContain("top-0");
+    expect(HERO_ANCHOR_CLASSES["middle-center"]).toContain("top-1/2");
+    expect(HERO_ANCHOR_CLASSES["middle-center"]).toContain("-translate-y-1/2");
+    expect(HERO_ANCHOR_CLASSES["bottom-right"]).toContain("bottom-0");
+    expect(HERO_COLUMN_ALIGN_CLASSES).toEqual({
+      left: "items-start text-left",
+      center: "items-center text-center",
+      right: "items-end text-right",
+    });
+  });
+
+  it("paints the named colours from the theme and leaves hex to the inline style", () => {
+    expect(HERO_COLOR_CLASSES).toEqual({
+      default: "text-black dark:text-white",
+      primary: "text-primary",
+      secondary: "text-secondary",
+      white: "text-white",
+    });
+  });
+});
+
+describe("a Block's box", () => {
+  const subtitle = (defaultHeroLayout as HeroLayout).blocks.find(
+    (block) => block.id === "default-subtitle",
+  ) as HeroBlock;
+
+  it("wears its spacing and width, and stays inside the content area", () => {
+    expect(blockBoxClasses(subtitle)).toEqual([
+      "max-w-full min-w-0",
+      "m-0",
+      "p-0",
+      "w-auto",
+    ]);
+  });
+
+  it("gets the glass panel only when it asks for it", () => {
+    const panelled: HeroBlock = {
+      ...subtitle,
+      outerSpacing: "md",
+      innerSpacing: "sm",
+      width: "md",
+      panel: "translucent",
+    };
+    expect(blockBoxClasses(panelled)).toEqual([
+      "max-w-full min-w-0",
+      "m-6",
+      "p-4",
+      "w-[32rem]",
+      "glass rounded-xl",
+    ]);
+  });
+});
+
+describe("a text Block", () => {
+  const subtitle = (defaultHeroLayout as HeroLayout).blocks.find(
+    (block) => block.id === "default-subtitle",
+  ) as HeroTextBlock;
+
+  it("renders its size for the mode, its weight and a named colour as classes", () => {
+    expect(textBlockClasses(subtitle, "home")).toEqual([
+      "text-2xl md:text-5xl",
+      "font-bold",
+      "text-black dark:text-white",
+    ]);
+    expect(textBlockClasses(subtitle, "compact")).toContain("text-xl md:text-3xl");
+    expect(textBlockStyle(subtitle)).toBeUndefined();
+  });
+
+  it("renders a hex colour inline and the shadow as a class", () => {
+    const badge: HeroTextBlock = {
+      ...subtitle,
+      size: "md",
+      weight: "normal",
+      color: "#b91c1c",
+      shadow: true,
+    };
+
+    const classes = textBlockClasses(badge, "home");
+    expect(classes).toContain("text-base md:text-lg");
+    expect(classes).toContain("font-normal");
+    expect(classes.some((entry) => entry.includes("text-shadow"))).toBe(true);
+    expect(classes.some((entry) => entry.includes("#b91c1c"))).toBe(false);
+    expect(textBlockStyle(badge)).toEqual({ color: "#b91c1c" });
+  });
+});

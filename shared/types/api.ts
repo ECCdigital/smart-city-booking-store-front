@@ -40,14 +40,6 @@ export interface ThemeBundle {
   heroLayout?: unknown;
   background?: unknown;
   logo?: unknown;
-  /**
-   * The pre-editor Hero, still read by `/api/theme/hero`. It leaves the
-   * contract once the Hero and the auth pages render from `heroLayout`.
-   */
-  hero?: {
-    title?: string;
-    subtitle?: string;
-  };
 }
 
 export interface CatalogData {

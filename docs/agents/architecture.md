@@ -52,7 +52,7 @@ server/
     catalog/             # Catalog bundle, mode, slug lookup
     checkout/            # Checkout flow, validation, completion
     bookings/            # User bookings, invoices, mobile keys
-    theme/               # Tenant CSS, logo, hero, favicon
+    theme/               # Theme bundle, CSS, logo, favicon
     utils/               # serverFetch, logger, loadBundleData, themeBundle
   service/               # AuthService (token refresh, cookie management)
   utils/                 # conditionalCache (SWR cache wrapper)

@@ -199,13 +199,16 @@ function readHexColor(
   return color as HexColor;
 }
 
+/** Whether a colour is one of the named tokens rather than a hex value. */
+export function isHeroColorToken(color: string): color is HeroColorToken {
+  return (HERO_COLOR_TOKENS as readonly string[]).includes(color);
+}
+
 /** A text colour: one of the named tokens, or `#rrggbb`. */
 function readHeroColor(value: unknown, path: string): HeroColor {
   if (!isPresent(value)) return "default";
   const color = readString(value, path);
-  if ((HERO_COLOR_TOKENS as readonly string[]).includes(color)) {
-    return color as HeroColorToken;
-  }
+  if (isHeroColorToken(color)) return color;
   if (!HEX_COLOR_PATTERN.test(color)) fail(path, "invalid_format");
   return color as HexColor;
 }

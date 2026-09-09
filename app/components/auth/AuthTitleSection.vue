@@ -31,18 +31,14 @@
   </div>
 </template>
 <script setup>
-import { computed } from "vue";
-
-const props = defineProps({
+defineProps({
   isLargeVersion: {
     type: Boolean,
     default: false,
   },
 });
 
-const { data: hero } = await useFetch("/api/theme/hero");
-
-const title = computed(() => hero.value?.title);
+const title = useSiteName();
 </script>
 
 <style scoped></style>
