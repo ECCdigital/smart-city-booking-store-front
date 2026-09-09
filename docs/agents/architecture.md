@@ -97,11 +97,16 @@ The `tenant-routes` module duplicates all pages under `/t/:tenantID/...`:
 
 ## Caching
 
-Server-side SWR cache on catalog and theme routes via `createConditionalCachedHandler`:
+Server-side SWR cache on the catalog routes via `createConditionalCachedHandler`:
 
 - Controlled by `NUXT_CACHE_ENABLED` (default enabled, set `false` for local dev)
 - Auth-scoped cache keys (`anon` vs `auth`) prevent leaking private responses
 - See README.md "Server-Side Cache" section for route-specific TTLs
+
+The theme routes are the exception: they read the Theme Bundle from a
+process-wide store that revalidates against the backend with a conditional GET
+(`NUXT_THEME_REVALIDATE_SECONDS`), so an admin save reaches the public site
+without a purge. See [ADR 0001](../adr/0001-theme-bundle-revalidation-instead-of-purge.md).
 
 ## Version lines
 

@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   parseBackground,
   parseHeroLayout,
+  parseHeroMediaReference,
   type HeroParseIssue,
 } from "~~/shared/utils/heroLayout";
 import type { HeroImageBlock, HeroRichtextBlock } from "~~/shared/types/hero";
@@ -351,4 +352,61 @@ describe("the invalid inputs of the Shared contract", () => {
       expect(issues).toEqual([testCase.expected]);
     });
   }
+});
+
+describe("parseHeroMediaReference", () => {
+  it("parses the enriched reference the Theme Bundle exports for the logo", () => {
+    const { issues, onIssue } = withIssues();
+
+    expect(
+      parseHeroMediaReference(
+        {
+          source: "media",
+          mediaId: "66f1c2000000000000000009",
+          url: "/api/media/66f1c2000000000000000009",
+          width: 320,
+          height: 80,
+        },
+        { onIssue },
+      ),
+    ).toEqual({
+      source: "media",
+      mediaId: "66f1c2000000000000000009",
+      url: "/api/media/66f1c2000000000000000009",
+      width: 320,
+      height: 80,
+    });
+    expect(issues).toEqual([]);
+  });
+
+  it("accepts a reference the dimension backfill has not reached", () => {
+    const { issues, onIssue } = withIssues();
+
+    expect(
+      parseHeroMediaReference(
+        { source: "media", mediaId: "66f1c2000000000000000009" },
+        { onIssue },
+      ),
+    ).toEqual({ source: "media", mediaId: "66f1c2000000000000000009" });
+    expect(issues).toEqual([]);
+  });
+
+  it("rejects an external reference and names the source", () => {
+    const { issues, onIssue } = withIssues();
+
+    expect(
+      parseHeroMediaReference(
+        { source: "external", url: "https://example.org/logo.png" },
+        { onIssue },
+      ),
+    ).toBeNull();
+    expect(issues).toEqual([{ path: "logo.source", code: "invalid_custom" }]);
+  });
+
+  it("reports the absent reference at the root path it was given", () => {
+    const { issues, onIssue } = withIssues();
+
+    expect(parseHeroMediaReference(null, { onIssue })).toBeNull();
+    expect(issues).toEqual([{ path: "logo", code: "required" }]);
+  });
 });

@@ -310,7 +310,7 @@ definition: `'wasm-unsafe-eval'` in `script-src`, and `permissionsPolicy.camera`
 
 ## Server-Side Cache
 
-The Nitro server proxy routes (`/api/catalog/...`, `/api/theme/...`) use `createConditionalCachedHandler` to optionally keep responses in an SWR cache:
+The Nitro server proxy routes (`/api/catalog/...`) use `createConditionalCachedHandler` to optionally keep responses in an SWR cache:
 
 ```bash
 NUXT_CACHE_ENABLED=true   # SWR cache enabled (default when not set)
@@ -324,10 +324,10 @@ NUXT_CACHE_ENABLED=false  # Disable cache (recommended for local development)
 | `/api/catalog/bundle` | 300s | yes | Auth-scoped key (anon vs. auth cookie) |
 | `/api/catalog/[t]/bundle` | 300s | yes | Includes tenantID + slug in cache key |
 | `/api/catalog/mode` | 300s | yes | Public |
-| `/api/theme/css` | 300s | n/a | Public, anon-scoped |
-| `/api/theme/[slug].css` | 300s | n/a | Includes slug in key |
 | `/api/theme/hero` | 300s | n/a | Reuses `themeBundle` per request |
 | `/api/theme/logo` | 300s | n/a | Reuses `themeBundle` per request |
+
+`/api/theme/bundle`, `/api/theme/css`, `/api/theme/[slug].css` and `/api/theme/favicon` are **not** in this cache. Their freshness is the Theme Bundle's own: the bundle is held per process and revalidated against the backend with a conditional GET (`NUXT_THEME_REVALIDATE_SECONDS`, `NUXT_THEME_REVALIDATE_TIMEOUT_MS`), and the rendered CSS and favicon bytes are memoised per etag. See [ADR 0001](docs/adr/0001-theme-bundle-revalidation-instead-of-purge.md).
 
 The bundle endpoints split the cache key into `auth` vs. `anon` based on the `access-token` cookie. Anonymous requests share a cached response; authenticated requests use the `auth` scope (further keyed by slug / tenant / bookable / event / include).
 

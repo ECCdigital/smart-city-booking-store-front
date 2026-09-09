@@ -499,6 +499,23 @@ export function parseHeroLayout(
 }
 
 /**
+ * Reads the enriched media reference the Theme Bundle exports for the logo.
+ *
+ * The Blocks carry their own references through {@link parseHeroLayout}; this
+ * is the one reference that stands on its own in the Theme View.
+ *
+ * @param input - Untrusted JSON: the `logo` of a Theme Bundle export.
+ * @param options - Where to report the first failing field.
+ * @returns The reference, or `null`.
+ */
+export function parseHeroMediaReference(
+  input: unknown,
+  options: HeroParseOptions = {},
+): HeroMediaReference | null {
+  return guard((path) => readMediaReference(input, path), "logo", options);
+}
+
+/**
  * Reads a Background as the backend exports it.
  *
  * @param input - Untrusted JSON: a Theme Bundle export or a Live Preview Draft.

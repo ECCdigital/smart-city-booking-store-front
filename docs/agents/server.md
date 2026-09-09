@@ -109,6 +109,11 @@ export default createConditionalCachedHandler(
 
 Cache is disabled when `NUXT_CACHE_ENABLED=false`. Always use `authScoped: true` when response content depends on login state.
 
+Do not wrap the theme routes in it: they read the Theme Bundle from the store in
+`server/utils/themeBundleStore.ts`, which owns their freshness (ADR 0001). A
+cached handler would also overwrite the `Cache-Control` a versioned request has
+earned.
+
 ## Adding a new BFF route
 
 1. Create handler in `server/api/` following Nitro file naming conventions

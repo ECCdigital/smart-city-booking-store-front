@@ -1,49 +1,83 @@
-import { createReadStream, existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { logger } from "~~/server/api/utils/logger.js";
-import { getThemeBundle } from "~~/server/api/utils/themeBundle";
-import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
+import { getThemeEntry } from "~~/server/api/utils/themeBundle";
+import { createEtagMemo } from "~~/server/utils/etagMemo";
+import { serveVersionedAsset } from "~~/server/utils/versionedAsset";
 
-export default createConditionalCachedHandler(
-  async (event) => {
-    const log = logger.child({ caller: "server/api/theme/favicon.get" });
+/**
+ * The instance favicon.
+ *
+ * Like the stylesheet routes it no longer sits behind the shared conditional
+ * cache: that cache writes a `Cache-Control` of its own after the handler has
+ * run, which would undo the immutable lifetime a versioned request has earned.
+ * The bytes are memoised per etag instead, so the upstream favicon is fetched
+ * once per Theme Bundle rather than once per request.
+ */
+interface Favicon {
+  body: Buffer;
+  contentType: string;
+}
 
-    const bundle = await getThemeBundle(event);
-    const faviconUrl = bundle?.faviconUrl ?? null;
+const byEtag = createEtagMemo<Favicon>(8);
 
-    if (faviconUrl) {
-      try {
-        const response = await fetch(faviconUrl);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch: ${response.status}`);
-        }
+/** The favicon shipped with the storefront, used when the instance has none. */
+async function bundledFavicon(): Promise<Favicon> {
+  const path = [
+    join(process.cwd(), "public", "favicon.ico"),
+    join(process.cwd(), ".output", "public", "favicon.ico"),
+  ].find((candidate) => existsSync(candidate));
 
-        const buffer = Buffer.from(await response.arrayBuffer());
-        const contentType =
-          response.headers.get("content-type") ?? "image/x-icon";
+  if (!path) {
+    throw createError({ statusCode: 404, statusMessage: "Favicon not found" });
+  }
 
-        setHeader(event, "Content-Type", contentType);
-        setHeader(event, "Cache-Control", "public, max-age=300, s-maxage=300");
-        return buffer;
-      } catch (error) {
-        log.warn(`Could not load remote favicon: ${error}`);
+  return { body: await readFile(path), contentType: "image/x-icon" };
+}
+
+export default defineEventHandler(async (event) => {
+  const log = logger.child({ caller: "server/api/theme/favicon.get" });
+
+  const entry = await getThemeEntry(event);
+  const etag = entry?.etag ?? "default";
+
+  if (serveVersionedAsset(event, entry?.etag ?? null)) return null;
+
+  const memoised = byEtag.get(etag);
+  if (memoised) {
+    setHeader(event, "Content-Type", memoised.contentType);
+    return memoised.body;
+  }
+
+  const faviconUrl = entry?.bundle?.faviconUrl ?? null;
+
+  if (faviconUrl) {
+    try {
+      const response = await fetch(faviconUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch: ${response.status}`);
       }
+
+      const favicon = byEtag.set(etag, {
+        body: Buffer.from(await response.arrayBuffer()),
+        contentType: response.headers.get("content-type") ?? "image/x-icon",
+      });
+
+      setHeader(event, "Content-Type", favicon.contentType);
+      return favicon.body;
+    } catch (error) {
+      // Deliberately not memoised: a favicon the instance has configured but
+      // that failed to load once must be retried, not replaced by the bundled
+      // one for the lifetime of this Theme Bundle.
+      log.warn(`Could not load remote favicon: ${error}`);
+      const fallback = await bundledFavicon();
+      setHeader(event, "Content-Type", fallback.contentType);
+      return fallback.body;
     }
+  }
 
-    const candidates = [
-      join(process.cwd(), "public", "favicon.ico"),
-      join(process.cwd(), ".output", "public", "favicon.ico"),
-    ];
-
-    const defaultFaviconPath = candidates.find((p) => existsSync(p));
-
-    if (!defaultFaviconPath) {
-      throw createError({ statusCode: 404, statusMessage: "Favicon not found" });
-    }
-
-    setHeader(event, "Content-Type", "image/x-icon");
-    setHeader(event, "Cache-Control", "public, max-age=300, s-maxage=300");
-    return sendStream(event, createReadStream(defaultFaviconPath));
-  },
-  { maxAge: 300, authScoped: false }
-);
+  const favicon = byEtag.set(etag, await bundledFavicon());
+  setHeader(event, "Content-Type", favicon.contentType);
+  return favicon.body;
+});

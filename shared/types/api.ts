@@ -19,14 +19,31 @@ export interface Branding {
 export interface PortalModeResponse {
   mode: PortalMode;
   portalUrl?: string;
-  branding: Branding;
 }
 
+/**
+ * The backend's Theme Bundle export. Everything that decides the look of the
+ * site travels here and nowhere else (storefront ADR 0001), which is why the
+ * catalog bundle and the portal mode carry no branding.
+ *
+ * The storefront never hands this to the client: `/api/theme/bundle` answers
+ * with the validated, sanitised `ThemeView` built from it.
+ */
 export interface ThemeBundle {
   theme?: Theme;
   visibility?: "public" | "private" | "unlisted";
   logoUrl?: string;
   faviconUrl?: string;
+  /** The Catalog's name — the Portal Name for the instance catalog. */
+  name?: string;
+  /** Validated by `parseHeroLayout`; shapes are in `shared/types/hero.ts`. */
+  heroLayout?: unknown;
+  background?: unknown;
+  logo?: unknown;
+  /**
+   * The pre-editor Hero, still read by `/api/theme/hero`. It leaves the
+   * contract once the Hero and the auth pages render from `heroLayout`.
+   */
   hero?: {
     title?: string;
     subtitle?: string;
@@ -41,15 +58,10 @@ export interface CatalogData {
   type: "instance" | "single";
   tenantId?: string;
   tenantIds?: string[];
-  hero?: {
-    title?: string;
-    subtitle?: string;
-  };
 }
 
 export interface OffersEnabledBundle {
   offersEnabled: true;
-  branding: Branding;
   portalUrl?: string;
   catalog: CatalogData;
   tenants: Array<{ id: string; name: string }>;
@@ -61,7 +73,6 @@ export interface OffersEnabledBundle {
 
 export interface PersonalBundle {
   offersEnabled: false;
-  branding: Branding;
   portalUrl?: string;
   catalog?: Partial<CatalogData>;
   tenants?: never[];
