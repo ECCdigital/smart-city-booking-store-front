@@ -11,6 +11,11 @@ import { firstImageBlockId, mobileRows } from "~/utils/heroBlocks";
  * The first image Block this tree shows fetches at high priority — its
  * own first, since the desktop tree's may be hidden here; no Block gets a
  * preload hint.
+ *
+ * The one column is `minmax(0, 1fr)` rather than the implicit `auto`: an
+ * auto track grows to the widest Block's fixed width, and a Block's
+ * `max-w-full` then resolves against that track instead of the content
+ * area, so a 32 rem Block would overflow a phone.
  */
 const props = defineProps({
   blocks: { type: Array, required: true },
@@ -24,7 +29,7 @@ const priorityBlockId = computed(() =>
 </script>
 
 <template>
-  <div class="grid h-full grid-rows-[auto_1fr_auto]">
+  <div class="grid h-full grid-cols-1 grid-rows-[auto_1fr_auto]">
     <div
       v-for="{ row, blocks: rowBlocks } in rows"
       :key="row"

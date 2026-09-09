@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -15,10 +17,12 @@ import {
   HERO_ROW_JUSTIFY_CLASSES,
   HERO_TEXT_SIZE_CLASSES,
   HERO_WIDTH_CLASSES,
+  blockColorStyle,
   imageClasses,
   imageStyle,
+  RICHTEXT_CLASS,
+  richtextBlockClasses,
   textBlockClasses,
-  textBlockStyle,
 } from "~/components/hero/heroClasses";
 import {
   HERO_COLOR_TOKENS,
@@ -31,9 +35,11 @@ import {
   type HeroBlock,
   type HeroImageBlock,
   type HeroLayout,
+  type HeroRichtextBlock,
   type HeroTextBlock,
 } from "~~/shared/types/hero";
 
+import crowdedHeroLayout from "./fixtures/hero-layout/crowded-hero-layout.json";
 import defaultHeroLayout from "./fixtures/hero-layout/default-hero-layout.json";
 
 /** A Tailwind class list is a literal: no template holes, no empty tokens. */
@@ -224,7 +230,7 @@ describe("a text Block", () => {
       "text-black dark:text-white",
     ]);
     expect(textBlockClasses(subtitle, "compact")).toContain("text-xl md:text-3xl");
-    expect(textBlockStyle(subtitle)).toBeUndefined();
+    expect(blockColorStyle(subtitle)).toBeUndefined();
   });
 
   it("renders a hex colour inline and the shadow as a class", () => {
@@ -241,7 +247,54 @@ describe("a text Block", () => {
     expect(classes).toContain("font-normal");
     expect(classes.some((entry) => entry.includes("text-shadow"))).toBe(true);
     expect(classes.some((entry) => entry.includes("#b91c1c"))).toBe(false);
-    expect(textBlockStyle(badge)).toEqual({ color: "#b91c1c" });
+    expect(blockColorStyle(badge)).toEqual({ color: "#b91c1c" });
+  });
+});
+
+describe("a rich-text Block", () => {
+  const openingHours = (crowdedHeroLayout as HeroLayout).blocks.find(
+    (block) => block.type === "richtext",
+  ) as HeroRichtextBlock;
+
+  it("is body copy: the hook for the stylesheet rule, the md step for the mode, its colour and shadow", () => {
+    expect(richtextBlockClasses(openingHours, "home")).toEqual([
+      RICHTEXT_CLASS,
+      HERO_TEXT_SIZE_CLASSES.home.md,
+      "text-white",
+      "[text-shadow:0_1px_3px_rgba(0,0,0,0.6)]",
+    ]);
+    expect(blockColorStyle(openingHours)).toBeUndefined();
+  });
+
+  it("renders one step down in the Compact Hero, like every text", () => {
+    expect(richtextBlockClasses(openingHours, "compact")).toContain(
+      HERO_TEXT_SIZE_CLASSES.compact.md,
+    );
+  });
+
+  it("renders a hex colour inline and no shadow unless asked", () => {
+    const plain: HeroRichtextBlock = {
+      ...openingHours,
+      color: "#1d4ed8",
+      shadow: false,
+    };
+
+    const classes = richtextBlockClasses(plain, "home");
+    expect(classes).toEqual([RICHTEXT_CLASS, HERO_TEXT_SIZE_CLASSES.home.md]);
+    expect(blockColorStyle(plain)).toEqual({ color: "#1d4ed8" });
+  });
+
+  it("puts the typography of the allowed tags in one stylesheet rule, not in classes", () => {
+    // The markup arrives through `v-html`, so no utility class can reach the
+    // tags inside it; `.hero-richtext` in main.css styles them instead. The
+    // preflight would otherwise strip the list markers and the link underline.
+    const stylesheet = readFileSync("app/assets/css/main.css", "utf8");
+
+    for (const tag of ["p", "ul", "ol", "li", "a"]) {
+      expect(stylesheet).toMatch(
+        new RegExp(String.raw`\.${RICHTEXT_CLASS}[^{]*\b${tag}\b[^{]*\{`),
+      );
+    }
   });
 });
 

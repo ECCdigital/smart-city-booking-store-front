@@ -1,8 +1,9 @@
 <script setup>
 import {
   blockBoxClasses,
+  blockColorStyle,
+  richtextBlockClasses,
   textBlockClasses,
-  textBlockStyle,
 } from "./heroClasses";
 import { localizedText } from "~/utils/heroBlocks";
 
@@ -12,8 +13,11 @@ import { localizedText } from "~/utils/heroBlocks";
  * only what is around it differs. It always carries its Block id and Zone
  * as data attributes, which is what the Live Preview measures against.
  *
- * Text Blocks render here; image Blocks render through the one logo element.
- * Rich-text Blocks are a later ticket and render nothing yet.
+ * Text and rich-text Blocks render here; image Blocks render through the one
+ * logo element. Rich text goes into the page through `v-html`: the markup
+ * comes from the Theme View, where the BFF has already run it through the
+ * frozen allowlist (`server/utils/heroRichtext.ts`), and the client never
+ * sanitises or receives anything that has not been sanitised.
  */
 const props = defineProps({
   block: { type: Object, required: true },
@@ -28,6 +32,9 @@ const { locale } = useI18n();
 const text = computed(() =>
   props.block.type === "text" ? props.block : null,
 );
+const richtext = computed(() =>
+  props.block.type === "richtext" ? props.block : null,
+);
 // A reference without an address has nothing to show; no empty box for it.
 const image = computed(() =>
   props.block.type === "image" && props.block.image.url ? props.block : null,
@@ -35,23 +42,32 @@ const image = computed(() =>
 
 // Spread rather than bound as `:style`, because the server renderer writes
 // an empty `style=""` for a bound `undefined`; without the key it writes nothing.
-const textStyle = computed(() => {
-  const style = text.value && textBlockStyle(text.value);
+const colorStyle = computed(() => {
+  const colored = text.value ?? richtext.value;
+  const style = colored && blockColorStyle(colored);
   return style ? { style } : undefined;
 });
 </script>
 
 <template>
   <div
-    v-if="text || image"
+    v-if="text || richtext || image"
     :data-block="block.id"
     :data-zone="block.zone"
     class="pointer-events-auto"
     :class="blockBoxClasses(block)"
   >
-    <p v-if="text" :class="textBlockClasses(text, mode)" v-bind="textStyle">
+    <p v-if="text" :class="textBlockClasses(text, mode)" v-bind="colorStyle">
       {{ localizedText(text.text, locale) }}
     </p>
+    <!-- eslint-disable vue/no-v-html -- server-sanitised markup, see the component comment -->
+    <div
+      v-else-if="richtext"
+      :class="richtextBlockClasses(richtext, mode)"
+      v-bind="colorStyle"
+      v-html="localizedText(richtext.html, locale)"
+    />
+    <!-- eslint-enable vue/no-v-html -->
     <ThemeLogo
       v-else-if="image"
       :image="image.image"

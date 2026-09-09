@@ -86,6 +86,61 @@ body {
   @apply bg-slate-50/20 dark:bg-gray-900/40 backdrop-blur-lg;
 }
 
+/*
+ * The typography of a rich-text Block in the Hero. Its markup arrives through
+ * `v-html`, server-sanitised against the frozen allowlist (p, br, strong, em,
+ * u, a, ul, ol, li), so no utility class can reach the tags inside it — this
+ * rule styles them instead. The preflight would otherwise leave paragraphs
+ * without spacing, lists without markers and links without an underline.
+ * Colour, size, alignment and shadow inherit from the Block's root, which
+ * HeroBlock.vue classes like a text Block; strong, em and u keep the
+ * browser's own rendering.
+ */
+.hero-richtext {
+    overflow-wrap: anywhere;
+}
+
+.hero-richtext p,
+.hero-richtext ul,
+.hero-richtext ol {
+    margin: 0;
+}
+
+.hero-richtext p + p,
+.hero-richtext p + ul,
+.hero-richtext p + ol,
+.hero-richtext ul + p,
+.hero-richtext ol + p,
+.hero-richtext li + li {
+    margin-top: 0.5em;
+}
+
+/*
+ * Markers sit inside the line, so a list follows its Zone's alignment like
+ * the paragraphs around it — centred in a centre column, right-aligned in a
+ * right one — instead of hanging off the left edge of a centred Block.
+ */
+.hero-richtext ul,
+.hero-richtext ol {
+    list-style-position: inside;
+    padding-inline-start: 0;
+}
+
+.hero-richtext ul {
+    list-style: disc;
+}
+
+.hero-richtext ol {
+    list-style: decimal;
+}
+
+.hero-richtext a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
+
+
 .container {
     max-width: 1400px;
     margin: auto;

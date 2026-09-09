@@ -20,6 +20,7 @@ import type {
   HeroHeight,
   HeroImageBlock,
   HeroImageMaxHeight,
+  HeroRichtextBlock,
   HeroSpacing,
   HeroTextBlock,
   HeroTextSize,
@@ -193,24 +194,63 @@ export function blockBoxClasses(block: HeroBlock): string[] {
 /** The readability toggle: a shadow that lifts text off a busy Background. */
 const TEXT_SHADOW_CLASS = "[text-shadow:0_1px_3px_rgba(0,0,0,0.6)]";
 
+/** A text or rich-text Block: what carries a colour and the shadow toggle. */
+type HeroCopyBlock = HeroTextBlock | HeroRichtextBlock;
+
 /**
- * The classes a text Block's element carries: its size for the mode, its
- * weight, a named colour and the shadow. A hex colour is not a class — it
- * is the one text value that goes inline, see {@link textBlockStyle}.
+ * A named colour as a class and the shadow, shared by text and rich text.
+ * A hex colour is not a class — it is the one text value that goes inline,
+ * see {@link blockColorStyle}.
  */
-export function textBlockClasses(block: HeroTextBlock, mode: HeroMode): string[] {
-  const classes = [
-    HERO_TEXT_SIZE_CLASSES[mode][block.size],
-    block.weight === "bold" ? "font-bold" : "font-normal",
-  ];
+function copyClasses(block: HeroCopyBlock): string[] {
+  const classes: string[] = [];
   if (isHeroColorToken(block.color)) classes.push(HERO_COLOR_CLASSES[block.color]);
   if (block.shadow) classes.push(TEXT_SHADOW_CLASS);
   return classes;
 }
 
-/** The inline style of a text Block: its hex colour, or nothing at all. */
-export function textBlockStyle(
-  block: HeroTextBlock,
+/**
+ * The classes a text Block's element carries: its size for the mode, its
+ * weight, a named colour and the shadow.
+ */
+export function textBlockClasses(block: HeroTextBlock, mode: HeroMode): string[] {
+  return [
+    HERO_TEXT_SIZE_CLASSES[mode][block.size],
+    block.weight === "bold" ? "font-bold" : "font-normal",
+    ...copyClasses(block),
+  ];
+}
+
+/**
+ * The hook the stylesheet rule hangs on: `.hero-richtext` in `main.css`
+ * styles the tags of the allowlist — paragraphs, lists, links — which no
+ * utility class can reach inside `v-html` markup.
+ */
+export const RICHTEXT_CLASS = "hero-richtext";
+
+/** Rich text has no `size` of its own: it is body copy and renders at the default text step. */
+const RICHTEXT_SIZE: HeroTextSize = "md";
+
+/**
+ * The classes a rich-text Block's root carries: the stylesheet hook, the
+ * body-copy step for the mode — one step down in the Compact Hero, like
+ * every text — a named colour and the shadow. Colour and shadow inherit into
+ * the markup, so a link or a list item is painted like the copy around it.
+ */
+export function richtextBlockClasses(
+  block: HeroRichtextBlock,
+  mode: HeroMode,
+): string[] {
+  return [
+    RICHTEXT_CLASS,
+    HERO_TEXT_SIZE_CLASSES[mode][RICHTEXT_SIZE],
+    ...copyClasses(block),
+  ];
+}
+
+/** The inline style of a text or rich-text Block: its hex colour, or nothing at all. */
+export function blockColorStyle(
+  block: HeroCopyBlock,
 ): Record<string, string> | undefined {
   return isHeroColorToken(block.color) ? undefined : { color: block.color };
 }
