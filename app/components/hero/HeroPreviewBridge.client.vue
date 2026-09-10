@@ -18,6 +18,7 @@ import {
 } from "~/composables/useThemeBundle";
 import {
   buildHeroPreviewSnapshot,
+  intendsOverlap,
   measureHeroPreview,
   parseHeroPreviewMessage,
 } from "~/utils/heroPreview";
@@ -171,6 +172,12 @@ function highlight(blockId) {
  * every Block, but the one the breakpoint hides answers an all-zero box,
  * so a Block's box comes from whichever tree is showing — and a Block the
  * mode or the viewport leaves out has no box at all and is not measured.
+ *
+ * The box comes from `getBoundingClientRect`, which applies the transforms
+ * of the element and its ancestors, so an offset Block is measured where it
+ * is painted with nothing to add here. What the Draft's own fields say — an
+ * Offset, a `front` Layer — comes along as the one derived flag the report
+ * needs: whether an overlap this Block lands in was asked for.
  */
 function measuredBlocks(root, layout) {
   const boxes = new Map();
@@ -180,7 +187,16 @@ function measuredBlocks(root, layout) {
   }
   return layout.blocks.flatMap((block) => {
     const box = boxes.get(block.id);
-    return box ? [{ id: block.id, zone: block.zone, box }] : [];
+    return box
+      ? [
+          {
+            id: block.id,
+            zone: block.zone,
+            box,
+            overlapIntended: intendsOverlap(block),
+          },
+        ]
+      : [];
   });
 }
 

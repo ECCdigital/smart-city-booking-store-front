@@ -21,6 +21,7 @@
 
 import type {
   HeroBlock,
+  HeroBlockOffset,
   HeroBlockWidth,
   HeroColorToken,
   HeroHeight,
@@ -69,16 +70,25 @@ export const HERO_HEIGHT_LENGTHS: Record<HeroHeight, string> = {
 /**
  * The nine anchor boxes inside the content area. Each spans the full
  * content width so `width: full` on a Block means the whole content area;
- * the column alignment then places a narrower Block inside it. The middle
- * row is centred through a translate, as the contract says.
+ * the column alignment then places a narrower Block inside it.
+ *
+ * The middle row spans the content height and centres its stack with
+ * `justify-center` — deliberately **not** with the `top-1/2 -translate-y-1/2`
+ * it used to, and not with any other transform: a transformed element is a
+ * stacking context, so a `front` Block inside such an anchor would be trapped
+ * in it, able to out-paint its own stack siblings but never a Block in
+ * another Zone. Centring by free space is the same picture — a stack taller
+ * than the content area overflows both ways either way, as the mobile tree's
+ * middle row has done all along in a track of exactly this kind — and it
+ * leaves the Layer meaning one thing everywhere.
  */
 export const HERO_ANCHOR_CLASSES: Record<HeroZone, string> = {
   "top-left": "top-0 inset-x-0",
   "top-center": "top-0 inset-x-0",
   "top-right": "top-0 inset-x-0",
-  "middle-left": "top-1/2 inset-x-0 -translate-y-1/2",
-  "middle-center": "top-1/2 inset-x-0 -translate-y-1/2",
-  "middle-right": "top-1/2 inset-x-0 -translate-y-1/2",
+  "middle-left": "inset-y-0 inset-x-0 justify-center",
+  "middle-center": "inset-y-0 inset-x-0 justify-center",
+  "middle-right": "inset-y-0 inset-x-0 justify-center",
   "bottom-left": "bottom-0 inset-x-0",
   "bottom-center": "bottom-0 inset-x-0",
   "bottom-right": "bottom-0 inset-x-0",
@@ -125,6 +135,51 @@ export const HERO_WIDTH_CLASSES: Record<HeroBlockWidth, string> = {
   md: "w-[32rem]",
   lg: "w-[48rem]",
   full: "w-full",
+};
+
+/**
+ * The horizontal Offset steps: −3 … 3 rem on the 0.5 grid, thirteen of them,
+ * positive to the right. Every literal carries `md:`, and that alone is the
+ * whole of the contract's "`x` is ignored below `md`" — the same Block
+ * element sits in both trees, and the mobile one simply never applies the
+ * class. No per-tree prop, no JavaScript breakpoint.
+ *
+ * The zero step is in the table with the others and is empty on purpose: a
+ * Block nobody moved has to come out exactly as it did before the field
+ * existed, so there is nothing to emit for it — and nothing to undo either,
+ * since an axis without a class keeps the `0` its custom property starts at.
+ */
+export const HERO_OFFSET_X_CLASSES: Record<number, string> = {
+  "-3": "md:-translate-x-[3rem]",
+  "-2.5": "md:-translate-x-[2.5rem]",
+  "-2": "md:-translate-x-[2rem]",
+  "-1.5": "md:-translate-x-[1.5rem]",
+  "-1": "md:-translate-x-[1rem]",
+  "-0.5": "md:-translate-x-[0.5rem]",
+  "0": "",
+  "0.5": "md:translate-x-[0.5rem]",
+  "1": "md:translate-x-[1rem]",
+  "1.5": "md:translate-x-[1.5rem]",
+  "2": "md:translate-x-[2rem]",
+  "2.5": "md:translate-x-[2.5rem]",
+  "3": "md:translate-x-[3rem]",
+};
+
+/** The same thirteen steps vertically, positive downwards and on every viewport. */
+export const HERO_OFFSET_Y_CLASSES: Record<number, string> = {
+  "-3": "-translate-y-[3rem]",
+  "-2.5": "-translate-y-[2.5rem]",
+  "-2": "-translate-y-[2rem]",
+  "-1.5": "-translate-y-[1.5rem]",
+  "-1": "-translate-y-[1rem]",
+  "-0.5": "-translate-y-[0.5rem]",
+  "0": "",
+  "0.5": "translate-y-[0.5rem]",
+  "1": "translate-y-[1rem]",
+  "1.5": "translate-y-[1.5rem]",
+  "2": "translate-y-[2rem]",
+  "2.5": "translate-y-[2.5rem]",
+  "3": "translate-y-[3rem]",
 };
 
 /**
@@ -267,8 +322,52 @@ export function blockPanelStyle(
 }
 
 /**
- * The classes of a Block's box, whatever its type: its spacing, its width
- * and its panel. `max-w-full` keeps a wide Block inside the content area.
+ * What `layer: "front"` is, and the whole of it: a Block is a flex item of
+ * its Zone's stack, so a `z-index` orders it without a `position` of its
+ * own. It lifts the Block above the Blocks it overlaps in **every** Zone —
+ * which holds only because no anchor is a stacking context, see
+ * {@link HERO_ANCHOR_CLASSES}. `back` wears nothing, and among equals
+ * document order decides, as it always has.
+ */
+const FRONT_LAYER_CLASS = "z-10";
+
+/**
+ * The Offset as classes: the step of each axis that has one. A translate is
+ * applied at paint time and changes no box in the flow, so the Block moves
+ * alone — its stack neighbours, the other Zones and the mobile row groups
+ * stay exactly where they are.
+ *
+ * A step of zero has no class, which is why this can return one class, two
+ * or none at all — as does a step off the 0.5 grid, which the guard does not
+ * let through in the first place. The two axes compose: each writes its own
+ * custom property and both write the same `translate`, so `x` on its own
+ * still translates by the `0` the `y` property starts at.
+ *
+ * The one thing a translate does change is paint order, and it is worth
+ * knowing: a translated element is a stacking context of its own and joins
+ * the Blocks that paint at `z-index: 0`, so an offset Block rises above a
+ * later, unmoved Block of its **own** Zone stack. Across Zones nothing moves
+ * — the anchor it sits in still decides — and inside a Zone the two Blocks
+ * are only on top of each other because the Offset put them there.
+ */
+function offsetClasses(offset: HeroBlockOffset): string[] {
+  const classes: string[] = [];
+  const x = HERO_OFFSET_X_CLASSES[offset.x];
+  const y = HERO_OFFSET_Y_CLASSES[offset.y];
+  if (x) classes.push(x);
+  if (y) classes.push(y);
+  return classes;
+}
+
+/**
+ * The classes of a Block's box, whatever its type: its spacing, its width,
+ * its Offset, its Layer and its panel. `max-w-full` keeps a wide Block
+ * inside the content area.
+ *
+ * The box takes no mode. The Compact Hero steps the text sizes down but
+ * applies the Offset **as authored**: an Offset is a placement the author
+ * chose in rem, and halving it silently would make the compact frame
+ * disagree with the form the admin filled in.
  */
 export function blockBoxClasses(block: HeroBlock): string[] {
   const classes = [
@@ -276,7 +375,9 @@ export function blockBoxClasses(block: HeroBlock): string[] {
     HERO_OUTER_SPACING_CLASSES[block.outerSpacing],
     HERO_INNER_SPACING_CLASSES[block.innerSpacing],
     HERO_WIDTH_CLASSES[block.width],
+    ...offsetClasses(block.offset),
   ];
+  if (block.layer === "front") classes.push(FRONT_LAYER_CLASS);
   if (block.panel) classes.push(...panelClasses(block.panel));
   return classes;
 }

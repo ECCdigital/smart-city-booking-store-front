@@ -14,6 +14,8 @@ import {
   HERO_IMAGE_MAX_HEIGHT_CLASSES,
   HERO_INNER_SPACING_CLASSES,
   HERO_MOBILE_HEIGHT_CLASSES,
+  HERO_OFFSET_X_CLASSES,
+  HERO_OFFSET_Y_CLASSES,
   HERO_OUTER_SPACING_CLASSES,
   HERO_PANEL_RADIUS_CLASSES,
   HERO_ROW_JUSTIFY_CLASSES,
@@ -27,6 +29,8 @@ import {
   textBlockClasses,
 } from "~/components/hero/heroClasses";
 import {
+  HERO_BLOCK_OFFSET_LIMIT,
+  HERO_BLOCK_OFFSET_NONE,
   HERO_COLOR_TOKENS,
   HERO_HEIGHTS,
   HERO_IMAGE_MAX_HEIGHTS,
@@ -174,16 +178,86 @@ describe("the Hero class tables", () => {
     });
   });
 
+  it("offsets a Block by the thirteen rem steps of each axis, `x` from `md` up", () => {
+    // −3 … 3 rem on the 0.5 grid, positive right and positive down. The `md:`
+    // prefix on the `x` table is the whole of "below `md` only `y` applies":
+    // both trees carry the same class and only one of them is showing.
+    expect(HERO_OFFSET_X_CLASSES).toEqual({
+      "-3": "md:-translate-x-[3rem]",
+      "-2.5": "md:-translate-x-[2.5rem]",
+      "-2": "md:-translate-x-[2rem]",
+      "-1.5": "md:-translate-x-[1.5rem]",
+      "-1": "md:-translate-x-[1rem]",
+      "-0.5": "md:-translate-x-[0.5rem]",
+      "0": "",
+      "0.5": "md:translate-x-[0.5rem]",
+      "1": "md:translate-x-[1rem]",
+      "1.5": "md:translate-x-[1.5rem]",
+      "2": "md:translate-x-[2rem]",
+      "2.5": "md:translate-x-[2.5rem]",
+      "3": "md:translate-x-[3rem]",
+    });
+    expect(HERO_OFFSET_Y_CLASSES).toEqual({
+      "-3": "-translate-y-[3rem]",
+      "-2.5": "-translate-y-[2.5rem]",
+      "-2": "-translate-y-[2rem]",
+      "-1.5": "-translate-y-[1.5rem]",
+      "-1": "-translate-y-[1rem]",
+      "-0.5": "-translate-y-[0.5rem]",
+      "0": "",
+      "0.5": "translate-y-[0.5rem]",
+      "1": "translate-y-[1rem]",
+      "1.5": "translate-y-[1.5rem]",
+      "2": "translate-y-[2rem]",
+      "2.5": "translate-y-[2.5rem]",
+      "3": "translate-y-[3rem]",
+    });
+
+    // Every step of the contract's grid is in both tables, and the vertical
+    // one is the only one a phone applies.
+    for (let step = -HERO_BLOCK_OFFSET_LIMIT; step <= HERO_BLOCK_OFFSET_LIMIT; step += 0.5) {
+      expect(HERO_OFFSET_X_CLASSES[step]).toBeDefined();
+      expect(HERO_OFFSET_Y_CLASSES[step]).toBeDefined();
+      expect(HERO_OFFSET_Y_CLASSES[step]).not.toContain("md:");
+    }
+  });
+
   it("anchors every Zone to its row and column of the content area", () => {
     expect(HERO_ANCHOR_CLASSES["top-left"]).toContain("top-0");
-    expect(HERO_ANCHOR_CLASSES["middle-center"]).toContain("top-1/2");
-    expect(HERO_ANCHOR_CLASSES["middle-center"]).toContain("-translate-y-1/2");
     expect(HERO_ANCHOR_CLASSES["bottom-right"]).toContain("bottom-0");
     expect(HERO_COLUMN_ALIGN_CLASSES).toEqual({
       left: "items-start text-left",
       center: "items-center text-center",
       right: "items-end text-right",
     });
+  });
+
+  it("centres the middle row without a transform, and spans the full content width", () => {
+    // A transformed element is a stacking context, and a `front` Block inside
+    // one could out-paint its own stack siblings but never a Block in another
+    // Zone. So the middle row spans the content height and centres its stack
+    // by free space, which overflows both ways exactly as the translate did.
+    // Nothing in this table may grow a transform back.
+    for (const zone of ["middle-left", "middle-center", "middle-right"] as const) {
+      expect(HERO_ANCHOR_CLASSES[zone]).toContain("inset-y-0");
+      expect(HERO_ANCHOR_CLASSES[zone]).toContain("justify-center");
+    }
+
+    for (const zone of HERO_ZONES) {
+      expect(HERO_ANCHOR_CLASSES[zone]).toContain("inset-x-0");
+      expect(HERO_ANCHOR_CLASSES[zone]).not.toMatch(/translate|rotate|scale/);
+    }
+  });
+
+  it("stacks its Blocks as a column the anchors can centre, taking no pointer events", () => {
+    // `justify-center` only centres what is laid out as a column, and an
+    // anchor that took pointer events would shadow the Zone overlay beneath
+    // it — both live in the component, which no test here renders.
+    const component = readFileSync("app/components/hero/HeroZones.vue", "utf8");
+    const anchor = component.match(/class="absolute[^"]*"/)?.[0] ?? "";
+
+    expect(anchor).toContain("flex-col");
+    expect(anchor).toContain("pointer-events-none");
   });
 
   it("paints the named colours from the theme and leaves hex to the inline style", () => {
@@ -211,6 +285,51 @@ describe("a Block's box", () => {
       "m-0",
       "p-0",
       "w-auto",
+    ]);
+  });
+
+  it("moves an offset Block with a translate on the Block itself", () => {
+    // Never a margin, which would move the stack neighbours, and never on the
+    // anchor, whose own placement it would overwrite.
+    const moved: HeroBlock = { ...subtitle, offset: { x: -1.5, y: 2 } };
+
+    expect(blockBoxClasses(moved)).toEqual([
+      "max-w-full min-w-0",
+      "m-0",
+      "p-0",
+      "w-auto",
+      "md:-translate-x-[1.5rem]",
+      "translate-y-[2rem]",
+    ]);
+  });
+
+  it("leaves a Block that is neither moved nor lifted exactly as it was", () => {
+    // Both fields default to nothing at all, which is the overwhelmingly
+    // common case: the class list has to be the one from before they existed.
+    const still: HeroBlock = {
+      ...subtitle,
+      offset: { ...HERO_BLOCK_OFFSET_NONE },
+      layer: "back",
+    };
+
+    expect(blockBoxClasses(still)).toEqual([
+      "max-w-full min-w-0",
+      "m-0",
+      "p-0",
+      "w-auto",
+    ]);
+  });
+
+  it("lifts a `front` Block above the Blocks it overlaps, wherever they are", () => {
+    const front: HeroBlock = { ...subtitle, layer: "front", offset: { x: 0, y: 1 } };
+
+    expect(blockBoxClasses(front)).toEqual([
+      "max-w-full min-w-0",
+      "m-0",
+      "p-0",
+      "w-auto",
+      "translate-y-[1rem]",
+      "z-10",
     ]);
   });
 
@@ -343,10 +462,16 @@ describe("a Block's box", () => {
     expect(component).toMatch(/v-bind="panelStyle"/);
   });
 
-  it("paints its Panel the same in the Compact Hero, which never sees one", () => {
-    // The box takes no mode: there is nothing for the Compact Hero to step a
-    // Panel down by, and this is what keeps it that way.
+  it("paints its Panel and places its Offset the same in the Compact Hero", () => {
+    // The box takes no mode, and this is what keeps it that way. There is
+    // nothing for the Compact Hero to step a Panel down by, and an Offset it
+    // must not step down: it is a placement the author chose in rem, and
+    // halving it silently would make the compact frame disagree with the form.
     expect(blockBoxClasses).toHaveLength(1);
+
+    const moved: HeroBlock = { ...subtitle, offset: { x: 3, y: -3 } };
+    expect(blockBoxClasses(moved)).toContain("md:translate-x-[3rem]");
+    expect(blockBoxClasses(moved)).toContain("-translate-y-[3rem]");
   });
 
   it("takes its padding from `innerSpacing` alone, whatever the Panel says", () => {

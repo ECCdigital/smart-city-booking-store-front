@@ -3,6 +3,7 @@ import type { HeroPreviewView } from "~/composables/useThemeBundle";
 import {
   HERO_PREVIEW_DRAFT,
   HERO_PREVIEW_PROTOCOL_VERSION,
+  type HeroBlockBase,
   type HeroMediaReference,
   type HeroPreviewDraftMessage,
   type HeroPreviewViewport,
@@ -169,11 +170,32 @@ export interface HeroPreviewBox {
   bottom: number;
 }
 
-/** One rendered Block as the Preview Report sees it: its id, its Zone and its box. */
+/**
+ * One rendered Block as the Preview Report sees it: its id, its Zone, its
+ * box, and what its own fields say about landing on another Block.
+ */
 export interface HeroPreviewMeasuredBlock {
   id: string;
   zone: HeroZone;
   box: HeroPreviewBox;
+  /** Whether an overlap this Block is in was asked for — {@link intendsOverlap}. */
+  overlapIntended: boolean;
+}
+
+/**
+ * Whether a Block's own fields say that an overlap it lands in was meant:
+ * it has been moved off its place in the Zone stack, or it was told to paint
+ * in front of what it covers. Both fields exist for deliberate overlap, so a
+ * pair holding either of them is not worth reporting.
+ *
+ * Derived here rather than carried into the report as the two raw fields,
+ * so the rule lives with the measurement it silences and the call site says
+ * what it is passing.
+ */
+export function intendsOverlap(
+  block: Pick<HeroBlockBase, "offset" | "layer">,
+): boolean {
+  return block.layer === "front" || block.offset.x !== 0 || block.offset.y !== 0;
 }
 
 /**
@@ -202,7 +224,13 @@ function hasExtent(box: HeroPreviewBox): boolean {
  * The warnings of one rendered Draft: the Blocks whose box leaves the content
  * area in any direction, then the pairs of Blocks from different Zones whose
  * boxes intersect, each pair once, both in the order the Blocks are given.
- * Stacking inside one Zone is intended and never reported.
+ * Stacking inside one Zone is intended and never reported, and neither is a
+ * pair either of whose Blocks was moved or lifted to make exactly that
+ * overlap ({@link intendsOverlap}).
+ *
+ * The edge warning is never suppressed, by an Offset or by anything else:
+ * leaving the content area means being clipped or hidden under the search
+ * bar, which nobody intends and which an Offset is the likeliest cause of.
  *
  * On mobile only the outside warning is reported: the rows stack there, so
  * where a Block lands is not the editor's choice and an intersection is not
@@ -237,7 +265,12 @@ export function measureHeroPreview(
 
   measured.forEach((a, index) => {
     for (const b of measured.slice(index + 1)) {
-      if (a.zone !== b.zone && intersects(a.box, b.box)) {
+      if (
+        a.zone !== b.zone &&
+        !a.overlapIntended &&
+        !b.overlapIntended &&
+        intersects(a.box, b.box)
+      ) {
         warnings.push({ code: "overlap", blockIds: [a.id, b.id] });
       }
     }

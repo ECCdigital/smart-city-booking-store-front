@@ -1,7 +1,10 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import {
   buildHeroPreviewSnapshot,
+  intendsOverlap,
   measureHeroPreview,
   parseHeroPreviewMessage,
   previewHeroMode,
@@ -9,7 +12,11 @@ import {
   type HeroPreviewMeasuredBlock,
 } from "~/utils/heroPreview";
 import type { HeroParseIssue } from "~~/shared/utils/heroLayout";
-import type { HeroRichtextBlock, HeroZone } from "~~/shared/types/hero";
+import {
+  HERO_BLOCK_OFFSET_NONE,
+  type HeroRichtextBlock,
+  type HeroZone,
+} from "~~/shared/types/hero";
 
 import defaultHeroLayout from "./fixtures/hero-layout/default-hero-layout.json";
 import crowdedHeroLayout from "./fixtures/hero-layout/crowded-hero-layout.json";
@@ -237,6 +244,31 @@ describe("buildHeroPreviewSnapshot", () => {
   });
 });
 
+describe("intendsOverlap", () => {
+  it("is what an Offset on either axis, or a `front` Layer, says about a Block", () => {
+    expect(
+      intendsOverlap({ offset: HERO_BLOCK_OFFSET_NONE, layer: "back" }),
+    ).toBe(false);
+    expect(intendsOverlap({ offset: { x: -0.5, y: 0 }, layer: "back" })).toBe(true);
+    expect(intendsOverlap({ offset: { x: 0, y: 3 }, layer: "back" })).toBe(true);
+    expect(
+      intendsOverlap({ offset: HERO_BLOCK_OFFSET_NONE, layer: "front" }),
+    ).toBe(true);
+  });
+
+  it("is derived by the bridge from the layout it measured", () => {
+    // A measured Block that never got the flag reads as `false`, which would
+    // put every deliberate overlap back into the report — and no test here
+    // mounts the bridge to catch it.
+    const bridge = readFileSync(
+      "app/components/hero/HeroPreviewBridge.client.vue",
+      "utf8",
+    );
+
+    expect(bridge).toMatch(/overlapIntended: intendsOverlap\(block\)/);
+  });
+});
+
 describe("measureHeroPreview", () => {
   const area = { left: 20, top: 40, right: 1220, bottom: 280 };
 
@@ -244,8 +276,9 @@ describe("measureHeroPreview", () => {
     id: string,
     zone: HeroZone,
     box: { left: number; top: number; right: number; bottom: number },
+    overlapIntended = false,
   ): HeroPreviewMeasuredBlock {
-    return { id, zone, box };
+    return { id, zone, box, overlapIntended };
   }
 
   it("reports nothing for a Block inside the content area", () => {
@@ -332,6 +365,54 @@ describe("measureHeroPreview", () => {
       block("b", "middle-left", { left: 20, top: 120, right: 200, bottom: 200 }),
     ];
 
+    expect(measureHeroPreview(area, blocks, "mobile")).toEqual([
+      { code: "outside-content-area", blockIds: ["a"] },
+    ]);
+  });
+
+  it("skips a pair whose overlap either Block was told to make", () => {
+    // An Offset and a `front` Layer exist to make overlap deliberate, and
+    // this is the seam that knows what was rendered — so the report simply
+    // never carries the pair, whichever of the two Blocks carries the field.
+    const pair = (intended: { title?: boolean; logo?: boolean }) => [
+      block("title", "top-left", { left: 20, top: 40, right: 500, bottom: 160 }, intended.title),
+      block("logo", "middle-left", { left: 20, top: 120, right: 200, bottom: 200 }, intended.logo),
+    ];
+
+    expect(measureHeroPreview(area, pair({ title: true }), "desktop")).toEqual([]);
+    expect(measureHeroPreview(area, pair({ logo: true }), "desktop")).toEqual([]);
+    expect(
+      measureHeroPreview(area, pair({ title: true, logo: true }), "desktop"),
+    ).toEqual([]);
+    // Two Blocks that only happen to collide are reported as before.
+    expect(measureHeroPreview(area, pair({}), "desktop")).toEqual([
+      { code: "overlap", blockIds: ["title", "logo"] },
+    ]);
+  });
+
+  it("reports the other pairs of a Block whose own overlap is deliberate", () => {
+    const box = { left: 100, top: 100, right: 300, bottom: 200 };
+    const blocks = [
+      block("a", "top-left", box),
+      block("b", "middle-center", box, true),
+      block("c", "bottom-right", box),
+    ];
+
+    expect(measureHeroPreview(area, blocks, "desktop")).toEqual([
+      { code: "overlap", blockIds: ["a", "c"] },
+    ]);
+  });
+
+  it("never suppresses the edge warning, whatever moved the Block there", () => {
+    // Leaving the content area means being clipped, or hidden under the
+    // search bar — which nobody intends, and which is the very thing an
+    // Offset makes likely. It fires in both trees.
+    const pushedOut = { left: 100, top: 220, right: 300, bottom: 340 };
+    const blocks = [block("a", "bottom-center", pushedOut, true)];
+
+    expect(measureHeroPreview(area, blocks, "desktop")).toEqual([
+      { code: "outside-content-area", blockIds: ["a"] },
+    ]);
     expect(measureHeroPreview(area, blocks, "mobile")).toEqual([
       { code: "outside-content-area", blockIds: ["a"] },
     ]);

@@ -4,10 +4,18 @@ import { blocksInZone, firstImageBlockId, zoneColumn } from "~/utils/heroBlocks"
 import { HERO_ZONES } from "~~/shared/types/hero";
 
 /**
- * The desktop tree: nine absolute anchor boxes inside the content area.
- * Blocks in a Zone stack vertically in array order, aligned to the Zone's
- * column; Blocks from different Zones may overlap — that is an editor
- * warning, never a renderer constraint.
+ * The desktop tree: nine absolute anchor boxes inside the content area, in
+ * Zone order. Blocks in a Zone stack vertically in array order, aligned to
+ * the Zone's column; Blocks from different Zones may overlap — that is an
+ * editor warning, never a renderer constraint.
+ *
+ * That same order is the paint order. No anchor is a stacking context — the
+ * middle row is centred without a transform for exactly that reason — so a
+ * `front` Block is lifted above the Blocks of every Zone, not only its own,
+ * and among equals, several `front` Blocks or several `back` ones, the tree
+ * decides: Zone order, then array order, as it always has. Nothing here
+ * arranges that; an Offset is the only thing that bends it, and only inside
+ * its own Zone (`blockBoxClasses`).
  *
  * The tree and its anchors let pointer events through — a later Zone's box
  * never shadows a link in an earlier one, and the Live Preview's Zone
