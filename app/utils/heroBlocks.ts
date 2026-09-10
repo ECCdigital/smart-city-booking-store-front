@@ -24,12 +24,19 @@ export interface FallbackHeroContent {
   logo: HeroMediaReference | null;
 }
 
-/** The fields every Block of the Fallback Hero Layout shares. */
+/**
+ * The fields every Block of the Fallback Hero Layout shares. Nothing fills
+ * defaults here — the Fallback is built, not parsed — so this list has to
+ * stay level with the contract's own defaults by hand.
+ */
 const FALLBACK_BLOCK = {
   outerSpacing: "none",
   innerSpacing: "none",
   width: "auto",
-  panel: "none",
+  align: "auto",
+  panel: null,
+  offset: { x: 0, y: 0 },
+  layer: "back",
   homeOnly: false,
   hideOnMobile: false,
 } as const;

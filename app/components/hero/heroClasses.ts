@@ -173,7 +173,11 @@ export const HERO_COLOR_CLASSES: Record<HeroColorToken, string> = {
   white: "text-white",
 };
 
-/** `panel: translucent` is the glass panel behind a Block. */
+/**
+ * The glass panel behind a Block. A Panel's own colour, opacity, radius and
+ * blur are not painted yet — every Panel still renders as today's `.glass`,
+ * so this reads no further than "is there one".
+ */
 const PANEL_CLASSES = "glass rounded-xl";
 
 /**
@@ -187,7 +191,7 @@ export function blockBoxClasses(block: HeroBlock): string[] {
     HERO_INNER_SPACING_CLASSES[block.innerSpacing],
     HERO_WIDTH_CLASSES[block.width],
   ];
-  if (block.panel === "translucent") classes.push(PANEL_CLASSES);
+  if (block.panel) classes.push(PANEL_CLASSES);
   return classes;
 }
 
@@ -228,7 +232,11 @@ export function textBlockClasses(block: HeroTextBlock, mode: HeroMode): string[]
  */
 export const RICHTEXT_CLASS = "hero-richtext";
 
-/** Rich text has no `size` of its own: it is body copy and renders at the default text step. */
+/**
+ * The step rich text renders at. A rich-text Block now carries a `size` of
+ * its own, but nothing paints it yet, so every Block still renders body copy
+ * at the default step — as it did when there was no field to read.
+ */
 const RICHTEXT_SIZE: HeroTextSize = "md";
 
 /**

@@ -32,12 +32,15 @@ import {
   HERO_TEXT_SIZES,
   HERO_ZONES,
   HERO_BLOCK_WIDTHS,
+  HERO_PANEL_GLASS,
   type HeroBlock,
   type HeroImageBlock,
   type HeroLayout,
   type HeroRichtextBlock,
   type HeroTextBlock,
 } from "~~/shared/types/hero";
+
+import { parseHeroLayout } from "~~/shared/utils/heroLayout";
 
 import crowdedHeroLayout from "./fixtures/hero-layout/crowded-hero-layout.json";
 import defaultHeroLayout from "./fixtures/hero-layout/default-hero-layout.json";
@@ -187,7 +190,11 @@ describe("the Hero class tables", () => {
 });
 
 describe("a Block's box", () => {
-  const subtitle = (defaultHeroLayout as HeroLayout).blocks.find(
+  // The box is the one thing that reads the Panel, so this Block comes out of
+  // the guard rather than off the raw fixture: the guard is what turns the
+  // export's `panel` — object or legacy word — into the Panel or the `null`
+  // the box asks about.
+  const subtitle = parseHeroLayout(defaultHeroLayout)!.blocks.find(
     (block) => block.id === "default-subtitle",
   ) as HeroBlock;
 
@@ -206,7 +213,7 @@ describe("a Block's box", () => {
       outerSpacing: "md",
       innerSpacing: "sm",
       width: "md",
-      panel: "translucent",
+      panel: HERO_PANEL_GLASS,
     };
     expect(blockBoxClasses(panelled)).toEqual([
       "max-w-full min-w-0",

@@ -36,7 +36,19 @@ describe("fallbackHeroLayout", () => {
     expected.blocks[0]!.image = logo;
     expected.blocks[2]!.text = { de: "Entdecken Sie unsere Angebote" };
 
-    expect(layout).toEqual(expected);
+    // The fixture is still in the shape the backend exported before the Panel
+    // became an object; the Fallback is built from the contract's current
+    // defaults, which is what these four keys restate.
+    expect(layout).toEqual({
+      ...expected,
+      blocks: expected.blocks.map((block) => ({
+        ...block,
+        align: "auto",
+        panel: null,
+        offset: { x: 0, y: 0 },
+        layer: "back",
+      })),
+    });
   });
 
   it("leaves the logo Block out when no logo is known", () => {

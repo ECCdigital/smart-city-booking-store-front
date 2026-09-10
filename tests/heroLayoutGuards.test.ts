@@ -6,7 +6,11 @@ import {
   parseHeroMediaReference,
   type HeroParseIssue,
 } from "~~/shared/utils/heroLayout";
-import type { HeroImageBlock, HeroRichtextBlock } from "~~/shared/types/hero";
+import {
+  HERO_PANEL_GLASS,
+  type HeroImageBlock,
+  type HeroRichtextBlock,
+} from "~~/shared/types/hero";
 
 import defaultHeroLayout from "./fixtures/hero-layout/default-hero-layout.json";
 import crowdedHeroLayout from "./fixtures/hero-layout/crowded-hero-layout.json";
@@ -34,10 +38,23 @@ function textBlock(id: string) {
 }
 
 describe("parseHeroLayout", () => {
-  it("accepts the Default Hero Layout unchanged", () => {
+  it("accepts the Default Hero Layout, filling what the amendment added", () => {
+    // The fixtures are still in the shape the backend exported before the
+    // Panel became an object — `panel: "none"`, no `align`, `offset` or
+    // `layer`. That they parse at all is the rollout guarantee: an instance
+    // whose backend has not shipped its half of the amendment keeps its Hero.
     const layout = parseHeroLayout(defaultHeroLayout);
 
-    expect(layout).toEqual(defaultHeroLayout);
+    expect(layout).toEqual({
+      ...defaultHeroLayout,
+      blocks: defaultHeroLayout.blocks.map((block) => ({
+        ...block,
+        align: "auto",
+        panel: null,
+        offset: { x: 0, y: 0 },
+        layer: "back",
+      })),
+    });
   });
 
   it("accepts the crowded layout with all three Block types", () => {
@@ -51,7 +68,7 @@ describe("parseHeroLayout", () => {
     expect(layout?.height).toBe("xl");
 
     const richtext = layout?.blocks[0] as HeroRichtextBlock;
-    expect(richtext.panel).toBe("translucent");
+    expect(richtext.panel).toEqual(HERO_PANEL_GLASS);
     expect(richtext.homeOnly).toBe(true);
     expect(richtext.color).toBe("white");
     expect(richtext.html.en).toContain("Opening hours");
@@ -90,7 +107,10 @@ describe("parseHeroLayout", () => {
           outerSpacing: "none",
           innerSpacing: "none",
           width: "auto",
-          panel: "none",
+          align: "auto",
+          panel: null,
+          offset: { x: 0, y: 0 },
+          layer: "back",
           homeOnly: false,
           hideOnMobile: false,
           text: { de: "Eins" },

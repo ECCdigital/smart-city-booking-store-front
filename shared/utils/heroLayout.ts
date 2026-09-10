@@ -22,14 +22,20 @@ import {
   BACKGROUND_INTENSITIES,
   BACKGROUND_TYPES,
   BACKGROUND_VARIANTS,
+  HERO_BLOCK_ALIGNMENTS,
   HERO_BLOCK_ID_PATTERN,
-  HERO_BLOCK_PANELS,
+  HERO_BLOCK_LAYERS,
+  HERO_BLOCK_OFFSET_LIMIT,
+  HERO_BLOCK_OFFSET_NONE,
   HERO_BLOCK_TYPES,
   HERO_BLOCK_WIDTHS,
   HERO_COLOR_TOKENS,
   HERO_HEIGHTS,
   HERO_IMAGE_MAX_HEIGHTS,
   HERO_LAYOUT_MAX_BLOCKS,
+  HERO_PANEL_COLOR_TOKENS,
+  HERO_PANEL_GLASS,
+  HERO_PANEL_RADII,
   HERO_RICHTEXT_RAW_MAX_LENGTH,
   HERO_SPACINGS,
   HERO_TEXT_MAX_LENGTH,
@@ -41,10 +47,14 @@ import {
   type BackgroundFocalPoint,
   type BackgroundOverlay,
   type HeroBlock,
+  type HeroBlockOffset,
   type HeroColor,
   type HeroColorToken,
   type HeroLayout,
   type HeroMediaReference,
+  type HeroPanel,
+  type HeroPanelColor,
+  type HeroPanelColorToken,
   type HexColor,
   type LocalizedString,
 } from "../types/hero";
@@ -214,8 +224,22 @@ function readHeroColor(value: unknown, path: string): HeroColor {
 }
 
 /**
- * A whole percentage. Used for focal points and overlay opacities, which are
- * both 0–100 and both meaningless as fractions.
+ * A whole percentage, 0–100. Focal points, overlay opacities and a Panel's
+ * opacity are all one, and all three are meaningless as fractions.
+ */
+function isPercentage(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= 0 &&
+    value <= 100
+  );
+}
+
+/**
+ * A percentage of the Background, where a value off the scale is a broken
+ * export and fails the whole thing. A wrong type and an out-of-range number
+ * are the same answer by contract, so there is one code for both.
  */
 function readPercentage(
   value: unknown,
@@ -223,10 +247,7 @@ function readPercentage(
   fallback: number,
 ): number {
   if (!isPresent(value)) return fallback;
-  if (typeof value !== "number" || !Number.isInteger(value)) {
-    fail(path, "invalid_format");
-  }
-  if (value < 0 || value > 100) fail(path, "invalid_format");
+  if (!isPercentage(value)) fail(path, "invalid_format");
   return value;
 }
 
@@ -262,6 +283,127 @@ function readMediaReference(
   return reference;
 }
 
+/** An object to read keys off, or an empty one when the value is not one. */
+function optionalObject(value: unknown): Record<string, unknown> {
+  if (!isPresent(value) || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+  return value as Record<string, unknown>;
+}
+
+/**
+ * The lenient counterpart of {@link readEnum}, and the rule the whole Panel
+ * amendment is read by: a value off the contract falls back to its default
+ * instead of failing the layout.
+ *
+ * That is a deliberate difference from the fields schema v1 shipped with,
+ * which still reject with `invalid_enum`. Those the backend has always
+ * normalised on save, so an unknown value there means the export is broken;
+ * `align`, `panel`, `offset`, `layer` and a rich text's `size` arrive from a
+ * backend that is still rolling its half out, and one odd value among them is
+ * not a reason to drop the author's whole Hero for the Fallback Hero Layout.
+ * Nothing is reported: there is no failure to report, only a default filled.
+ */
+function readEnumOrDefault<T extends string>(
+  value: unknown,
+  allowed: readonly T[],
+  fallback: T,
+): T {
+  if (typeof value !== "string") return fallback;
+  return (allowed as readonly string[]).includes(value) ? (value as T) : fallback;
+}
+
+/**
+ * One axis of an Offset, as the contract writes the check. `0.5` is exact in
+ * binary floating point, so testing the half-steps with `value * 2` needs no
+ * epsilon and no rounding.
+ */
+function isOffsetStep(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value >= -HERO_BLOCK_OFFSET_LIMIT &&
+    value <= HERO_BLOCK_OFFSET_LIMIT &&
+    Number.isInteger(value * 2)
+  );
+}
+
+/**
+ * A Block's displacement. The two axes fall back independently, so an Offset
+ * that is off the grid in `y` alone keeps the `x` the author chose rather than
+ * losing both — the Offset is a pure translation and half of one still lands
+ * the Block somewhere deliberate.
+ */
+function readOffset(value: unknown): HeroBlockOffset {
+  const source = optionalObject(value);
+  return {
+    x: isOffsetStep(source.x) ? source.x : HERO_BLOCK_OFFSET_NONE.x,
+    y: isOffsetStep(source.y) ? source.y : HERO_BLOCK_OFFSET_NONE.y,
+  };
+}
+
+/**
+ * Whether a Panel colour is one of the named tokens rather than a hex value —
+ * the Panel's counterpart to {@link isHeroColorToken}, against the Panel's own
+ * shorter list. The renderer needs the split because a token resolves to a
+ * theme colour while a hex value is painted as given.
+ */
+export function isHeroPanelColorToken(
+  color: string,
+): color is HeroPanelColorToken {
+  return (HERO_PANEL_COLOR_TOKENS as readonly string[]).includes(color);
+}
+
+/** A Panel colour: the Panel's own tokens — `black` among them — or `#rrggbb`. */
+function readPanelColor(value: unknown): HeroPanelColor {
+  if (typeof value !== "string") return HERO_PANEL_GLASS.color;
+  if (isHeroPanelColorToken(value)) return value;
+  return HEX_COLOR_PATTERN.test(value)
+    ? (value as HexColor)
+    : HERO_PANEL_GLASS.color;
+}
+
+/**
+ * The alpha of the fill colour — the same scale as {@link readPercentage},
+ * read leniently. `0` and `100` are both legitimate: pure frosting and an
+ * opaque fill.
+ */
+function readPanelOpacity(value: unknown): number {
+  return isPercentage(value) ? value : HERO_PANEL_GLASS.opacity;
+}
+
+/**
+ * The surface behind a Block. `null` when there is none, and a fresh object
+ * every time there is one — never {@link HERO_PANEL_GLASS} itself, which two
+ * Blocks would then share and the Live Preview could hand to an editor.
+ *
+ * Every key falls back to its „Glas“ default, which is what makes `panel: {}`
+ * the preset without a second definition of it. Anything that is not `null`,
+ * an object or one of the two legacy words falls back to `panel`'s own
+ * default, and `panel`'s own default is no Panel — which is why this cannot
+ * read its keys off {@link optionalObject} the way {@link readOffset} does:
+ * there is always an Offset, and there is not always a Panel.
+ */
+function readPanel(value: unknown): HeroPanel | null {
+  if (!isPresent(value)) return null;
+  if (value === "none") return null;
+  if (value === "translucent") return { ...HERO_PANEL_GLASS };
+  if (typeof value !== "object" || Array.isArray(value)) return null;
+
+  const source = value as Record<string, unknown>;
+  return {
+    color: readPanelColor(source.color),
+    opacity: readPanelOpacity(source.opacity),
+    radius: readEnumOrDefault(
+      source.radius,
+      HERO_PANEL_RADII,
+      HERO_PANEL_GLASS.radius,
+    ),
+    blur:
+      typeof source.blur === "boolean" ? source.blur : HERO_PANEL_GLASS.blur,
+  };
+}
+
 function readBlock(value: unknown, path: string): HeroBlock {
   const source = readObject(value, path);
 
@@ -284,7 +426,10 @@ function readBlock(value: unknown, path: string): HeroBlock {
       "none",
     ),
     width: readEnum(source.width, `${path}.width`, HERO_BLOCK_WIDTHS, "auto"),
-    panel: readEnum(source.panel, `${path}.panel`, HERO_BLOCK_PANELS, "none"),
+    align: readEnumOrDefault(source.align, HERO_BLOCK_ALIGNMENTS, "auto"),
+    panel: readPanel(source.panel),
+    offset: readOffset(source.offset),
+    layer: readEnumOrDefault(source.layer, HERO_BLOCK_LAYERS, "back"),
     homeOnly: readBoolean(source.homeOnly, `${path}.homeOnly`, false),
     hideOnMobile: readBoolean(source.hideOnMobile, `${path}.hideOnMobile`, false),
   };
@@ -320,6 +465,7 @@ function readBlock(value: unknown, path: string): HeroBlock {
           `${path}.html`,
           HERO_RICHTEXT_RAW_MAX_LENGTH,
         ),
+        size: readEnumOrDefault(source.size, HERO_TEXT_SIZES, "md"),
         color: readHeroColor(source.color, `${path}.color`),
         shadow: readBoolean(source.shadow, `${path}.shadow`, false),
       };

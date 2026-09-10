@@ -54,10 +54,103 @@ export const HERO_BLOCK_WIDTHS = ["auto", "sm", "md", "lg", "full"] as const;
 
 export type HeroBlockWidth = (typeof HERO_BLOCK_WIDTHS)[number];
 
-/** `translucent` is the glass panel behind a Block. */
-export const HERO_BLOCK_PANELS = ["none", "translucent"] as const;
+/**
+ * How a Block's content sits inside its own box. Only visible when the box is
+ * wider than the content, which means a `width` other than `auto`. `auto`
+ * follows the Zone's column, and centres on mobile, where there are none.
+ */
+export const HERO_BLOCK_ALIGNMENTS = ["auto", "left", "center", "right"] as const;
 
-export type HeroBlockPanel = (typeof HERO_BLOCK_PANELS)[number];
+export type HeroBlockAlignment = (typeof HERO_BLOCK_ALIGNMENTS)[number];
+
+/**
+ * Whether a Block paints in front of or behind the Blocks it overlaps. Among
+ * equals document order decides, as it always has.
+ */
+export const HERO_BLOCK_LAYERS = ["back", "front"] as const;
+
+export type HeroBlockLayer = (typeof HERO_BLOCK_LAYERS)[number];
+
+/**
+ * A Block's displacement from its place in the Zone stack, in rem. It moves
+ * that Block only, never its neighbours: positive `x` moves right, positive
+ * `y` moves **down**.
+ */
+export interface HeroBlockOffset {
+  x: number;
+  y: number;
+}
+
+/** Each axis runs −3…3 rem on the 0.5 grid — thirteen steps. */
+export const HERO_BLOCK_OFFSET_LIMIT = 3;
+
+/**
+ * No displacement, and so the default of every Block's `offset`. Frozen
+ * because it is handed out as a value, not copied: a Block that wants an
+ * Offset builds its own.
+ */
+export const HERO_BLOCK_OFFSET_NONE: Readonly<HeroBlockOffset> = Object.freeze({
+  x: 0,
+  y: 0,
+});
+
+/**
+ * A Panel's named colours. This is deliberately not the text colour list:
+ * `black` is Panel-only vocabulary, and a Panel has no `default` because it
+ * is mode-independent and so has nothing to follow.
+ */
+export const HERO_PANEL_COLOR_TOKENS = [
+  "white",
+  "black",
+  "primary",
+  "secondary",
+] as const;
+
+export type HeroPanelColorToken = (typeof HERO_PANEL_COLOR_TOKENS)[number];
+
+/** A Panel colour: one of the Panel's own tokens, or `#rrggbb`. */
+export type HeroPanelColor = HeroPanelColorToken | HexColor;
+
+/** Corner radius steps, resolved at the theme's current `--ui-radius`. */
+export const HERO_PANEL_RADII = ["none", "sm", "md", "lg", "full"] as const;
+
+export type HeroPanelRadius = (typeof HERO_PANEL_RADII)[number];
+
+/**
+ * The surface a Block paints behind itself. No Panel is `null`, never a
+ * string. `opacity` is a whole percentage of the fill colour alone, so `0`
+ * with `blur: true` is pure frosting and `0` with `blur: false` is invisible —
+ * both are legitimate, neither is an error.
+ *
+ * `panel` carried the two words `"none"` and `"translucent"` before it became
+ * an object. The guards still read them — a backend that has not shipped its
+ * half of this amendment exports them, and a Hero that silently loses its
+ * Panels during a rollout is worse than one that reads both forms — but they
+ * are normalised away to `null` and to „Glas“, so nothing downstream of the
+ * guards ever meets one, and nothing writes them.
+ */
+export interface HeroPanel {
+  color: HeroPanelColor;
+  opacity: number;
+  radius: HeroPanelRadius;
+  blur: boolean;
+}
+
+/**
+ * „Glas“ — the Panel's preset and starting point. The contract defines it as
+ * the default of each of its keys rather than as a separate object, so this
+ * constant is both: the guards read every key with the matching value here as
+ * its fallback, which is what makes `panel: {}` normalise to exactly this.
+ *
+ * Frozen, because a guard hands out a copy of it and never it — a preset one
+ * Block could edit would be every other Block's preset too.
+ */
+export const HERO_PANEL_GLASS: Readonly<HeroPanel> = Object.freeze({
+  color: "white",
+  opacity: 60,
+  radius: "md",
+  blur: true,
+});
 
 export const HERO_BLOCK_TYPES = ["text", "richtext", "image"] as const;
 
@@ -146,7 +239,11 @@ export interface HeroBlockBase {
   outerSpacing: HeroSpacing;
   innerSpacing: HeroSpacing;
   width: HeroBlockWidth;
-  panel: HeroBlockPanel;
+  align: HeroBlockAlignment;
+  /** The surface behind the Block, or `null` for no Panel. */
+  panel: HeroPanel | null;
+  offset: HeroBlockOffset;
+  layer: HeroBlockLayer;
   /** Hidden in the Compact Hero. Combinable with `hideOnMobile`. */
   homeOnly: boolean;
   hideOnMobile: boolean;
@@ -163,12 +260,14 @@ export interface HeroTextBlock extends HeroBlockBase {
 }
 
 /**
- * Body copy. There is no `size`: headlines are `text` Blocks, so the rich-text
- * allowlist can stay free of headings.
+ * Body copy. Headlines are still `text` Blocks, so the rich-text allowlist can
+ * stay free of headings; `size` and `color` are what a run of words inherits
+ * when it carries no `hero-size-*` or `hero-color-*` class of its own.
  */
 export interface HeroRichtextBlock extends HeroBlockBase {
   type: "richtext";
   html: LocalizedString;
+  size: HeroTextSize;
   color: HeroColor;
   shadow: boolean;
 }
