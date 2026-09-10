@@ -33,34 +33,6 @@ const nameColor = computed(() => {
   }
 });
 
-const items = computed(() => {
-  return [
-    [
-      {
-        label: "Buchungen",
-        icon: "i-lucide-book-marked",
-        onSelect: () => goTo("/account/bookings"),
-      },
-      {
-        label: "Digitale Schlüssel",
-        icon: "i-lucide-key-round",
-        onSelect: () => goTo("/mobile-key"),
-      },
-      {
-        label: "Rechnungen",
-        icon: "i-lucide-wallet-cards",
-        onSelect: () => goTo("/account/invoices"),
-        disabled: true,
-      },
-      {
-        label: "Favoriten",
-        icon: "i-lucide-book-heart",
-        onSelect: () => goTo("/account/favorites"),
-        disabled: true,
-      },
-    ],
-  ];
-});
 function goTo(targetString) {
   const router = useRouter();
   const tenantTargetString = tenantTo(targetString);

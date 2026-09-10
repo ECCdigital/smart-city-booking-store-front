@@ -13,7 +13,7 @@
   />
 </template>
 <script setup>
-const props = defineProps({
+defineProps({
   denyAccess: {
     type: Boolean,
     default: false,

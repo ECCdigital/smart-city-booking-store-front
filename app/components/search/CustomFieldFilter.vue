@@ -77,8 +77,6 @@ function defaultFor(type, meta) {
 const localValue = ref(
   props.modelValue ?? defaultFor(props.filterType, props.meta),
 );
-const numberOfVisibleOptions = ref(5)
-
 watch(
   () => props.modelValue,
   (v) => {

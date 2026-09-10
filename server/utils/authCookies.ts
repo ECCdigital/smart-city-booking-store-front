@@ -3,6 +3,8 @@
  * (`bff/src/cookieContract.js` / `bff/src/cookies.js`).
  */
 
+import type { H3Event } from "h3";
+
 const SECURE = process.env.NODE_ENV === "production";
 
 export function authCookieOptions(maxAge: number, httpOnly = true) {
@@ -16,7 +18,7 @@ export function authCookieOptions(maxAge: number, httpOnly = true) {
 }
 
 /** Clear with the same path/sameSite/secure used when setting — required across apps. */
-export function clearAuthCookies(event: any) {
+export function clearAuthCookies(event: H3Event) {
   const base = {
     path: "/",
     sameSite: "lax" as const,

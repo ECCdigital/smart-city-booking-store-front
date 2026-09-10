@@ -16,12 +16,14 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ### Fixed
 
+- `cardSignup()` threw a `ReferenceError` when called without a payload: its default argument was built from seven identifiers that do not exist. The one caller always passes a payload, so no user ever reached it
 - The emergency-help accordion on the booking detail page renders again — it had been calling `useEmergencyHelp` with a signature that no longer existed; it now reads the booking's compartments from `accessInfo` (backend 4.3) and shows the provider contact from the tenant projection together with the compartment's booking id. The page's `lockerSystem === "ifbs"` check moved into `decideEmergencyHelp`; `lockerInfo` is no longer read
 - A media URL is recognized by its path no matter whether it arrives relative or absolute: the backend's embed interface (`/json/...`) exports absolute media URLs now, which fell through the relative-only check — those images silently loaded the full-size original without any `?size=` preset
 - Form fields on phones (below the `sm` breakpoint) use at least 16px font-size so iOS Safari no longer zooms into a focused field and leaves the page zoomed in
 
 ### Changed
 
+- The repository lints clean: the 114 ESLint errors that predate this change are fixed rather than silenced. Every `any` gave way to the shape the code around it actually reads — the auth routes share one `UpstreamError` view of a rejected `$fetch`, the card auth method moved to `shared/types`, and the catalog search names its item, its wrapper and its custom fields. Dead code, orphaned imports and one empty component are gone, and JavaScript files now honour the same leading-underscore convention for a deliberately unused binding that TypeScript files already did
 - The provider's emergency contact (`ProviderHelpSection`) comes from the public tenant projection (`GET /api/tenants/public` → `accessApps[].customerService`, backend 4.3) instead of the removed `/locker/:provider/customer-service-info`; the key list loads the tenants on its own, so tenant contacts are there on a direct visit too
 - The open button is offered only at access points the backend names remote-operable (`accessEligibility.remoteOperableAccessPointIds`, backend 4.3); a door that only takes a code is refused in the client with `no_remote_access` before the tap, in the key list, the panel and on the scan page alike
 - Access points in `authorization` and `both` mode carry a badge of their own ("Code an der Tür", "Per Knopf oder Code") instead of "Unbekannter Modus"

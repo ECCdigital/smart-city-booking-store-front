@@ -55,7 +55,6 @@
 <script setup>
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
-import { useTenantStore } from "~~/stores/tenant.js";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 
 const props = defineProps({

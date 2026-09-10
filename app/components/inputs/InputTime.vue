@@ -47,8 +47,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useCalendarDateField } from "~/composables/useCalendarDateField.js";
-import { readTimeFromTimeFieldRoot } from "~/utils/localDate.js";
 import PeriodField from "~/components/inputs/PeriodField.vue";
 
 const dateModel = defineModel("date", { type: Date, default: null });
@@ -57,7 +55,7 @@ const timeModel = defineModel("time", {
   default: { hours: null, minutes: null },
 });
 
-const props = defineProps({
+defineProps({
   disabled: {
     type: Boolean,
     default: false,
@@ -110,17 +108,6 @@ const timeInput = computed(() => {
   const mm = String(timeModel.value.minutes).padStart(2, "0");
   return `${hh}:${mm}`;
 });
-function isCompleteTime(t) {
-  return (
-    t != null &&
-    Number.isInteger(t.hours) &&
-    Number.isInteger(t.minutes) &&
-    t.hours >= 0 &&
-    t.hours <= 23 &&
-    t.minutes >= 0 &&
-    t.minutes <= 59
-  );
-}
 function onTimeInputChange(event: Event) {
   const v = event.target.value; // "HH:mm" oder ""
   if (!v) {

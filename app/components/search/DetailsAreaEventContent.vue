@@ -146,7 +146,6 @@
   </div>
 </template>
 <script setup>
-import { useTenantStore } from "~~/stores/tenant.js";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import EventInfoDisplay from "~/components/events/EventInfoDisplay.vue";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";

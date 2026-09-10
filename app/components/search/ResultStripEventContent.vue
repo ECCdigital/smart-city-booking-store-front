@@ -73,7 +73,6 @@ import EventPriceDisplay from "~/components/events/EventPriceDisplay.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import EventAdressInformation from "~/components/events/EventAdressInformation.vue";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
-import { useTenantStore } from "~~/stores/tenant.js";
 import EventBookingButton from "~/components/events/EventBookingButton.vue";
 
 const props = defineProps({

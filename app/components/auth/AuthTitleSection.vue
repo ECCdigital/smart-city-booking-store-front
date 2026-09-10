@@ -37,7 +37,7 @@
 import { useHeroConfig } from "~/composables/useHeroConfig.ts";
 import { computed } from "vue";
 
-const props = defineProps({
+defineProps({
   isLargeVersion: {
     type: Boolean,
     default: false,

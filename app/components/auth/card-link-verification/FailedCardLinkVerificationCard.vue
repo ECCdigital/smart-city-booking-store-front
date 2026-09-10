@@ -15,7 +15,7 @@ const errorMessages = {
   default: t("cardLinkVerification.error.default"),
 };
 
-const emit = defineEmits(["backToLogin"]);
+defineEmits(["backToLogin"]);
 </script>
 
 <template>

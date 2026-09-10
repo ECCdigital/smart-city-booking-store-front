@@ -11,7 +11,7 @@
 <script setup>
 import BookableRelatedItems from "~/components/bookables/BookableRelatedItems.vue";
 
-const props = defineProps({
+defineProps({
   item: {
     type: Object,
     required: true,

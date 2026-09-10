@@ -1,3 +1,16 @@
+import type { UpstreamError } from "~~/server/utils/upstreamError";
+
+/** Card sign-in answers with one of two shapes, told apart by the flag. */
+type CardSigninResponse =
+  | { requiresRegistration: true; prefill?: unknown; cardInfo?: unknown }
+  | {
+      requiresRegistration?: false;
+      accessToken: string;
+      refreshToken: string;
+      user?: unknown;
+      permissions?: unknown;
+    };
+
 export default defineEventHandler(async (event) => {
     const { appId, publicId, secret } = await readBody(event);
     const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
@@ -10,7 +23,7 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        const response = await $fetch<any>(`${API_BASE_URL}/auth/card/signin`, {
+        const response = await $fetch<CardSigninResponse>(`${API_BASE_URL}/auth/card/signin`, {
             method: "POST",
             body: { appId, publicId, secret },
         });
@@ -52,7 +65,8 @@ export default defineEventHandler(async (event) => {
                 permissions,
             },
         };
-    } catch (error: any) {
+    } catch (err) {
+        const error = err as UpstreamError;
         throw createError({
             statusCode: error.response?.status || 500,
             statusMessage:

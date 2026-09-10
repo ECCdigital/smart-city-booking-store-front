@@ -58,7 +58,6 @@
 </template>
 <script setup>
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
-import { useTenantStore } from "~~/stores/tenant.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import EventAdressInformation from "~/components/events/EventAdressInformation.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";

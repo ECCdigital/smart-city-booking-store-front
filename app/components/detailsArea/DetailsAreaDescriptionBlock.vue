@@ -48,8 +48,10 @@ const props = defineProps({
   },
 });
 
-const { htmlDescription, belowDescriptionFields, customFieldValueText } =
-  useBookableDetailContent(() => props.item, props.isEvent);
+const { htmlDescription } = useBookableDetailContent(
+  () => props.item,
+  props.isEvent,
+);
 
 const showFullDescription = ref(false);
 </script>
