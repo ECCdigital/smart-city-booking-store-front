@@ -52,17 +52,7 @@ export const useAuth = () => {
     return response.data;
   };
 
-  const cardSignup = async (
-    payload = {
-      appId,
-      publicId,
-      secret,
-      email,
-      firstName,
-      lastName,
-      company,
-    }
-  ) => {
+  const cardSignup = async (payload) => {
     const response = await $fetch("/api/auth/card/signup", {
       method: "POST",
       body: payload,

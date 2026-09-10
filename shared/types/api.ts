@@ -119,3 +119,25 @@ export interface BlockPeriodsResponse {
   title: string;
   blockPeriods: BlockPeriodInstance[];
 }
+
+/** One input of a card auth method, as the backend labels it. */
+export interface CardField {
+  label?: string;
+  placeholder?: string;
+  helpText?: string;
+}
+
+/** A card auth method offered by the instance, from `/auth/card-methods`. */
+export interface CardMethod {
+  id: string;
+  label?: string;
+  description?: string;
+  publicIdField: CardField;
+  secretField: CardField;
+}
+
+/** What the backend returns for a signed-in session. */
+export interface SsoSigninResponse {
+  user?: unknown;
+  permissions?: unknown;
+}

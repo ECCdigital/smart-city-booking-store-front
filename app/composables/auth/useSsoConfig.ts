@@ -5,7 +5,8 @@ export function useSsoConfig() {
 
     const ssoEnabled = computed(() => {
         return !!instanceStore.instance?.applications?.find(
-            (app: any) => app.id === "keycloak" && app.active
+            (app: { id?: string; active?: boolean }) =>
+                app.id === "keycloak" && app.active
         );
     });
 

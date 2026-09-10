@@ -1,3 +1,5 @@
+import type { UpstreamError } from "~~/server/utils/upstreamError";
+
 export default defineEventHandler(async (event) => {
     const { token, id } = await readBody(event);
     const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
@@ -6,7 +8,7 @@ export default defineEventHandler(async (event) => {
     const sanitizedId = String(id).trim().toLowerCase();
 
     try {
-        const response = await $fetch<any>(`${API_BASE_URL}/auth/card/link`, {
+        const response = await $fetch<unknown>(`${API_BASE_URL}/auth/card/link`, {
             method: "POST",
             body: {
                 token: sanitizedToken,
@@ -18,7 +20,8 @@ export default defineEventHandler(async (event) => {
             success: true,
             data: response,
         };
-    } catch (error: any) {
+    } catch (err) {
+        const error = err as UpstreamError;
         console.error("Error verifying card:", error);
         throw createError({
             success: false,

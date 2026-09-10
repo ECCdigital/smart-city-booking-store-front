@@ -58,16 +58,5 @@ usePageTitle(() => {
     : t("meta.pages.accountBookingDetail");
 });
 
-const currentTime = ref(new Date().getTime());
-const isActive = computed(() => {
-  if (booking.value.timeBegin && booking.value.timeEnd) {
-    return (
-      currentTime.value >= booking.value.timeBegin &&
-      currentTime.value <= booking.value.timeEnd
-    );
-  }
-
-  return false;
-});
 </script>
 <style scoped></style>

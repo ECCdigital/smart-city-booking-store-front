@@ -1,9 +1,12 @@
 import AuthService from "~~/server/service/AuthService.js";
+import type { H3Event } from "h3";
 import {
   getKeycloakConfig,
   getKeycloakEndpoints,
 } from "~~/server/utils/keycloak";
+import type { KeycloakTokenResponse } from "~~/server/utils/keycloak";
 import { clearAuthCookies } from "~~/server/utils/authCookies";
+import type { UpstreamError } from "~~/server/utils/upstreamError";
 
 export default defineEventHandler(async (event) => {
   const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
@@ -34,7 +37,8 @@ export default defineEventHandler(async (event) => {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     return { success: true, data: response };
-  } catch (error: any) {
+  } catch (err) {
+    const error = err as UpstreamError;
     if (error.response?.status !== 401 || !refreshToken) {
       throw createError({
         statusCode: error.response?.status || 500,
@@ -72,7 +76,7 @@ export default defineEventHandler(async (event) => {
 });
 
 async function renewAccessToken(
-  event: any,
+  event: H3Event,
   refreshToken: string,
   authType: string | undefined
 ): Promise<string | null> {
@@ -84,14 +88,14 @@ async function renewAccessToken(
 }
 
 async function refreshKeycloakToken(
-  event: any,
+  event: H3Event,
   refreshToken: string
 ): Promise<string | null> {
   try {
     const config = await getKeycloakConfig();
     const endpoints = getKeycloakEndpoints(config.serverUrl, config.realm);
 
-    const response: any = await $fetch(endpoints.token, {
+    const response = await $fetch<KeycloakTokenResponse>(endpoints.token, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({

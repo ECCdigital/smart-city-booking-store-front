@@ -170,7 +170,7 @@ const colorMode = useColorMode();
 const currentTheme = ref(props.theme || "light");
 const isMounted = ref(false);
 
-const theme = computed(() => {
+const detectedTheme = computed(() => {
   if (colorMode.value === "dark") return "dark";
   if (colorMode.value === "light") return "light";
   return "light";
@@ -187,7 +187,7 @@ watch(
   () => colorMode.value,
   () => {
     if (!props.theme) {
-      currentTheme.value = theme.value;
+      currentTheme.value = detectedTheme.value;
     }
   }
 );

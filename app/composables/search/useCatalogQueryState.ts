@@ -1,6 +1,9 @@
 import { computed, reactive, watch } from "vue";
 import { useRoute, useRouter } from "#imports";
-import type { CatalogQueryState } from "~/types/catalogParams";
+import type {
+  CatalogQueryState,
+  CustomFieldValue,
+} from "~/types/catalogParams";
 
 function parseNumberOrNull(v: unknown): number | null {
   if (v === undefined || v === null || v === "") return null;
@@ -10,7 +13,7 @@ function parseNumberOrNull(v: unknown): number | null {
 
 const CF_PREFIX = "cf_";
 
-function parseCustomFieldValue(raw: string): any {
+function parseCustomFieldValue(raw: string): CustomFieldValue {
   if (raw === "true") return true;
   if (raw === "false") return false;
 
@@ -31,7 +34,7 @@ function parseCustomFieldValue(raw: string): any {
   return decodeURIComponent(raw);
 }
 
-function serializeCustomFieldValue(value: any): string | null {
+function serializeCustomFieldValue(value: unknown): string | null {
   if (value === undefined || value === null) return null;
   if (typeof value === "boolean") return value ? "true" : "false";
   if (typeof value === "number") return String(value);
@@ -57,7 +60,7 @@ export function useCatalogQueryState() {
   const router = useRouter();
 
   const extractCustomFields = () => {
-    const initialCustomFields: Record<string, any> = {};
+    const initialCustomFields: Record<string, CustomFieldValue> = {};
     for (const [key, value] of Object.entries(route.query)) {
       if (!key.startsWith(CF_PREFIX) || typeof value !== "string") continue;
       const fieldId = key.slice(CF_PREFIX.length);
@@ -104,7 +107,7 @@ export function useCatalogQueryState() {
     viewMode: (route.query.view as string) || "list",
   });
 
-  const initialCustomFields: Record<string, any> = {};
+  const initialCustomFields: Record<string, CustomFieldValue> = {};
   for (const [key, value] of Object.entries(route.query)) {
     if (!key.startsWith(CF_PREFIX) || typeof value !== "string") continue;
     const fieldId = key.slice(CF_PREFIX.length);

@@ -52,7 +52,7 @@ const handleConfirm = async () => {
     pendingRedirect.value = null;
 
     await navigateTo(redirect);
-  } catch (err) {
+  } catch {
     notification.error(
       t("notifications.loginError.message"),
       t("notifications.loginError.title")

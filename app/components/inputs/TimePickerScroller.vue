@@ -79,7 +79,6 @@ const props = defineProps({
 });
 const emit = defineEmits(["updateHour", "updateMinute"]);
 const ITEM_HEIGHT = 28;
-const VISIBLE_ITEMS = 5;
 const LOOP_COPIES = 7;
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];

@@ -1,3 +1,5 @@
+import type { UpstreamError } from "~~/server/utils/upstreamError";
+
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
     const { apiBaseUrl: API_BASE_URL, userBaseUrl: USER_BASE_URL } =
@@ -24,7 +26,7 @@ export default defineEventHandler(async (event) => {
     const sanitizedEmail = String(email).trim().toLowerCase();
 
     try {
-        const response = await $fetch<any>(`${API_BASE_URL}/auth/card/signup`, {
+        const response = await $fetch<{ status?: string }>(`${API_BASE_URL}/auth/card/signup`, {
             method: "POST",
             body: {
                 appId,
@@ -44,7 +46,8 @@ export default defineEventHandler(async (event) => {
             success: true,
             data: response,
         };
-    } catch (error: any) {
+    } catch (err) {
+        const error = err as UpstreamError;
         throw createError({
             statusCode: error.status || 500,
             statusMessage:
