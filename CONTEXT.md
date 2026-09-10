@@ -22,6 +22,18 @@ _Avoid_: Box, element, widget, component
 One of the nine anchor positions of the Hero (top/middle/bottom × left/centre/right) a Block is placed in. Blocks sharing a Zone stack in a defined order.
 _Avoid_: Slot, cell, position, area
 
+**Panel** (admin label: „Fläche hinter dem Block“):
+The surface a Block paints behind its own content: a colour at an opacity, a corner radius and an optional frosting of whatever lies behind it. Mode-independent — the same in light and dark, which is why plain copy on one is black in both. A Block without one carries no Panel at all, never a word for one. Its preset, „Glas“, is simply the default of each of those four settings. Not to be confused with the **panel pages** below, which are a page arrangement and not a surface.
+_Avoid_: Card, box, background, glass
+
+**Offset** (admin label: „Versatz“):
+A Block's displacement from where its Zone's stack placed it, in rem steps on either axis. It moves that one Block and never its neighbours, and the Compact Hero applies it as the author wrote it rather than scaling it down.
+_Avoid_: Margin, shift, nudge, indent
+
+**Layer** (admin label: „Im Vordergrund“):
+Whether a Block paints in front of or behind the Blocks it overlaps — in every Zone, not only its own.
+_Avoid_: Z-index, stacking, depth, elevation
+
 **Background**:
 What the Hero paints behind its Blocks: one of a built-in Variant, a solid colour, or an image from the Media Library.
 _Avoid_: Backdrop, theme background
@@ -29,6 +41,14 @@ _Avoid_: Backdrop, theme background
 **Variant**:
 One of the built-in generated backgrounds (`mesh`, `aurora`, `poly`, `grid`, `minimal`).
 _Avoid_: Pattern, preset, style
+
+**Class vocabulary**:
+The fixed list of `hero-*` classes, and the one colour attribute, that the markup of a rich-text Block may carry: a size, a colour, an alignment. Nothing outside the list is part of the contract, wherever the markup came from.
+_Avoid_: Allowed classes, whitelist, markup styles
+
+**Class pass**:
+The second of the two steps that sanitise rich text: the walk over the markup that enforces the Class vocabulary, run after the allowlist step has dropped every tag and attribute that is not allowed. "Sanitising" means both steps, and both run when a layout is saved and again when it is rendered.
+_Avoid_: Filter, cleanup, post-processing
 
 ### Branding
 

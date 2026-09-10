@@ -14,6 +14,7 @@ import {
 
 import defaultHeroLayout from "./fixtures/hero-layout/default-hero-layout.json";
 import crowdedHeroLayout from "./fixtures/hero-layout/crowded-hero-layout.json";
+import acceptanceHeroLayout from "./fixtures/hero-layout/acceptance-hero-layout.json";
 import backgroundVariant from "./fixtures/hero-layout/background-variant.json";
 import backgroundColor from "./fixtures/hero-layout/background-color.json";
 import backgroundImage from "./fixtures/hero-layout/background-image.json";
@@ -37,24 +38,50 @@ function textBlock(id: string) {
   return { id, type: "text", zone: "top-left", text: { de: "Eins" } };
 }
 
-describe("parseHeroLayout", () => {
-  it("accepts the Default Hero Layout, filling what the amendment added", () => {
-    // The fixtures are still in the shape the backend exported before the
-    // Panel became an object — `panel: "none"`, no `align`, `offset` or
-    // `layer`. That they parse at all is the rollout guarantee: an instance
-    // whose backend has not shipped its half of the amendment keeps its Hero.
-    const layout = parseHeroLayout(defaultHeroLayout);
+/**
+ * A fixture as the backend exported it before the amendment: `panel` back to
+ * one of the two words it used to be, and the four fields the amendment added
+ * taken away again. Only the two layouts whose Panels are „Glas“ or none can
+ * be written this way — the legacy words say nothing else.
+ */
+function asLegacyExport(layout: object) {
+  const legacy = structuredClone(layout) as {
+    blocks: Record<string, unknown>[];
+  };
 
-    expect(layout).toEqual({
-      ...defaultHeroLayout,
-      blocks: defaultHeroLayout.blocks.map((block) => ({
-        ...block,
-        align: "auto",
-        panel: null,
-        offset: { x: 0, y: 0 },
-        layer: "back",
-      })),
-    });
+  for (const block of legacy.blocks) {
+    block.panel = block.panel ? "translucent" : "none";
+    delete block.align;
+    delete block.offset;
+    delete block.layer;
+    if (block.type === "richtext") delete block.size;
+  }
+  return legacy;
+}
+
+describe("parseHeroLayout", () => {
+  it("accepts the Default Hero Layout unchanged", () => {
+    expect(parseHeroLayout(defaultHeroLayout)).toEqual(defaultHeroLayout);
+  });
+
+  it("accepts the acceptance fixture unchanged, every added field with it", () => {
+    // The amendment's own acceptance case, and the reason it is a fixture:
+    // every field the amendment adds appears in it at least once, so parsing
+    // it back unchanged is the whole of the addition round-tripping.
+    expect(parseHeroLayout(acceptanceHeroLayout)).toEqual(acceptanceHeroLayout);
+  });
+
+  it("reads the legacy shape of those layouts into the very same thing", () => {
+    // The fixtures carry the amendment's shape, so parsing them no longer
+    // says anything about the shape the export had before it. That shape has
+    // to stay covered: an instance whose backend has not shipped its half of
+    // the amendment still sends exactly this, and a Hero that silently loses
+    // its Panels during a rollout is worse than one that reads both forms.
+    for (const layout of [defaultHeroLayout, crowdedHeroLayout]) {
+      expect(parseHeroLayout(asLegacyExport(layout))).toEqual(
+        parseHeroLayout(layout),
+      );
+    }
   });
 
   it("accepts the crowded layout with all three Block types", () => {

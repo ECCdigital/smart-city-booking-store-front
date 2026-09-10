@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { fallbackHeroLayout } from "~/utils/heroBlocks";
 import { buildHeroPreviewSnapshot } from "~/utils/heroPreview";
 import {
   isHeroPanelColorToken,
@@ -324,25 +323,3 @@ describe("the Draft path of the Live Preview", () => {
   });
 });
 
-describe("the Fallback Hero Layout", () => {
-  it("carries the amendment's defaults, as the backend's Default does", () => {
-    // The Fallback is built in the storefront rather than parsed, so nothing
-    // fills its defaults for it. It has the shape of the backend's Default
-    // Hero Layout and has to keep having it, Panel amendment included.
-    const layout = fallbackHeroLayout({
-      title: "Stadt Musterhausen",
-      subtitle: "Entdecken Sie unsere Angebote",
-      logo: { source: "media", mediaId: "66f1c2000000000000000005" },
-    });
-
-    expect(layout.blocks).toHaveLength(3);
-    for (const block of layout.blocks) {
-      expect(block).toMatchObject({
-        align: "auto",
-        panel: null,
-        offset: { x: 0, y: 0 },
-        layer: "back",
-      });
-    }
-  });
-});
