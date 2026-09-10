@@ -482,27 +482,55 @@ export function textBlockClasses(block: HeroTextBlock, mode: HeroMode): string[]
 export const RICHTEXT_CLASS = "hero-richtext";
 
 /**
- * The step rich text renders at. A rich-text Block now carries a `size` of
- * its own, but nothing paints it yet, so every Block still renders body copy
- * at the default step — as it did when there was no field to read.
+ * The Compact Hero, said in the one language the stylesheet understands.
+ *
+ * A `hero-size-*` run has to step down with the Hero, exactly as the Block's
+ * own size does, and the mode is a component prop — nothing CSS can read. So
+ * the root carries it as a class and the compact size rules select on it.
  */
-const RICHTEXT_SIZE: HeroTextSize = "md";
+export const RICHTEXT_COMPACT_CLASS = "hero-compact";
 
 /**
- * The classes a rich-text Block's root carries: the stylesheet hook, the
- * body-copy step for the mode — one step down in the Compact Hero, like
- * every text — a named colour and the shadow. Colour and shadow inherit into
- * the markup, so a link or a list item is painted like the copy around it.
+ * A Panel under the copy, said the same way and for the same reason.
+ *
+ * {@link copyClasses} settles this for the Block's own colour by reading its
+ * Panel, and a `hero-color-default` run inside the markup needs the same
+ * answer: black in both modes, because a Panel does not flip. Nothing in the
+ * markup knows it sits on a surface, so the root says so.
+ *
+ * Two hooks rather than one, because they answer two independent questions —
+ * a compact Hero may or may not have a Panel — and a single hook would have
+ * to spell all four combinations. They live on the rich-text root rather than
+ * on the Block's box ({@link blockBoxClasses}) because rendered rich text is
+ * the only thing that reads them: a text Block's own copy takes both facts as
+ * ordinary classes, having no markup of its own.
+ */
+export const RICHTEXT_PANEL_CLASS = "hero-on-panel";
+
+/**
+ * The classes a rich-text Block's root carries: the stylesheet hook, its own
+ * step for the mode — one step down in the Compact Hero, like every text — a
+ * named colour and the shadow. Size, colour and shadow inherit into the
+ * markup, so a link or a list item is painted like the copy around it, and a
+ * run of words that names a step or a colour of its own overrides what it
+ * inherited (`.hero-richtext` in `main.css`).
+ *
+ * The two hooks those rules select on come last, with the rest of what a
+ * Block only sometimes wears. Nothing reads the order — a class attribute is
+ * a set — so the tests pin it merely to keep the list readable.
  */
 export function richtextBlockClasses(
   block: HeroRichtextBlock,
   mode: HeroMode,
 ): string[] {
-  return [
+  const classes = [
     RICHTEXT_CLASS,
-    HERO_TEXT_SIZE_CLASSES[mode][RICHTEXT_SIZE],
+    HERO_TEXT_SIZE_CLASSES[mode][block.size],
     ...copyClasses(block),
   ];
+  if (mode === "compact") classes.push(RICHTEXT_COMPACT_CLASS);
+  if (block.panel) classes.push(RICHTEXT_PANEL_CLASS);
+  return classes;
 }
 
 /** The inline style of a text or rich-text Block: its hex colour, or nothing at all. */

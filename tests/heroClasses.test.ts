@@ -26,6 +26,8 @@ import {
   imageClasses,
   imageStyle,
   RICHTEXT_CLASS,
+  RICHTEXT_COMPACT_CLASS,
+  RICHTEXT_PANEL_CLASS,
   richtextBlockClasses,
   textBlockClasses,
 } from "~/components/hero/heroClasses";
@@ -54,9 +56,28 @@ import {
 } from "~~/shared/types/hero";
 
 import { parseHeroLayout } from "~~/shared/utils/heroLayout";
+import { HERO_RICHTEXT_CLASSES } from "~~/shared/utils/heroRichtextAllowlist";
 
 import crowdedHeroLayout from "./fixtures/hero-layout/crowded-hero-layout.json";
 import defaultHeroLayout from "./fixtures/hero-layout/default-hero-layout.json";
+
+/** The stylesheet the Hero's rich text is painted by, read once. */
+const STYLESHEET = readFileSync("app/assets/css/main.css", "utf8");
+
+/**
+ * What one rule of {@link STYLESHEET} applies, as the stylesheet spells it:
+ * the utility classes of its `@apply`, or nothing when it has no such rule.
+ *
+ * The vocabulary of rendered rich text is painted by rules rather than by
+ * classes on an element — no utility class reaches inside `v-html` — so this
+ * is the only place the Hero's tables can be checked against what the page
+ * will actually do with them.
+ */
+function appliedBy(selector: string): string | undefined {
+  const escaped = selector.replaceAll(".", String.raw`\.`);
+  const rule = new RegExp(String.raw`^${escaped} \{\n\s*@apply ([^;]+);`, "m");
+  return rule.exec(STYLESHEET)?.[1];
+}
 
 /** A Tailwind class list is a literal: no template holes, no empty tokens. */
 function isClassLiteral(value: string): boolean {
@@ -553,12 +574,15 @@ describe("a rich-text Block", () => {
     (block) => block.type === "richtext",
   ) as HeroRichtextBlock;
 
-  it("is body copy: the hook for the stylesheet rule, the md step for the mode, its colour and shadow", () => {
+  it("wears the stylesheet hooks, its step for the mode, its colour and shadow", () => {
+    // The fixture Block stores no `size`, so the guard's `md` is its step,
+    // and its `"translucent"` normalised into a Panel — hence the hook.
     expect(richtextBlockClasses(openingHours, "home")).toEqual([
       RICHTEXT_CLASS,
       HERO_TEXT_SIZE_CLASSES.home.md,
       "text-white",
       "[text-shadow:0_1px_3px_rgba(0,0,0,0.6)]",
+      RICHTEXT_PANEL_CLASS,
     ]);
     expect(blockColorStyle(openingHours)).toBeUndefined();
   });
@@ -569,6 +593,40 @@ describe("a rich-text Block", () => {
     );
   });
 
+  it("renders at its own step of the scale, at every step and in both Heroes", () => {
+    for (const size of HERO_TEXT_SIZES) {
+      const stepped: HeroRichtextBlock = { ...openingHours, size };
+      expect(richtextBlockClasses(stepped, "home")).toContain(
+        HERO_TEXT_SIZE_CLASSES.home[size],
+      );
+      expect(richtextBlockClasses(stepped, "compact")).toContain(
+        HERO_TEXT_SIZE_CLASSES.compact[size],
+      );
+    }
+  });
+
+  it("marks the Compact Hero on its root, which the stylesheet cannot see", () => {
+    // The mode is a component prop, and a `hero-size-*` run inside `v-html`
+    // has to step down with it: the hook is how the rule reaches the mode.
+    expect(richtextBlockClasses(openingHours, "compact")).toContain(
+      RICHTEXT_COMPACT_CLASS,
+    );
+    expect(richtextBlockClasses(openingHours, "home")).not.toContain(
+      RICHTEXT_COMPACT_CLASS,
+    );
+  });
+
+  it("marks its Panel on its root, so a `default` run goes black on it too", () => {
+    // `copyClasses` decides this for the Block's own copy by reading its
+    // Panel; a `hero-color-default` run inside `v-html` is out of its reach,
+    // and the hook is what carries the same fact to the stylesheet.
+    const onPanel: HeroRichtextBlock = { ...openingHours, panel: HERO_PANEL_GLASS };
+    expect(richtextBlockClasses(onPanel, "home")).toContain(RICHTEXT_PANEL_CLASS);
+
+    const bare: HeroRichtextBlock = { ...openingHours, panel: null };
+    expect(richtextBlockClasses(bare, "home")).not.toContain(RICHTEXT_PANEL_CLASS);
+  });
+
   it("renders a hex colour inline and no shadow unless asked", () => {
     const plain: HeroRichtextBlock = {
       ...openingHours,
@@ -577,7 +635,11 @@ describe("a rich-text Block", () => {
     };
 
     const classes = richtextBlockClasses(plain, "home");
-    expect(classes).toEqual([RICHTEXT_CLASS, HERO_TEXT_SIZE_CLASSES.home.md]);
+    expect(classes).toEqual([
+      RICHTEXT_CLASS,
+      HERO_TEXT_SIZE_CLASSES.home.md,
+      RICHTEXT_PANEL_CLASS,
+    ]);
     expect(blockColorStyle(plain)).toEqual({ color: "#1d4ed8" });
   });
 
@@ -601,14 +663,75 @@ describe("a rich-text Block", () => {
     );
   });
 
+  it("paints the six size steps of the vocabulary at the values a text Block uses", () => {
+    // The one rule of this ticket that cannot be a class: the run is inside
+    // `v-html`. `@apply` keeps the Tailwind classes of the table the single
+    // source of truth, and this test is what pins the two together — the
+    // stylesheet, the class vocabulary the sanitiser lets through and the
+    // size table have to name the same six steps and the same values.
+    for (const size of HERO_TEXT_SIZES) {
+      const mark = `hero-size-${size}`;
+      expect(HERO_RICHTEXT_CLASSES.size).toContain(mark);
+
+      expect(appliedBy(`.${RICHTEXT_CLASS} span.${mark}`)).toBe(
+        HERO_TEXT_SIZE_CLASSES.home[size],
+      );
+      expect(
+        appliedBy(`.${RICHTEXT_CLASS}.${RICHTEXT_COMPACT_CLASS} span.${mark}`),
+      ).toBe(HERO_TEXT_SIZE_CLASSES.compact[size]);
+    }
+  });
+
+  it("paints the four colour tokens of the vocabulary, `default` black on a Panel", () => {
+    for (const token of HERO_COLOR_TOKENS) {
+      const mark = `hero-color-${token}`;
+      expect(HERO_RICHTEXT_CLASSES.color).toContain(mark);
+      expect(appliedBy(`.${RICHTEXT_CLASS} span.${mark}`)).toBe(
+        HERO_COLOR_CLASSES[token],
+      );
+    }
+
+    // A Panel does not flip with the colour mode, so the copy on it cannot
+    // either — the same black `copyClasses` gives the Block's own `default`.
+    const onPanel: HeroRichtextBlock = {
+      ...openingHours,
+      color: "default",
+      panel: HERO_PANEL_GLASS,
+    };
+    expect(
+      appliedBy(`.${RICHTEXT_CLASS}.${RICHTEXT_PANEL_CLASS} span.hero-color-default`),
+    ).toBe("text-black");
+    expect(richtextBlockClasses(onPanel, "home")).toContain("text-black");
+
+    // `data-color` is already a `style` on its own span, which beats every
+    // rule in the stylesheet; a rule that selected the attribute could only
+    // fight it, so there is none.
+    expect(STYLESHEET).not.toMatch(/\[data-color/);
+  });
+
+  it("lets a paragraph's own alignment override the Block's", () => {
+    for (const align of ["left", "center", "right"] as const) {
+      // The Block declares its `align` on its box, so the paragraph inherits
+      // it; the paragraph rule has to name the very same alignment to be an
+      // override of it rather than a second opinion about it.
+      const [blockAlign] = blockBoxClasses({
+        ...openingHours,
+        align,
+      }).filter((entry) => entry.startsWith("text-"));
+
+      expect(HERO_RICHTEXT_CLASSES.align).toContain(`hero-align-${align}`);
+      expect(appliedBy(`.${RICHTEXT_CLASS} p.hero-align-${align}`)).toBe(
+        blockAlign,
+      );
+    }
+  });
+
   it("puts the typography of the allowed tags in one stylesheet rule, not in classes", () => {
     // The markup arrives through `v-html`, so no utility class can reach the
     // tags inside it; `.hero-richtext` in main.css styles them instead. The
     // preflight would otherwise strip the list markers and the link underline.
-    const stylesheet = readFileSync("app/assets/css/main.css", "utf8");
-
     for (const tag of ["p", "ul", "ol", "li", "a"]) {
-      expect(stylesheet).toMatch(
+      expect(STYLESHEET).toMatch(
         new RegExp(String.raw`\.${RICHTEXT_CLASS}[^{]*\b${tag}\b[^{]*\{`),
       );
     }

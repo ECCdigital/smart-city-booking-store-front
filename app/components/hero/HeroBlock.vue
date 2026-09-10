@@ -28,6 +28,13 @@ import { localizedText } from "~/utils/heroBlocks";
  * frozen allowlist (`server/utils/heroRichtext.ts`) — or, on the Live
  * Preview alone, from a Draft the bridge sanitised in the browser against
  * the same allowlist. Nothing unsanitised reaches this component.
+ *
+ * A run of words inside that markup may carry a size, a colour or an
+ * alignment of its own, and no utility class reaches it — the stylesheet
+ * rules under `.hero-richtext` paint it instead. Two of the things those
+ * rules have to know are not in the markup at all: the Hero's mode and
+ * whether the Block has a Panel. `richtextBlockClasses` knows both and puts
+ * them on the rich-text root as hooks the rules can select on.
  */
 const props = defineProps({
   block: { type: Object, required: true },
