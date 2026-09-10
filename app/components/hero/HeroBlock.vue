@@ -24,10 +24,14 @@ import { localizedText } from "~/utils/heroBlocks";
  *
  * Text and rich-text Blocks render here; image Blocks render through the one
  * logo element. Rich text goes into the page through `v-html`: the markup
- * comes from the Theme View, where the BFF has already run it through the
- * frozen allowlist (`server/utils/heroRichtext.ts`) — or, on the Live
- * Preview alone, from a Draft the bridge sanitised in the browser against
- * the same allowlist. Nothing unsanitised reaches this component.
+ * comes from the Theme View, where the BFF has already sanitised it
+ * (`server/utils/heroRichtext.ts`) — or, on the Live Preview alone, from a
+ * Draft the bridge sanitised in the browser. Sanitising is both passes, the
+ * frozen allowlist and then the class pass that enforces the class
+ * vocabulary, and the two sides run the one shared copy of them
+ * (`shared/utils/heroRichtextAllowlist.ts`), so what reaches this component
+ * cannot differ between a delivered page and a preview of it. Nothing
+ * unsanitised reaches it at all.
  *
  * A run of words inside that markup may carry a size, a colour or an
  * alignment of its own, and no utility class reaches it — the stylesheet
@@ -57,22 +61,22 @@ const image = computed(() =>
   props.block.type === "image" && props.block.image.url ? props.block : null,
 );
 
-// An inline style is spread rather than bound as `:style`, because the server
-// renderer writes an empty `style=""` for a bound `undefined`; without the
-// key it writes nothing.
-function spread(style) {
+// An inline style reaches the element through `v-bind` of an object rather
+// than a bound `:style`, because the server renderer writes an empty
+// `style=""` for a bound `undefined`; without the key it writes nothing.
+function styleAttribute(style) {
   return style ? { style } : undefined;
 }
 
 // The copy's hex colour, when it has one instead of a named token.
 const colorStyle = computed(() => {
   const colored = text.value ?? richtext.value;
-  return spread(colored ? blockColorStyle(colored) : undefined);
+  return styleAttribute(colored ? blockColorStyle(colored) : undefined);
 });
 
 // The Panel's fill. Its radius and blur are classes; only the colour at its
 // opacity has to be a runtime value.
-const panelStyle = computed(() => spread(blockPanelStyle(props.block)));
+const panelStyle = computed(() => styleAttribute(blockPanelStyle(props.block)));
 </script>
 
 <template>

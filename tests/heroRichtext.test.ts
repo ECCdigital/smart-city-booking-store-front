@@ -273,6 +273,30 @@ describe("the class pass against the rest of the markup", () => {
     ).toBe('<p>vor <span class="hero-size-xl">gross</span> nach</p>');
   });
 
+  it("unwraps a span that kept nothing, even when an allowlist attribute survived on it", () => {
+    // `ALLOWED_ATTR` is not per tag, so `href`, `target` and `rel` reach a
+    // span and survive the allowlist pass. They are inert there, but they
+    // would make a span with nothing of the vocabulary look like a mark; the
+    // contract says such a span is not a mark at all, so it goes with them.
+    for (const html of [
+      '<p><span href="https://example.org" class="promo">Text</span></p>',
+      '<p><span target="_blank">Text</span></p>',
+      '<p><span rel="noopener">Text</span></p>',
+    ]) {
+      expect(sanitizeHeroRichtext(html)).toBe("<p>Text</p>");
+    }
+  });
+
+  it("keeps an allowlist attribute on a span that is a mark", () => {
+    // The rule is about the vocabulary, not about tidiness: once a span
+    // carries a mark, what else it holds is the allowlist pass's business.
+    expect(
+      sanitizeHeroRichtext(
+        '<p><span class="hero-size-lg" href="https://example.org">Gross</span></p>',
+      ),
+    ).toBe('<p><span href="https://example.org" class="hero-size-lg">Gross</span></p>');
+  });
+
   it("leaves its own output alone the second time", () => {
     // The contract sanitises on save and again on render, so the render pass
     // meets markup the backend already sanitised. It must be a fixed point:

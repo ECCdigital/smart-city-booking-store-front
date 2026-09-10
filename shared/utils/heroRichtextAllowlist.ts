@@ -186,6 +186,15 @@ function vocabularyAttributes(
 }
 
 /**
+ * Whether a span kept anything of the vocabulary — the only thing that makes
+ * it a mark. `style` is not consulted: it is never on its own, only ever
+ * written beside the `data-color` it was built from.
+ */
+function isMark(attribs: Record<string, string>): boolean {
+  return attribs.class !== undefined || attribs["data-color"] !== undefined;
+}
+
+/**
  * The class pass over one already-allowlisted subtree, depth first: every
  * element keeps what the vocabulary names and nothing else.
  */
@@ -197,10 +206,17 @@ function walk(nodes: HeroRichtextNode[]): HeroRichtextNode[] {
     node.attribs = vocabularyAttributes(node);
 
     // An emptied `class` is already gone with the attribute it was on, and a
-    // span carrying nothing at all is not a mark: it leaves its text behind
-    // and goes. The admin's editor drops the same span while loading, so the
-    // two agree at the edge; this rule is here for input that never met it.
-    return node.name === "span" && Object.keys(node.attribs).length === 0
+    // span that kept nothing of the vocabulary is not a mark: it leaves its
+    // text behind and goes. The admin's editor drops the same span while
+    // loading, so the two agree at the edge; this rule is here for input
+    // that never met it.
+    //
+    // What decides is the vocabulary, not the attribute count. `ALLOWED_ATTR`
+    // is not per tag, so `href`, `target` or `rel` can reach a span and
+    // survive the allowlist — inert there, but enough to make a span look
+    // like a mark it never was. A hand-forged `<span href="…">` is exactly
+    // the input this rule exists for, so those attributes go with it.
+    return node.name === "span" && !isMark(node.attribs)
       ? node.children
       : [node];
   });
