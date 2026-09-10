@@ -2,15 +2,16 @@
 import {
   blockBoxClasses,
   blockColorStyle,
+  blockPanelStyle,
   richtextBlockClasses,
   textBlockClasses,
 } from "./heroClasses";
 import { localizedText } from "~/utils/heroBlocks";
 
 /**
- * One Block of the Hero Layout: its box — spacing, width, panel — and its
- * content. The same element serves the desktop Zones and the mobile rows;
- * only what is around it differs. It always carries its Block id and Zone
+ * One Block of the Hero Layout: its box — spacing, width, the surface of its
+ * Panel — and its content. The same element serves the desktop Zones and the
+ * mobile rows; only what is around it differs. It always carries its Block id and Zone
  * as data attributes, which is what the Live Preview measures against.
  *
  * Text and rich-text Blocks render here; image Blocks render through the one
@@ -41,13 +42,22 @@ const image = computed(() =>
   props.block.type === "image" && props.block.image.url ? props.block : null,
 );
 
-// Spread rather than bound as `:style`, because the server renderer writes
-// an empty `style=""` for a bound `undefined`; without the key it writes nothing.
+// An inline style is spread rather than bound as `:style`, because the server
+// renderer writes an empty `style=""` for a bound `undefined`; without the
+// key it writes nothing.
+function spread(style) {
+  return style ? { style } : undefined;
+}
+
+// The copy's hex colour, when it has one instead of a named token.
 const colorStyle = computed(() => {
   const colored = text.value ?? richtext.value;
-  const style = colored && blockColorStyle(colored);
-  return style ? { style } : undefined;
+  return spread(colored ? blockColorStyle(colored) : undefined);
 });
+
+// The Panel's fill. Its radius and blur are classes; only the colour at its
+// opacity has to be a runtime value.
+const panelStyle = computed(() => spread(blockPanelStyle(props.block)));
 </script>
 
 <template>
@@ -57,6 +67,7 @@ const colorStyle = computed(() => {
     :data-zone="block.zone"
     class="pointer-events-auto"
     :class="blockBoxClasses(block)"
+    v-bind="panelStyle"
   >
     <p v-if="text" :class="textBlockClasses(text, mode)" v-bind="colorStyle">
       {{ localizedText(text.text, locale) }}

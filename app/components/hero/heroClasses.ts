@@ -7,6 +7,12 @@
  * 1:1 from the contract's "Rendering semantics"; a value that changes here
  * changes the look the admin's Live Preview promised.
  *
+ * Two things here have no class literal to be and go inline instead: a text
+ * colour the author typed as a hex value, and a Panel's fill — a colour at an
+ * arbitrary percentage. They are two of the seven runtime values the contract
+ * allows inline; the rest live on the Background, on an image and inside
+ * rendered rich text.
+ *
  * Mobile and desktop are told apart by CSS alone (`md:`), never by a
  * JavaScript breakpoint: both trees are in the server-rendered HTML, and a
  * breakpoint decided in JavaScript would render the desktop tree on the
@@ -20,13 +26,19 @@ import type {
   HeroHeight,
   HeroImageBlock,
   HeroImageMaxHeight,
+  HeroPanel,
+  HeroPanelColorToken,
+  HeroPanelRadius,
   HeroRichtextBlock,
   HeroSpacing,
   HeroTextBlock,
   HeroTextSize,
   HeroZone,
 } from "~~/shared/types/hero";
-import { isHeroColorToken } from "~~/shared/utils/heroLayout";
+import {
+  isHeroColorToken,
+  isHeroPanelColorToken,
+} from "~~/shared/utils/heroLayout";
 import type { HeroMode } from "~/composables/useHeroMode";
 import type { HeroZoneColumn, HeroZoneRow } from "~/utils/heroBlocks";
 
@@ -174,11 +186,85 @@ export const HERO_COLOR_CLASSES: Record<HeroColorToken, string> = {
 };
 
 /**
- * The glass panel behind a Block. A Panel's own colour, opacity, radius and
- * blur are not painted yet — every Panel still renders as today's `.glass`,
- * so this reads no further than "is there one".
+ * A Panel's corner radius per step: 0 / 0.375 / 0.75 / 1.5 rem and a pill at
+ * the theme's own `--ui-radius`, which is what every `rounded-*` in Nuxt UI
+ * resolves against. The step names and the class names deliberately do not
+ * line up — `sm` is `rounded-md` — because the contract names five steps of
+ * its own and picks the Tailwind class each one lands on.
  */
-const PANEL_CLASSES = "glass rounded-xl";
+export const HERO_PANEL_RADIUS_CLASSES: Record<HeroPanelRadius, string> = {
+  none: "rounded-none",
+  sm: "rounded-md",
+  md: "rounded-xl",
+  lg: "rounded-3xl",
+  full: "rounded-full",
+};
+
+/** The frosting of what lies behind a Panel: 16 px, no steps. */
+const PANEL_BLUR_CLASS = "backdrop-blur-lg";
+
+/**
+ * What a Panel wears as classes: its radius, and the blur when it asks for
+ * one. The fill is not here — a colour at an arbitrary percentage cannot be a
+ * class literal, so it goes inline, see {@link blockPanelStyle}.
+ *
+ * At full opacity the backdrop filter is dropped: nothing behind an opaque
+ * fill can show through it, so it would buy a compositing layer and paint
+ * nothing.
+ */
+function panelClasses(panel: HeroPanel): string[] {
+  const classes = [HERO_PANEL_RADIUS_CLASSES[panel.radius]];
+  if (panel.blur && panel.opacity < 100) classes.push(PANEL_BLUR_CLASS);
+  return classes;
+}
+
+/**
+ * What a Panel's named colours resolve to. `primary` and `secondary` are the
+ * two custom properties the stylesheet route declares
+ * (`server/utils/themeCss.ts`), so a Panel follows the instance's branding
+ * the way `text-primary` does. A Panel has no `default`: it is
+ * mode-independent and so has nothing to follow.
+ */
+const HERO_PANEL_COLOR_VALUES: Record<HeroPanelColorToken, string> = {
+  // `white` at 60 % is what „Glas“ is made of, and it stands in for the
+  // `bg-slate-50/60` of today's `.glass` — 4/255 per channel apart, which no
+  // eye finds in a side-by-side. The dark half of `.glass` has no counterpart
+  // here and that is not an oversight: a Panel is mode-independent by
+  // decision, so an author who wants a dark Panel picks `black`.
+  white: "#ffffff",
+  black: "#000000",
+  primary: "var(--ui-primary)",
+  secondary: "var(--ui-secondary)",
+};
+
+/**
+ * A Panel's fill: its colour at its opacity, as `background-color`.
+ *
+ * Deliberately not the `opacity` property, which would fade the Block's text
+ * and image along with the surface behind them. `color-mix` gives the alpha
+ * to the colour itself and takes a token, a custom property and a hex value
+ * the same way — `0%` mixes to fully transparent and `100%` to the colour as
+ * given, so both ends of the scale come out right without a special case.
+ */
+function panelFill(panel: HeroPanel): string {
+  const color = isHeroPanelColorToken(panel.color)
+    ? HERO_PANEL_COLOR_VALUES[panel.color]
+    : panel.color;
+  return `color-mix(in srgb, ${color} ${panel.opacity}%, transparent)`;
+}
+
+/**
+ * The inline style of a Block's box: its Panel's fill, or nothing at all.
+ *
+ * The fill is one of the runtime values named at the top of this file: a
+ * colour at an arbitrary percentage has no class literal to be. Radius and
+ * blur do, and stay in {@link blockBoxClasses}.
+ */
+export function blockPanelStyle(
+  block: HeroBlock,
+): Record<string, string> | undefined {
+  return block.panel ? { backgroundColor: panelFill(block.panel) } : undefined;
+}
 
 /**
  * The classes of a Block's box, whatever its type: its spacing, its width
@@ -191,7 +277,7 @@ export function blockBoxClasses(block: HeroBlock): string[] {
     HERO_INNER_SPACING_CLASSES[block.innerSpacing],
     HERO_WIDTH_CLASSES[block.width],
   ];
-  if (block.panel) classes.push(PANEL_CLASSES);
+  if (block.panel) classes.push(...panelClasses(block.panel));
   return classes;
 }
 
@@ -202,13 +288,33 @@ const TEXT_SHADOW_CLASS = "[text-shadow:0_1px_3px_rgba(0,0,0,0.6)]";
 type HeroCopyBlock = HeroTextBlock | HeroRichtextBlock;
 
 /**
+ * `default` on a Panel: the light half of `HERO_COLOR_CLASSES.default`, and
+ * the one place that half is written twice — a class literal is not assembled
+ * from another one here, whatever it costs in repetition, so a change to the
+ * default text colour has to be made in both.
+ *
+ * A Panel is painted the same in both colour modes, so the copy on it cannot
+ * follow the mode either: white text in dark mode would land on a Panel that
+ * stayed white. The Block reads its own Panel for this, which is the only
+ * thing that can be right — nothing else knows whether the copy sits on a
+ * surface.
+ */
+const PANEL_DEFAULT_COLOR_CLASS = "text-black";
+
+/**
  * A named colour as a class and the shadow, shared by text and rich text.
  * A hex colour is not a class — it is the one text value that goes inline,
  * see {@link blockColorStyle}.
  */
 function copyClasses(block: HeroCopyBlock): string[] {
   const classes: string[] = [];
-  if (isHeroColorToken(block.color)) classes.push(HERO_COLOR_CLASSES[block.color]);
+  if (isHeroColorToken(block.color)) {
+    classes.push(
+      block.color === "default" && block.panel
+        ? PANEL_DEFAULT_COLOR_CLASS
+        : HERO_COLOR_CLASSES[block.color],
+    );
+  }
   if (block.shadow) classes.push(TEXT_SHADOW_CLASS);
   return classes;
 }

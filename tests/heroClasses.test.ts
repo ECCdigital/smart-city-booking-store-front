@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   blockBoxClasses,
+  blockPanelStyle,
   HERO_ANCHOR_CLASSES,
   HERO_COLOR_CLASSES,
   HERO_COLUMN_ALIGN_CLASSES,
@@ -14,6 +15,7 @@ import {
   HERO_INNER_SPACING_CLASSES,
   HERO_MOBILE_HEIGHT_CLASSES,
   HERO_OUTER_SPACING_CLASSES,
+  HERO_PANEL_RADIUS_CLASSES,
   HERO_ROW_JUSTIFY_CLASSES,
   HERO_TEXT_SIZE_CLASSES,
   HERO_WIDTH_CLASSES,
@@ -33,9 +35,13 @@ import {
   HERO_ZONES,
   HERO_BLOCK_WIDTHS,
   HERO_PANEL_GLASS,
+  HERO_PANEL_RADII,
   type HeroBlock,
   type HeroImageBlock,
   type HeroLayout,
+  type HeroPanel,
+  type HeroPanelColor,
+  type HeroPanelRadius,
   type HeroRichtextBlock,
   type HeroTextBlock,
 } from "~~/shared/types/hero";
@@ -64,6 +70,7 @@ describe("the Hero class tables", () => {
       [HERO_COLOR_TOKENS, HERO_COLOR_CLASSES],
       [HERO_IMAGE_MAX_HEIGHTS, HERO_IMAGE_MAX_HEIGHT_CLASSES],
       [HERO_IMAGE_MAX_HEIGHTS, HERO_IMAGE_HEIGHT_CLASSES],
+      [HERO_PANEL_RADII, HERO_PANEL_RADIUS_CLASSES],
       [["left", "center", "right"], HERO_COLUMN_ALIGN_CLASSES],
       [["top", "middle", "bottom"], HERO_ROW_JUSTIFY_CLASSES],
     ];
@@ -207,7 +214,7 @@ describe("a Block's box", () => {
     ]);
   });
 
-  it("gets the glass panel only when it asks for it", () => {
+  it("wears its Panel's radius and frosting only when it has a Panel", () => {
     const panelled: HeroBlock = {
       ...subtitle,
       outerSpacing: "md",
@@ -220,13 +227,147 @@ describe("a Block's box", () => {
       "m-6",
       "p-4",
       "w-[32rem]",
-      "glass rounded-xl",
+      "rounded-xl",
+      "backdrop-blur-lg",
     ]);
+  });
+
+  it("rounds its Panel to the step the author picked, `full` as a pill", () => {
+    for (const [radius, expected] of Object.entries({
+      none: "rounded-none",
+      sm: "rounded-md",
+      md: "rounded-xl",
+      lg: "rounded-3xl",
+      full: "rounded-full",
+    })) {
+      const panelled: HeroBlock = {
+        ...subtitle,
+        panel: { ...HERO_PANEL_GLASS, radius: radius as HeroPanelRadius },
+      };
+      expect(blockBoxClasses(panelled)).toContain(expected);
+    }
+  });
+
+  it("frosts what lies behind its Panel, but not behind an opaque fill", () => {
+    // A backdrop filter under a fill nothing can show through paints nothing
+    // and costs a compositing layer, so full opacity drops it.
+    const frosted: HeroBlock = { ...subtitle, panel: HERO_PANEL_GLASS };
+    expect(blockBoxClasses(frosted)).toContain("backdrop-blur-lg");
+
+    const opaque: HeroBlock = {
+      ...subtitle,
+      panel: { ...HERO_PANEL_GLASS, opacity: 100 },
+    };
+    expect(blockBoxClasses(opaque)).not.toContain("backdrop-blur-lg");
+
+    const unfrosted: HeroBlock = {
+      ...subtitle,
+      panel: { ...HERO_PANEL_GLASS, blur: false },
+    };
+    expect(blockBoxClasses(unfrosted)).not.toContain("backdrop-blur-lg");
+  });
+
+  it("paints an empty Panel as pure frosting, or as nothing at all", () => {
+    // `opacity: 0` is legitimate at both ends: with the blur it is frosting
+    // without a tint, without it the Panel is invisible. Neither is an error,
+    // so neither is special-cased away.
+    const frosting: HeroBlock = {
+      ...subtitle,
+      panel: { ...HERO_PANEL_GLASS, opacity: 0 },
+    };
+    expect(blockBoxClasses(frosting)).toContain("backdrop-blur-lg");
+    expect(blockPanelStyle(frosting)).toEqual({
+      backgroundColor: "color-mix(in srgb, #ffffff 0%, transparent)",
+    });
+
+    const invisible: HeroBlock = {
+      ...subtitle,
+      panel: { ...HERO_PANEL_GLASS, opacity: 0, blur: false },
+    };
+    expect(blockBoxClasses(invisible)).toEqual([
+      "max-w-full min-w-0",
+      "m-0",
+      "p-0",
+      "w-auto",
+      "rounded-xl",
+    ]);
+  });
+
+  it("mixes its Panel's fill inline, because no class carries a colour at a percentage", () => {
+    expect(blockPanelStyle(subtitle)).toBeUndefined();
+
+    const fills: [HeroPanelColor, string][] = [
+      ["white", "#ffffff"],
+      ["black", "#000000"],
+      ["primary", "var(--ui-primary)"],
+      ["secondary", "var(--ui-secondary)"],
+      ["#b91c1c", "#b91c1c"],
+    ];
+
+    for (const [color, expected] of fills) {
+      const panelled: HeroBlock = {
+        ...subtitle,
+        panel: { ...HERO_PANEL_GLASS, color, opacity: 40 },
+      };
+      expect(blockPanelStyle(panelled)).toEqual({
+        backgroundColor: `color-mix(in srgb, ${expected} 40%, transparent)`,
+      });
+      // The fill is the whole of what goes inline; the classes stay literal.
+      expect(
+        blockBoxClasses(panelled).some((entry) => entry.includes(expected)),
+      ).toBe(false);
+    }
+  });
+
+  it("keeps an opaque Panel opaque and its alpha off the Block's content", () => {
+    // The percentage is the alpha of the fill alone — never the `opacity`
+    // property, which would fade the text and the image on top of it too.
+    const opaque: HeroBlock = {
+      ...subtitle,
+      panel: { ...HERO_PANEL_GLASS, color: "black", opacity: 100 },
+    };
+    expect(blockPanelStyle(opaque)).toEqual({
+      backgroundColor: "color-mix(in srgb, #000000 100%, transparent)",
+    });
+  });
+
+  it("hands its fill to the element the Block renders, or the Panel is invisible", () => {
+    // There is no component test in this repo, and a fill that never reaches
+    // an element is a Panel nobody can see, so the wiring is asserted at the
+    // source — as the preview bridge's sanitiser is. The Block's box binds it
+    // the way the copy binds its hex colour: spread rather than `:style`, so
+    // the server renderer writes no empty `style=""` for a Block without one.
+    const component = readFileSync("app/components/hero/HeroBlock.vue", "utf8");
+
+    expect(component).toMatch(/blockPanelStyle\(/);
+    expect(component).toMatch(/v-bind="panelStyle"/);
+  });
+
+  it("paints its Panel the same in the Compact Hero, which never sees one", () => {
+    // The box takes no mode: there is nothing for the Compact Hero to step a
+    // Panel down by, and this is what keeps it that way.
+    expect(blockBoxClasses).toHaveLength(1);
+  });
+
+  it("takes its padding from `innerSpacing` alone, whatever the Panel says", () => {
+    const padded: HeroBlock = { ...subtitle, innerSpacing: "lg" };
+    const panels: (HeroPanel | null)[] = [
+      null,
+      HERO_PANEL_GLASS,
+      { ...HERO_PANEL_GLASS, radius: "full", opacity: 0, blur: false },
+    ];
+
+    for (const panel of panels) {
+      expect(blockBoxClasses({ ...padded, panel })).toContain("p-8");
+    }
   });
 });
 
 describe("a text Block", () => {
-  const subtitle = (defaultHeroLayout as HeroLayout).blocks.find(
+  // Parsed rather than read off the fixture, like the box above: a copy Block
+  // reads its own Panel now, and the export's `panel` is what the guard turns
+  // into one.
+  const subtitle = parseHeroLayout(defaultHeroLayout)!.blocks.find(
     (block) => block.id === "default-subtitle",
   ) as HeroTextBlock;
 
@@ -256,10 +397,31 @@ describe("a text Block", () => {
     expect(classes.some((entry) => entry.includes("#b91c1c"))).toBe(false);
     expect(blockColorStyle(badge)).toEqual({ color: "#b91c1c" });
   });
+
+  it("drops `default` to black in both modes on a Panel, which does not flip", () => {
+    expect(textBlockClasses(subtitle, "home")).toContain(
+      "text-black dark:text-white",
+    );
+
+    const onPanel: HeroTextBlock = { ...subtitle, panel: HERO_PANEL_GLASS };
+    expect(textBlockClasses(onPanel, "home")).toContain("text-black");
+    expect(textBlockClasses(onPanel, "home")).not.toContain(
+      "text-black dark:text-white",
+    );
+
+    // The Compact Hero steps the text size down and nothing else: a Panel is
+    // painted the same in both Heroes, so the colour it forces is too.
+    expect(textBlockClasses(onPanel, "compact")).toContain("text-black");
+
+    // Only `default` follows the mode, so only `default` has anything to give
+    // up; every other named colour is painted the same on a Panel and off it.
+    const white: HeroTextBlock = { ...onPanel, color: "white" };
+    expect(textBlockClasses(white, "home")).toContain("text-white");
+  });
 });
 
 describe("a rich-text Block", () => {
-  const openingHours = (crowdedHeroLayout as HeroLayout).blocks.find(
+  const openingHours = parseHeroLayout(crowdedHeroLayout)!.blocks.find(
     (block) => block.type === "richtext",
   ) as HeroRichtextBlock;
 
@@ -289,6 +451,26 @@ describe("a rich-text Block", () => {
     const classes = richtextBlockClasses(plain, "home");
     expect(classes).toEqual([RICHTEXT_CLASS, HERO_TEXT_SIZE_CLASSES.home.md]);
     expect(blockColorStyle(plain)).toEqual({ color: "#1d4ed8" });
+  });
+
+  it("drops `default` to black on a Panel, like the copy of a text Block", () => {
+    const plain: HeroRichtextBlock = {
+      ...openingHours,
+      color: "default",
+      panel: null,
+    };
+    expect(richtextBlockClasses(plain, "home")).toContain(
+      "text-black dark:text-white",
+    );
+
+    const onPanel: HeroRichtextBlock = {
+      ...plain,
+      panel: HERO_PANEL_GLASS,
+    };
+    expect(richtextBlockClasses(onPanel, "home")).toContain("text-black");
+    expect(richtextBlockClasses(onPanel, "home")).not.toContain(
+      "text-black dark:text-white",
+    );
   });
 
   it("puts the typography of the allowed tags in one stylesheet rule, not in classes", () => {
