@@ -6,9 +6,12 @@ import { firstImageBlockId, mobileRows } from "~/utils/heroBlocks";
  * The mobile tree: the Blocks grouped by the row of their Zone — top at the
  * top, middle centred in the remaining space, bottom at the bottom — in
  * array order inside a row and all horizontally centred, whatever their
- * Zone's column. Blocks marked hide-on-mobile are not here at all. Like
- * the desktop tree it lets pointer events through and the Blocks take them
- * back, so the Live Preview's Zone overlay beneath is reachable.
+ * Zone's column. That centring is the box's and it stays: a Block that names
+ * an `align` moves the content inside its box and never the box itself, and
+ * a Block at `align: "auto"` inherits this row's `text-center`, there being
+ * no columns here to follow. Blocks marked hide-on-mobile are not here at
+ * all. Like the desktop tree it lets pointer events through and the Blocks
+ * take them back, so the Live Preview's Zone overlay beneath is reachable.
  *
  * The first image Block this tree shows fetches at high priority — its
  * own first, since the desktop tree's may be hidden here; no Block gets a

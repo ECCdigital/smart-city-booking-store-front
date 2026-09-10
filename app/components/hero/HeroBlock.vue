@@ -3,6 +3,7 @@ import {
   blockBoxClasses,
   blockColorStyle,
   blockPanelStyle,
+  imageBlockClasses,
   richtextBlockClasses,
   textBlockClasses,
 } from "./heroClasses";
@@ -13,6 +14,13 @@ import { localizedText } from "~/utils/heroBlocks";
  * Panel — and its content. The same element serves the desktop Zones and the
  * mobile rows; only what is around it differs. It always carries its Block id and Zone
  * as data attributes, which is what the Live Preview measures against.
+ *
+ * `align` places that content inside the box, and it takes two forms because
+ * an image is not a line of copy: the box carries the alignment its text
+ * inherits, and the image element carries the margins that place it, which
+ * is the whole of the difference (`imageBlockClasses`). Neither is emitted
+ * for `align: "auto"` — a Block nobody aligned follows whatever the tree
+ * around it declares, as it did before the field existed.
  *
  * Text and rich-text Blocks render here; image Blocks render through the one
  * logo element. Rich text goes into the page through `v-html`: the markup
@@ -87,6 +95,7 @@ const panelStyle = computed(() => spread(blockPanelStyle(props.block)));
       :max-height="image.maxHeight"
       :invert-in-dark-mode="image.invertInDarkMode"
       :priority="priority"
+      :class="imageBlockClasses(image)"
     />
   </div>
 </template>

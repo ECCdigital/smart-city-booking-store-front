@@ -21,6 +21,7 @@
 
 import type {
   HeroBlock,
+  HeroBlockAlignment,
   HeroBlockOffset,
   HeroBlockWidth,
   HeroColorToken,
@@ -360,9 +361,49 @@ function offsetClasses(offset: HeroBlockOffset): string[] {
 }
 
 /**
+ * A table of the three alignments an author can name. `auto` is in none of
+ * them, because it has nothing to emit — see {@link alignClasses}.
+ */
+type HeroAlignClasses = Record<Exclude<HeroBlockAlignment, "auto">, string>;
+
+/**
+ * The named alignments as the property that carries them for a line of copy:
+ * `text-align`, inherited by everything inside the box.
+ */
+const HERO_ALIGN_TEXT_CLASSES: HeroAlignClasses = {
+  left: "text-left",
+  center: "text-center",
+  right: "text-right",
+};
+
+/**
+ * What `align` emits from one of the two tables, and the one place that says
+ * `auto` emits **nothing** at all.
+ *
+ * That is the whole of "follows the Zone column". The anchor already declares
+ * the column's `text-align` and the mobile row group its `text-center` (see
+ * {@link HERO_COLUMN_ALIGN_CLASSES}), and a Block that declares none of its
+ * own inherits whichever of the two is showing. Emitting the column's class
+ * here instead would say the same thing twice on desktop and the wrong thing
+ * on mobile, where there are no columns.
+ *
+ * The three named values carry no `md:`: they are absolute, so an author who
+ * asks for one gets it on a phone too. Only the Block's **box** stays centred
+ * there, which is the mobile tree's own doing and not this field's. Nor does
+ * either table take a Hero mode: an alignment is not a size and has nothing
+ * the Compact Hero could step down.
+ */
+function alignClasses(
+  align: HeroBlockAlignment,
+  table: HeroAlignClasses,
+): string[] {
+  return align === "auto" ? [] : [table[align]];
+}
+
+/**
  * The classes of a Block's box, whatever its type: its spacing, its width,
- * its Offset, its Layer and its panel. `max-w-full` keeps a wide Block
- * inside the content area.
+ * the alignment of its lines, its Offset, its Layer and its panel.
+ * `max-w-full` keeps a wide Block inside the content area.
  *
  * The box takes no mode. The Compact Hero steps the text sizes down but
  * applies the Offset **as authored**: an Offset is a placement the author
@@ -375,6 +416,7 @@ export function blockBoxClasses(block: HeroBlock): string[] {
     HERO_OUTER_SPACING_CLASSES[block.outerSpacing],
     HERO_INNER_SPACING_CLASSES[block.innerSpacing],
     HERO_WIDTH_CLASSES[block.width],
+    ...alignClasses(block.align, HERO_ALIGN_TEXT_CLASSES),
     ...offsetClasses(block.offset),
   ];
   if (block.layer === "front") classes.push(FRONT_LAYER_CLASS);
@@ -520,4 +562,45 @@ export function imageStyle(
   return isMeasured(options.image)
     ? { height: `${options.image.height}px` }
     : undefined;
+}
+
+/**
+ * The same three alignments for the one thing `text-align` cannot place: the
+ * image of an image Block.
+ *
+ * The preflight makes an image a block-level element, and a block-level box
+ * of its own intrinsic width is placed by its margins, not by the
+ * `text-align` its copy siblings follow. `left` is where such a box already
+ * sits, and its entry says so out loud rather than leaving the table with a
+ * hole: unlike an Offset of zero it is a value the author picked, and only
+ * `auto` means "emit nothing".
+ */
+const HERO_ALIGN_IMAGE_CLASSES: HeroAlignClasses = {
+  left: "mr-auto",
+  center: "mx-auto",
+  right: "ml-auto",
+};
+
+/**
+ * What an image Block adds to the image element {@link imageClasses}
+ * dresses: where the image sits inside the Block's box.
+ *
+ * It is separate from `imageClasses` because that one is the image element
+ * everywhere — the logo above the auth forms renders through it too — and
+ * this is a Block's field. And it is separate from {@link blockBoxClasses}
+ * because the box aligns its **lines**: an image needs the property its own
+ * layout listens to.
+ *
+ * `auto` emits nothing here as well, and that is a deliberate reading of the
+ * contract worth stating: `auto` "follows the Zone column" as far as
+ * inheritance carries it, which for an image is nowhere, because a
+ * block-level image ignores the `text-align` the column declares. So an
+ * `auto` image in a wide box stands at the box's left edge in every Zone —
+ * exactly where it stood before this field existed, which is the one thing
+ * `auto` may never change. Deriving a margin from the column instead would
+ * move an image nobody aligned, and it is the author of a Block wide enough
+ * for the difference to show who has the field to say where it goes.
+ */
+export function imageBlockClasses(block: HeroImageBlock): string[] {
+  return alignClasses(block.align, HERO_ALIGN_IMAGE_CLASSES);
 }

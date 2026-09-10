@@ -9,6 +9,13 @@ import { HERO_ZONES } from "~~/shared/types/hero";
  * the Zone's column; Blocks from different Zones may overlap — that is an
  * editor warning, never a renderer constraint.
  *
+ * The column alignment does two things at once, and only the first is this
+ * tree's: `items-*` places the Block boxes, which is what makes `width: full`
+ * and a column mean anything, and `text-*` is what a Block with
+ * `align: "auto"` inherits for its own content. A Block that names an
+ * alignment overrides the second inside its own box and leaves the first
+ * alone.
+ *
  * That same order is the paint order. No anchor is a stacking context — the
  * middle row is centred without a transform for exactly that reason — so a
  * `front` Block is lifted above the Blocks of every Zone, not only its own,

@@ -22,6 +22,7 @@ import {
   HERO_TEXT_SIZE_CLASSES,
   HERO_WIDTH_CLASSES,
   blockColorStyle,
+  imageBlockClasses,
   imageClasses,
   imageStyle,
   RICHTEXT_CLASS,
@@ -29,6 +30,7 @@ import {
   textBlockClasses,
 } from "~/components/hero/heroClasses";
 import {
+  HERO_BLOCK_ALIGNMENTS,
   HERO_BLOCK_OFFSET_LIMIT,
   HERO_BLOCK_OFFSET_NONE,
   HERO_COLOR_TOKENS,
@@ -41,6 +43,7 @@ import {
   HERO_PANEL_GLASS,
   HERO_PANEL_RADII,
   type HeroBlock,
+  type HeroBlockAlignment,
   type HeroImageBlock,
   type HeroLayout,
   type HeroPanel,
@@ -653,5 +656,125 @@ describe("an image", () => {
       "w-auto max-w-full object-contain",
       "max-h-64",
     ]);
+  });
+});
+
+describe("a Block's alignment", () => {
+  const subtitle = parseHeroLayout(defaultHeroLayout)!.blocks.find(
+    (block) => block.id === "default-subtitle",
+  ) as HeroBlock;
+  const crest = parseHeroLayout(defaultHeroLayout)!.blocks.find(
+    (block) => block.id === "default-logo",
+  ) as HeroImageBlock;
+
+  it("aligns the lines of a text or rich-text Block inside its own box", () => {
+    const aligned: [HeroBlockAlignment, string][] = [
+      ["left", "text-left"],
+      ["center", "text-center"],
+      ["right", "text-right"],
+    ];
+
+    for (const [align, expected] of aligned) {
+      expect(blockBoxClasses({ ...subtitle, align, width: "sm" })).toEqual([
+        "max-w-full min-w-0",
+        "m-0",
+        "p-0",
+        "w-80",
+        expected,
+      ]);
+    }
+  });
+
+  it("leaves an `auto` Block to the Zone it sits in, in all nine of them", () => {
+    // The strictest thing this field has to do: a Block nobody aligned comes
+    // out exactly as it did before the field existed, at every width and in
+    // every Zone. `auto` therefore emits nothing at all and inherits what the
+    // anchor — or, on mobile, the row group — already declares.
+    for (const zone of HERO_ZONES) {
+      for (const width of HERO_BLOCK_WIDTHS) {
+        const untouched: HeroBlock = { ...subtitle, zone, width, align: "auto" };
+
+        expect(blockBoxClasses(untouched)).toEqual([
+          "max-w-full min-w-0",
+          "m-0",
+          "p-0",
+          HERO_WIDTH_CLASSES[width],
+        ]);
+        expect(imageBlockClasses({ ...crest, zone, width, align: "auto" })).toEqual(
+          [],
+        );
+      }
+    }
+  });
+
+  it("is what the anchor and the mobile row group leave an `auto` Block to inherit", () => {
+    // `auto` is only "the Zone column, and centre on mobile" for as long as
+    // these two declare it, and neither is asserted anywhere else: the column
+    // table places the boxes with `items-*` and aligns their lines with
+    // `text-*`, and the mobile row does both for a tree that has no columns.
+    for (const column of ["left", "center", "right"] as const) {
+      expect(HERO_COLUMN_ALIGN_CLASSES[column]).toContain(`text-${column}`);
+    }
+
+    const mobile = readFileSync("app/components/hero/HeroMobileStack.vue", "utf8");
+    const row = mobile.match(/class="flex min-h-0[^"]*"/)?.[0] ?? "";
+
+    expect(row).toContain("items-center");
+    expect(row).toContain("text-center");
+  });
+
+  it("centres an image inside its box, where no `text-align` reaches it", () => {
+    // The acceptance fixture's coat of arms: 20 rem of box and an image that
+    // shrinks to its own width. The preflight makes an image a block-level
+    // element, which ignores the `text-align` its lines-of-copy siblings
+    // follow, so it is placed by its margins instead.
+    expect(imageBlockClasses({ ...crest, width: "sm", align: "center" })).toEqual([
+      "mx-auto",
+    ]);
+  });
+
+  it("hands that alignment to the image element, or it aligns nothing", () => {
+    // There is no component test in this repo, so the wiring is asserted at
+    // the source, as the Panel's fill is: the class falls through the one
+    // image element onto the `img` it renders.
+    const component = readFileSync("app/components/hero/HeroBlock.vue", "utf8");
+
+    expect(component).toMatch(/:class="imageBlockClasses\(image\)"/);
+  });
+
+  it("is emitted at `width: \"auto\"` too, where there is nothing to align in", () => {
+    // A box that shrinks to fit has nothing to spare, so the field is
+    // invisible there — a consequence of the width and not a rule of its own,
+    // which is why nothing is special-cased for it and the same class comes
+    // out. The exception proves the rule: a Block whose lines wrap against
+    // `max-w-full` has a box wider than its lines after all, and then the
+    // alignment shows at `auto` as well.
+    expect(blockBoxClasses({ ...subtitle, align: "center", width: "auto" })).toEqual([
+      "max-w-full min-w-0",
+      "m-0",
+      "p-0",
+      "w-auto",
+      "text-center",
+    ]);
+    expect(imageBlockClasses({ ...crest, align: "center", width: "auto" })).toEqual([
+      "mx-auto",
+    ]);
+  });
+
+  it("is absolute on a phone as well, and the same in the Compact Hero", () => {
+    // Nothing here is stepped or prefixed: an author who picks an alignment
+    // gets it in both trees — only the Block's box stays centred on mobile,
+    // which is the row group's doing — and in both Hero modes, which is why
+    // neither function takes one.
+    for (const align of HERO_BLOCK_ALIGNMENTS) {
+      const aligned: HeroBlock = { ...subtitle, align, width: "sm" };
+      const image: HeroImageBlock = { ...crest, align, width: "sm" };
+
+      for (const entry of [...blockBoxClasses(aligned), ...imageBlockClasses(image)]) {
+        expect(entry).not.toContain("md:");
+      }
+    }
+
+    expect(imageBlockClasses).toHaveLength(1);
   });
 });
