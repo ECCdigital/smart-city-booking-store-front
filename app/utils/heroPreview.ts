@@ -85,7 +85,11 @@ export function parseHeroPreviewMessage(
 }
 
 export interface HeroPreviewBuildOptions {
-  /** The browser DOMPurify build, bound to the frozen allowlist. */
+  /**
+   * Both sanitising passes of the browser: DOMPurify bound to the frozen
+   * allowlist, then the class pass, tied together by
+   * `buildHeroRichtextSanitizer`.
+   */
   sanitize: HeroRichtextSanitizer;
   /**
    * The logo of the stored Theme View. A Draft does not carry one — the

@@ -7,7 +7,10 @@ import {
   HERO_PREVIEW_ZONE_CLICK,
   HERO_ZONES,
 } from "~~/shared/types/hero";
-import { HERO_RICHTEXT_ALLOWLIST } from "~~/shared/utils/heroRichtextAllowlist";
+import {
+  buildHeroRichtextSanitizer,
+  HERO_RICHTEXT_ALLOWLIST,
+} from "~~/shared/utils/heroRichtextAllowlist";
 import { adminOrigin } from "~~/shared/utils/adminOrigin";
 import {
   useHeroPreviewOverride,
@@ -25,8 +28,9 @@ import {
  * The frame announces itself once it has mounted; the admin answers with a
  * complete snapshot of the Draft and sends a new one after every edit. Each
  * snapshot is validated with the same guards the BFF runs on a bundle and its
- * rich text sanitised with DOMPurify's browser build against the same frozen
- * allowlist — loaded lazily, so it is bundled for this page alone. A valid
+ * rich text sanitised with DOMPurify's browser build through the same two
+ * passes as the BFF — loaded lazily, so DOMPurify is bundled for this page
+ * alone. A valid
  * Draft replaces the Theme View in shared state, which is all the Hero ever
  * sees of the preview; an invalid one leaves the last valid render in place
  * and is answered with `invalid-draft`. The colour mode the editor shows is
@@ -72,12 +76,14 @@ const IMAGE_DECODE_TIMEOUT_MS = 5000;
 
 // One load per frame, started at mount so the first Draft does not wait for
 // it. A dynamic import keeps DOMPurify out of every other page's bundle.
+// What comes back is both passes: the browser build handed to the shared
+// builder, so the preview sanitises exactly as the BFF does.
 let sanitizerLoad;
 function loadSanitizer() {
-  sanitizerLoad ??= import("dompurify").then(
-    ({ default: DOMPurify }) =>
-      (html) =>
-        DOMPurify.sanitize(html, HERO_RICHTEXT_ALLOWLIST),
+  sanitizerLoad ??= import("dompurify").then(({ default: DOMPurify }) =>
+    buildHeroRichtextSanitizer((html) =>
+      DOMPurify.sanitize(html, HERO_RICHTEXT_ALLOWLIST),
+    ),
   );
   return sanitizerLoad;
 }
