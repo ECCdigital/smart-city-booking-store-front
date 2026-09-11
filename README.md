@@ -61,7 +61,7 @@ This repository has its **own release line** (currently **v1.x**). It requires t
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) v20+ (recommended; CI tests 18.x and 20.x)
+- [Node.js](https://nodejs.org/) v22.22.2+ (CI tests 22.x; the production image is `node:22-slim`)
 - [npm](https://www.npmjs.com/) v10+
 - [Docker](https://www.docker.com/) v20+ (optional, for container deployments)
 - A running **[v4.x backend API](https://github.com/ECCdigital/smart-city-booking-backend)** instance

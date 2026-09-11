@@ -31,6 +31,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ### Changed
 
+- Node 22 is the floor, in CI and in the production image alike: the server-side rich-text sanitiser pulls in jsdom 30, whose undici reads `markAsUncloneable` from `node:worker_threads`, which Node 20 does not have — importing jsdom there throws before a page renders. The CI matrix and the three `Dockerfile` stages move to 22, and `package.json` declares the supported range (`^22.22.2 || ^24.15.0 || >=26.0.0`)
 - The provider's emergency contact (`ProviderHelpSection`) comes from the public tenant projection (`GET /api/tenants/public` → `accessApps[].customerService`, backend 4.3) instead of the removed `/locker/:provider/customer-service-info`; the key list loads the tenants on its own, so tenant contacts are there on a direct visit too
 - The open button is offered only at access points the backend names remote-operable (`accessEligibility.remoteOperableAccessPointIds`, backend 4.3); a door that only takes a code is refused in the client with `no_remote_access` before the tap, in the key list, the panel and on the scan page alike
 - Access points in `authorization` and `both` mode carry a badge of their own ("Code an der Tür", "Per Knopf oder Code") instead of "Unbekannter Modus"
