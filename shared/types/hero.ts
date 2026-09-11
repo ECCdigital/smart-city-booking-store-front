@@ -1,0 +1,487 @@
+/**
+ * The Hero Layout contract, schema v1.
+ *
+ * This is the storefront's copy of the "Shared contract" section that the
+ * backend and the admin UI carry in their own specs. It is a contract, not a
+ * local type: a field that needs to change here needs to change in all three
+ * repositories. Cross-reference:
+ * `smart-city-booking-backend` and `smart-city-booking-vue-app`,
+ * `.scratch/hero-layout/spec.md`, section "Shared contract (schema v1)".
+ *
+ * The enum members live here as `as const` arrays rather than as bare union
+ * types, because the guards in `shared/utils/heroLayout.ts` need the same lists
+ * at runtime and a second, hand-maintained copy of nine zone strings is exactly
+ * the kind of drift this contract exists to prevent.
+ */
+
+/**
+ * A localised string. The locale list is the backend constant `["de", "en"]`:
+ * `de` is mandatory, `en` optional. An empty `en` counts as absent, so
+ * consumers may read `en ?? de` without checking for the empty string.
+ */
+export interface LocalizedString {
+  de: string;
+  en?: string;
+}
+
+/** Height steps: `sm` 12rem, `md` 16rem, `lg` 24rem, `xl` 32rem — outer height. */
+export const HERO_HEIGHTS = ["sm", "md", "lg", "xl"] as const;
+
+export type HeroHeight = (typeof HERO_HEIGHTS)[number];
+
+/** The nine anchor positions, top/middle/bottom × left/center/right. */
+export const HERO_ZONES = [
+  "top-left",
+  "top-center",
+  "top-right",
+  "middle-left",
+  "middle-center",
+  "middle-right",
+  "bottom-left",
+  "bottom-center",
+  "bottom-right",
+] as const;
+
+export type HeroZone = (typeof HERO_ZONES)[number];
+
+/** Outer and inner spacing: 0 / 0.5 / 1 / 1.5 / 2 / 3 rem, all sides equal. */
+export const HERO_SPACINGS = ["none", "xs", "sm", "md", "lg", "xl"] as const;
+
+export type HeroSpacing = (typeof HERO_SPACINGS)[number];
+
+/** Block width: auto / 20 / 32 / 48 rem / the whole content width. */
+export const HERO_BLOCK_WIDTHS = ["auto", "sm", "md", "lg", "full"] as const;
+
+export type HeroBlockWidth = (typeof HERO_BLOCK_WIDTHS)[number];
+
+/**
+ * How a Block's content sits inside its own box. Only visible when the box is
+ * wider than the content, which means a `width` other than `auto`. `auto`
+ * follows the Zone's column, and centres on mobile, where there are none.
+ */
+export const HERO_BLOCK_ALIGNMENTS = ["auto", "left", "center", "right"] as const;
+
+export type HeroBlockAlignment = (typeof HERO_BLOCK_ALIGNMENTS)[number];
+
+/**
+ * Whether a Block paints in front of or behind the Blocks it overlaps. Among
+ * equals document order decides, as it always has.
+ */
+export const HERO_BLOCK_LAYERS = ["back", "front"] as const;
+
+export type HeroBlockLayer = (typeof HERO_BLOCK_LAYERS)[number];
+
+/**
+ * A Block's displacement from its place in the Zone stack, in rem. It moves
+ * that Block only, never its neighbours: positive `x` moves right, positive
+ * `y` moves **down**.
+ */
+export interface HeroBlockOffset {
+  x: number;
+  y: number;
+}
+
+/** Each axis runs −3…3 rem on the 0.5 grid — thirteen steps. */
+export const HERO_BLOCK_OFFSET_LIMIT = 3;
+
+/**
+ * No displacement, and so the default of every Block's `offset`. Frozen
+ * because it is handed out as a value, not copied: a Block that wants an
+ * Offset builds its own.
+ */
+export const HERO_BLOCK_OFFSET_NONE: Readonly<HeroBlockOffset> = Object.freeze({
+  x: 0,
+  y: 0,
+});
+
+/**
+ * A Panel's named colours. This is deliberately not the text colour list:
+ * `black` is Panel-only vocabulary, and a Panel has no `default` because it
+ * is mode-independent and so has nothing to follow.
+ */
+export const HERO_PANEL_COLOR_TOKENS = [
+  "white",
+  "black",
+  "primary",
+  "secondary",
+] as const;
+
+export type HeroPanelColorToken = (typeof HERO_PANEL_COLOR_TOKENS)[number];
+
+/** A Panel colour: one of the Panel's own tokens, or `#rrggbb`. */
+export type HeroPanelColor = HeroPanelColorToken | HexColor;
+
+/** Corner radius steps, resolved at the theme's current `--ui-radius`. */
+export const HERO_PANEL_RADII = ["none", "sm", "md", "lg", "full"] as const;
+
+export type HeroPanelRadius = (typeof HERO_PANEL_RADII)[number];
+
+/**
+ * The surface a Block paints behind itself. No Panel is `null`, never a
+ * string. `opacity` is a whole percentage of the fill colour alone, so `0`
+ * with `blur: true` is pure frosting and `0` with `blur: false` is invisible —
+ * both are legitimate, neither is an error.
+ *
+ * `panel` carried the two words `"none"` and `"translucent"` before it became
+ * an object. The guards still read them — a backend that has not shipped its
+ * half of this amendment exports them, and a Hero that silently loses its
+ * Panels during a rollout is worse than one that reads both forms — but they
+ * are normalised away to `null` and to „Glas“, so nothing downstream of the
+ * guards ever meets one, and nothing writes them.
+ */
+export interface HeroPanel {
+  color: HeroPanelColor;
+  opacity: number;
+  radius: HeroPanelRadius;
+  blur: boolean;
+}
+
+/**
+ * „Glas“ — the Panel's preset and starting point. The contract defines it as
+ * the default of each of its keys rather than as a separate object, so this
+ * constant is both: the guards read every key with the matching value here as
+ * its fallback, which is what makes `panel: {}` normalise to exactly this.
+ *
+ * Frozen, because a guard hands out a copy of it and never it — a preset one
+ * Block could edit would be every other Block's preset too.
+ */
+export const HERO_PANEL_GLASS: Readonly<HeroPanel> = Object.freeze({
+  color: "white",
+  opacity: 60,
+  radius: "md",
+  blur: true,
+});
+
+export const HERO_BLOCK_TYPES = ["text", "richtext", "image"] as const;
+
+export type HeroBlockType = (typeof HERO_BLOCK_TYPES)[number];
+
+/** Six text steps; the Compact Hero renders each one step down. */
+export const HERO_TEXT_SIZES = ["xs", "sm", "md", "lg", "xl", "2xl"] as const;
+
+export type HeroTextSize = (typeof HERO_TEXT_SIZES)[number];
+
+export const HERO_TEXT_WEIGHTS = ["normal", "bold"] as const;
+
+export type HeroTextWeight = (typeof HERO_TEXT_WEIGHTS)[number];
+
+/** Image Block max height: 2 / 3.5 / 6 / 10 / 16 rem. */
+export const HERO_IMAGE_MAX_HEIGHTS = ["xs", "sm", "md", "lg", "xl"] as const;
+
+export type HeroImageMaxHeight = (typeof HERO_IMAGE_MAX_HEIGHTS)[number];
+
+/** The named colours a text or rich-text Block may carry instead of a hex value. */
+export const HERO_COLOR_TOKENS = [
+  "default",
+  "primary",
+  "secondary",
+  "white",
+] as const;
+
+export type HeroColorToken = (typeof HERO_COLOR_TOKENS)[number];
+
+/**
+ * `#rrggbb` — no alpha channel, no shorthand. The template literal only keeps
+ * a named token from being assigned where a colour is meant; the six hex digits
+ * themselves are enforced by `HEX_COLOR_PATTERN` and by the guards, not by the
+ * type.
+ */
+export type HexColor = `#${string}`;
+
+/** A text or rich-text colour: one of the named tokens, or `#rrggbb`. */
+export type HeroColor = HeroColorToken | HexColor;
+
+export const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
+
+/** Block ids are generated by the admin editor and unique within a layout. */
+export const HERO_BLOCK_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+
+export const HERO_LAYOUT_MAX_BLOCKS = 12;
+
+/** Per locale, for `text.text` and `image.alt`. */
+export const HERO_TEXT_MAX_LENGTH = 200;
+
+/**
+ * Per locale, for `richtext.html`, measured **after** sanitising. The guards
+ * see raw input and so cannot check it; the render path enforces it once it
+ * has sanitised, and rejects with `max_length` above it.
+ */
+export const HERO_RICHTEXT_MAX_LENGTH = 10_000;
+
+/**
+ * Per locale, the cap on `richtext.html` **before** sanitising — the one a
+ * guard can apply. Markup that survives sanitising is a fraction of what goes
+ * in, so a value between the two caps is normal input, not an over-long one.
+ */
+export const HERO_RICHTEXT_RAW_MAX_LENGTH = 50_000;
+
+/**
+ * A reference to a public image in the instance's Media Library.
+ *
+ * `source: "external"` exists in the contract only to be rejected. `url`,
+ * `width` and `height` are derived: the backend adds them when it exports the
+ * reference and strips them again on input. `width` and `height` are the
+ * original dimensions of the medium and are absent while the backfill has not
+ * reached it — a Block with an unmeasured image reserves height only.
+ */
+export interface HeroMediaReference {
+  source: "media";
+  mediaId: string;
+  url?: string;
+  width?: number;
+  height?: number;
+}
+
+/** The fields every Block carries, whatever its type. */
+export interface HeroBlockBase {
+  id: string;
+  zone: HeroZone;
+  outerSpacing: HeroSpacing;
+  innerSpacing: HeroSpacing;
+  width: HeroBlockWidth;
+  align: HeroBlockAlignment;
+  /** The surface behind the Block, or `null` for no Panel. */
+  panel: HeroPanel | null;
+  offset: HeroBlockOffset;
+  layer: HeroBlockLayer;
+  /** Hidden in the Compact Hero. Combinable with `hideOnMobile`. */
+  homeOnly: boolean;
+  hideOnMobile: boolean;
+}
+
+export interface HeroTextBlock extends HeroBlockBase {
+  type: "text";
+  text: LocalizedString;
+  size: HeroTextSize;
+  color: HeroColor;
+  weight: HeroTextWeight;
+  /** The readability toggle: a text shadow against a busy Background. */
+  shadow: boolean;
+}
+
+/**
+ * Body copy. Headlines are still `text` Blocks, so the rich-text allowlist can
+ * stay free of headings; `size` and `color` are what a run of words inherits
+ * when it carries no `hero-size-*` or `hero-color-*` class of its own.
+ */
+export interface HeroRichtextBlock extends HeroBlockBase {
+  type: "richtext";
+  html: LocalizedString;
+  size: HeroTextSize;
+  color: HeroColor;
+  shadow: boolean;
+}
+
+export interface HeroImageBlock extends HeroBlockBase {
+  type: "image";
+  image: HeroMediaReference;
+  alt: LocalizedString;
+  maxHeight: HeroImageMaxHeight;
+  invertInDarkMode: boolean;
+}
+
+export type HeroBlock = HeroTextBlock | HeroRichtextBlock | HeroImageBlock;
+
+/**
+ * The admin-editable configuration of the Hero. Lives on the Catalog; the
+ * backend derives the Default Hero Layout when a Catalog stores none.
+ *
+ * Array order of `blocks` is both the stacking order inside a Zone and the
+ * reading order on mobile. There is no `order` field.
+ */
+export interface HeroLayout {
+  version: 1;
+  /** Home page, from the `md` breakpoint up. */
+  height: HeroHeight;
+  /** Home page, below `md`. */
+  mobileHeight: HeroHeight;
+  /** The Compact Hero on every viewport; ignores `mobileHeight`. */
+  compactHeight: HeroHeight;
+  blocks: HeroBlock[];
+}
+
+export const BACKGROUND_VARIANTS = [
+  "mesh",
+  "aurora",
+  "poly",
+  "grid",
+  "minimal",
+] as const;
+
+export type BackgroundVariant = (typeof BACKGROUND_VARIANTS)[number];
+
+export const BACKGROUND_INTENSITIES = ["subtle", "normal", "strong"] as const;
+
+export type BackgroundIntensity = (typeof BACKGROUND_INTENSITIES)[number];
+
+export const BACKGROUND_TYPES = ["variant", "color", "image"] as const;
+
+export type BackgroundType = (typeof BACKGROUND_TYPES)[number];
+
+/** One of the built-in generated backgrounds. */
+export interface VariantBackground {
+  version: 1;
+  type: "variant";
+  variant: BackgroundVariant;
+  orbs: boolean;
+  noise: boolean;
+  intensity: BackgroundIntensity;
+}
+
+/** A flat colour. `dark` falls back to `light` when it is not set. */
+export interface ColorBackground {
+  version: 1;
+  type: "color";
+  light: HexColor;
+  dark?: HexColor;
+}
+
+/** `opacity` is a percentage, 0–100. */
+export interface BackgroundOverlay {
+  color: HexColor;
+  opacity: number;
+}
+
+/** Percentages, 0–100, of the image's own box. */
+export interface BackgroundFocalPoint {
+  x: number;
+  y: number;
+}
+
+/**
+ * An image from the Media Library. The overlay colour of the current colour
+ * mode at full opacity doubles as the placeholder painted before the image
+ * loads, so there is no separate placeholder colour in v1.
+ */
+export interface ImageBackground {
+  version: 1;
+  type: "image";
+  image: HeroMediaReference;
+  focalPoint: BackgroundFocalPoint;
+  overlay: {
+    light: BackgroundOverlay;
+    dark?: BackgroundOverlay;
+  };
+}
+
+/**
+ * What the Hero paints behind its Blocks. Instance-wide: the auth pages render
+ * the same object, adding their own vignette on top.
+ */
+export type Background = VariantBackground | ColorBackground | ImageBackground;
+
+/**
+ * What `/api/theme/bundle` answers with: everything the storefront needs to
+ * paint the Hero and the auth pages, and nothing else. No backend URLs and no
+ * colours — those stay in the CSS routes.
+ *
+ * `heroLayout` and `background` are `null` when the backend could not be read
+ * or delivered something the guards rejected; the Fallback Hero Layout and the
+ * default Background apply in that case.
+ */
+export interface ThemeView {
+  etag: string;
+  name: string;
+  heroLayout: HeroLayout | null;
+  background: Background | null;
+  logo: HeroMediaReference | null;
+}
+
+/**
+ * The Live Preview protocol between the admin's Hero Editor and the storefront
+ * preview route.
+ *
+ * The storefront owns this protocol: these constants and message shapes are
+ * defined here, and the admin UI (`smart-city-booking-vue-app`) copies them
+ * verbatim with a cross-reference comment pointing back at this file. A change
+ * to a message shape bumps `HERO_PREVIEW_PROTOCOL_VERSION` and is noted in both
+ * changelogs. Messages carrying another protocol version, or a type not listed
+ * here, are ignored silently on both sides.
+ */
+export const HERO_PREVIEW_PROTOCOL_VERSION = 1;
+
+/** Admin → storefront: a complete, idempotent snapshot of the Draft. */
+export const HERO_PREVIEW_DRAFT = "hero-preview:draft";
+
+/** Storefront → admin: the frame has mounted and wants the current Draft. */
+export const HERO_PREVIEW_READY = "hero-preview:ready";
+
+/** Storefront → admin: what the rendered Draft measured. */
+export const HERO_PREVIEW_REPORT = "hero-preview:report";
+
+/** Storefront → admin: a Zone was clicked while a Block is selected. */
+export const HERO_PREVIEW_ZONE_CLICK = "hero-preview:zone-click";
+
+/** Storefront → admin: a rendered Block was clicked. */
+export const HERO_PREVIEW_BLOCK_CLICK = "hero-preview:block-click";
+
+export interface HeroPreviewMessageBase {
+  protocol: typeof HERO_PREVIEW_PROTOCOL_VERSION;
+}
+
+/**
+ * `heroLayout` and `background` arrive in Theme Bundle export form, already
+ * resolved by the backend's preview endpoint, but they are typed as `unknown`
+ * on purpose: the preview page is the one place that validates a payload
+ * client-side, and a snapshot that fails the guards leaves the last valid state
+ * in place. `draftId` is a running number, so a report about a superseded Draft
+ * can be discarded. The locale is not in the message — it lives in the URL.
+ */
+export interface HeroPreviewDraftMessage extends HeroPreviewMessageBase {
+  type: typeof HERO_PREVIEW_DRAFT;
+  draftId: number;
+  heroLayout: unknown;
+  background: unknown;
+  name: string;
+  selectedBlockId?: string;
+  colorMode: "light" | "dark";
+}
+
+export interface HeroPreviewReadyMessage extends HeroPreviewMessageBase {
+  type: typeof HERO_PREVIEW_READY;
+}
+
+export const HERO_PREVIEW_WARNING_CODES = [
+  "outside-content-area",
+  "overlap",
+] as const;
+
+export type HeroPreviewWarningCode =
+  (typeof HERO_PREVIEW_WARNING_CODES)[number];
+
+/** `overlap` names the two Blocks; `outside-content-area` names one. */
+export interface HeroPreviewWarning {
+  code: HeroPreviewWarningCode;
+  blockIds: string[];
+}
+
+export type HeroPreviewViewport = "desktop" | "mobile";
+
+export interface HeroPreviewReportMessage extends HeroPreviewMessageBase {
+  type: typeof HERO_PREVIEW_REPORT;
+  draftId: number;
+  viewport: HeroPreviewViewport;
+  warnings: HeroPreviewWarning[];
+  /** Set when the Draft failed the storefront's own validation. */
+  error?: "invalid-draft";
+}
+
+export interface HeroPreviewZoneClickMessage extends HeroPreviewMessageBase {
+  type: typeof HERO_PREVIEW_ZONE_CLICK;
+  zone: HeroZone;
+}
+
+export interface HeroPreviewBlockClickMessage extends HeroPreviewMessageBase {
+  type: typeof HERO_PREVIEW_BLOCK_CLICK;
+  blockId: string;
+}
+
+/** What the storefront accepts from the admin. */
+export type HeroPreviewInboundMessage = HeroPreviewDraftMessage;
+
+/** What the storefront posts to `window.parent`. */
+export type HeroPreviewOutboundMessage =
+  | HeroPreviewReadyMessage
+  | HeroPreviewReportMessage
+  | HeroPreviewZoneClickMessage
+  | HeroPreviewBlockClickMessage;

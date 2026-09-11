@@ -65,6 +65,29 @@ const IMAGE_CONTEXTS = {
     fallback: "thumb",
     sizes: "80px",
   },
+  /**
+   * The image Background behind the Hero and the auth pages — a full-bleed
+   * `object-cover` box. `100vw` is the floor for an unmeasured medium: with
+   * dimensions, `coverImageSizes` replaces it with the larger of the viewport
+   * width and the box height times the aspect ratio, because a box taller
+   * than the image is tall needs more pixels than it is wide.
+   */
+  banner: {
+    presets: ["sm", "md", "lg"],
+    fallback: "lg",
+    sizes: "100vw",
+  },
+  /**
+   * The Hero's image Blocks and the logo above the auth forms. One candidate
+   * at 480px, the contract's choice for v1: a logo never needs more, and the
+   * preset is what makes an SVG an image at all (the original is served as a
+   * download). A wide image Block at the largest height step can outgrow it.
+   */
+  logo: {
+    presets: ["sm"],
+    fallback: "sm",
+    sizes: "480px",
+  },
   /** Checkout add-on icon — a 32px square. */
   mini: {
     presets: ["thumb"],

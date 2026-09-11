@@ -10,6 +10,59 @@ body {
 }
 
 /*
+ * The Background palette BackgroundLayers.vue paints its Variants with. It
+ * lives here, under :root and .dark, so the colour mode is decided by the
+ * `.dark` class in the SSR HTML — on <html> from the colour-mode cookie, or on
+ * any wrapper that forces dark — and never by JavaScript after mount. The
+ * three channel triplets are space-separated so a layer can add its own alpha.
+ */
+:root {
+    --bg-gradient-from: #f9fafb; /* gray-50 */
+    --bg-gradient-via: #ffffff;
+    --bg-gradient-to: #f3f4f6; /* gray-100 */
+    --bg-primary-from: #a5b4fc;
+    --bg-primary-to: #c4b5fd;
+    --bg-secondary-from: #93c5fd;
+    --bg-secondary-to: #67e8f9;
+    --bg-tertiary-from: #c4b5fd;
+    --bg-tertiary-to: #f9a8d4;
+    --bg-quaternary-from: #6ee7b7;
+    --bg-quaternary-to: #93c5fd;
+    --bg-accent: 99 102 241;
+    --bg-base: 100 116 139;
+    --bg-line: 71 85 105;
+    --bg-poly-opacity: 0.6;
+    --bg-orb-opacity: 0.25;
+    --bg-grid-opacity: 0.1;
+    --bg-noise-opacity: 0.025;
+    --bg-vignette-opacity: 0.1;
+    /* Scaled by BackgroundLayers' intensity classes; 1 keeps every calc() valid outside them. */
+    --bg-intensity: 1;
+}
+
+.dark {
+    --bg-gradient-from: #101828; /* gray-900 */
+    --bg-gradient-via: #030712; /* gray-950 */
+    --bg-gradient-to: #000000;
+    --bg-primary-from: #6366f1;
+    --bg-primary-to: #8b5cf6;
+    --bg-secondary-from: #3b82f6;
+    --bg-secondary-to: #06b6d4;
+    --bg-tertiary-from: #8b5cf6;
+    --bg-tertiary-to: #ec4899;
+    --bg-quaternary-from: #10b981;
+    --bg-quaternary-to: #3b82f6;
+    --bg-accent: 99 102 241;
+    --bg-base: 255 255 255;
+    --bg-line: 255 255 255;
+    --bg-poly-opacity: 0.4;
+    --bg-orb-opacity: 0.15;
+    --bg-grid-opacity: 0.05;
+    --bg-noise-opacity: 0.015;
+    --bg-vignette-opacity: 0.4;
+}
+
+/*
  * iOS Safari zooms into a focused form field whose font-size is below 16px.
  * Nuxt UI's default field size (`md`) is `text-sm` = 14px, so every input on a
  * phone triggered that zoom and left the page zoomed in afterwards.
@@ -32,6 +85,215 @@ body {
 .glass-light {
   @apply bg-slate-50/20 dark:bg-gray-900/40 backdrop-blur-lg;
 }
+
+/*
+ * The typography of a rich-text Block in the Hero. Its markup arrives through
+ * `v-html`, server-sanitised against the frozen allowlist (p, br, strong, em,
+ * u, a, ul, ol, li), so no utility class can reach the tags inside it — this
+ * rule styles them instead. The preflight would otherwise leave paragraphs
+ * without spacing, lists without markers and links without an underline.
+ * Colour, size, alignment and shadow inherit from the Block's root, which
+ * HeroBlock.vue classes like a text Block; strong, em and u keep the
+ * browser's own rendering.
+ */
+.hero-richtext {
+    overflow-wrap: anywhere;
+}
+
+.hero-richtext p,
+.hero-richtext ul,
+.hero-richtext ol {
+    margin: 0;
+}
+
+.hero-richtext p + p,
+.hero-richtext p + ul,
+.hero-richtext p + ol,
+.hero-richtext ul + p,
+.hero-richtext ol + p,
+.hero-richtext li + li {
+    margin-top: 0.5em;
+}
+
+/*
+ * Markers sit inside the line, so a list follows its Zone's alignment like
+ * the paragraphs around it — centred in a centre column, right-aligned in a
+ * right one — instead of hanging off the left edge of a centred Block.
+ */
+.hero-richtext ul,
+.hero-richtext ol {
+    list-style-position: inside;
+    padding-inline-start: 0;
+}
+
+.hero-richtext ul {
+    list-style: disc;
+}
+
+.hero-richtext ol {
+    list-style: decimal;
+}
+
+.hero-richtext a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
+
+/*
+ * The class vocabulary of rendered rich text, painted: the steps of the text
+ * scale, the four named colours and a paragraph's own alignment. Those are
+ * everything a run of words may still carry after the class pass
+ * (`shared/utils/heroRichtextAllowlist.ts`), and none of them can be a
+ * utility class the way a Block's own fields are — the markup is a string
+ * that goes into the page through `v-html`, so these rules are the only place
+ * the vocabulary can become paint.
+ *
+ * `@apply` rather than hand-written lengths, so a marked-up word is spelled
+ * in exactly the Tailwind classes `heroClasses.ts` gives the Block around it.
+ * These rules are a second copy of that table and there is no way around it —
+ * a stylesheet cannot import a TypeScript record — so the copy is kept honest
+ * from the outside instead: `tests/heroClasses.test.ts` reads this file and
+ * fails the moment a value here and a value there disagree.
+ *
+ * Every selector names its element — `span` for a marked run, `p` for a
+ * paragraph — because the vocabulary does: the class pass keeps `hero-size-*`
+ * and `hero-color-*` on a `<span>` and `hero-align-*` on a `<p>`, and drops
+ * both attributes everywhere else. The rules say the same thing the pass
+ * enforces rather than painting whatever wears the class.
+ *
+ * The two hooks the selectors need are on the rich-text root, because neither
+ * fact is in the markup: `.hero-compact` is the Hero's mode, a component
+ * prop, and `.hero-on-panel` is the Block's Panel, which only the Block
+ * knows. Both come from `richtextBlockClasses`.
+ */
+
+/*
+ * A run's step is absolute on the scale, not relative to the Block's: a
+ * font-size on the run against a font-size on the root, so two `md`s never
+ * compound into an `lg`. Mobile and desktop are the same two values a text
+ * Block renders at, `md:` and all.
+ */
+.hero-richtext span.hero-size-xs {
+    @apply text-xs md:text-sm;
+}
+
+.hero-richtext span.hero-size-sm {
+    @apply text-sm md:text-base;
+}
+
+.hero-richtext span.hero-size-md {
+    @apply text-base md:text-lg;
+}
+
+.hero-richtext span.hero-size-lg {
+    @apply text-lg md:text-2xl;
+}
+
+.hero-richtext span.hero-size-xl {
+    @apply text-xl md:text-3xl;
+}
+
+.hero-richtext span.hero-size-2xl {
+    @apply text-2xl md:text-5xl;
+}
+
+/*
+ * The Compact Hero, one step down — the second axis every Hero text size has,
+ * so a marked-up word steps with everything around it. The compound selector
+ * is what beats the rules above, whatever their order, and `xs` has nowhere
+ * to step, exactly as in the table.
+ */
+.hero-richtext.hero-compact span.hero-size-xs {
+    @apply text-xs;
+}
+
+.hero-richtext.hero-compact span.hero-size-sm {
+    @apply text-xs md:text-sm;
+}
+
+.hero-richtext.hero-compact span.hero-size-md {
+    @apply text-sm md:text-base;
+}
+
+.hero-richtext.hero-compact span.hero-size-lg {
+    @apply text-base md:text-lg;
+}
+
+.hero-richtext.hero-compact span.hero-size-xl {
+    @apply text-lg md:text-2xl;
+}
+
+.hero-richtext.hero-compact span.hero-size-2xl {
+    @apply text-xl md:text-3xl;
+}
+
+/*
+ * The four named colours, resolved the way a Block resolves its own: the
+ * theme's `--ui-primary` / `--ui-secondary` from the stylesheet route behind
+ * `text-primary` and `text-secondary`, and `default` following the colour
+ * mode. There is no `hero-color-black`; a run that names nothing inherits the
+ * Block's colour, which is the whole of "follows the Block".
+ *
+ * A `data-color` run needs no rule at all: the class pass writes the
+ * regex-validated hex into a `style` on the same span, and an inline
+ * declaration beats every rule here on its own.
+ */
+.hero-richtext span.hero-color-default {
+    @apply text-black dark:text-white;
+}
+
+.hero-richtext span.hero-color-primary {
+    @apply text-primary;
+}
+
+.hero-richtext span.hero-color-secondary {
+    @apply text-secondary;
+}
+
+.hero-richtext span.hero-color-white {
+    @apply text-white;
+}
+
+/*
+ * `default` on a Panel is black in both modes, as it is for the Block's own
+ * copy (`PANEL_DEFAULT_COLOR_CLASS`): a Panel is painted the same in both, so
+ * white text in dark mode would land on a Panel that stayed white.
+ */
+.hero-richtext.hero-on-panel span.hero-color-default {
+    @apply text-black;
+}
+
+/*
+ * A paragraph's own alignment, which overrides the Block's for that paragraph
+ * alone. The Block declares its `align` as a `text-align` on its box, so
+ * every paragraph inherits it; a rule that matches the paragraph itself beats
+ * an inherited value outright, whatever either one's specificity. A paragraph
+ * without the class keeps inheriting, and that is "follows the Block".
+ */
+.hero-richtext p.hero-align-left {
+    @apply text-left;
+}
+
+.hero-richtext p.hero-align-center {
+    @apply text-center;
+}
+
+.hero-richtext p.hero-align-right {
+    @apply text-right;
+}
+
+/*
+ * The Block the admin's Hero Editor has selected, on the Live Preview. The
+ * bridge marks it with an attribute rather than a class: Vue rewrites a
+ * Block's class list when a Draft changes its box, and would drop a class
+ * it did not put there.
+ */
+[data-hero-selected] {
+    outline: 2px solid var(--ui-primary);
+    outline-offset: 2px;
+}
+
 
 .container {
     max-width: 1400px;

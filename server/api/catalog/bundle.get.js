@@ -69,7 +69,6 @@ export default createConditionalCachedHandler(
 
     const result = {
       offersEnabled: data.offersEnabled,
-      branding: slugRes?.data?.branding ?? data.branding,
       portalUrl: slugRes?.data?.portalUrl ?? data.portalUrl,
       catalog: slugCatalog ?? data.catalog,
       tenants: data.tenants ?? [],
