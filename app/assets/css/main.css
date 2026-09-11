@@ -295,23 +295,29 @@ body {
 }
 
 
+/*
+ * Centred horizontally only. `margin: auto` on all four sides let a container
+ * that is a direct child of a `flex-col` layout soak up the free vertical
+ * space of a short page, which showed as a gap between the navigation bar
+ * and the content on the panel pages (Mobile Key, invoices, ...).
+ */
 .container {
     max-width: 1400px;
-    margin: auto;
+    margin-inline: auto;
     padding-left: 20px;
     padding-right: 20px;
 }
 
 .container-md {
     max-width: 900px;
-    margin: auto;
+    margin-inline: auto;
     padding-left: 20px;
     padding-right: 20px;
 }
 
 .container-sm {
     max-width: 600px;
-    margin: auto;
+    margin-inline: auto;
     padding-left: 20px;
     padding-right: 20px;
 }
