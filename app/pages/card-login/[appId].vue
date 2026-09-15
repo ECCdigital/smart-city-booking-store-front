@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useAuth } from "~/composables/auth/useAuth";
 import { useAuthStore } from "~~/stores/auth.js";
 import CardLoginCard from "~/components/auth/CardLoginCard";
+import type { CardMethod } from "~~/shared/types/api";
 
 definePageMeta({ layout: "default" });
 
@@ -15,14 +16,14 @@ const { getCardAuthMethods } = useAuth();
 
 const appId = computed(() => route.params.appId as string);
 
-const cardMethod = ref<any | null>(null);
+const cardMethod = ref<CardMethod | null>(null);
 const loading = ref(true);
 
 const fetchCardMethod = async () => {
   loading.value = true;
   try {
     const methods = await getCardAuthMethods();
-    cardMethod.value = methods.find((m: any) => m.id === appId.value) || null;
+    cardMethod.value = methods.find((m) => m.id === appId.value) || null;
   } catch {
     cardMethod.value = null;
   } finally {

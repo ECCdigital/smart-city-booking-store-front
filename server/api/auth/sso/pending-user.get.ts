@@ -1,5 +1,13 @@
 import jwt from "jsonwebtoken";
 
+/** The OpenID claims the pending Keycloak token is read for. */
+interface KeycloakIdTokenClaims {
+    email?: string;
+    given_name?: string;
+    family_name?: string;
+    preferred_username?: string;
+}
+
 export default defineEventHandler(async (event) => {
 
     const pendingToken = getCookie(event, "kc-pending-token");
@@ -12,7 +20,7 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        const decoded = jwt.decode(pendingToken) as any;
+        const decoded = jwt.decode(pendingToken) as KeycloakIdTokenClaims | null;
 
 
         return {

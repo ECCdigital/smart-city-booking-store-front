@@ -243,8 +243,4 @@ function openDetails() {
 function onDownloadIcal() {
   downloadBookingIcal(props.booking.id, props.booking.tenantId);
 }
-function openMobileKey() {
-  const router = useRouter();
-  router.push({ path: `/account/keys/${props.booking.id}` });
-}
 </script>

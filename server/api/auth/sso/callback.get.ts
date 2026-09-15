@@ -1,7 +1,10 @@
+import type { H3Event } from "h3";
 import {
     getKeycloakConfig,
     getKeycloakEndpoints,
 } from "~~/server/utils/keycloak";
+import type { KeycloakTokenResponse } from "~~/server/utils/keycloak";
+import type { UpstreamError } from "~~/server/utils/upstreamError";
 
 export default defineEventHandler(async (event) => {
     const config = await getKeycloakConfig(event);
@@ -47,7 +50,7 @@ export default defineEventHandler(async (event) => {
     const redirectUri = `${getRequestURL(event).origin}/api/auth/sso/callback`;
 
     try {
-        const tokenResponse: any = await $fetch(endpoints.token, {
+        const tokenResponse = await $fetch<KeycloakTokenResponse>(endpoints.token, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({
@@ -69,7 +72,8 @@ export default defineEventHandler(async (event) => {
                 body: { token: kcAccessToken },
             });
             userExists = true;
-        } catch (backendError: any) {
+        } catch (err) {
+            const backendError = err as UpstreamError;
             if (backendError.response?.status !== 404) {
                 throw backendError;
             }
@@ -126,7 +130,7 @@ export default defineEventHandler(async (event) => {
 });
 
 function setAuthCookies(
-    event: any,
+    event: H3Event,
     accessToken: string,
     refreshToken?: string
 ) {

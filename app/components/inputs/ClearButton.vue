@@ -19,7 +19,7 @@
   </div>
 </template>
 <script setup >
-const props = defineProps({
+defineProps({
   showClearButton: {
     type: Boolean,
     default: false,

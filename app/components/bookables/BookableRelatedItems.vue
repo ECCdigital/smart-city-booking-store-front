@@ -28,7 +28,7 @@
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
 
-const props = defineProps({
+defineProps({
   relatedBookables: {
     type: Array,
     default: () => [],

@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   const bookableID = getRouterParam(event, "bookableID");
   const { tenantID } = getQuery(event, "tenantID");
 
-  const { data, error } = await serverFetch(
+  const { data } = await serverFetch(
     event,
     `/api/${tenantID}/bookables/public/${bookableID}`,
     {

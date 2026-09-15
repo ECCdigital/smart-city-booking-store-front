@@ -1,9 +1,6 @@
-import { logger } from "../utils/logger";
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 
 export default defineEventHandler(async (event) => {
-  const log = logger.child({ caller: "server/api/catalog/[slug].get" });
-
   const { data, error } = await serverFetch(event, `/api/catalog/public`, {
     method: "GET",
   });

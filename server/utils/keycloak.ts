@@ -1,4 +1,4 @@
-import { H3Event } from "h3";
+import type { H3Event } from "h3";
 
 interface KeycloakAppConfig {
     id: string;
@@ -6,7 +6,13 @@ interface KeycloakAppConfig {
     serverUrl: string;
     realm: string;
     publicClient: string;
-    [key: string]: any;
+    [key: string]: unknown;
+}
+
+/** What Keycloak's token endpoint answers with. */
+export interface KeycloakTokenResponse {
+    access_token: string;
+    refresh_token?: string;
 }
 
 let cachedConfig: KeycloakAppConfig | null = null;
@@ -14,7 +20,7 @@ let cacheTimestamp = 0;
 const CACHE_TTL = 60_000;
 
 export async function getKeycloakConfig(
-    event?: H3Event
+    _event?: H3Event
 ): Promise<KeycloakAppConfig> {
     const now = Date.now();
 
@@ -24,10 +30,12 @@ export async function getKeycloakConfig(
 
     const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
 
-    const instance = await $fetch(`${API_BASE_URL}/api/instances/public`);
+    const instance = await $fetch<{ applications?: KeycloakAppConfig[] }>(
+        `${API_BASE_URL}/api/instances/public`
+    );
 
     const keycloakApp = instance?.applications?.find(
-        (app: any) => app.id === "keycloak" && app.active
+        (app) => app.id === "keycloak" && app.active
     );
 
 

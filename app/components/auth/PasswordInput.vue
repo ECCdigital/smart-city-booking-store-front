@@ -30,7 +30,7 @@ const password = defineModel({
   type: String,
   required: true,
 });
-const props = defineProps({
+defineProps({
   label: {
     type: String,
     required: true,

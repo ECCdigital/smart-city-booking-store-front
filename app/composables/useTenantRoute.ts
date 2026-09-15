@@ -29,14 +29,14 @@ export const useTenantRoute = () => {
     return `/t/${tenantID.value}${cleaned}`;
   }
 
-  function resolveTargetPath(to: string | Record<string, any>): string {
+  function resolveTargetPath(to: string | Record<string, unknown>): string {
     if (typeof to === "string") return to;
     if (typeof to.path === "string") return to.path;
     return "";
   }
 
   function queryForNavigation(
-    to: string | Record<string, any>,
+    to: string | Record<string, unknown>,
   ): Record<string, string | string[]> {
     const targetPath = resolveTargetPath(to);
     const canResolveTargetPath = targetPath.length > 0;
@@ -59,7 +59,7 @@ export const useTenantRoute = () => {
     };
   }
 
-  function tenantTo(to: string | Record<string, any>) {
+  function tenantTo(to: string | Record<string, unknown>) {
     const navigationQuery = queryForNavigation(to);
 
     if (typeof to === "string") {

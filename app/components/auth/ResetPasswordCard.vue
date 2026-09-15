@@ -57,7 +57,7 @@ import PasswordProgress from "~/components/auth/PasswordProgress.vue";
 
 //const t = useI18n().t;
 
-const props = defineProps({
+defineProps({
   loading: {
     type: Boolean,
     default: false,

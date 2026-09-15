@@ -206,13 +206,6 @@ const isAutoPolling = computed(
   () => canAutoPoll.value && autoPollStartedAt.value != null
 );
 
-const autoPollRemainingMs = computed(() => {
-  if (!autoPollStartedAt.value) return POLL_WINDOW_MS;
-  return Math.max(
-    POLL_WINDOW_MS - (autoPollTick.value - autoPollStartedAt.value),
-    0
-  );
-});
 
 const paymentConfirmedDuringPolling = computed(
   () => paymentConfirmedByPolling.value

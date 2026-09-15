@@ -259,11 +259,7 @@
 import ClearButton from "~/components/inputs/ClearButton.vue";
 import PeriodFieldCompact from "~/components/inputs/PeriodFieldCompact.vue";
 import InputTime from "~/components/inputs/InputTime.vue";
-
-type TimePeriod = {
-  start: number | null;
-  end: number | null;
-};
+import type { TimePeriod } from "~/types/catalogParams";
 
 type TimeHM = { hours: number | null; minutes: number | null } | null;
 type MissingValues = { start: string[]; end: string[] };
@@ -275,8 +271,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:timePeriod", v: TimePeriod): void;
-  (e: "selectDate", v: TimePeriod): void;
+  (e: "update:timePeriod" | "selectDate", v: TimePeriod): void;
   (e: "removeDate"): void;
   (e: "update:open", v: boolean): void;
 }>();
