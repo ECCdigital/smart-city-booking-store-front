@@ -54,9 +54,8 @@ export function useCatalogBundle() {
     contextKey,
     { effectiveBookableID = null, effectiveEventID = null } = {},
   ) {
-    if (data?.branding) {
+    if (data?.portalUrl !== undefined) {
       portalStore.$patch({
-        branding: data.branding,
         portalUrl: data.portalUrl ?? null,
         loadedFor: contextKey,
       });
@@ -279,7 +278,6 @@ export function useCatalogBundle() {
       }
 
       return {
-        branding: portalStore.branding,
         portalUrl: portalStore.portalUrl,
         catalog: catalogStore.catalog,
         tenants: tenantStore.tenants,

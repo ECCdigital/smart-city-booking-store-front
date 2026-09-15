@@ -7,10 +7,6 @@ import DetailsArea from "~/components/search/DetailsArea.vue";
 definePageMeta({
   layout: "catalog",
   middleware: ["catalog-auth"],
-  hero: {
-    height: "sm",
-    showOnMobile: true,
-  },
 });
 
 const route = useRoute();

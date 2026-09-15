@@ -12,6 +12,10 @@ import * as locales from "@nuxt/ui/locale";
 
 const { locale } = useI18n();
 const siteName = useSiteName();
+const { version: themeVersion } = await useThemeBundle();
+
+const themeCssHref = computed(() => `/api/theme/css${themeVersion.value}`);
+const faviconHref = computed(() => `/api/theme/favicon${themeVersion.value}`);
 
 const lang = computed(() => locales[locale.value].code);
 const dir = computed(() => locales[locale.value].dir);
@@ -27,8 +31,8 @@ useHead({
     return `${titleChunk} | ${site}`;
   },
   link: [
-    { rel: "stylesheet", href: `/api/theme/css` },
-    { rel: "icon", href: `/api/theme/favicon`, key: "favicon" },
+    { rel: "stylesheet", href: themeCssHref },
+    { rel: "icon", href: faviconHref, key: "favicon" },
   ],
 });
 </script>

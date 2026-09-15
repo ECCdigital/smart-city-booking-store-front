@@ -1,4 +1,15 @@
 import "dotenv/config";
+import { HERO_PREVIEW_ROUTES } from "./shared/utils/heroPreviewRoutes";
+
+// The Hero's Live Preview is framed by the admin UI, so it alone drops
+// `X-Frame-Options` and is kept out of search indexes. Which origin may frame
+// it is only known at start-up and is added in
+// `server/plugins/hero-preview-headers.ts`; every other route keeps `'self'`.
+const heroPreviewRouteRule = {
+  headers: { "X-Robots-Tag": "noindex" },
+  security: { headers: { xFrameOptions: false } },
+};
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
@@ -9,6 +20,11 @@ export default defineNuxtConfig({
   },
 
   pages: true,
+
+  // Agent worktrees (Claude Code, Cursor) live under .claude/ inside the
+  // project and bring their own node_modules; the dev watcher would otherwise
+  // pick them up and run out of file descriptors (EMFILE on macOS).
+  ignore: [".claude/**"],
 
   vite: {
     server: {
@@ -35,6 +51,9 @@ export default defineNuxtConfig({
     // Colour mode is now in the SSR HTML (cookie + html class). A shared ISR
     // cache would serve one visitor's mode to the next for 300s.
     "/catalog/**": { ssr: true },
+    ...Object.fromEntries(
+      HERO_PREVIEW_ROUTES.map((route) => [route, heroPreviewRouteRule]),
+    ),
   },
 
   modules: [

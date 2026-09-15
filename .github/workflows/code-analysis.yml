@@ -8,12 +8,16 @@ jobs:
 
     strategy:
       matrix:
-        # 18.x dropped, not overlooked: nuxt 4.2.1 and @oxc-parser's native
-        # bindings both require node "^20.19.0 || >=22.12.0", so `npm ci`
-        # cannot complete there. If this matrix grows a second entry, add
+        # 20.x dropped, not overlooked: jsdom 30, which the server-side
+        # rich-text sanitiser pulls in, requires node
+        # "^22.22.2 || ^24.15.0 || >=26", and its undici reads
+        # `markAsUncloneable` from node:worker_threads, which node 20 does not
+        # have. Importing jsdom there throws before a single test runs. The
+        # runtime image in the Dockerfile is on 22 for the same reason; the two
+        # move together. If this matrix grows a second entry, add
         # `fail-fast: false` too, or a lint failure on one line will cancel
         # the other before its tests run.
-        node-version: [20.x]
+        node-version: [22.x]
 
     steps:
       - uses: actions/checkout@v4

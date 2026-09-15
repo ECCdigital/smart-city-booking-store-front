@@ -1,5 +1,5 @@
 # 1) Dependencies
-FROM node:20-slim AS deps
+FROM node:22-slim AS deps
 WORKDIR /app
 
 # Make install deterministic
@@ -11,7 +11,7 @@ COPY package*.json ./
 RUN npm ci --ignore-scripts
 
 # 2) Build
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
 ENV NITRO_PRESET=node-server
 
@@ -22,7 +22,7 @@ COPY . .
 RUN npm run build
 
 # 3) Runtime
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

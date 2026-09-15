@@ -5,7 +5,8 @@ export default defineNuxtModule({
   meta: { name: "tenant-routes" },
   setup() {
     extendPages((pages) => {
-      const excluded = ["/login", "/register", "/password"];
+      // The Hero's Live Preview exists for the instance catalog only.
+      const excluded = ["/login", "/register", "/password", "/preview"];
 
       function shouldInclude(path: string): boolean {
         return !excluded.some((ex) => path.startsWith(ex));

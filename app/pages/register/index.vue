@@ -52,7 +52,7 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <PageBackground variant="poly" :vignette="true" intensity="normal">
+  <PageBackground>
     <AuthTitleSection
       is-large-version
       class="hidden lg:flex w-3/5 items-center justify-center"

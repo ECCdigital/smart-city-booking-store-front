@@ -124,12 +124,10 @@ definePageMeta({
   requiresAuth: true,
   layout: "panel",
   navigation: "user",
-  hero: {
-    height: "sm",
-    showOnMobile: true,
-    staticSubtitle: "Mobile Key",
-  },
 });
+
+const { t } = useI18n();
+usePageTitle(() => t("meta.pages.mobileKey"));
 
 const route = useRoute();
 const { resolveScan, getBookingsForAccessPoint } = useAccessPoints();

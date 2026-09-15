@@ -53,7 +53,7 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <PageBackground variant="poly" :vignette="true" intensity="normal">
+  <PageBackground>
     <div class="flex items-center justify-center p-6 w-full">
       <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
         <template #header>

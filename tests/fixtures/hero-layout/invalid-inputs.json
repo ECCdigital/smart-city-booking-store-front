@@ -1,0 +1,205 @@
+[
+  {
+    "name": "a layout with an unknown schema version",
+    "target": "heroLayout",
+    "input": { "version": 2, "blocks": [] },
+    "expected": { "path": "heroLayout.version", "code": "invalid_enum" }
+  },
+  {
+    "name": "a layout without blocks",
+    "target": "heroLayout",
+    "input": { "version": 1 },
+    "expected": { "path": "heroLayout.blocks", "code": "required" }
+  },
+  {
+    "name": "a layout with an unknown height step",
+    "target": "heroLayout",
+    "input": { "version": 1, "height": "huge", "blocks": [] },
+    "expected": { "path": "heroLayout.height", "code": "invalid_enum" }
+  },
+  {
+    "name": "two blocks sharing an id",
+    "target": "heroLayout",
+    "input": {
+      "version": 1,
+      "blocks": [
+        { "id": "twice", "type": "text", "zone": "top-left", "text": { "de": "Eins" } },
+        { "id": "twice", "type": "text", "zone": "top-right", "text": { "de": "Zwei" } }
+      ]
+    },
+    "expected": { "path": "heroLayout.blocks[1].id", "code": "duplicate_id" }
+  },
+  {
+    "name": "a block id with a character outside the pattern",
+    "target": "heroLayout",
+    "input": {
+      "version": 1,
+      "blocks": [{ "id": "not ok", "type": "text", "zone": "top-left", "text": { "de": "Eins" } }]
+    },
+    "expected": { "path": "heroLayout.blocks[0].id", "code": "invalid_format" }
+  },
+  {
+    "name": "a block without an id",
+    "target": "heroLayout",
+    "input": {
+      "version": 1,
+      "blocks": [{ "type": "text", "zone": "top-left", "text": { "de": "Eins" } }]
+    },
+    "expected": { "path": "heroLayout.blocks[0].id", "code": "required" }
+  },
+  {
+    "name": "a block in an unknown zone",
+    "target": "heroLayout",
+    "input": {
+      "version": 1,
+      "blocks": [{ "id": "a", "type": "text", "zone": "middle-centre", "text": { "de": "Eins" } }]
+    },
+    "expected": { "path": "heroLayout.blocks[0].zone", "code": "invalid_enum" }
+  },
+  {
+    "name": "a block of an unknown type",
+    "target": "heroLayout",
+    "input": {
+      "version": 1,
+      "blocks": [{ "id": "a", "type": "video", "zone": "top-left" }]
+    },
+    "expected": { "path": "heroLayout.blocks[0].type", "code": "invalid_enum" }
+  },
+  {
+    "name": "a text block without the German locale",
+    "target": "heroLayout",
+    "input": {
+      "version": 1,
+      "blocks": [{ "id": "a", "type": "text", "zone": "top-left", "text": { "en": "One" } }]
+    },
+    "expected": { "path": "heroLayout.blocks[0].text.de", "code": "required" }
+  },
+  {
+    "name": "a text block with a shorthand hex colour",
+    "target": "heroLayout",
+    "input": {
+      "version": 1,
+      "blocks": [
+        { "id": "a", "type": "text", "zone": "top-left", "text": { "de": "Eins" }, "color": "#fff" }
+      ]
+    },
+    "expected": { "path": "heroLayout.blocks[0].color", "code": "invalid_format" }
+  },
+  {
+    "name": "a text block with an unknown size",
+    "target": "heroLayout",
+    "input": {
+      "version": 1,
+      "blocks": [
+        { "id": "a", "type": "text", "zone": "top-left", "text": { "de": "Eins" }, "size": "3xl" }
+      ]
+    },
+    "expected": { "path": "heroLayout.blocks[0].size", "code": "invalid_enum" }
+  },
+  {
+    "name": "a rich-text block without html",
+    "target": "heroLayout",
+    "input": {
+      "version": 1,
+      "blocks": [{ "id": "a", "type": "richtext", "zone": "bottom-center" }]
+    },
+    "expected": { "path": "heroLayout.blocks[0].html", "code": "required" }
+  },
+  {
+    "name": "an image block referencing an external image",
+    "target": "heroLayout",
+    "input": {
+      "version": 1,
+      "blocks": [
+        {
+          "id": "a",
+          "type": "image",
+          "zone": "middle-right",
+          "image": { "source": "external", "url": "https://example.org/logo.png" },
+          "alt": { "de": "Logo" }
+        }
+      ]
+    },
+    "expected": { "path": "heroLayout.blocks[0].image.source", "code": "invalid_custom" }
+  },
+  {
+    "name": "an image block without an alt text",
+    "target": "heroLayout",
+    "input": {
+      "version": 1,
+      "blocks": [
+        {
+          "id": "a",
+          "type": "image",
+          "zone": "middle-right",
+          "image": { "source": "media", "mediaId": "66f1c2000000000000000001" }
+        }
+      ]
+    },
+    "expected": { "path": "heroLayout.blocks[0].alt", "code": "required" }
+  },
+  {
+    "name": "a background of an unknown family",
+    "target": "background",
+    "input": { "version": 1, "type": "gradient" },
+    "expected": { "path": "background.type", "code": "invalid_enum" }
+  },
+  {
+    "name": "a background with an unknown schema version",
+    "target": "background",
+    "input": { "version": 2, "type": "variant", "variant": "poly" },
+    "expected": { "path": "background.version", "code": "invalid_enum" }
+  },
+  {
+    "name": "a variant background with an unknown variant",
+    "target": "background",
+    "input": { "version": 1, "type": "variant", "variant": "waves" },
+    "expected": { "path": "background.variant", "code": "invalid_enum" }
+  },
+  {
+    "name": "a colour background without a light colour",
+    "target": "background",
+    "input": { "version": 1, "type": "color", "dark": "#111827" },
+    "expected": { "path": "background.light", "code": "required" }
+  },
+  {
+    "name": "a colour background with a named colour",
+    "target": "background",
+    "input": { "version": 1, "type": "color", "light": "primary" },
+    "expected": { "path": "background.light", "code": "invalid_format" }
+  },
+  {
+    "name": "an image background without an image",
+    "target": "background",
+    "input": { "version": 1, "type": "image" },
+    "expected": { "path": "background.image", "code": "required" }
+  },
+  {
+    "name": "an image background with a focal point outside the box",
+    "target": "background",
+    "input": {
+      "version": 1,
+      "type": "image",
+      "image": { "source": "media", "mediaId": "66f1c2000000000000000003" },
+      "focalPoint": { "x": 120, "y": 35 }
+    },
+    "expected": { "path": "background.focalPoint.x", "code": "invalid_format" }
+  },
+  {
+    "name": "an image background with an overlay opacity above 100",
+    "target": "background",
+    "input": {
+      "version": 1,
+      "type": "image",
+      "image": { "source": "media", "mediaId": "66f1c2000000000000000003" },
+      "overlay": { "light": { "color": "#000000", "opacity": 140 } }
+    },
+    "expected": { "path": "background.overlay.light.opacity", "code": "invalid_format" }
+  },
+  {
+    "name": "a background that is not an object at all",
+    "target": "background",
+    "input": "poly",
+    "expected": { "path": "background", "code": "invalid_format" }
+  }
+]

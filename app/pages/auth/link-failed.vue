@@ -78,7 +78,7 @@ const showRawReason = computed(
 </script>
 
 <template>
-  <PageBackground variant="poly" :vignette="true" intensity="normal">
+  <PageBackground>
     <div class="flex w-full items-center justify-center p-6">
       <UCard
           variant="soft"

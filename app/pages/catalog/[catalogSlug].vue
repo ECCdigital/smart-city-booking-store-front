@@ -24,11 +24,15 @@ try {
 
 usePageTitle();
 
+const { version: themeVersion } = await useThemeBundle(catalogSlug.value);
+
 useHead({
   link: [
     {
       rel: "stylesheet",
-      href: `/api/theme/${catalogSlug.value}.css`,
+      href: computed(
+        () => `/api/theme/${catalogSlug.value}.css${themeVersion.value}`,
+      ),
     },
   ],
 });

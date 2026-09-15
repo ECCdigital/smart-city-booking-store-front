@@ -50,7 +50,8 @@ usePageTitle(pageTitle);
 </script>
 
 <template>
-  <PageBackground class="error-page" theme="dark" variant="poly" :vignette="true" intensity="normal" >
+  <!-- `dark` on the wrapper forces the dark palette whatever the visitor's colour mode -->
+  <PageBackground class="error-page dark">
     <div class="error-card">
       <UIcon
         size="48"

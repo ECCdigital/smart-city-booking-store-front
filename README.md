@@ -61,7 +61,7 @@ This repository has its **own release line** (currently **v1.x**). It requires t
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) v20+ (recommended; CI tests 18.x and 20.x)
+- [Node.js](https://nodejs.org/) v22.22.2+ (CI tests 22.x; the production image is `node:22-slim`)
 - [npm](https://www.npmjs.com/) v10+
 - [Docker](https://www.docker.com/) v20+ (optional, for container deployments)
 - A running **[v4.x backend API](https://github.com/ECCdigital/smart-city-booking-backend)** instance
@@ -111,7 +111,7 @@ Nuxt maps `runtimeConfig` fields to `NUXT_*` environment variables. Values with 
 | `NUXT_USER_BASE_URL` | **Yes** | Public URL of this storefront (auth emails, server-side) | `https://booking.example.com` |
 | `NUXT_PUBLIC_USER_BASE_URL` | **Yes** | Same URL for client-side redirects (e.g. password reset) | `https://booking.example.com` |
 | `NUXT_ADMIN_BASE_URL` | No | Admin portal URL (server-side) | `https://admin.booking.example.com` |
-| `NUXT_PUBLIC_ADMIN_BASE_URL` | No | Admin portal link in navigation (users with memberships) | `https://admin.booking.example.com` |
+| `NUXT_PUBLIC_ADMIN_BASE_URL` | No | Admin portal link in navigation (users with memberships); needed for the Live Preview of the Hero, which only this origin may frame (`/preview/hero` answers 404 without it) | `https://admin.booking.example.com` |
 | `NUXT_PUBLIC_SILENT_SSO_ENABLED` | No | `true` enables automatic SSO check on page load (Keycloak) | `false` |
 | `NUXT_CACHE_ENABLED` | No | `false` disables the server-side SWR cache (recommended for local dev) | `false` |
 | `LOG_LEVEL` | No | Pino log level: `trace`, `debug`, `info`, `warn`, `error`, `fatal` | `info` |
@@ -310,7 +310,7 @@ definition: `'wasm-unsafe-eval'` in `script-src`, and `permissionsPolicy.camera`
 
 ## Server-Side Cache
 
-The Nitro server proxy routes (`/api/catalog/...`, `/api/theme/...`) use `createConditionalCachedHandler` to optionally keep responses in an SWR cache:
+The Nitro server proxy routes (`/api/catalog/...`) use `createConditionalCachedHandler` to optionally keep responses in an SWR cache:
 
 ```bash
 NUXT_CACHE_ENABLED=true   # SWR cache enabled (default when not set)
@@ -324,10 +324,8 @@ NUXT_CACHE_ENABLED=false  # Disable cache (recommended for local development)
 | `/api/catalog/bundle` | 300s | yes | Auth-scoped key (anon vs. auth cookie) |
 | `/api/catalog/[t]/bundle` | 300s | yes | Includes tenantID + slug in cache key |
 | `/api/catalog/mode` | 300s | yes | Public |
-| `/api/theme/css` | 300s | n/a | Public, anon-scoped |
-| `/api/theme/[slug].css` | 300s | n/a | Includes slug in key |
-| `/api/theme/hero` | 300s | n/a | Reuses `themeBundle` per request |
-| `/api/theme/logo` | 300s | n/a | Reuses `themeBundle` per request |
+
+`/api/theme/bundle`, `/api/theme/css`, `/api/theme/[slug].css` and `/api/theme/favicon` are **not** in this cache. Their freshness is the Theme Bundle's own: the bundle is held per process and revalidated against the backend with a conditional GET (`NUXT_THEME_REVALIDATE_SECONDS`, `NUXT_THEME_REVALIDATE_TIMEOUT_MS`), and the rendered CSS and favicon bytes are memoised per etag. See [ADR 0001](docs/adr/0001-theme-bundle-revalidation-instead-of-purge.md).
 
 The bundle endpoints split the cache key into `auth` vs. `anon` based on the `access-token` cookie. Anonymous requests share a cached response; authenticated requests use the `auth` scope (further keyed by slug / tenant / bookable / event / include).
 

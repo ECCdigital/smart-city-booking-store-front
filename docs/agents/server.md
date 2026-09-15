@@ -12,7 +12,7 @@ server/
     bookables/         # Bookable data, availability, pricing, occupancy
     events/            # Event listing, iCal export
     tenants/           # Tenant info, payment providers, user roles
-    theme/             # Tenant theming (CSS, logo, hero, favicon)
+    theme/             # Tenant theming (bundle, CSS, logo, favicon)
     instance/          # Global instance config
     memberships/       # User memberships
     user/              # User profile updates
@@ -109,6 +109,11 @@ export default createConditionalCachedHandler(
 
 Cache is disabled when `NUXT_CACHE_ENABLED=false`. Always use `authScoped: true` when response content depends on login state.
 
+Do not wrap the theme routes in it: they read the Theme Bundle from the store in
+`server/utils/themeBundleStore.ts`, which owns their freshness (ADR 0001). A
+cached handler would also overwrite the `Cache-Control` a versioned request has
+earned.
+
 ## Adding a new BFF route
 
 1. Create handler in `server/api/` following Nitro file naming conventions
@@ -127,6 +132,7 @@ Server-side config from environment variables (see `.env.example`):
 | `apiBaseUrl` | `NUXT_API_BASE_URL` | Backend API base URL |
 | `userBaseUrl` | `NUXT_USER_BASE_URL` | Storefront public URL |
 | `adminBaseUrl` | `NUXT_ADMIN_BASE_URL` | Admin portal URL |
+| `public.adminBaseUrl` | `NUXT_PUBLIC_ADMIN_BASE_URL` | Admin portal link; its origin (`shared/utils/adminOrigin.ts`) is the only one allowed to frame the Hero's Live Preview (`/preview/hero`) — see `server/plugins/hero-preview-headers.ts` |
 | `cacheEnabled` | `NUXT_CACHE_ENABLED` | Server-side SWR cache |
 
 Access via `useRuntimeConfig()` in server handlers, `useRuntimeConfig().public` for client-safe values.
