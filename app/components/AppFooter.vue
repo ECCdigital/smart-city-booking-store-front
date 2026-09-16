@@ -1,11 +1,20 @@
 <script setup>
 import { useLegalDocuments } from "~/composables/useLegalDocuments.js";
+import { copyrightLine } from "~/utils/copyrightLine.js";
+import { useInstanceStore } from "~~/stores/instance.js";
 
 const documents = useLegalDocuments();
+const instanceStore = useInstanceStore();
 
 // Rendered on the server and reused on hydration. With ISR the cached year is at
 // most 300s stale, which only ever shows on New Year's Eve.
 const year = new Date().getFullYear();
+
+// The rights holder travels with the legal documents on the public instance;
+// it is instance data, not UI copy, so there is no i18n key for it.
+const copyright = computed(() =>
+  copyrightLine(year, instanceStore.instance?.copyright),
+);
 </script>
 
 <template>
@@ -16,7 +25,7 @@ const year = new Date().getFullYear();
     >
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-8">
         <span class="text-gray-600 dark:text-gray-400">
-          © {{ year }}
+          {{ copyright }}
         </span>
 
         <nav v-if="documents.length" class="flex flex-wrap gap-x-6 gap-y-2">
