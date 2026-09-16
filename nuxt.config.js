@@ -114,6 +114,12 @@ export default defineNuxtConfig({
       // HSTS + upgrade-insecure-requests break local HTTP dev in Safari (forces https://localhost).
       strictTransportSecurity:
         process.env.NODE_ENV === "development" ? false : undefined,
+      // OpenStreetMap's tile servers reject requests that carry no Referer and
+      // answer with a 403 "Access blocked" placeholder tile, so every map goes
+      // grey. nuxt-security defaults to `no-referrer`; the browser default only
+      // ever leaks the bare origin cross-origin, which is what OSM's tile usage
+      // policy asks an app to identify itself with.
+      referrerPolicy: "strict-origin-when-cross-origin",
       contentSecurityPolicy: {
         "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://www.orka-mv.de"],
         // Mobile Key / QR-Scan: ohne 'wasm-unsafe-eval' verweigert der Browser die
