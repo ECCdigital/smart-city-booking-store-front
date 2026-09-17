@@ -5,6 +5,7 @@ import {
   ACCESS_ERROR_SCREENS,
   BLOCKING_REASONS,
   buildErrorScreen,
+  errorScreenMoment,
   failureMayPass,
   formatBlockingReasonMessage,
 } from "~/utils/accessErrorScreens.js";
@@ -186,7 +187,10 @@ describe("buildErrorScreen", () => {
   it("weicht bei too_early ohne Datum auf den zweiten Schlüssel aus", () => {
     const screen = buildErrorScreen(ACCESS_ERRORS.TOO_EARLY, { t, label: LABEL });
 
-    expect(screen.description).toBe(de.mobileKey.errors.too_early.description_undated);
+    expect(screen.description).toBe(
+      t("mobileKey.errors.too_early.description_undated", { label: LABEL }),
+    );
+    expect(screen.description).not.toContain("{label}");
   });
 
   it("lässt den Knopf weg, wenn dem Ausweg sein Ziel fehlt", () => {
@@ -289,5 +293,68 @@ describe("formatBlockingReasonMessage", () => {
   it("fällt ohne Grund auf den mitgegebenen Satz zurück", () => {
     expect(formatBlockingReasonMessage([], t, "Fallback")).toBe("Fallback");
     expect(formatBlockingReasonMessage(null, t, "Fallback")).toBe("Fallback");
+  });
+});
+
+describe("errorScreenMoment", () => {
+  const HOUR = 60 * 60 * 1000;
+  const NOW = Date.UTC(2026, 8, 17, 9, 0);
+  const DOOR_ID = "ap-7f3a";
+
+  const booking = {
+    timeBegin: NOW,
+    timeEnd: NOW + HOUR,
+    accessPoints: [
+      { id: DOOR_ID, accessFrom: NOW - HOUR, accessTo: NOW + 2 * HOUR },
+    ],
+    accessEligibility: {
+      accessWindow: { from: NOW - 2 * HOUR, to: NOW + 3 * HOUR },
+    },
+  };
+
+  it("nennt bei too_early den Beginn des Türfensters, bei too_late sein Ende", () => {
+    expect(
+      errorScreenMoment(ACCESS_ERRORS.TOO_EARLY, { booking, accessPointId: DOOR_ID }),
+    ).toBe(NOW - HOUR);
+    expect(
+      errorScreenMoment(ACCESS_ERRORS.TOO_LATE, { booking, accessPointId: DOOR_ID }),
+    ).toBe(NOW + 2 * HOUR);
+  });
+
+  it("weicht ohne Tür auf die Hülle der Buchung aus, ohne Hülle auf die Buchungszeit", () => {
+    expect(errorScreenMoment(ACCESS_ERRORS.TOO_EARLY, { booking })).toBe(
+      NOW - 2 * HOUR,
+    );
+    expect(
+      errorScreenMoment(ACCESS_ERRORS.TOO_LATE, { booking, accessPointId: "other" }),
+    ).toBe(NOW + 3 * HOUR);
+
+    const bare = { timeBegin: NOW, timeEnd: NOW + HOUR, accessEligibility: { accessWindow: null } };
+    expect(errorScreenMoment(ACCESS_ERRORS.TOO_EARLY, { booking: bare })).toBe(NOW);
+    expect(errorScreenMoment(ACCESS_ERRORS.TOO_LATE, { booking: bare })).toBe(
+      NOW + HOUR,
+    );
+  });
+
+  it("kennt für andere Fälle und ohne Buchung keinen Zeitpunkt", () => {
+    expect(errorScreenMoment(ACCESS_ERRORS.GENERIC, { booking })).toBeNull();
+    expect(errorScreenMoment(ACCESS_ERRORS.TOO_LATE, { booking: null })).toBeNull();
+    expect(errorScreenMoment(ACCESS_ERRORS.TOO_EARLY, { booking: {} })).toBeNull();
+  });
+
+  it("nennt bei too_late das Ende, sobald eines bekannt ist - sonst den zweiten Schlüssel", () => {
+    const dated = buildErrorScreen(ACCESS_ERRORS.TOO_LATE, {
+      t,
+      label: LABEL,
+      date: "17.09.2026, 11:00",
+    });
+    expect(dated.description).toContain("17.09.2026, 11:00");
+    expect(dated.description).toContain(LABEL);
+
+    const undated = buildErrorScreen(ACCESS_ERRORS.TOO_LATE, { t, label: LABEL });
+    expect(undated.description).toBe(
+      t("mobileKey.errors.too_late.description_undated", { label: LABEL }),
+    );
+    expect(undated.description).not.toContain("{date}");
   });
 });

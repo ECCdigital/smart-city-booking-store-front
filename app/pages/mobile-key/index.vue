@@ -65,7 +65,9 @@
 
 <script setup>
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
+import { useAccessClock } from "~/composables/useAccessClock.js";
 import { useTenantStore } from "~~/stores/tenant.js";
+import { compareByAccessWindow } from "~/utils/accessWindow.js";
 import GeneralHelpSection from "~/components/mobileKey/GeneralHelpSection.vue";
 import MobileKeyBookingList from "~/components/mobileKey/MobileKeyBookingList.vue";
 
@@ -115,47 +117,74 @@ const loadingKey = ref("bookings");
 
 const responsePayload = (response) => response?.data ?? response;
 
-const loadBookings = async () => {
-  await withLoading("bookings", async () => {
-    const response = await getAccessBookings({
-      filter: bookingFilter.value,
-      includeAccessPoints: includeAccessPoints.value ? "true" : "false",
-      includeLockers: includeLockers.value ? "true" : "false",
-      includeBuffer: includeBuffer.value ? "true" : "false",
-      includeEligibility: includeEligibility.value ? "true" : "false",
-    });
+/**
+ * Fetches the list and puts it in place, sorted by the booking envelope from
+ * the eligibility (`accessWindow`, backend 4.3): active, upcoming, past -
+ * see `compareByAccessWindow`. The 60-minute buffer the sort used to guess
+ * is gone; the envelope is the buffer the backend actually applied.
+ */
+const fetchBookings = async () => {
+  const response = await getAccessBookings({
+    filter: bookingFilter.value,
+    includeAccessPoints: includeAccessPoints.value ? "true" : "false",
+    includeLockers: includeLockers.value ? "true" : "false",
+    includeBuffer: includeBuffer.value ? "true" : "false",
+    includeEligibility: includeEligibility.value ? "true" : "false",
+  });
 
-    lastResponse.value = response;
+  lastResponse.value = response;
 
-    bookings.value = (responsePayload(response) || []).sort((a, b) => {
-      const now = new Date();
+  bookings.value = (responsePayload(response) || []).sort(
+    compareByAccessWindow(Date.now()),
+  );
 
-      const statusRank = (booking) => {
-        if (
-          booking.timeBegin &&
-          now.getTime() < booking.timeBegin - 60 * 60 * 1000
-        )
-          return 1; // kommend (mit 60 Min Puffer)
-        if (booking.timeEnd && now.getTime() > booking.timeEnd + 60 * 60 * 1000)
-          return 2; // vergangen (mit 60 Min Puffer)
-        return 0; // aktiv (inkl. Puffer)
-      };
-
-      const rankDiff = statusRank(a) - statusRank(b);
-      if (rankDiff !== 0) return rankDiff;
-
-      return (b.timeBegin ?? 0) - (a.timeBegin ?? 0);
-    });
-
-    if (includeAccessPoints.value) {
-      for (const booking of bookings.value) {
-        if (booking.accessPoints?.length) {
-          accessPointsByBooking.value[booking.id] = booking.accessPoints;
-        }
+  if (includeAccessPoints.value) {
+    for (const booking of bookings.value) {
+      if (booking.accessPoints?.length) {
+        accessPointsByBooking.value[booking.id] = booking.accessPoints;
       }
     }
-  });
+  }
 };
+
+const loadBookings = async () => {
+  await withLoading("bookings", fetchBookings);
+};
+
+/**
+ * The reload a window start asks for: only the server can put a door into
+ * the remote-operable list. Silent - no skeleton, the list stays in place and
+ * the result is swapped in; a reload that fails keeps the old state and says
+ * nothing. A load already showing its skeleton is not doubled.
+ */
+const reloadSilently = async () => {
+  if (loadingKey.value) {
+    return;
+  }
+
+  try {
+    await fetchBookings();
+  } catch {
+    // The list on the screen is still the truth from the last load.
+  }
+};
+
+/**
+ * The page's clock, handed to every key row and to the sheet
+ * (`useAccessNow`). A window end is client-side alone - badge, line and
+ * button follow `now`. A window start reloads silently, as does a return to
+ * the tab after a boundary went by while it was hidden.
+ */
+const doors = computed(() =>
+  bookings.value.flatMap((booking) => booking.accessPoints ?? []),
+);
+useAccessClock(doors, {
+  onCrossing({ starts, resumed }) {
+    if (starts > 0 || resumed) {
+      reloadSilently();
+    }
+  },
+});
 
 onMounted(() => {
   // Nothing else fills the tenant store on a direct visit; the help section

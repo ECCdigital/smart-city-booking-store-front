@@ -21,6 +21,9 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: error.status || 500,
       statusMessage: error.message || "Failed to open access point",
+      // The backend's error body, so the client can read Lock Busy
+      // (`code: "lock_busy"` on a 423) off the thrown error.
+      data: error.data,
     });
   }
 

@@ -1,13 +1,20 @@
 import { isUnlocked } from "~/utils/accessOpenFlow.js";
+import {
+  ACCESS_WINDOW_STATES,
+  doorWindow,
+  sameLocalDay,
+  windowState,
+} from "~/utils/accessWindow.js";
 
 /**
  * How an access point is shown, wherever it is shown: what it is called, and
- * the badge that says how it opens. Two places render this - the row in
- * `AccessPointListRow.vue` and the card in `AccessPointCard.vue` - in two
- * different shapes, but they must never disagree about the words.
+ * whether the person has to do anything at the door itself. Two places render
+ * this - the row in `AccessPointListRow.vue` and the card in
+ * `AccessPointCard.vue` - in two different shapes, but they must never
+ * disagree about the facts.
  *
  * The lock symbol below belongs to the row alone. The card draws its own from
- * the *stage* it stands over (`AccessPointOpenFlow.vue:309`), which is a second
+ * the *stage* it stands over (`AccessPointOpenFlow.vue`), which is a second
  * reading of the same door only by appearance: inside the flow, a door nobody
  * has read yet is the `loading` stage, so the card never needs the third state
  * the row needs. The two share the colours by coincidence today, and if that
@@ -15,40 +22,9 @@ import { isUnlocked } from "~/utils/accessOpenFlow.js";
  *
  * A pure module rather than a component, for the same reason
  * `accessErrorScreens.js` is one: an SFC cannot be imported in a Node test.
- * The wording stays hard German here rather than moving to `de.json`, like the
- * rest of the list does - see the note on `blockingReasonLabels`.
+ * That is also why the lock states carry an i18n *key* rather than a word:
+ * the module has no `t()`, the renderer does.
  */
-
-const REMOTE_DOOR = Object.freeze({
-  label: "Per Knopf",
-  color: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
-  icon: "i-lucide-lock-open",
-});
-
-const CODE_DOOR = Object.freeze({
-  label: "Code an der Tür",
-  color: "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100",
-  icon: "i-lucide-key-round",
-});
-
-/**
- * Keyed by the backend's `mode` (`remote | authorization | both`). `code`
- * never came from any backend, but the key costs nothing and is not made
- * wrong by `authorization` - it stays as an alias.
- */
-export const ACCESS_POINT_MODES = Object.freeze({
-  remote: REMOTE_DOOR,
-  authorization: CODE_DOOR,
-  code: CODE_DOOR,
-  // The button works here as well, so it wears the button's colours.
-  both: Object.freeze({ ...REMOTE_DOOR, label: "Per Knopf oder Code" }),
-});
-
-export const UNKNOWN_MODE = Object.freeze({
-  label: "Unbekannter Modus",
-  color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100",
-  icon: "i-lucide-alert-triangle",
-});
 
 /**
  * A locker has no label of its own, so it is named by the number on the box
@@ -75,9 +51,53 @@ export function accessPointTitle(accessPoint) {
   return accessPoint?.label || "Unbekannte Tür";
 }
 
-/** An unknown mode is named as unknown, never silently left blank. */
-export function accessPointMode(accessPoint) {
-  return ACCESS_POINT_MODES[accessPoint?.mode] || UNKNOWN_MODE;
+/**
+ * Whether the person has to enter a code at the door itself. Keyed by the
+ * backend's `mode` (`remote | authorization | both`): `authorization` is the
+ * backend's word for a door that takes a code or a card; `code` never came
+ * from any backend, but the alias costs nothing and is not made wrong by it.
+ * A `both` door is opened by the button - the code is a second way, not an
+ * instruction - so it gets no hint either.
+ *
+ * A missing or unknown mode answers `false`: a hint is an instruction, and
+ * sending someone to a keypad this module cannot vouch for is worse than
+ * saying nothing. The row used to wear an "Unbekannter Modus" badge for that
+ * case; a fact nobody can act on has no place in the row.
+ */
+export function needsCodeAtDoor(accessPoint) {
+  const mode = accessPoint?.mode;
+
+  return mode === "authorization" || mode === "code";
+}
+
+/**
+ * The one line a row says about its Access Window, chosen by where `now`
+ * stands: before it "Zugang ab {from}", during it "Zugang möglich bis {to}",
+ * after it "Zugang endete um {to}" (`mobileKey.accessPoint.window.*`). The
+ * moment named is the start before the window and the end from then on.
+ *
+ * `withDate` says whether the renderer has to spell out the day: a moment on
+ * the same local day as `now` is stated by its time alone, any other day with
+ * its date. The full "von … bis …" form stays the row's title and is not
+ * decided here.
+ *
+ * A door without window fields gets no line - a row without a window says
+ * nothing rather than something invented from the booking's raw times.
+ *
+ * @param {Object|null|undefined} accessPoint With `accessFrom` / `accessTo`
+ * @param {number} now
+ * @returns {{ state: "before"|"during"|"after", at: number, withDate: boolean }|null}
+ */
+export function accessWindowLine(accessPoint, now) {
+  const window = doorWindow(accessPoint);
+  const state = windowState(window, now);
+  if (!state) {
+    return null;
+  }
+
+  const at = state === ACCESS_WINDOW_STATES.BEFORE ? window.from : window.to;
+
+  return { state, at, withDate: !sameLocalDay(at, now) };
 }
 
 /**
@@ -95,19 +115,19 @@ export function accessPointMode(accessPoint) {
  */
 export const ACCESS_POINT_LOCK_STATES = Object.freeze({
   open: Object.freeze({
-    label: "Offen",
+    labelKey: "mobileKey.accessPoint.lockState.open",
     color: "text-green-600",
     background: "bg-green-600/10",
     icon: "i-lucide-unlock",
   }),
   closed: Object.freeze({
-    label: "Zu",
+    labelKey: "mobileKey.accessPoint.lockState.closed",
     color: "text-primary",
     background: "bg-primary/10",
     icon: "i-lucide-lock",
   }),
   unknown: Object.freeze({
-    label: "Zustand unbekannt",
+    labelKey: "mobileKey.accessPoint.lockState.unknown",
     color: "text-neutral-400",
     background: "bg-neutral-400/10",
     icon: "i-lucide-circle-dashed",

@@ -4,6 +4,10 @@ import {
   compartmentsOf,
   customerServiceOf,
   decideEmergencyHelp,
+  supportContactOf,
+  withAccessApps,
+  hasAccessApps,
+  supportReferenceOf,
 } from "~/utils/emergencyHelp.js";
 
 const IFBS_CONTACT = Object.freeze({
@@ -64,6 +68,80 @@ describe("customerServiceOf", () => {
   it("answers null for an app that names no contact", () => {
     const tenant = { accessApps: [{ id: "ifbs", customerService: null }] };
     expect(customerServiceOf(tenant, "ifbs")).toBeNull();
+  });
+});
+
+describe("supportContactOf", () => {
+  /** A tenant with a general contact and an IFBS app, as the public projection sends it. */
+  const tenantWithGeneralContact = (accessApps) => ({
+    id: "berlin",
+    name: "Berlin",
+    contactName: "Bürgerbüro Berlin",
+    phone: "+49 30 000",
+    mail: "buergerbuero@example.org",
+    accessApps,
+  });
+
+  it("hands out the provider's contact as a whole, marked as the provider's", () => {
+    expect(
+      supportContactOf(
+        tenantWithGeneralContact([{ id: "ifbs", customerService: { ...IFBS_CONTACT } }]),
+        "ifbs",
+      ),
+    ).toEqual({ ...IFBS_CONTACT, source: "provider" });
+  });
+
+  it("keeps the provider's contact whole when one of its fields is empty - no mixing with the tenant", () => {
+    expect(
+      supportContactOf(
+        tenantWithGeneralContact([
+          { id: "ifbs", customerService: { name: "", phone: "+49 30 1234567", email: "" } },
+        ]),
+        "ifbs",
+      ),
+    ).toEqual({ name: "", phone: "+49 30 1234567", email: "", source: "provider" });
+  });
+
+  it("falls back to the tenant's general contact when the provider names none of the three fields", () => {
+    // The admin always saves `{ name: "", email: "", phone: "" }` for IFBS.
+    expect(
+      supportContactOf(
+        tenantWithGeneralContact([
+          { id: "ifbs", customerService: { name: "", email: "", phone: "" } },
+        ]),
+        "ifbs",
+      ),
+    ).toEqual({
+      name: "Bürgerbüro Berlin",
+      phone: "+49 30 000",
+      email: "buergerbuero@example.org",
+      source: "tenant",
+    });
+  });
+
+  it("falls back to the tenant's general contact for a provider without an app or contact", () => {
+    expect(supportContactOf(tenantWithGeneralContact([]), "nuki")).toMatchObject({
+      source: "tenant",
+    });
+    expect(
+      supportContactOf(
+        tenantWithGeneralContact([{ id: "nuki", customerService: null }]),
+        "nuki",
+      ),
+    ).toMatchObject({ source: "tenant" });
+  });
+
+  it("answers null when neither the provider nor the tenant names anything", () => {
+    expect(supportContactOf({ id: "berlin", accessApps: [] }, "nuki")).toBeNull();
+    expect(
+      supportContactOf({ id: "berlin", contactName: "", phone: "", mail: "" }, "nuki"),
+    ).toBeNull();
+    expect(supportContactOf(undefined, "nuki")).toBeNull();
+  });
+
+  it("leaves customerServiceOf's answer untouched by the fallback", () => {
+    const tenant = tenantWithGeneralContact([{ id: "nuki", customerService: null }]);
+    expect(customerServiceOf(tenant, "nuki")).toBeNull();
   });
 });
 
@@ -194,5 +272,57 @@ describe("decideEmergencyHelp", () => {
     expect(
       decideEmergencyHelp(undefined, { accessInfo: [grantedIfbsCompartment()] }),
     ).toBeNull();
+  });
+});
+
+describe("withAccessApps", () => {
+  const catalogTenants = [
+    { id: "t1", name: "Eins", contactName: "A", mail: "a@x.de", phone: "" },
+    { id: "t2", name: "Zwei", contactName: "B", mail: "b@x.de", phone: "" },
+  ];
+  const publicTenants = [
+    { id: "t1", name: "Eins", accessApps: [{ id: "nuki", customerService: { name: "Nuki Support", phone: "1", email: "" } }] },
+    { id: "t3", name: "Drei", accessApps: [] },
+  ];
+
+  it("hands every catalog tenant the access apps of its public counterpart, keeping the list as it is", () => {
+    const merged = withAccessApps(catalogTenants, publicTenants);
+    expect(merged.map((t) => t.id)).toEqual(["t1", "t2"]);
+    expect(merged[0]).toEqual({ ...catalogTenants[0], accessApps: publicTenants[0].accessApps });
+    expect(merged[1]).toEqual({ ...catalogTenants[1], accessApps: [] });
+  });
+
+  it("is the public list itself when nothing was loaded before", () => {
+    expect(withAccessApps([], publicTenants)).toBe(publicTenants);
+  });
+
+  it("tells whether the access apps are still missing", () => {
+    expect(hasAccessApps(catalogTenants)).toBe(false);
+    expect(hasAccessApps(withAccessApps(catalogTenants, publicTenants))).toBe(true);
+    expect(hasAccessApps([])).toBe(false);
+  });
+});
+
+describe("supportReferenceOf", () => {
+  it("names the provider's own process number where the door carries one (iFBS)", () => {
+    expect(
+      supportReferenceOf({ provider: "ifbs", externalBookingId: "4711" }, "XMSD-SJKM"),
+    ).toEqual({ kind: "process", value: "4711" });
+  });
+
+  it("falls back to the platform's booking number", () => {
+    expect(supportReferenceOf({ provider: "nuki" }, "XMSD-SJKM")).toEqual({
+      kind: "booking",
+      value: "XMSD-SJKM",
+    });
+    expect(supportReferenceOf({ externalBookingId: null }, "XMSD-SJKM")).toEqual({
+      kind: "booking",
+      value: "XMSD-SJKM",
+    });
+  });
+
+  it("names nothing without either", () => {
+    expect(supportReferenceOf(null, null)).toBeNull();
+    expect(supportReferenceOf({ externalBookingId: "" }, "")).toBeNull();
   });
 });

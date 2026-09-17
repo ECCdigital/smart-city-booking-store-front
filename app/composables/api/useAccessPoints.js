@@ -5,10 +5,21 @@ const cleanQuery = (params = {}) =>
     ),
   );
 
+/**
+ * Turns a failed `useApiClient` result into a thrown error carrying
+ * `statusCode` and, as `data`, the backend's own error body - so a caller can
+ * tell Lock Busy (`code: "lock_busy"`) from a door that is unreachable.
+ *
+ * The body travels one level down: the BFF puts it under `data` of the H3
+ * error it throws, and that whole H3 body is what `$fetch` hands over as the
+ * client error's `data`. Where there is no such level (no body, or an H3Error
+ * reached directly), what is there stands as is.
+ */
 const unwrapResult = ({ data, error }, fallbackMessage) => {
   if (error) {
     const requestError = new Error(error.statusMessage || fallbackMessage);
     requestError.statusCode = error.statusCode;
+    requestError.data = error.data?.data ?? error.data;
     throw requestError;
   }
 
@@ -43,6 +54,12 @@ export function useAccessPoints() {
     );
   };
 
+  /**
+   * The access points of one booking together with the backend's decision
+   * for it: the body as the BFF forwards it, `{ success, data: [points],
+   * accessEligibility }`. Read it through `readAccessPointsAnswer`, which
+   * also copes with an older backend that answers the bare list.
+   */
   const getAccessPoints = async (tenant, bookingId) => {
     const result = await api.get(`/api/access/${pathPart(tenant)}/points`, {
       query: cleanQuery({ bookingId }),

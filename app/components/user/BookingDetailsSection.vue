@@ -127,14 +127,20 @@
       <p>{{ booking.comment }}</p>
     </div>
 
-    <!-- keys / access points  -->
+    <!--
+      keys / access points - the same rows as on the Mobile Key, fed the
+      booking with the decision attached (`keyBooking`). A grey button gives
+      no reason of its own: the window line says too early / too late, the
+      status chip above says the rest. A cancelled or rejected booking keeps
+      the section, button grey, window line as it is.
+    -->
     <div v-if="accessPoints.length > 0" class="mb-5">
-      <p class="font-medium">Schlüssel</p>
+      <p class="font-medium">{{ t("mobileKey.accessPoint.sectionTitle") }}</p>
       <AccessPointListRow
         v-for="(accessPoint, i) in accessPoints"
         :key="accessPoint.id"
         :access-point="accessPoint"
-        :booking="booking"
+        :booking="keyBooking"
         :show-separator="i < accessPoints.length - 1"
         class="bg-gray-200 dark:bg-gray-800 p-2 rounded-sm"
       />
@@ -158,6 +164,8 @@ import {
   resolveBookingStatus,
 } from "~/utils/bookingStatus.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
+import { useAccessClock } from "~/composables/useAccessClock.js";
+import { readAccessPointsAnswer } from "~/utils/accessOpenFlow.js";
 import AccessPointListRow from "~/components/mobileKey/AccessPointListRow.vue";
 
 const { t } = useI18n();
@@ -176,7 +184,27 @@ const { downloadBookingIcal } = useIcalDownload();
 const { getTenantName } = useTenant();
 
 const { getAccessPoints } = useAccessPoints();
-const accessPoints = ref([]);
+
+/**
+ * The last answer of the points route: the doors and the backend's decision
+ * for this booking (`readAccessPointsAnswer`). Empty until the first load,
+ * and back to empty where that load fails - no doors, no section.
+ */
+const accessAnswer = ref({ points: [], accessEligibility: null });
+const accessPoints = computed(() => accessAnswer.value.points);
+
+/**
+ * The booking as the shared key rows read it. The store's booking carries no
+ * `accessEligibility`; the points route delivers the decision as a sibling of
+ * the list, and attaching both to a local copy lets `remoteOperable`,
+ * `decideStage`, the window line and `findDoor` read the same shape as on
+ * the Mobile Key. `GET /api/bookings` stays as it is.
+ */
+const keyBooking = computed(() => ({
+  ...props.booking,
+  accessEligibility: accessAnswer.value.accessEligibility,
+  accessPoints: accessAnswer.value.points,
+}));
 
 const eventIds = computed(() => {
   return props.booking.bookableItems
@@ -309,22 +337,62 @@ async function downloadAppointment() {
   await downloadBookingIcal(props.booking.id, props.booking.tenantId);
 }
 
+/** A load is under way; a silent reload does not double it. */
+let loadingAccessPoints = false;
+
+async function fetchAccessPoints() {
+  loadingAccessPoints = true;
+  try {
+    accessAnswer.value = readAccessPointsAnswer(
+      await getAccessPoints(props.booking.tenantId, props.booking.id),
+    );
+  } finally {
+    loadingAccessPoints = false;
+  }
+}
+
 async function loadAccessPoints() {
   try {
-    const response = await getAccessPoints(
-      props.booking.tenantId,
-      props.booking.id,
-    );
-    const list = response?.data ?? response;
-    accessPoints.value = Array.isArray(list) ? list : [];
+    await fetchAccessPoints();
   } catch (error) {
     console.error("Error fetching access points:", error);
-    accessPoints.value = [];
+    accessAnswer.value = { points: [], accessEligibility: null };
+  }
+}
+
+/**
+ * The reload a window start asks for: only the server can put a door into
+ * the remote-operable list. Silent - the rows stay in place and the answer
+ * is swapped in; a reload that fails keeps the old state and says nothing.
+ */
+async function reloadSilently() {
+  if (loadingAccessPoints) {
+    return;
+  }
+
+  try {
+    await fetchAccessPoints();
+  } catch {
+    // The rows on the screen are still the truth from the last load.
   }
 }
 
 watch(() => [props.booking.tenantId, props.booking.id], loadAccessPoints, {
   immediate: true,
+});
+
+/**
+ * The page's clock, handed to every key row and to the sheet below
+ * (`useAccessNow`), as on the Mobile Key. A window end is client-side alone -
+ * line and button follow `now`. A window start reloads silently, as does a
+ * return to the tab after a boundary went by while it was hidden.
+ */
+useAccessClock(accessPoints, {
+  onCrossing({ starts, resumed }) {
+    if (starts > 0 || resumed) {
+      reloadSilently();
+    }
+  },
 });
 </script>
 

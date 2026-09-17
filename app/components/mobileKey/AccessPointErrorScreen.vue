@@ -30,7 +30,10 @@
 <script setup>
 import AccessPointStatusScreen from "~/components/mobileKey/AccessPointStatusScreen.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
-import { buildErrorScreen } from "~/utils/accessErrorScreens.js";
+import {
+  buildErrorScreen,
+  errorScreenMoment,
+} from "~/utils/accessErrorScreens.js";
 
 const props = defineProps({
   /** An `ACCESS_ERRORS` value from `~/utils/accessOpenFlow.js`. */
@@ -62,6 +65,15 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  /**
+   * The door the failure is about, so `too_early` / `too_late` can name the
+   * door's own Access Window rather than the booking's raw times. Without it
+   * the booking envelope stands in.
+   */
+  accessPointId: {
+    type: [String, Number],
+    default: null,
+  },
 });
 
 /**
@@ -74,6 +86,14 @@ const emit = defineEmits(["retry"]);
 const { t } = useI18n();
 const { formatDate } = useFormatting();
 
+/** When access begins or ended, as the window screens say it - or nothing. */
+const moment = computed(() =>
+  errorScreenMoment(props.kind, {
+    booking: props.booking,
+    accessPointId: props.accessPointId,
+  }),
+);
+
 const screen = computed(() =>
   buildErrorScreen(props.kind, {
     t,
@@ -81,7 +101,7 @@ const screen = computed(() =>
     booking: props.booking,
     tenantId: props.tenantId,
     blockingReason: props.blockingReason,
-    date: props.booking?.timeBegin ? formatDate(props.booking.timeBegin) : null,
+    date: moment.value !== null ? formatDate(moment.value) : null,
   }),
 );
 </script>
