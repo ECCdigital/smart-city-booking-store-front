@@ -5,6 +5,8 @@ import {
   customerServiceOf,
   decideEmergencyHelp,
   supportContactOf,
+  withAccessApps,
+  hasAccessApps,
 } from "~/utils/emergencyHelp.js";
 
 const IFBS_CONTACT = Object.freeze({
@@ -269,5 +271,33 @@ describe("decideEmergencyHelp", () => {
     expect(
       decideEmergencyHelp(undefined, { accessInfo: [grantedIfbsCompartment()] }),
     ).toBeNull();
+  });
+});
+
+describe("withAccessApps", () => {
+  const catalogTenants = [
+    { id: "t1", name: "Eins", contactName: "A", mail: "a@x.de", phone: "" },
+    { id: "t2", name: "Zwei", contactName: "B", mail: "b@x.de", phone: "" },
+  ];
+  const publicTenants = [
+    { id: "t1", name: "Eins", accessApps: [{ id: "nuki", customerService: { name: "Nuki Support", phone: "1", email: "" } }] },
+    { id: "t3", name: "Drei", accessApps: [] },
+  ];
+
+  it("hands every catalog tenant the access apps of its public counterpart, keeping the list as it is", () => {
+    const merged = withAccessApps(catalogTenants, publicTenants);
+    expect(merged.map((t) => t.id)).toEqual(["t1", "t2"]);
+    expect(merged[0]).toEqual({ ...catalogTenants[0], accessApps: publicTenants[0].accessApps });
+    expect(merged[1]).toEqual({ ...catalogTenants[1], accessApps: [] });
+  });
+
+  it("is the public list itself when nothing was loaded before", () => {
+    expect(withAccessApps([], publicTenants)).toBe(publicTenants);
+  });
+
+  it("tells whether the access apps are still missing", () => {
+    expect(hasAccessApps(catalogTenants)).toBe(false);
+    expect(hasAccessApps(withAccessApps(catalogTenants, publicTenants))).toBe(true);
+    expect(hasAccessApps([])).toBe(false);
   });
 });

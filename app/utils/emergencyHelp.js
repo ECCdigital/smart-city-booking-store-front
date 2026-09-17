@@ -122,3 +122,46 @@ export function decideEmergencyHelp(tenant, booking) {
   }
   return null;
 }
+
+/**
+ * Whether a tenant list carries the access apps at all. The catalog bundle
+ * fills the tenant store with the catalog's own projection (id, name and the
+ * general contact) and none of the access apps; the public tenant route is
+ * the only source of `accessApps`. A list without them cannot answer for a
+ * Provider Support Contact, however many tenants it holds.
+ *
+ * @param {Object[]|undefined} tenants Tenants as the store holds them
+ * @returns {boolean}
+ */
+export function hasAccessApps(tenants) {
+  return (
+    Array.isArray(tenants) &&
+    tenants.length > 0 &&
+    tenants.every((tenant) => Array.isArray(tenant?.accessApps))
+  );
+}
+
+/**
+ * Hands every tenant of the store its `accessApps` from the public tenant
+ * list, by id, and changes nothing else: the list keeps its members and their
+ * order, so what the catalog decided is visible stays decided. A tenant the
+ * public list does not name gets an empty list, which is a fact ("no access
+ * apps"), not a missing one. Nothing loaded before means the public list is
+ * the store's list.
+ *
+ * @param {Object[]} tenants Tenants as the store holds them
+ * @param {Object[]} publicTenants Tenants as `GET /api/tenants` sends them
+ * @returns {Object[]}
+ */
+export function withAccessApps(tenants, publicTenants) {
+  if (!tenants?.length) {
+    return publicTenants;
+  }
+  const appsById = new Map(
+    (publicTenants ?? []).map((tenant) => [tenant.id, tenant.accessApps ?? []]),
+  );
+  return tenants.map((tenant) => ({
+    ...tenant,
+    accessApps: appsById.get(tenant.id) ?? [],
+  }));
+}

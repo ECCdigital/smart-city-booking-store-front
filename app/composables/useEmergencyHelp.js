@@ -6,7 +6,7 @@ import { customerServiceOf, supportContactOf } from "~/utils/emergencyHelp.js";
  * (`GET /api/tenants/public` → `accessApps[].customerService`, backend 4.3).
  * There is no request of its own any more - the locker route this used to
  * proxy is gone - so `fetchCustomerServiceInfo` only makes sure the tenants
- * are loaded; `serviceInfo` follows the store from then on.
+ * carry their access apps; `serviceInfo` follows the store from then on.
  *
  * `serviceInfo` is the provider's contact alone (the locker accordion);
  * `supportContact` is the Provider Support Contact at the Control Button,
@@ -30,7 +30,9 @@ export function useEmergencyHelp(tenantId, providerId) {
     );
 
     async function fetchCustomerServiceInfo() {
-        await tenantStore.fetchTenants();
+        // The catalog bundle may have filled the store without the access
+        // apps; this brings them in without replacing the list.
+        await tenantStore.fetchAccessApps();
     }
 
     return { serviceInfo, supportContact, fetchCustomerServiceInfo };
