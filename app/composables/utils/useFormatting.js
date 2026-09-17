@@ -8,6 +8,12 @@ export function useFormatting() {
             minute: "2-digit",
         });
     }
+    function formatTime(dateString) {
+        return new Date(dateString).toLocaleTimeString("de-DE", {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    }
     function formatDateRange(from, to) {
         if (!from || !to) {
             return "";
@@ -27,5 +33,5 @@ export function useFormatting() {
         }).format(price);
     }
 
-    return { formatDate, formatDateRange, formatPrice,formateDateToTimestamp };
+    return { formatDate, formatTime, formatDateRange, formatPrice,formateDateToTimestamp };
 }

@@ -86,14 +86,15 @@
         :booking="booking"
         :tenant-id="tenantId"
         :blocking-reason="blockingReason"
+        :access-point-id="accessPoint?.id ?? null"
         @retry="start"
       />
 
-      <ProviderHelpSection
-        v-if="showProviderHelp"
-        :provider-id="accessPoint.provider"
+      <SupportContactLine
+        :provider-id="accessPoint?.provider ?? null"
         :tenant-id="tenantId"
-        :booking-id="String(booking.id)"
+        :booking-id="booking?.id ? String(booking.id) : null"
+        expanded
       />
 
       <UButton variant="ghost" block to="/mobile-key" class="cursor-pointer">
@@ -108,10 +109,9 @@ import AccessPointCard from "~/components/mobileKey/AccessPointCard.vue";
 import AccessPointErrorScreen from "~/components/mobileKey/AccessPointErrorScreen.vue";
 import AccessPointLoadingSpinner from "~/components/mobileKey/AccessPointLoadingSpinner.vue";
 import AccessPointOpenFlow from "~/components/mobileKey/AccessPointOpenFlow.vue";
-import ProviderHelpSection from "~/components/mobileKey/ProviderHelpSection.vue";
+import SupportContactLine from "~/components/mobileKey/SupportContactLine.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
-import { ACCESS_ERROR_SCREENS } from "~/utils/accessErrorScreens.js";
 import {
   ACCESS_ERRORS,
   decideBookingOutcome,
@@ -298,15 +298,6 @@ const bookingTimeRange = (candidate) =>
  * Until the sticker resolves there is no name to say.
  */
 const accessPointLabel = computed(() => scannedLabel.value || "Der Zugang");
-
-/** Which failures the provider's help can speak to is the case's own trait. */
-const showProviderHelp = computed(
-  () =>
-    stage.value === "error" &&
-    Boolean(accessPoint.value?.provider) &&
-    Boolean(booking.value?.id) &&
-    Boolean(ACCESS_ERROR_SCREENS[errorKind.value]?.help),
-);
 
 watch([tenantId, scanCode], () => {
   start();

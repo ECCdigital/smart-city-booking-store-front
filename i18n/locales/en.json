@@ -581,5 +581,59 @@
       "missingRole": "Your account is not allowed to create recurring bookings for this item.",
       "checking": "Checking permission…"
     }
+  },
+  "mobileKey": {
+    "accessPoint": {
+      "sectionTitle": "Keys",
+      "lockState": {
+        "open": "Open",
+        "closed": "Closed",
+        "unknown": "State unknown"
+      },
+      "window": {
+        "before": "Access from {from}",
+        "during": "Access possible until {to}",
+        "after": "Access ended at {to}",
+        "full": "Access possible from {from} to {to}"
+      },
+      "codeHint": "Enter the code at the door"
+    },
+    "errors": {
+      "too_early": {
+        "title": "Not yet",
+        "description": "Access possible from {date}. From then on you can open {label} here.",
+        "description_undated": "Your access has not begun yet. {label} cannot be opened yet."
+      },
+      "too_late": {
+        "title": "Access ended",
+        "description": "Your access ended on {date}. {label} can no longer be opened with it.",
+        "description_undated": "Your access has ended. {label} can no longer be opened with it."
+      }
+    },
+    "cooldown": {
+      "caption": {
+        "open": "Open possible in {n} s",
+        "close": "Lock possible in {n} s"
+      },
+      "seconds": "seconds",
+      "busy": "The lock was still busy. The wait starts over.",
+      "holding": "Hold …",
+      "reading": "Status …",
+      "aria": {
+        "open": "Open. Press and hold to check the lock status.",
+        "close": "Lock. Press and hold to check the lock status.",
+        "open_in": "Open possible in {n} seconds. Press and hold to check the lock status.",
+        "close_in": "Lock possible in {n} seconds. Press and hold to check the lock status.",
+        "reading": "Checking the lock status …"
+      }
+    },
+    "supportContact": {
+      "collapsed": "Problem at the door? Support:",
+      "name": "Contact person",
+      "phone": "Phone",
+      "email": "Email",
+      "booking_number": "Booking number",
+      "booking_hint": "please have it ready"
+    }
   }
 }

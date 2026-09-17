@@ -4,7 +4,7 @@
       <div
         class="flex shrink-0 items-center justify-center rounded-lg w-8 h-8"
         :class="lock.background"
-        :title="lock.label"
+        :title="t(lock.labelKey)"
       >
         <UIcon
           :name="lock.icon"
@@ -18,16 +18,11 @@
           {{ accessPointTitle(accessPoint) }}
         </div>
         <div class="text-sm text-neutral-500">
-          <span
-            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-            :class="accessPointMode(accessPoint).color"
-          >
-            <UIcon
-              :name="accessPointMode(accessPoint).icon"
-              class="w-3.5 h-3.5"
-            />
-            {{ accessPointMode(accessPoint).label }}
-          </span>
+          <!-- the Access Window first, the code hint under it -->
+          <AccessWindowLine :access-point="accessPoint" />
+          <p v-if="needsCodeAtDoor(accessPoint)">
+            {{ t("mobileKey.accessPoint.codeHint") }}
+          </p>
         </div>
       </div>
 
@@ -55,7 +50,9 @@
 </template>
 <script setup>
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
+import { useAccessNow } from "~/composables/useAccessClock.js";
 import AccessPointPanel from "~/components/mobileKey/AccessPointPanel.vue";
+import AccessWindowLine from "~/components/mobileKey/AccessWindowLine.vue";
 import {
   canReportStatus,
   readStatus,
@@ -63,9 +60,11 @@ import {
 } from "~/utils/accessOpenFlow.js";
 import {
   accessPointLock,
-  accessPointMode,
   accessPointTitle,
+  needsCodeAtDoor,
 } from "~/utils/accessPointDisplay.js";
+
+const { t } = useI18n();
 
 const props = defineProps({
   accessPoint: {
@@ -83,6 +82,7 @@ const props = defineProps({
 });
 
 const { getStatus } = useAccessPoints();
+const now = useAccessNow();
 const status = ref(undefined);
 
 const lock = computed(() => accessPointLock(status.value));
@@ -91,10 +91,15 @@ const lock = computed(() => accessPointLock(status.value));
  * The server-side eligibility is the authority (#18). A second, hand-rolled
  * sum in the client can only ever disagree with it - so where the server
  * names no remote-operable access point, none gets the button: a code door is
- * operable and still refuses the open (backend 4.3), and its badge says why.
+ * operable and still refuses the open (backend 4.3), and the code hint below
+ * the title says what to do instead.
+ *
+ * Read against the page's clock as well: the list is a fact from the last
+ * load, and a door whose window has ended since greys its button where it
+ * stands - no request, nothing moves under the thumb.
  */
 const canOperate = computed(() =>
-  remoteOperable(props.booking, props.accessPoint.id),
+  remoteOperable(props.booking, props.accessPoint.id, now.value),
 );
 
 function onStatus(next) {

@@ -29,14 +29,18 @@
           {{ title }}
         </p>
 
-        <p v-if="showMode && !compact" class="text-sm text-neutral-500 mt-1">
-          <span
-            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-            :class="mode.color"
-          >
-            <UIcon :name="mode.icon" class="w-3.5 h-3.5" />
-            {{ mode.label }}
-          </span>
+        <!--
+          The Access Window, then the code hint - in the full card only; the
+          compact header has no second line to spend.
+        -->
+        <div v-if="accessPoint && !compact" class="text-sm text-neutral-500">
+          <AccessWindowLine :access-point="accessPoint" />
+        </div>
+        <p
+          v-if="needsCodeAtDoor(accessPoint) && !compact"
+          class="text-sm text-neutral-500"
+        >
+          {{ t("mobileKey.accessPoint.codeHint") }}
         </p>
 
         <p
@@ -62,10 +66,11 @@
 </template>
 
 <script setup>
+import AccessWindowLine from "~/components/mobileKey/AccessWindowLine.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import {
-  accessPointMode,
   accessPointTitle,
+  needsCodeAtDoor,
 } from "~/utils/accessPointDisplay.js";
 
 const props = defineProps({
@@ -82,10 +87,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  showMode: {
-    type: Boolean,
-    default: false,
-  },
   /**
    * The one-line shape for a panel header: no shell, no address, no booking
    * number - the door and when it is yours, and nothing that costs a second
@@ -97,11 +98,10 @@ const props = defineProps({
   },
 });
 
+const { t } = useI18n();
 const { formatDateRange } = useFormatting();
 
 const title = computed(() => accessPointTitle(props.accessPoint));
-
-const mode = computed(() => accessPointMode(props.accessPoint));
 
 const locationLine = computed(
   () => props.booking?.leadBookable?.location?.display_address || "",

@@ -129,7 +129,7 @@
 
     <!-- keys / access points  -->
     <div v-if="accessPoints.length > 0" class="mb-5">
-      <p class="font-medium">Schlüssel</p>
+      <p class="font-medium">{{ t("mobileKey.accessPoint.sectionTitle") }}</p>
       <AccessPointListRow
         v-for="(accessPoint, i) in accessPoints"
         :key="accessPoint.id"

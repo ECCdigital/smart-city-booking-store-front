@@ -2,12 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import {
   ACCESS_POINT_LOCK_STATES,
-  ACCESS_POINT_MODES,
-  UNKNOWN_MODE,
   accessPointLock,
-  accessPointMode,
   accessPointTitle,
+  accessWindowLine,
+  needsCodeAtDoor,
 } from "~/utils/accessPointDisplay.js";
+
+const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
+// Local time on purpose: "same day" is the day the person sees.
+const NOW = new Date(2026, 8, 17, 9, 0).getTime();
 
 describe("accessPointTitle", () => {
   it("names a bike box by the number written on it", () => {
@@ -68,48 +72,77 @@ describe("accessPointTitle", () => {
   });
 });
 
-describe("accessPointMode", () => {
-  it("gives each known mode its own badge", () => {
-    expect(accessPointMode({ mode: "remote" })).toBe(
-      ACCESS_POINT_MODES.remote,
-    );
-    expect(accessPointMode({ mode: "code" })).toBe(ACCESS_POINT_MODES.code);
-  });
-
-  it("names a code door by what the backend calls it", () => {
+describe("needsCodeAtDoor", () => {
+  it("tells the person about the code where the button alone will not do", () => {
     // `authorization` is the backend's word for a door that takes a code or a
     // card; `code` was never sent by any backend and stays as an alias.
-    expect(accessPointMode({ mode: "authorization" }).label).toBe(
-      "Code an der Tür",
-    );
-    expect(accessPointMode({ mode: "code" }).label).toBe("Code an der Tür");
+    expect(needsCodeAtDoor({ mode: "authorization" })).toBe(true);
+    expect(needsCodeAtDoor({ mode: "code" })).toBe(true);
   });
 
-  it("gives a door that takes both ways a badge of its own", () => {
-    const badge = accessPointMode({ mode: "both" });
+  it("says nothing where the button is the way", () => {
+    expect(needsCodeAtDoor({ mode: "remote" })).toBe(false);
+    expect(needsCodeAtDoor({ mode: "both" })).toBe(false);
+  });
 
-    expect(badge).not.toBe(UNKNOWN_MODE);
-    expect(badge.label).toBe("Per Knopf oder Code");
-    expect(badge).toMatchObject({
-      color: expect.any(String),
-      icon: expect.stringMatching(/^i-lucide-/),
+  it("does not send a person to a keypad it cannot vouch for", () => {
+    // An unknown or missing mode is not a code door; a wrong instruction is
+    // worse than none.
+    expect(needsCodeAtDoor({ mode: "carrier-pigeon" })).toBe(false);
+    expect(needsCodeAtDoor({})).toBe(false);
+    expect(needsCodeAtDoor(null)).toBe(false);
+    expect(needsCodeAtDoor(undefined)).toBe(false);
+  });
+});
+
+describe("accessWindowLine", () => {
+  const door = (from, to) => ({ id: "d1", accessFrom: from, accessTo: to });
+
+  it("says 'Zugang ab' with the start before the window", () => {
+    expect(accessWindowLine(door(NOW + HOUR, NOW + 3 * HOUR), NOW)).toEqual({
+      state: "before",
+      at: NOW + HOUR,
+      withDate: false,
     });
   });
 
-  it("says unknown out loud rather than leaving the badge blank", () => {
-    expect(accessPointMode({ mode: "carrier-pigeon" })).toBe(UNKNOWN_MODE);
-    expect(accessPointMode({})).toBe(UNKNOWN_MODE);
-    expect(accessPointMode(null)).toBe(UNKNOWN_MODE);
+  it("says 'möglich bis' with the end during the window", () => {
+    expect(accessWindowLine(door(NOW - HOUR, NOW + HOUR), NOW)).toEqual({
+      state: "during",
+      at: NOW + HOUR,
+      withDate: false,
+    });
   });
 
-  it("hands out a badge with every field a renderer reads", () => {
-    for (const badge of [...Object.values(ACCESS_POINT_MODES), UNKNOWN_MODE]) {
-      expect(badge).toMatchObject({
-        label: expect.any(String),
-        color: expect.any(String),
-        icon: expect.stringMatching(/^i-lucide-/),
-      });
-    }
+  it("says 'endete um' with the end after the window", () => {
+    expect(accessWindowLine(door(NOW - 3 * HOUR, NOW - HOUR), NOW)).toEqual({
+      state: "after",
+      at: NOW - HOUR,
+      withDate: false,
+    });
+  });
+
+  it("adds the date when the moment is not today", () => {
+    expect(accessWindowLine(door(NOW + DAY, NOW + DAY + HOUR), NOW)).toMatchObject({
+      state: "before",
+      withDate: true,
+    });
+    expect(accessWindowLine(door(NOW - 2 * DAY, NOW - DAY), NOW)).toMatchObject({
+      state: "after",
+      withDate: true,
+    });
+    // A window that ends tonight is stated by the time alone.
+    expect(accessWindowLine(door(NOW - HOUR, NOW + 14 * HOUR), NOW)).toMatchObject({
+      state: "during",
+      withDate: false,
+    });
+  });
+
+  it("says nothing for a door without window fields", () => {
+    // No invented dates: a row without a window has no line, not a wrong one.
+    expect(accessWindowLine({ id: "d1" }, NOW)).toBeNull();
+    expect(accessWindowLine({ id: "d1", accessFrom: NOW }, NOW)).toBeNull();
+    expect(accessWindowLine(null, NOW)).toBeNull();
   });
 });
 
@@ -162,7 +195,7 @@ describe("accessPointLock", () => {
   it("hands out a symbol with every field a renderer reads", () => {
     for (const state of Object.values(ACCESS_POINT_LOCK_STATES)) {
       expect(state).toMatchObject({
-        label: expect.any(String),
+        labelKey: expect.stringMatching(/^mobileKey\.accessPoint\.lockState\./),
         color: expect.any(String),
         background: expect.any(String),
         icon: expect.stringMatching(/^i-lucide-/),

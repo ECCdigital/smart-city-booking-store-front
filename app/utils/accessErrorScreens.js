@@ -18,6 +18,7 @@
  */
 
 import { ACCESS_ERRORS } from "~/utils/accessOpenFlow.js";
+import { bookingWindow, doorWindow, findDoor } from "~/utils/accessWindow.js";
 
 const bookablesPath = (tenantId) => `/t/${tenantId}/bookables`;
 
@@ -25,7 +26,8 @@ const bookablesPath = (tenantId) => `/t/${tenantId}/bookables`;
  * The appearance of every failure.
  *
  * - `icon` / `color` go straight to `AccessPointStatusScreen`.
- * - `help` blends in `ProviderHelpSection`.
+ * - `help` opens the Provider Support Contact (`SupportContactLine`) that
+ *   stands under every stage anyway; it decides "expanded", not "shown".
  * - `action` names the button under `mobileKey.actions`, and only rows that
  *   show a button of their own carry one.
  * - `retry` re-runs what failed (`"action"`) or just re-reads the status
@@ -188,6 +190,35 @@ export function formatBlockingReasonMessage(
 }
 
 /**
+ * The moment a window screen names: for `too_early` when access begins, for
+ * `too_late` when it ended - the door's own Access Window first, the booking
+ * envelope where the door is not known, the booking's raw times as the last
+ * resort (a booking without eligibility, as the wider scan-page query returns
+ * it). `null` for every other failure, and where nothing names a time - the
+ * screen then takes its undated wording.
+ *
+ * @param {string} kind An {@link ACCESS_ERRORS} value
+ * @param {{ booking?: Object|null, accessPointId?: string|number|null }} context
+ * @returns {number|null} epoch ms
+ */
+export function errorScreenMoment(kind, { booking = null, accessPointId = null }) {
+  if (kind !== ACCESS_ERRORS.TOO_EARLY && kind !== ACCESS_ERRORS.TOO_LATE) {
+    return null;
+  }
+
+  const side = kind === ACCESS_ERRORS.TOO_EARLY ? "from" : "to";
+  const window =
+    doorWindow(findDoor(booking, accessPointId)) ?? bookingWindow(booking);
+  if (window) {
+    return window[side];
+  }
+
+  const raw = kind === ACCESS_ERRORS.TOO_EARLY ? booking?.timeBegin : booking?.timeEnd;
+
+  return Number.isFinite(raw) ? raw : null;
+}
+
+/**
  * The whole screen for one failure: appearance from the table above, wording
  * from `de.json`, the way out only where it has somewhere to go.
  *
@@ -204,7 +235,8 @@ export function formatBlockingReasonMessage(
  * @param {Object|null} [context.booking] The booking the failure is about
  * @param {string|null} [context.tenantId] Tenant the destinations stay inside
  * @param {string|null} [context.blockingReason] What the server named, if anything
- * @param {string|null} [context.date] Booking start, already formatted
+ * @param {string|null} [context.date] The moment the window screens name
+ *   (see {@link errorScreenMoment}), already formatted
  * @returns {{ icon: string, color: string, title: string, description: string,
  *   exit: { label: string, to: string|null, retry: string|null }|null }}
  */
@@ -236,8 +268,11 @@ export function buildErrorScreen(
  * carries sentences, not logic.
  */
 function describeFailure(kind, { t, label, blockingReason, date, wording }) {
-  if (kind === ACCESS_ERRORS.TOO_EARLY && !date) {
-    return t(`${wording}.description_undated`);
+  if (
+    (kind === ACCESS_ERRORS.TOO_EARLY || kind === ACCESS_ERRORS.TOO_LATE) &&
+    !date
+  ) {
+    return t(`${wording}.description_undated`, { label });
   }
 
   if (kind === ACCESS_ERRORS.GENERIC) {

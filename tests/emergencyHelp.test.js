@@ -4,6 +4,7 @@ import {
   compartmentsOf,
   customerServiceOf,
   decideEmergencyHelp,
+  supportContactOf,
 } from "~/utils/emergencyHelp.js";
 
 const IFBS_CONTACT = Object.freeze({
@@ -64,6 +65,80 @@ describe("customerServiceOf", () => {
   it("answers null for an app that names no contact", () => {
     const tenant = { accessApps: [{ id: "ifbs", customerService: null }] };
     expect(customerServiceOf(tenant, "ifbs")).toBeNull();
+  });
+});
+
+describe("supportContactOf", () => {
+  /** A tenant with a general contact and an IFBS app, as the public projection sends it. */
+  const tenantWithGeneralContact = (accessApps) => ({
+    id: "berlin",
+    name: "Berlin",
+    contactName: "Bürgerbüro Berlin",
+    phone: "+49 30 000",
+    mail: "buergerbuero@example.org",
+    accessApps,
+  });
+
+  it("hands out the provider's contact as a whole, marked as the provider's", () => {
+    expect(
+      supportContactOf(
+        tenantWithGeneralContact([{ id: "ifbs", customerService: { ...IFBS_CONTACT } }]),
+        "ifbs",
+      ),
+    ).toEqual({ ...IFBS_CONTACT, source: "provider" });
+  });
+
+  it("keeps the provider's contact whole when one of its fields is empty - no mixing with the tenant", () => {
+    expect(
+      supportContactOf(
+        tenantWithGeneralContact([
+          { id: "ifbs", customerService: { name: "", phone: "+49 30 1234567", email: "" } },
+        ]),
+        "ifbs",
+      ),
+    ).toEqual({ name: "", phone: "+49 30 1234567", email: "", source: "provider" });
+  });
+
+  it("falls back to the tenant's general contact when the provider names none of the three fields", () => {
+    // The admin always saves `{ name: "", email: "", phone: "" }` for IFBS.
+    expect(
+      supportContactOf(
+        tenantWithGeneralContact([
+          { id: "ifbs", customerService: { name: "", email: "", phone: "" } },
+        ]),
+        "ifbs",
+      ),
+    ).toEqual({
+      name: "Bürgerbüro Berlin",
+      phone: "+49 30 000",
+      email: "buergerbuero@example.org",
+      source: "tenant",
+    });
+  });
+
+  it("falls back to the tenant's general contact for a provider without an app or contact", () => {
+    expect(supportContactOf(tenantWithGeneralContact([]), "nuki")).toMatchObject({
+      source: "tenant",
+    });
+    expect(
+      supportContactOf(
+        tenantWithGeneralContact([{ id: "nuki", customerService: null }]),
+        "nuki",
+      ),
+    ).toMatchObject({ source: "tenant" });
+  });
+
+  it("answers null when neither the provider nor the tenant names anything", () => {
+    expect(supportContactOf({ id: "berlin", accessApps: [] }, "nuki")).toBeNull();
+    expect(
+      supportContactOf({ id: "berlin", contactName: "", phone: "", mail: "" }, "nuki"),
+    ).toBeNull();
+    expect(supportContactOf(undefined, "nuki")).toBeNull();
+  });
+
+  it("leaves customerServiceOf's answer untouched by the fallback", () => {
+    const tenant = tenantWithGeneralContact([{ id: "nuki", customerService: null }]);
+    expect(customerServiceOf(tenant, "nuki")).toBeNull();
   });
 });
 

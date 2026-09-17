@@ -14,6 +14,13 @@
  */
 
 import { isCommittedBooking } from "~/utils/bookingStatus.js";
+import {
+  ACCESS_WINDOW_STATES,
+  bookingWindow,
+  doorWindow,
+  findDoor,
+  windowState,
+} from "~/utils/accessWindow.js";
 
 /** The situations either way can end up in. */
 export const ACCESS_ERRORS = Object.freeze({
@@ -89,23 +96,55 @@ function namesDoor(ids, accessPointId) {
 }
 
 /**
- * Whether this booking may open this door through the API right now - the set
- * `open` is checked against in the backend (`remoteOperableAccessPointIds`,
- * backend 4.3). A door that only takes a code is *operable* (close, status)
- * but not this, and the button that would only fail is not offered for it.
+ * @private
+ * Whether the server's remote-operable list names this door - the set `open`
+ * is checked against in the backend (`remoteOperableAccessPointIds`, backend
+ * 4.3). The list as it was at the last load, with no clock read against it.
  *
  * **Fail-closed:** an eligibility that names no remote-operable list at all
  * makes nothing remote-operable. Reading the wider `operableAccessPointIds`
  * in its place would be the dual support this storefront does not carry.
- *
- * @param {Object|null|undefined} booking A booking with its `accessEligibility`
- * @param {string|number} accessPointId The door
- * @returns {boolean}
  */
-export function remoteOperable(booking, accessPointId) {
+function remoteListed(booking, accessPointId) {
   return namesDoor(
     booking?.accessEligibility?.remoteOperableAccessPointIds,
     accessPointId,
+  );
+}
+
+/**
+ * @private
+ * Whether `now` lies inside the door's own Access Window. A door without
+ * window fields answers `true`: a missing window never withholds a button the
+ * server granted - the list alone decides for it, as before the clock.
+ */
+function insideDoorWindow(booking, accessPointId, now) {
+  const window = doorWindow(findDoor(booking, accessPointId));
+
+  return !window || windowState(window, now) === ACCESS_WINDOW_STATES.DURING;
+}
+
+/**
+ * Whether this booking may open this door through the API right now: the
+ * server's remote-operable list names it **and** `now` lies inside the door's
+ * own Access Window (`accessFrom` / `accessTo` on the booking's access point).
+ * The list is a fact from the last load; the clock has moved on since, and a
+ * button that would only fail is not offered. A door that only takes a code is
+ * *operable* (close, status) but not this.
+ *
+ * Where the door carries no window fields, the list alone decides - see
+ * {@link insideDoorWindow}.
+ *
+ * @param {Object|null|undefined} booking A booking with its `accessEligibility`
+ *   and, for the window, its `accessPoints`
+ * @param {string|number} accessPointId The door
+ * @param {number} [now]
+ * @returns {boolean}
+ */
+export function remoteOperable(booking, accessPointId, now = Date.now()) {
+  return (
+    remoteListed(booking, accessPointId) &&
+    insideDoorWindow(booking, accessPointId, now)
   );
 }
 
@@ -116,13 +155,18 @@ export function remoteOperable(booking, accessPointId) {
  * for the booking's own reason; one that is operable but not remote-operable
  * is a code door, and the reason is `no_remote_access`.
  *
+ * A door the list names whose own window the clock has since left is blocked
+ * for `outside_access_window` - the reason the server would name had it been
+ * asked now.
+ *
  * @param {Object|null|undefined} booking A booking with its `accessEligibility`
  * @param {string|number} accessPointId The door
+ * @param {number} [now]
  * @returns {string|null} A backend `ACCESS_BLOCKING_REASONS` value, `null`
  *   where nothing speaks against opening - or where there is no eligibility
  *   to read one from
  */
-export function doorBlockingReason(booking, accessPointId) {
+export function doorBlockingReason(booking, accessPointId, now = Date.now()) {
   const eligibility = booking?.accessEligibility;
   if (!eligibility) {
     return null;
@@ -130,8 +174,11 @@ export function doorBlockingReason(booking, accessPointId) {
   if (!namesDoor(eligibility.operableAccessPointIds, accessPointId)) {
     return eligibility.primaryBlockingReason ?? null;
   }
-  if (!remoteOperable(booking, accessPointId)) {
+  if (!remoteListed(booking, accessPointId)) {
     return "no_remote_access";
+  }
+  if (!insideDoorWindow(booking, accessPointId, now)) {
+    return "outside_access_window";
   }
 
   return null;
@@ -202,11 +249,11 @@ export function decideBookingOutcome({
  * anything the booking as a whole says.
  */
 function blockedOutcome(booking, accessPointId, now) {
-  const reason = doorBlockingReason(booking, accessPointId);
+  const reason = doorBlockingReason(booking, accessPointId, now);
 
   return {
     screen: "error",
-    error: reasonError(reason, booking, now),
+    error: reasonError(reason, booking, now, accessPointId),
     booking,
     blockingReason: reason,
   };
@@ -217,24 +264,31 @@ function blockedOutcome(booking, accessPointId, now) {
  * The screen a blocking reason leads to, booking in hand: every reason but
  * `outside_access_window` can be read on its own.
  */
-function reasonError(reason, booking, now) {
+function reasonError(reason, booking, now, accessPointId) {
   return reason === "outside_access_window"
-    ? windowError(booking, now)
+    ? windowError(booking, now, accessPointId)
     : mapBlockingReason(reason);
 }
 
 /**
  * @private
- * A closed window is either "not yet" or "over" - only the booking's own times
- * can say which, so without them the honest answer stays generic.
+ * A closed window is either "not yet" or "over". The door's own Access Window
+ * says which; failing that the booking envelope, failing that the booking's
+ * raw times (the window contains them, so the side is the same). Without any
+ * of these the honest answer stays generic.
  */
-function windowError(booking, now) {
-  if (!booking?.timeBegin || !booking?.timeEnd) {
+function windowError(booking, now, accessPointId) {
+  const window =
+    doorWindow(findDoor(booking, accessPointId)) ??
+    bookingWindow(booking) ??
+    (booking?.timeBegin && booking?.timeEnd
+      ? { from: booking.timeBegin, to: booking.timeEnd }
+      : null);
+
+  if (!window) {
     return ACCESS_ERRORS.GENERIC;
   }
-  return now < booking.timeBegin
-    ? ACCESS_ERRORS.TOO_EARLY
-    : ACCESS_ERRORS.TOO_LATE;
+  return now < window.from ? ACCESS_ERRORS.TOO_EARLY : ACCESS_ERRORS.TOO_LATE;
 }
 
 /**
@@ -756,7 +810,13 @@ const OPEN_STEP = Object.freeze(["open"]);
  *   the remote-operable ones): a code door stands on `error` with
  *   `no_remote_access` before any button. Without it the booking-level
  *   `canOperate` is all there is to read
- * @param {number} [facts.now]
+ * @param {boolean} [facts.settling] A command is still settling - its
+ *   Cooldown, its Confirmation Burst or the read owed after Lock Busy is
+ *   running. The door's own Access Window is then not read against `now`:
+ *   a window that ends mid-command flips the stage to `too_late` only once
+ *   the command has finished. The server's lists still apply
+ * @param {number} [facts.now] The clock the Access Window is read against -
+ *   `useAccessClock`'s `now`, so the stage follows the window without a reload
  * @returns {{ stage: "loading"|"evidence"|"can_open"|"can_close"|"opening"
  *   |"closing"|"opened"|"closed"|"error", steps: string[], currentStep: number,
  *   error: string|null, blockingReason: string|null }}
@@ -770,6 +830,7 @@ export function decideStage({
   result = null,
   booking = null,
   accessPointId,
+  settling = false,
   now = Date.now(),
 } = {}) {
   // Both lists are facts, never defaults: one nobody stated is not a door
@@ -822,11 +883,23 @@ export function decideStage({
   // still refuses the open, and the button it would get could only fail. The
   // gate is the list, not the reason: a door in neither list is an error even
   // where the booking names no reason for it - fail-closed, like the backend.
+  //
+  // The clock is read against the door's own window as well - the list is a
+  // fact from the last load - except while a command settles: the Cooldown
+  // and the Confirmation Burst finish first, then the window's end is the
+  // stage. No grace period beyond that; the lag buffer is the operator's.
   if (booking?.accessEligibility) {
     if (isStated(accessPointId)) {
-      if (!remoteOperable(booking, accessPointId)) {
-        const reason = doorBlockingReason(booking, accessPointId);
-        return view(STAGES.ERROR, reasonError(reason, booking, now), reason);
+      const mayOpen = settling
+        ? remoteListed(booking, accessPointId)
+        : remoteOperable(booking, accessPointId, now);
+      if (!mayOpen) {
+        const reason = doorBlockingReason(booking, accessPointId, now);
+        return view(
+          STAGES.ERROR,
+          reasonError(reason, booking, now, accessPointId),
+          reason,
+        );
       }
     } else if (booking.accessEligibility.canOperate === false) {
       const reason = booking.accessEligibility.primaryBlockingReason ?? null;
@@ -860,3 +933,179 @@ export function decideStage({
 
   return view(evidenceMissing ? STAGES.EVIDENCE : STAGES.CAN_OPEN);
 }
+
+/**
+ * How long the Control Button accepts no further command after one was sent:
+ * the Cooldown. A lock is still carrying out the previous action for about
+ * this long and answers Lock Busy to anything sent meanwhile.
+ *
+ * The Cooldown is a **flag, not a stage**: the flow keeps `cooldownUntil` as a
+ * fact beside `status`, and `decideStage` never hears of it. It changes
+ * whether the button takes a tap, never which stage a person is in.
+ */
+export const COOLDOWN_MS = 8000;
+
+/**
+ * Starts the Cooldown from full - after every sent command, both directions,
+ * and again on Lock Busy, where the second start simply wins.
+ *
+ * @param {number} [now]
+ * @returns {number} The epoch ms the Cooldown ends at: the new `cooldownUntil`
+ */
+export function startCooldown(now = Date.now()) {
+  return now + COOLDOWN_MS;
+}
+
+/**
+ * Whether the Cooldown still holds the button back. `0`, `null` or
+ * `undefined` mean no Cooldown was ever started.
+ *
+ * @param {number|null|undefined} cooldownUntil
+ * @param {number} [now]
+ * @returns {boolean}
+ */
+export function isCooling(cooldownUntil, now = Date.now()) {
+  return remainingMs(cooldownUntil, now) > 0;
+}
+
+/**
+ * The seconds still to wait, rounded up: the digit on the button never reads
+ * "0" while the Cooldown still holds. `0` once it is over.
+ *
+ * @param {number|null|undefined} cooldownUntil
+ * @param {number} [now]
+ * @returns {number}
+ */
+export function cooldownSecondsLeft(cooldownUntil, now = Date.now()) {
+  return Math.ceil(remainingMs(cooldownUntil, now) / 1000);
+}
+
+/**
+ * How far the Cooldown has drained, `0` at the start and `1` at the end -
+ * what the ring around the button draws. Clamped, so a Cooldown that is over
+ * (or was never started) reads as fully drained.
+ *
+ * @param {number|null|undefined} cooldownUntil
+ * @param {number} [now]
+ * @returns {number}
+ */
+export function cooldownProgress(cooldownUntil, now = Date.now()) {
+  return 1 - remainingMs(cooldownUntil, now) / COOLDOWN_MS;
+}
+
+/**
+ * @private
+ * The milliseconds the Cooldown still has, never negative and never more than
+ * a full Cooldown - so every derivation above can rely on it being in range.
+ */
+function remainingMs(cooldownUntil, now) {
+  return Math.min(COOLDOWN_MS, Math.max(0, (cooldownUntil ?? 0) - now));
+}
+
+/**
+ * When the Confirmation Burst reads the door, in ms after the command's
+ * answer. Three staggered reads, the last of them still inside the Cooldown:
+ * a lock takes its time to turn, and a read the instant the command returns
+ * only ever catches it mid-turn. The burst stops at the first read that
+ * confirms the command; every read it makes is one `status` audit row.
+ */
+export const BURST_DELAYS_MS = Object.freeze([1500, 4000, 6500]);
+
+/**
+ * Whether a reading says the lock did what the command asked. Open is
+ * `open === true` - the backend's reduction already counts `unlatching`,
+ * `unlatched` and `unlocked` as open, so no `lockState` sequence is watched
+ * here. Close is `locked === true`; `locking` is "not yet". An unreadable
+ * status confirms nothing.
+ *
+ * @param {"open"|"close"} command
+ * @param {ReturnType<typeof readStatus>|undefined} status
+ * @returns {boolean}
+ */
+export function commandConfirmed(command, status) {
+  if (command === "open") {
+    return status?.open === true;
+  }
+  if (command === "close") {
+    return status?.locked === true;
+  }
+
+  return false;
+}
+
+/**
+ * The reads a command still owes after its answer. A close answer carries the
+ * backend's own read from inside the close, which counts as read zero of the
+ * burst: where it already reports `locked`, the burst is over before it
+ * starts. An open answer carries no status, so an open always gets the full
+ * burst.
+ *
+ * @param {"open"|"close"} command
+ * @param {ReturnType<typeof readStatus>|undefined} answerStatus The status
+ *   that travelled with the command's answer, if any
+ * @returns {readonly number[]} Delays after the answer, as {@link BURST_DELAYS_MS}
+ */
+export function planBurst(command, answerStatus) {
+  return commandConfirmed(command, answerStatus) ? [] : BURST_DELAYS_MS;
+}
+
+/**
+ * What the door stands on once the burst ran out without a match: the lock's
+ * reading always outranks the command's word, so the last readable reading
+ * wins and the button flips to it - no new screen. Only where nothing was
+ * readable throughout does the command's own word stand.
+ *
+ * @param {"open"|"close"} command
+ * @param {ReturnType<typeof readStatus>|undefined} lastReadable The last
+ *   readable reading of the burst, read zero included; `null` or `undefined`
+ *   where there was none
+ * @returns {ReturnType<typeof readStatus>}
+ */
+export function concludeBurst(command, lastReadable) {
+  return lastReadable ?? buildCommandStatus({ open: command === "open" });
+}
+
+/**
+ * Whether a failed command was Lock Busy: the lock was still carrying out the
+ * previous action and took nothing. The backend answers HTTP 423 with
+ * `code: "lock_busy"` in the body; the BFF passes both through, and either on
+ * its own counts - a raw 423 without a body as much as the code on some other
+ * status.
+ *
+ * Lock Busy is an **outcome, not an error**: it has no {@link ACCESS_ERRORS}
+ * id and no screen. The flow restarts the Cooldown and says so under the
+ * caption; the button keeps the stage it had before the tap.
+ *
+ * @param {{ statusCode?: number, data?: { code?: string } }|null|undefined} error
+ *   What `useAccessPoints` threw: `statusCode` and the backend body as `data`
+ * @returns {boolean}
+ */
+export function isLockBusy(error) {
+  return error?.statusCode === 423 || error?.data?.code === "lock_busy";
+}
+
+/**
+ * The result of a command the lock was too busy to take. `busy` is the one
+ * thing it says; `error: null` keeps {@link decideStage} on the stage the
+ * status decides, and `opened` / `closed` false keeps every "was it carried
+ * out" check honest.
+ *
+ * @param {"open"|"close"} command
+ * @returns {{ opened?: false, closed?: false, busy: true, error: null }}
+ */
+export function buildBusyResult(command) {
+  return {
+    [command === "open" ? "opened" : "closed"]: false,
+    busy: true,
+    error: null,
+  };
+}
+
+/**
+ * When the one plain read after Lock Busy asks the door, in ms after the
+ * answer: nothing was accepted, so there is no Confirmation Burst to run, but
+ * the sheet should still learn what the busy lock was doing. Inside the
+ * restarted Cooldown, and applied whatever it says; a read that fails is
+ * ignored silently.
+ */
+export const LOCK_BUSY_READ_MS = 4000;

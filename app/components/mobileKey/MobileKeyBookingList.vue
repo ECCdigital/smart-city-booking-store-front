@@ -134,7 +134,12 @@
 </template>
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+import { useAccessNow } from "~/composables/useAccessClock.js";
 import AccessPointListRow from "~/components/mobileKey/AccessPointListRow.vue";
+import {
+  ACCESS_WINDOW_STATES,
+  bookingWindowState,
+} from "~/utils/accessWindow.js";
 
 defineProps({
   bookings: {
@@ -168,6 +173,7 @@ const SKELETON_CARDS = 2;
 
 const { getTenantName } = useTenant();
 const { formatDate } = useFormatting();
+const now = useAccessNow();
 
 /**
  * The badge on a booking, in as many words as a badge holds. The full
@@ -189,11 +195,19 @@ const blockingReasonLabels = Object.freeze({
   evidence_rule_unavailable: "Zugang nicht prüfbar",
 });
 
+/**
+ * Kommend / Aktiv / Vergangen come from the booking envelope in the
+ * eligibility (`accessWindow`, backend 4.3), read against the page's clock -
+ * the same fact the backend's own "active" filter uses, so the badge flips at
+ * the boundary without a reload, and the card stays where it is until the
+ * next load. A booking without an envelope gets no time badge: its raw times
+ * are not a window, and nothing is invented from them.
+ */
 const bookingStatus = (booking) => {
-  const now = Date.now();
   const eligibility = booking.accessEligibility;
+  const windowState = bookingWindowState(booking, now.value);
 
-  if (booking.timeBegin && now < booking.timeBegin) {
+  if (windowState === ACCESS_WINDOW_STATES.BEFORE) {
     return {
       label: "Kommend",
       color: "bg-yellow-100 text-yellow-800",
@@ -201,7 +215,7 @@ const bookingStatus = (booking) => {
     };
   }
 
-  if (booking.timeEnd && now > booking.timeEnd) {
+  if (windowState === ACCESS_WINDOW_STATES.AFTER) {
     return {
       label: "Vergangen",
       color: "bg-gray-100 text-gray-800",

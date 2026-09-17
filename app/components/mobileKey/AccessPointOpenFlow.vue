@@ -51,7 +51,9 @@
               : ''
           "
           :access-point-label="accessPointLabel"
+          v-bind="buttonState"
           @open="openDoor"
+          @refresh="readStatusOnHold"
         />
       </div>
 
@@ -62,7 +64,9 @@
             t('mobileKey.stages.can_close.title', { label: accessPointLabel })
           "
           :access-point-label="accessPointLabel"
+          v-bind="buttonState"
           @lock="closeDoor"
+          @refresh="readStatusOnHold"
         />
       </div>
 
@@ -102,7 +106,9 @@
             variant="open"
             :title="t('mobileKey.actions.open_again')"
             :access-point-label="accessPointLabel"
+            v-bind="buttonState"
             @open="openDoor"
+            @refresh="readStatusOnHold"
           />
         </div>
       </div>
@@ -130,6 +136,7 @@
         :booking="booking"
         :tenant-id="tenantId"
         :blocking-reason="view.blockingReason"
+        :access-point-id="accessPoint.id"
         @retry="retryFailure"
       />
     </div>
@@ -148,11 +155,16 @@
       <span>{{ passedFailure.title }}</span>
     </p>
 
-    <ProviderHelpSection
-      v-if="showProviderHelp"
-      :provider-id="accessPoint.provider"
+    <!--
+      The Provider Support Contact, under every stage a person could need it -
+      folded while the button works, open once a failure is in the room.
+    -->
+    <SupportContactLine
+      v-if="view.stage !== 'loading' && view.stage !== 'evidence'"
+      :provider-id="accessPoint.provider ?? null"
       :tenant-id="tenantId"
       :booking-id="bookingId"
+      :expanded="supportContactExpanded"
     />
 
     <!-- the way out of the context, rendered by whoever put the flow here -->
@@ -178,8 +190,9 @@ import AccessPointLoadingSpinner from "~/components/mobileKey/AccessPointLoading
 import AccessPointScanEvidence from "~/components/mobileKey/AccessPointScanEvidence.vue";
 import AccessPointStatusScreen from "~/components/mobileKey/AccessPointStatusScreen.vue";
 import AccessPointStepper from "~/components/mobileKey/AccessPointStepper.vue";
-import ProviderHelpSection from "~/components/mobileKey/ProviderHelpSection.vue";
+import SupportContactLine from "~/components/mobileKey/SupportContactLine.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
+import { useAccessNow } from "~/composables/useAccessClock.js";
 import {
   ACCESS_ERROR_SCREENS,
   buildErrorScreen,
@@ -187,12 +200,21 @@ import {
 } from "~/utils/accessErrorScreens.js";
 import {
   ACCESS_ERRORS,
+  LOCK_BUSY_READ_MS,
+  buildBusyResult,
   buildCommandStatus,
   buildOpenRequest,
   canReportStatus,
+  commandConfirmed,
+  concludeBurst,
+  cooldownProgress,
+  cooldownSecondsLeft,
   decideStage,
-  isUnlocked,
+  isCooling,
+  isLockBusy,
+  planBurst,
   readCloseOutcome,
+  startCooldown,
   readOpenConfirmation,
   readOpenOutcome,
   readStatus,
@@ -221,7 +243,12 @@ const props = defineProps({
   },
 });
 
-/** The only thing this flow says outwards: the status it just learned. */
+/**
+ * The only thing this flow says outwards: the status it just learned - every
+ * one it learns while it stands, and its last known one once more as it goes,
+ * so the key row behind a closed sheet keeps what the sheet knew and has no
+ * reason to read again.
+ */
 const emit = defineEmits(["status"]);
 
 const { open, close, getStatus, pollOpenStatus } = useAccessPoints();
@@ -233,25 +260,95 @@ const action = ref(null);
 const result = ref(null);
 
 /**
+ * The Cooldown, a fact beside `status` and never a stage: the epoch ms until
+ * which the button takes no command. `0` where none was ever started. Set by
+ * every sent command, both directions, and set again from full on Lock Busy.
+ */
+const cooldownUntil = ref(0);
+
+/**
+ * Raised when the lock answered Lock Busy to the last command: the amber line
+ * under the caption saying the wait starts over. It stands for the length of
+ * the restarted Cooldown - it is only shown while cooling - and the next
+ * action takes it down.
+ */
+const busyNotice = ref(false);
+
+/**
+ * The one plain read owed after Lock Busy, `null` outside one. Plain, not
+ * reactive: nothing renders from it. A hold before it fires takes its place.
+ * `busyReadDue` is its reactive shadow, for `settling` alone.
+ */
+let busyReadTimer = null;
+const busyReadDue = ref(false);
+
+/**
+ * A status read in flight - the hold's or the Confirmation Burst's. The
+ * button shows a spinner for it, and a hold that lands meanwhile is absorbed
+ * by it rather than starting a second read.
+ */
+const reading = ref(false);
+
+/**
+ * The Confirmation Burst in flight, `null` outside one: the command it
+ * confirms, the timers still owed a read (`timers`, so Lock Busy can call
+ * them off and put its own single read in their place - S3) and the last
+ * readable reading so far, the close answer's own status counted as read zero.
+ * Plain, not reactive: nothing renders from it. `bursting` is its reactive
+ * shadow, for `settling` alone.
+ */
+let burst = null;
+const bursting = ref(false);
+
+/**
+ * The clock the Cooldown is read against. It only ticks while there is a
+ * Cooldown to drain, so the flow at rest costs no timer.
+ */
+const now = ref(Date.now());
+const COOLDOWN_TICK_MS = 100;
+let cooldownTicker = null;
+
+const cooling = computed(() => isCooling(cooldownUntil.value, now.value));
+
+/**
+ * The page's clock (`useAccessClock`), which moves at the door's window
+ * boundaries; the stage reads the Access Window against it. Joined with the
+ * Cooldown's own ticks, whichever is later - the two are never both moving,
+ * and the later one is the truer `now`.
+ */
+const accessNow = useAccessNow();
+const stageNow = computed(() => Math.max(accessNow.value, now.value));
+
+/**
+ * A command is still settling: its Cooldown, its Confirmation Burst or the
+ * read owed after Lock Busy is running, or the command itself is in flight.
+ * The window's end waits for it - the stage flips to `too_late` once the
+ * last of them is done, never mid-command.
+ */
+const settling = computed(
+  () =>
+    cooling.value ||
+    bursting.value ||
+    busyReadDue.value ||
+    action.value !== null,
+);
+
+/** What the button needs to draw the Cooldown and the running read. */
+const buttonState = computed(() => ({
+  cooling: cooling.value,
+  cooldownSeconds: cooldownSecondsLeft(cooldownUntil.value, now.value),
+  cooldownProgress: cooldownProgress(cooldownUntil.value, now.value),
+  reading: reading.value,
+  busyNotice: busyNotice.value && cooling.value,
+}));
+
+/**
  * How long a result stands before it gives the button back. The only piece of
  * time in this flow, and it stays here: `decideStage` decides stages, never
  * durations (#7), which is why its nine stages and their tests are untouched
  * by any of this - `opened` is now entered briefly rather than lived in.
  */
 const RESULT_VISIBLE_MS = 2500;
-
-/**
- * How long the lock is given to finish turning before it is asked again.
- *
- * A status read the instant a command returns catches the lock mid-turn and
- * still reports the state it is coming from - the backend reads it that early
- * itself (`_readStatusAfterClose` in `access-service.js`, whose own comment
- * says "a lock takes its time to turn"), and so does `refreshStatus`. Nothing
- * in the payload tells a turning lock from an unknown one, because
- * `_resolveOpen` maps every state it does not know to `null`. So the flow
- * waits instead, and asks a second time.
- */
-const STATUS_SETTLE_MS = 1200;
 
 /** Timers still owed a callback, so an unmount can call them off. */
 const pendingWaits = new Set();
@@ -304,6 +401,8 @@ const view = computed(() =>
     result: result.value,
     booking: props.booking,
     accessPointId: props.accessPoint.id,
+    settling: settling.value,
+    now: stageNow.value,
   }),
 );
 
@@ -316,12 +415,13 @@ const failureInTheRoom = computed(() =>
   view.value.stage === "error" ? view.value.error : passedFailureKind.value,
 );
 
-/** Which failures the provider's help can speak to is the case's own trait. */
-const showProviderHelp = computed(
+/**
+ * Which failures unfold the support contact is the case's own trait. The
+ * contact itself stands under every stage; this only decides "expanded".
+ */
+const supportContactExpanded = computed(
   () =>
     Boolean(failureInTheRoom.value) &&
-    Boolean(props.accessPoint.provider) &&
-    Boolean(props.booking?.id) &&
     Boolean(ACCESS_ERROR_SCREENS[failureInTheRoom.value]?.help),
 );
 
@@ -371,25 +471,230 @@ function applyStatus(next) {
 }
 
 /**
- * Reads the door's own state. A door that cannot report one is not asked -
- * `decideStage` then skips the spinner rather than waiting for an answer that
- * will never come.
+ * One read of the door's own state, applied by whoever asked for it. A door
+ * that cannot report one is not asked - `decideStage` then skips the spinner
+ * rather than waiting for an answer that will never come - and the answer is
+ * `undefined`, as it is once the sheet has gone: a reading nobody can show is
+ * not applied over whatever the row kept.
+ *
+ * @returns {Promise<ReturnType<typeof readStatus>|undefined>} `null` where
+ *   the door had no readable status, `undefined` where it was not asked
+ */
+async function readDoor() {
+  if (!canReportStatus(props.accessPoint)) {
+    return undefined;
+  }
+
+  reading.value = true;
+  let next = null;
+  try {
+    next = readStatus(
+      await getStatus(props.tenantId, props.accessPoint.id, bookingId.value),
+    );
+  } catch (error) {
+    console.error("Status konnte nicht geladen werden:", error);
+  } finally {
+    reading.value = false;
+  }
+
+  return mounted ? next : undefined;
+}
+
+/**
+ * Reads the door and shows what it said - the mount, the retry and the hold.
+ * Inside a Confirmation Burst the reading is the burst's as well: a match
+ * ends it, anything else is one more reading for it to weigh at the end.
  */
 async function refreshStatus() {
+  const next = await readDoor();
+  if (next === undefined) {
+    return;
+  }
+
+  if (burst) {
+    absorbIntoBurst(next);
+  }
+  applyStatus(next);
+}
+
+/**
+ * The hold on the Control Button: read the status, send nothing. Works at any
+ * time, inside and outside the Cooldown. A read already running - the burst's
+ * or another hold's - absorbs it: the button is showing that read's spinner,
+ * and one answer is all it needs. Outside a running read the hold reads at
+ * once, and the burst, if one is on, is neither restarted nor put off. The
+ * read still owed after Lock Busy is another matter: the hold *is* that read,
+ * and the scheduled one is called off - one read in total.
+ */
+function readStatusOnHold() {
+  if (reading.value) {
+    return;
+  }
+  stopBusyRead();
+  refreshStatus();
+}
+
+/**
+ * Starts the Confirmation Burst for a command that was carried out: the
+ * commanded state is shown at once, and the door is read at
+ * `BURST_DELAYS_MS` until a reading confirms the command. A close answer's own
+ * status is read zero - where it already confirms, it is shown and nothing is
+ * scheduled. A door that cannot report its state keeps the command's word.
+ *
+ * @param {"open"|"close"} command
+ * @param {ReturnType<typeof readStatus>|undefined} answerStatus The status
+ *   that came with the command's answer, if any
+ */
+function startBurst(command, answerStatus) {
+  stopBurst();
+
+  const delays = planBurst(command, answerStatus);
+  if (!delays.length) {
+    applyStatus(answerStatus);
+    return;
+  }
+
+  applyStatus(buildCommandStatus({ open: command === "open" }));
   if (!canReportStatus(props.accessPoint)) {
     return;
   }
 
-  try {
-    applyStatus(
-      readStatus(
-        await getStatus(props.tenantId, props.accessPoint.id, bookingId.value),
-      ),
-    );
-  } catch (error) {
-    console.error("Status konnte nicht geladen werden:", error);
-    applyStatus(null);
+  burst = { command, timers: [], lastReadable: answerStatus ?? null };
+  bursting.value = true;
+  for (const delay of delays) {
+    const id = setTimeout(() => burstRead(id), delay);
+    burst.timers.push(id);
   }
+}
+
+/** Calls off every read the burst still owes. */
+function stopBurst() {
+  if (burst) {
+    burst.timers.forEach(clearTimeout);
+    burst = null;
+  }
+  bursting.value = false;
+}
+
+/**
+ * One scheduled read of the burst. A read already running - a hold's, or an
+ * earlier burst read that is taking its time - absorbs it: that read's answer
+ * is weighed for the burst in its place.
+ */
+async function burstRead(id) {
+  const mine = burst;
+  mine.timers = mine.timers.filter((timer) => timer !== id);
+
+  if (reading.value) {
+    return;
+  }
+
+  const next = await readDoor();
+  if (burst !== mine || next === undefined) {
+    return;
+  }
+  absorbIntoBurst(next);
+}
+
+/**
+ * Weighs one reading for the burst. A reading that confirms the command ends
+ * the burst; an unreadable one changes nothing. When the last read is in
+ * without a match, the burst concludes: the last readable reading wins over
+ * the command's word, and the button flips to it without a new screen.
+ */
+function absorbIntoBurst(next) {
+  const mine = burst;
+
+  if (next) {
+    mine.lastReadable = next;
+  }
+  if (commandConfirmed(mine.command, next)) {
+    stopBurst();
+    applyStatus(next);
+    return;
+  }
+  if (!mine.timers.length) {
+    stopBurst();
+    applyStatus(concludeBurst(mine.command, mine.lastReadable));
+  }
+}
+
+/**
+ * Starts the Cooldown from full and keeps the clock ticking until it has
+ * drained. Called for every sent command, whatever its answer turns out to be:
+ * the lock has the command either way and is busy with it.
+ */
+function beginCooldown() {
+  cooldownUntil.value = startCooldown();
+  now.value = Date.now();
+
+  if (cooldownTicker !== null) {
+    return;
+  }
+  cooldownTicker = setInterval(() => {
+    now.value = Date.now();
+    if (!isCooling(cooldownUntil.value, now.value)) {
+      stopCooldownTicker();
+    }
+  }, COOLDOWN_TICK_MS);
+}
+
+function stopCooldownTicker() {
+  if (cooldownTicker !== null) {
+    clearInterval(cooldownTicker);
+    cooldownTicker = null;
+  }
+}
+
+/**
+ * The lock took nothing: it was still busy with the action before. An
+ * outcome, not an error - no screen, no toast, the stage as it was before the
+ * tap. The Cooldown restarts from full (the answer came later than the tap,
+ * so the first start is behind), the amber line goes up for its length, and
+ * one plain read is scheduled so the sheet learns what the busy lock was
+ * doing. No Confirmation Burst: there is no command to confirm.
+ *
+ * @param {"open"|"close"} command
+ */
+function settleLockBusy(command) {
+  result.value = buildBusyResult(command);
+  beginCooldown();
+  busyNotice.value = true;
+
+  stopBusyRead();
+  if (canReportStatus(props.accessPoint)) {
+    busyReadTimer = setTimeout(busyRead, LOCK_BUSY_READ_MS);
+    busyReadDue.value = true;
+  }
+}
+
+/**
+ * The one read after Lock Busy, applied whatever it says. A read already
+ * running - a hold's - absorbs it, as in the burst. A read that fails is
+ * ignored silently: the status stays what it was, and nobody gets a
+ * "status unavailable" screen for a read they never asked for.
+ */
+async function busyRead() {
+  busyReadTimer = null;
+  if (reading.value) {
+    busyReadDue.value = false;
+    return;
+  }
+
+  const next = await readDoor();
+  busyReadDue.value = false;
+  if (next) {
+    applyStatus(next);
+  }
+}
+
+/** Calls off the read still owed after Lock Busy, if one is. */
+function stopBusyRead() {
+  if (busyReadTimer !== null) {
+    clearTimeout(busyReadTimer);
+    busyReadTimer = null;
+  }
+  busyReadDue.value = false;
 }
 
 /** A wait an unmount or a fresh action can call off. */
@@ -411,48 +716,18 @@ function stopPass() {
   pendingWaits.clear();
 }
 
-/** Every action starts on a clean slate: no old result, no old failure line. */
+/**
+ * Every action starts on a clean slate: no old result, no old failure line,
+ * and no burst still confirming the command before it.
+ */
 function beginAction(kind) {
   stopPass();
+  stopBurst();
+  stopBusyRead();
   action.value = kind;
   result.value = null;
   passedFailureKind.value = null;
-}
-
-/**
- * The command's own word about the door, put in place of a status that cannot
- * be had - or of one that contradicts it, which right after a command means a
- * lock caught mid-turn far more often than a door that disobeyed. It stands in
- * only until `confirmStatus` gets a reading the lock had time to make.
- */
-function applyCommandStatus(nowOpen) {
-  const unreadable = status.value === undefined || status.value === null;
-
-  if (unreadable || isUnlocked(status.value) !== nowOpen) {
-    applyStatus(buildCommandStatus({ open: nowOpen }));
-  }
-}
-
-/**
- * The second look, once the lock has had time to finish turning - and the one
- * that decides. A door that did not move says so here, which is why this
- * reading outranks the command's word rather than merely confirming it.
- */
-async function confirmStatus(nowOpen, ours) {
-  await wait(STATUS_SETTLE_MS);
-  if (!ours()) {
-    return;
-  }
-
-  await refreshStatus();
-  if (!ours()) {
-    return;
-  }
-
-  // Still nothing readable: the command's word is all anyone has.
-  if (status.value === undefined || status.value === null) {
-    applyStatus(buildCommandStatus({ open: nowOpen }));
-  }
+  busyNotice.value = false;
 }
 
 /**
@@ -461,14 +736,10 @@ async function confirmStatus(nowOpen, ours) {
  * `failureMayPass`); one that may not is never timed and keeps its screen
  * until someone acts on it.
  *
- * The result never passes before the door has been asked a second time, so the
- * button that comes back is decided by the best reading there is - and that
- * wait costs nothing, because the result is on screen for it anyway.
- *
- * @param {boolean|null} nowOpen What the command established about the door;
- *   `null` where it established nothing, a failure being no news about a lock.
+ * The button that comes back shows the commanded state; the Confirmation
+ * Burst runs on beside it and flips it should the lock say otherwise.
  */
-async function letResultPass(nowOpen) {
+async function letResultPass() {
   const failure = result.value?.error ?? null;
 
   // Whoever closed the panel mid-request is owed no timer: this runs after
@@ -478,14 +749,9 @@ async function letResultPass(nowOpen) {
   }
 
   const run = ++passRun;
-  const ours = () => mounted && run === passRun;
 
-  await Promise.all([
-    wait(RESULT_VISIBLE_MS),
-    nowOpen === null ? Promise.resolve() : confirmStatus(nowOpen, ours),
-  ]);
-
-  if (!ours()) {
+  await wait(RESULT_VISIBLE_MS);
+  if (!mounted || run !== passRun) {
     return;
   }
 
@@ -500,7 +766,13 @@ async function letResultPass(nowOpen) {
  * door.
  */
 async function openDoor() {
+  // The button shakes instead of emitting while cooling; this is the backstop.
+  if (cooling.value) {
+    return;
+  }
+
   beginAction("open");
+  beginCooldown();
 
   try {
     const outcome = readOpenOutcome(
@@ -524,23 +796,33 @@ async function openDoor() {
         )
       : outcome;
   } catch (error) {
-    console.error("Tür konnte nicht geöffnet werden:", error);
-    result.value = { opened: false, error: ACCESS_ERRORS.DOOR_UNREACHABLE };
+    if (isLockBusy(error)) {
+      settleLockBusy("open");
+    } else {
+      console.error("Tür konnte nicht geöffnet werden:", error);
+      result.value = { opened: false, error: ACCESS_ERRORS.DOOR_UNREACHABLE };
+    }
   } finally {
     action.value = null;
-    await refreshStatus();
 
-    const opened = result.value?.opened === true;
-    if (opened) {
-      applyCommandStatus(true);
+    // No read the instant the answer is in: it would only catch the lock
+    // mid-turn. The burst reads once the lock has had time to turn; a failure
+    // is no news about the lock and starts none.
+    if (result.value?.opened === true) {
+      startBurst("open", undefined);
     }
 
-    letResultPass(opened ? true : null);
+    letResultPass();
   }
 }
 
 async function closeDoor() {
+  if (cooling.value) {
+    return;
+  }
+
   beginAction("close");
+  beginCooldown();
 
   // The close answer carries the state after closing - one roundtrip saved.
   let stateAfterClosing = null;
@@ -552,23 +834,22 @@ async function closeDoor() {
     result.value = outcome;
     stateAfterClosing = outcome.status;
   } catch (error) {
-    console.error("Tür konnte nicht geschlossen werden:", error);
-    result.value = { closed: false, error: ACCESS_ERRORS.CLOSE_FAILED };
+    if (isLockBusy(error)) {
+      settleLockBusy("close");
+    } else {
+      console.error("Tür konnte nicht geschlossen werden:", error);
+      result.value = { closed: false, error: ACCESS_ERRORS.CLOSE_FAILED };
+    }
   } finally {
     action.value = null;
 
-    if (stateAfterClosing) {
-      applyStatus(stateAfterClosing);
-    } else {
-      await refreshStatus();
+    // The backend's own read inside close is read zero of the burst: where it
+    // already reports locked, nothing more is scheduled.
+    if (result.value?.closed === true) {
+      startBurst("close", stateAfterClosing);
     }
 
-    const closed = result.value?.closed === true;
-    if (closed) {
-      applyCommandStatus(false);
-    }
-
-    letResultPass(closed ? false : null);
+    letResultPass();
   }
 }
 
@@ -590,6 +871,15 @@ onMounted(refreshStatus);
 onUnmounted(() => {
   mounted = false;
   stopPass();
+  stopBurst();
+  stopBusyRead();
+  stopCooldownTicker();
+
+  // The sheet's last word to the key row: what it knew as it closed, a burst
+  // still running or not. The row keeps that and does not read again.
+  if (status.value !== undefined) {
+    emit("status", status.value);
+  }
 });
 </script>
 

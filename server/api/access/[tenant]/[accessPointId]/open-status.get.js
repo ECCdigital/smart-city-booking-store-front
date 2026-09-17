@@ -18,6 +18,8 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: error.status || 500,
       statusMessage: error.message || "Failed to fetch open process status",
+      // The backend's error body travels along, as it does for open and close.
+      data: error.data,
     });
   }
 

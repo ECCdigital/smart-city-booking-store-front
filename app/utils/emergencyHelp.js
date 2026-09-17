@@ -25,6 +25,45 @@ export function customerServiceOf(tenant, providerId) {
   return app?.customerService ?? null;
 }
 
+const CONTACT_FIELDS = Object.freeze(["name", "phone", "email"]);
+
+const isFilled = (value) => typeof value === "string" && value.trim() !== "";
+
+/**
+ * The Provider Support Contact shown at the Control Button (glossary), with
+ * the whole-or-fallback rule: the provider's `customerService` counts as
+ * entered once any of its three fields is filled and is then handed out as
+ * a whole - even with an empty field in it. Only a provider that names none
+ * of the three (the admin saves `{ name: "", email: "", phone: "" }` for
+ * IFBS) falls back to the tenant's general contact. The two are never mixed.
+ *
+ * @param {Object|undefined} tenant A tenant from the store
+ * @param {string} providerId The provider key an access point carries
+ * @returns {{ name: string, phone: string, email: string,
+ *   source: "provider"|"tenant" }|null} `null` when nobody names anything
+ */
+export function supportContactOf(tenant, providerId) {
+  const providerContact = customerServiceOf(tenant, providerId);
+  if (providerContact && CONTACT_FIELDS.some((f) => isFilled(providerContact[f]))) {
+    return {
+      name: providerContact.name ?? "",
+      phone: providerContact.phone ?? "",
+      email: providerContact.email ?? "",
+      source: "provider",
+    };
+  }
+
+  const tenantContact = {
+    name: tenant?.contactName ?? "",
+    phone: tenant?.phone ?? "",
+    email: tenant?.mail ?? "",
+  };
+  if (!CONTACT_FIELDS.some((f) => isFilled(tenantContact[f]))) {
+    return null;
+  }
+  return { ...tenantContact, source: "tenant" };
+}
+
 /**
  * The compartments a booking holds, read from its `accessInfo` entries of
  * type `locker` (backend 4.3), in the entries' order. A compartment is

@@ -971,6 +971,21 @@
     }
   },
   "mobileKey": {
+    "accessPoint": {
+      "sectionTitle": "Schlüssel",
+      "lockState": {
+        "open": "Offen",
+        "closed": "Zu",
+        "unknown": "Zustand unbekannt"
+      },
+      "window": {
+        "before": "Zugang ab {from}",
+        "during": "Zugang möglich bis {to}",
+        "after": "Zugang endete um {to}",
+        "full": "Zugang möglich von {from} bis {to}"
+      },
+      "codeHint": "Code an der Tür eingeben"
+    },
     "stages": {
       "loading": {
         "title": "Status wird geprüft …"
@@ -1017,12 +1032,13 @@
       },
       "too_early": {
         "title": "Noch nicht so weit",
-        "description": "Ihre Buchung beginnt am {date}. Ab dann können Sie {label} hier öffnen.",
-        "description_undated": "Ihre Buchung hat noch nicht begonnen."
+        "description": "Zugang möglich ab {date}. Ab dann können Sie {label} hier öffnen.",
+        "description_undated": "Ihr Zugang hat noch nicht begonnen. {label} lässt sich noch nicht öffnen."
       },
       "too_late": {
-        "title": "Buchung beendet",
-        "description": "Ihre Buchung ist abgelaufen. {label} lässt sich damit nicht mehr öffnen."
+        "title": "Zugang beendet",
+        "description": "Ihr Zugang endete am {date}. {label} lässt sich damit nicht mehr öffnen.",
+        "description_undated": "Ihr Zugang ist beendet. {label} lässt sich damit nicht mehr öffnen."
       },
       "door_unreachable": {
         "title": "{label} nicht erreichbar",
@@ -1076,6 +1092,31 @@
       "rebook": "Erneut buchen",
       "book_now": "Jetzt buchen",
       "open_again": "Erneut öffnen"
+    },
+    "cooldown": {
+      "caption": {
+        "open": "Öffnen in {n} s möglich",
+        "close": "Abschließen in {n} s möglich"
+      },
+      "seconds": "Sekunden",
+      "busy": "Das Schloss war noch beschäftigt. Die Wartezeit beginnt von vorn.",
+      "holding": "Halten …",
+      "reading": "Status …",
+      "aria": {
+        "open": "Öffnen. Gedrückt halten, um den Status des Schlosses abzufragen.",
+        "close": "Abschließen. Gedrückt halten, um den Status des Schlosses abzufragen.",
+        "open_in": "Öffnen in {n} Sekunden möglich. Gedrückt halten, um den Status des Schlosses abzufragen.",
+        "close_in": "Abschließen in {n} Sekunden möglich. Gedrückt halten, um den Status des Schlosses abzufragen.",
+        "reading": "Status des Schlosses wird abgefragt …"
+      }
+    },
+    "supportContact": {
+      "collapsed": "Problem an der Tür? Support:",
+      "name": "Kontaktperson",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "booking_number": "Buchungsnummer",
+      "booking_hint": "bitte bereithalten"
     },
     "evidence": {
       "step_verify": "Vor Ort nachweisen",

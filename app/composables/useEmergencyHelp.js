@@ -1,5 +1,5 @@
 import { useTenantStore } from "~~/stores/tenant.js";
-import { customerServiceOf } from "~/utils/emergencyHelp.js";
+import { customerServiceOf, supportContactOf } from "~/utils/emergencyHelp.js";
 
 /**
  * The provider's emergency contact for one tenant, read from the tenant store
@@ -7,6 +7,10 @@ import { customerServiceOf } from "~/utils/emergencyHelp.js";
  * There is no request of its own any more - the locker route this used to
  * proxy is gone - so `fetchCustomerServiceInfo` only makes sure the tenants
  * are loaded; `serviceInfo` follows the store from then on.
+ *
+ * `serviceInfo` is the provider's contact alone (the locker accordion);
+ * `supportContact` is the Provider Support Contact at the Control Button,
+ * with the fallback to the tenant's general contact.
  */
 export function useEmergencyHelp(tenantId, providerId) {
     const tenantStore = useTenantStore();
@@ -18,9 +22,16 @@ export function useEmergencyHelp(tenantId, providerId) {
         ),
     );
 
+    const supportContact = computed(() =>
+        supportContactOf(
+            tenantStore.getTenantById(unref(tenantId)),
+            unref(providerId),
+        ),
+    );
+
     async function fetchCustomerServiceInfo() {
         await tenantStore.fetchTenants();
     }
 
-    return { serviceInfo, fetchCustomerServiceInfo };
+    return { serviceInfo, supportContact, fetchCustomerServiceInfo };
 }
