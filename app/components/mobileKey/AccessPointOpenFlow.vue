@@ -162,6 +162,7 @@
     <SupportContactLine
       v-if="view.stage !== 'loading' && view.stage !== 'evidence'"
       :provider-id="accessPoint.provider ?? null"
+      :access-point="accessPoint"
       :tenant-id="tenantId"
       :booking-id="bookingId"
       :expanded="supportContactExpanded"

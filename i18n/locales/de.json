@@ -1116,6 +1116,7 @@
       "phone": "Telefon",
       "email": "E-Mail",
       "booking_number": "Buchungsnummer",
+      "process_number": "Vorgangsnummer",
       "booking_hint": "bitte bereithalten"
     },
     "evidence": {

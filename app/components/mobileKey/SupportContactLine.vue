@@ -62,12 +62,12 @@
           </a>
         </div>
       </div>
-      <div v-if="bookingId" class="flex items-center gap-2">
+      <div v-if="reference" class="flex items-center gap-2">
         <UIcon name="i-lucide-hash" size="16" class="text-primary shrink-0" />
         <div>
-          <span>{{ t("mobileKey.supportContact.booking_number") }}: </span>
+          <span>{{ t(`mobileKey.supportContact.${reference.kind}_number`) }}: </span>
           <br class="sm:hidden" >
-          <span class="font-mono font-bold">{{ bookingId }}</span>
+          <span class="font-mono font-bold">{{ reference.value }}</span>
           <span class="text-neutral-500">
             ({{ t("mobileKey.supportContact.booking_hint") }})
           </span>
@@ -79,6 +79,7 @@
 
 <script setup>
 import { useEmergencyHelp } from "~/composables/useEmergencyHelp.js";
+import { supportReferenceOf } from "~/utils/emergencyHelp.js";
 
 const props = defineProps({
   tenantId: { type: String, required: true },
@@ -86,6 +87,12 @@ const props = defineProps({
   providerId: { type: String, default: null },
   /** The booking to name to the hotline; nothing to name while none is known. */
   bookingId: { type: String, default: null },
+  /**
+   * The door as the per-booking projection sends it. A Provider with its own
+   * process number (iFBS `externalBookingId`) has that named instead of the
+   * booking number.
+   */
+  accessPoint: { type: Object, default: null },
   /** Preset open - the error stages do, the button stages do not. */
   expanded: { type: Boolean, default: false },
 });
@@ -95,6 +102,11 @@ const { t } = useI18n();
 const { supportContact, fetchCustomerServiceInfo } = useEmergencyHelp(
   toRef(props, "tenantId"),
   toRef(props, "providerId"),
+);
+
+/** What the hotline looks the person up by: the Provider's number, else ours. */
+const reference = computed(() =>
+  supportReferenceOf(props.accessPoint, props.bookingId),
 );
 
 const open = ref(props.expanded);

@@ -7,6 +7,7 @@ import {
   supportContactOf,
   withAccessApps,
   hasAccessApps,
+  supportReferenceOf,
 } from "~/utils/emergencyHelp.js";
 
 const IFBS_CONTACT = Object.freeze({
@@ -299,5 +300,29 @@ describe("withAccessApps", () => {
     expect(hasAccessApps(catalogTenants)).toBe(false);
     expect(hasAccessApps(withAccessApps(catalogTenants, publicTenants))).toBe(true);
     expect(hasAccessApps([])).toBe(false);
+  });
+});
+
+describe("supportReferenceOf", () => {
+  it("names the provider's own process number where the door carries one (iFBS)", () => {
+    expect(
+      supportReferenceOf({ provider: "ifbs", externalBookingId: "4711" }, "XMSD-SJKM"),
+    ).toEqual({ kind: "process", value: "4711" });
+  });
+
+  it("falls back to the platform's booking number", () => {
+    expect(supportReferenceOf({ provider: "nuki" }, "XMSD-SJKM")).toEqual({
+      kind: "booking",
+      value: "XMSD-SJKM",
+    });
+    expect(supportReferenceOf({ externalBookingId: null }, "XMSD-SJKM")).toEqual({
+      kind: "booking",
+      value: "XMSD-SJKM",
+    });
+  });
+
+  it("names nothing without either", () => {
+    expect(supportReferenceOf(null, null)).toBeNull();
+    expect(supportReferenceOf({ externalBookingId: "" }, "")).toBeNull();
   });
 });

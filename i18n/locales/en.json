@@ -633,6 +633,7 @@
       "phone": "Phone",
       "email": "Email",
       "booking_number": "Booking number",
+      "process_number": "Process number",
       "booking_hint": "please have it ready"
     }
   }

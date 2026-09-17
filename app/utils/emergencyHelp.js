@@ -165,3 +165,26 @@ export function withAccessApps(tenants, publicTenants) {
     accessApps: appsById.get(tenant.id) ?? [],
   }));
 }
+
+/**
+ * The number the hotline will ask for. A Provider that runs its own bookings
+ * (iFBS: the Vorgangsnummer, the grant's `authorizationId`, which the
+ * projection hands out as `externalBookingId`) knows nothing of the
+ * platform's booking number, so that one is named instead; every other door
+ * is looked up by the platform's booking number.
+ *
+ * @param {{ externalBookingId?: string|number|null }|null|undefined} accessPoint
+ *   The door as the per-booking projection sends it
+ * @param {string|null|undefined} bookingId The platform's booking number
+ * @returns {{ kind: "process"|"booking", value: string }|null}
+ */
+export function supportReferenceOf(accessPoint, bookingId) {
+  const processNumber = accessPoint?.externalBookingId;
+  if (processNumber !== null && processNumber !== undefined && String(processNumber) !== "") {
+    return { kind: "process", value: String(processNumber) };
+  }
+  if (bookingId) {
+    return { kind: "booking", value: String(bookingId) };
+  }
+  return null;
+}
