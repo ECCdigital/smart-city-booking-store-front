@@ -382,6 +382,34 @@ export function readAccessPoint(raw) {
 }
 
 /**
+ * Reads the answer of `GET /api/access/:tenant/points?bookingId=` - the
+ * backend body forwarded whole: `{ success, data: [points],
+ * accessEligibility }`, where `accessEligibility` is the decision the backend
+ * computed for that booking (backend 4.3, the same shape
+ * `GET /api/access/bookings?includeEligibility=true` puts on each booking).
+ *
+ * Tolerant towards a backend that still answers a bare list, or one that
+ * names no decision: the points stand, the eligibility is `null` - and a
+ * `null` eligibility makes nothing remote-operable (→ `remoteOperable`),
+ * so an older backend greys every button rather than offering one that fails.
+ *
+ * @param {{ data?: Object[], accessEligibility?: Object }|Object[]|null|undefined} response
+ * @returns {{ points: Object[], accessEligibility: Object|null }}
+ */
+export function readAccessPointsAnswer(response) {
+  const list = Array.isArray(response) ? response : response?.data;
+  const eligibility = Array.isArray(response)
+    ? null
+    : response?.accessEligibility;
+
+  return {
+    points: Array.isArray(list) ? list : [],
+    accessEligibility:
+      eligibility && typeof eligibility === "object" ? eligibility : null,
+  };
+}
+
+/**
  * Whether a door can be asked for its state. The one place the `getStatus`
  * capability is spelled: the flow, the list and {@link decideStage} all skip
  * the same doors - a locker at rest declares `open` alone and would answer a

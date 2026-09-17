@@ -54,6 +54,12 @@ export function useAccessPoints() {
     );
   };
 
+  /**
+   * The access points of one booking together with the backend's decision
+   * for it: the body as the BFF forwards it, `{ success, data: [points],
+   * accessEligibility }`. Read it through `readAccessPointsAnswer`, which
+   * also copes with an older backend that answers the bare list.
+   */
   const getAccessPoints = async (tenant, bookingId) => {
     const result = await api.get(`/api/access/${pathPart(tenant)}/points`, {
       query: cleanQuery({ bookingId }),
