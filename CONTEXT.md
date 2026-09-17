@@ -103,3 +103,41 @@ _Avoid_: Working copy, pending state, snapshot
 **Preview Report**:
 What the Live Preview sends back to the editor after rendering a Draft: the Blocks that fall outside the Hero's content area and the Blocks that overlap, per viewport.
 _Avoid_: Warnings, validation result, feedback
+
+### Mobile Key
+
+**Mobile Key** (admin label: „Schlüssel“):
+The storefront's key page where a booker opens and closes the doors of their bookings from the phone. A panel page; shows no Hero.
+_Avoid_: Keys page, digital key, lock page
+
+**Access Point** (admin label: „Zugang“):
+One door lock or locker compartment a booking grants access to, operated through its Provider (Nuki, IFBS). Shown as one row per booking on the Mobile Key.
+_Avoid_: Lock, door, smartlock (those are the Provider's devices, not the platform's notion)
+
+**Control Button**:
+The round tap target in the open sheet that sends the booker's one action: Öffnen (the Provider pulls the latch where the lock has one, otherwise unlocks) or Schließen. Bookers have exactly these two actions; the admin's plain „Aufschließen“ is not one of them.
+_Avoid_: Open button, lock button, unlock button
+
+**Cooldown**:
+The fixed wait after every sent command during which the Control Button accepts no further command, shown as a countdown. Exists because the lock answers Lock Busy while it is still carrying out the previous action. A long press during the Cooldown only refreshes the status.
+_Avoid_: Debounce, throttle, rate limit, delay
+
+**Confirmation Burst**:
+The short series of status reads the storefront makes after a sent command, inside the Cooldown, until the lock reports the state the command asked for. The lock's reading always outranks the command's own word. A long press that lands while a burst read is running is absorbed by it.
+_Avoid_: Polling, status loop, settle read
+
+**Lock Busy**:
+The Provider's refusal of a command because the lock is still executing the previous one (Nuki: HTTP 423). Not an unreachable lock and not a rate limit, and not a failure the booker is shown a screen for: it only restarts the Cooldown.
+_Avoid_: 423, locked, busy error, unreachable
+
+**Access Window** (admin label: „Vorlaufzeit“ / „Nachlaufzeit“ around the booking):
+The time span in which a booking's Access Points may be operated: the booking period extended by the bookable's lead and lag buffer. Without a buffer it equals the booking period exactly. Viewing the keys is allowed outside it; operating them is not, except for the Admin Override.
+_Avoid_: Booking window, validity, buffer (the buffer is the extension, not the window)
+
+**Admin Override**:
+The right of anyone who may manage the tenant's bookings to close an Access Point and read its status after its Access Window has ended, so a lock left open can be brought back to a known state. It never allows opening, never applies before the window starts, and lifts nothing but the window: the booking must still be valid. Every overridden command is marked as such in the audit.
+_Avoid_: Emergency access, master key, bypass (that is the evidence bypass, a different thing)
+
+**Provider Support Contact** (admin label: „Kundenservice“ of a Schließsystem):
+The name, phone and e-mail a tenant enters per Provider for door problems; shown at the Control Button. The Provider's contact counts as entered once any of its three fields is filled and is then shown as a whole; only a Provider with no field filled falls back to the tenant's general contact. The two are never mixed.
+_Avoid_: Emergency help, hotline, tenant contact (that is the fallback, not the term)
