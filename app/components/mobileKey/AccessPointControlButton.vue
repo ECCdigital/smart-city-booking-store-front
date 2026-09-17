@@ -7,7 +7,11 @@
       :class="haloClass"
     />
 
-    <!-- the ring that drains clockwise over the Cooldown -->
+    <!--
+      The ring that drains clockwise over the Cooldown: rotated to start at
+      12 o'clock, and the offset negative, so the gap opens clockwise from
+      there and the remaining arc ends where it began.
+    -->
     <svg
       v-if="cooling"
       class="absolute w-40 h-40 -rotate-90 pointer-events-none"
@@ -31,7 +35,7 @@
         stroke-width="3"
         stroke-linecap="round"
         :stroke-dasharray="RING"
-        :stroke-dashoffset="RING * cooldownProgress"
+        :stroke-dashoffset="-RING * cooldownProgress"
         class="text-neutral-500 transition-[stroke-dashoffset] duration-100 ease-linear"
       />
     </svg>
@@ -299,13 +303,23 @@ function cancelHold() {
   holding.value = false;
 }
 
-/** The tap: held back by the Cooldown with a shake, otherwise the command. */
+/** How long the shake plays; the fallback that ends it where no animation runs. */
+const SHAKE_MS = 450;
+
+/** The end of the current shake, `null` while none plays. */
+let shakeTimer = null;
+
+/**
+ * The tap: held back by the Cooldown with a shake - also while a burst read
+ * has the spinner up, the Cooldown is what the person runs into - otherwise
+ * ignored during a read, otherwise the command.
+ */
 function onTap() {
-  if (props.reading) {
+  if (props.cooling) {
+    shake();
     return;
   }
-  if (props.cooling) {
-    shaking.value = true;
+  if (props.reading) {
     return;
   }
   switch (props.variant) {
@@ -318,10 +332,27 @@ function onTap() {
   }
 }
 
+/**
+ * One shake. `animationend` ends it where the animation plays; under
+ * `prefers-reduced-motion` it never starts, so a timeout of its length ends
+ * it instead - else the flag would stick and no later tap could shake.
+ */
+function shake() {
+  shaking.value = true;
+  clearTimeout(shakeTimer);
+  shakeTimer = setTimeout(endShake, SHAKE_MS);
+}
+
+function endShake() {
+  clearTimeout(shakeTimer);
+  shakeTimer = null;
+  shaking.value = false;
+}
+
 /** The shake has played out; the next held-back tap may shake again. */
 function onAnimationEnd(event) {
   if (event.animationName === "shake") {
-    shaking.value = false;
+    endShake();
   }
 }
 
@@ -357,7 +388,10 @@ function onKeyUp(event) {
   endHold();
 }
 
-onUnmounted(cancelHold);
+onUnmounted(() => {
+  cancelHold();
+  endShake();
+});
 </script>
 <style scoped>
 .controlButton {

@@ -50,8 +50,6 @@ export function useAccessClock(doors, { onCrossing } = {}) {
   const list = () => unref(typeof doors === "function" ? doors() : doors) ?? [];
 
   let timer = null;
-  /** A boundary went by while the tab was hidden; reported at the return. */
-  let crossedWhileHidden = false;
 
   const hidden = () =>
     typeof document !== "undefined" && document.visibilityState === "hidden";
@@ -63,9 +61,17 @@ export function useAccessClock(doors, { onCrossing } = {}) {
     }
   }
 
-  /** One timeout on the next boundary - or none, where every boundary lies behind. */
+  /**
+   * One timeout on the next boundary - or none, where every boundary lies
+   * behind. Client only: the immediate watch runs during SSR too, and a timer
+   * armed there has nobody to fire for.
+   */
   function arm() {
     disarm();
+
+    if (!import.meta.client) {
+      return;
+    }
 
     const next = nextBoundary(list(), now.value);
     if (next === null) {
@@ -80,21 +86,18 @@ export function useAccessClock(doors, { onCrossing } = {}) {
    * Moves `now` and reports what was crossed since the last look. A timer that
    * fires early (clamped, or a throttled tab that woke late) reports nothing
    * and merely re-arms.
+   *
+   * Every crossing is reported exactly once: a timer that still fires in a
+   * hidden tab reports it then, and the return to the tab finds nothing left
+   * to report; a timer the browser held back leaves the crossing for the
+   * return, which counts the boundaries since the last look itself.
    */
   function evaluate({ resumed = false } = {}) {
     const since = now.value;
     now.value = Date.now();
 
     const crossed = crossedBoundaries(list(), since, now.value);
-    const any = crossed.starts > 0 || crossed.ends > 0;
-
-    if (any && hidden()) {
-      crossedWhileHidden = true;
-    }
-    if (any || (resumed && crossedWhileHidden)) {
-      if (resumed) {
-        crossedWhileHidden = false;
-      }
+    if (crossed.starts > 0 || crossed.ends > 0) {
       onCrossing?.({ ...crossed, resumed });
     }
 

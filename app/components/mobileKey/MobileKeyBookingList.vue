@@ -40,6 +40,7 @@
         <!-- Status -->
         <div class="flex justify-end">
           <div
+            v-if="bookingStatus(booking)"
             class="flex px-3 py-1 rounded-full text-xs font-medium w-max"
             :class="bookingStatus(booking).color"
           >
@@ -201,7 +202,8 @@ const blockingReasonLabels = Object.freeze({
  * the same fact the backend's own "active" filter uses, so the badge flips at
  * the boundary without a reload, and the card stays where it is until the
  * next load. A booking without an envelope gets no time badge: its raw times
- * are not a window, and nothing is invented from them.
+ * are not a window, and nothing is invented from them - a blocking reason is
+ * still named, and without one the badge is `null` and stays away.
  */
 const bookingStatus = (booking) => {
   const eligibility = booking.accessEligibility;
@@ -236,6 +238,10 @@ const bookingStatus = (booking) => {
       color: "bg-orange-100 text-orange-800",
       icon: "i-lucide-lock",
     };
+  }
+
+  if (windowState !== ACCESS_WINDOW_STATES.DURING) {
+    return null;
   }
 
   return {

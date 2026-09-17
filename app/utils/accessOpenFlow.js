@@ -388,19 +388,18 @@ export function readAccessPoint(raw) {
  * computed for that booking (backend 4.3, the same shape
  * `GET /api/access/bookings?includeEligibility=true` puts on each booking).
  *
- * Tolerant towards a backend that still answers a bare list, or one that
- * names no decision: the points stand, the eligibility is `null` - and a
- * `null` eligibility makes nothing remote-operable (→ `remoteOperable`),
- * so an older backend greys every button rather than offering one that fails.
+ * Tolerant towards a body that names no decision or an unreadable one: the
+ * points stand, the eligibility is `null` - and a `null` eligibility makes
+ * nothing remote-operable (→ `remoteOperable`), so every button greys rather
+ * than offering one that fails. A bare list is no body of this backend and
+ * reads as no points: the 4.3 envelope is required, not tolerated around.
  *
- * @param {{ data?: Object[], accessEligibility?: Object }|Object[]|null|undefined} response
+ * @param {{ data?: Object[], accessEligibility?: Object }|null|undefined} response
  * @returns {{ points: Object[], accessEligibility: Object|null }}
  */
 export function readAccessPointsAnswer(response) {
-  const list = Array.isArray(response) ? response : response?.data;
-  const eligibility = Array.isArray(response)
-    ? null
-    : response?.accessEligibility;
+  const list = response?.data;
+  const eligibility = response?.accessEligibility;
 
   return {
     points: Array.isArray(list) ? list : [],

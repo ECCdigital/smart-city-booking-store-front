@@ -503,16 +503,32 @@ async function readDoor() {
 /**
  * Reads the door and shows what it said - the mount, the retry and the hold.
  * Inside a Confirmation Burst the reading is the burst's as well: a match
- * ends it, anything else is one more reading for it to weigh at the end.
+ * ends it, anything else is one more reading for it to weigh at the end - and
+ * only a readable one is shown meanwhile. An unreadable one changes nothing:
+ * the command's word stands, no new screen (S2).
+ *
+ * @param {{ owedAfterBusy?: boolean }} [options] The read stands in for the
+ *   one owed after Lock Busy: a failure is then ignored silently, as that
+ *   read's would have been (S3)
  */
-async function refreshStatus() {
+async function refreshStatus({ owedAfterBusy = false } = {}) {
   const next = await readDoor();
+  if (owedAfterBusy) {
+    busyReadDue.value = false;
+  }
   if (next === undefined) {
     return;
   }
 
   if (burst) {
     absorbIntoBurst(next);
+    if (next && burst) {
+      applyStatus(next);
+    }
+    return;
+  }
+  if (next === null && owedAfterBusy) {
+    return;
   }
   applyStatus(next);
 }
@@ -524,14 +540,19 @@ async function refreshStatus() {
  * and one answer is all it needs. Outside a running read the hold reads at
  * once, and the burst, if one is on, is neither restarted nor put off. The
  * read still owed after Lock Busy is another matter: the hold *is* that read,
- * and the scheduled one is called off - one read in total.
+ * and the scheduled one is called off - one read in total, with that read's
+ * silence about a failure.
  */
 function readStatusOnHold() {
   if (reading.value) {
     return;
   }
-  stopBusyRead();
-  refreshStatus();
+  const owedAfterBusy = busyReadTimer !== null;
+  if (owedAfterBusy) {
+    clearTimeout(busyReadTimer);
+    busyReadTimer = null;
+  }
+  refreshStatus({ owedAfterBusy });
 }
 
 /**
@@ -799,7 +820,7 @@ async function openDoor() {
     if (isLockBusy(error)) {
       settleLockBusy("open");
     } else {
-      console.error("Tür konnte nicht geöffnet werden:", error);
+      console.error("Door could not be opened:", error);
       result.value = { opened: false, error: ACCESS_ERRORS.DOOR_UNREACHABLE };
     }
   } finally {
@@ -837,7 +858,7 @@ async function closeDoor() {
     if (isLockBusy(error)) {
       settleLockBusy("close");
     } else {
-      console.error("Tür konnte nicht geschlossen werden:", error);
+      console.error("Door could not be closed:", error);
       result.value = { closed: false, error: ACCESS_ERRORS.CLOSE_FAILED };
     }
   } finally {

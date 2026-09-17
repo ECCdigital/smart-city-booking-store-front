@@ -121,5 +121,11 @@ const lead = computed(() => {
   return null;
 });
 
-await fetchCustomerServiceInfo();
+// The line is a helper on someone else's sheet: a tenant list that cannot be
+// loaded leaves it out and never takes the sheet down with it.
+try {
+  await fetchCustomerServiceInfo();
+} catch (error) {
+  console.error("Support contact could not be loaded:", error);
+}
 </script>

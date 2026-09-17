@@ -23,9 +23,9 @@ describe("readAccessPointsAnswer", () => {
     ).toEqual({ points: [POINT], accessEligibility: ELIGIBILITY });
   });
 
-  it("takes a bare list from an older backend as points without a decision", () => {
+  it("reads a bare list as an unreadable body - the 4.3 envelope is required", () => {
     expect(readAccessPointsAnswer([POINT])).toEqual({
-      points: [POINT],
+      points: [],
       accessEligibility: null,
     });
   });
