@@ -17,6 +17,7 @@ export default createConditionalCachedHandler(
       catalogType,
       catalogTenantId,
       tenantIds,
+      tenantHint,
     } = getQuery(event);
     const tenantsFromQuery = tenantIds
       ? String(tenantIds)
@@ -39,6 +40,7 @@ export default createConditionalCachedHandler(
         bookableId,
         eventId,
         include,
+        tenantHint: tenantHint ? String(tenantHint) : null,
       });
     }
 
@@ -84,6 +86,7 @@ export default createConditionalCachedHandler(
       bookableId,
       eventId,
       include,
+      tenantHint: tenantHint ? String(tenantHint) : null,
     });
 
     return { ...result, ...items };

@@ -1,5 +1,6 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 import { loadBundleData } from "~~/server/api/utils/loadBundleData.ts";
+import { tenantMustBeListed } from "~~/server/api/utils/detailResolution.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
 
 export default createConditionalCachedHandler(
@@ -53,7 +54,10 @@ export default createConditionalCachedHandler(
       return result;
     }
 
-    if (!result.tenants.some((t) => t.id === tenantID)) {
+    if (
+      tenantMustBeListed({ bookableId, eventId }) &&
+      !result.tenants.some((t) => t.id === tenantID)
+    ) {
       throw createError({ statusCode: 404, statusMessage: "Tenant Not Found" });
     }
 

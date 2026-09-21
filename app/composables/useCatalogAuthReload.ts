@@ -2,6 +2,7 @@ import { useAuthStore } from "~~/stores/auth.js";
 import { useBookableStore } from "~~/stores/bookable.js";
 import { useEventStore } from "~~/stores/event.js";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
+import { tenantHintOf } from "~/utils/catalogDetail.js";
 
 type ReloadParams = {
   slug: string | null;
@@ -114,6 +115,7 @@ export function useCatalogAuthReload() {
           slug: params.slug,
           bookableID: params.bookableID,
           eventID: params.eventID,
+          tenantHint: tenantHintOf(route.query),
           force: true,
         });
         return;
