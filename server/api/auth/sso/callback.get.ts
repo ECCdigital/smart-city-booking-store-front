@@ -5,6 +5,7 @@ import {
 } from "~~/server/utils/keycloak";
 import type { KeycloakTokenResponse } from "~~/server/utils/keycloak";
 import type { UpstreamError } from "~~/server/utils/upstreamError";
+import { appendReturnTarget } from "~~/shared/utils/returnTarget";
 
 export default defineEventHandler(async (event) => {
     const config = await getKeycloakConfig(event);
@@ -18,13 +19,20 @@ export default defineEventHandler(async (event) => {
 
     const savedState = getCookie(event, "kc-state");
     const codeVerifier = getCookie(event, "kc-code-verifier");
-    const redirectPath = getCookie(event, "kc-redirect") || "/";
+    const redirectPath = safeReturnTarget(getCookie(event, "kc-redirect"));
 
     deleteCookie(event, "kc-state");
     deleteCookie(event, "kc-code-verifier");
     deleteCookie(event, "kc-redirect");
 
     const isSilentCheck = savedState?.startsWith("silent_");
+
+    // A failed login keeps the return target, so a retry still leads back.
+    const loginError = (code: string) =>
+        appendReturnTarget(
+            `/login?error=${code}`,
+            redirectPath === "/" ? null : redirectPath
+        );
 
     if (error) {
         if (
@@ -34,17 +42,17 @@ export default defineEventHandler(async (event) => {
             return sendRedirect(event, redirectPath);
         }
         console.error("Keycloak auth error:", error, query.error_description);
-        return sendRedirect(event, `/login?error=sso_failed`);
+        return sendRedirect(event, loginError("sso_failed"));
     }
 
     if (!state || state !== savedState) {
         if (isSilentCheck) return sendRedirect(event, redirectPath);
-        return sendRedirect(event, `/login?error=invalid_state`);
+        return sendRedirect(event, loginError("invalid_state"));
     }
 
     if (!code || !codeVerifier) {
         if (isSilentCheck) return sendRedirect(event, redirectPath);
-        return sendRedirect(event, `/login?error=missing_params`);
+        return sendRedirect(event, loginError("missing_params"));
     }
 
     const redirectUri = `${getRequestURL(event).origin}/api/auth/sso/callback`;
@@ -125,7 +133,7 @@ export default defineEventHandler(async (event) => {
     } catch (err) {
         console.error("SSO callback error:", err);
         if (isSilentCheck) return sendRedirect(event, redirectPath);
-        return sendRedirect(event, `/login?error=sso_failed`);
+        return sendRedirect(event, loginError("sso_failed"));
     }
 });
 

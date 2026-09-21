@@ -6,6 +6,13 @@ import { useAuth } from "~/composables/auth/useAuth.js";
 import AlreadyVerifiedEmailCard from "~/components/auth/email-verification/AlreadyVerifiedEmailCard.vue";
 import EmailVerificationActionCard from "~/components/auth/email-verification/EmailVerificationActionCard.vue";
 import AuthTitleSection from "~/components/auth/AuthTitleSection.vue";
+import { useReturnTarget } from "~/composables/auth/useReturnTarget";
+import { useRateLimitNotice } from "~/composables/auth/useRateLimitNotice";
+import { verifiedReturnTarget } from "~/utils/authEntryFlow";
+import {
+  appendReturnTarget,
+  VERIFY_RETURN_TARGET_PARAM,
+} from "~~/shared/utils/returnTarget";
 
 const { verifyEmail } = useAuth();
 const { t } = useI18n();
@@ -17,6 +24,18 @@ const route = useRoute();
 const token = route.query.token || "";
 const id = route.query.id || "";
 
+// The return target of the signup: the mail link carries it as `?next=`, and
+// the backend answers the one it kept on the verification hook.
+const { options: returnTargetOptions } = useReturnTarget();
+const { notifyRateLimited } = useRateLimitNotice();
+const returnTarget = ref(
+  verifiedReturnTarget(
+    { linked: route.query[VERIFY_RETURN_TARGET_PARAM] },
+    returnTargetOptions,
+  ),
+);
+const loginTo = computed(() => appendReturnTarget("/login", returnTarget.value));
+
 const verificationStatus = ref("actionRequired"); // "pending", "success", "failed", "alreadyVerified"
 const errorType = ref(null);
 
@@ -24,12 +43,21 @@ function fecthVerificationStatus() {
   verificationStatus.value = "pending";
 
   verifyEmail(token, id)
-    .then(() => {
+    .then((response) => {
+      returnTarget.value = verifiedReturnTarget(
+        {
+          answered: response?.data?.nextUrl,
+          linked: route.query[VERIFY_RETURN_TARGET_PARAM],
+        },
+        returnTargetOptions,
+      );
       verificationStatus.value = "success";
     })
     .catch((e) => {
       console.error("Email verification failed:", e.statusCode);
-      if (e.statusCode === 400) {
+      if (notifyRateLimited(e)) {
+        verificationStatus.value = "actionRequired";
+      } else if (e.statusCode === 400) {
         errorType.value = "invalidToken";
         verificationStatus.value = "failed";
       } else if (e.statusCode === 404) {
@@ -77,6 +105,7 @@ onMounted(() => {
       />
       <SuccessEmailVerificationCard
         v-else-if="verificationStatus === 'success'"
+        :login-to="loginTo"
         class="shadow-2xl/50"
       />
       <FailedEmailVerificationCard
@@ -86,6 +115,7 @@ onMounted(() => {
       />
       <AlreadyVerifiedEmailCard
         v-else-if="verificationStatus === 'alreadyVerified'"
+        :login-to="loginTo"
         class="shadow-2xl/50"
       />
     </div>

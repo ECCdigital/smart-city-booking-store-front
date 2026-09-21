@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     });
     const endpoints = getKeycloakEndpoints(config.serverUrl, config.realm);
     const query = getQuery(event);
-    const redirect = (query.redirect as string) || "/";
+    const redirect = safeReturnTarget(query.redirect);
 
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = generateCodeChallenge(codeVerifier);

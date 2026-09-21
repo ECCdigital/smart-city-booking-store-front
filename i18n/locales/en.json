@@ -89,7 +89,21 @@
   "footer": {
     "legalNotice": "Legal notice",
     "dataProtection": "Privacy policy",
-    "termsAndConditions": "Terms and conditions"
+    "termsAndConditions": "Terms and conditions",
+    "offerSpaces": "Offer spaces"
+  },
+  "rateLimit": {
+    "title": "Too many attempts",
+    "seconds": "Please try again in {count} second. | Please try again in {count} seconds.",
+    "minutes": "Please try again in {count} minute. | Please try again in {count} minutes.",
+    "later": "Please try again later."
+  },
+  "register": {
+    "success": {
+      "heading": "Please check your inbox",
+      "description": "If the address you entered can be used, you will shortly receive an e-mail with a confirmation link. Please use it to confirm your e-mail address and activate your account.",
+      "resent": "If the address belongs to an account that is not confirmed yet, we have sent the confirmation link again."
+    }
   },
   "colorMode": {
     "toggle": "Colour mode",
