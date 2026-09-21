@@ -1,5 +1,11 @@
 import type { H3Event } from "h3";
 import { serverFetch } from "./serverFetch";
+import {
+  detailCandidateTenants,
+  resolveDetail,
+  type DetailFetchResult,
+  type DetailKind,
+} from "./detailResolution";
 
 type Tenant = { id: string };
 
@@ -14,6 +20,8 @@ type LoadParams = {
   bookableId?: string;
   eventId?: string;
   include?: string;
+  /** The tenant a direct link names explicitly (`?tenantId=`). */
+  tenantHint?: string | null;
 };
 
 export type BundleItems = {
@@ -27,20 +35,30 @@ type FetchResult<T> =
   | { data: T; error: null }
   | { data: null; error: { status: number; message: string } };
 
-async function fetchSingleAcrossTenants<T>(
+/**
+ * One bookable or event for a direct link: asked in every tenant that can
+ * hold it, listed in the bundle or not — the backend decides.
+ */
+async function loadDetailItem(
   event: H3Event,
-  tenants: Tenant[],
-  path: (tenantId: string) => string
+  kind: DetailKind,
+  id: string,
+  { catalog, tenants, tenantHint }: LoadParams
 ) {
-  const responses = await Promise.all(
-    tenants.map(async (tenant) => {
-      const res = (await serverFetch<T>(event, path(tenant.id), {
+  const hit = await resolveDetail({
+    kind,
+    id,
+    tenantIds: detailCandidateTenants({
+      catalogTenantId: catalog?.type === "single" ? catalog.tenantId : null,
+      listedTenantIds: tenants.map((tenant) => tenant.id),
+      tenantHint,
+    }),
+    fetch: (path) =>
+      serverFetch<unknown>(event, path, {
         method: "GET",
-      })) as FetchResult<T>;
-      return { tenant, ...res };
-    })
-  );
-  return responses.find((r) => !r.error && r.data != null) ?? null;
+      }) as Promise<DetailFetchResult>,
+  });
+  return hit?.item ?? null;
 }
 
 async function fetchListAcrossTenants<T>(
@@ -63,29 +81,22 @@ async function fetchListAcrossTenants<T>(
 
 export async function loadBundleData(
   event: H3Event,
-  { catalog, tenants, bookableId, eventId, include }: LoadParams
+  params: LoadParams
 ): Promise<BundleItems> {
+  const { catalog, tenants, bookableId, eventId, include } = params;
   const result: BundleItems = {};
   const includes = include?.split(",").map((s) => s.trim()) ?? [];
 
   if (catalog?.type === "instance") {
     if (bookableId) {
-      const hit = await fetchSingleAcrossTenants<unknown>(
-        event,
-        tenants,
-        (id) => `/json/${id}/bookables/${bookableId}`
-      );
-      if (hit?.data) result.bookable = hit.data;
+      const bookable = await loadDetailItem(event, "bookable", bookableId, params);
+      if (bookable) result.bookable = bookable;
       return result;
     }
 
     if (eventId) {
-      const hit = await fetchSingleAcrossTenants<unknown>(
-        event,
-        tenants,
-        (id) => `/json/${id}/events/${eventId}`
-      );
-      if (hit?.data) result.event = hit.data;
+      const item = await loadDetailItem(event, "event", eventId, params);
+      if (item) result.event = item;
       return result;
     }
 
@@ -126,34 +137,26 @@ export async function loadBundleData(
     }
 
     if (bookableId) {
-      const { data, error } = (await serverFetch<{ bookable?: unknown }>(
-        event,
-        `/json/${tenantId}/bookables/${bookableId}`,
-        { method: "GET" }
-      )) as FetchResult<{ bookable?: unknown }>;
-      if (error || !data?.bookable) {
+      const bookable = await loadDetailItem(event, "bookable", bookableId, params);
+      if (!bookable) {
         throw createError({
           statusCode: 404,
           statusMessage: "Bookable not found",
         });
       }
-      result.bookable = data.bookable;
+      result.bookable = bookable;
       return result;
     }
 
     if (eventId) {
-      const { data, error } = (await serverFetch<{ event?: unknown }>(
-        event,
-        `/json/${tenantId}/events/${eventId}`,
-        { method: "GET" }
-      )) as FetchResult<{ event?: unknown }>;
-      if (error || !data?.event) {
+      const item = await loadDetailItem(event, "event", eventId, params);
+      if (!item) {
         throw createError({
           statusCode: 404,
           statusMessage: "Event not found",
         });
       }
-      result.event = data.event;
+      result.event = item;
       return result;
     }
 

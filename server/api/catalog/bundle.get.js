@@ -17,6 +17,7 @@ export default createConditionalCachedHandler(
       catalogType,
       catalogTenantId,
       tenantIds,
+      tenantHint,
     } = getQuery(event);
     const tenantsFromQuery = tenantIds
       ? String(tenantIds)
@@ -39,6 +40,7 @@ export default createConditionalCachedHandler(
         bookableId,
         eventId,
         include,
+        tenantHint: tenantHint ? String(tenantHint) : null,
       });
     }
 
@@ -84,6 +86,7 @@ export default createConditionalCachedHandler(
       bookableId,
       eventId,
       include,
+      tenantHint: tenantHint ? String(tenantHint) : null,
     });
 
     return { ...result, ...items };
@@ -96,7 +99,8 @@ export default createConditionalCachedHandler(
       const token = getCookie(event, "access-token");
       const scope = token ? "auth" : "anon";
       const { slug, bookableId, eventId, include } = getQuery(event);
-      const { base, catalogType, catalogTenantId, tenantIds } = getQuery(event);
+      const { base, catalogType, catalogTenantId, tenantIds, tenantHint } =
+        getQuery(event);
       const inc = include
         ? String(include).split(",").map((s) => s.trim()).sort().join(",")
         : "";
@@ -111,6 +115,7 @@ export default createConditionalCachedHandler(
         catalogType ?? "-",
         catalogTenantId ?? "-",
         tenantIds ?? "-",
+        tenantHint ?? "-",
       ].join("::");
     },
   }

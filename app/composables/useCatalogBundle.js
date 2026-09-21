@@ -5,6 +5,7 @@ import { useTenantStore } from "~~/stores/tenant.js";
 import { usePortalStore } from "~~/stores/portal.js";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
+import { missingTenantIdOf, shouldLoadDetail } from "~/utils/catalogDetail.js";
 import { sendRedirect } from "h3";
 
 function getAuthScope() {
@@ -133,7 +134,10 @@ export function useCatalogBundle() {
       ? bookableStore.loadedDetailsFor[contextKey]
       : eventStore.loadedDetailsFor[contextKey];
 
-    return detailsForScope?.includes(detailId) ?? false;
+    return !shouldLoadDetail({
+      detailId,
+      loadedDetailIds: detailsForScope,
+    });
   }
 
   function invalidateBundle() {
@@ -160,10 +164,16 @@ export function useCatalogBundle() {
     );
   }
 
+  /**
+   * Loads one bookable or event by id, independent of the catalog list.
+   *
+   * @param {{ slug?: string | null, bookableID?: string | null, eventID?: string | null, tenantHint?: string | null, force?: boolean }} [params]
+   */
   async function loadDetail({
     slug = null,
     bookableID = null,
     eventID = null,
+    tenantHint = null,
     force = false,
   } = {}) {
     if (!bookableID && !eventID) {
@@ -198,6 +208,7 @@ export function useCatalogBundle() {
       catalogType: catalogStore.catalog?.type ?? null,
       catalogTenantID: catalogStore.catalog?.tenantId ?? null,
       tenantIDs: tenantStore.tenants.map((tenant) => tenant.id),
+      tenantHint,
     });
 
     if (data?.offersEnabled === false) {
@@ -213,9 +224,17 @@ export function useCatalogBundle() {
       effectiveEventID: eventID,
     });
 
-    return bookableID
+    const item = bookableID
       ? bookableStore.getBookableById(detailId)
       : eventStore.getEventById(detailId);
+
+    // An offer of a tenant the catalog does not list still shows its tenant.
+    const missingTenantId = missingTenantIdOf(item, tenantStore.tenants);
+    if (missingTenantId) {
+      await tenantStore.fetchUnlistedTenant(missingTenantId);
+    }
+
+    return item;
   }
 
   async function loadBundle({
