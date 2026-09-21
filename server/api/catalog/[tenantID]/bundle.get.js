@@ -2,6 +2,7 @@ import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 import { loadBundleData } from "~~/server/api/utils/loadBundleData.ts";
 import { tenantMustBeListed } from "~~/server/api/utils/detailResolution.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
 export default createConditionalCachedHandler(
   async (event) => {
@@ -33,11 +34,7 @@ export default createConditionalCachedHandler(
     ]);
 
     if (error) {
-      throw createError({
-        statusCode: error.status || 500,
-        statusMessage: "Failed to fetch catalog bundle",
-        data: error.message,
-      });
+      throw createError(proxyErrorOf(error, "Failed to fetch catalog bundle"));
     }
 
     const slugCatalog =

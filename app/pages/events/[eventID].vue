@@ -56,7 +56,7 @@ usePageTitle(() =>
         name="i-lucide-calendar-off"
         class="text-gray-400 mb-4"
       />
-      <p class="text-gray-500">{{ $t("events.noEvent") }}</p>
+      <p class="text-gray-500">{{ $t("errors.offerNotAvailable") }}</p>
       <UButton :label="$t('common.back')" :to="tenantPath('/events')" class="mt-4" />
     </div>
   </div>

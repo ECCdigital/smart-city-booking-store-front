@@ -65,10 +65,12 @@ import { serverFetch } from "../utils/serverFetch";
 
 export default defineEventHandler(async (event) => {
   const { data, error } = await serverFetch(event, "/bookables");
-  if (error) throw createError({ statusCode: error.status, statusMessage: error.message });
+  if (error) throw createError(proxyErrorOf(error, "Failed to fetch bookables"));
   return data;
 });
 ```
+
+`proxyErrorOf()` (`server/utils/proxyError.ts`) keeps the backend's status code and passes its error body on as `data`; a backend that did not answer is a 502. Never return a successful empty answer for a failed request. On the client the backend body is `error.data.data` (`backendErrorBodyOf()` in `app/utils/checkoutErrors.js`).
 
 ## Auth routes
 
