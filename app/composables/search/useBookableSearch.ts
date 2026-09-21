@@ -8,7 +8,10 @@ import type {
   ViewMode,
 } from "~/types/catalogParams";
 import haversine from "haversine-distance";
-import { getCustomFieldValue } from "~/composables/search/useCustomFieldFilters";
+import {
+  getCustomFieldValue,
+  scalarCustomFieldValues,
+} from "~/composables/search/useCustomFieldFilters";
 
 /** A price category as the search reads it. */
 interface PriceCategory {
@@ -1041,16 +1044,19 @@ export function useBookableSearch<TItem extends SearchableItem>(
     filterType: string | undefined,
     filterDef: CustomFieldDefinition = { inputType: "" },
   ) {
-    if (itemValue === undefined || itemValue === null || itemValue === "") {
+    const itemValues = scalarCustomFieldValues(itemValue);
+    if (itemValues.length === 0) {
       return false;
     }
 
     if (filterType === "select") {
       if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
       if (filterDef.inputType === "numeric") {
-        return filterValue.some((v) => Number(v) === itemValue);
+        return filterValue.some((v) =>
+          itemValues.some((iv) => Number(v) === iv),
+        );
       }
-      return filterValue.includes(itemValue);
+      return filterValue.some((v) => itemValues.includes(v));
     }
 
     if (filterType === "checkbox") {
