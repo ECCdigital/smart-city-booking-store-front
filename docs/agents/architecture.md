@@ -97,8 +97,9 @@ The `tenant-routes` module duplicates all pages under `/t/:tenantID/...`:
 
 ## Caching
 
-Server-side SWR cache on the catalog routes via `createConditionalCachedHandler`:
+Server-side SWR cache via `createConditionalCachedHandler`, for release-free answers only (`catalog/mode`):
 
+- Answers that carry a tenant or offer release (catalog bundles, tenants, bookables, events, checkout reads) are never cached and go out with `Cache-Control: no-store` (tenant supervision)
 - Controlled by `NUXT_CACHE_ENABLED` (default enabled, set `false` for local dev)
 - Auth-scoped cache keys (`anon` vs `auth`) prevent leaking private responses
 - See README.md "Server-Side Cache" section for route-specific TTLs

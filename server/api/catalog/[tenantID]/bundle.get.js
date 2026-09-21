@@ -68,28 +68,7 @@ export default createConditionalCachedHandler(
 
     return { ...result, ...items };
   },
-  {
-    maxAge: 300,
-    swr: true,
-    authScoped: true,
-    getKey: (event) => {
-      const token = getCookie(event, "access-token");
-      const scope = token ? "auth" : "anon";
-      const tenantID = getRouterParam(event, "tenantID") ?? "-";
-      const { slug, bookableId, eventId, include, base } = getQuery(event);
-      const inc = include
-        ? String(include).split(",").map((s) => s.trim()).sort().join(",")
-        : "";
-      return [
-        "catalog-bundle",
-        scope,
-        tenantID,
-        slug ?? "root",
-        bookableId ?? "-",
-        eventId ?? "-",
-        inc,
-        base === "false" ? "items" : "base",
-      ].join("::");
-    },
-  }
+  // Tenants and offers of the bundle carry a release (tenant supervision), so
+  // the answer is never cached: a block shows on the very next request.
+  { releaseSensitive: true }
 );

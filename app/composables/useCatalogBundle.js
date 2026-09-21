@@ -5,6 +5,10 @@ import { useTenantStore } from "~~/stores/tenant.js";
 import { usePortalStore } from "~~/stores/portal.js";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
+import {
+  mayReuseLoadedDetail,
+  withoutWithdrawnDetail,
+} from "~/utils/catalogFreshness.js";
 import { sendRedirect } from "h3";
 
 function getAuthScope() {
@@ -48,6 +52,7 @@ export function useCatalogBundle() {
   const tenantStore = useTenantStore();
   const portalStore = usePortalStore();
   const { tenantID } = useTenant();
+  const nuxtApp = useNuxtApp();
 
   function applyBundleResponse(
     data,
@@ -174,9 +179,15 @@ export function useCatalogBundle() {
     const contextKey = buildContextKey(slug, tenantID.value, authScope);
     const detailId = bookableID ?? eventID;
 
+    // A new entry to a detail page asks the backend again (tenant
+    // supervision); only the SSR hand-over reuses what the store holds.
     if (
-      !force &&
-      isDetailLoadedForCurrentAuth({ slug, bookableID, eventID })
+      mayReuseLoadedDetail({
+        loaded: isDetailLoadedForCurrentAuth({ slug, bookableID, eventID }),
+        hydrating: Boolean(nuxtApp.isHydrating),
+        server: import.meta.server,
+        force,
+      })
     ) {
       return bookableID
         ? bookableStore.getBookableById(bookableID)
@@ -212,6 +223,19 @@ export function useCatalogBundle() {
       effectiveBookableID: bookableID,
       effectiveEventID: eventID,
     });
+
+    // The backend no longer delivers the detail: do not show the copy an
+    // earlier list or detail load left in the store.
+    bookableStore.bookables = withoutWithdrawnDetail(
+      bookableStore.bookables,
+      bookableID,
+      data?.bookable,
+    );
+    eventStore.events = withoutWithdrawnDetail(
+      eventStore.events,
+      eventID,
+      data?.event,
+    );
 
     return bookableID
       ? bookableStore.getBookableById(detailId)
@@ -319,10 +343,13 @@ export function useCatalogBundle() {
       {
         server: true,
         dedupe: "defer",
+        // The SSR payload answers the hydrating client only; it must not
+        // outlive that hand-over and answer a later navigation (tenant
+        // supervision).
         getCachedData: force
           ? () => undefined
           : (key, nuxtApp) =>
-              nuxtApp.payload.data[key] ?? nuxtApp.static.data[key],
+              nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
       },
     );
 
