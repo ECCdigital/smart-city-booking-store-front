@@ -9,8 +9,12 @@ import {
   mayReuseLoadedDetail,
   withoutWithdrawnDetail,
 } from "~/utils/catalogFreshness.js";
-import { missingTenantIdOf, shouldLoadDetail } from "~/utils/catalogDetail.js";
-import { sendRedirect } from "h3";
+import {
+  isNotAvailableError,
+  missingTenantIdOf,
+  shouldLoadDetail,
+} from "~/utils/catalogDetail.js";
+import { sendRedirect, setResponseStatus } from "h3";
 
 function getAuthScope() {
   const authStore = useAuthStore();
@@ -220,6 +224,13 @@ export function useCatalogBundle() {
       catalogTenantID: catalogStore.catalog?.tenantId ?? null,
       tenantIDs: tenantStore.tenants.map((tenant) => tenant.id),
       tenantHint,
+    }).catch((error) => {
+      // Not available: the page shows its empty state and SSR answers 404.
+      // Every other failure stays an error.
+      if (!isNotAvailableError(error)) throw error;
+      const requestEvent = nuxtApp.ssrContext?.event;
+      if (requestEvent) setResponseStatus(requestEvent, 404);
+      return null;
     });
 
     if (data?.offersEnabled === false) {

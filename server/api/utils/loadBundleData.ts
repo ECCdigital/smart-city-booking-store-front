@@ -1,11 +1,14 @@
 import type { H3Event } from "h3";
 import { serverFetch } from "./serverFetch";
 import {
+  DetailResolutionError,
   detailCandidateTenants,
   resolveDetail,
   type DetailFetchResult,
   type DetailKind,
 } from "./detailResolution";
+import { ListResolutionError, mergeTenantLists } from "./listResolution";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
 type Tenant = { id: string };
 
@@ -33,11 +36,33 @@ export type BundleItems = {
 
 type FetchResult<T> =
   | { data: T; error: null }
-  | { data: null; error: { status: number; message: string } };
+  | { data: null; error: { status: number; message: string; data?: unknown } };
+
+/** A backend failure stays an error, with the backend's status and body. */
+function rethrowUpstream(err: unknown, statusMessage: string): never {
+  if (
+    err instanceof DetailResolutionError ||
+    err instanceof ListResolutionError
+  ) {
+    throw createError(proxyErrorOf(err.upstream, statusMessage));
+  }
+  throw err;
+}
+
+/** A list the backend fails to deliver is an error, not an empty list. */
+function failOnBackendFailure(
+  error: { status: number; message: string; data?: unknown } | null,
+  statusMessage: string
+) {
+  if (error && error.status !== 404) {
+    throw createError(proxyErrorOf(error, statusMessage));
+  }
+}
 
 /**
  * One bookable or event for a direct link: asked in every tenant that can
- * hold it, listed in the bundle or not — the backend decides.
+ * hold it, listed in the bundle or not — the backend decides. What it
+ * delivers for no tenant is "not available": a 404, whatever the catalog type.
  */
 async function loadDetailItem(
   event: H3Event,
@@ -57,8 +82,16 @@ async function loadDetailItem(
       serverFetch<unknown>(event, path, {
         method: "GET",
       }) as Promise<DetailFetchResult>,
-  });
-  return hit?.item ?? null;
+  }).catch((err) => rethrowUpstream(err, `Failed to fetch ${kind}`));
+
+  if (!hit) {
+    throw createError({
+      statusCode: 404,
+      statusMessage:
+        kind === "bookable" ? "Bookable not found" : "Event not found",
+    });
+  }
+  return hit.item;
 }
 
 async function fetchListAcrossTenants<T>(
@@ -74,9 +107,11 @@ async function fetchListAcrossTenants<T>(
         }) as Promise<FetchResult<T[]>>
     )
   );
-  return responses.flatMap(({ data, error }) =>
-    !error && Array.isArray(data) ? data : []
-  );
+  try {
+    return mergeTenantLists<T>(responses);
+  } catch (err) {
+    return rethrowUpstream(err, "Failed to fetch catalog list");
+  }
 }
 
 export async function loadBundleData(
@@ -89,14 +124,12 @@ export async function loadBundleData(
 
   if (catalog?.type === "instance") {
     if (bookableId) {
-      const bookable = await loadDetailItem(event, "bookable", bookableId, params);
-      if (bookable) result.bookable = bookable;
+      result.bookable = await loadDetailItem(event, "bookable", bookableId, params);
       return result;
     }
 
     if (eventId) {
-      const item = await loadDetailItem(event, "event", eventId, params);
-      if (item) result.event = item;
+      result.event = await loadDetailItem(event, "event", eventId, params);
       return result;
     }
 
@@ -137,26 +170,12 @@ export async function loadBundleData(
     }
 
     if (bookableId) {
-      const bookable = await loadDetailItem(event, "bookable", bookableId, params);
-      if (!bookable) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: "Bookable not found",
-        });
-      }
-      result.bookable = bookable;
+      result.bookable = await loadDetailItem(event, "bookable", bookableId, params);
       return result;
     }
 
     if (eventId) {
-      const item = await loadDetailItem(event, "event", eventId, params);
-      if (!item) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: "Event not found",
-        });
-      }
-      result.event = item;
+      result.event = await loadDetailItem(event, "event", eventId, params);
       return result;
     }
 
@@ -170,6 +189,7 @@ export async function loadBundleData(
             { method: "GET" }
           ) as Promise<FetchResult<{ bookables?: unknown[] }>>
         ).then(({ data, error }) => {
+          failOnBackendFailure(error, "Failed to fetch bookables");
           if (!error) result.bookables = data?.bookables ?? [];
         })
       );
@@ -181,6 +201,7 @@ export async function loadBundleData(
             method: "GET",
           }) as Promise<FetchResult<unknown[]>>
         ).then(({ data, error }) => {
+          failOnBackendFailure(error, "Failed to fetch events");
           if (!error) result.events = Array.isArray(data) ? data : [];
         })
       );

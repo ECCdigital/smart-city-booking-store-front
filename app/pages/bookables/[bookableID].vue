@@ -54,7 +54,7 @@ usePageTitle(() =>
     </div>
     <div v-else class="text-center mt-10">
       <UIcon size="48" name="i-lucide-monitor-off" class="text-gray-400 mb-4" />
-      <p class="text-gray-500">{{ $t("resources.noResource") }}</p>
+      <p class="text-gray-500">{{ $t("errors.offerNotAvailable") }}</p>
       <UButton :label="$t('common.back')" :to="tenantPath('/bookables')" class="mt-4" />
     </div>
   </div>

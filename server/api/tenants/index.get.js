@@ -1,3 +1,5 @@
+import { proxyErrorOf, upstreamErrorOf } from "~~/server/utils/proxyError";
+
 export default defineEventHandler(async () => {
   const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
 
@@ -11,10 +13,8 @@ export default defineEventHandler(async () => {
     });
     return response;
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Failed to fetch instance",
-      data: error.message,
-    });
+    throw createError(
+      proxyErrorOf(upstreamErrorOf(error), "Failed to fetch tenants"),
+    );
   }
 });

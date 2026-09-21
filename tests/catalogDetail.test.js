@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  isNotAvailableError,
   missingTenantIdOf,
   shouldLoadDetail,
   tenantHintOf,
@@ -67,5 +68,32 @@ describe("the tenant information a resolved offer still needs", () => {
   it("is nothing for a miss: no offer, nothing to look up", () => {
     expect(missingTenantIdOf(undefined, listed)).toBeNull();
     expect(missingTenantIdOf(null, listed)).toBeNull();
+  });
+});
+
+/**
+ * An offer the backend does not deliver is "not available" — never existed,
+ * withdrawn or blocked alike. A backend that fails is a different answer.
+ */
+describe("whether a failed load means the offer is not available", () => {
+  it("does for a 404 of the backend", () => {
+    expect(isNotAvailableError({ statusCode: 404 })).toBe(true);
+    expect(isNotAvailableError({ status: 404 })).toBe(true);
+  });
+
+  it("does not for an infrastructure error", () => {
+    expect(isNotAvailableError({ statusCode: 500 })).toBe(false);
+    expect(isNotAvailableError({ statusCode: 502 })).toBe(false);
+    expect(isNotAvailableError(new Error("fetch failed"))).toBe(false);
+  });
+
+  it("does not for a refused login or permission", () => {
+    expect(isNotAvailableError({ statusCode: 401 })).toBe(false);
+    expect(isNotAvailableError({ statusCode: 403 })).toBe(false);
+  });
+
+  it("does not without an error", () => {
+    expect(isNotAvailableError(null)).toBe(false);
+    expect(isNotAvailableError(undefined)).toBe(false);
   });
 });

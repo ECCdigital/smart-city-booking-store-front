@@ -86,6 +86,45 @@
     "city": "City",
     "imageNotFound": "Image not found"
   },
+  "errors": {
+    "offerNotAvailable": "This offer is not (or no longer) available.",
+    "loadFailed": {
+      "title": "The content could not be loaded",
+      "message": "Please try again later."
+    },
+    "page": {
+      "notAvailable": {
+        "title": "Page not available",
+        "message": "The requested page does not exist or is not (or no longer) available."
+      },
+      "forbidden": {
+        "title": "Access denied",
+        "message": "You do not have permission to view this page."
+      },
+      "serverError": {
+        "title": "Server error",
+        "message": "An internal error occurred. Please try again later."
+      },
+      "generic": {
+        "title": "An error occurred",
+        "message": "Something went wrong."
+      },
+      "code": "Error",
+      "home": "Back to home",
+      "back": "Back"
+    },
+    "noCatalog": "No catalog was found",
+    "noTenantFound": {
+      "title": "No tenant found",
+      "message": "No tenant was found for this domain. Please check the URL or contact support."
+    }
+  },
+  "events": {
+    "noEvent": "No event found"
+  },
+  "resources": {
+    "noResource": "No resource found"
+  },
   "footer": {
     "legalNotice": "Legal notice",
     "dataProtection": "Privacy policy",
@@ -115,6 +154,7 @@
     "additionalObjects": "Additional Objects",
     "mandatoryObjects": "Mandatory Objects",
     "login_required": "Sign-in is required for this booking.",
+    "offer_not_reachable": "This offer is no longer available and cannot be booked.",
     "bookable_unavailable": "This object is not available for the selected time period.",
     "unknown_error": "An error occurred during validation.",
     "group_booking_disabled": "Recurring bookings are not allowed for this object.",

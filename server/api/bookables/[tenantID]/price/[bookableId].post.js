@@ -1,4 +1,5 @@
 import { serverFetch } from "../../../utils/serverFetch.ts";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
 export default defineEventHandler(async (event) => {
   const tenantID = getRouterParam(event, "tenantID");
@@ -19,11 +20,7 @@ export default defineEventHandler(async (event) => {
     }
   );
   if (error) {
-    throw createError({
-      statusCode: error.status || 500,
-      statusMessage: "Failed to check bookable calculatedPrice",
-      data: error.message,
-    });
+    throw createError(proxyErrorOf(error, "Failed to check bookable calculatedPrice"));
   }
   return data;
 });

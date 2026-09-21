@@ -13,9 +13,15 @@
 
 export type DetailKind = "bookable" | "event";
 
+export type DetailFetchFailure = {
+  status: number;
+  message: string;
+  data?: unknown;
+};
+
 export type DetailFetchResult =
   | { data: unknown; error: null }
-  | { data: null; error: { status: number; message: string } };
+  | { data: null; error: DetailFetchFailure };
 
 export type DetailFetch = (path: string) => Promise<DetailFetchResult>;
 
@@ -124,30 +130,57 @@ const routes = {
   },
 };
 
+/**
+ * The backend failed to answer for an offer: anything but a 404. It is an
+ * error of its own and never "not available".
+ */
+export class DetailResolutionError extends Error {
+  upstream: DetailFetchFailure;
+
+  constructor(upstream: DetailFetchFailure) {
+    super(`Detail resolution failed: ${upstream.status} ${upstream.message}`);
+    this.name = "DetailResolutionError";
+    this.upstream = upstream;
+  }
+}
+
+type TenantAnswer = { hit: DetailHit | null; failure: DetailFetchFailure | null };
+
+/** A 404 is the backend saying "not available"; every other error is a failure. */
+function failureOf(result: DetailFetchResult): DetailFetchFailure | null {
+  return result.error && result.error.status !== 404 ? result.error : null;
+}
+
 async function resolveInTenant(
   kind: DetailKind,
   id: string,
   tenantId: string,
   fetch: DetailFetch,
-): Promise<DetailHit | null> {
+): Promise<TenantAnswer> {
   const route = routes[kind];
 
   const listed = await fetch(route.listed(tenantId, id));
   if (!listed.error && isRecord(listed.data) && listed.data.id) {
-    return { tenantId, item: listed.data };
+    return { hit: { tenantId, item: listed.data }, failure: null };
   }
 
   const direct = await fetch(route.directLink(tenantId, id));
   if (!direct.error && isRecord(direct.data) && direct.data.id) {
-    return { tenantId, item: route.fromDirectLink(direct.data) };
+    return {
+      hit: { tenantId, item: route.fromDirectLink(direct.data) },
+      failure: null,
+    };
   }
 
-  return null;
+  return { hit: null, failure: failureOf(direct) ?? failureOf(listed) };
 }
 
 /**
  * Finds the offer in the first candidate tenant the backend delivers it
- * for; null when it delivers it for none.
+ * for; null when it delivers it for none (404 everywhere).
+ *
+ * @throws {DetailResolutionError} when no tenant delivers it and the backend
+ *   failed for at least one: the offer may well exist.
  */
 export async function resolveDetail({
   kind,
@@ -160,8 +193,15 @@ export async function resolveDetail({
   tenantIds: string[];
   fetch: DetailFetch;
 }): Promise<DetailHit | null> {
-  const hits = await Promise.all(
+  const answers = await Promise.all(
     tenantIds.map((tenantId) => resolveInTenant(kind, id, tenantId, fetch)),
   );
-  return hits.find((hit) => hit !== null) ?? null;
+
+  const hit = answers.find((answer) => answer.hit)?.hit;
+  if (hit) return hit;
+
+  const failure = answers.find((answer) => answer.failure)?.failure;
+  if (failure) throw new DetailResolutionError(failure);
+
+  return null;
 }

@@ -1,6 +1,7 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 import { loadBundleData } from "~~/server/api/utils/loadBundleData.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
 const errorMapping = {
   401: { statusCode: 401, statusMessage: "unauthorized" },
@@ -59,11 +60,10 @@ export default createConditionalCachedHandler(
     ]);
 
     if (error) {
-      const mapped = errorMapping[error.status] || {
-        statusCode: error.status || 500,
-        statusMessage: error.message || "Error fetching catalog bundle",
-      };
-      throw createError(mapped);
+      throw createError(
+        errorMapping[error.status] ||
+          proxyErrorOf(error, "Error fetching catalog bundle"),
+      );
     }
 
     const slugCatalog =

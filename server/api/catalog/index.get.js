@@ -1,4 +1,5 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
 export default defineEventHandler(async (event) => {
   const { data, error } = await serverFetch(event, `/api/catalog/public`, {
@@ -6,11 +7,7 @@ export default defineEventHandler(async (event) => {
   });
 
   if (error) {
-    throw createError({
-      statusCode: error.status || 500,
-      statusMessage: "Failed to fetch catalog",
-      data: error.message,
-    });
+    throw createError(proxyErrorOf(error, "Failed to fetch catalog"));
   }
 
   return data;

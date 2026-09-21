@@ -141,6 +141,34 @@ describe("resolving a bookable direct link", () => {
     ]);
   });
 
+  it("surfaces an infrastructure error instead of calling the bookable not available", async () => {
+    // Tenant `a` answers 404 on both routes, the backend fails for tenant `b`.
+    const fetch: DetailFetch = async (path) =>
+      path.includes("/b/")
+        ? { data: null, error: { status: 502, message: "Backend unreachable" } }
+        : { data: null, error: { status: 404, message: "Not Found" } };
+
+    await expect(
+      resolveDetail({ kind: "bookable", id: "court", tenantIds: ["a", "b"], fetch }),
+    ).rejects.toMatchObject({ upstream: { status: 502 } });
+  });
+
+  it("still delivers a bookable one tenant holds while another tenant fails", async () => {
+    const fetch: DetailFetch = async (path) =>
+      path === "/json/a/bookables/court"
+        ? { data: { id: "court", tenantId: "a" }, error: null }
+        : { data: null, error: { status: 500, message: "Internal Server Error" } };
+
+    const hit = await resolveDetail({
+      kind: "bookable",
+      id: "court",
+      tenantIds: ["a", "b"],
+      fetch,
+    });
+
+    expect(hit?.tenantId).toBe("a");
+  });
+
   it("answers null without candidates", async () => {
     const { fetch, asked } = backend({});
 
@@ -206,6 +234,17 @@ describe("resolving an event direct link", () => {
       },
       tickets: [],
     });
+  });
+
+  it("surfaces a backend that fails instead of calling the event not available", async () => {
+    const fetch: DetailFetch = async () => ({
+      data: null,
+      error: { status: 503, message: "Service Unavailable" },
+    });
+
+    await expect(
+      resolveDetail({ kind: "event", id: "fair", tenantIds: ["a"], fetch }),
+    ).rejects.toMatchObject({ upstream: { status: 503 } });
   });
 
   it("treats the empty answer of the direct-link route as a miss", async () => {

@@ -275,6 +275,32 @@
   },
 
   "errors": {
+    "offerNotAvailable": "Dieses Angebot ist nicht (mehr) verfügbar.",
+    "loadFailed": {
+      "title": "Inhalte konnten nicht geladen werden",
+      "message": "Bitte versuchen Sie es später erneut."
+    },
+    "page": {
+      "notAvailable": {
+        "title": "Seite nicht verfügbar",
+        "message": "Die angeforderte Seite existiert nicht oder ist nicht (mehr) verfügbar."
+      },
+      "forbidden": {
+        "title": "Zugriff verweigert",
+        "message": "Sie haben keine Berechtigung, diese Seite aufzurufen."
+      },
+      "serverError": {
+        "title": "Serverfehler",
+        "message": "Ein interner Fehler ist aufgetreten. Bitte versuchen Sie es später erneut."
+      },
+      "generic": {
+        "title": "Ein Fehler ist aufgetreten",
+        "message": "Etwas ist schiefgelaufen."
+      },
+      "code": "Fehler",
+      "home": "Zur Startseite",
+      "back": "Zurück"
+    },
     "noCatalog": "Es wurde kein Katalog gefunden",
     "noTenantFound": {
       "title": "Kein Mandant gefunden",
@@ -476,6 +502,7 @@
     "bad_request": "Ungültige Anfrage. Bitte überprüfen Sie Ihre Eingaben.",
     "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
     "bookable_not_found": "Das angeforderte Objekt wurde nicht gefunden.",
+    "offer_not_reachable": "Dieses Angebot ist nicht mehr verfügbar und kann nicht gebucht werden.",
     "bookable_not_bookable": "Dieses Objekt kann nicht gebucht werden.",
     "bookable_unavailable": "Dieses Objekt ist im gewählten Zeitraum nicht verfügbar.",
     "parent_unavailable": "Das übergeordnete Objekt ist im gewählten Zeitraum nicht verfügbar.",
