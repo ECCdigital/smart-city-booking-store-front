@@ -137,6 +137,9 @@
     "minutes": "Please try again in {count} minute. | Please try again in {count} minutes.",
     "later": "Please try again later."
   },
+  "emailVerification": {
+    "resendLink": "Send confirmation link again"
+  },
   "register": {
     "success": {
       "heading": "Please check your inbox",
