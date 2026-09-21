@@ -5,7 +5,11 @@ export default defineEventHandler(async (event) => {
     const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
     const pendingToken = getCookie(event, "kc-pending-token");
     const pendingRefresh = getCookie(event, "kc-pending-refresh");
-    const pendingRedirect = getCookie(event, "kc-pending-redirect") || "/";
+    // The cookie is readable and writable in the browser, so it is validated
+    // again here instead of being trusted as the callback wrote it.
+    const pendingRedirect = safeReturnTarget(
+        getCookie(event, "kc-pending-redirect")
+    );
 
     if (!pendingToken) {
         throw createError({

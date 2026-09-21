@@ -108,7 +108,14 @@
   "footer": {
     "legalNotice": "Impressum",
     "dataProtection": "Datenschutz",
-    "termsAndConditions": "AGB"
+    "termsAndConditions": "AGB",
+    "offerSpaces": "Angebote bereitstellen"
+  },
+  "rateLimit": {
+    "title": "Zu viele Versuche",
+    "seconds": "Bitte versuche es in {count} Sekunde erneut. | Bitte versuche es in {count} Sekunden erneut.",
+    "minutes": "Bitte versuche es in {count} Minute erneut. | Bitte versuche es in {count} Minuten erneut.",
+    "later": "Bitte versuche es später erneut."
   },
   "login": {
     "title": "Melden Sie sich in Ihrem Konto an",
@@ -174,8 +181,9 @@
       "number": "Mindestens eine Zahl (0-9)"
     },
     "success": {
-      "heading": "Registrierung erfolgreich!",
-      "description": "Wir haben dir eine E-Mail mit einem Bestätigungslink gesendet. Bitte öffne dein Postfach und bestätige deine E-Mail-Adresse, um dein Konto zu aktivieren.",
+      "heading": "Bitte prüfe dein Postfach",
+      "description": "Wenn die angegebene E-Mail-Adresse verwendet werden kann, erhältst du in Kürze eine E-Mail mit einem Bestätigungslink. Bitte bestätige darüber deine E-Mail-Adresse, um dein Konto zu aktivieren.",
+      "resent": "Wenn die E-Mail-Adresse zu einem noch nicht bestätigten Konto gehört, haben wir den Bestätigungslink erneut gesendet.",
       "spamHint": "Wenn du die E-Mail nicht findest, überprüfe bitte auch deinen Spam- oder Werbeordner.",
       "toHome": "Zur Startseite",
       "toLogin": "Zur Anmeldung"
@@ -300,10 +308,6 @@
     "registerError": {
       "title": "Registrierungsfehler",
       "message": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
-    },
-    "registerErrorEmailExists": {
-      "title": "Registrierungsfehler",
-      "message": "Die E-Mail-Adresse ist bereits registriert."
     },
     "forgotPasswordError": {
       "title": "Anfrage fehlgeschlagen",

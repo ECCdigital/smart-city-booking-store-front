@@ -15,7 +15,7 @@ function generateCodeChallenge(verifier: string): string {
 export default defineEventHandler(async (event) => {
 
     const query = getQuery(event);
-    const redirect = (query.redirect as string) || "/";
+    const redirect = safeReturnTarget(query.redirect);
 
     let config;
     try {

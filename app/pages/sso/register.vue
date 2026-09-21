@@ -1,6 +1,7 @@
 <script setup>
 import {useAuthStore} from "~~/stores/auth.js";
 import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
+import { useReturnTarget } from "~/composables/auth/useReturnTarget";
 
 definePageMeta({ layout: "default" });
 
@@ -10,6 +11,7 @@ const notification = useNotification();
 const loading = ref(false);
 const authStore = useAuthStore();
 const pendingRedirect = useCookie("kc-pending-redirect");
+const { follow: followReturnTarget } = useReturnTarget();
 
 const {
   documents: legalDocuments,
@@ -41,7 +43,7 @@ const handleRegister = async () => {
       notification.success(t("notifications.registerSuccess.message"));
       const redirect = pendingRedirect.value || "/";
       pendingRedirect.value = null;
-      await navigateTo(redirect);
+      await followReturnTarget(redirect);
     }
   } catch (err) {
     notification.error(t("notifications.registerError.message"));

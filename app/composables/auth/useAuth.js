@@ -11,6 +11,13 @@ export const useAuth = () => {
     return response;
   };
 
+  const resendVerification = async (email, nextUrl) => {
+    return await $fetch("/api/auth/resend-verification", {
+      method: "POST",
+      body: { email, nextUrl },
+    });
+  };
+
   const verifyEmail = async (token, id) => {
     const response = await $fetch("/api/auth/verify-email", {
       method: "POST",
@@ -70,6 +77,7 @@ export const useAuth = () => {
     login: authStore.login,
     logout: authStore.logout,
     register,
+    resendVerification,
     verifyEmail,
     verifyCardLink,
     changePassword,
