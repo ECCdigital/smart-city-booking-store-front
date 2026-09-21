@@ -91,7 +91,15 @@ setCookie(event, "access-token", accessToken, {
 
 ## Caching
 
-Use `createConditionalCachedHandler` for cacheable public/semi-public routes:
+Never cache an answer that carries a tenant or offer release (tenants,
+bookables, events, catalog bundles, availability, prices, checkout reads): with
+tenant supervision a block or a withdrawn approval has to show on the next
+request. Such a handler passes `{ releaseSensitive: true }` (or is a plain
+`defineEventHandler`), and its path belongs in
+`server/utils/releaseFreshness.ts`, which makes `server/middleware/release-freshness.ts`
+send `Cache-Control: no-store`.
+
+Use `createConditionalCachedHandler` with a lifetime only for release-free public/semi-public routes (today: `catalog/mode`):
 
 ```typescript
 import { createConditionalCachedHandler } from "../../utils/conditionalCache";

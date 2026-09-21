@@ -113,7 +113,7 @@ Nuxt maps `runtimeConfig` fields to `NUXT_*` environment variables. Values with 
 | `NUXT_ADMIN_BASE_URL` | No | Admin portal URL (server-side) | `https://admin.booking.example.com` |
 | `NUXT_PUBLIC_ADMIN_BASE_URL` | No | Admin portal link in navigation (users with memberships); needed for the Live Preview of the Hero, which only this origin may frame (`/preview/hero` answers 404 without it) | `https://admin.booking.example.com` |
 | `NUXT_PUBLIC_SILENT_SSO_ENABLED` | No | `true` enables automatic SSO check on page load (Keycloak) | `false` |
-| `NUXT_CACHE_ENABLED` | No | `false` disables the server-side SWR cache (recommended for local dev) | `false` |
+| `NUXT_CACHE_ENABLED` | No | `false` disables the server-side SWR cache of release-free answers (recommended for local dev); tenants and offers are never cached, see [Server-Side Cache](#server-side-cache) | `false` |
 | `LOG_LEVEL` | No | Pino log level: `trace`, `debug`, `info`, `warn`, `error`, `fatal` | `info` |
 | `PORT` | No | HTTP port in Docker/production | `3000` |
 | `NODE_ENV` | – | `development` or `production` (controls e.g. the `secure` flag on cookies) | `production` |
@@ -233,6 +233,17 @@ Pre-built images are published to GHCR on GitHub release (`ghcr.io/eccdigital/sm
 
 Both containers should be on the same network; the reverse proxy terminates TLS and forwards to port `3000`.
 
+### Tenant supervision rollout
+
+Tenant supervision (blocked tenants, approved offers) ships as one cutover of backend, Admin UI and storefront; the backend's `docs/tenant-supervision-cutover.md` is the runbook. The storefront's part:
+
+1. **Deploy matching versions.** This storefront release belongs to the backend release with tenant supervision. An older storefront keeps catalog bundles for up to 300 s and must not serve traffic after the cutover.
+2. **Restart every storefront process.** The old bundle cache lives in process memory only — no Nitro storage or cache driver is configured (`nuxt.config.js`), nothing is written to disk or Redis — so it dies with the process. Replace or restart all replicas; do not leave an old one behind the load balancer.
+3. **Purge CDN and reverse-proxy caches** for `/api/**` and the HTML pages. From this release on the release-carrying answers are sent with `Cache-Control: no-store` (see [Server-Side Cache](#server-side-cache)); entries stored before it have to be discarded once.
+4. **`NUXT_CACHE_ENABLED`** needs no change. It no longer covers the catalog bundles, which are never cached; it only switches the cache of `/api/catalog/mode` and the Theme Bundle revalidation interval.
+
+After that, a block or a withdrawn approval shows on the next request. A page that is already open is not refreshed live; every new detail page entry, checkout entry and booking attempt is checked against the backend.
+
 ---
 
 ## Operations
@@ -265,7 +276,7 @@ In `NODE_ENV=production`, auth cookies are set with the `Secure` flag. The store
 ### Scaling
 
 - Stateless Nitro server — horizontally scalable behind a load balancer.
-- The server-side SWR cache (`NUXT_CACHE_ENABLED`) is local per instance (LRU). With multiple replicas, cache state may briefly differ — generally acceptable for catalog data.
+- The server-side SWR cache (`NUXT_CACHE_ENABLED`) is local per instance (LRU) and holds release-free answers only (portal mode). Tenants and offers are never cached, so replicas cannot disagree about a block or an approval.
 
 ### Release versioning
 
@@ -310,24 +321,26 @@ definition: `'wasm-unsafe-eval'` in `script-src`, and `permissionsPolicy.camera`
 
 ## Server-Side Cache
 
-The Nitro server proxy routes (`/api/catalog/...`) use `createConditionalCachedHandler` to optionally keep responses in an SWR cache:
+`createConditionalCachedHandler` keeps the answer of a Nitro proxy route in an in-memory SWR cache — but only an answer that carries **no tenant or offer release**. With tenant supervision a tenant can be blocked and an offer's approval withdrawn at any time, and the next request has to show it. A handler marked `releaseSensitive: true` is therefore never cached, whatever `NUXT_CACHE_ENABLED` says.
 
 ```bash
-NUXT_CACHE_ENABLED=true   # SWR cache enabled (default when not set)
-NUXT_CACHE_ENABLED=false  # Disable cache (recommended for local development)
+NUXT_CACHE_ENABLED=true   # SWR cache for release-free answers enabled (default when not set)
+NUXT_CACHE_ENABLED=false  # Disable it as well (recommended for local development)
 ```
 
-> The cache is **enabled by default** unless `NUXT_CACHE_ENABLED` is explicitly set to `false`.
+| Route | Server cache | Notes |
+| --- | --- | --- |
+| `/api/catalog/bundle` | never | Release-sensitive |
+| `/api/catalog/[t]/bundle` | never | Release-sensitive |
+| `/api/catalog/mode` | 300s, swr | Portal mode, portal URL and branding only; key scoped `anon` / `auth` |
 
-| Route | maxAge | swr | Notes |
-| --- | --- | --- | --- |
-| `/api/catalog/bundle` | 300s | yes | Auth-scoped key (anon vs. auth cookie) |
-| `/api/catalog/[t]/bundle` | 300s | yes | Includes tenantID + slug in cache key |
-| `/api/catalog/mode` | 300s | yes | Public |
+`NUXT_CACHE_ENABLED` now only switches the `/api/catalog/mode` cache and, set to `false`, forces the Theme Bundle revalidation interval to `0`. It no longer decides how fresh tenants and offers are.
+
+Every proxy answer that carries a release — `/api/catalog/**` (except `mode`), `/api/tenants/**`, `/api/bookables/**` (availability, block periods, occupancy, prices), `/api/events/**` and `/api/checkout/**` — goes out with `Cache-Control: no-store` (`server/middleware/release-freshness.ts`), so no browser, CDN or reverse proxy stores it. Do not override that header at the reverse proxy.
+
+The image proxy `/api/img` passes the backend's `Cache-Control`, `ETag` and `Last-Modified` of a media file through unchanged and adds no lifetime of its own: how long an offer image may be kept is the backend's decision. Versioned theme assets keep their long lifetime.
 
 `/api/theme/bundle`, `/api/theme/css`, `/api/theme/[slug].css` and `/api/theme/favicon` are **not** in this cache. Their freshness is the Theme Bundle's own: the bundle is held per process and revalidated against the backend with a conditional GET (`NUXT_THEME_REVALIDATE_SECONDS`, `NUXT_THEME_REVALIDATE_TIMEOUT_MS`), and the rendered CSS and favicon bytes are memoised per etag. See [ADR 0001](docs/adr/0001-theme-bundle-revalidation-instead-of-purge.md).
-
-The bundle endpoints split the cache key into `auth` vs. `anon` based on the `access-token` cookie. Anonymous requests share a cached response; authenticated requests use the `auth` scope (further keyed by slug / tenant / bookable / event / include).
 
 ---
 
