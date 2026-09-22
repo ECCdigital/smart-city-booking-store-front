@@ -125,6 +125,16 @@
   "resources": {
     "noResource": "No resource found"
   },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "bookings": "Bookings",
+    "resources": "Resources",
+    "user": "User",
+    "reports": "Reports",
+    "admin": "Admin area",
+    "settings": "Settings"
+  },
   "footer": {
     "legalNotice": "Legal notice",
     "dataProtection": "Privacy policy",
