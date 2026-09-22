@@ -51,11 +51,22 @@ export function useCustomFieldFilters(
 function collectFieldValues(wrappers, fieldId) {
   const values = [];
   for (const w of wrappers || []) {
-    const v = getCustomFieldValue(w?.item, fieldId);
-    if (v === undefined || v === null || v === "") continue;
-    values.push(v);
+    values.push(
+      ...scalarCustomFieldValues(getCustomFieldValue(w?.item, fieldId)),
+    );
   }
   return values;
+}
+
+/**
+ * Turns a stored custom-field value into the scalars the filter counts.
+ * A `multiselect` stores an array of option values; each selected option
+ * is one occurrence. Empty / missing values yield nothing.
+ */
+export function scalarCustomFieldValues(value) {
+  if (value === undefined || value === null || value === "") return [];
+  const list = Array.isArray(value) ? value : [value];
+  return list.filter((item) => item !== undefined && item !== null && item !== "");
 }
 
 function buildMeta(def, values) {
