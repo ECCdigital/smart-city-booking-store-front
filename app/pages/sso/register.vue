@@ -36,7 +36,7 @@ const handleRegister = async () => {
 
     if (response.success) {
       authStore.user = response.data.user;
-      authStore.permission = response.data.permissions;
+      authStore.permissions = response.data.permissions;
       authStore.tokenValid = true;
       authStore.authChecked = true;
 

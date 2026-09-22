@@ -69,7 +69,7 @@ export const useAuth = () => {
 
   return {
     user: readonly(computed(() => authStore.user)),
-    permission: readonly(computed(() => authStore.permission)),
+    permissions: readonly(computed(() => authStore.permissions)),
     isLoggedIn: readonly(computed(() => authStore.isLoggedIn)),
     authChecked: readonly(computed(() => authStore.authChecked)),
     validateAuth: authStore.validateAuth,

@@ -144,3 +144,59 @@ export interface SsoSigninResponse {
   user?: unknown;
   permissions?: unknown;
 }
+
+/** The signed-in user as `GET /auth/me` returns it (`User.exportPublic()`). */
+export interface User {
+  /** The e-mail address, lowercased; there is no separate `email` field. */
+  id: string;
+  firstName: string;
+  lastName: string;
+  company: string;
+  phone: string;
+  address: string;
+  zipCode: string;
+  city: string;
+  /** ms epoch */
+  created: number;
+  isVerified: boolean;
+  isSuspended: boolean;
+  /** "local" | "keycloak" | … */
+  authType: string;
+  /** Date serialised */
+  idpEmailVerifiedAt: string | null;
+  idpEmailVerifiedProvider: string | null;
+}
+
+/** A key is only set when some role defines the dimension. */
+export interface ActionFlags {
+  create?: boolean;
+  readAny?: boolean;
+  readOwn?: boolean;
+  updateAny?: boolean;
+  updateOwn?: boolean;
+  deleteAny?: boolean;
+  deleteOwn?: boolean;
+}
+
+/** One row per tenant with an active membership, resolved through roles. */
+export interface TenantPermission {
+  tenantId: string;
+  isOwner: boolean;
+  /** Role enum plus "tenants" for owners. */
+  adminInterfaces: string[];
+  freeBookings: boolean;
+  manageUsers: ActionFlags;
+  manageRoles: ActionFlags;
+  manageBookables: ActionFlags;
+  manageBookings: ActionFlags;
+  manageCoupons: ActionFlags;
+  manageMedia: ActionFlags;
+}
+
+/** `permissions` of `GET /auth/me`; the storefront computes no rights itself. */
+export interface Permissions {
+  /** Active memberships only. */
+  tenants: TenantPermission[];
+  allowCreateTenant: boolean;
+  instanceOwner: boolean;
+}

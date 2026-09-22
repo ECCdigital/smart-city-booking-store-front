@@ -1,7 +1,7 @@
 <script setup>
 import { useAuthStore } from "~~/stores/auth.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
-import { useMemberships } from "~/composables/api/useMemberships.js";
+import { adminEntry } from "~/utils/authEntryFlow";
 
 const { tenantTo } = useTenantRoute();
 
@@ -28,28 +28,26 @@ const userName = computed(() => {
   return fullname.slice(0, 20) + suffix;
 });
 
-const hasMemberships = ref(false);
+// Admin Entry or Offer Spaces Entry, decided from the permissions the auth
+// store already holds: no extra request, no second loading phase.
+const entry = computed(() =>
+  adminEntry(authStore.permissions, config.public.adminBaseUrl),
+);
 
-onMounted(async () => {
-  const { fetchMyMemberships } = useMemberships();
-
-  try {
-    const memberships = await fetchMyMemberships();
-    hasMemberships.value = Array.isArray(memberships) && memberships.length > 0;
-  } catch {
-    hasMemberships.value = false;
-  }
-});
+const ENTRY_ITEMS = {
+  admin: { label: "navigation.admin", icon: "i-lucide-user-star" },
+  offerSpaces: { label: "navigation.offerSpaces", icon: "i-lucide-store" },
+};
 
 const items = computed(() => {
-  const adminSection = hasMemberships.value
+  const adminSection = entry.value
     ? [
         [
           {
-            label: t("navigation.admin"),
-            icon: "i-lucide-user-star",
-            to: config.public.adminBaseUrl,
-            target: "_blank",
+            label: t(ENTRY_ITEMS[entry.value.kind].label),
+            icon: ENTRY_ITEMS[entry.value.kind].icon,
+            to: entry.value.url,
+            target: entry.value.target,
           },
         ],
       ]
@@ -59,21 +57,21 @@ const items = computed(() => {
     ...adminSection,
     [
       {
-        label: "Aktivitäten",
+        label: t("navigation.activities"),
         class: "font-bold cursor-default hover:bg-transparent",
       },
       {
-        label: "Buchungen",
+        label: t("navigation.bookings"),
         icon: "i-lucide-book-marked",
         onSelect: () => goTo("/account/bookings"),
       },
       {
-        label: "Digitale Schlüssel",
+        label: t("navigation.mobileKey"),
         icon: "i-lucide-key-round",
         onSelect: () => goTo("/mobile-key"),
       },
       {
-        label: "Rechnungen",
+        label: t("navigation.invoices"),
         icon: "i-lucide-wallet-cards",
         onSelect: () => goTo("/account/invoices"),
       },
@@ -86,7 +84,7 @@ const items = computed(() => {
     ],
     [
       {
-        label: "Benutzerkonto",
+        label: t("navigation.account"),
         class: "font-bold cursor-default hover:bg-transparent",
       },
       {

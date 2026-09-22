@@ -103,7 +103,12 @@
     "user": "Benutzer",
     "reports": "Berichte",
     "admin": "Admin-Bereich",
-    "settings": "Einstellungen"
+    "offerSpaces": "Angebote bereitstellen",
+    "settings": "Einstellungen",
+    "activities": "Aktivitäten",
+    "mobileKey": "Digitale Schlüssel",
+    "invoices": "Rechnungen",
+    "account": "Benutzerkonto"
   },
   "footer": {
     "legalNotice": "Impressum",

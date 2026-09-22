@@ -1,3 +1,4 @@
+import type { Permissions } from "~~/shared/types/api";
 import { adminOrigin } from "~~/shared/utils/adminOrigin";
 import { rateLimitWait } from "~~/shared/utils/retryAfter";
 import {
@@ -73,10 +74,57 @@ export function offerSpacesEntryUrl(
   if (instance?.allowAllUsersToCreateTenant !== true) {
     return null;
   }
+  return onboardingUrl(adminBaseUrl);
+}
+
+/** The admin UI's onboarding under a configured admin base URL, else `null`. */
+function onboardingUrl(adminBaseUrl: unknown): string | null {
   if (typeof adminBaseUrl !== "string" || !adminOrigin(adminBaseUrl)) {
     return null;
   }
 
   const url = new URL(adminBaseUrl.trim());
   return `${url.origin}${url.pathname.replace(/\/+$/, "")}/onboarding`;
+}
+
+export type AdminEntry = {
+  kind: "admin" | "offerSpaces";
+  url: string;
+  target: "_blank" | "_self";
+};
+
+/**
+ * Which entry into the admin UI the user menu shows, if any.
+ *
+ * Admin Entry for an instance owner or anyone with an active membership;
+ * Offer Spaces Entry (the admin UI's onboarding) for everyone else who may
+ * create a tenant. The rights come from `GET /api/auth/me` as the auth store
+ * keeps them; the storefront computes none of its own.
+ *
+ * @param permissions - `authStore.permissions`; may be missing before login.
+ * @param adminBaseUrl - `NUXT_PUBLIC_ADMIN_BASE_URL`; no admin UI, no entry.
+ */
+export function adminEntry(
+  permissions: Partial<Permissions> | null | undefined,
+  adminBaseUrl: unknown,
+): AdminEntry | null {
+  const onboarding = onboardingUrl(adminBaseUrl);
+  if (!onboarding) {
+    return null;
+  }
+
+  const tenants = Array.isArray(permissions?.tenants)
+    ? permissions.tenants
+    : [];
+  if (permissions?.instanceOwner === true || tenants.length > 0) {
+    return {
+      kind: "admin",
+      url: (adminBaseUrl as string).trim(),
+      target: "_blank",
+    };
+  }
+  if (permissions?.allowCreateTenant === true) {
+    return { kind: "offerSpaces", url: onboarding, target: "_self" };
+  }
+  return null;
 }

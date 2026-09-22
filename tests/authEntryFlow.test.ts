@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  adminEntry,
   offerSpacesEntryUrl,
   signupOutcome,
   verifiedReturnTarget,
@@ -116,5 +117,94 @@ describe("offerSpacesEntryUrl", () => {
     expect(
       offerSpacesEntryUrl(base, { allowAllUsersToCreateTenant: "true" }),
     ).toBeNull();
+  });
+});
+
+describe("adminEntry", () => {
+  const admin = "https://admin.example.com";
+  const membership = {
+    tenantId: "t1",
+    isOwner: false,
+    adminInterfaces: ["bookings"],
+    freeBookings: false,
+    manageUsers: {},
+    manageRoles: {},
+    manageBookables: {},
+    manageBookings: {},
+    manageCoupons: {},
+    manageMedia: {},
+  };
+
+  it("offers the Admin Entry to a member of a tenant, in a new tab", () => {
+    expect(
+      adminEntry(
+        { tenants: [membership], allowCreateTenant: false, instanceOwner: false },
+        admin,
+      ),
+    ).toEqual({ kind: "admin", url: admin, target: "_blank" });
+  });
+
+  it("offers the Offer Spaces Entry to a user who may create a tenant, same tab", () => {
+    expect(
+      adminEntry(
+        { tenants: [], allowCreateTenant: true, instanceOwner: false },
+        admin,
+      ),
+    ).toEqual({
+      kind: "offerSpaces",
+      url: "https://admin.example.com/onboarding",
+      target: "_self",
+    });
+    expect(
+      adminEntry(
+        { tenants: [], allowCreateTenant: true, instanceOwner: false },
+        "https://example.com/admin/",
+      ),
+    ).toEqual({
+      kind: "offerSpaces",
+      url: "https://example.com/admin/onboarding",
+      target: "_self",
+    });
+  });
+
+  it("offers the Admin Entry to an instance owner without a membership", () => {
+    expect(
+      adminEntry(
+        { tenants: [], allowCreateTenant: true, instanceOwner: true },
+        admin,
+      ),
+    ).toEqual({ kind: "admin", url: admin, target: "_blank" });
+  });
+
+  it("never shows both: a member who may create a tenant gets the Admin Entry", () => {
+    expect(
+      adminEntry(
+        { tenants: [membership], allowCreateTenant: true, instanceOwner: false },
+        admin,
+      ),
+    ).toEqual({ kind: "admin", url: admin, target: "_blank" });
+  });
+
+  it("has no entry for a booker who neither administers nor may create", () => {
+    expect(
+      adminEntry(
+        { tenants: [], allowCreateTenant: false, instanceOwner: false },
+        admin,
+      ),
+    ).toBeNull();
+  });
+
+  it("has no entry without a configured admin UI, whatever the rights", () => {
+    const owner = { tenants: [membership], allowCreateTenant: true, instanceOwner: true };
+    expect(adminEntry(owner, "")).toBeNull();
+    expect(adminEntry(owner, undefined)).toBeNull();
+    expect(adminEntry(owner, "javascript:alert(1)")).toBeNull();
+  });
+
+  it("has no entry with empty or missing permissions", () => {
+    expect(adminEntry(null, admin)).toBeNull();
+    expect(adminEntry(undefined, admin)).toBeNull();
+    expect(adminEntry({}, admin)).toBeNull();
+    expect(adminEntry({ tenants: [] }, admin)).toBeNull();
   });
 });

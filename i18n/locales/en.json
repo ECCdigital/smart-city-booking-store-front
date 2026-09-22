@@ -133,7 +133,12 @@
     "user": "User",
     "reports": "Reports",
     "admin": "Admin area",
-    "settings": "Settings"
+    "offerSpaces": "Offer spaces",
+    "settings": "Settings",
+    "activities": "Activities",
+    "mobileKey": "Digital keys",
+    "invoices": "Invoices",
+    "account": "Account"
   },
   "footer": {
     "legalNotice": "Legal notice",
