@@ -1,6 +1,6 @@
 <template>
-  <div class="basis-3/4 p-4 flex flex-col">
-    <div>
+  <div class="basis-3/4 p-4 flex flex-col justify-between gap-2">
+    <div class="flex flex-col gap-2">
       <!-- Title -->
       <div class="cursor-pointer" @click="openDetails()">
         <p
@@ -13,14 +13,18 @@
       </div>
 
       <!-- Zeitpunkt, Adresse und Entfernung -->
-      <div class="w-full my-5">
+      <div class="w-full flex flex-col gap-1">
         <EventTimeInformation :event="event" class="w-full text-sm" />
         <EventAdressInformation
           :event="event"
           show-distance
           class="w-full text-sm"
         />
-        <div class="my-5 line-clamp-3" v-html="htmlTeaserText" />
+        <div
+          v-if="hasTeaserText"
+          class="line-clamp-3"
+          v-html="htmlTeaserText"
+        />
       </div>
       <USeparator
         color="neutral"
@@ -29,17 +33,23 @@
       />
     </div>
 
-    <div class="flex h-full justify-between overflow-hidden">
+    <div class="flex gap-2 justify-between items-end">
       <!-- Veranstalter & Eigenschaften -->
-      <div class="basis-3/5 w-full my-2">
-        <p class="w-full my-2">Veranstalter: {{ event.eventOrganizer.name }}</p>
+      <div
+        v-if="organizerName || hasFlags"
+        class="basis-3/5 min-w-0 self-center flex flex-col gap-1"
+      >
+        <p v-if="organizerName" class="w-full">
+          Veranstalter: {{ organizerName }}
+        </p>
         <BookableFlagDisplay
+          v-if="hasFlags"
           :flags="event.information.flags"
           class="line-clamp-3"
         />
       </div>
 
-      <div class="basis-2/5 w-full grid content-end mt-4">
+      <div class="basis-2/5 ml-auto grid content-end">
         <EventPriceDisplay
           v-if="!isNotBookable && !isNotSuitable"
           :event-tickets="event.tickets"
@@ -110,6 +120,22 @@ const { sanitizeHtml } = useSanitizeHtml();
 const htmlTeaserText = computed(() => {
   return sanitizeHtml(props.event.information.teaserText || "");
 });
+
+// Markup alone is not content: an empty paragraph from the editor must not
+// reserve three lines in the strip.
+const hasTeaserText = computed(
+  () =>
+    htmlTeaserText.value
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim().length > 0,
+);
+
+const organizerName = computed(() => props.event?.eventOrganizer?.name || "");
+
+const hasFlags = computed(
+  () => (props.event?.information?.flags?.length ?? 0) > 0,
+);
 
 function openDetails() {
   emit("openDetails", props.event.id, "event");

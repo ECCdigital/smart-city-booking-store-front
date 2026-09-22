@@ -4,16 +4,13 @@
     class="@container bg-white dark:bg-gray-700 flex flex-row rounded-sm shadow-lg"
     :class="[
       isNotSuitable ? 'opacity-70' : ' ',
-      isEvent
-        ? 'max-h-100 h-100'
-        : mapListMode
-          ? ''
-          : mapMode
-            ? ''
-            : 'max-h-74 h-74',
+      listMode ? 'min-h-48' : isEvent ? 'max-h-100 h-100' : '',
     ]"
   >
-    <div class="w-24 shrink-0 @sm:basis-1/4 flex items-center">
+    <div
+      class="w-24 shrink-0 @sm:basis-1/4 flex"
+      :class="listMode ? 'items-stretch' : 'items-center'"
+    >
       <div
         class="basis-9/10 w-full h-full relative cursor-pointer"
         @click="onOpenDetails(item?.id, item?.type)"
@@ -22,7 +19,7 @@
           :type="item?.type"
           :is-event="isEvent"
           :icon-only="iconOnly"
-          class="absolute"
+          class="absolute z-10"
           :class="mapMode ? 'top-1 left-1' : 'top-2 left-2'"
         />
 
@@ -32,12 +29,19 @@
           alt=""
           :loading="eager ? 'eager' : 'lazy'"
           class="w-full object-cover rounded-l-sm"
-          :class="mapListMode ? 'h-24 ' : 'h-full'"
+          :class="
+            mapListMode
+              ? 'h-24'
+              : listMode
+                ? 'absolute inset-0 h-full'
+                : 'h-full'
+          "
           @error="onImageError"
         />
         <ClientOnly v-else>
           <div
-            class="@container w-full h-full flex items-center justify-center relative"
+            class="@container w-full h-full flex items-center justify-center"
+            :class="listMode ? 'absolute inset-0' : 'relative'"
           >
             <ImagePlaceholder
               :theme="theme"
@@ -53,7 +57,6 @@
           </div>
         </ClientOnly>
       </div>
-
       <USeparator
         orientation="vertical"
         color="primary"
@@ -146,6 +149,10 @@ const { goToDetails } = useRedirection();
 const isEvent = computed(() => {
   return props.item.type === "event";
 });
+
+// The plain list is the only mode that sizes itself to its content: the map
+// tooltip and the map list keep their fixed boxes.
+const listMode = computed(() => !props.mapMode && !props.mapListMode);
 
 const image = computed(() =>
   imageSource(coverImageOf(props.item, isEvent.value), "strip"),
