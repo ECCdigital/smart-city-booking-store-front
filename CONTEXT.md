@@ -104,6 +104,16 @@ _Avoid_: Working copy, pending state, snapshot
 What the Live Preview sends back to the editor after rendering a Draft: the Blocks that fall outside the Hero's content area and the Blocks that overlap, per viewport.
 _Avoid_: Warnings, validation result, feedback
 
+### Einstiege
+
+**Admin Entry** (admin label: „Admin-Bereich“):
+The entry in the storefront's user menu that takes someone who already administers into the admin UI: an instance owner, or anyone with an active membership in a tenant. Never shown to a booker without either.
+_Avoid_: Admin button, admin link, dashboard link
+
+**Offer Spaces Entry** (admin label: „Angebote bereitstellen“):
+The entry into the admin UI's onboarding for someone who may create a tenant. Lives in two places with two gates: in the footer as the public entry, shown when the instance allows everyone to create a tenant; in the user menu for a logged-in user who may create a tenant but has no Admin Entry. A user never sees both the Admin Entry and the Offer Spaces Entry in the menu.
+_Avoid_: Onboarding link, create-tenant button, provider entry
+
 ### Mobile Key
 
 **Mobile Key** (admin label: „Schlüssel“):
