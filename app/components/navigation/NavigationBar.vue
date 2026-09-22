@@ -5,28 +5,48 @@
        that spans the full width. -->
   <div :class="barClass">
     <div class="container flex justify-between">
-      <div class="flex">
+      <!-- Identity: home, then the tenant the visitor is in. -->
+      <!-- `min-w-0` lets the tenant name shrink instead of pushing the actions
+           off a phone's line; the actions keep their width. -->
+      <div class="flex min-w-0 items-center">
         <UTooltip text="Zurück zur Startseite">
           <NavigationLink
             :tab="{ value: '/', icon: 'i-lucide-home', label: '' }"
           />
         </UTooltip>
+
+        <ClientOnly>
+          <TenantSwitcher class="text-lg font-bold" />
+        </ClientOnly>
+
         <div v-for="(tab, k) in tabs" :key="k">
           <NavigationLink :tab="tab" />
         </div>
       </div>
 
+      <!-- Actions: the visitor's own things first, then -- behind a divider --
+           the two switches that only change how the site is shown. -->
       <ClientOnly>
-        <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex shrink-0 items-center gap-1 sm:gap-3">
           <slot name="actions" />
-          <ColorModeToggle />
           <AuthActions />
+
+          <div
+            class="h-6 w-px opacity-30"
+            :style="{ backgroundColor: contrastToSecondary }"
+          />
+
+          <div class="flex items-center">
+            <LanguageToggle />
+            <ColorModeToggle />
+          </div>
         </div>
         <template #fallback>
           <div class="flex items-center gap-2 sm:gap-3 px-4 opacity-50">
             <USkeleton class="h-8 w-20" />
-            <USkeleton class="h-8 w-8" />
             <USkeleton class="h-8 w-24" />
+            <USkeleton class="h-8 w-8" />
+            <USkeleton class="h-8 w-8" />
           </div>
         </template>
       </ClientOnly>
@@ -38,6 +58,8 @@
 import NavigationLink from "./NavigationLink.vue";
 import AuthActions from "~/components/navigation/AuthActions.vue";
 import ColorModeToggle from "~/components/navigation/ColorModeToggle.vue";
+import LanguageToggle from "~/components/navigation/LanguageToggle.vue";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 defineProps({
   tabs: {
@@ -45,6 +67,8 @@ defineProps({
     default: () => [],
   },
 });
+
+const { contrastToSecondary } = useContrastColor();
 
 // Below `sm` (the width the app treats as "phone") the bar stays pinned to the
 // top edge while the page scrolls under it; from `sm` up it flows as before.

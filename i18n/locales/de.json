@@ -95,6 +95,15 @@
     "switchToDark": "Dunkles Design",
     "switchToLight": "Helles Design"
   },
+  "language": {
+    "toggle": "Sprache",
+    "switchTo": "Sprache auf {language} umstellen"
+  },
+  "catalog": {
+    "type": "Was möchten Sie buchen?",
+    "bookables": "Buchungsobjekte",
+    "events": "Veranstaltungen"
+  },
   "navigation": {
     "home": "Startseite",
     "dashboard": "Dashboard",
@@ -274,7 +283,7 @@
     }
   },
   "tenants": {
-    "selectTenant": "Mandant auswählen",
+    "selectTenant": "Anbieter auswählen",
     "tenant": "Mandant",
     "tenants": "Mandanten",
     "clearSelection": "Auswahl aufheben"

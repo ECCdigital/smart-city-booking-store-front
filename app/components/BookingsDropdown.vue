@@ -1,7 +1,7 @@
 <template>
   <UButton
     variant="ghost"
-    class="flex items-center gap-2 outline-none cursor-pointer"
+    class="flex items-center gap-2 px-1 sm:px-2.5 outline-none cursor-pointer"
     @click="() => goTo('/account/bookings')"
   >
     <UUser

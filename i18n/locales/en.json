@@ -96,6 +96,21 @@
     "switchToDark": "Dark theme",
     "switchToLight": "Light theme"
   },
+  "language": {
+    "toggle": "Language",
+    "switchTo": "Switch language to {language}"
+  },
+  "catalog": {
+    "type": "What would you like to book?",
+    "bookables": "Bookable items",
+    "events": "Events"
+  },
+  "tenants": {
+    "selectTenant": "Select tenant",
+    "tenant": "Tenant",
+    "tenants": "Tenants",
+    "clearSelection": "Clear selection"
+  },
   "checkout": {
     "noBookable": "No matching resources found",
     "additionalObjects": "Additional Objects",

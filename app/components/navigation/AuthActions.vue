@@ -1,11 +1,13 @@
 <template>
-  <div class="flex items-center gap-2 sm:gap-3">
+  <!-- On a phone the actions sit tight against each other so the language and
+       colour mode buttons still fit on the same line. -->
+  <div class="flex items-center gap-0 sm:gap-3">
     <template v-if="!isAuthenticated">
       <UButton
         :label="isGreaterThanSm ? 'Anmelden' : ' '"
         :icon="isGreaterThanSm ? '' : 'i-lucide-log-in'"
         variant="ghost"
-        class="block px-2"
+        class="block px-1 sm:px-2"
         :style="{ color: contrastToSecondary }"
         :to="loginTo"
       />
@@ -16,7 +18,7 @@
         :to="registerTo"
       />
     </template>
-    <div v-else class="flex gap-2 sm:gap-3">
+    <div v-else class="flex sm:gap-3">
       <BookingsDropdown />
       <UserDropdown />
     </div>
