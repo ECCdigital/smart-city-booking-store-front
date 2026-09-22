@@ -93,7 +93,6 @@ interface SearchResultItem {
   calculatedPrice?: { userGrossPriceEur: number } | null;
 }
 
-
 interface UseBookableSearchOptions<TItem> {
   sourceItems: ComputedRef<TItem[]> | Ref<TItem[]>;
   isEvent: boolean;
@@ -294,7 +293,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
   }
 
   const sortedItems = computed(() => {
-    const temp = filteredItems.value.slice().sort((a, b) => {
+    return filteredItems.value.slice().sort((a, b) => {
       //sort by price
       if (query.sortMode === "priceAscending") {
         return getPrice(a) - getPrice(b);
@@ -332,8 +331,6 @@ export function useBookableSearch<TItem extends SearchableItem>(
       }
       return 0;
     });
-    console.log("*A*", temp);
-    return temp;
   });
 
   function getBookableMinPrice(bookable: SearchResultItem) {
