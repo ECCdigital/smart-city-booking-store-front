@@ -1,15 +1,22 @@
 <template>
   <div>
     <div class="flex">
-      <div class="grid place-content-center">
+      <div class="grid place-content-center shrink-0">
         <UIcon name="i-lucide-map-pin" class="size-5" />
       </div>
-      <div v-if="location.length" class="p-3">{{ location }}</div>
-      <div v-else class="italic p-3">Keine Adresse bekannt.</div>
+      <div
+        v-if="location.length"
+        class="p-3 min-w-0 whitespace-normal break-words"
+      >
+        {{ location }}
+      </div>
+      <div v-else class="italic p-3 min-w-0 whitespace-normal">
+        Keine Adresse bekannt.
+      </div>
       <div class="flex-1" />
       <div
         v-if="location.length && enableCopyButton"
-        class="grid place-content-center"
+        class="grid place-content-center shrink-0"
       >
         <UIcon
           name="i-lucide-copy"
@@ -64,9 +71,9 @@ const location = computed(() => {
 const distance = computed(() => {
   if (props.bookable.distanceMeter == null) return null;
   return (props.bookable.distanceMeter / 1000)
-      .toFixed(2)
-      .replace(".", ",")
-      .replace(/,00$/, "");
+    .toFixed(2)
+    .replace(".", ",")
+    .replace(/,00$/, "");
 });
 
 const copyAddressToClipboard = async () => {

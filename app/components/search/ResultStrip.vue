@@ -62,6 +62,7 @@
       :is-not-bookable="isNotBookable"
       :entry-page-mode="entryPageMode"
       :map-mode="mapMode"
+      class="w-auto"
       @open-details="onOpenDetails"
     />
     <ResultStripEventContent

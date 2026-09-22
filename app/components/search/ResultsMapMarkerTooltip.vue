@@ -68,6 +68,9 @@ defineProps({
 
 <style>
 .leaflet-tooltip.clean-tooltip {
+  /* Leaflet setzt für .leaflet-tooltip white-space: nowrap – dadurch laufen
+     lange Adressen seitlich aus der Tooltip-Karte heraus. */
+  white-space: normal;
   background: transparent;
   border: none;
   border-radius: 50px;
