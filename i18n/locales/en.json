@@ -636,5 +636,12 @@
       "process_number": "Process number",
       "booking_hint": "please have it ready"
     }
+  },
+  "results": {
+    "pagination": {
+      "itemsPerPage": "Per page",
+      "all": "All",
+      "range": "{from}–{to} of {total}"
+    }
   }
 }

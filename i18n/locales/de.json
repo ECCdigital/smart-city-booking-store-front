@@ -1144,5 +1144,12 @@
         "not_readable": "Kamera wird bereits benutzt"
       }
     }
+  },
+  "results": {
+    "pagination": {
+      "itemsPerPage": "Pro Seite",
+      "all": "Alle",
+      "range": "{from}–{to} von {total}"
+    }
   }
 }
