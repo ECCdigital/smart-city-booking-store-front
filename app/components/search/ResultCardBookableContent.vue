@@ -2,14 +2,20 @@
   <div
     id="body"
     class="p-2 text-gray-800 dark:text-gray-100"
-    :class="mapDetailMode? '': 'flex flex-wrap content-between h-full'"
+    :class="mapDetailMode ? '' : 'flex flex-wrap content-between h-full'"
   >
     <div class="w-full max-w-full min-w-0 overflow-hidden break-all">
       <!--<div :class="mapMode ? 'w-full max-w-full bg-blue-500 break-words overflow-hidden':'w-full'">-->
       <!-- Title -->
       <p
         class="font-bold whitespace-normal break-words"
-        :class="hasLongTitle ? 'text-base line-clamp-3' : 'text-lg'"
+        :class="
+          mapDetailMode
+            ? 'text-base line-clamp-2'
+            : hasLongTitle
+              ? 'text-base line-clamp-3'
+              : 'text-lg'
+        "
       >
         {{ bookable.title }}
       </p>
@@ -21,7 +27,7 @@
           :bookable="bookable"
           show-distance
           class="whitespace-normal break-before-auto"
-          :class="mapDetailMode? 'text-sm' : ''"
+          :class="mapDetailMode ? 'text-sm' : ''"
         />
       </div>
       <USeparator

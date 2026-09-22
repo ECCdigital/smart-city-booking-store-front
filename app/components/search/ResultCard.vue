@@ -3,7 +3,7 @@
     class="shadow-lg bg-white dark:bg-gray-700 rounded-xl"
     :class="[
       isNotSuitable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer',
-      mapDetailMode ? 'h-80' : '',
+      mapDetailMode ? 'h-72' : '',
     ]"
     @click="onGoToDetails"
   >

@@ -1,26 +1,42 @@
 <template>
   <div
-    class="basis-3/4 flex flex-col justify-between"
-    :class="mapMode ? 'p-2' : 'p-4'"
+    class="basis-3/4 flex flex-col"
+    :class="[
+      mapMode ? 'p-2' : 'p-4',
+      mapListMode ? 'justify-between' : 'justify-between',
+    ]"
   >
     <div>
       <!-- Title -->
-      <div class="cursor-pointer" @click="openDetails()">
+      <div
+        class="cursor-pointer"
+        :class="mapListMode ? 'mb-2' : ''"
+        @click="openDetails()"
+      >
         <p
           class="font-bold"
-          :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'"
+          :class="
+            mapListMode
+              ? 'text-base line-clamp-2'
+              : hasLongTitle
+                ? 'text-base line-clamp-2'
+                : 'text-lg'
+          "
         >
           {{ bookable?.title }}
         </p>
-        <p>{{ getTenantName(bookable.tenantId) }}</p>
+        <p :class="mapListMode ? 'text-sm' : ''">
+          {{ getTenantName(bookable.tenantId) }}
+        </p>
       </div>
 
       <!-- Adresse und Entfernung -->
       <BookableAdressInformation
+        v-if="!mapListMode"
         :bookable="bookable"
         show-distance
         class="w-full"
-        :class="mapMode ? 'text-sm my-1' : 'my-5'"
+        :class="mapMode ? 'text-sm my-0' : 'my-2'"
       />
       <USeparator
         v-if="!mapMode"
@@ -31,15 +47,21 @@
     </div>
 
     <div
-      class="flex h-full"
-      :class="mapMode ? 'justify-start' : 'overflow-hidden justify-between'"
+      class="flex"
+      :class="
+        mapMode ? 'justify-start' : 'h-full overflow-hidden justify-between'
+      "
     >
       <!-- Eigenschaften -->
       <div v-if="!mapMode" class="basis-3/5 w-full my-2">
         <BookableFlagDisplay :flags="bookable?.flags" class="line-clamp-3" />
       </div>
 
-      <div class="w-full content-end" :class="mapMode ? '' : 'basis-2/5 grid '">
+      <div
+        v-if="!mapListMode"
+        class="w-full content-end"
+        :class="mapMode ? '' : 'basis-2/5 grid '"
+      >
         <!-- Preis -->
         <BookablePriceDisplay
           v-if="!isNotBookable && !isNotSuitable"
@@ -129,6 +151,10 @@ const props = defineProps({
     default: false,
   },
   mapMode: {
+    type: Boolean,
+    default: false,
+  },
+  mapListMode: {
     type: Boolean,
     default: false,
   },

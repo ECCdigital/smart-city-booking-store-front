@@ -1,21 +1,22 @@
 <template>
   <div
-      class="bg-auto w-[280px] shrink-0 h-[80vh] z-20 my-2 ml-2 overflow-auto p-2 border border-gray-200 rounded hidden lg:block"
+    class="bg-auto w-[280px] shrink-0 h-[80vh] z-20 my-2 ml-2 overflow-auto p-2 border border-gray-200 rounded hidden lg:block"
   >
     <TransitionGroup name="list" tag="div" class="space-y-1">
       <div
-          v-for="bookable in bookables"
-          :key="bookable.item.id"
-          @mouseenter="currentBookable = bookable"
-          @mouseleave="currentBookable = null"
+        v-for="bookable in bookables"
+        :key="bookable.item.id"
+        @mouseenter="currentBookable = bookable"
+        @mouseleave="currentBookable = null"
       >
         <ResultStrip
-            class="cursor-pointer"
-            :item="bookable.item"
-            :is-not-suitable="bookable.matchStatus !== 'match'"
-            :calculated-price="bookable.calculatedPrice"
-            map-mode
-            @click="emit('openDetails',bookable, true)"
+          class="cursor-pointer"
+          :item="bookable.item"
+          :is-not-suitable="bookable.matchStatus !== 'match'"
+          :calculated-price="bookable.calculatedPrice"
+          map-mode
+          map-list-mode
+          @click="emit('openDetails', bookable, true)"
         />
       </div>
       <div v-if="!bookables || bookables.length === 0" key="empty-state">
@@ -26,7 +27,7 @@
     </TransitionGroup>
   </div>
 </template>
-<script setup >
+<script setup>
 import ResultStrip from "~/components/search/ResultStrip.vue";
 
 const currentBookable = defineModel({
@@ -43,7 +44,6 @@ defineProps({
 
 const emit = defineEmits(["openDetails"]);
 </script>
-
 
 <style scoped>
 .list-move, /* apply transition to moving elements */

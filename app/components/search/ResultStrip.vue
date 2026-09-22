@@ -4,7 +4,13 @@
     class="@container bg-white dark:bg-gray-700 flex flex-row rounded-sm shadow-lg"
     :class="[
       isNotSuitable ? 'opacity-70' : ' ',
-      isEvent ? 'max-h-100 h-100' : mapMode ? '' : 'max-h-74 h-74',
+      isEvent
+        ? 'max-h-100 h-100'
+        : mapListMode
+          ? ''
+          : mapMode
+            ? ''
+            : 'max-h-74 h-74',
     ]"
   >
     <div class="w-24 shrink-0 @sm:basis-1/4 flex items-center">
@@ -25,7 +31,8 @@
           v-bind="image"
           alt=""
           :loading="eager ? 'eager' : 'lazy'"
-          class="w-full h-full object-cover rounded-l-sm"
+          class="w-full object-cover rounded-l-sm"
+          :class="mapListMode ? 'h-24 ' : 'h-full'"
           @error="onImageError"
         />
         <ClientOnly v-else>
@@ -62,6 +69,7 @@
       :is-not-bookable="isNotBookable"
       :entry-page-mode="entryPageMode"
       :map-mode="mapMode"
+      :map-list-mode="mapListMode"
       class="w-auto"
       @open-details="onOpenDetails"
     />
@@ -114,6 +122,10 @@ const props = defineProps({
     default: false,
   },
   mapMode: {
+    type: Boolean,
+    default: false,
+  },
+  mapListMode: {
     type: Boolean,
     default: false,
   },

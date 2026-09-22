@@ -17,7 +17,7 @@
       v-else-if="group.bookables?.length === 2 || group.bookables?.length === 3"
       class="rounded-2xl bg-white shadow-2xl p-2 space-y-1"
     >
-      <div v-for="bookable in group.bookables" :key="bookable.item.id" class="">
+      <div v-for="bookable in group.bookables" :key="bookable.item.id">
         <ResultStrip
           :item="bookable.item"
           :is-not-suitable="bookable.matchStatus !== 'match'"
