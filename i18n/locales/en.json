@@ -111,6 +111,10 @@
     "tenants": "Tenants",
     "clearSelection": "Clear selection"
   },
+  "filter": {
+    "fittingResults": "matching results",
+    "provider": "Provider"
+  },
   "checkout": {
     "noBookable": "No matching resources found",
     "additionalObjects": "Additional Objects",

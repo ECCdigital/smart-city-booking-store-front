@@ -386,7 +386,8 @@
   },
 
   "filter": {
-    "fittingResults": "passende Ergebnisse"
+    "fittingResults": "passende Ergebnisse",
+    "provider": "Anbieter"
   },
 
   "cardLogin": {

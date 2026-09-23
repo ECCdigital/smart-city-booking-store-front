@@ -55,6 +55,17 @@
       />
     </div>
 
+    <!-- Anbieter -->
+    <div v-if="possibleTenants.length > 1" class="my-7">
+      <p class="mb-3">{{ $t("filter.provider") }}</p>
+      <FilterCheckboxGroup
+        v-model="_tenants"
+        :items="possibleTenants"
+        use-more-button
+        @change="instantFilter"
+      />
+    </div>
+
     <!-- Orte -->
     <div v-if="possibleCities && possibleCities.length" class="my-7">
       <p class="mb-3">Orte</p>
@@ -141,6 +152,7 @@ import { useCustomFieldFilters } from "~/composables/search/useCustomFieldFilter
 import CustomFieldFilter from "~/components/search/CustomFieldFilter.vue";
 import FilterHistogramSlider from "~/components/search/FilterHistogramSlider.vue";
 import FilterCheckboxGroup from "~/components/search/FilterCheckboxGroup.vue";
+import { useTenantStore } from "~~/stores/tenant.js";
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -165,6 +177,10 @@ const props = defineProps({
     default: () => [],
   },
   cities: {
+    type: Array,
+    default: () => [],
+  },
+  tenants: {
     type: Array,
     default: () => [],
   },
@@ -202,6 +218,7 @@ const _cities = ref(props.cities);
 const _onlyPublicEvents = ref(props.onlyPublicEvents);
 const _onlyRegistrationNeededEvents = ref(props.onlyRegistrationNeededEvents);
 const _categories = ref(props.categories);
+const _tenants = ref(props.tenants);
 
 //Kategorien
 //toDo - read from instance later !!!!
@@ -224,6 +241,35 @@ const possibleCategories = computed(() => {
       value: "ticket",
     },
   ];
+});
+
+// Anbieter: the tenants the current results come from, named from the tenant
+// store and counted like the other facets. A tenant the store has not loaded
+// falls back to its id rather than dropping out of the list.
+const tenantStore = useTenantStore();
+
+const possibleTenants = computed(() => {
+  if (!props.bookables || props.bookables.length === 0) {
+    return [];
+  }
+
+  const tenantCount = {};
+  props.bookables.forEach((b) => {
+    if (b.matchStatus !== "match") return;
+
+    const tenantId = b.item?.tenantId;
+    if (!tenantId) return;
+
+    tenantCount[tenantId] = (tenantCount[tenantId] || 0) + 1;
+  });
+
+  return Object.entries(tenantCount)
+    .map(([value, count]) => ({
+      label: tenantStore.getTenantById(value)?.name ?? value,
+      value,
+      count,
+    }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 });
 
 //Distanz
@@ -482,6 +528,7 @@ function onFilter() {
   filter.regEv = _onlyRegistrationNeededEvents.value;
   filter.cat = _categories.value;
   filter.cities = _cities.value;
+  filter.tenants = _tenants.value;
   filter.distance = _distance.value;
   filter.price = sameAsPossible ? [] : _price.value;
   filter.customFields = _customFieldValues.value;
@@ -495,6 +542,7 @@ function removeFilter() {
   _onlyRegistrationNeededEvents.value = false;
   _cities.value = [];
   _categories.value = [];
+  _tenants.value = [];
   _price.value = possiblePriceRange.value.slice();
   _distance.value = distanceRange.value[1];
   _customFieldValues.value = {};
@@ -506,6 +554,7 @@ function removeFilter() {
   filter.regEv = _onlyRegistrationNeededEvents.value;
   filter.cat = _categories.value;
   filter.cities = _cities.value;
+  filter.tenants = _tenants.value;
   filter.distance = distanceRange.value[1];
 
   const sameAsPossible =

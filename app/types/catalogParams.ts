@@ -18,11 +18,7 @@ export interface TimePeriod {
  * checkbox, a number, a free-text value, a multi-select, or a numeric range.
  */
 export type CustomFieldValue =
-  | boolean
-  | number
-  | string
-  | string[]
-  | [number, number];
+  boolean | number | string | string[] | [number, number];
 
 export interface CatalogQueryState {
   term: string;
@@ -36,6 +32,7 @@ export interface CatalogQueryState {
   regEv: boolean;
   cat: string[];
   cities: string[];
+  tenants: string[];
   price: number[];
 
   sortMode: SortMode;

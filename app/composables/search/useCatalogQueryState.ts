@@ -92,6 +92,12 @@ export function useCatalogQueryState() {
           .map((c) => decodeURIComponent(c.toLowerCase()))
       : [],
 
+    tenants: route.query.tenants
+      ? (route.query.tenants as string)
+          .split(",")
+          .map((t) => decodeURIComponent(t))
+      : [],
+
     price: route.query.price
       ? (() => {
           const [min, max] = (route.query.price as string)
@@ -136,6 +142,10 @@ export function useCatalogQueryState() {
       q.cities = s.cities.map((c) => encodeURIComponent(c)).join(",");
     }
 
+    if (s.tenants.length > 0) {
+      q.tenants = s.tenants.map((t) => encodeURIComponent(t)).join(",");
+    }
+
     if (s.price.length > 0) {
       q.price = `${s.price[0]},${s.price[1]}`;
     }
@@ -176,6 +186,7 @@ export function useCatalogQueryState() {
     if (s.regEv) return true;
     if (s.cat.length > 0) return true;
     if (s.cities.length > 0) return true;
+    if (s.tenants.length > 0) return true;
     if (s.distance != null) return true;
     if (s.price.length === 2) return true;
     if (s.customFields !== null) return true;
