@@ -1,6 +1,14 @@
 <template>
+  <!--
+    The hover lift is a transform and a ring, and nothing else: both paint
+    outside the layout, so the cards beside and below this one stay where they
+    are. A negative margin or a border that only exists on hover would resize
+    the card's box in the flow instead and push the whole row around.
+    `relative` plus `hover:z-10` keeps the lifted card above its neighbours;
+    the scale is dropped for visitors who ask for less motion, the ring stays.
+  -->
   <UCard
-      class="mainCategoryCard h-full bg-white dark:bg-gray-700 text-black dark:text-gray-200 shadow-lg  hover:scale-125 hover:border-3 hover:-m-3 hover:border-primary"
+      class="mainCategoryCard relative h-full cursor-pointer bg-white dark:bg-gray-700 text-black dark:text-gray-200 shadow-lg transition duration-200 ease-out hover:z-10 hover:scale-105 hover:shadow-xl hover:ring-2 hover:ring-primary motion-reduce:transition-none motion-reduce:hover:scale-100"
       variant="solid"
       @click="goToCategory"
   >
