@@ -108,8 +108,8 @@ function getErrorForItem(itemId) {
             getErrorForItem(entry.item.id)
               ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950'
               : isSelected(entry.item.id)
-                ? 'border-primary bg-primary/5 dark:bg-primary/10'
-                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600',
+                ? 'border-secondary bg-secondary/5 dark:bg-secondary/10'
+                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-primary',
             entry.item.isBookable ? '' : 'opacity-50 cursor-not-allowed',
           ]"
           @click="!isMandatory(entry) && toggleSelection(entry.item.id)"
@@ -119,7 +119,7 @@ function getErrorForItem(itemId) {
               class="w-5 h-5 rounded flex items-center justify-center border-2 transition-colors"
               :class="
                 isSelected(entry.item.id)
-                  ? 'bg-primary border-primary'
+                  ? 'bg-secondary border-secondary'
                   : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
               "
             >
@@ -138,7 +138,7 @@ function getErrorForItem(itemId) {
               isSelected(entry.item.id)
                 ? getErrorForItem(entry.item.id)
                   ? 'bg-red-400/10 dark:bg-red-500/20'
-                  : 'bg-primary/10 dark:bg-primary/20'
+                  : 'bg-secondary/10 dark:bg-secondary/20'
                 : 'bg-gray-100 dark:bg-gray-800'
             "
           >
@@ -157,7 +157,7 @@ function getErrorForItem(itemId) {
                 isSelected(entry.item.id)
                   ? getErrorForItem(entry.item.id)
                     ? 'text-red-400 dark:text-red-500'
-                    : 'text-primary'
+                    : 'text-secondary'
                   : 'text-gray-400 dark:text-gray-500'
               "
             />

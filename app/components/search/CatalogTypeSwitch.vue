@@ -7,8 +7,10 @@
       :icon="type.icon"
       :label="type.label"
       :variant="isActivePath(type.value) ? 'solid' : 'outline'"
-      :color="isActivePath(type.value) ? 'primary' : 'neutral'"
-      :style="isActivePath(type.value) ? { color: contrastToPrimary } : undefined"
+      :color="isActivePath(type.value) ? 'secondary' : 'primary'"
+      :style="
+        isActivePath(type.value) ? { color: contrastToSecondary } : undefined
+      "
       :aria-current="isActivePath(type.value) ? 'page' : undefined"
       class="rounded-full px-4"
     />
@@ -25,7 +27,7 @@ import { useContrastColor } from "~/composables/utils/useContrastColor.js";
  */
 const { t } = useI18n();
 const { tenantTo, isActivePath } = useTenantRoute();
-const { contrastToPrimary } = useContrastColor();
+const { contrastToSecondary } = useContrastColor();
 
 const types = computed(() => [
   {

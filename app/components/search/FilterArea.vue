@@ -12,9 +12,9 @@
         <UButton
           v-if="!useAsDialog && isFilterActive"
           icon="i-lucide-trash"
+          color="primary"
           variant="ghost"
           class="rounded-full py-2 px-3"
-          :class="isFilterActive ? '' : ''"
           @click="removeFilter"
         />
       </UTooltip>
@@ -24,18 +24,21 @@
       <div class="space-y-3">
         <USwitch
           v-model="_includeNonSuitable"
+          color="secondary"
           label="Nicht passende Objekte anzeigen."
           @change="instantFilter"
         />
         <USwitch
           v-if="isEvent"
           v-model="_onlyPublicEvents"
+          color="secondary"
           label="Nur öffentliche Events anzeigen."
           @change="instantFilter"
         />
         <USwitch
           v-if="isEvent"
           v-model="_onlyRegistrationNeededEvents"
+          color="secondary"
           label="Nur anmeldepflichte Events anzeigen."
           @change="instantFilter"
         />
@@ -115,7 +118,7 @@
         v-if="isFilterActive"
         label="Filter entfernen"
         icon="i-lucide-trash"
-        color="neutral"
+        color="primary"
         variant="soft"
         class="rounded-full py-2 px-3"
         @click="removeFilter"
@@ -124,7 +127,7 @@
       <UButton
         label="Filter anwenden"
         icon="i-lucide-funnel"
-        color="neutral"
+        color="primary"
         variant="soft"
         class="rounded-full py-2 px-3"
         @click="onFilter"

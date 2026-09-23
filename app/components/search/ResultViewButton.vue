@@ -5,7 +5,7 @@
       :key="option.value"
       :label="option.label"
       :icon="option.icon"
-      :color="view === option.value ? 'primary' : 'neutral'"
+      :color="view === option.value ? 'secondary' : 'neutral'"
       :variant="view === option.value ? 'solid' : 'soft'"
       class="first:rounded-l-full last:rounded-r-full"
       @click="selectView(option.value)"

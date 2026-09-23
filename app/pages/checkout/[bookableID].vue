@@ -2935,7 +2935,7 @@ function onReviewEdit(section) {
                 </UButton>
                 <UButton
                   v-else-if="!requiresLoginForCheckout"
-                  color="neutral"
+                  color="primary"
                   variant="soft"
                   icon="i-lucide-log-out"
                   :loading="isLoggingOut"
@@ -3071,7 +3071,7 @@ function onReviewEdit(section) {
 }
 
 .checkout-splitpanes :deep(.splitpanes__splitter:hover::before) {
-  background-color: var(--color-primary-500, #6366f1);
+  background-color: var(--color-primary, #6366f1);
   width: 3px;
 }
 
@@ -3081,7 +3081,7 @@ function onReviewEdit(section) {
 }
 
 :root.dark .checkout-splitpanes :deep(.splitpanes__splitter:hover::before) {
-  background-color: var(--color-primary-400, #818cf8);
+  background-color: var(--color-primary, #818cf8);
 }
 
 /* ── Responsive: stack vertically on small screens ── */

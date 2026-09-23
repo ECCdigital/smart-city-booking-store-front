@@ -1016,7 +1016,7 @@ async function handleManualRefresh() {
             >
               <div class="mt-4 space-y-3">
                 <UButton
-                  color="neutral"
+                  color="primary"
                   variant="subtle"
                   block
                   :loading="statusPending || isRefreshing"
@@ -1037,7 +1037,7 @@ async function handleManualRefresh() {
                 </UButton>
 
                 <UButton
-                  color="neutral"
+                  color="primary"
                   variant="subtle"
                   block
                   to="/"

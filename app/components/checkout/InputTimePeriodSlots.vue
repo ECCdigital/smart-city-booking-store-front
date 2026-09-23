@@ -663,7 +663,7 @@ function dayHasAnyFreeSlot(
 
 function getDayClass(day) {
   if (isSelectedDay(day)) {
-    return "border-primary dark:border-primary bg-primary/10 ring-1 ring-primary dark:ring-primary";
+    return "border-secondary dark:border-secondary bg-secondary/10 ring-1 ring-secondary dark:ring-secondary";
   }
   if (!day.hasAvailability) {
     if (day.hasMatchingPeriod) {
@@ -676,7 +676,7 @@ function getDayClass(day) {
 
 function getDayNumberClass(day) {
   if (isSelectedDay(day)) {
-    return "text-primary dark:text-primary";
+    return "text-secondary dark:text-secondary";
   }
   if (!day.hasAvailability) {
     if (day.hasMatchingPeriod) {
@@ -689,7 +689,7 @@ function getDayNumberClass(day) {
 
 function getDayWeekdayClass(day) {
   if (isSelectedDay(day)) {
-    return "text-primary/80 dark:text-primary/80";
+    return "text-secondary/80 dark:text-secondary/80";
   }
   if (!day.hasAvailability) {
     return "text-gray-400 dark:text-gray-500";
@@ -714,7 +714,7 @@ function getSlotClass(slot) {
     return "border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 text-gray-300 dark:text-gray-600 cursor-not-allowed";
   }
   if (isSlotSelected(slot)) {
-    return "border-primary dark:border-primary bg-primary/10 dark:bg-primary text-primary shadow-sm ring-1 ring-primary dark:ring-primary";
+    return "border-secondary dark:border-secondary bg-secondary/10 dark:bg-secondary text-secondary shadow-sm ring-1 ring-secondary dark:ring-secondary";
   }
   return "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary";
 }

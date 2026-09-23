@@ -1,6 +1,6 @@
 <template>
   <UModal v-model:open="isOpen">
-    <UChip :show="hasFilters" inset>
+    <UChip :show="hasFilters" color="secondary" inset>
       <UButton
         label="Filtern"
         icon="i-lucide-funnel"

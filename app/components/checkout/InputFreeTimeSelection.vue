@@ -137,7 +137,7 @@
           </span>
           <span class="flex items-center gap-1.5">
             <span
-              class="inline-block w-4 h-3 rounded-sm bg-primary/90 dark:bg-primary/10"
+              class="inline-block w-4 h-3 rounded-sm bg-secondary/90 dark:bg-secondary/10"
             />
             {{ $t("scheduleSelection.yourSelection") }}
           </span>
@@ -967,14 +967,14 @@ watch(
 
 /* ── User selection event ────────────────────────────────── */
 :deep(.fc-event.fc-user-selection) {
-  background-color: var(--color-primary, #6366f1) !important;
+  background-color: var(--color-secondary, #6366f1) !important;
   opacity: 0.9;
   border-radius: 3px !important;
   box-shadow: none !important;
 }
 
 :is(.dark) :deep(.fc-event.fc-user-selection) {
-  background-color: var(--color-primary, #6366f1) !important;
+  background-color: var(--color-secondary, #6366f1) !important;
 }
 
 :deep(.fc-user-selection .fc-event-main) {
@@ -983,11 +983,19 @@ watch(
 
 /* ── Selection highlight (while dragging) ────────────────── */
 :deep(.fc-highlight) {
-  background-color: rgba(99, 102, 241, 0.15) !important;
+  background-color: color-mix(
+    in oklab,
+    var(--color-secondary, #6366f1) 15%,
+    transparent
+  ) !important;
 }
 
 :is(.dark) :deep(.fc-highlight) {
-  background-color: rgba(99, 102, 241, 0.2) !important;
+  background-color: color-mix(
+    in oklab,
+    var(--color-secondary, #6366f1) 20%,
+    transparent
+  ) !important;
 }
 
 /* ── Now-indicator line ──────────────────────────────────── */

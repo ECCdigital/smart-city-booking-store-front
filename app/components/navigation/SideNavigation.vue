@@ -62,7 +62,7 @@ const inactiveLinkStyle =
   "bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 hover:dark:bg-gray-800";
 const disabledLinkStyle =
   "cursor-not-allowed opacity-75 bg-gray-100 dark:bg-gray-900";
-const activeLinkStyle = "bg-primary/20 hover:bg-primary/40 font-semibold";
+const activeLinkStyle = "bg-secondary/20 hover:bg-secondary/40 font-semibold";
 
 const scrollContainer = ref(null);
 const showLeftHint = ref(false);

@@ -17,8 +17,9 @@
         </div>
       </div>
       <UButton
-        class="text-sm bg-primary text-white px-2 md:px-3 py-1"
+        class="text-sm px-2 md:px-3 py-1"
         label="Ansehen"
+        :style="{ color: contrastToPrimary }"
         @click="goToDetails(item.id, item.type)"
       />
     </div>
@@ -27,6 +28,7 @@
 <script setup>
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 defineProps({
   relatedBookables: {
@@ -36,6 +38,7 @@ defineProps({
 });
 
 const { goToDetails } = useRedirection();
+const { contrastToPrimary } = useContrastColor();
 </script>
 
 <style scoped></style>

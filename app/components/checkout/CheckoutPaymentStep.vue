@@ -87,8 +87,8 @@ function isSelected(id) {
           class="w-full flex items-start gap-3 p-3 rounded-xl border-2 transition-all duration-150 text-left overflow-hidden"
           :class="
             isSelected(item.value)
-              ? 'border-primary bg-primary/5 dark:bg-primary/10'
-              : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600'
+              ? 'border-secondary bg-secondary/5 dark:bg-secondary/10'
+              : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-primary'
           "
           @click="selectProvider(item.value)"
         >
@@ -98,7 +98,7 @@ function isSelected(id) {
             class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
             :class="
               isSelected(item.value)
-                ? 'bg-primary/10 dark:bg-primary/20'
+                ? 'bg-secondary/10 dark:bg-secondary/20'
                 : 'bg-gray-100 dark:bg-gray-800'
             "
           >
@@ -107,7 +107,7 @@ function isSelected(id) {
               size="20"
               :class="
                 isSelected(item.value)
-                  ? 'text-primary'
+                  ? 'text-secondary'
                   : 'text-gray-400 dark:text-gray-500'
               "
             />

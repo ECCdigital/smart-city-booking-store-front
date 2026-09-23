@@ -1,13 +1,6 @@
 <template>
-  <!-- The coloured surface stays full-bleed; only its content is held to the
-       container edges. Keep the background (and any future sticky positioning)
-       on this outer element -- iOS 26 only tints the status bar area from a bar
-       that spans the full width. -->
   <div :class="barClass">
     <div class="container flex justify-between">
-      <!-- Identity: home, then the tenant the visitor is in. -->
-      <!-- `min-w-0` lets the tenant name shrink instead of pushing the actions
-           off a phone's line; the actions keep their width. -->
       <div class="flex min-w-0 items-center">
         <UTooltip text="Zurück zur Startseite">
           <NavigationLink
@@ -24,8 +17,6 @@
         </div>
       </div>
 
-      <!-- Actions: the visitor's own things first, then -- behind a divider --
-           the two switches that only change how the site is shown. -->
       <ClientOnly>
         <div class="flex shrink-0 items-center gap-1 sm:gap-3">
           <slot name="actions" />
@@ -85,7 +76,7 @@ const { contrastToSecondary } = useContrastColor();
 // 10px, opaque and free of `backdrop-filter` — so adding `.glass`, a blur or an
 // alpha-bearing background colour here would silently turn that colouring off.
 const barClass = computed(() => [
-  "bg-[var(--color-secondary)]",
+  "bg-[var(--color-primary)]",
   "sticky top-0 z-10 sm:static",
 ]);
 </script>
