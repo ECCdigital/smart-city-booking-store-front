@@ -11,7 +11,7 @@
             isDirectConnection ? 'px-5' : 'px-10',
             bookingDisabled
               ? 'bg-primary/60 cursor-not-allowed'
-              : 'cursor-pointer',
+              : '',
           ]"
           :color="bookingDisabled ? '' : 'primary'"
           :disabled="bookingDisabled"

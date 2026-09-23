@@ -103,7 +103,7 @@ function getErrorForItem(itemId) {
         <button
           type="button"
           :disabled="isMandatory(entry)"
-          class="@container w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-150 text-left cursor-pointer disabled:cursor-default overflow-hidden"
+          class="@container w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-150 text-left disabled:cursor-default overflow-hidden"
           :class="[
             getErrorForItem(entry.item.id)
               ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950'

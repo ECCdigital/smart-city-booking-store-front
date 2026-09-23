@@ -38,7 +38,7 @@
               icon="i-lucide-calendar-arrow-down"
               variant="soft"
               color="neutral"
-              class="text-gray-700 dark:text-gray-300 cursor-pointer"
+              class="text-gray-700 dark:text-gray-300"
               @click="downloadAppointment()"
             />
           </UTooltip>

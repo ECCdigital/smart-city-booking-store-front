@@ -4,7 +4,7 @@
       :icon="actionIcon"
       variant="ghost"
       color="neutral"
-      class="flex h-12 items-center px-2 sm:px-3 cursor-pointer hover:!bg-current/15 active:!bg-current/20"
+      class="flex h-12 items-center px-2 sm:px-3 hover:!bg-current/15 active:!bg-current/20"
       :style="{ color: contrastToSecondary }"
       :aria-label="t('colorMode.toggle')"
       :aria-pressed="isDark"

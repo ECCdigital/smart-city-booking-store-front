@@ -41,7 +41,7 @@
         v-for="(image, index) in images"
         :key="index"
         type="button"
-        class="w-20 h-20 shrink-0 rounded-md overflow-hidden border-2 transition-colors cursor-pointer"
+        class="w-20 h-20 shrink-0 rounded-md overflow-hidden border-2 transition-colors"
         :class="
           index === activeIndex
             ? 'border-primary'

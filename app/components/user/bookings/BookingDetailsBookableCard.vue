@@ -9,7 +9,7 @@
           <UButton
             icon="i-lucide-square-arrow-out-up-right"
             variant="soft"
-            class="text-gray-700 dark:text-gray-300 cursor-pointer"
+            class="text-gray-700 dark:text-gray-300"
             @click="goToBookable(bookable.bookableId)"
           />
         </UTooltip>
@@ -17,7 +17,7 @@
           <UButton
             icon="i-lucide-calendar"
             variant="soft"
-            class="text-gray-700 dark:text-gray-300 cursor-pointer"
+            class="text-gray-700 dark:text-gray-300"
             @click="goToEvent()"
           />
         </UTooltip>

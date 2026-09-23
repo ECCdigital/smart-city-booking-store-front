@@ -77,7 +77,7 @@
         :aria-label="t('mobileKey.evidence.torch')"
         color="neutral"
         variant="solid"
-        class="absolute bottom-3 right-3 cursor-pointer"
+        class="absolute bottom-3 right-3"
         @click="torchOn = !torchOn"
       />
     </div>
@@ -105,7 +105,6 @@
         <UButton
           size="xs"
           color="warning"
-          class="cursor-pointer"
           :label="
             t('mobileKey.evidence.wrong_door.action', {
               scanned: scannedDoorLabel,
@@ -141,7 +140,7 @@
     <button
       v-else
       type="button"
-      class="mt-3 text-sm text-gray-600 dark:text-gray-300 underline text-left cursor-pointer"
+      class="mt-3 text-sm text-gray-600 dark:text-gray-300 underline text-left"
       @click="fallbackRequested = !fallbackRequested"
     >
       {{

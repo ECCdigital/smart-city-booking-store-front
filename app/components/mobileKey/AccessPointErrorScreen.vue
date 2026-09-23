@@ -11,7 +11,7 @@
       v-if="screen.exit?.retry"
       block
       icon="i-lucide-refresh-cw"
-      class="py-3 shadow-lg cursor-pointer"
+      class="py-3 shadow-lg"
       @click="emit('retry', screen.exit.retry)"
     >
       {{ screen.exit.label }}
@@ -20,7 +20,7 @@
       v-else-if="screen.exit"
       block
       :to="screen.exit.to"
-      class="py-3 shadow-lg cursor-pointer"
+      class="py-3 shadow-lg"
     >
       {{ screen.exit.label }}
     </UButton>

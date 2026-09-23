@@ -1,6 +1,26 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+/* Cursor rules for interactive elements, including ARIA roles.*/
+@layer base {
+    button:not(:disabled),
+    summary,
+    [role="button"],
+    [role="menuitem"],
+    [role="menuitemcheckbox"],
+    [role="menuitemradio"],
+    [role="option"],
+    [role="tab"] {
+        cursor: pointer;
+    }
+
+    button:disabled,
+    [aria-disabled="true"],
+    [data-disabled] {
+        cursor: default;
+    }
+}
+
 body {
     background-color: rgb(250 250 250); /* bg-neutral-50  */
 }

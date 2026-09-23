@@ -10,7 +10,7 @@
     <div class="flex flex-wrap items-center justify-center gap-x-1">
       <button
         type="button"
-        class="inline-flex items-center gap-1 text-neutral-500 cursor-pointer"
+        class="inline-flex items-center gap-1 text-neutral-500"
         :aria-expanded="open"
         @click="open = !open"
       >

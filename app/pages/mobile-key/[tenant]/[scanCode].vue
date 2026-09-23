@@ -41,7 +41,7 @@
         :key="candidate.id"
         variant="outline"
         block
-        class="justify-start py-3 cursor-pointer"
+        class="justify-start py-3"
         @click="chooseBooking(candidate)"
       >
         <div class="text-left">
@@ -68,7 +68,7 @@
       @status="(next) => (status = next)"
     >
       <template #exit>
-        <UButton variant="ghost" block to="/mobile-key" class="cursor-pointer">
+        <UButton variant="ghost" block to="/mobile-key">
           Zur Schlüsselliste
         </UButton>
       </template>
@@ -98,7 +98,7 @@
         expanded
       />
 
-      <UButton variant="ghost" block to="/mobile-key" class="cursor-pointer">
+      <UButton variant="ghost" block to="/mobile-key">
         Zur Schlüsselliste
       </UButton>
     </div>

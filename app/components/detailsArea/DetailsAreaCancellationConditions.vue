@@ -4,7 +4,7 @@
     class="bg-gray-200 dark:bg-gray-700 rounded-md p-3 group"
   >
     <summary
-      class="font-bold cursor-pointer list-none flex items-center justify-between gap-3"
+      class="font-bold list-none flex items-center justify-between gap-3"
     >
       <span>Stornierungsbedingungen</span>
       <span

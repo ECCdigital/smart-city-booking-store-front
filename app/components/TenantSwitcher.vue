@@ -116,8 +116,8 @@ const { contrastToSecondary } = useContrastColor();
 // rather than pushing the language and colour mode buttons off a phone's line.
 const buttonClass = computed(() =>
   isBar.value
-    ? "h-12 min-w-0 px-2 sm:px-3 cursor-pointer font-medium hover:!bg-current/15 active:!bg-current/20"
-    : "cursor-pointer px-0 text-gray-700 dark:text-gray-300",
+    ? "h-12 min-w-0 px-2 sm:px-3 font-medium hover:!bg-current/15 active:!bg-current/20"
+    : "px-0 text-gray-700 dark:text-gray-300",
 );
 </script>
 

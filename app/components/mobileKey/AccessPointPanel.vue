@@ -60,7 +60,6 @@
             <UButton
               variant="ghost"
               block
-              class="cursor-pointer"
               @click="onCloseDialog"
             >
               Abbrechen
@@ -78,7 +77,6 @@
               <UButton
                 variant="ghost"
                 block
-                class="cursor-pointer"
                 @click="onCloseDialog"
               >
                 Schließen
@@ -143,7 +141,6 @@
             <UButton
               variant="ghost"
               block
-              class="cursor-pointer"
               @click="onCloseDialog"
             >
               Abbrechen
@@ -161,7 +158,6 @@
               <UButton
                 variant="ghost"
                 block
-                class="cursor-pointer"
                 @click="onCloseDialog"
               >
                 Schließen

@@ -1021,7 +1021,6 @@ async function handleManualRefresh() {
                   block
                   :loading="statusPending || isRefreshing"
                   icon="i-lucide-refresh-cw"
-                  class="cursor-pointer"
                   @click="handleManualRefresh"
                 >
                   {{ $t("checkout.status.manualRefreshAction") }}

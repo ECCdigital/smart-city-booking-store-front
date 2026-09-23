@@ -663,7 +663,7 @@ function dayHasAnyFreeSlot(
 
 function getDayClass(day) {
   if (isSelectedDay(day)) {
-    return "border-primary dark:border-primary bg-primary/10 ring-1 ring-primary dark:ring-primary cursor-pointer";
+    return "border-primary dark:border-primary bg-primary/10 ring-1 ring-primary dark:ring-primary";
   }
   if (!day.hasAvailability) {
     if (day.hasMatchingPeriod) {
@@ -671,7 +671,7 @@ function getDayClass(day) {
     }
     return "border-dashed border-gray-200 dark:border-gray-800 opacity-50 cursor-not-allowed";
   }
-  return "border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary cursor-pointer";
+  return "border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary";
 }
 
 function getDayNumberClass(day) {
@@ -714,9 +714,9 @@ function getSlotClass(slot) {
     return "border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 text-gray-300 dark:text-gray-600 cursor-not-allowed";
   }
   if (isSlotSelected(slot)) {
-    return "border-primary dark:border-primary bg-primary/10 dark:bg-primary text-primary shadow-sm cursor-pointer ring-1 ring-primary dark:ring-primary";
+    return "border-primary dark:border-primary bg-primary/10 dark:bg-primary text-primary shadow-sm ring-1 ring-primary dark:ring-primary";
   }
-  return "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary cursor-pointer";
+  return "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary";
 }
 
 function onSlotClick(slot) {

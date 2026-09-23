@@ -84,7 +84,7 @@ function isSelected(id) {
         <button
           type="button"
           :aria-checked="isSelected(item.value)"
-          class="w-full flex items-start gap-3 p-3 rounded-xl border-2 transition-all duration-150 text-left cursor-pointer overflow-hidden"
+          class="w-full flex items-start gap-3 p-3 rounded-xl border-2 transition-all duration-150 text-left overflow-hidden"
           :class="
             isSelected(item.value)
               ? 'border-primary bg-primary/5 dark:bg-primary/10'

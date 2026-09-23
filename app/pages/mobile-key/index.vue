@@ -19,7 +19,7 @@
           icon="i-lucide-list"
           :variant="viewMode === 'list' ? 'subtle' : 'ghost'"
           label="Liste"
-          class="p-3 cursor-pointer"
+          class="p-3"
           @click="() => (viewMode = 'list')"
         />
         <!--
@@ -27,7 +27,7 @@
           icon="i-lucide-map"
           :variant="viewMode === 'map' ? 'subtle' : 'ghost'"
           label="Raumkarte"
-          class="p-3 cursor-pointer"
+          class="p-3"
           disabled
           @click="() => (viewMode = 'map')"
         />
