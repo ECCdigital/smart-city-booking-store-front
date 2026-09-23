@@ -261,7 +261,7 @@ const hit = ref(false);
  */
 const handledCode = ref("");
 
-const accessPointLabel = computed(() => props.accessPoint.label || "Der Zugang");
+const accessPointLabel = computed(() => props.accessPoint.label || t("mobileKey.accessPointFallback"));
 
 /** A door that names none is still a door to switch to, just an unnamed one. */
 const scannedDoorLabel = computed(
@@ -309,7 +309,7 @@ async function onDetect(codes) {
     // No sticker of ours. Nothing to say and nothing to ask the server - the
     // camera simply keeps looking. What the code said stays out of the log:
     // a wifi code carries a password, and it is none of our business.
-    console.warn("Kein Zugangs-Aufkleber gescannt");
+    console.warn(t("mobileKey.noStickerScanned"));
     lastMiss.value = null;
     return;
   }

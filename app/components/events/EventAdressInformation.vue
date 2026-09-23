@@ -5,7 +5,7 @@
         <UIcon name="i-lucide-map-pin" class="size-5" />
       </div>
       <div v-if="location.length" class="p-3">{{ location }}</div>
-      <div v-else class="italic p-3">Keine Adresse bekannt.</div>
+      <div v-else class="italic p-3">{{ $t("bookableDetail.noAddress") }}</div>
 
       <div class="flex-1" />
       <div
@@ -29,6 +29,9 @@
 </template>
 <script setup>
 import { useRoute } from "#imports";
+
+const { t } = useI18n();
+
 
 const props = defineProps({
   event: {
@@ -73,8 +76,8 @@ const copyAddressToClipboard = async () => {
     await navigator.clipboard.writeText(location.value);
     const notification = useNotification();
     notification.success(
-      "Die Adresse wurde in Ihre Zwischenablage kopiert.",
-      "Adresse erfolgreich kopiert!",
+      t("bookableDetail.addressCopiedMessage"),
+      t("bookableDetail.addressCopiedTitle"),
     );
   }
 };

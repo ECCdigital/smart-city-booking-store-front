@@ -4,7 +4,7 @@
       variant="ghost"
       color="neutral"
       class="flex h-12 items-center px-2 sm:px-3 font-bold hover:bg-current/15! active:bg-current/20!"
-      :style="{ color: contrastToSecondary }"
+      :style="{ color: contrastToPrimary }"
       :aria-label="t('language.switchTo', { language: targetName })"
       @click="toggle"
     >
@@ -16,7 +16,7 @@
 <script setup>
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
-const { contrastToSecondary } = useContrastColor();
+const { contrastToPrimary } = useContrastColor();
 const { t, locale, locales, setLocale } = useI18n();
 
 const targetLocale = computed(() => (locale.value === "en" ? "de" : "en"));

@@ -47,9 +47,9 @@ useHead({
       class="bg-gray-200 px-10 py-15 flex justify-between shadow-sm hidden md:block"
     >
       <div class="grid content-center max-w-220px">
-        <p class="text-primary font-bold">Marktplatz</p>
+        <p class="text-primary font-bold">{{ $t("catalog.marketplace") }}</p>
         <p class="text-black text-3xl font-bold">
-          Unsere Angebote und Veranstaltungen
+          {{ $t("catalog.offersAndEvents") }}
         </p>
       </div>
       <div style="flex: 1; min-width: 15vw" />

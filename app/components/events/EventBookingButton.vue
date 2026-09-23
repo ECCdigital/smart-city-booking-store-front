@@ -54,6 +54,9 @@ import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 import EventTicketOptionsDialog from "~/components/events/EventTicketOptionsDialog.vue";
 
+const { t } = useI18n();
+
+
 const props = defineProps({
   event: {
     type: Object,
@@ -82,9 +85,9 @@ const isPrivateEvent = computed(() => {
 
 const tooltipText = computed(() => {
   if (isPrivateEvent.value) {
-    return "Das Event ist nicht öffentlich und kann nicht gebucht werden.";
+    return t("events.notPublicShort");
   } else if (!hasEventTickets.value) {
-    return "Für dieses Event sind keine Tickets verfügbar.";
+    return t("price.noTicketOptions");
   } else {
     return "";
   }

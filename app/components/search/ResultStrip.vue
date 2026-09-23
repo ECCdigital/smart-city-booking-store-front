@@ -52,7 +52,7 @@
                 name="i-lucide-image-off"
                 :class="iconOnly ? 'w-8 h-8' : 'w-4 h-4'"
               />
-              <p v-if="!iconOnly" class="text-xs">Nicht gefunden</p>
+              <p v-if="!iconOnly" class="text-xs">{{ $t("bookableDetail.notFound") }}</p>
             </div>
           </div>
         </ClientOnly>
@@ -93,6 +93,7 @@ import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
 import { useMediaImage } from "~/composables/utils/useMediaImage";
+
 
 const colorMode = useColorMode();
 const { coverImageOf, imageSource } = useMediaImage();

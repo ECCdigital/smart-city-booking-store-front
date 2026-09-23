@@ -5,8 +5,7 @@
       <div class="text-4xl mb-4">⭐</div>
       <h1 class="text-xl font-semibold mb-2">{{ $t("account.favoritesSoon") }}</h1>
       <p class="text-gray-500 max-w-md">
-        Aktuell gibt es hier noch nichts zu sehen. Gespeicherte Inhalte werden
-        künftig an dieser Stelle angezeigt.
+        {{ $t("account.favoritesEmpty") }}
       </p>
     </div>
   </div>

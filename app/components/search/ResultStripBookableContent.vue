@@ -79,7 +79,7 @@
           class="w-full mt-2 flex justify-end content-end gap-2"
         >
           <UButton
-            label="Details ansehen"
+            :label="$t('bookableDetail.viewDetails')"
             variant="outline"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer' }"
@@ -91,7 +91,7 @@
           >
             <UButton
               v-if="!isNotSuitable && !entryPageMode"
-              label="Buchen"
+              :label="$t('booking.book')"
               class="justify-center px-10"
               :disabled="isNotBookable"
               :style="{
@@ -109,7 +109,7 @@
         >
           <UButton
             v-if="!isNotBookable"
-            label="Details ansehen"
+            :label="$t('bookableDetail.viewDetails')"
             variant="solid"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer', color: contrastToPrimary }"
@@ -127,6 +127,7 @@ import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vu
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
+
 
 const props = defineProps({
   bookable: {

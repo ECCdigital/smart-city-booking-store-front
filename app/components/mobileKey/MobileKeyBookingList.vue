@@ -16,7 +16,7 @@
         class="w-12 h-12 text-error mb-3"
       />
       <p class="text-sm text-neutral-500">
-        Ihre Schlüssel konnten nicht geladen werden.
+        {{ $t("mobileKey.loadFailed") }}
       </p>
       <p class="text-xs text-neutral-400 mt-1">{{ error }}</p>
     </div>
@@ -142,6 +142,9 @@ import {
   bookingWindowState,
 } from "~/utils/accessWindow.js";
 
+const { t } = useI18n();
+
+
 defineProps({
   bookings: {
     type: Array,
@@ -180,21 +183,23 @@ const now = useAccessNow();
  * The badge on a booking, in as many words as a badge holds. The full
  * sentences for the same reasons live in `de.json`
  * (`mobileKey.blocking_reasons`) and belong to the error screen; a badge with
- * a whole sentence in it is not an option, so the two stay apart and the list
- * stays outside the translation keys.
+ * a whole sentence in it is not an option, so the two stay apart and they keep
+ * their own short keys under `mobileKey.blockingBadges`.
  */
-const blockingReasonLabels = Object.freeze({
-  rejected: "Abgelehnt",
-  not_committed: "Noch nicht bestätigt",
-  payment_required: "Zahlung ausstehend",
-  authorization_revoked: "Berechtigung widerrufen",
-  outside_access_window: "Außerhalb des Zeitfensters",
-  not_provisioned: "Noch nicht freigegeben",
-  no_remote_access: "Keine Fernsteuerung",
-  evidence_missing: "Nachweis fehlt",
-  evidence_invalid: "Nachweis ungültig",
-  evidence_rule_unavailable: "Zugang nicht prüfbar",
-});
+const blockingReasonLabels = computed(() =>
+  Object.freeze({
+    rejected: t("mobileKey.blockingBadges.rejected"),
+    not_committed: t("mobileKey.blockingBadges.not_committed"),
+    payment_required: t("mobileKey.blockingBadges.payment_required"),
+    authorization_revoked: t("mobileKey.blockingBadges.authorization_revoked"),
+    outside_access_window: t("mobileKey.blockingBadges.outside_access_window"),
+    not_provisioned: t("mobileKey.blockingBadges.not_provisioned"),
+    no_remote_access: t("mobileKey.blockingBadges.no_remote_access"),
+    evidence_missing: t("mobileKey.blockingBadges.evidence_missing"),
+    evidence_invalid: t("mobileKey.blockingBadges.evidence_invalid"),
+    evidence_rule_unavailable: t("mobileKey.blockingBadges.evidence_rule_unavailable"),
+  }),
+);
 
 /**
  * Kommend / Aktiv / Vergangen come from the booking envelope in the
@@ -211,7 +216,7 @@ const bookingStatus = (booking) => {
 
   if (windowState === ACCESS_WINDOW_STATES.BEFORE) {
     return {
-      label: "Kommend",
+      label: t("mobileKey.upcoming"),
       color: "bg-yellow-100 text-yellow-800",
       icon: "i-lucide-clock",
     };
@@ -219,7 +224,7 @@ const bookingStatus = (booking) => {
 
   if (windowState === ACCESS_WINDOW_STATES.AFTER) {
     return {
-      label: "Vergangen",
+      label: t("mobileKey.past"),
       color: "bg-gray-100 text-gray-800",
       icon: "i-lucide-clock",
     };
@@ -233,8 +238,8 @@ const bookingStatus = (booking) => {
   ) {
     return {
       label:
-        blockingReasonLabels[eligibility.primaryBlockingReason] ||
-        "Nicht verfügbar",
+        blockingReasonLabels.value[eligibility.primaryBlockingReason] ||
+        t("mobileKey.unavailable"),
       color: "bg-orange-100 text-orange-800",
       icon: "i-lucide-lock",
     };
@@ -245,7 +250,7 @@ const bookingStatus = (booking) => {
   }
 
   return {
-    label: "Aktiv",
+    label: t("mobileKey.activeBadge"),
     color: "bg-green-100 text-green-800",
     icon: "i-lucide-check",
   };

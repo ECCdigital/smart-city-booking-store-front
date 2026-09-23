@@ -154,6 +154,8 @@ import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import AddressLookup from "~/components/inputs/AddressLookup.vue";
 
+const { t } = useI18n();
+
 const isInitialized = defineModel("isInitailized", {
   type: Boolean,
   default: false,
@@ -220,13 +222,13 @@ watch(
   },
 );
 
-const types = ref([
+const types = computed(() => [
   {
-    label: "Buchungsobjekte",
+    label: t("catalog.bookables"),
     value: "bookables",
   },
   {
-    label: "Veranstaltungen",
+    label: t("catalog.events"),
     value: "events",
   },
 ]);
@@ -275,8 +277,8 @@ function onSearch() {
   if (hasMissingType.value) {
     const notification = useNotification();
     notification.success(
-      "Bitte legen Sie fest, wonach Sie suchen möchten.",
-      "Unklare Suchanfrage",
+      t("filter.searchTypeRequired"),
+      t("results.unclearQuery"),
     );
     return;
   }

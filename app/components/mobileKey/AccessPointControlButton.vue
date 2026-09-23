@@ -194,9 +194,9 @@ let holdTimer = null;
 const label = computed(() => {
   switch (props.variant) {
     case "open":
-      return "Öffnen";
+      return t("mobileKey.open");
     case "close":
-      return "Abschließen";
+      return t("mobileKey.lock");
     default:
       return "";
   }

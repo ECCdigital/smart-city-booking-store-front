@@ -6,7 +6,7 @@
   >
     <UButton
       icon="i-lucide-ellipsis-vertical"
-      aria-label="Aktionen"
+      :aria-label="$t('common.actions')"
       size="xl"
       class="justify-center px-3"
       :style="{ color: contrastToPrimary, cursor: 'pointer' }"
@@ -16,6 +16,9 @@
 <script setup>
 import { useBookableDetailContent } from "~/composables/bookables/useBookableDetailContent.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
+
+
+const { t } = useI18n();
 
 const props = defineProps({
   item: {
@@ -40,14 +43,14 @@ const notification = useNotification();
 const moreActionOptions = computed(() => {
   const items = [
     {
-      label: "Teilen",
+      label: t("bookableDetail.share"),
       icon: "i-lucide-share-2",
       onSelect: share,
     },
   ];
   if (props.item.relatedBookables?.length) {
     items.push({
-      label: "Buchungsoptionen ansehen",
+      label: t("bookableDetail.viewBookingOptions"),
       icon: "i-lucide-list",
       onSelect: goToRelatedItems,
     });
@@ -55,7 +58,7 @@ const moreActionOptions = computed(() => {
 
   if (props.isEvent) {
     items.push({
-      label: "Termin herunterladen",
+      label: t("booking.downloadAppointment"),
       icon: "i-lucide-calendar-arrow-down",
       onSelect: downloadAppointment,
     });
@@ -67,8 +70,8 @@ const moreActionOptions = computed(() => {
 async function share() {
   await navigator.clipboard.writeText(window.location.href);
   notification.success(
-    "Der Link zur aktuellen Suche wurde in Ihre Zwischenablage kopiert.",
-    "Link erfolgreich kopiert!",
+    t("bookableDetail.linkCopiedMessage"),
+    t("bookableDetail.linkCopiedTitle"),
   );
 }
 

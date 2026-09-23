@@ -160,8 +160,11 @@
 </template>
 
 <script setup>
-import { useBookables } from "../../composables/api/useBookables.js";
+import { useBookables } from "~/composables/api/useBookables.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 import DateJumper from "../inputs/DateJumper.vue";
+
+const { monthNames } = useFormatting();
 
 const props = defineProps({
   tenantId: { type: String, default: null },
@@ -187,35 +190,10 @@ const { getBookableAvailability } = useBookables();
 
 // -- Constants ----------------------------------------------------------------
 
-const MONTH_LABELS_FULL = [
-  "Januar",
-  "Februar",
-  "März",
-  "April",
-  "Mai",
-  "Juni",
-  "Juli",
-  "August",
-  "September",
-  "Oktober",
-  "November",
-  "Dezember",
-];
-
-const MONTH_LABELS_SHORT = [
-  "Jan",
-  "Feb",
-  "Mär",
-  "Apr",
-  "Mai",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Okt",
-  "Nov",
-  "Dez",
-];
+// Month names come from `Intl` in the reading language rather than a German
+// array; `computed`, so they follow a switch.
+const MONTH_LABELS_FULL = computed(() => monthNames("long"));
+const MONTH_LABELS_SHORT = computed(() => monthNames("short"));
 
 // -- Helpers ------------------------------------------------------------------
 
@@ -226,7 +204,7 @@ function pad2(n) {
 function formatMonthRange(firstDay, lastDay) {
   const startDay = pad2(firstDay.getDate());
   const endDay = pad2(lastDay.getDate());
-  const monthLabel = MONTH_LABELS_SHORT[firstDay.getMonth()];
+  const monthLabel = MONTH_LABELS_SHORT.value[firstDay.getMonth()];
   return `${startDay}. – ${endDay}. ${monthLabel} ${firstDay.getFullYear()}`;
 }
 
@@ -277,7 +255,7 @@ const rawMonths = computed(() => {
     months.push({
       monthIndex: m,
       year,
-      label: MONTH_LABELS_FULL[m],
+      label: MONTH_LABELS_FULL.value[m],
       rangeLabel: formatMonthRange(firstDay, lastDay),
       startDate: firstDay,
       endDate: lastDay,

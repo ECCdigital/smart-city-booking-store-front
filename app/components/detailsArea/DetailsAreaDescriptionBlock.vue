@@ -3,7 +3,7 @@
     <div class="line-clamp-3 md:line-clamp-none" v-html="htmlDescription" />
 
     <div v-if="isEvent" class="flex gap-2 mt-4">
-      <p class="font-semibold">Veranstalter:</p>
+      <p class="font-semibold">{{ $t("bookableDetail.organiser") }}</p>
       <p>
         {{ item.eventOrganizer.name }}
       </p>
@@ -36,6 +36,7 @@
 <script setup>
 import { useBookableDetailContent } from "~/composables/bookables/useBookableDetailContent.js";
 import BookableCustomFieldsDescription from "~/components/bookables/BookableCustomFieldsDescription.vue";
+
 
 const props = defineProps({
   item: {

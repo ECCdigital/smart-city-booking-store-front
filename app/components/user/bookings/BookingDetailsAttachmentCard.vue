@@ -5,14 +5,22 @@
         {{ attachmentType }}
       </p>
       {{ attachment.title }}
-      <p v-if="!isPaymentDocument" class="text-sm">
-        {{ attachmentType }} für
-        <span class="italic">{{
-          getBookableTitle(attachment.bookableId)
-        }}</span>
-      </p>
+      <i18n-t
+        v-if="!isPaymentDocument"
+        keypath="booking.attachmentFor"
+        tag="p"
+        class="text-sm"
+        scope="global"
+      >
+        <template #type>{{ attachmentType }}</template>
+        <template #bookable>
+          <span class="italic">{{
+            getBookableTitle(attachment.bookableId)
+          }}</span>
+        </template>
+      </i18n-t>
       <div v-if="!isPaymentDocument" class="mt-1 flex items-center">
-        Akzeptiert:
+        {{ $t("booking.accepted") }}
         <UIcon
           v-if="attachment.accepted"
           name="i-lucide-square-check-big"
@@ -26,7 +34,7 @@
       </div>
       <div v-if="isPaymentDocument" class="mt-2 text-sm flex items-center">
         <UIcon name="i-lucide-calendar-clock" class="size-3 mr-1" />
-        Erstellt: {{ formatDate(attachment.timeCreated) }}
+        {{ $t("booking.createdAt") }} {{ formatDate(attachment.timeCreated) }}
       </div>
     </div>
     <div class="grid content-center">
@@ -45,6 +53,9 @@
 <script setup>
 import { useBookings } from "~/composables/api/useBookings.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+
+
+const { t } = useI18n();
 
 const props = defineProps({
   attachment: {
@@ -74,31 +85,31 @@ const { formatDate } = useFormatting();
 const attachmentType = computed(() => {
   switch (props.attachment.type) {
     case "invoice":
-      return "Rechnung";
+      return t("booking.attachmentTypes.invoice");
     case "receipt":
-      return "Zahlungsbeleg";
+      return t("booking.attachmentTypes.receipt");
     case "agreement":
-      return "Nutzervereinbarung";
+      return t("booking.attachmentTypes.agreement");
     case "privacy-agreement":
-      return "Datenschutzerklärung";
+      return t("booking.attachmentTypes.privacyAgreement");
     case "user-manual":
-      return "Betriebsanleitung";
+      return t("booking.attachmentTypes.userManual");
     case "security-information":
-      return "Sicherheitshinweise";
+      return t("booking.attachmentTypes.securityInformation");
     case "product-information":
-      return "Produktinformationen";
+      return t("booking.attachmentTypes.productInformation");
     default:
-      return "Unbekannter Anhangstyp";
+      return t("booking.attachmentTypes.unknown");
   }
 });
 
 function getBookableTitle(bookableId) {
   if (!props.bookables || props.bookables.length === 0) {
-    return "Unbekanntes Buchungsobjekt";
+    return t("booking.unknownBookable");
   }
   return (
     props.bookables.find((bookable) => bookable.id === bookableId)?.title ||
-    "Unbekanntes Buchungsobjekt"
+    t("booking.unknownBookable")
   );
 }
 
@@ -138,8 +149,8 @@ async function downloadAttachment() {
   } else {
     const notification = useNotification();
     notification.error(
-      "Das Dokument konnte nicht heruntergeladen werden.",
-      "Download fehlgeschlagen",
+      t("booking.download.failedMessage"),
+      t("booking.download.failedTitle"),
     );
   }
 }

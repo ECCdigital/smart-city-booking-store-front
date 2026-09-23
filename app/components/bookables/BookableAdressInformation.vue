@@ -11,7 +11,7 @@
         {{ location }}
       </div>
       <div v-else class="italic p-3 min-w-0 whitespace-normal">
-        Keine Adresse bekannt.
+        {{ $t("bookableDetail.noAddress") }}
       </div>
       <div class="flex-1" />
       <div
@@ -34,6 +34,9 @@
 </template>
 <script setup>
 import { useRoute } from "#imports";
+
+const { t } = useI18n();
+
 
 const props = defineProps({
   bookable: {
@@ -81,8 +84,8 @@ const copyAddressToClipboard = async () => {
     await navigator.clipboard.writeText(location.value);
     const notification = useNotification();
     notification.success(
-      "Die Adresse wurde in Ihre Zwischenablage kopiert.",
-      "Adresse erfolgreich kopiert!",
+      t("bookableDetail.addressCopiedMessage"),
+      t("bookableDetail.addressCopiedTitle"),
     );
   }
 };

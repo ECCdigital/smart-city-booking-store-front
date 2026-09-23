@@ -11,12 +11,10 @@
 
       <div>
         <h3 class="text-md font-semibold">
-          Schlüssel nicht sichtbar oder Tür-Problem?
+          {{ $t("mobileKey.helpTitle") }}
         </h3>
         <p class="text-sm my-1">
-          Es werden nur Türen angezeigt, für die Sie aktuell eine Buchung mit
-          Schließberechtigung haben. Fehlt ein Schlüssel oder lässt sich eine
-          Tür nicht öffnen, hilft Ihnen unser Support weiter.
+          {{ $t("mobileKey.helpDescription") }}
         </p>
 
         <button
@@ -24,7 +22,7 @@
           class="mt-1 inline-flex items-center gap-2 text-sm font-medium text-primary underline"
           @click="showHelpContact = !showHelpContact"
         >
-          Hilfe &amp; Kontakt anzeigen
+          {{ $t("mobileKey.helpShowContact") }}
         </button>
       </div>
     </div>
@@ -48,7 +46,7 @@
               <div class="flex items-center gap-2">
                 <UIcon name="i-lucide-phone" size="16" class="text-primary" />
                 <div>
-                  <span> Telefon-Support: </span>
+                  <span> {{ $t("mobileKey.phoneSupport") }} </span>
                   <br class="sm:hidden" />
                   <a
                     :href="`tel:${tenant.phone}`"
@@ -61,7 +59,7 @@
               <div class="flex items-center gap-2">
                 <UIcon name="i-lucide-mail" size="16" class="text-primary" />
                 <div>
-                  <span> E-Mail: </span>
+                  <span> {{ $t("mobileKey.emailLabel") }} </span>
                   <br class="sm:hidden" />
                   <a
                     :href="`mailto:${tenant.mail}`"
@@ -74,7 +72,7 @@
               <div class="flex items-center gap-2">
                 <UIcon name="i-lucide-wrench" size="16" class="text-primary" />
                 <div>
-                  <span> Kontaktperson: </span>
+                  <span> {{ $t("mobileKey.contactPersonLabel") }} </span>
                   <br class="sm:hidden" />
                   <span>{{ tenant.contactName }}</span>
                 </div>
@@ -88,6 +86,9 @@
 </template>
 
 <script setup>
+
+
+
 const props = defineProps({
   tenantIds: {
     type: Array,

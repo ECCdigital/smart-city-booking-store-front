@@ -4,8 +4,8 @@
       :icon="actionIcon"
       variant="ghost"
       color="neutral"
-      class="flex h-12 items-center px-2 sm:px-3 hover:!bg-current/15 active:!bg-current/20"
-      :style="{ color: contrastToSecondary }"
+      class="flex h-12 items-center px-2 sm:px-3 hover:bg-current/15! active:bg-current/20!"
+      :style="{ color: contrastToPrimary }"
       :aria-label="t('colorMode.toggle')"
       :aria-pressed="isDark"
       @click="toggle"
@@ -16,7 +16,7 @@
 <script setup>
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
-const { contrastToSecondary } = useContrastColor();
+const { contrastToPrimary } = useContrastColor();
 const { t } = useI18n();
 
 // The only holder of the colour mode is colorMode.preference -- no local ref, no

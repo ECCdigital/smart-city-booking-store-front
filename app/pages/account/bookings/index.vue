@@ -15,7 +15,7 @@
       <!--
       <QuickAccessCard
         icon="i-lucide-book-heart"
-        title="Favoriten"
+        :title="$t('account.favoritesTitle')"
         :description="$t('account.quickBookDescription')"
         to="/account/favorites"
       />
@@ -23,26 +23,16 @@
 
       <QuickAccessCard
         icon="i-lucide-wallet-cards"
-        title="Rechnungen"
+        :title="$t('navigation.invoices')"
         :description="$t('account.invoicesShortDescription')"
         to="/account/invoices"
       />
     </div>
 
-    <!--
-    toDo - bisher nur IFBS! Später noch für weitere Access Points erweitern
-    <div v-if="activeBookingsWithLocking?.length">
-      <h2 class="text-xl font-bold">
-        Aktuelle Buchungen mit Schließberechtigung
-      </h2>
-      <BookingSection
-        :bookings="activeBookingsWithLocking"
-        :use-pagination="activeBookingsWithLocking.length > 10"
-      />
-    </div>
-    -->
     <div class="md:flex justify-between items-center w-full mb-4">
-      <h2 class="mt-5 text-xl font-bold">{{ $t("meta.pages.accountBookings") }}</h2>
+      <h2 class="mt-5 text-xl font-bold">
+        {{ $t("meta.pages.accountBookings") }}
+      </h2>
       <BookingSearchFilterArea
         :bookings="bookings"
         @update:bookings="setFilteredBookings"

@@ -1,7 +1,7 @@
 <template>
   <div class="rounded-xl px-1 py-2">
     <div class="flex items-center gap-2">
-      <span class="w-14 shrink-0 text-sm font-medium text-muted">Beginn</span>
+      <span class="w-14 shrink-0 text-sm font-medium text-muted">{{ $t("timePeriods.start") }}</span>
 
       <button
         type="button"
@@ -81,6 +81,7 @@
 <script setup lang="ts">
 import DatePicker from "~/components/inputs/DatePicker.vue";
 import TimePickerScroller from "~/components/inputs/TimePickerScroller.vue";
+
 
 type TimeHM = { hours: number | null; minutes: number | null } | null;
 type PopoverKey = "date" | "time" | null;

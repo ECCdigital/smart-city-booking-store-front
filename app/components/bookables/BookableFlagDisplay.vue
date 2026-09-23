@@ -18,7 +18,7 @@
       variant="soft"
       :class="[badgeStyle, 'cursor-pointer']"
       @click="showAll = true"
-      >+ {{ hiddenCount }} Weitere</UBadge
+      >{{ $t("bookableDetail.moreFlags", { count: hiddenCount }) }}</UBadge
     >
     <UBadge
       v-else-if="showAll && allItems.length > maxToShow"

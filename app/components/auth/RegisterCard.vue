@@ -31,7 +31,7 @@
         <UInput
           v-model="userData.company"
           type="text"
-          placeholder="Meine Firma GmbH"
+          placeholder="Firma GmbH"
           class="w-full"
         />
       </UFormField>

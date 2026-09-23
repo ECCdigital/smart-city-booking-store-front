@@ -24,7 +24,7 @@
 
           <div
             class="h-6 w-px opacity-30"
-            :style="{ backgroundColor: contrastToSecondary }"
+            :style="{ backgroundColor: contrastToPrimary }"
           />
 
           <div class="flex items-center">
@@ -59,7 +59,7 @@ defineProps({
   },
 });
 
-const { contrastToSecondary } = useContrastColor();
+const { contrastToPrimary } = useContrastColor();
 
 // Below `sm` (the width the app treats as "phone") the bar stays pinned to the
 // top edge while the page scrolls under it; from `sm` up it flows as before.

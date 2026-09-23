@@ -18,7 +18,7 @@
         </DialogTitle>
 
         <DialogDescription class="sr-only">
-          Informationen und Status des Schließsystems
+          {{ $t("mobileKey.lockSystemInfo") }}
         </DialogDescription>
 
         <!--
@@ -62,7 +62,7 @@
               block
               @click="onCloseDialog"
             >
-              Abbrechen
+              {{ $t("mobileKey.cancel") }}
             </UButton>
           </div>
 
@@ -79,7 +79,7 @@
                 block
                 @click="onCloseDialog"
               >
-                Schließen
+                {{ $t("mobileKey.close") }}
               </UButton>
             </template>
           </AccessPointOpenFlow>
@@ -105,7 +105,7 @@
             {{ accessPointLabel }}
           </DialogTitle>
           <DialogDescription class="sr-only">
-            Informationen und Status des Schließsystems
+            {{ $t("mobileKey.lockSystemInfo") }}
           </DialogDescription>
 
           <!-- the same header as on the phone: the door beside the way out -->
@@ -143,7 +143,7 @@
               block
               @click="onCloseDialog"
             >
-              Abbrechen
+              {{ $t("mobileKey.cancel") }}
             </UButton>
           </div>
 
@@ -160,7 +160,7 @@
                 block
                 @click="onCloseDialog"
               >
-                Schließen
+                {{ $t("mobileKey.close") }}
               </UButton>
             </template>
           </AccessPointOpenFlow>
@@ -189,6 +189,10 @@ import {
   isUnlocked,
   readAccessPoint,
 } from "~/utils/accessOpenFlow.js";
+
+const { t } = useI18n();
+
+
 
 const props = defineProps({
   /** Always explicit, never read off the access point (#21). */
@@ -229,7 +233,7 @@ const door = computed(() => readAccessPoint(props.accessPoint));
  * case the name is needed most: a refused door still has a label, and the
  * error screen says which door it is talking about or it says nothing useful.
  */
-const accessPointLabel = computed(() => props.accessPoint.label || "Der Zugang");
+const accessPointLabel = computed(() => props.accessPoint.label || t("mobileKey.accessPointFallback"));
 
 /**
  * The last status the flow reported. It was passed straight on before; the

@@ -11,7 +11,7 @@
           variant="link"
           size="sm"
           icon="i-lucide-circle-x"
-          aria-label="Clear input"
+          :aria-label="$t('common.clearInput')"
           class=""
           @click="onClear"
       />
@@ -19,6 +19,7 @@
   </div>
 </template>
 <script setup >
+
 defineProps({
   showClearButton: {
     type: Boolean,

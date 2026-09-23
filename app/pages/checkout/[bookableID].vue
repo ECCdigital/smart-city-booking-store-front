@@ -27,6 +27,10 @@ definePageMeta({
   layout: "checkout",
 });
 
+// Declared before anything that reads it: `t` was used further up the file
+// than it was bound, which throws during setup and takes the whole page down.
+const { t, te, locale } = useI18n();
+
 const CONTACT_FIELD_KEYS = [
   "firstName",
   "lastName",
@@ -286,22 +290,22 @@ const requiresManualApproval = computed(() => {
   return v === false || v === "false" || v === 0 || v === "0";
 });
 
-const TYPE_LABELS = {
-  room: "Raumbuchung",
-  resource: "Ressourcen-Buchung",
-  ticket: "Ticketbuchung",
-  event: "Eventbuchung",
-};
+const typeLabels = computed(() => ({
+  room: t("booking.typeRoom"),
+  resource: t("booking.typeResource"),
+  ticket: t("booking.typeTicket"),
+  event: t("booking.typeEvent"),
+}));
 
 const checkoutNavTab = useState("checkoutNavTab", () => {});
 
 watch(
-  leadBookable,
-  (b) => {
+  [leadBookable, () => locale.value],
+  ([b]) => {
     const type = b?.type;
     const bookableID = route.params.bookableID;
     const tenantID = route.query.tenantId;
-    const label = TYPE_LABELS[type] || type || "";
+    const label = typeLabels.value[type] || type || "";
 
     if (!bookableID || !tenantID) {
       checkoutNavTab.value = { label, url: "" };
@@ -342,7 +346,6 @@ const selectedAdditionalBookables = ref([]);
 
 const amounts = ref({});
 
-const { t, te } = useI18n();
 usePageTitle(() =>
   leadBookable.value?.title
     ? t("meta.pages.checkoutDetail", { title: leadBookable.value.title })
@@ -1342,7 +1345,7 @@ async function validateAll() {
       const label = isLead
         ? leadBookable.value?.title
         : additionalBookables.value.find((b) => b.item.id === id)?.item.title ||
-          "Zusatzbuchung";
+          t("booking.typeAdditional");
 
       const row = results[i];
 

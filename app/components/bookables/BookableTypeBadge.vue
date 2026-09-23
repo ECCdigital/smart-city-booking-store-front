@@ -9,6 +9,9 @@
   />
 </template>
 <script setup>
+
+const { t } = useI18n();
+
 const props = defineProps({
   type: {
     type: String,
@@ -31,21 +34,21 @@ const props = defineProps({
 //toDo - read dynamically from instance
 const category = computed(() => {
   if (props.isEvent) {
-    return { label: "Veranstaltung", icon: "i-lucide-calendar-check-2" };
+    return { label: t("bookableType.event"), icon: "i-lucide-calendar-check-2" };
   }
   switch (props.type) {
     case "room":
-      return { label: "Raum", icon: "i-lucide-door-open" };
+      return { label: t("bookableType.room"), icon: "i-lucide-door-open" };
     case "event-location":
-      return { label: "Veranstaltungsort", icon: "i-lucide-building-2" };
+      return { label: t("bookableType.eventLocation"), icon: "i-lucide-building-2" };
     case "resource":
-      return { label: "Gerät", icon: "i-lucide-wrench" };
+      return { label: t("bookableType.resource"), icon: "i-lucide-wrench" };
     case "event":
-      return { label: "Veranstaltung", icon: "i-lucide-calendar-check-2" };
+      return { label: t("bookableType.event"), icon: "i-lucide-calendar-check-2" };
     case "ticket":
-      return { label: "Ticket", icon: "i-lucide-ticket" };
+      return { label: t("bookableType.ticket"), icon: "i-lucide-ticket" };
     default:
-      return { label: "Unbekannt", icon: "i-lucide-file-exclamation-point" };
+      return { label: t("bookableType.unknown"), icon: "i-lucide-file-exclamation-point" };
   }
 });
 </script>

@@ -14,10 +14,10 @@
         />
         <div class="text-left">
           <p class="font-semibold text-gray-900 dark:text-white text-sm">
-            Hilfe bei Problemen mit der Fahrradbox
+            {{ $t("mobileKey.bikeBoxHelp") }}
           </p>
           <p class="text-xs text-gray-500 dark:text-gray-400">
-            Notfallkontakt & Vorgehen bei Störungen
+            {{ $t("mobileKey.emergencyContact") }}
           </p>
         </div>
       </div>
@@ -43,6 +43,7 @@
 import { useTenantStore } from "~~/stores/tenant.js";
 import { decideEmergencyHelp } from "~/utils/emergencyHelp.js";
 import EmergencyHelpContent from "~/components/mobileKey/EmergencyHelpContent.vue";
+
 
 const props = defineProps({
   tenantId: { type: String, required: true },

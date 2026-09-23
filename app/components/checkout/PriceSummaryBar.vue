@@ -397,7 +397,7 @@ const hasContent = computed(() => {
           v-if="summary.taxAmount > 0"
           class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400"
         >
-          <span>MwSt.</span>
+          <span>{{ $t("price.vat") }}</span>
           <span class="tabular-nums whitespace-nowrap">
             {{ formatEur(summary.taxAmount) }}
           </span>
@@ -409,7 +409,7 @@ const hasContent = computed(() => {
           <span
             class="text-base md:text-lg font-bold text-gray-900 dark:text-white"
           >
-            Gesamt
+            {{ $t("price.total") }}
           </span>
           <span
             v-if="summary.total > 0"
@@ -417,7 +417,7 @@ const hasContent = computed(() => {
           >
             {{ formatEur(summary.total) }}
           </span>
-          <span v-else class="text-gray-400">Kostenlos</span>
+          <span v-else class="text-gray-400">{{ $t("price.free") }}</span>
         </div>
       </template>
     </div>

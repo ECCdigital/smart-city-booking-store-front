@@ -6,7 +6,7 @@
     <summary
       class="font-bold list-none flex items-center justify-between gap-3"
     >
-      <span>Stornierungsbedingungen</span>
+      <span>{{ $t("bookableDetail.cancellationTitleShort") }}</span>
       <span
         class="text-sm font-normal text-gray-600 dark:text-gray-300 group-open:rotate-180 transition-transform"
       >
@@ -16,7 +16,7 @@
 
     <div class="mt-3 text-sm text-gray-700 dark:text-gray-200">
       <p class="mb-3">
-        Je früher storniert wird, desto höher ist die Rückerstattung.
+        {{ $t("bookableDetail.cancellationHint") }}
       </p>
 
       <ul class="space-y-2">
@@ -28,7 +28,7 @@
           <span>{{ formatDaysBeforeStart(tier.daysBeforeStart) }}</span>
           <span class="font-semibold text-right"
             >{{ tier.refundPercentage }} % <br class="block md:hidden" />
-            Rückerstattung</span
+            {{ $t("bookableDetail.refund") }}</span
           >
         </li>
       </ul>
@@ -37,6 +37,8 @@
 </template>
 <script setup>
 import { computed } from "vue";
+
+const { t } = useI18n();
 
 const props = defineProps({
   item: {
@@ -69,14 +71,14 @@ const hasCancellationRefundTiers = computed(
 
 function formatDaysBeforeStart(daysBeforeStart) {
   if (daysBeforeStart === 0) {
-    return "Am Starttag";
+    return t("bookableDetail.onStartDay");
   }
 
   if (daysBeforeStart === 1) {
-    return "Bis 1 Tag vor Beginn";
+    return t("bookableDetail.untilOneDayBefore");
   }
 
-  return `Bis ${daysBeforeStart} Tage vor Beginn`;
+  return t("bookableDetail.untilDaysBefore", { days: daysBeforeStart });
 }
 </script>
 <style scoped></style>

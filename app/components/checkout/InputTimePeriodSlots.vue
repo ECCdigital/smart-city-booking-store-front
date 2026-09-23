@@ -202,6 +202,7 @@
 
 <script setup>
 import { useBookables } from "~/composables/api/useBookables.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
 import { parseLocalDateIso } from "~/utils/localDate.js";
 
@@ -243,21 +244,11 @@ const effectiveNumDays = computed(() => (props.compact ? 4 : props.numDays));
 const { getBookableAvailability } = useBookables();
 const { t } = useI18n();
 
-const WEEKDAY_LABELS = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-const MONTH_LABELS = [
-  "Jan",
-  "Feb",
-  "Mär",
-  "Apr",
-  "Mai",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Okt",
-  "Nov",
-  "Dez",
-];
+const { monthNames, weekdayNames } = useFormatting();
+
+// Both from `Intl`, in the reading language.
+const WEEKDAY_LABELS = computed(() => weekdayNames("short"));
+const MONTH_LABELS = computed(() => monthNames("short"));
 
 function pad2(n) {
   return n.toString().padStart(2, "0");
@@ -522,9 +513,9 @@ const days = computed(() => {
       date: d,
       iso: localISODate(d),
       weekday,
-      weekdayLabel: WEEKDAY_LABELS[weekday],
+      weekdayLabel: WEEKDAY_LABELS.value[weekday],
       dayNumber: d.getDate(),
-      monthLabel: MONTH_LABELS[d.getMonth()],
+      monthLabel: MONTH_LABELS.value[d.getMonth()],
       hasMatchingPeriod,
       hasAvailability: hasFreeSlots,
     });
@@ -550,9 +541,9 @@ const selectedDay = computed(() => {
     date,
     iso: selectedDayIso.value,
     weekday: date.getDay(),
-    weekdayLabel: WEEKDAY_LABELS[date.getDay()],
+    weekdayLabel: WEEKDAY_LABELS.value[date.getDay()],
     dayNumber: date.getDate(),
-    monthLabel: MONTH_LABELS[date.getMonth()],
+    monthLabel: MONTH_LABELS.value[date.getMonth()],
     hasMatchingPeriod: true,
     hasAvailability: true,
   };

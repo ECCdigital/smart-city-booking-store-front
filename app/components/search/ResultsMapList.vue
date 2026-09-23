@@ -21,7 +21,7 @@
       </div>
       <div v-if="!bookables || bookables.length === 0" key="empty-state">
         <p class="text-center text-gray-500 mt-10">
-          Keine Ergebnisse in diesem Bereich.
+          {{ $t("results.noneInArea") }}
         </p>
       </div>
     </TransitionGroup>
@@ -29,6 +29,7 @@
 </template>
 <script setup>
 import ResultStrip from "~/components/search/ResultStrip.vue";
+
 
 const currentBookable = defineModel({
   type: Object,

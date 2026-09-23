@@ -18,7 +18,7 @@
       </div>
       <UButton
         class="text-sm px-2 md:px-3 py-1"
-        label="Ansehen"
+        :label="$t('bookableDetail.view')"
         :style="{ color: contrastToPrimary }"
         @click="goToDetails(item.id, item.type)"
       />
@@ -29,6 +29,7 @@
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+
 
 defineProps({
   relatedBookables: {

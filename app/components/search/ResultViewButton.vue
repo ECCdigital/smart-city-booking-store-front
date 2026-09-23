@@ -14,6 +14,9 @@
 </template>
 
 <script setup>
+
+const { t } = useI18n();
+
 const view = defineModel({
   type: String,
   required: true,
@@ -21,18 +24,20 @@ const view = defineModel({
 
 const emit = defineEmits(["setView"]);
 
-const viewOptions = [
+// Computed, not a plain array: `t()` read once at setup would freeze the labels
+// in the language the toggle was mounted in.
+const viewOptions = computed(() => [
   {
     value: "list",
-    label: "Listenansicht",
+    label: t("results.listView"),
     icon: "i-lucide-list",
   },
   {
     value: "map",
-    label: "Kartenansicht",
+    label: t("results.mapView"),
     icon: "i-lucide-map-pin",
   },
-];
+]);
 
 const selectView = (value) => {
   view.value = value;
@@ -40,7 +45,7 @@ const selectView = (value) => {
 };
 
 onMounted(() => {
-  if (!viewOptions.some((opt) => opt.value === view.value)) {
+  if (!viewOptions.value.some((opt) => opt.value === view.value)) {
     console.log(
       "Invalid view detected, defaulting to 'list'. Current value:",
       view.value,

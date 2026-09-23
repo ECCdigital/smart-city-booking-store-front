@@ -21,7 +21,7 @@
       <!-- Veranstalter & Eigenschaften -->
 
       <div class="w-full my-2">
-        <p>Veranstalter: {{ event.eventOrganizer.name }}</p>
+        <p>{{ $t("bookableDetail.organiser") }} {{ event.eventOrganizer.name }}</p>
       </div>
       <div class="w-full my-5">
         <BookableFlagDisplay :flags="event.information.flags" />
@@ -63,6 +63,7 @@ import EventAdressInformation from "~/components/events/EventAdressInformation.v
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import EventPriceDisplay from "~/components/events/EventPriceDisplay.vue";
 import EventTicketOptionsDialog from "~/components/events/EventTicketOptionsDialog.vue";
+
 
 const openTicketOptions = defineModel("openTicketOptions", { type: Boolean });
 const props = defineProps({

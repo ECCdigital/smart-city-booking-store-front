@@ -110,7 +110,7 @@ function onClear() {
   });
 }
 
-const { contrastToSecondary } = useContrastColor();
+const { contrastToPrimary } = useContrastColor();
 
 // In the bar the name gives way before the actions do: it shrinks and clips
 // rather than pushing the language and colour mode buttons off a phone's line.
@@ -140,7 +140,7 @@ const buttonClass = computed(() =>
       :label="label"
       :class="buttonClass"
       :ui="isBar ? { label: 'truncate', trailingIcon: 'shrink-0' } : undefined"
-      :style="isBar ? { color: contrastToSecondary } : undefined"
+      :style="isBar ? { color: contrastToPrimary } : undefined"
     />
   </UDropdownMenu>
 </template>

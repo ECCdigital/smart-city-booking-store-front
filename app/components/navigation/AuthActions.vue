@@ -4,7 +4,7 @@
   <div class="flex items-center gap-0 sm:gap-3">
     <template v-if="!isAuthenticated">
       <UButton
-        :label="isGreaterThanSm ? 'Anmelden' : ' '"
+        :label="isGreaterThanSm ? t('common.login') : ' '"
         :icon="isGreaterThanSm ? '' : 'i-lucide-log-in'"
         variant="ghost"
         class="block px-1 sm:px-2"
@@ -13,7 +13,7 @@
       />
       <UButton
         v-if="isGreaterThanSm"
-        label="Registrieren"
+        :label="t('common.register')"
         class="hidden sm:block px-4 text-black dark:text-white bg-white dark:bg-black"
         :to="registerTo"
       />
@@ -31,6 +31,9 @@ import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import BookingsDropdown from "~/components/BookingsDropdown.vue";
+
+
+const { t } = useI18n();
 
 const { contrastToSecondary } = useContrastColor();
 const { isGreaterThanSm } = useBreakpointCheck();

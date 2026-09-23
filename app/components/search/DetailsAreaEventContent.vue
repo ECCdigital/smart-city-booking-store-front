@@ -33,7 +33,7 @@
           <div class="line-clamp-3 md:line-clamp-none" v-html="htmlText" />
           <div class="flex justify-end md:hidden">
             <UButton
-              label="Alles ansehen"
+              :label="$t('bookableDetail.viewAll')"
               variant="ghost"
               class="mt-2"
               @click="showFullDescription = true"
@@ -54,7 +54,7 @@
         </div>
 
         <div class="mt-5">
-          <span class="font-bold"> Veranstalter: </span>
+          <span class="font-bold"> {{ $t("bookableDetail.organiser") }} </span>
           {{ item.eventOrganizer.name }}
         </div>
         <USeparator
@@ -158,6 +158,7 @@ import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 import AddressInformationArea from "~/components/AddressInformationArea.vue";
 import PriceInformationArea from "~/components/PriceInformationArea.vue";
 import EventBookingButton from "~/components/events/EventBookingButton.vue";
+
 
 const props = defineProps({
   item: {

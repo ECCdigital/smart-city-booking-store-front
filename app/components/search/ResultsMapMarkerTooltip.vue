@@ -31,7 +31,7 @@
 
     <div v-else class="rounded-2xl bg-white shadow-2xl p-2 w-80">
       <p class="text-md font-bold mb-2">
-        {{ group.bookables.length }} Ergebnisse an diesem Standort:
+        {{ group.bookables.length }} {{ $t("results.atThisLocation") }}
       </p>
       <div
         v-for="bookable in group.bookables"
@@ -57,6 +57,7 @@
 import ResultStrip from "~/components/search/ResultStrip.vue";
 import ResultCard from "~/components/search/ResultCard.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
+
 
 defineProps({
   group: {

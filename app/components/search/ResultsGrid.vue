@@ -16,7 +16,7 @@
     <!-- Nicht passende Ergebnisse -->
     <div v-if="pagedNonSuitable.length > 0">
       <h2 v-if="includeNonSuitable" class="text-2xl font-bold my-5 mt-7">
-        Nicht passende Objekte
+        {{ $t("filter.nonSuitable") }}
       </h2>
       <UPageList class="my-5">
         <ResultCard
@@ -47,6 +47,7 @@
 import ResultCard from "~/components/search/ResultCard.vue";
 import ResultsPagination from "~/components/search/ResultsPagination.vue";
 import { useResultPagination } from "~/composables/search/useResultPagination.js";
+
 
 const props = defineProps({
   bookables: {

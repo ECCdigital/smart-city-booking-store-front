@@ -40,7 +40,7 @@
         class="basis-3/5 min-w-0 self-center flex flex-col gap-1"
       >
         <p v-if="organizerName" class="w-full">
-          Veranstalter: {{ organizerName }}
+          {{ $t("bookableDetail.organiser") }} {{ organizerName }}
         </p>
         <BookableFlagDisplay
           v-if="hasFlags"
@@ -60,7 +60,7 @@
         <!--Aktionen-->
         <div class="w-full mt-2 flex justify-end content-end gap-2">
           <UButton
-            label="Details ansehen"
+            :label="$t('bookableDetail.viewDetails')"
             variant="outline"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer' }"
@@ -84,6 +84,7 @@ import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue"
 import EventAdressInformation from "~/components/events/EventAdressInformation.vue";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import EventBookingButton from "~/components/events/EventBookingButton.vue";
+
 
 const props = defineProps({
   event: {

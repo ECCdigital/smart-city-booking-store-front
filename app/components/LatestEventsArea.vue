@@ -8,7 +8,7 @@
         class="text-primary text-bold cursor-pointer"
         @click="goToEventsPage()"
       >
-        Alle Events ansehen
+        {{ $t("events.showAllEvents") }}
       </p>
     </div>
     <div class="md:flex md:space-x-2">
@@ -31,6 +31,7 @@
 <script setup>
 import ResultCard from "~/components/search/ResultCard.vue";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
+
 
 const props = defineProps({
   items: {

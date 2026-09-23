@@ -1,6 +1,6 @@
 <template>
   <div class="text-right">
-    <p v-if="isFree || props.eventTickets.length === 0">Kostenlos</p>
+    <p v-if="isFree || props.eventTickets.length === 0">{{ $t("price.free") }}</p>
     <p v-else>
       {{ displayMinDefaultPrice() }}
     </p>
@@ -14,6 +14,9 @@
   </div>
 </template>
 <script setup>
+
+const { t } = useI18n();
+
 const props = defineProps({
   eventTickets: {
     type: Array,
@@ -45,7 +48,7 @@ function displayMinDefaultPrice() {
 
   const min = Math.min(...allTicketMin);
   if (min === 0) {
-    return "Kostenlos";
+    return t("price.free");
   }
   return "ab " + min.toFixed(2).toString().replace(/\./g, ",") + " €";
 }
