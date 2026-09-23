@@ -16,7 +16,7 @@
       <div class="flex md:block justify-end md:content-center">
         <UTooltip
           :disabled="ticketsAvailable"
-          text="Dieser Tickettyp ist ausverkauft."
+          :text="$t('events.soldOut')"
         >
           <UButton
             label="Buchen"

@@ -67,8 +67,8 @@ usePageTitle(pageTitle);
       </div>
 
       <div class="error-actions">
-        <button class="btn-primary" @click="handleError">Zur Startseite</button>
-        <button class="btn-secondary" @click="$router.back()">Zurück</button>
+        <button class="btn-primary" @click="handleError">{{ $t("common.toHome") }}</button>
+        <button class="btn-secondary" @click="$router.back()">{{ $t("common.back") }}</button>
       </div>
     </div>
   </PageBackground>

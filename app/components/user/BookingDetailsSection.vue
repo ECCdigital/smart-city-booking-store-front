@@ -13,7 +13,7 @@
     </div>
     <div class="flex mb-5">
       <div class="basis-1/2">
-        <p class="font-medium">Mandant</p>
+        <p class="font-medium">{{ $t("tenants.tenant") }}</p>
         <p>{{ getTenantName(booking.tenantId) }}</p>
       </div>
       <div class="">
@@ -68,7 +68,7 @@
       v-if="booking.bookableItems && booking.bookableItems.length > 0"
       class="mb-5"
     >
-      <p class="font-medium">Gebuchte Objekte</p>
+      <p class="font-medium">{{ $t("account.bookedItems") }}</p>
       <BookingDetailsBookableCard
         v-for="(bookable, i) in booking.bookableItems"
         :key="i"
@@ -99,7 +99,7 @@
 
     <!-- invoices and receipts  -->
     <div v-if="paymentDocuments.length > 0" class="mb-5">
-      <p class="font-medium">Rechnungen und Zahlungsbelege</p>
+      <p class="font-medium">{{ $t("account.invoicesAndReceipts") }}</p>
       <BookingDetailsAttachmentCard
         v-for="(attachment, i) in paymentDocuments"
         :key="i"
@@ -112,7 +112,7 @@
 
     <!-- attachments  -->
     <div v-if="otherDocuments.length > 0" class="mb-5">
-      <p class="font-medium">Anhänge</p>
+      <p class="font-medium">{{ $t("account.attachments") }}</p>
       <BookingDetailsAttachmentCard
         v-for="(attachment, i) in otherDocuments"
         :key="i"

@@ -2,7 +2,7 @@
   <div class="w-full">
     <PageHeader
       :title="t('account.invoices.title')"
-      description="Hier finden Sie Ihre Rechnungen und Zahlungsbelege."
+      :description="$t('account.invoicesDescription')"
     />
 
     <div

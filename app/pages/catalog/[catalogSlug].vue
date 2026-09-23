@@ -59,11 +59,11 @@ useHead({
           alt="Logo Kiel Region"
           class="text-center"
           style="height: 7vw"
-        >
+        />
       </div>
     </div>
     <UPageHero
-      title="Unsere Angebote und Veranstaltungen"
+      :title="$t('catalog.offersAndEvents')"
       :ui="{
         container:
           'bg-[url(/assets/kiel_bootshafen.jpg)] contrast-70 p-10 pb-25 shadow-lg',
@@ -78,7 +78,7 @@ useHead({
             alt="Logo Kiel Region"
             class="text-center"
             style="height: 15vw"
-          >
+          />
         </div>
       </template>
     </UPageHero>

@@ -1,7 +1,7 @@
 <template>
   <div style="padding: 50px 0">
     <div class="flex items-end mb-5">
-      <h2 class="text-2xl font-bold mt-7">Anstehende Veranstaltungen</h2>
+      <h2 class="text-2xl font-bold mt-7">{{ $t("events.upcoming") }}</h2>
       <div class="flex-1" />
       <p
         v-if="latestEvents.length > 3"

@@ -7,8 +7,8 @@
     "
   >
     <div class="flex justify-between items-center">
-      <p class="my-4 font-bold">Ergebnisse filtern</p>
-      <UTooltip v-if="!useAsDialog" text="Filter zurücksetzen">
+      <p class="my-4 font-bold">{{ $t("filter.title") }}</p>
+      <UTooltip v-if="!useAsDialog" :text="$t('filter.reset')">
         <UButton
           v-if="!useAsDialog && isFilterActive"
           icon="i-lucide-trash"
@@ -25,21 +25,21 @@
         <USwitch
           v-model="_includeNonSuitable"
           color="secondary"
-          label="Nicht passende Objekte anzeigen."
+          :label="$t('filter.includeNonSuitable')"
           @change="instantFilter"
         />
         <USwitch
           v-if="isEvent"
           v-model="_onlyPublicEvents"
           color="secondary"
-          label="Nur öffentliche Events anzeigen."
+          :label="$t('filter.onlyPublicEvents')"
           @change="instantFilter"
         />
         <USwitch
           v-if="isEvent"
           v-model="_onlyRegistrationNeededEvents"
           color="secondary"
-          label="Nur anmeldepflichte Events anzeigen."
+          :label="$t('filter.onlyRegistrationNeeded')"
           @change="instantFilter"
         />
       </div>
@@ -47,7 +47,7 @@
 
     <!-- Kategorie -->
     <div v-if="!isEvent" class="my-7">
-      <p class="mb-3">Kategorie</p>
+      <p class="mb-3">{{ $t("filter.category") }}</p>
       <FilterCheckboxGroup
         v-model="_categories"
         :items="possibleCategories"
@@ -68,7 +68,7 @@
 
     <!-- Orte -->
     <div v-if="possibleCities && possibleCities.length" class="my-7">
-      <p class="mb-3">Orte</p>
+      <p class="mb-3">{{ $t("filter.cities") }}</p>
       <FilterCheckboxGroup
         v-model="_cities"
         :items="possibleCities"
@@ -79,7 +79,7 @@
 
     <!-- Distanz -->
     <div v-if="distance != null" class="my-7">
-      <p class="mb-3">Distanz</p>
+      <p class="mb-3">{{ $t("filter.distance") }}</p>
       <p class="mb-3">0 km - {{ _distance }} km</p>
       <FilterHistogramSlider
         v-model="_distance"
@@ -94,7 +94,7 @@
 
     <!-- Price-->
     <div class="my-7">
-      <p class="mb-3">Preis</p>
+      <p class="mb-3">{{ $t("filter.price") }}</p>
       <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
 
       <FilterHistogramSlider
@@ -110,7 +110,7 @@
 
     <!-- Custom Field Filter -->
     <div v-if="sortedCustomFieldFilters.length > 0" class="my-7">
-      <p class="mb-3">Weitere Filter</p>
+      <p class="mb-3">{{ $t("filter.more") }}</p>
       <div class="space-y-4">
         <CustomFieldFilter
           v-for="cf in sortedCustomFieldFilters"
@@ -127,7 +127,7 @@
     <div v-if="useAsDialog" class="flex justify-between">
       <UButton
         v-if="isFilterActive"
-        label="Filter entfernen"
+        :label="$t('filter.remove')"
         icon="i-lucide-trash"
         color="primary"
         variant="soft"
@@ -136,7 +136,7 @@
       />
       <div v-else class="flex-1" />
       <UButton
-        label="Filter anwenden"
+        :label="$t('filter.apply')"
         icon="i-lucide-funnel"
         color="primary"
         variant="soft"
@@ -153,6 +153,8 @@ import CustomFieldFilter from "~/components/search/CustomFieldFilter.vue";
 import FilterHistogramSlider from "~/components/search/FilterHistogramSlider.vue";
 import FilterCheckboxGroup from "~/components/search/FilterCheckboxGroup.vue";
 import { useTenantStore } from "~~/stores/tenant.js";
+
+const { t } = useI18n();
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -225,19 +227,19 @@ const _tenants = ref(props.tenants);
 const possibleCategories = computed(() => {
   return [
     {
-      label: "Räume",
+      label: t("filter.categories.room"),
       value: "room",
     },
     {
-      label: "Veranstaltungsorte",
+      label: t("filter.categories.eventLocation"),
       value: "event-location",
     },
     {
-      label: "Geräte",
+      label: t("filter.categories.resource"),
       value: "resource",
     },
     {
-      label: "Tickets",
+      label: t("filter.categories.ticket"),
       value: "ticket",
     },
   ];

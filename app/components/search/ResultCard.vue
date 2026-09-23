@@ -39,7 +39,7 @@
               class="absolute bottom-2 left-2 right-2 flex items-center justify-center space-x-1 text-xs text-center text-gray-600 dark:text-gray-300 bg-white/80 dark:bg-gray-800/80 rounded px-2 py-1"
             >
               <UIcon name="i-lucide-image-off" class="w-4 h-4" />
-              <p>Bild konnte nicht geladen werden</p>
+              <p>{{ $t("common.imageLoadFailed") }}</p>
             </div>
           </div>
         </ClientOnly>

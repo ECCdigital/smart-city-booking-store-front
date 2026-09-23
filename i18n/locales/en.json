@@ -55,6 +55,20 @@
     }
   },
   "common": {
+    "unsavedChangesTitle": "Unsaved changes",
+    "unsavedChangesLeave": "You have unsaved changes. Save or discard them before you leave the page.",
+    "save": "Save",
+    "reset": "Reset",
+    "toHome": "To the home page",
+    "showAll": "Show all",
+    "showLess": "Show less",
+    "clearEntry": "Clear entry",
+    "searchPlaceholder": "Search...",
+    "imageLoadFailed": "Image could not be loaded",
+    "unsavedChanges": "You have unsaved changes.",
+    "distanceUnknown": "Distance unavailable.",
+    "addressNotFound": "Address could not be found.",
+    "featureUnavailable": "This feature is currently unavailable.",
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "repeatPassword": "Repeat Password",
@@ -81,9 +95,12 @@
     "mandatory": "Mandatory",
     "obligation": "Required",
     "phone": "Phone",
+    "completeAddress": "Address",
     "address": "Street and number",
     "zipCode": "Postal code",
     "city": "City",
+    "clear": "Clear",
+    "retry": "Retry",
     "imageNotFound": "Image not found"
   },
   "footer": {
@@ -101,6 +118,7 @@
     "switchTo": "Switch language to {language}"
   },
   "catalog": {
+    "offersAndEvents": "Our offers and events",
     "type": "What would you like to book?",
     "bookables": "Bookable items",
     "events": "Events"
@@ -111,7 +129,51 @@
     "tenants": "Tenants",
     "clearSelection": "Clear selection"
   },
+  "navigation": {
+    "backToHome": "Back to the home page"
+  },
+  "events": {
+    "upcoming": "Upcoming events",
+    "ticketOptions": "Ticket options",
+    "ticketOptionsAndAvailability": "Ticket options and availability",
+    "selectDatesHint": "Pick dates to see availability and prices.",
+    "bookAtProvider": "Book with the provider",
+    "notPublicTitle": "Not a public event.",
+    "notPublicDescription": "This event is not public, so it cannot be booked.",
+    "noRegistrationTitle": "No registration needed.",
+    "noRegistrationDescription": "This event needs no registration. You can attend without signing up first.",
+    "noTicketsTitle": "No tickets available.",
+    "noTicketsDescription": "This event has no ticket options at the moment.",
+    "noRegistrationNeeded": "No registration needed",
+    "noRegistrationNeededShort": "no registration needed",
+    "publicNoRegistration": "This event is public and can be attended without registration.",
+    "soldOut": "This ticket type is sold out.",
+    "selectTicketOption": "Select a ticket option"
+  },
   "filter": {
+    "title": "Filter results",
+    "open": "Filter",
+    "reset": "Reset filters",
+    "remove": "Remove filters",
+    "apply": "Apply filters",
+    "includeNonSuitable": "Show items that do not match.",
+    "onlyPublicEvents": "Show public events only.",
+    "onlyRegistrationNeeded": "Show events that need registration only.",
+    "category": "Category",
+    "cities": "Places",
+    "distance": "Distance",
+    "price": "Price",
+    "more": "More filters",
+    "nonSuitable": "Items that do not match",
+    "noResults": "No items found.",
+    "searchType": "What are you looking for?",
+    "keyword": "Keyword",
+    "categories": {
+      "room": "Rooms",
+      "eventLocation": "Event venues",
+      "resource": "Equipment",
+      "ticket": "Tickets"
+    },
     "fittingResults": "matching results",
     "provider": "Provider"
   },
@@ -375,6 +437,11 @@
     "finish": "Finish"
   },
   "timePeriods": {
+    "selectPeriod": "Select a period",
+    "selectPeriodDescription": "Set start and end of the booking.",
+    "openCalendar": "Open the calendar",
+    "selectTimeTitle": "Select a time",
+    "time": "Time",
     "selectDate": "Select date",
     "previousDays": "Show earlier days",
     "laterDays": "Show later days",
@@ -410,6 +477,7 @@
   },
 
   "bookableDetail": {
+    "checkOptionsHint": "Open the details to see the booking options.",
     "bookNow": "Book now",
     "viewBookingOptions": "View booking options",
     "book": "Book",
@@ -481,13 +549,24 @@
   },
 
   "account": {
+    "activities": "My activity",
+    "digitalKeys": "Digital keys",
+    "digitalKeysDescription": "Open doors, lockers and bike boxes with your phone.",
+    "quickBookDescription": "Book the items you use and save often, again in moments.",
+    "invoicesShortDescription": "Every invoice and receipt in one place.",
+    "invoicesDescription": "Here you will find your invoices and payment receipts.",
+    "favoritesTitle": "Your favourites",
+    "favoritesSoon": "Your favourites are coming soon",
+    "appearanceDescription": "Manage how the app looks. You can switch between a light and a dark theme, and change the language of the interface.",
+    "bookedItems": "Booked items",
+    "invoicesAndReceipts": "Invoices and receipts",
+    "attachments": "Attachments",
+    "changePassword": "Change password",
+    "newPasswordRepeat": "New password (repeat)",
     "bookingDetails": {
       "rejectionReason": "Reason for rejection",
       "cancellationReason": "Reason for cancellation"
-    }
-  },
-
-  "account": {
+    },
     "invoices": {
       "title": "Your invoices and receipts",
       "emptyTitle": "No invoices available",
@@ -602,6 +681,14 @@
     }
   },
   "mobileKey": {
+    "yourKeys": "Your keys",
+    "yourKeysDescription": "Open and lock doors during your booking.",
+    "openDoor": "Open the door",
+    "scannedDescription": "You scanned the code at the door.",
+    "whichBooking": "Which booking?",
+    "noKeysFound": "No keys found",
+    "lockSystemInfo": "Information and status of the locking system",
+    "openAction": "Open",
     "accessPoint": {
       "sectionTitle": "Keys",
       "lockState": {
@@ -657,6 +744,7 @@
     }
   },
   "results": {
+    "clickToOpen": "Click to open the selection",
     "pagination": {
       "itemsPerPage": "Per page",
       "all": "All",

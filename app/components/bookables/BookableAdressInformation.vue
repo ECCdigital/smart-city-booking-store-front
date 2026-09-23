@@ -28,7 +28,7 @@
     <p v-if="showDistance && hasLocationParam && location.length">
       <UIcon name="i-lucide-navigation" class="size-5" />
       <span v-if="distance != null" class="p-3">{{ distance }} km </span>
-      <span v-else class="italic p-3">Distanz nicht ermittelbar. </span>
+      <span v-else class="italic p-3">{{ $t("common.distanceUnknown") }} </span>
     </p>
   </div>
 </template>

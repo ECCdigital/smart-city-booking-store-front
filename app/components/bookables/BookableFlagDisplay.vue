@@ -27,7 +27,7 @@
       variant="soft"
       :class="[badgeStyle, 'cursor-pointer']"
       @click="showAll = false"
-      >Weniger anzeigen</UBadge
+      >{{ $t("common.showLess") }}</UBadge
     >
   </div>
 </template>

@@ -16,7 +16,7 @@
 
     <!-- Nicht passende Ergebnisse -->
     <div v-if="pagedNonSuitable.length > 0">
-      <h2 class="text-2xl font-bold my-4 mt-7">Nicht passende Objekte</h2>
+      <h2 class="text-2xl font-bold my-4 mt-7">{{ $t("filter.nonSuitable") }}</h2>
       <UPageList>
         <ResultStrip
           v-for="(b, i) in pagedNonSuitable"
@@ -38,7 +38,7 @@
       :last-item-on-page="lastItemOnPage"
     />
 
-    <p v-if="bookables.length < 1">Keine Objekte gefunden.</p>
+    <p v-if="bookables.length < 1">{{ $t("filter.noResults") }}</p>
   </div>
 </template>
 <script setup>

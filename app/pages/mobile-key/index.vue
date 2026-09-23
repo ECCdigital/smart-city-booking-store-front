@@ -2,8 +2,8 @@
   <div class="w-full">
     <div class="md:flex justify-between items-center w-full mb-4">
       <PageHeader
-        title="Ihre Schlüssel"
-        description="Öffnen und schließen Sie Türen im Zeitraum Ihrer Buchung."
+        :title="$t('mobileKey.yourKeys')"
+        :description="$t('mobileKey.yourKeysDescription')"
         class="mb-3 md:mb-0"
       />
       <!-- toDo - Suchleiste für Schlüssel??? -->

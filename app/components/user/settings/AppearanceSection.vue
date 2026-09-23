@@ -34,7 +34,7 @@
       <h3 class="text-xl font-bold mb-2">Sprache</h3>
       <div class="md:flex items-center">
         <div class="basis-1/5 text-sm font-semibold">Anzeigesprache</div>
-        <UTooltip text="Diese Funktion ist derzeit nicht verfügbar.">
+        <UTooltip :text="$t('common.featureUnavailable')">
           <USelect
             v-model="language"
             :items="languageOptions"

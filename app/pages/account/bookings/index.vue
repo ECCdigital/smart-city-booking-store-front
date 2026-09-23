@@ -1,14 +1,14 @@
 <template>
   <div class="w-full">
-    <PageHeader title="Meine Aktivitäten" class="mb-3 md:mb-0" />
+    <PageHeader :title="$t('account.activities')" class="mb-3 md:mb-0" />
 
     <div
       class="w-full my-2 mb-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6"
     >
       <QuickAccessCard
         icon="i-lucide-key-round"
-        title="Digitale Schlüssel"
-        description="Öffnen Sie Türen, Schließfächer oder Fahrradboxen mit Ihrem Smartphone."
+        :title="$t('account.digitalKeys')"
+        :description="$t('account.digitalKeysDescription')"
         to="/mobile-key"
       />
 
@@ -16,7 +16,7 @@
       <QuickAccessCard
         icon="i-lucide-book-heart"
         title="Favoriten"
-        description="Häufig genutzte und gemerkte Buchungsobjekte schnell wieder buchen."
+        :description="$t('account.quickBookDescription')"
         to="/account/favorites"
       />
       -->
@@ -24,7 +24,7 @@
       <QuickAccessCard
         icon="i-lucide-wallet-cards"
         title="Rechnungen"
-        description="Alle Rechnungen und Belege an einem Ort."
+        :description="$t('account.invoicesShortDescription')"
         to="/account/invoices"
       />
     </div>
@@ -42,7 +42,7 @@
     </div>
     -->
     <div class="md:flex justify-between items-center w-full mb-4">
-      <h2 class="mt-5 text-xl font-bold">Meine Buchungen</h2>
+      <h2 class="mt-5 text-xl font-bold">{{ $t("meta.pages.accountBookings") }}</h2>
       <BookingSearchFilterArea
         :bookings="bookings"
         @update:bookings="setFilteredBookings"

@@ -1,8 +1,8 @@
 <template>
   <div class="w-full max-w-xl mx-auto mb-10">
     <PageHeader
-      title="Tür öffnen"
-      description="Sie haben den Code an der Tür gescannt."
+      :title="$t('mobileKey.openDoor')"
+      :description="$t('mobileKey.scannedDescription')"
       class="mb-5"
     />
 
@@ -31,7 +31,7 @@
     <!-- more than one booking is active right now -->
     <div v-else-if="stage === 'select'" class="space-y-4">
       <div>
-        <h2 class="text-lg font-semibold">Welche Buchung?</h2>
+        <h2 class="text-lg font-semibold">{{ $t("mobileKey.whichBooking") }}</h2>
         <p class="text-sm text-neutral-500">
           Mehrere Ihrer Buchungen passen gerade zu dieser Tür.
         </p>

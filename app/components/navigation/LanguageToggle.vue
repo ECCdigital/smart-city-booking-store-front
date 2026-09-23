@@ -17,11 +17,8 @@
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const { contrastToSecondary } = useContrastColor();
-const { t, locale, locales } = useI18n();
+const { t, locale, locales, setLocale } = useI18n();
 
-// Like the colour mode button next to it, the label announces the action rather
-// than the state: in German the button reads "EN", because that is where a click
-// leads. The accessible name spells the same thing out.
 const targetLocale = computed(() => (locale.value === "en" ? "de" : "en"));
 
 const targetName = computed(
@@ -30,11 +27,10 @@ const targetName = computed(
     targetLocale.value.toUpperCase(),
 );
 
-function toggle() {
-  // The switch itself -- setLocale plus the localised route -- comes with its own
-  // ticket. Until then the button only reports where it would go.
-  console.log(
-    `[LanguageToggle] would switch locale to "${targetLocale.value}"`,
-  );
+// `setLocale` is the whole switch: it writes the `i18n_redirected` cookie the
+// browser-language detection reads on the next visit and navigates to the same
+// page under the new locale -- German has no prefix, English gets `/en`.
+async function toggle() {
+  await setLocale(targetLocale.value);
 }
 </script>

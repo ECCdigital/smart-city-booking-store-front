@@ -22,7 +22,7 @@
     v-else
     class="h-[300px] w-full grid place-content-center text-sm italic text-gray-600 dark:text-gray-400 my-5"
   >
-    <p>(Adresse konnte nicht gefunden werden.)</p>
+    <p>({{ $t("common.addressNotFound") }})</p>
   </div>
 </template>
 <script setup>

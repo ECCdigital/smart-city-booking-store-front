@@ -2,7 +2,7 @@
   <div :class="barClass">
     <div class="container flex justify-between">
       <div class="flex min-w-0 items-center">
-        <UTooltip text="Zurück zur Startseite">
+        <UTooltip :text="$t('navigation.backToHome')">
           <NavigationLink
             :tab="{ value: '/', icon: 'i-lucide-home', label: '' }"
           />

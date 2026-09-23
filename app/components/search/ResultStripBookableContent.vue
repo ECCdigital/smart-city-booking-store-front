@@ -87,7 +87,7 @@
           />
           <UTooltip
             :show="isNotBookable"
-            text="Prüfen Sie zur Buchung die Optionen in den Details."
+            :text="$t('bookableDetail.checkOptionsHint')"
           >
             <UButton
               v-if="!isNotSuitable && !entryPageMode"

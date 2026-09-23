@@ -40,7 +40,7 @@
       :last-item-on-page="lastItemOnPage"
     />
 
-    <p v-if="bookables.length < 1">Keine Objekte gefunden.</p>
+    <p v-if="bookables.length < 1">{{ $t("filter.noResults") }}</p>
   </div>
 </template>
 <script setup>

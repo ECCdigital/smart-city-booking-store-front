@@ -29,7 +29,7 @@
         name="i-lucide-calendar-off"
         class="w-12 h-12 text-neutral-400 mb-3"
       />
-      <p class="text-sm text-neutral-500">Keine Schlüssel gefunden</p>
+      <p class="text-sm text-neutral-500">{{ $t("mobileKey.noKeysFound") }}</p>
     </div>
   </UCard>
 

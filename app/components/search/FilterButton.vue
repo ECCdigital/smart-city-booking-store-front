@@ -2,7 +2,7 @@
   <UModal v-model:open="isOpen">
     <UChip :show="hasFilters" color="secondary" inset>
       <UButton
-        label="Filtern"
+        :label="$t('filter.open')"
         icon="i-lucide-funnel"
         color="neutral"
         variant="soft"

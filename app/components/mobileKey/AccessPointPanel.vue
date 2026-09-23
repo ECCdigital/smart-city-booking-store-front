@@ -5,7 +5,7 @@
       side="bottom"
       inset
       :title="accessPointLabel"
-      description="Informationen und Status des Schließsystems"
+      :description="$t('mobileKey.lockSystemInfo')"
       :ui="{
         wrapper: 'bg-black/60',
         content: 'w-[90vw] mx-auto rounded-t-2xl shadow-lg',
@@ -96,7 +96,7 @@
         content: 'w-[50vw] max-w-[80vw] h-[60vh] shadow-lg',
       }"
       :title="accessPointLabel"
-      description="Informationen und Status des Schließsystems"
+      :description="$t('mobileKey.lockSystemInfo')"
     >
       <AccessPointPanelButton :deny-access="denyAccess" />
       <template #content>

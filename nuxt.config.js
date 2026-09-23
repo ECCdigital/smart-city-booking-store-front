@@ -89,16 +89,24 @@ export default defineNuxtConfig({
         file: "en.json",
       },
     ],
-    customRoutes: "page",
     defaultLocale: "de",
     // The vue-i18n fallback lives in i18n/i18n.config.ts - see the comment there.
-    strategy: "prefix_except_default",
+    //
+    // One path per page, whatever the language: the locale is carried by the
+    // `i18n_redirected` cookie alone. `prefix_except_default` would put English
+    // under `/en`, and the app is not built for that -- roughly sixty links,
+    // redirects and middleware guards assemble raw paths ("/account",
+    // "/login?redirect=...") and `useTenantRoute` compares `route.path` against
+    // one to mark the active tab. Every one of them would have to learn the
+    // prefix, and each new link would be another chance to forget it. The cost
+    // is that a language cannot be linked to or indexed separately; bring the
+    // prefix back only together with a routing helper every link goes through.
+    strategy: "no_prefix",
     lazy: true,
     langDir: "locales/",
     detectBrowserLanguage: {
       useCookie: true,
       cookieKey: "i18n_redirected",
-      redirectOn: "root",
     },
   },
   security: {

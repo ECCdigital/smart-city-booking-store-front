@@ -42,7 +42,7 @@
       <div class="flex justify-end mt-2">
         <UButton
           v-if="!isNotSuitable && !event.attendees.needsRegistration"
-          label="Keine Anmeldung nötig"
+          :label="$t('events.noRegistrationNeeded')"
           variant="soft"
           disabled
           class="justify-center px-3 text-color-dark dark:text-color-light"

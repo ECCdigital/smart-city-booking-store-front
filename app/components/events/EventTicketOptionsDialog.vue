@@ -1,9 +1,9 @@
 <template>
-  <UModal v-model:open="model" title="Ticketoption auswählen">
+  <UModal v-model:open="model" :title="$t('events.selectTicketOption')">
     <template #body>
       <div v-if="!registrationNeeded" class="flex justify-center p-2 my-5 mb-2">
         <p class="text-lg text-center md:text-left">
-          Für das Event ist <b>keine Anmeldung nötig</b>. <br ><br >
+          Für das Event ist <b>{{ $t("events.noRegistrationNeededShort") }}</b>. <br ><br >
           Sie können ohne Buchung teilnehmen.
         </p>
       </div>

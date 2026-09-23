@@ -55,7 +55,7 @@
         <div class="md:flex space-y-2 md:space-y-0 my-3 mt-6">
           <SettingsInputField
             field-id="address"
-            label="Straße und Hausnummer"
+            :label="$t('common.address')"
             :value="currentUser.address"
             icon="i-lucide-house"
             class="basis-1/2"
@@ -105,7 +105,7 @@
           <UButton
             v-if="!enableEditingPassword"
             icon="i-lucide-edit"
-            label="Passwort ändern"
+            :label="$t('account.changePassword')"
             class="ml-2"
             @click="() => (enableEditingPassword = true)"
           />
@@ -118,7 +118,7 @@
           <div class="basis-1/2 mb-5 md:mb-2">
             <PasswordInput
               v-model="newPassword"
-              label="Neues Passwort"
+              :label="$t('common.newPassword')"
               input-style-classes="w-full md:w-[70%]"
             />
             <PasswordProgress
@@ -128,7 +128,7 @@
           </div>
           <PasswordInput
             v-model="repeatedPassword"
-            label="Neues Passwort (Wiederholung)"
+            :label="$t('account.newPasswordRepeat')"
             input-style-classes="w-full md:w-[70%]"
             class="basis-1/2"
           />
@@ -136,7 +136,7 @@
         <UButton
           v-if="enableEditingPassword"
           icon="i-lucide-save"
-          label="Speichern"
+          :label="$t('common.save')"
           color="primary"
           variant="solid"
           class="mt-2 md:mt-3"
@@ -152,18 +152,18 @@
       <div
         class="mx-auto flex w-full max-w-5xl items-center justify-between gap-3"
       >
-        <span class="text-sm">Sie haben nicht gespeicherte Änderungen.</span>
+        <span class="text-sm">{{ $t("common.unsavedChanges") }}</span>
         <div class="flex items-center gap-2">
           <UButton
             icon="i-lucide-save"
-            label="Speichern"
+            :label="$t('common.save')"
             color="primary"
             variant="solid"
             @click="saveUpdatedUser()"
           />
           <UButton
             icon="i-lucide-rotate-ccw"
-            label="Zurücksetzen"
+            :label="$t('common.reset')"
             color="neutral"
             variant="soft"
             @click="resetUserChanges()"
@@ -178,6 +178,8 @@ import SettingsInputField from "~/components/user/settings/SettingsInputField.vu
 import { useAuthStore } from "~~/stores/auth.js";
 import PasswordInput from "~/components/auth/PasswordInput.vue";
 import PasswordProgress from "~/components/auth/PasswordProgress.vue";
+
+const { t } = useI18n();
 
 const props = defineProps({
   user: {
@@ -208,8 +210,8 @@ onBeforeRouteLeave(() => {
   }
 
   notification.error(
-    "Sie haben nicht gespeicherte Änderungen. Bitte speichern oder verwerfen Sie diese, bevor Sie die Seite verlassen.",
-    "Nicht gespeicherte Änderungen",
+    t("common.unsavedChangesLeave"),
+    t("common.unsavedChangesTitle"),
   );
 
   return false;

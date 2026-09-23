@@ -145,8 +145,8 @@
       v-model:open="isOpen"
       side="bottom"
       inset
-      title="Zeitraum auswählen"
-      description="Beginn und Ende der Buchung festlegen."
+      :title="$t('timePeriods.selectPeriod')"
+      :description="$t('timePeriods.selectPeriodDescription')"
       :ui="{
         overlay: 'bg-black/60',
         content: 'w-[94vw] mx-auto rounded-t-2xl shadow-lg max-h-[85vh] pb-2',
@@ -157,7 +157,7 @@
     >
       <template #header>
         <div class="flex items-center justify-between w-full gap-2">
-          <p class="text-base font-semibold">Zeitraum auswählen</p>
+          <p class="text-base font-semibold">{{ $t("timePeriods.selectPeriod") }}</p>
           <UButton
             color="neutral"
             variant="ghost"
@@ -242,7 +242,7 @@
       <template #footer>
         <div class="flex gap-2 w-full">
           <UButton
-            label="Abbrechen"
+            :label="$t('common.cancel')"
             color="neutral"
             variant="soft"
             class="flex-1 justify-center"

@@ -28,7 +28,7 @@
     <!-- no registration -->
     <UTooltip
       v-if="!event.attendees.needsRegistration"
-      text="Dieses Event ist öffentlich und kann ohne Anmeldung besucht werden."
+      :text="$t('events.publicNoRegistration')"
     >
       <UButton
         :class="[
@@ -37,7 +37,7 @@
         ]"
         color=""
         disabled
-        label="Keine Anmeldung nötig"
+        :label="$t('events.noRegistrationNeeded')"
       />
     </UTooltip>
 

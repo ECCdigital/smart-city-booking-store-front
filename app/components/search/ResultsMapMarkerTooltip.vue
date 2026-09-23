@@ -49,7 +49,7 @@
         </div>
       </div>
 
-      <p class="text-center italic">[ Klick um Auswahl zu öffnen ]</p>
+      <p class="text-center italic">[ {{ $t("results.clickToOpen") }} ]</p>
     </div>
   </LTooltip>
 </template>

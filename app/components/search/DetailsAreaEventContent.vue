@@ -68,11 +68,11 @@
 
         <!-- Availability -->
         <div>
-          <h3 class="text-xl font-bold mb-5">Ticketoptionen & Verfügbarkeit</h3>
+          <h3 class="text-xl font-bold mb-5">{{ $t("events.ticketOptionsAndAvailability") }}</h3>
           <div v-if="hasTimeRelatedPrices" class="">
             <UAlert
               v-if="!timePeriod || (!timePeriod.start && !timePeriod.end)"
-              title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
+              :title="$t('events.selectDatesHint')"
               icon="i-lucide-info"
               variant="ghost"
               class="p-2 text-info w-full"
@@ -95,7 +95,7 @@
             }}</span>
             <div class="flex-1" />
             <UButton
-              label="Beim Anbieter buchen"
+              :label="$t('events.bookAtProvider')"
               class="justify-center px-5"
               :style="{ color: contrastToPrimary }"
               @click="goToExternalCheckout()"
@@ -105,15 +105,15 @@
           <!-- private Events -->
           <EventInfoDisplay
             v-if="!item.attendees.publicEvent"
-            title="Kein öffentliches Event."
-            description="Das Event ist keine öffentliche Veranstaltung und kann deshalb nicht gebucht werden."
+            :title="$t('events.notPublicTitle')"
+            :description="$t('events.notPublicDescription')"
           />
 
           <!-- Events ohne Anmeldepflicht-->
           <EventInfoDisplay
             v-if="!item.attendees.needsRegistration"
-            title="Keine Anmeldung nötig."
-            description="Für dieses Event ist keine Anmeldung notwendig. Sie können auch ohne vorherige Anmeldung an der Veranstaltung teilnehmen."
+            :title="$t('events.noRegistrationTitle')"
+            :description="$t('events.noRegistrationDescription')"
           />
 
           <!-- keine Tickets hinterlegt -->
@@ -123,8 +123,8 @@
               item.attendees.needsRegistration &&
               item.tickets.length === 0
             "
-            title="Keine Tickets verfügbar."
-            description="Für dieses Event sind derzeit keine Ticketoptionen hinterlegt."
+            :title="$t('events.noTicketsTitle')"
+            :description="$t('events.noTicketsDescription')"
           />
 
           <!-- Auflistung der Ticketoptionen -->

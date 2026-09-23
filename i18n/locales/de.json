@@ -55,6 +55,20 @@
     }
   },
   "common": {
+    "unsavedChangesTitle": "Nicht gespeicherte Änderungen",
+    "unsavedChangesLeave": "Sie haben nicht gespeicherte Änderungen. Bitte speichern oder verwerfen Sie diese, bevor Sie die Seite verlassen.",
+    "save": "Speichern",
+    "reset": "Zurücksetzen",
+    "toHome": "Zur Startseite",
+    "showAll": "Alle anzeigen",
+    "showLess": "Weniger anzeigen",
+    "clearEntry": "Eintrag löschen",
+    "searchPlaceholder": "Suchen...",
+    "imageLoadFailed": "Bild konnte nicht geladen werden",
+    "unsavedChanges": "Sie haben nicht gespeicherte Änderungen.",
+    "distanceUnknown": "Distanz nicht ermittelbar.",
+    "addressNotFound": "Adresse konnte nicht gefunden werden.",
+    "featureUnavailable": "Diese Funktion ist derzeit nicht verfügbar.",
     "password": "Passwort",
     "confirmPassword": "Passwort bestätigen",
     "repeatPassword": "Passwort wiederholen",
@@ -100,11 +114,13 @@
     "switchTo": "Sprache auf {language} umstellen"
   },
   "catalog": {
+    "offersAndEvents": "Unsere Angebote und Veranstaltungen",
     "type": "Was möchten Sie buchen?",
     "bookables": "Buchungsobjekte",
     "events": "Veranstaltungen"
   },
   "navigation": {
+    "backToHome": "Zurück zur Startseite",
     "home": "Startseite",
     "dashboard": "Dashboard",
     "bookings": "Buchungen",
@@ -120,6 +136,10 @@
     "termsAndConditions": "AGB"
   },
   "login": {
+    "logoutErrorMessage": {
+      "message": "Sie konnten nicht abgemeldet werden. Bitte versuchen Sie es erneut.",
+      "title": "Abmeldung fehlgeschlagen"
+    },
     "title": "Melden Sie sich in Ihrem Konto an",
     "forgotPassword": "Passwort vergessen?",
     "noAccount": "Noch kein Konto?",
@@ -242,6 +262,7 @@
     "error": {
       "heading": "Kartenverknüpfung fehlgeschlagen",
       "alreadyLinkedHeading": "Karte bereits verknüpft",
+      "alreadyVerifiedHeading": "Karte bereits bestätigt",
       "default": "Es gab ein Problem bei der Verknüpfung Ihrer Karte.",
       "alreadyVerified": "Diese Karte ist bereits mit diesem Konto verknüpft. Sie können sich mit Ihrer Karte anmelden.",
       "invalidToken": "Ungültiger oder abgelaufener Bestätigungstoken. Bitte fordern Sie einen neuen Bestätigungslink an.",
@@ -344,6 +365,22 @@
     "noLocation": "Kein Standort gefunden"
   },
   "events": {
+    "upcoming": "Anstehende Veranstaltungen",
+    "ticketOptions": "Ticketoptionen",
+    "ticketOptionsAndAvailability": "Ticketoptionen & Verfügbarkeit",
+    "selectDatesHint": "Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen.",
+    "bookAtProvider": "Beim Anbieter buchen",
+    "notPublicTitle": "Kein öffentliches Event.",
+    "notPublicDescription": "Das Event ist keine öffentliche Veranstaltung und kann deshalb nicht gebucht werden.",
+    "noRegistrationTitle": "Keine Anmeldung nötig.",
+    "noRegistrationDescription": "Für dieses Event ist keine Anmeldung notwendig. Sie können auch ohne vorherige Anmeldung an der Veranstaltung teilnehmen.",
+    "noTicketsTitle": "Keine Tickets verfügbar.",
+    "noTicketsDescription": "Für dieses Event sind derzeit keine Ticketoptionen hinterlegt.",
+    "noRegistrationNeeded": "Keine Anmeldung nötig",
+    "noRegistrationNeededShort": "keine Anmeldung nötig",
+    "publicNoRegistration": "Dieses Event ist öffentlich und kann ohne Anmeldung besucht werden.",
+    "soldOut": "Dieser Tickettyp ist ausverkauft.",
+    "selectTicketOption": "Ticketoption auswählen",
     "events": "Veranstaltungen",
     "event": "Veranstaltung",
     "addEvent": "Veranstaltung hinzufügen",
@@ -356,6 +393,7 @@
     "noEvent": "Keine Veranstaltung gefunden"
   },
   "bookableDetail": {
+    "checkOptionsHint": "Prüfen Sie zur Buchung die Optionen in den Details.",
     "bookNow": "Jetzt buchen",
     "viewBookingOptions": "Buchungsoptionen ansehen",
     "book": "Buchen",
@@ -386,6 +424,29 @@
   },
 
   "filter": {
+    "title": "Ergebnisse filtern",
+    "open": "Filtern",
+    "reset": "Filter zurücksetzen",
+    "remove": "Filter entfernen",
+    "apply": "Filter anwenden",
+    "includeNonSuitable": "Nicht passende Objekte anzeigen.",
+    "onlyPublicEvents": "Nur öffentliche Events anzeigen.",
+    "onlyRegistrationNeeded": "Nur anmeldepflichte Events anzeigen.",
+    "category": "Kategorie",
+    "cities": "Orte",
+    "distance": "Distanz",
+    "price": "Preis",
+    "more": "Weitere Filter",
+    "nonSuitable": "Nicht passende Objekte",
+    "noResults": "Keine Objekte gefunden.",
+    "searchType": "Was suchen Sie?",
+    "keyword": "Stichwort",
+    "categories": {
+      "room": "Räume",
+      "eventLocation": "Veranstaltungsorte",
+      "resource": "Geräte",
+      "ticket": "Tickets"
+    },
     "fittingResults": "passende Ergebnisse",
     "provider": "Anbieter"
   },
@@ -758,6 +819,11 @@
   },
 
   "timePeriods": {
+    "selectPeriod": "Zeitraum auswählen",
+    "selectPeriodDescription": "Beginn und Ende der Buchung festlegen.",
+    "openCalendar": "Kalender öffnen",
+    "selectTimeTitle": "Uhrzeit auswählen",
+    "time": "Uhrzeit",
     "selectDate": "Datum wählen",
     "previousDays": "Frühere Tage anzeigen",
     "laterDays": "Spätere Tage anzeigen",
@@ -850,13 +916,24 @@
   },
 
   "account": {
+    "activities": "Meine Aktivitäten",
+    "digitalKeys": "Digitale Schlüssel",
+    "digitalKeysDescription": "Öffnen Sie Türen, Schließfächer oder Fahrradboxen mit Ihrem Smartphone.",
+    "quickBookDescription": "Häufig genutzte und gemerkte Buchungsobjekte schnell wieder buchen.",
+    "invoicesShortDescription": "Alle Rechnungen und Belege an einem Ort.",
+    "invoicesDescription": "Hier finden Sie Ihre Rechnungen und Zahlungsbelege.",
+    "favoritesTitle": "Ihre Favoriten",
+    "favoritesSoon": "Ihre Favoriten kommen bald",
+    "appearanceDescription": "Verwalten Sie die Darstellung der Anwendung. Sie können beispielsweise zwischen einem hellen und einem dunklen Design wechseln. Optional können Sie auch die Sprache der Benutzeroberfläche anpassen.",
+    "bookedItems": "Gebuchte Objekte",
+    "invoicesAndReceipts": "Rechnungen und Zahlungsbelege",
+    "attachments": "Anhänge",
+    "changePassword": "Passwort ändern",
+    "newPasswordRepeat": "Neues Passwort (Wiederholung)",
     "bookingDetails": {
       "rejectionReason": "Ablehnungsgrund",
       "cancellationReason": "Stornierungsgrund"
-    }
-  },
-
-  "account": {
+    },
     "invoices": {
       "title": "Ihre Rechnungen und Zahlungsbelege",
       "emptyTitle": "Keine Rechnungen vorhanden",
@@ -981,6 +1058,14 @@
     }
   },
   "mobileKey": {
+    "yourKeys": "Ihre Schlüssel",
+    "yourKeysDescription": "Öffnen und schließen Sie Türen im Zeitraum Ihrer Buchung.",
+    "openDoor": "Tür öffnen",
+    "scannedDescription": "Sie haben den Code an der Tür gescannt.",
+    "whichBooking": "Welche Buchung?",
+    "noKeysFound": "Keine Schlüssel gefunden",
+    "lockSystemInfo": "Informationen und Status des Schließsystems",
+    "openAction": "Öffnen",
     "accessPoint": {
       "sectionTitle": "Schlüssel",
       "lockState": {
@@ -1156,6 +1241,7 @@
     }
   },
   "results": {
+    "clickToOpen": "Klick um Auswahl zu öffnen",
     "pagination": {
       "itemsPerPage": "Pro Seite",
       "all": "Alle",
