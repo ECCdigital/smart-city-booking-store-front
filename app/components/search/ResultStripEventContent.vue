@@ -1,39 +1,65 @@
 <template>
-  <div class="basis-3/4 p-4 flex flex-col justify-between gap-2">
+  <!--
+    In the map's compact modes (tooltip strip, map list) this is the bookable
+    strip's skeleton: title, provider, then the time line where the bookable
+    shows its address, and the price. Teaser, organiser, flags and the buttons
+    belong to the full list only.
+  -->
+  <div
+    class="basis-3/4 flex flex-col justify-between gap-2"
+    :class="mapMode ? 'p-2' : 'p-4'"
+  >
     <div class="flex flex-col gap-2">
       <!-- Title -->
       <div class="cursor-pointer" @click="openDetails()">
         <p
           class="font-bold"
-          :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'"
+          :class="
+            mapListMode || hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'
+          "
         >
           {{ event.information.name }}
         </p>
-        <p>{{ getTenantName(event.tenantId) }}</p>
+        <p :class="mapListMode ? 'text-sm' : ''">
+          {{ getTenantName(event.tenantId) }}
+        </p>
       </div>
 
       <!-- Zeitpunkt, Adresse und Entfernung -->
       <div class="w-full flex flex-col gap-1">
         <EventTimeInformation :event="event" class="w-full text-sm" />
         <EventAdressInformation
+          v-if="!mapMode"
           :event="event"
           show-distance
           class="w-full text-sm"
         />
         <div
-          v-if="hasTeaserText"
+          v-if="hasTeaserText && !mapMode"
           class="line-clamp-3"
           v-html="htmlTeaserText"
         />
       </div>
       <USeparator
+        v-if="!mapMode"
         color="neutral"
         class="w-full"
         :ui="{ border: 'border-gray-300' }"
       />
     </div>
 
-    <div class="flex gap-2 justify-between items-end">
+    <div
+      v-if="mapMode"
+      class="flex justify-end text-sm font-bold"
+    >
+      <EventPriceDisplay
+        v-if="!isNotBookable && !isNotSuitable"
+        :event-tickets="event.tickets"
+        :is-free="event.attendees.free"
+      />
+    </div>
+
+    <div v-else class="flex gap-2 justify-between items-end">
       <!-- Veranstalter & Eigenschaften -->
       <div
         v-if="organizerName || hasFlags"
@@ -104,6 +130,14 @@ const props = defineProps({
     default: false,
   },
   entryPageMode: {
+    type: Boolean,
+    default: false,
+  },
+  mapMode: {
+    type: Boolean,
+    default: false,
+  },
+  mapListMode: {
     type: Boolean,
     default: false,
   },

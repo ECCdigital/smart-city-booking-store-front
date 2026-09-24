@@ -1,6 +1,23 @@
 <template>
-  <div class="flex flex-wrap content-between h-full p-2">
-    <div class="w-full">
+  <!--
+    The compact form (map tooltip, pin carousel, mobile sheet) is the bookable
+    card's: name, provider, the time line, the place and the price in a box
+    of fixed height. The full card adds teaser, organiser and flags.
+  -->
+  <div
+    id="body"
+    class="p-2 text-gray-800 dark:text-gray-100"
+    :class="mapDetailMode ? 'flex flex-col h-full min-h-0' : 'flex flex-wrap content-between h-full'"
+  >
+    <div v-if="mapDetailMode" class="w-full min-w-0">
+      <p class="font-bold text-base line-clamp-2">
+        {{ event.information.name }}
+      </p>
+      <p class="text-sm">{{ getTenantName(event.tenantId) }}</p>
+      <EventTimeInformation :event="event" class="text-sm mt-1" />
+      <EventAdressInformation :event="event" class="text-sm" />
+    </div>
+    <div v-else class="w-full">
       <!-- Title -->
       <p class="font-bold" :class="hasLongTitle ? 'text-base line-clamp-3' : 'text-lg'">
         {{ event.information.name }}
@@ -32,6 +49,7 @@
     <div
       v-if="!isNotSuitable"
       class="w-full flex flex-col justify-end text-md font-bold"
+      :class="mapDetailMode ? 'mt-auto' : ''"
     >
       <EventPriceDisplay
         v-if="!isNotSuitable"
@@ -39,7 +57,7 @@
         :is-free="event.attendees.free"
         class="grid place-content-end text-md font-bold mt-2"
       />
-      <div class="flex justify-end mt-2">
+      <div v-if="!mapDetailMode" class="flex justify-end mt-2">
         <UButton
           v-if="!isNotSuitable && !event.attendees.needsRegistration"
           :label="$t('events.noRegistrationNeeded')"
@@ -80,6 +98,10 @@ const props = defineProps({
     default: false,
   },
   entryPageMode: {
+    type: Boolean,
+    default: false,
+  },
+  mapDetailMode: {
     type: Boolean,
     default: false,
   },

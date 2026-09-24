@@ -62,6 +62,7 @@
       :is-not-bookable="isNotBookable"
       :is-not-suitable="isNotSuitable"
       :entry-page-mode="entryPageMode"
+      :map-detail-mode="mapDetailMode"
     />
   </div>
 </template>

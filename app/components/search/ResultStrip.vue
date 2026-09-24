@@ -4,7 +4,7 @@
     class="@container bg-white dark:bg-gray-700 flex flex-row rounded-sm shadow-lg"
     :class="[
       isNotSuitable ? 'opacity-70' : ' ',
-      listMode ? 'min-h-48' : isEvent ? 'max-h-100 h-100' : '',
+      listMode ? (isEvent ? 'max-h-100 h-100' : 'min-h-48') : '',
     ]"
   >
     <div
@@ -82,6 +82,9 @@
       :is-not-suitable="isNotSuitable"
       :is-not-bookable="isNotBookable"
       :entry-page-mode="entryPageMode"
+      :map-mode="mapMode"
+      :map-list-mode="mapListMode"
+      class="w-auto"
       @open-details="onOpenDetails"
     />
   </div>
@@ -151,8 +154,9 @@ const isEvent = computed(() => {
   return props.item.type === "event";
 });
 
-// The plain list is the only mode that sizes itself to its content: the map
-// tooltip and the map list keep their fixed boxes.
+// The plain list reserves a height per Kind; the map tooltip and the map list
+// are compact and size themselves to their content, which is what keeps the
+// strips of one pin from painting over each other.
 const listMode = computed(() => !props.mapMode && !props.mapListMode);
 
 const image = computed(() =>

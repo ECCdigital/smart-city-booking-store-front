@@ -25,6 +25,32 @@
         </p>
       </div>
     </TransitionGroup>
+
+    <!-- Offers the map cannot place: not on it, but not lost either -->
+    <div
+      v-if="withoutLocation.length > 0"
+      class="mt-4 pt-3 border-t border-dashed border-gray-300 dark:border-gray-600"
+    >
+      <p
+        class="mb-2 flex items-center gap-1 text-xs uppercase tracking-wide text-gray-500"
+      >
+        <UIcon name="i-lucide-map-pin-off" class="size-3.5" />
+        {{ $t("results.noLocation") }}
+      </p>
+      <div class="space-y-1 opacity-70">
+        <ResultStrip
+          v-for="bookable in withoutLocation"
+          :key="bookable.item.id"
+          class="cursor-pointer"
+          :item="bookable.item"
+          :is-not-suitable="bookable.matchStatus !== 'match'"
+          :calculated-price="bookable.calculatedPrice"
+          map-mode
+          map-list-mode
+          @click="emit('openDetails', bookable, true)"
+        />
+      </div>
+    </div>
   </div>
 </template>
 <script setup>
@@ -40,6 +66,10 @@ defineProps({
   bookables: {
     type: Array,
     required: true,
+  },
+  withoutLocation: {
+    type: Array,
+    default: () => [],
   },
 });
 

@@ -23,20 +23,17 @@
         </p>
       </div>
 
-      <!-- Adresse, Entfernung und Beschreibung -->
-      <div
-        v-if="!mapListMode || hasDescription"
-        class="w-full flex flex-col gap-1"
-      >
+      <!-- Adresse, Entfernung und Beschreibung; the compact map strips show
+           neither the address (the pin says where) nor the description -->
+      <div v-if="!mapListMode" class="w-full flex flex-col gap-1">
         <BookableAdressInformation
-          v-if="!mapListMode"
           :bookable="bookable"
           show-distance
           class="w-full"
           :class="mapMode ? 'text-sm' : ''"
         />
         <div
-          v-if="hasDescription"
+          v-if="hasDescription && !mapMode"
           class="text-sm line-clamp-3"
           v-html="htmlDescription"
         />

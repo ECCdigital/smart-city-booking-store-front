@@ -2,7 +2,7 @@
   <div v-if="!fetchedCoordinates && !hasBounds">
     <USkeleton class="w-full h-[80vh] my-2 rounded" />
   </div>
-  <div v-else class="flex w-full">
+  <div v-else class="results-map flex w-full">
     <div
       class="w-full lg:flex-1 lg:min-w-0 h-[80vh] z-10 my-2 mr-0.5 rounded overflow-hidden"
     >
@@ -68,10 +68,11 @@
       />
     </div>
 
-    <!-- List of visible bookables -->
+    <!-- List of visible Offers, then the ones the map cannot place -->
     <ResultsMapList
       v-model="currentBookable"
       :bookables="visibleBookables"
+      :without-location="withoutLocation"
       @open-details="openBookableDetails"
     />
   </div>
@@ -167,8 +168,22 @@ const hasBounds = computed(() => {
 const showCurrentBookable = ref(false);
 const currentBookable = ref(null);
 
+// Not on the map, so not in the map's own list either; they get their own
+// block at the end of it.
+const withoutLocation = computed(() =>
+  props.bookables
+    .filter((b) => !hasCoordinates(b.item))
+    .sort((a, b) => {
+      const aIsMatch = a.matchStatus === "match" ? 0 : 1;
+      const bIsMatch = b.matchStatus === "match" ? 0 : 1;
+      return aIsMatch - bIsMatch;
+    }),
+);
+
 const visibleBookables = computed(() => {
-  if (!currentBounds.value) return props.bookables;
+  if (!currentBounds.value) {
+    return props.bookables.filter((b) => hasCoordinates(b.item));
+  }
 
   return props.bookables
     .filter((b) => {
@@ -384,4 +399,12 @@ watch(
 );
 </script>
 
-<style></style>
+<style>
+/* The map follows the colour mode. The CSP allows tiles from OpenStreetMap
+   only, so the dark basemap is the same tiles inverted and hue-rotated, not
+   a second provider. */
+.dark .results-map .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.9)
+    saturate(0.7);
+}
+</style>
