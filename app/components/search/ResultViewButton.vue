@@ -8,14 +8,23 @@
       :color="view === option.value ? 'secondary' : 'neutral'"
       :variant="view === option.value ? 'solid' : 'soft'"
       class="first:rounded-l-full last:rounded-r-full"
+      :style="
+        view === option.value ? { color: contrastToSecondary } : undefined
+      "
       @click="selectView(option.value)"
     />
   </UFieldGroup>
 </template>
 
 <script setup>
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const { t } = useI18n();
+
+// Only the selected button is filled with the secondary colour, so only it
+// needs that colour's contrast; the other one keeps the neutral foreground
+// Nuxt UI picks against the page. The icon follows through `currentColor`.
+const { contrastToSecondary } = useContrastColor();
 
 const view = defineModel({
   type: String,

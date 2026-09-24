@@ -6,12 +6,7 @@
       class="flex justify-between items-center bg-white dark:bg-gray-700 rounded-lg shadow-sm px-4 py-2 border border-gray-200 dark:border-gray-500 min-w-[250px]"
     >
       <div class="space-y-0.5">
-        <BookableTypeBadge
-          :type="item.type"
-          :ui="{
-            base: 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
-          }"
-        />
+        <BookableTypeBadge :type="item.type" neutral />
         <div class="text-sm font-semibold text-gray-700 dark:text-gray-200">
           {{ item.title }}
         </div>

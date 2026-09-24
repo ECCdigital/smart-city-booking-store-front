@@ -1,5 +1,9 @@
 <template>
-  <div ref="wrapperRef" class="@container space-y-5">
+  <div
+    ref="wrapperRef"
+    class="@container space-y-5"
+    :style="{ '--selection-text-color': contrastToSecondary }"
+  >
     <div class="grid grid-cols-1 @lg:flex @lg:flex-wrap gap-4">
       <div class="md:flex items-center space-x-1">
         <label
@@ -179,6 +183,7 @@ import enLocale from "@fullcalendar/core/locales/en-gb";
 import { useMediaQuery } from "@vueuse/core";
 import { useBookables } from "~/composables/api/useBookables.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
 import InputTime from "~/components/inputs/InputTime.vue";
 import {
@@ -323,8 +328,9 @@ function onJumpDate(date) {
 }
 
 /* ── language ────────────────────────────────────────────── */
-const { locale } = useI18n();
+const { t, locale } = useI18n();
 const { localeTag } = useFormatting();
+const { contrastToSecondary } = useContrastColor();
 
 const CALENDAR_LOCALES = { de: deLocale, en: enLocale };
 const calendarLocale = computed(
@@ -512,7 +518,7 @@ function renderEventContent(arg) {
   return {
     html: `
       <div>
-        <div class="font-bold">Ihre Auswahl</div>${arg.event.title}
+        <div class="font-bold">${t("scheduleSelection.yourSelection")}</div>${arg.event.title}
       </div>
     `,
   };
@@ -982,8 +988,15 @@ watch(
 }
 
 /* ── User selection event ────────────────────────────────── */
+/* The block is filled with the secondary colour, so its text takes that
+   colour's contrast instead of FullCalendar's fixed white. Overriding
+   `--fc-event-text-color` rather than `color` alone: FullCalendar sets the
+   colour again on `.fc-event-main` from that variable, which would otherwise
+   win over anything inherited from the event. */
 :deep(.fc-event.fc-user-selection) {
+  --fc-event-text-color: var(--selection-text-color, #fff);
   background-color: var(--color-secondary, #6366f1) !important;
+  color: var(--selection-text-color, #fff) !important;
   opacity: 0.9;
   border-radius: 3px !important;
   box-shadow: none !important;
