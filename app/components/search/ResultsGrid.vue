@@ -62,10 +62,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  isEventGrid: {
-    type: Boolean,
-    default: false,
-  },
   entryPageMode: {
     type: Boolean,
     default: false,

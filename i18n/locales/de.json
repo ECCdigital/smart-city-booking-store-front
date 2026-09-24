@@ -51,6 +51,7 @@
       "bookableDetail": "{title}",
       "events": "Veranstaltungen",
       "eventDetail": "{title}",
+      "search": "Angebote",
       "login": "Anmelden",
       "register": "Registrieren",
       "emailVerify": "E-Mail bestätigen",
@@ -1502,6 +1503,7 @@
     }
   },
   "results": {
+    "noOffers": "Keine Angebote gefunden.",
     "noneInArea": "Keine Ergebnisse in diesem Bereich.",
     "unclearQuery": "Unklare Suchanfrage",
     "listView": "Listenansicht",

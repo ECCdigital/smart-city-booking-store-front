@@ -59,10 +59,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  isEventList: {
-    type: Boolean,
-    default: false,
-  },
   entryPageMode: {
     type: Boolean,
     default: false,

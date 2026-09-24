@@ -21,10 +21,6 @@ const { t } = useI18n();
 const emit = defineEmits(["sort"]);
 
 const props = defineProps({
-  isEvent: {
-    type: Boolean,
-    default: false,
-  },
   sortMode: {
     type: String,
     default: "alphabeticAscending",

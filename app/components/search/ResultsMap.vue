@@ -78,7 +78,7 @@
 </template>
 <script setup>
 import { useRedirection } from "~/composables/utils/useRedirection.js";
-import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
+import { searchAddress } from "~/composables/search/useBookableSearch.js";
 import { nextTick } from "vue";
 import ResultsMapMarkerIcon from "~/components/search/ResultsMapMarkerIcon.vue";
 import ResultsMapMarkerPopup from "~/components/search/ResultsMapMarkerPopup.vue";
@@ -94,10 +94,6 @@ const props = defineProps({
 });
 
 const { goToDetailsNewTab } = useRedirection();
-const { searchAddress } = useBookableSearch({
-  isEvent: false,
-  sourceItems: props.bookables,
-});
 
 const route = useRoute();
 const mapRef = ref(null);

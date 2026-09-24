@@ -178,7 +178,7 @@ const {
   updatedItems: events,
   runSearch,
   resetResults,
-} = useBookableSearch({ isEvent: true, sourceItems: [props.item] });
+} = useBookableSearch({ sourceItems: [props.item] });
 
 const currentEvent = computed(() => {
   if (events.value.length === 1) {
@@ -215,7 +215,6 @@ onMounted(async () => {
       location: "",
       timeStart: timePeriod.value.start,
       timeEnd: timePeriod.value.end,
-      isEvent: true,
     });
   }
 });
@@ -229,7 +228,6 @@ async function setSearchTimePeriod(tp) {
     location: "",
     timeStart: timePeriod.value.start,
     timeEnd: timePeriod.value.end,
-    isEvent: false,
   });
 }
 function removeSearchTimePeriod() {
