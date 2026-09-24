@@ -33,6 +33,7 @@ import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import { resolveBookingPaymentSearchLabel } from "~/utils/bookingPaymentStatus.js";
 import { resolveBookingStatusSearchLabel } from "~/utils/bookingStatus.js";
+import { loadCatalogEventsForBookings } from "~/utils/bookingEventTimes.js";
 
 const { t } = useI18n();
 
@@ -72,15 +73,11 @@ const paginatedBookings = computed(() => {
 const { loadBundle } = useCatalogBundle();
 const bundleLoaded = ref(false);
 
-if (
-  allBookings.value.some((booking) =>
-    booking.bookableItems.some((item) => item._bookableUsed.type === "ticket"),
-  )
-) {
-  loadBundle({ include: ["events"] }).then(() => {
-    bundleLoaded.value = true;
-  });
-}
+// The catalog's events are an extra: a bundle that answers 404 (the tenant
+// is no longer public) leaves the list as the booking answer renders it.
+loadCatalogEventsForBookings(allBookings.value, loadBundle).then((loaded) => {
+  bundleLoaded.value = loaded;
+});
 
 //pagination
 const { isGreaterThanLg } = useBreakpointCheck();

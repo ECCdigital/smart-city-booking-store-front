@@ -2,6 +2,11 @@
  * Event bookings created without slot times (`timeBegin` / `timeEnd`) carry
  * their schedule on the referenced event instead. This module looks that
  * schedule up so the booking list can show and sort those bookings.
+ *
+ * The catalog answers first. Where it does not - the tenant is pending
+ * approval or declined and so publicly absent, or the event left the
+ * catalog - the booking answer's own `event` (title and times) stands in:
+ * a customer's booking pages never fail on catalog data.
  */
 
 export function buildEventDateTime(date, time) {
@@ -17,6 +22,25 @@ export function buildEventDateTime(date, time) {
 
 function hasValue(value) {
   return value !== null && value !== undefined && value !== "";
+}
+
+/**
+ * The fallback where the catalog does not answer for the event (the tenant
+ * is not public, the event left the catalog): the booking answer carries the
+ * event's core data in `booking.event`, with `timeBegin` / `timeEnd` already
+ * in epoch milliseconds. A booking without it (the event is gone, or an
+ * older backend) stays as it is.
+ */
+function withBookingEventTimes(booking) {
+  if (!booking.event) {
+    return booking;
+  }
+
+  return {
+    ...booking,
+    eventBegin: booking.event.timeBegin,
+    eventEnd: booking.event.timeEnd,
+  };
 }
 
 /**
@@ -63,7 +87,7 @@ export async function enrichBookingsWithEventDateTimes(
       const eventInformation = event?.information;
 
       if (!eventInformation) {
-        return booking;
+        return withBookingEventTimes(booking);
       }
 
       return {
@@ -79,4 +103,52 @@ export async function enrichBookingsWithEventDateTimes(
       };
     }),
   );
+}
+
+/**
+ * The event the booking detail page shows from the booking answer
+ * (`booking.event`: id, title, `timeBegin` / `timeEnd` in epoch
+ * milliseconds) where the catalog holds none of the booking's events: the
+ * tenant is not public, or the event left the catalog. `null` while the
+ * catalog answers (its events stay preferred) and when the booking answer
+ * carries no event (not a ticket booking, an older backend, or the event is
+ * gone).
+ *
+ * @param {Object} booking
+ * @param {Object[]} catalogEvents The booking's events as the event store holds them
+ * @returns {{ id: string, title: string, timeBegin: number|null, timeEnd: number|null } | null}
+ */
+export function bookingEventFallback(booking, catalogEvents) {
+  if (catalogEvents.length > 0) {
+    return null;
+  }
+
+  return booking.event ?? null;
+}
+
+function isTicketBooking(booking) {
+  return (booking?.bookableItems ?? []).some(
+    (item) => item?._bookableUsed?.type === "ticket",
+  );
+}
+
+/**
+ * Loads the catalog's events for the booking list, and only when a ticket
+ * booking is among `bookings`. Resolves `true` once the bundle answered and
+ * `false` otherwise: the bundle is an extra, and a tenant that is no longer
+ * public answers 404 (also the bundle proxy under `/t/:tenantID/...`), so a
+ * failed load never rejects - the list renders without catalog extras.
+ * `loadBundle` is injected so the decision can run outside Nuxt.
+ */
+export async function loadCatalogEventsForBookings(bookings, loadBundle) {
+  if (!Array.isArray(bookings) || !bookings.some(isTicketBooking)) {
+    return false;
+  }
+
+  try {
+    await loadBundle({ include: ["events"] });
+    return true;
+  } catch {
+    return false;
+  }
 }

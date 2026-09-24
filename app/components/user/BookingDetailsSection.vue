@@ -59,6 +59,14 @@
             <EventTimeInformation :event="event" :use-icon="false" />
           </div>
         </div>
+        <div v-else-if="bookingEvent" class="space-y-0.5">
+          <div class="rounded-md bg-gray-200 p-1">
+            <span>{{ bookingEvent.title }}</span>
+            <p v-if="bookingEventTimeSlot">
+              {{ bookingEventTimeSlot[0] }} - {{ bookingEventTimeSlot[1] }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -156,6 +164,7 @@ import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { useEventStore } from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
+import { bookingEventFallback } from "~/utils/bookingEventTimes.js";
 import {
   BOOKING_STATUS,
   isFreeBooking,
@@ -233,6 +242,12 @@ watch(
   { immediate: true },
 );
 
+// Where the event store holds none of the booking's events (the tenant is no
+// longer public, the event left the catalog), the booking answer names it.
+const bookingEvent = computed(() =>
+  bookingEventFallback(props.booking, events.value),
+);
+
 const isLive = computed(() => isLiveBooking(props.booking));
 
 // The backend writes rejectionReason for both states; a booking the
@@ -244,14 +259,20 @@ const reasonHeading = computed(() =>
     : t("account.bookingDetails.cancellationReason"),
 );
 
-const bookingTimeSlot = computed(() => {
-  if (props.booking.timeBegin && props.booking.timeEnd) {
-    const beginn = formatDate(props.booking.timeBegin);
-    const end = formatDate(props.booking.timeEnd);
-    return [beginn, end];
+function formatTimeSlot(timeBegin, timeEnd) {
+  if (timeBegin && timeEnd) {
+    return [formatDate(timeBegin), formatDate(timeEnd)];
   }
   return null;
-});
+}
+
+const bookingTimeSlot = computed(() =>
+  formatTimeSlot(props.booking.timeBegin, props.booking.timeEnd),
+);
+
+const bookingEventTimeSlot = computed(() =>
+  formatTimeSlot(bookingEvent.value?.timeBegin, bookingEvent.value?.timeEnd),
+);
 
 const isFree = computed(() => isFreeBooking(props.booking));
 
