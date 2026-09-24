@@ -29,9 +29,9 @@
         <UButton
           v-else
           :label="$t('bookableDetail.unavailable')"
+          color="neutral"
           variant="soft"
           class="justify-center px-2 md:px-5"
-          :style="{ color: contrastToPrimary }"
         />
       </div>
     </div>

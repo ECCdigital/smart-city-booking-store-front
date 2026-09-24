@@ -1,6 +1,6 @@
 <template>
   <UButton
-    label="Öffnen"
+    :label="$t('mobileKey.openAction')"
     trailing-icon="i-lucide-chevron-right"
     variant="ghost"
     color="primary"

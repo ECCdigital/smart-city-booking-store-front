@@ -1,25 +1,30 @@
 <template>
-  <UModal v-model:open="model" title="Ticketoption auswählen">
+  <UModal v-model:open="model" :title="$t('events.selectTicketOption')">
     <template #body>
       <div v-if="!registrationNeeded" class="flex justify-center p-2 my-5 mb-2">
         <p class="text-lg text-center md:text-left">
-          Für das Event ist <b>keine Anmeldung nötig</b>. <br ><br >
-          Sie können ohne Buchung teilnehmen.
+          <i18n-t keypath="events.forThisEvent" tag="span" scope="global">
+            <template #status
+              ><b>{{ $t("events.noRegistrationNeededShort") }}</b></template
+            >
+          </i18n-t>
+          <br ><br >
+          {{ $t("events.isFreeToAttend") }}
         </p>
       </div>
       <div v-else-if="isPrivateEvent" class="flex justify-center p-2 my-5 mb-2">
         <p class="text-lg text-center md:text-left">
-          Das Event ist nicht öffentlich und kann nicht gebucht werden.
+          {{ $t("events.notPublicShort") }}
         </p>
       </div>
       <div v-else-if="tickets.length === 0">
         <p class="text-lg text-center md:text-left">
-          Es sind keine Tickets für dieses Event verfügbar.
+          {{ $t("events.noTicketsShort") }}
         </p>
       </div>
       <div v-else>
         <p class="mb-5">
-          Wählen Sie zur Buchung einer der folgenden Ticketoptionen:
+          {{ $t("events.chooseTicketOption") }}
         </p>
         <EventTicketStrip
           v-for="(ticket, i) in props.tickets"
@@ -32,6 +37,7 @@
 </template>
 <script setup>
 import EventTicketStrip from "~/components/events/EventTicketStrip.vue";
+
 
 const model = defineModel();
 const props = defineProps({

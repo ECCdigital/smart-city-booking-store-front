@@ -41,11 +41,11 @@
         v-for="(image, index) in images"
         :key="index"
         type="button"
-        class="w-20 h-20 shrink-0 rounded-md overflow-hidden border-2 transition-colors cursor-pointer"
+        class="w-20 h-20 shrink-0 rounded-md overflow-hidden border-2 transition-colors"
         :class="
           index === activeIndex
-            ? 'border-primary'
-            : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+            ? 'border-secondary'
+            : 'border-transparent hover:border-primary'
         "
         :aria-label="$t('bookableDetail.gallery.showImage', { index: index + 1 })"
         :aria-current="index === activeIndex"

@@ -5,19 +5,19 @@
         <span :class="bookableTitle?.length > 100 ? 'text-sm' : ''">{{
           bookableTitle
         }}</span>
-        <UTooltip text="Zum Buchungsobjekt gehen" class="ml-2">
+        <UTooltip :text="$t('booking.goToBookable')" class="ml-2">
           <UButton
             icon="i-lucide-square-arrow-out-up-right"
             variant="soft"
-            class="text-gray-700 dark:text-gray-300 cursor-pointer"
+            class="text-gray-700 dark:text-gray-300"
             @click="goToBookable(bookable.bookableId)"
           />
         </UTooltip>
-        <UTooltip v-if="eventId" text="Zum Event gehen" class="ml-2">
+        <UTooltip v-if="eventId" :text="$t('booking.goToEvent')" class="ml-2">
           <UButton
             icon="i-lucide-calendar"
             variant="soft"
-            class="text-gray-700 dark:text-gray-300 cursor-pointer"
+            class="text-gray-700 dark:text-gray-300"
             @click="goToEvent()"
           />
         </UTooltip>
@@ -27,8 +27,8 @@
         <span class="font-bold">{{ bookingPrice }}</span>
       </div>
       <div class="md:hidden text-sm">
-        <p>Einzelpreis: {{ bookingPrice }}</p>
-        <p>Anzahl: {{ bookable.amount }}x</p>
+        <p>{{ $t("booking.unitPrice") }} {{ bookingPrice }}</p>
+        <p>{{ $t("booking.quantity") }} {{ bookable.amount }}x</p>
       </div>
     </div>
     <BookablesBookableAdressInformation

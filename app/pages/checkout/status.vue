@@ -1016,12 +1016,11 @@ async function handleManualRefresh() {
             >
               <div class="mt-4 space-y-3">
                 <UButton
-                  color="neutral"
+                  color="primary"
                   variant="subtle"
                   block
                   :loading="statusPending || isRefreshing"
                   icon="i-lucide-refresh-cw"
-                  class="cursor-pointer"
                   @click="handleManualRefresh"
                 >
                   {{ $t("checkout.status.manualRefreshAction") }}
@@ -1038,7 +1037,7 @@ async function handleManualRefresh() {
                 </UButton>
 
                 <UButton
-                  color="neutral"
+                  color="primary"
                   variant="subtle"
                   block
                   to="/"

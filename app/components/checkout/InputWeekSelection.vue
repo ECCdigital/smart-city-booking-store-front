@@ -161,7 +161,11 @@
 
 <script setup>
 import { useBookables } from "~/composables/api/useBookables.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
+
+
+const { monthNames } = useFormatting();
 
 const props = defineProps({
   tenantId: { type: String, default: null },
@@ -187,35 +191,10 @@ const { getBookableAvailability } = useBookables();
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
-const MONTH_LABELS_FULL = [
-  "Januar",
-  "Februar",
-  "März",
-  "April",
-  "Mai",
-  "Juni",
-  "Juli",
-  "August",
-  "September",
-  "Oktober",
-  "November",
-  "Dezember",
-];
-
-const MONTH_LABELS_SHORT = [
-  "Jan",
-  "Feb",
-  "Mär",
-  "Apr",
-  "Mai",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Okt",
-  "Nov",
-  "Dez",
-];
+// Month names come from `Intl` in the reading language rather than a German
+// array; `computed`, so they follow a switch.
+const MONTH_LABELS_FULL = computed(() => monthNames("long"));
+const MONTH_LABELS_SHORT = computed(() => monthNames("short"));
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -244,8 +223,8 @@ function getMondayOfWeek(date) {
 function formatWeekRange(monday, sunday) {
   const startDay = pad2(monday.getDate());
   const endDay = pad2(sunday.getDate());
-  const startMonth = MONTH_LABELS_SHORT[monday.getMonth()];
-  const endMonth = MONTH_LABELS_SHORT[sunday.getMonth()];
+  const startMonth = MONTH_LABELS_SHORT.value[monday.getMonth()];
+  const endMonth = MONTH_LABELS_SHORT.value[sunday.getMonth()];
 
   if (monday.getMonth() === sunday.getMonth()) {
     return `${startDay}. – ${endDay}. ${endMonth}`;
@@ -260,7 +239,7 @@ const displayMonth = ref(now.getMonth());
 const displayYear = ref(now.getFullYear());
 
 const currentMonthLabel = computed(
-  () => `${MONTH_LABELS_FULL[displayMonth.value]} ${displayYear.value}`,
+  () => `${MONTH_LABELS_FULL.value[displayMonth.value]} ${displayYear.value}`,
 );
 
 const canGoPreviousMonth = computed(() => {
@@ -487,9 +466,9 @@ function getWeekCardClass(week) {
     return "border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 cursor-not-allowed opacity-70";
   }
   if (isSelectedWeek(week)) {
-    return "border-primary dark:border-primary bg-primary/5 dark:bg-primary/10 ring-1 ring-primary dark:ring-primary cursor-pointer";
+    return "border-secondary dark:border-secondary bg-secondary/5 dark:bg-secondary/10 ring-1 ring-secondary dark:ring-secondary";
   }
-  return "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-primary dark:hover:border-primary cursor-pointer";
+  return "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-primary dark:hover:border-primary";
 }
 
 // ── Sync with modelValue prop ──────────────────────────────────────────────────

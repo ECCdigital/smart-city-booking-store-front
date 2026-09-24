@@ -1,8 +1,8 @@
 <template>
   <UModal v-model:open="isOpen">
-    <UChip :show="hasFilters" inset>
+    <UChip :show="hasFilters" color="secondary" inset>
       <UButton
-        label="Filtern"
+        :label="$t('filter.open')"
         icon="i-lucide-funnel"
         color="neutral"
         variant="soft"
@@ -28,6 +28,7 @@
           :include-non-suitable="includeNonSuitable"
           :categories="categories"
           :cities="cities"
+          :tenants="tenants"
           :distance="distance"
           :price="price"
           :only-public-events="onlyPublicEvents"
@@ -67,6 +68,10 @@ defineProps({
     type: Array,
     default: () => [],
   },
+  tenants: {
+    type: Array,
+    default: () => [],
+  },
   distance: {
     type: Number,
     default: null,
@@ -99,6 +104,7 @@ const hasFilters = computed(() => {
     "pubEv",
     "regEv",
     "cities",
+    "tenants",
     "categories",
     "price",
   ];

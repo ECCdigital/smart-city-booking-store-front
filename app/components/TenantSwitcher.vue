@@ -6,6 +6,24 @@ import { useTenant } from "~/composables/useTenant";
 
 const t = useI18n().t;
 
+const props = defineProps({
+  /**
+   * Where the switcher is rendered.
+   *
+   * `bar` is the navigation bar: it names the tenant the visitor is already in
+   * and opens the list from the chevron next to the name. Without a selected
+   * tenant it renders nothing -- choosing one is the footer's job.
+   *
+   * `footer` is the one place the selection always lives, with or without a
+   * tenant.
+   */
+  variant: {
+    type: String,
+    default: "bar",
+    validator: (value) => ["bar", "footer"].includes(value),
+  },
+});
+
 const route = useRoute();
 const { tenantID } = useTenant();
 
@@ -15,9 +33,8 @@ const tenants = computed(() => tenantStore.getTenants);
 const selectedTenant = computed(() => {
   return tenants.value.find((tenant) => tenant.id === tenantID.value);
 });
-const selectedTenantLabel = computed(() => {
-  return selectedTenant.value?.name ?? "Mandant...";
-});
+
+const isBar = computed(() => props.variant === "bar");
 
 const tenantOptions = computed(() => {
   const items = [];
@@ -45,6 +62,17 @@ const tenantOptions = computed(() => {
 
   return items;
 });
+
+// In the bar the switcher is the site's identity, so it only shows once there is
+// a name to show; in the footer it is the control itself and stays.
+const isVisible = computed(() => {
+  if (tenantOptions.value.length === 0) return false;
+  return isBar.value ? !!selectedTenant.value : true;
+});
+
+const label = computed(
+  () => selectedTenant.value?.name ?? t("tenants.selectTenant"),
+);
 
 function onSelect(tenant) {
   const { path, query, hash } = route;
@@ -82,23 +110,20 @@ function onClear() {
   });
 }
 
-const { contrastToSecondary } = useContrastColor();
-const nameColor = computed(() => {
-  if (contrastToSecondary.value === "#ffffff") {
-    return "text-white hidden md:inline";
-  } else {
-    return "text-black hidden md:inline";
-  }
-});
+const { contrastToPrimary } = useContrastColor();
+
+// In the bar the name gives way before the actions do: it shrinks and clips
+// rather than pushing the language and colour mode buttons off a phone's line.
+const buttonClass = computed(() =>
+  isBar.value
+    ? "h-12 min-w-0 px-2 sm:px-3 font-medium hover:!bg-current/15 active:!bg-current/20"
+    : "px-0 text-gray-700 dark:text-gray-300",
+);
 </script>
 
 <template>
-  <div
-    v-if="selectedTenant"
-    class="absolute top-0 left-0 w-full h-1 bg-secondary/40"
-  />
   <UDropdownMenu
-    v-if="tenantOptions.length > 0"
+    v-if="isVisible"
     size="lg"
     :items="tenantOptions"
     :ui="{
@@ -106,38 +131,17 @@ const nameColor = computed(() => {
       itemLeadingIcon: 'mt-1',
       item: ' before:bg-transparent data-highlighted:before:bg-transparent',
     }"
-    class="pr-0 md:pr-1 md:pl-2 h-12"
-    :class="[
-      'transition-colors',
-      selectedTenant
-        ? 'rounded-none text-(--color-on-primary) bg-(--color-primary)'
-        : '',
-    ]"
   >
     <UButton
       variant="ghost"
-      class="flex items-center gap-0 md:gap-2 outline-none cursor-pointer"
-    >
-      <UUser
-        :name="selectedTenantLabel"
-        :avatar="{
-          icon: 'i-lucide-building-2',
-        }"
-        :ui="{
-          base: 'transition-none',
-          avatar: {
-            size: 'h-8 w-8',
-          },
-          name: nameColor,
-        }"
-        class="mr-0"
-      />
-      <UIcon
-        name="i-lucide-chevron-down"
-        :class="nameColor"
-        class="mr-1 md:mr-0"
-      />
-    </UButton>
+      color="neutral"
+      :icon="isBar ? undefined : 'i-lucide-building-2'"
+      trailing-icon="i-lucide-chevron-down"
+      :label="label"
+      :class="buttonClass"
+      :ui="isBar ? { label: 'truncate', trailingIcon: 'shrink-0' } : undefined"
+      :style="isBar ? { color: contrastToPrimary } : undefined"
+    />
   </UDropdownMenu>
 </template>
 

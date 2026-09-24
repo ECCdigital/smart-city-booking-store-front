@@ -1,22 +1,24 @@
 <template>
-  <div class="flex items-center gap-2 sm:gap-3">
+  <!-- On a phone the actions sit tight against each other so the language and
+       colour mode buttons still fit on the same line. -->
+  <div class="flex items-center gap-0 sm:gap-3">
     <template v-if="!isAuthenticated">
       <UButton
-        :label="isGreaterThanSm ? 'Anmelden' : ' '"
+        :label="isGreaterThanSm ? t('common.login') : ' '"
         :icon="isGreaterThanSm ? '' : 'i-lucide-log-in'"
         variant="ghost"
-        class="block px-2"
-        :style="{ color: contrastToSecondary }"
+        class="block px-1 sm:px-2"
+        :style="{ color: contrastToPrimary }"
         :to="loginTo"
       />
       <UButton
         v-if="isGreaterThanSm"
-        label="Registrieren"
+        :label="t('common.register')"
         class="hidden sm:block px-4 text-black dark:text-white bg-white dark:bg-black"
         :to="registerTo"
       />
     </template>
-    <div v-else class="flex gap-2 sm:gap-3">
+    <div v-else class="flex sm:gap-3">
       <BookingsDropdown />
       <UserDropdown />
     </div>
@@ -30,7 +32,9 @@ import { useAuthStore } from "~~/stores/auth.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import BookingsDropdown from "~/components/BookingsDropdown.vue";
 
-const { contrastToSecondary } = useContrastColor();
+const { t } = useI18n();
+
+const { contrastToPrimary } = useContrastColor();
 const { isGreaterThanSm } = useBreakpointCheck();
 const authStore = useAuthStore();
 const route = useRoute();

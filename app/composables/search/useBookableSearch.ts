@@ -96,7 +96,6 @@ interface SearchResultItem {
   calculatedPrice?: { userGrossPriceEur: number } | null;
 }
 
-
 interface UseBookableSearchOptions<TItem> {
   sourceItems: ComputedRef<TItem[]> | Ref<TItem[]>;
   isEvent: boolean;
@@ -225,6 +224,10 @@ export function useBookableSearch<TItem extends SearchableItem>(
       });
     }
 
+    if (Array.isArray(query.tenants) && query.tenants.length > 0) {
+      filtered = filtered.filter((b) => query.tenants.includes(b.item.tenantId));
+    }
+
     const maxDistance = query.distance;
     if (query.location && maxDistance !== null) {
       filtered = filtered.filter((b) => {
@@ -297,7 +300,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
   }
 
   const sortedItems = computed(() => {
-    const temp = filteredItems.value.slice().sort((a, b) => {
+    return filteredItems.value.slice().sort((a, b) => {
       //sort by price
       if (query.sortMode === "priceAscending") {
         return getPrice(a) - getPrice(b);
@@ -335,8 +338,6 @@ export function useBookableSearch<TItem extends SearchableItem>(
       }
       return 0;
     });
-    console.log("*A*", temp);
-    return temp;
   });
 
   function getBookableMinPrice(bookable: SearchResultItem) {
@@ -409,6 +410,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
     query.regEv = criteria.regEv ?? query.regEv;
     query.cat = criteria.cat ?? query.cat;
     query.cities = criteria.cities ?? query.cities;
+    query.tenants = criteria.tenants ?? query.tenants;
     query.distance = query.location
       ? (criteria.distance ?? query.distance)
       : null;

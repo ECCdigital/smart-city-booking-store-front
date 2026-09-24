@@ -820,7 +820,7 @@ const submitButtonLabel = computed(() =>
                 color="primary"
                 size="sm"
                 :loading="couponApplying"
-                class="shrink-0 uppercase tracking-wide font-semibold"
+                class="shrink-0 tracking-wide font-semibold"
                 @click="applyCoupon"
               >
                 {{ $t("checkout.review.couponApply") }}
@@ -942,10 +942,9 @@ const submitButtonLabel = computed(() =>
             <div class="text-center">
               <UButton
                 variant="link"
-                color="neutral"
+                color="primary"
                 size="sm"
                 icon="i-lucide-arrow-left"
-                class="text-gray-500"
                 @click="onBack"
               >
                 {{

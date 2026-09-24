@@ -7,36 +7,34 @@ const props = defineProps({
 
 const handleError = () => clearError({ redirect: "/" });
 
-const errorConfig: Record<
-  number,
-  { title: string; icon: string; message: string }
-> = {
+const { t } = useI18n();
+
+const errorConfig = computed<
+  Record<number, { title: string; icon: string; message: string }>
+>(() => ({
   404: {
-    title: "Seite nicht gefunden",
+    title: t("errors.notFoundTitle"),
     icon: "i-lucide-search",
-    message: "Die angeforderte Seite existiert nicht oder wurde verschoben.",
+    message: t("errors.notFoundMessage"),
   },
   403: {
-    title: "Zugriff verweigert",
+    title: t("errors.forbiddenTitle"),
     icon: "i-lucide-lock",
-    message: "Sie haben keine Berechtigung, diese Seite aufzurufen.",
+    message: t("errors.forbiddenMessage"),
   },
   500: {
-    title: "Serverfehler",
+    title: t("errors.serverTitle"),
     icon: "i-lucide-cog",
-    message:
-      "Ein interner Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
+    message: t("errors.serverMessage"),
   },
-};
+}));
 
 const getErrorInfo = (code?: number) =>
-  errorConfig[code ?? 500] ?? {
-    title: "Ein Fehler ist aufgetreten",
+  errorConfig.value[code ?? 500] ?? {
+    title: t("errors.genericTitle"),
     icon: "i-lucide-bug",
-    message: "Etwas ist schiefgelaufen.",
+    message: t("errors.genericMessage"),
   };
-
-const { t } = useI18n();
 
 const pageTitle = computed(() => {
   const code = props.error?.statusCode;
@@ -58,17 +56,21 @@ usePageTitle(pageTitle);
         :name="getErrorInfo(error?.statusCode).icon"
         class="mb-4"
       />
-      <h1 class="error-code">{{ error?.statusCode ?? "Fehler" }}</h1>
+      <h1 class="error-code">{{ error?.statusCode ?? $t("errors.label") }}</h1>
       <h2 class="error-title">{{ getErrorInfo(error?.statusCode).title }}</h2>
       <p class="error-message">{{ getErrorInfo(error?.statusCode).message }}</p>
 
-      <div class="error-details" v-if="error?.url">
+      <div v-if="error?.url" class="error-details">
         <code>{{ error.url }}</code>
       </div>
 
       <div class="error-actions">
-        <button class="btn-primary" @click="handleError">Zur Startseite</button>
-        <button class="btn-secondary" @click="$router.back()">Zurück</button>
+        <button class="btn-primary" @click="handleError">
+          {{ $t("common.toHome") }}
+        </button>
+        <button class="btn-secondary" @click="$router.back()">
+          {{ $t("common.back") }}
+        </button>
       </div>
     </div>
   </PageBackground>
@@ -81,7 +83,10 @@ usePageTitle(pageTitle);
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 .error-card {

@@ -1,8 +1,8 @@
 <template>
   <div class="w-full max-w-xl mx-auto mb-10">
     <PageHeader
-      title="Tür öffnen"
-      description="Sie haben den Code an der Tür gescannt."
+      :title="$t('mobileKey.openDoor')"
+      :description="$t('mobileKey.scannedDescription')"
       class="mb-5"
     />
 
@@ -24,16 +24,16 @@
     <div v-if="stage === 'loading'" class="py-10">
       <AccessPointLoadingSpinner />
       <p class="text-center text-neutral-500 mt-4">
-        Ihre Buchungen werden geprüft …
+        {{ $t("mobileKey.checkingBookings") }}
       </p>
     </div>
 
     <!-- more than one booking is active right now -->
     <div v-else-if="stage === 'select'" class="space-y-4">
       <div>
-        <h2 class="text-lg font-semibold">Welche Buchung?</h2>
+        <h2 class="text-lg font-semibold">{{ $t("mobileKey.whichBooking") }}</h2>
         <p class="text-sm text-neutral-500">
-          Mehrere Ihrer Buchungen passen gerade zu dieser Tür.
+          {{ $t("mobileKey.severalBookingsMatch") }}
         </p>
       </div>
       <UButton
@@ -41,7 +41,7 @@
         :key="candidate.id"
         variant="outline"
         block
-        class="justify-start py-3 cursor-pointer"
+        class="justify-start py-3"
         @click="chooseBooking(candidate)"
       >
         <div class="text-left">
@@ -68,8 +68,8 @@
       @status="(next) => (status = next)"
     >
       <template #exit>
-        <UButton variant="ghost" block to="/mobile-key" class="cursor-pointer">
-          Zur Schlüsselliste
+        <UButton variant="ghost" block to="/mobile-key">
+          {{ $t("mobileKey.toKeyList") }}
         </UButton>
       </template>
     </AccessPointOpenFlow>
@@ -98,8 +98,8 @@
         expanded
       />
 
-      <UButton variant="ghost" block to="/mobile-key" class="cursor-pointer">
-        Zur Schlüsselliste
+      <UButton variant="ghost" block to="/mobile-key">
+        {{ $t("mobileKey.toKeyList") }}
       </UButton>
     </div>
   </div>
@@ -298,7 +298,7 @@ const bookingTimeRange = (candidate) =>
  * The door by name - the wording never says "the door", it says which one.
  * Until the sticker resolves there is no name to say.
  */
-const accessPointLabel = computed(() => scannedLabel.value || "Der Zugang");
+const accessPointLabel = computed(() => scannedLabel.value || t("mobileKey.accessPointFallback"));
 
 watch([tenantId, scanCode], () => {
   start();

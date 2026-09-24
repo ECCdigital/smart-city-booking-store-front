@@ -4,12 +4,12 @@
       <!-- Contact Information Section -->
       <div class="mb-10 space-y-5">
         <div class="flex justify-between md:justify-normal mb-2 md:mb-5">
-          <h3 class="text-xl font-bold">Kontaktdaten</h3>
+          <h3 class="text-xl font-bold">{{ $t("account.contactData") }}</h3>
         </div>
         <div class="md:flex space-y-2 md:space-y-0">
           <SettingsInputField
             field-id="firstName"
-            label="Vorname"
+            :label="$t('common.firstName')"
             :value="currentUser.firstName"
             icon="i-lucide-user"
             class="basis-1/2"
@@ -17,7 +17,7 @@
           />
           <SettingsInputField
             field-id="lastName"
-            label="Nachname"
+            :label="$t('common.lastName')"
             :value="currentUser.lastName"
             icon="i-lucide-user"
             class="basis-1/2"
@@ -27,7 +27,7 @@
         <div class="md:flex space-y-2 md:space-y-0 my-3">
           <SettingsInputField
             field-id="company"
-            label="Firma"
+            :label="$t('common.company')"
             :value="currentUser.company"
             icon="i-lucide-building-2"
             class="basis-1/2"
@@ -37,7 +37,7 @@
         <div class="md:flex space-y-2 md:space-y-0 my-3">
           <SettingsInputField
             field-id="id"
-            label="E-Mail"
+            :label="$t('common.email')"
             :value="currentUser.id"
             icon="i-lucide-mail"
             is-disabled
@@ -45,7 +45,7 @@
           />
           <SettingsInputField
             field-id="phone"
-            label="Telefonnummer"
+            :label="$t('common.phoneNumber')"
             :value="currentUser.phone"
             icon="i-lucide-phone"
             class="basis-1/2"
@@ -55,7 +55,7 @@
         <div class="md:flex space-y-2 md:space-y-0 my-3 mt-6">
           <SettingsInputField
             field-id="address"
-            label="Straße und Hausnummer"
+            :label="$t('common.address')"
             :value="currentUser.address"
             icon="i-lucide-house"
             class="basis-1/2"
@@ -65,7 +65,7 @@
         <div class="md:flex space-y-2 md:space-y-0 my-3 mt-3">
           <SettingsInputField
             field-id="zipCode"
-            label="PLZ"
+            :label="$t('common.zipCode')"
             :value="currentUser.zipCode"
             icon="i-lucide-house"
             class="basis-1/2"
@@ -73,7 +73,7 @@
           />
           <SettingsInputField
             field-id="city"
-            label="Stadt"
+            :label="$t('common.city')"
             :value="currentUser.city"
             icon="i-lucide-house"
             class="basis-1/2"
@@ -85,10 +85,10 @@
       <!-- Security Information Section -->
       <div class="mb-10 space-y-5">
         <div class="flex justify-between md:justify-normal mb-2 md:mb-5">
-          <h3 class="text-xl font-bold">Sicherheit</h3>
+          <h3 class="text-xl font-bold">{{ $t("account.security") }}</h3>
         </div>
         <div class="flex basis-1/2 mb-5">
-          Account verifiziert?
+          {{ $t("account.accountVerified") }}
           <UIcon
             v-if="currentUser.isVerified"
             name="i-lucide-square-check-big"
@@ -101,11 +101,11 @@
           />
         </div>
         <div class="flex items-center basis-1/2 mb-5 md:mb-2">
-          Passwort:
+          {{ $t("account.passwordLabel") }}
           <UButton
             v-if="!enableEditingPassword"
             icon="i-lucide-edit"
-            label="Passwort ändern"
+            :label="$t('account.changePassword')"
             class="ml-2"
             @click="() => (enableEditingPassword = true)"
           />
@@ -118,7 +118,7 @@
           <div class="basis-1/2 mb-5 md:mb-2">
             <PasswordInput
               v-model="newPassword"
-              label="Neues Passwort"
+              :label="$t('common.newPassword')"
               input-style-classes="w-full md:w-[70%]"
             />
             <PasswordProgress
@@ -128,7 +128,7 @@
           </div>
           <PasswordInput
             v-model="repeatedPassword"
-            label="Neues Passwort (Wiederholung)"
+            :label="$t('account.newPasswordRepeat')"
             input-style-classes="w-full md:w-[70%]"
             class="basis-1/2"
           />
@@ -136,7 +136,7 @@
         <UButton
           v-if="enableEditingPassword"
           icon="i-lucide-save"
-          label="Speichern"
+          :label="$t('common.save')"
           color="primary"
           variant="solid"
           class="mt-2 md:mt-3"
@@ -152,18 +152,18 @@
       <div
         class="mx-auto flex w-full max-w-5xl items-center justify-between gap-3"
       >
-        <span class="text-sm">Sie haben nicht gespeicherte Änderungen.</span>
+        <span class="text-sm">{{ $t("common.unsavedChanges") }}</span>
         <div class="flex items-center gap-2">
           <UButton
             icon="i-lucide-save"
-            label="Speichern"
+            :label="$t('common.save')"
             color="primary"
             variant="solid"
             @click="saveUpdatedUser()"
           />
           <UButton
             icon="i-lucide-rotate-ccw"
-            label="Zurücksetzen"
+            :label="$t('common.reset')"
             color="neutral"
             variant="soft"
             @click="resetUserChanges()"
@@ -178,6 +178,8 @@ import SettingsInputField from "~/components/user/settings/SettingsInputField.vu
 import { useAuthStore } from "~~/stores/auth.js";
 import PasswordInput from "~/components/auth/PasswordInput.vue";
 import PasswordProgress from "~/components/auth/PasswordProgress.vue";
+
+const { t } = useI18n();
 
 const props = defineProps({
   user: {
@@ -208,8 +210,8 @@ onBeforeRouteLeave(() => {
   }
 
   notification.error(
-    "Sie haben nicht gespeicherte Änderungen. Bitte speichern oder verwerfen Sie diese, bevor Sie die Seite verlassen.",
-    "Nicht gespeicherte Änderungen",
+    t("common.unsavedChangesLeave"),
+    t("common.unsavedChangesTitle"),
   );
 
   return false;
@@ -230,8 +232,8 @@ async function saveUpdatedUser() {
   currentUser.value = cloneUser(currentUser.value);
   formVersion.value += 1;
   notification.success(
-    "Ihre Änderungen wurden erfolgreich gespeichert.",
-    "Änderungen gespeichert",
+    t("account.changesSavedMessage"),
+    t("account.changesSaved"),
   );
 
   enableEditingContactInfo.value = false;
@@ -245,15 +247,15 @@ function resetUserChanges() {
 function changePassword() {
   if (newPassword.value !== repeatedPassword.value) {
     notification.error(
-      "Die eingegebenen Passwörter stimmen nicht überein.",
-      "Passwortänderung fehlgeschlagen",
+      t("account.passwordMismatch"),
+      t("account.passwordChangeFailed"),
     );
     return;
   }
   authStore.changePassword(currentUser.value.id, newPassword.value);
   notification.success(
-    "Ihr Passwort wurde erfolgreich geändert.",
-    "Passwort geändert",
+    t("account.passwordChangedMessage"),
+    t("account.passwordChanged"),
   );
   enableEditingPassword.value = false;
   newPassword.value = "";

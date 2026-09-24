@@ -2,8 +2,8 @@
   <div class="w-full">
     <div class="md:flex justify-between items-center w-full mb-4">
       <PageHeader
-        title="Ihre Schlüssel"
-        description="Öffnen und schließen Sie Türen im Zeitraum Ihrer Buchung."
+        :title="$t('mobileKey.yourKeys')"
+        :description="$t('mobileKey.yourKeysDescription')"
         class="mb-3 md:mb-0"
       />
       <!-- toDo - Suchleiste für Schlüssel??? -->
@@ -18,16 +18,16 @@
         <UButton
           icon="i-lucide-list"
           :variant="viewMode === 'list' ? 'subtle' : 'ghost'"
-          label="Liste"
-          class="p-3 cursor-pointer"
+          :label="$t('mobileKey.viewList')"
+          class="p-3"
           @click="() => (viewMode = 'list')"
         />
         <!--
         <UButton
           icon="i-lucide-map"
           :variant="viewMode === 'map' ? 'subtle' : 'ghost'"
-          label="Raumkarte"
-          class="p-3 cursor-pointer"
+          :label="$t('mobileKey.viewMap')"
+          class="p-3"
           disabled
           @click="() => (viewMode = 'map')"
         />
@@ -85,12 +85,15 @@ const tenantStore = useTenantStore();
 
 const viewMode = ref("list");
 
-const filterOptions = [
-  { label: "Aktive", value: "active" },
-  { label: "Kommende", value: "upcoming" },
-  { label: "Vergangene", value: "past" },
-  { label: "Alle", value: "all" },
-];
+// `computed`, not a plain array: a `t()` call evaluated once at setup keeps the
+// language that happened to be active when the component was created and never
+// follows a switch.
+const filterOptions = computed(() => [
+  { label: t("booking.filter.active"), value: "active" },
+  { label: t("booking.filter.upcoming"), value: "upcoming" },
+  { label: t("booking.filter.past"), value: "past" },
+  { label: t("booking.filter.all"), value: "all" },
+]);
 const bookingFilter = ref("active");
 watch(bookingFilter, () => {
   loadBookings();
@@ -201,7 +204,7 @@ const withLoading = async (key, callback) => {
     await callback();
   } catch (error) {
     errorMessage.value =
-      error?.statusMessage || error?.message || "Unbekannter API-Fehler";
+      error?.statusMessage || error?.message || t("mobileKey.unknownApiError");
   } finally {
     loadingKey.value = "";
   }

@@ -10,7 +10,7 @@
         icon="i-lucide-map-pin"
         size="lg"
         variant="ghost"
-        placeholder="Adresse"
+        :placeholder="$t('filter.address')"
         class="w-full rounded-md dark:bg-gray-700"
         :ui="{
           base: 'w-full pr-1 placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent focus:bg-transparent rounded-none rounded-l-md',
@@ -33,7 +33,7 @@
                 v-if="item.isManualEntry"
                 class="text-xs text-gray-500 italic"
               >
-                Adresse ohne Koordinaten und Umkreissuche nutzen
+                {{ $t("filter.addressWithoutCoordinates") }}
               </span>
             </div>
           </div>

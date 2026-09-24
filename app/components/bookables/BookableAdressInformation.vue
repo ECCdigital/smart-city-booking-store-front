@@ -1,15 +1,22 @@
 <template>
   <div>
     <div class="flex">
-      <div class="grid place-content-center">
+      <div class="grid place-content-center shrink-0">
         <UIcon name="i-lucide-map-pin" class="size-5" />
       </div>
-      <div v-if="location.length" class="p-3">{{ location }}</div>
-      <div v-else class="italic p-3">Keine Adresse bekannt.</div>
+      <div
+        v-if="location.length"
+        class="p-3 min-w-0 whitespace-normal break-words"
+      >
+        {{ location }}
+      </div>
+      <div v-else class="italic p-3 min-w-0 whitespace-normal">
+        {{ $t("bookableDetail.noAddress") }}
+      </div>
       <div class="flex-1" />
       <div
         v-if="location.length && enableCopyButton"
-        class="grid place-content-center"
+        class="grid place-content-center shrink-0"
       >
         <UIcon
           name="i-lucide-copy"
@@ -21,12 +28,15 @@
     <p v-if="showDistance && hasLocationParam && location.length">
       <UIcon name="i-lucide-navigation" class="size-5" />
       <span v-if="distance != null" class="p-3">{{ distance }} km </span>
-      <span v-else class="italic p-3">Distanz nicht ermittelbar. </span>
+      <span v-else class="italic p-3">{{ $t("common.distanceUnknown") }} </span>
     </p>
   </div>
 </template>
 <script setup>
 import { useRoute } from "#imports";
+
+const { t } = useI18n();
+
 
 const props = defineProps({
   bookable: {
@@ -64,9 +74,9 @@ const location = computed(() => {
 const distance = computed(() => {
   if (props.bookable.distanceMeter == null) return null;
   return (props.bookable.distanceMeter / 1000)
-      .toFixed(2)
-      .replace(".", ",")
-      .replace(/,00$/, "");
+    .toFixed(2)
+    .replace(".", ",")
+    .replace(/,00$/, "");
 });
 
 const copyAddressToClipboard = async () => {
@@ -74,8 +84,8 @@ const copyAddressToClipboard = async () => {
     await navigator.clipboard.writeText(location.value);
     const notification = useNotification();
     notification.success(
-      "Die Adresse wurde in Ihre Zwischenablage kopiert.",
-      "Adresse erfolgreich kopiert!",
+      t("bookableDetail.addressCopiedMessage"),
+      t("bookableDetail.addressCopiedTitle"),
     );
   }
 };

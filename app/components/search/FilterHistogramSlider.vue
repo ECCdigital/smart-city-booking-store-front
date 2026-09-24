@@ -8,8 +8,12 @@
         <div
           v-for="(count, index) in bars"
           :key="index"
-          class="absolute bottom-0 w-2 bg-primary opacity-40 transition-opacity -translate-x-1/2"
-          :class="{ 'opacity-80': isBarActive(index) }"
+          class="absolute bottom-0 w-2 transition-opacity -translate-x-1/2"
+          :class="
+            isBarActive(index)
+              ? 'bg-secondary opacity-80'
+              : 'bg-primary opacity-40'
+          "
           style="max-height: 50px"
           :style="{
             left: `calc(${(index / (bars.length - 1)) * 100}% - 6px)`,
@@ -26,8 +30,12 @@
       <div
         v-for="(count, index) in bars"
         :key="index"
-        class="w-full bg-primary opacity-40 mr-1 transition-opacity"
-        :class="{ 'opacity-80': isBarActive(index) }"
+        class="w-full mr-1 transition-opacity"
+        :class="
+          isBarActive(index)
+            ? 'bg-secondary opacity-80'
+            : 'bg-primary opacity-40'
+        "
         style="max-height: 50px"
         :style="{
           height: (count / maxBar) * 50 + 'px',
@@ -37,6 +45,7 @@
 
     <USlider
       v-model="modelValue"
+      color="secondary"
       :min="min"
       :max="max"
       :step="step"

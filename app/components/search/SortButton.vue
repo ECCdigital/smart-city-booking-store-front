@@ -6,7 +6,7 @@
     }"
   >
     <UButton
-      :label="'Sortieren: ' + displaySortMode()"
+      :label="$t('filter.sort.button', { mode: displaySortMode() })"
       icon="i-lucide-arrow-up-down"
       color="neutral"
       variant="soft"
@@ -15,6 +15,9 @@
   </UDropdownMenu>
 </template>
 <script setup>
+
+const { t } = useI18n();
+
 const emit = defineEmits(["sort"]);
 
 const props = defineProps({
@@ -41,7 +44,7 @@ const sortOptions = computed(() => {
     options.push(
       {
         value: "distanceAscending",
-        label: "Distanz (aufsteigend)",
+        label: t("filter.sort.distanceAsc"),
         icon: "i-lucide-arrow-up",
         class: computed(() =>
           _sortMode.value === "distanceAscending" ? "bg-primary/10" : "",
@@ -53,7 +56,7 @@ const sortOptions = computed(() => {
       },
       {
         value: "distanceDescending",
-        label: "Distanz (absteigend)",
+        label: t("filter.sort.distanceDesc"),
         icon: "i-lucide-arrow-down",
         class: computed(() =>
           _sortMode.value === "distanceDescending" ? "bg-primary/10" : "",
@@ -68,7 +71,7 @@ const sortOptions = computed(() => {
   options.push(
     {
       value: "alphabeticAscending",
-      label: "Alphabetisch (aufsteigend)",
+      label: t("filter.sort.alphaAsc"),
       icon: "i-lucide-arrow-up",
       class: computed(() =>
         _sortMode.value === "alphabeticAscending" ? "bg-primary/10" : "",
@@ -80,7 +83,7 @@ const sortOptions = computed(() => {
     },
     {
       value: "alphabeticDescending",
-      label: "Alphabetisch (absteigend)",
+      label: t("filter.sort.alphaDesc"),
       icon: "i-lucide-arrow-down",
       class: computed(() =>
         _sortMode.value === "alphabeticDescending" ? "bg-primary/10" : "",
@@ -92,7 +95,7 @@ const sortOptions = computed(() => {
     },
     {
       value: "priceAscending",
-      label: "Preis (aufsteigend)",
+      label: t("filter.sort.priceAsc"),
       icon: "i-lucide-arrow-up",
       class: computed(() =>
         _sortMode.value === "priceAscending" ? "bg-primary/10" : "",
@@ -104,7 +107,7 @@ const sortOptions = computed(() => {
     },
     {
       value: "priceDescending",
-      label: "Preis (absteigend)",
+      label: t("filter.sort.priceDesc"),
       icon: "i-lucide-arrow-down",
       class: computed(() =>
         _sortMode.value === "priceDescending" ? "bg-primary/10" : "",

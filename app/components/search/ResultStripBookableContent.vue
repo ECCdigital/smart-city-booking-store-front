@@ -1,27 +1,47 @@
 <template>
   <div
-    class="basis-3/4 flex flex-col justify-between"
+    class="basis-3/4 flex flex-col justify-between gap-2"
     :class="mapMode ? 'p-2' : 'p-4'"
   >
-    <div>
+    <div class="flex flex-col gap-2">
       <!-- Title -->
       <div class="cursor-pointer" @click="openDetails()">
         <p
           class="font-bold"
-          :class="hasLongTitle ? 'text-base line-clamp-2' : 'text-lg'"
+          :class="
+            mapListMode
+              ? 'text-base line-clamp-2'
+              : hasLongTitle
+                ? 'text-base line-clamp-2'
+                : 'text-lg'
+          "
         >
           {{ bookable?.title }}
         </p>
-        <p>{{ getTenantName(bookable.tenantId) }}</p>
+        <p :class="mapListMode ? 'text-sm' : ''">
+          {{ getTenantName(bookable.tenantId) }}
+        </p>
       </div>
 
-      <!-- Adresse und Entfernung -->
-      <BookableAdressInformation
-        :bookable="bookable"
-        show-distance
-        class="w-full"
-        :class="mapMode ? 'text-sm my-1' : 'my-5'"
-      />
+      <!-- Adresse, Entfernung und Beschreibung -->
+      <div
+        v-if="!mapListMode || hasDescription"
+        class="w-full flex flex-col gap-1"
+      >
+        <BookableAdressInformation
+          v-if="!mapListMode"
+          :bookable="bookable"
+          show-distance
+          class="w-full"
+          :class="mapMode ? 'text-sm' : ''"
+        />
+        <div
+          v-if="hasDescription"
+          class="text-sm line-clamp-3"
+          v-html="htmlDescription"
+        />
+      </div>
+
       <USeparator
         v-if="!mapMode"
         color="neutral"
@@ -31,15 +51,19 @@
     </div>
 
     <div
-      class="flex h-full"
-      :class="mapMode ? 'justify-start' : 'overflow-hidden justify-between'"
+      class="flex gap-2"
+      :class="mapMode ? 'justify-start' : 'justify-between items-end'"
     >
       <!-- Eigenschaften -->
-      <div v-if="!mapMode" class="basis-3/5 w-full my-2">
+      <div v-if="!mapMode && hasFlags" class="basis-3/5 min-w-0 self-center">
         <BookableFlagDisplay :flags="bookable?.flags" class="line-clamp-3" />
       </div>
 
-      <div class="w-full content-end" :class="mapMode ? '' : 'basis-2/5 grid '">
+      <div
+        v-if="!mapListMode"
+        class="content-end"
+        :class="mapMode ? 'w-full' : 'basis-2/5 ml-auto grid'"
+      >
         <!-- Preis -->
         <BookablePriceDisplay
           v-if="!isNotBookable && !isNotSuitable"
@@ -55,7 +79,7 @@
           class="w-full mt-2 flex justify-end content-end gap-2"
         >
           <UButton
-            label="Details ansehen"
+            :label="$t('bookableDetail.viewDetails')"
             variant="outline"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer' }"
@@ -63,11 +87,11 @@
           />
           <UTooltip
             :show="isNotBookable"
-            text="Prüfen Sie zur Buchung die Optionen in den Details."
+            :text="$t('bookableDetail.checkOptionsHint')"
           >
             <UButton
               v-if="!isNotSuitable && !entryPageMode"
-              label="Buchen"
+              :label="$t('booking.book')"
               class="justify-center px-10"
               :disabled="isNotBookable"
               :style="{
@@ -85,7 +109,7 @@
         >
           <UButton
             v-if="!isNotBookable"
-            label="Details ansehen"
+            :label="$t('bookableDetail.viewDetails')"
             variant="solid"
             class="justify-center px-10 text-color-dark dark:text-color-light"
             :style="{ cursor: 'pointer', color: contrastToPrimary }"
@@ -100,6 +124,7 @@
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
+import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 
@@ -132,6 +157,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  mapListMode: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["openDetails"]);
@@ -139,6 +168,21 @@ const emit = defineEmits(["openDetails"]);
 const hasLongTitle = computed(() => {
   return (props.bookable?.title?.length ?? 0) > 60;
 });
+const { sanitizeHtml } = useSanitizeHtml();
+const htmlDescription = computed(() => {
+  return sanitizeHtml(props.bookable?.description || "");
+});
+// Markup alone is not content: an empty paragraph from the editor must not
+// reserve three lines in the strip.
+const hasDescription = computed(
+  () =>
+    htmlDescription.value
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim().length > 0,
+);
+
+const hasFlags = computed(() => (props.bookable?.flags?.length ?? 0) > 0);
 
 const { getTenantName } = useTenant();
 

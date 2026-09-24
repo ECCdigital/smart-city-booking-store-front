@@ -2,17 +2,17 @@ export const navigationPresets = {
   user: [
     {
       value: null,
-      label: "Aktivitäten",
+      labelKey: "navigation.activities",
     },
     {
       value: "/account/bookings",
-      label: "Buchungen",
+      labelKey: "navigation.bookings",
       icon: "i-lucide-book-marked",
       disabled: false,
     },
     {
       value: "/mobile-key",
-      label: "Schlüssel",
+      labelKey: "navigation.keys",
       icon: "i-lucide-key-round",
       disabled: false,
     },
@@ -25,17 +25,17 @@ export const navigationPresets = {
     },*/
     {
       value: "/account/invoices",
-      label: "Rechnungen",
+      labelKey: "navigation.invoices",
       icon: "i-lucide-wallet-cards",
       disabled: false,
     },
     {
       value: null,
-      label: "Benutzerkonto",
+      labelKey: "navigation.account",
     },
     {
       value: "/account/settings",
-      label: "Einstellungen",
+      labelKey: "navigation.settings",
       icon: "i-lucide-user-round-pen",
       disabled: false,
     },

@@ -379,7 +379,7 @@ const passedFailureKind = ref(null);
 const evidenceCollectedHere = ref([]);
 
 const bookingId = computed(() => String(props.booking.id));
-const accessPointLabel = computed(() => props.accessPoint.label || "Der Zugang");
+const accessPointLabel = computed(() => props.accessPoint.label || t("mobileKey.accessPointFallback"));
 
 /**
  * The proof in hand, wherever it came from - the scan URL (#3) or the scanner

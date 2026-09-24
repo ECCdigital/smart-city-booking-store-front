@@ -55,6 +55,25 @@
     }
   },
   "common": {
+    "actions": "Actions",
+    "clearInput": "Clear input",
+    "phoneNumber": "Phone number",
+    "comingSoon": "Coming soon",
+    "backToLogin": "Back to sign-in",
+    "unsavedChangesTitle": "Unsaved changes",
+    "unsavedChangesLeave": "You have unsaved changes. Save or discard them before you leave the page.",
+    "save": "Save",
+    "reset": "Reset",
+    "toHome": "To the home page",
+    "showAll": "Show all",
+    "showLess": "Show less",
+    "clearEntry": "Clear entry",
+    "searchPlaceholder": "Search...",
+    "imageLoadFailed": "Image could not be loaded",
+    "unsavedChanges": "You have unsaved changes.",
+    "distanceUnknown": "Distance unavailable.",
+    "addressNotFound": "Address could not be found.",
+    "featureUnavailable": "This feature is currently unavailable.",
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "repeatPassword": "Repeat Password",
@@ -81,9 +100,12 @@
     "mandatory": "Mandatory",
     "obligation": "Required",
     "phone": "Phone",
+    "completeAddress": "Address",
     "address": "Street and number",
     "zipCode": "Postal code",
     "city": "City",
+    "clear": "Clear",
+    "retry": "Retry",
     "imageNotFound": "Image not found"
   },
   "footer": {
@@ -95,6 +117,128 @@
     "toggle": "Colour mode",
     "switchToDark": "Dark theme",
     "switchToLight": "Light theme"
+  },
+  "language": {
+    "toggle": "Language",
+    "switchTo": "Switch language to {language}"
+  },
+  "catalog": {
+    "marketplace": "Marketplace",
+    "categories": {
+      "eventLocationTitle": "Event venues",
+      "eventLocationDescription": "Event venues near you",
+      "roomTitle": "Rooms",
+      "roomDescription": "Co-working spaces, seminar rooms and more",
+      "resourceTitle": "Equipment and more",
+      "resourceDescription": "Rent equipment, vehicles and more",
+      "eventTitle": "Events",
+      "eventDescription": "Events and courses near you"
+    },
+    "offersAndEvents": "Our offers and events",
+    "type": "What would you like to book?",
+    "bookables": "Bookable items",
+    "events": "Events"
+  },
+  "tenants": {
+    "selectTenant": "Select tenant",
+    "tenant": "Tenant",
+    "tenants": "Tenants",
+    "clearSelection": "Clear selection"
+  },
+  "navigation": {
+    "keys": "Keys",
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "bookings": "Bookings",
+    "accountBookings": "My bookings",
+    "activities": "Activity",
+    "digitalKeys": "Digital keys",
+    "invoices": "Invoices",
+    "account": "Account",
+    "resources": "Resources",
+    "user": "User",
+    "reports": "Reports",
+    "admin": "Admin area",
+    "settings": "Settings",
+    "backToHome": "Back to the home page"
+  },
+  "events": {
+    "forThisEvent": "For this event, {status}.",
+    "isFreeToAttend": "You can attend without booking.",
+    "notPublicShort": "This event is not public and cannot be booked.",
+    "noTicketsShort": "There are no tickets available for this event.",
+    "chooseTicketOption": "Choose one of the following ticket options to book:",
+    "showAllEvents": "View all events",
+    "upcoming": "Upcoming events",
+    "ticketOptions": "Ticket options",
+    "ticketOptionsAndAvailability": "Ticket options and availability",
+    "selectDatesHint": "Pick dates to see availability and prices.",
+    "bookAtProvider": "Book with the provider",
+    "notPublicTitle": "Not a public event.",
+    "notPublicDescription": "This event is not public, so it cannot be booked.",
+    "noRegistrationTitle": "No registration needed.",
+    "noRegistrationDescription": "This event needs no registration. You can attend without signing up first.",
+    "noTicketsTitle": "No tickets available.",
+    "noTicketsDescription": "This event has no ticket options at the moment.",
+    "noRegistrationNeeded": "No registration needed",
+    "noRegistrationNeededShort": "no registration needed",
+    "publicNoRegistration": "This event is public and can be attended without registration.",
+    "soldOut": "This ticket type is sold out.",
+    "selectTicketOption": "Select a ticket option",
+    "noEvent": "No event found",
+    "noEvents": "No events found"
+  },
+  "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundMessage": "The page you asked for does not exist or has moved.",
+    "forbiddenTitle": "Access denied",
+    "forbiddenMessage": "You do not have permission to open this page.",
+    "serverTitle": "Server error",
+    "serverMessage": "Something went wrong on our side. Please try again later.",
+    "genericTitle": "Something went wrong",
+    "genericMessage": "Something went wrong.",
+    "label": "Error",
+    "noCatalog": "No catalogue found"
+  },
+  "filter": {
+    "address": "Address",
+    "period": "Time",
+    "addressWithoutCoordinates": "Use this address without coordinates and radius search",
+    "searchTypeRequired": "Please choose what you are looking for.",
+    "sort": {
+      "button": "Sort by: {mode}",
+      "distanceAsc": "Distance (nearest first)",
+      "distanceDesc": "Distance (furthest first)",
+      "alphaAsc": "Alphabetical (A to Z)",
+      "alphaDesc": "Alphabetical (Z to A)",
+      "priceAsc": "Price (lowest first)",
+      "priceDesc": "Price (highest first)"
+    },
+    "title": "Filter results",
+    "open": "Filter",
+    "reset": "Reset filters",
+    "remove": "Remove filters",
+    "apply": "Apply filters",
+    "includeNonSuitable": "Show items that do not match.",
+    "onlyPublicEvents": "Show public events only.",
+    "onlyRegistrationNeeded": "Show events that need registration only.",
+    "category": "Category",
+    "cities": "Places",
+    "distance": "Distance",
+    "price": "Price",
+    "more": "More filters",
+    "nonSuitable": "Items that do not match",
+    "noResults": "No items found.",
+    "searchType": "What are you looking for?",
+    "keyword": "Keyword",
+    "categories": {
+      "room": "Rooms",
+      "eventLocation": "Event venues",
+      "resource": "Equipment",
+      "ticket": "Tickets"
+    },
+    "fittingResults": "matching results",
+    "provider": "Provider"
   },
   "checkout": {
     "noBookable": "No matching resources found",
@@ -145,7 +289,8 @@
       "loggedInDescription": "You can sign out and continue this booking as a guest instead.",
       "logoutGuestAction": "Sign out and continue as guest",
       "customFieldsSectionTitle": "Additional details",
-      "customFieldSelectPlaceholder": "Please select"
+      "customFieldSelectPlaceholder": "Please select",
+      "invalidEmailHint": "That email address is not valid."
     },
     "permissionGuard": {
       "loggedOutTitle": "Sign-in required",
@@ -346,8 +491,10 @@
       "thankYouRequestTitle": "Thank you for your request",
       "thankYouRequestBody": "Your booking request was submitted successfully.",
       "closeWindowHint": "You can close this window now or return to the home page to start another booking.",
-      "invoiceMailHint": "The invoice will be sent shortly to the email address you provided."
-    }
+      "invoiceMailHint": "The invoice will be sent shortly to the email address you provided.",
+      "bookableTitle": "Booked item"
+    },
+    "generateGroupBooking": "No recurring booking created"
   },
   "stepper": {
     "stepOf": "Step {current} of {total}",
@@ -356,6 +503,19 @@
     "finish": "Finish"
   },
   "timePeriods": {
+    "start": "Start",
+    "end": "End",
+    "now": "Now",
+    "needStartDate": "Please pick a start date.",
+    "needStartTime": "Please enter a start time.",
+    "needEndTime": "Please enter an end time.",
+    "endBeforeStart": "The end time must be after the start time.",
+    "noTimes": "No times given",
+    "selectPeriod": "Select a period",
+    "selectPeriodDescription": "Set start and end of the booking.",
+    "openCalendar": "Open the calendar",
+    "selectTimeTitle": "Select a time",
+    "time": "Time",
     "selectDate": "Select date",
     "previousDays": "Show earlier days",
     "laterDays": "Show later days",
@@ -370,16 +530,15 @@
     "legendFullyBooked": "Fully booked",
     "legendClosed": "Not bookable"
   },
-
   "weekSelection": {
     "subtitle": "Select a calendar week",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "available": "Available",
     "occupied": "Occupied",
-    "past": "Past"
+    "past": "Past",
+    "selected": "Selected week"
   },
-
   "monthSelection": {
     "subtitle": "Select a month",
     "previousYear": "Previous year",
@@ -389,8 +548,26 @@
     "past": "Past",
     "selected": "Selected month"
   },
-
   "bookableDetail": {
+    "notFound": "Not found",
+    "cancellationTitleShort": "Cancellation terms",
+    "cancellationHint": "The earlier you cancel, the higher the refund.",
+    "refund": "refund",
+    "onStartDay": "On the start day",
+    "untilOneDayBefore": "Up to 1 day before the start",
+    "untilDaysBefore": "Up to {days} days before the start",
+    "organiser": "Organiser:",
+    "noAddress": "No address available.",
+    "addressCopiedTitle": "Address copied",
+    "addressCopiedMessage": "The address has been copied to your clipboard.",
+    "viewDetails": "View details",
+    "view": "View",
+    "showMore": "Show more",
+    "moreFlags": "+ {count} more",
+    "share": "Share",
+    "linkCopiedTitle": "Link copied",
+    "linkCopiedMessage": "The link to this search has been copied to your clipboard.",
+    "checkOptionsHint": "Open the details to see the booking options.",
     "bookNow": "Book now",
     "viewBookingOptions": "View booking options",
     "book": "Book",
@@ -406,7 +583,6 @@
       "showImage": "Show image {index}"
     }
   },
-
   "detailsAvailability": {
     "title": "Availability",
     "selectPeriodHint": "Select a time period to see availability and prices.",
@@ -415,9 +591,10 @@
     "longRangeWeekHint": "Select a calendar week.",
     "longRangeMonthHint": "Select a month.",
     "blockPeriodHint": "Select a booking time window.",
-    "noTimeSelection": "No time period selection is required for this object."
+    "noTimeSelection": "No time period selection is required for this object.",
+    "groupBookingDescription": "This item can be booked several times at a fixed interval. Choose the start and end time of your first booking and we will work out the following dates.",
+    "groupBookingTitle": "Recurring bookings possible"
   },
-
   "bookingTimeWindowSelection": {
     "subtitle": "Select a booking time window.",
     "previousMonth": "Previous month",
@@ -436,7 +613,6 @@
       "6": "Sat"
     }
   },
-
   "status": {
     "awaiting_approval": "Awaiting approval from the provider",
     "payment_expected": "Payment required to complete the booking",
@@ -444,9 +620,99 @@
     "rejected": "Rejected or cancelled",
     "confirmed_without_payment": "Completed (free of charge)"
   },
-
   "booking": {
+    "emptyTitle": "No bookings yet",
+    "emptyDescription": "You have not made any bookings yet.",
+    "typeRoom": "Room booking",
+    "typeResource": "Equipment booking",
+    "typeTicket": "Ticket booking",
+    "typeEvent": "Event booking",
+    "typeAdditional": "Additional booking",
+    "book": "Book",
+    "attachmentFor": "{type} for {bookable}",
+    "accepted": "Accepted:",
+    "unknownBookable": "Unknown bookable",
+    "bookedAt": "Booked on:",
+    "createdAt": "Created:",
+    "goToBookable": "Go to the bookable item",
+    "goToEvent": "Go to the event",
+    "unitPrice": "Unit price:",
+    "quantity": "Quantity:",
+    "number": "Booking number",
+    "bookedOn": "Booked on",
+    "statusLabel": "Status",
+    "period": "Booking period",
+    "paymentInformation": "Payment information",
+    "total": "Total",
+    "paymentMethod": "Payment method",
+    "active": "Active",
+    "eventTime": "Event time",
+    "priceLabel": "Price:",
+    "downloadAppointment": "Download appointment",
+    "downloadAppointmentTooltip": "Download as an appointment",
+    "comment": "Your comment",
+    "attachmentTypes": {
+      "invoice": "Invoice",
+      "receipt": "Payment receipt",
+      "agreement": "User agreement",
+      "privacyAgreement": "Privacy policy",
+      "userManual": "User manual",
+      "securityInformation": "Safety information",
+      "productInformation": "Product information",
+      "unknown": "Unknown attachment type"
+    },
+    "download": {
+      "failedTitle": "Download failed",
+      "failedMessage": "The document could not be downloaded."
+    },
+    "errors": {
+      "notFoundTitle": "Page not found",
+      "notFoundMessage": "The page you asked for does not exist or has moved.",
+      "forbiddenTitle": "Access denied",
+      "forbiddenMessage": "You do not have permission to open this page.",
+      "serverTitle": "Server error",
+      "serverMessage": "Something went wrong on our side. Please try again later.",
+      "genericTitle": "Something went wrong",
+      "genericMessage": "Something went wrong.",
+      "label": "Error"
+    },
+    "filter": {
+      "active": "Active",
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "all": "All",
+      "filterBy": "Filter by:",
+      "sortBy": "Sort by:",
+      "activeBookings": "Active bookings",
+      "status": "Status:",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled or rejected",
+      "pending": "Pending",
+      "paymentStatus": "Payment status:",
+      "paid": "Paid",
+      "unpaid": "Not paid"
+    },
+    "sort": {
+      "titleAsc": "Title (A to Z)",
+      "titleDesc": "Title (Z to A)",
+      "periodAsc": "Period (earliest first)",
+      "periodDesc": "Period (latest first)",
+      "priceAsc": "Price (lowest first)",
+      "priceDesc": "Price (highest first)",
+      "bookedAtDesc": "Booked on (newest first)",
+      "bookedAtAsc": "Booked on (oldest first)"
+    },
     "payment": {
+      "methods": {
+        "invoice": "Invoice",
+        "cash": "Cash",
+        "transfer": "Bank transfer",
+        "creditCard": "Credit card",
+        "debitCard": "Debit card",
+        "other": "Other",
+        "sofort": "SOFORT bank transfer",
+        "notSpecified": "Not specified"
+      },
       "free": "Free of charge",
       "paid": "Paid",
       "unpaid": "Unpaid"
@@ -460,15 +726,50 @@
       "cancelled": "Cancelled"
     }
   },
-
   "account": {
+    "favoritesEmpty": "Nothing to see here yet. Anything you save will appear here.",
+    "contactData": "Contact details",
+    "security": "Security",
+    "accountVerified": "Account verified?",
+    "passwordLabel": "Password:",
+    "passwordChanged": "Password changed",
+    "passwordChangedMessage": "Your password has been changed.",
+    "languages": {
+      "de": "German",
+      "en": "English",
+      "fr": "French",
+      "es": "Spanish"
+    },
+    "settingsPersonalData": "Personal details",
+    "settingsAppearance": "Appearance",
+    "appearanceTitle": "Appearance",
+    "appearanceColorScheme": "Colour scheme",
+    "appearanceLanguage": "Language",
+    "appearanceDisplayLanguage": "Display language",
+    "appearanceDark": "Dark",
+    "appearanceLight": "Light",
+    "changesSaved": "Changes saved",
+    "changesSavedMessage": "Your changes have been saved.",
+    "passwordMismatch": "The passwords you entered do not match.",
+    "passwordChangeFailed": "Password change failed",
+    "activities": "My activity",
+    "digitalKeys": "Digital keys",
+    "digitalKeysDescription": "Open doors, lockers and bike boxes with your phone.",
+    "quickBookDescription": "Book the items you use and save often, again in moments.",
+    "invoicesShortDescription": "Every invoice and receipt in one place.",
+    "invoicesDescription": "Here you will find your invoices and payment receipts.",
+    "favoritesTitle": "Your favourites",
+    "favoritesSoon": "Your favourites are coming soon",
+    "appearanceDescription": "Manage how the app looks. You can switch between a light and a dark theme, and change the language of the interface.",
+    "bookedItems": "Booked items",
+    "invoicesAndReceipts": "Invoices and receipts",
+    "attachments": "Attachments",
+    "changePassword": "Change password",
+    "newPasswordRepeat": "New password (repeat)",
     "bookingDetails": {
       "rejectionReason": "Reason for rejection",
       "cancellationReason": "Reason for cancellation"
-    }
-  },
-
-  "account": {
+    },
     "invoices": {
       "title": "Your invoices and receipts",
       "emptyTitle": "No invoices available",
@@ -489,20 +790,17 @@
       }
     }
   },
-
   "booking_status": {
     "missing_parameters": "Required information is missing.",
     "internal_error": "A technical error occurred. Please try again later.",
     "booking_not_found": "This booking was not found."
   },
-
   "inputDate": {
     "openPicker": "Select date",
     "clear": "Clear date",
     "dialogTitle": "Select date",
     "dialogDescription": "Choose the desired date."
   },
-
   "scheduleSelection": {
     "availability": "Availability",
     "weekOverview": "Week overview",
@@ -519,7 +817,6 @@
     "overlapWarning": "The selected time range overlaps with already occupied times. The booking may not be possible.",
     "resetTime": "Reset time selection"
   },
-
   "groupBooking": {
     "toggleTitle": "Recurring booking",
     "toggleDescription": "Create multiple bookings on a fixed schedule with a single booking request.",
@@ -540,11 +837,22 @@
       "monthlyByDay": "On day of month",
       "monthlyByWeekday": "On weekday of month",
       "dayOfMonth": "Day of month",
-      "ordinal": "Position in month"
+      "ordinal": "Position in month",
+      "each": "Every",
+      "every": "Every",
+      "invalidTimeslot": "The end time must be after the start time.",
+      "ofMonth": "of the month",
+      "repeat": "repeat",
+      "rhythmExample": "For example „every 2 weeks“ or „every 3 months“.",
+      "rhythmExplanation": "Choose how often the dates should repeat.",
+      "timeExplanation": "Set the start and end time of your first booking. Those times are the basis for every further date in the series.",
+      "untilExplanation": "Optionally set when the series should end."
     },
     "frequency": {
       "weekly": "Weekly",
-      "monthly": "Monthly"
+      "monthly": "Monthly",
+      "months": "months",
+      "weeks": "weeks"
     },
     "ordinals": {
       "first": "First",
@@ -583,6 +891,56 @@
     }
   },
   "mobileKey": {
+    "unknownApiError": "Unknown API error",
+    "accessPointFallback": "The access point",
+    "emailLabel": "Email:",
+    "open": "Open",
+    "lock": "Lock",
+    "loading": "Loading...",
+    "noStickerScanned": "No access sticker scanned",
+    "cancel": "Cancel",
+    "close": "Close",
+    "contactPerson": "Contact",
+    "phone247": "Phone (24/7)",
+    "email": "Email",
+    "keepBookingId": "Please have your booking ID ready:",
+    "phoneSupport": "Phone support:",
+    "contactPersonLabel": "Contact person:",
+    "bikeBoxHelp": "Help with the bike box",
+    "emergencyContact": "Emergency contact and what to do if something fails",
+    "checkingBookings": "Checking your bookings...",
+    "severalBookingsMatch": "Several of your bookings match this door right now.",
+    "toKeyList": "To the key list",
+    "loadFailed": "Your keys could not be loaded.",
+    "upcoming": "Upcoming",
+    "activeBadge": "Active",
+    "past": "Past",
+    "unavailable": "Unavailable",
+    "blockingBadges": {
+      "rejected": "Rejected",
+      "not_committed": "Not confirmed yet",
+      "payment_required": "Payment pending",
+      "authorization_revoked": "Access revoked",
+      "outside_access_window": "Outside the access window",
+      "not_provisioned": "Not released yet",
+      "no_remote_access": "No remote control",
+      "evidence_missing": "Proof missing",
+      "evidence_invalid": "Proof invalid",
+      "evidence_rule_unavailable": "Access cannot be checked"
+    },
+    "viewList": "List",
+    "viewMap": "Floor plan",
+    "helpTitle": "A key missing, or trouble at the door?",
+    "helpDescription": "Only doors you currently hold a booking with access rights for are shown. If a key is missing or a door will not open, our support team can help.",
+    "helpShowContact": "Show help and contact",
+    "yourKeys": "Your keys",
+    "yourKeysDescription": "Open and lock doors during your booking.",
+    "openDoor": "Open the door",
+    "scannedDescription": "You scanned the code at the door.",
+    "whichBooking": "Which booking?",
+    "noKeysFound": "No keys found",
+    "lockSystemInfo": "Information and status of the locking system",
+    "openAction": "Open",
     "accessPoint": {
       "sectionTitle": "Keys",
       "lockState": {
@@ -635,6 +993,381 @@
       "booking_number": "Booking number",
       "process_number": "Process number",
       "booking_hint": "please have it ready"
+    },
+    "actions": {
+      "open_again": "Open again"
+    },
+    "evidence": {
+      "camera": {
+        "description": "Open the QR code at {label} with your phone's camera app — the sticker brings you straight back here."
+      },
+      "fallback_link": "Camera not working? Scan with the camera app",
+      "hint": "Scan the QR code at {label}.",
+      "torch": "Torch",
+      "wrong_door": {
+        "action": "Switch to {scanned}",
+        "description": "The code you scanned belongs to {scanned}, not to {label}.",
+        "title": "Different access point",
+        "unnamed": "another access point"
+      },
+      "wrong_tenant": {
+        "description": "This QR code belongs to a different provider.",
+        "title": "Different provider"
+      }
+    },
+    "stages": {
+      "can_close": {
+        "title": "{label} is open"
+      },
+      "can_open": {
+        "evidence_confirmed": "✓ Proof accepted"
+      },
+      "closed": {
+        "description": "{label} has been locked.",
+        "title": "Locked"
+      },
+      "loading": {
+        "title": "Checking the status …"
+      },
+      "opened": {
+        "description": "{label} has been opened.",
+        "title": "Open"
+      }
     }
+  },
+  "results": {
+    "noneInArea": "No results in this area.",
+    "unclearQuery": "Unclear search",
+    "listView": "List view",
+    "mapView": "Map view",
+    "atThisLocation": "Results at this location:",
+    "clickToOpen": "Click to open the selection",
+    "pagination": {
+      "itemsPerPage": "Per page",
+      "all": "All",
+      "range": "{from}–{to} of {total}"
+    }
+  },
+  "login": {
+    "logoutErrorMessage": {
+      "message": "You could not be signed out. Please try again.",
+      "title": "Sign-out failed"
+    },
+    "title": "Sign in to your account",
+    "forgotPassword": "Forgotten your password?",
+    "noAccount": "No account yet?",
+    "registerHere": "Register here",
+    "logoutMessage": "You have been signed out.",
+    "or": "or",
+    "ssoLoginOrg": "Sign in with my work account",
+    "sso": {
+      "confirmTitle": "SSO sign-in",
+      "authenticatedAs": "Signed in as",
+      "changeUser": "Switch user",
+      "confirmError": "The SSO session has expired. Please try again.",
+      "tryAgain": "Try again"
+    },
+    "ssoError": {
+      "title": "SSO error",
+      "failed": "SSO sign-in failed.",
+      "invalidState": "Invalid session. Please try again.",
+      "missingParams": "Missing parameters. Please try again.",
+      "generic": "Something went wrong."
+    },
+    "errors": {
+      "invalidCredentials": "Those sign-in details are not correct. Please try again.",
+      "accountLocked": "Your account is locked. Please contact support.",
+      "accountInactive": "Your account is not active yet. Check your email for the activation instructions.",
+      "tooManyAttempts": "Too many failed sign-in attempts. Please try again later.",
+      "unknownError": "Something went wrong. Please try again."
+    }
+  },
+  "register": {
+    "welcome": "Create an account to use every feature.",
+    "title": "Create a new account",
+    "haveAccount": "Already have an account?",
+    "loginHere": "Sign in here",
+    "errors": {
+      "passwordMismatch": "The passwords do not match."
+    },
+    "legal": {
+      "acceptPrefix": "I accept the",
+      "dataProtection": "privacy policy",
+      "termsAndConditions": "terms and conditions",
+      "required": "Please accept the required documents to continue."
+    },
+    "passwordStrengthCheck": {
+      "description": "Must contain",
+      "nonePassword": "Enter a password",
+      "weakPassword": "Weak password",
+      "mediumPassword": "Medium password",
+      "strongPassword": "Strong password",
+      "minLength": "At least 8 characters",
+      "uppercase": "At least one capital letter (A-Z)",
+      "lowercase": "At least one small letter (a-z)",
+      "number": "At least one digit (0-9)"
+    },
+    "success": {
+      "heading": "Registration complete",
+      "description": "We have sent you an email with a confirmation link. Open your inbox and confirm your address to activate your account.",
+      "spamHint": "If you cannot find the email, check your spam or promotions folder.",
+      "toHome": "To the home page",
+      "toLogin": "To sign-in"
+    }
+  },
+  "forgotPassword": {
+    "title": "Reset password",
+    "headline": "Forgotten your password?",
+    "description": "Enter your email address and we will send you a link to reset your password.",
+    "submit": "Send link",
+    "remembered": "Remembered your password?",
+    "success": {
+      "heading": "Email sent",
+      "description": "If an account exists for that email address, we have sent it a link to reset the password.",
+      "spamHint": "Check your spam folder if no email arrives."
+    }
+  },
+  "resetPassword": {
+    "title": "Set a new password",
+    "headline": "Set a new password",
+    "description": "Enter your new password.",
+    "submit": "Reset password",
+    "backToLogin": "Back to",
+    "passwordMismatch": {
+      "title": "Passwords do not match",
+      "message": "Make sure both password fields are identical."
+    }
+  },
+  "emailVerification": {
+    "title": "Confirm your email address",
+    "description": "Check your email and follow the confirmation link to verify your address.",
+    "resendLink": "Send the confirmation link again",
+    "progress": {
+      "heading": "Confirming your email...",
+      "description": "One moment while we confirm your email address."
+    },
+    "action": {
+      "heading": "Confirm email",
+      "description": "Use the button below to confirm your email address.",
+      "startVerification": "Confirm email",
+      "emailHint": "This address will be confirmed"
+    },
+    "success": {
+      "heading": "Email confirmed",
+      "description": "Your email address has been verified. You can sign in now.",
+      "toLogin": "To sign-in"
+    },
+    "error": {
+      "heading": "Email confirmation failed",
+      "alreadyVerifiedHeading": "Email already confirmed",
+      "default": "Something went wrong while confirming your email address.",
+      "invalidToken": "That confirmation link is invalid or has expired. Please request a new one.",
+      "alreadyVerified": "Your email address is already verified. You can sign in.",
+      "userNotFound": "That user could not be found. Please register again."
+    }
+  },
+  "sso": {
+    "register": {
+      "title": "Create account",
+      "description": "You have been authenticated but are not registered in this system yet. Would you like to create your account now?"
+    }
+  },
+  "notifications": {
+    "loginSuccess": {
+      "title": "Signed in",
+      "message": "Welcome back"
+    },
+    "loginError": {
+      "title": "Sign-in failed",
+      "message": "Check your sign-in details and try again."
+    },
+    "logoutSuccess": {
+      "title": "Signed out",
+      "message": "You have been signed out."
+    },
+    "registerSuccess": {
+      "title": "Registration complete",
+      "message": "Check your email to activate your account."
+    },
+    "registerError": {
+      "title": "Registration failed",
+      "message": "Something went wrong. Please try again."
+    },
+    "registerErrorEmailExists": {
+      "title": "Registration failed",
+      "message": "That email address is already registered."
+    },
+    "forgotPasswordError": {
+      "title": "Request failed",
+      "message": "The password reset request could not be sent. Please try again."
+    },
+    "resetPasswordSuccess": {
+      "title": "Password changed",
+      "message": "Your password has been reset. You can sign in now."
+    },
+    "resetPasswordError": {
+      "title": "Reset failed",
+      "message": "The password could not be reset. Please try again."
+    },
+    "resetPasswordInvalidToken": {
+      "title": "Link not valid",
+      "message": "That link is invalid or has expired. Please request a new one."
+    }
+  },
+  "cardLogin": {
+    "title": "Card sign-in",
+    "fallbackTitle": "Sign in with a card",
+    "publicId": "Card number",
+    "secret": "Secret",
+    "useDifferentMethod": "Use a different sign-in method",
+    "notFound": {
+      "title": "Sign-in method unavailable",
+      "description": "This card sign-in method is unavailable or has been switched off."
+    },
+    "success": {
+      "title": "Signed in",
+      "description": "Taking you onwards..."
+    },
+    "awaitingVerification": {
+      "title": "Account created",
+      "message": "Please confirm your email address.",
+      "description": "We have sent you a confirmation email. Follow the link in it to activate your account."
+    },
+    "linkRequested": {
+      "title": "Confirmation needed",
+      "message": "Confirmation email sent.",
+      "description": "The email address {email} is already registered. We have sent you a confirmation email to link the card to your account."
+    },
+    "register": {
+      "infoTitle": "No account yet",
+      "infoDescription": "This card is not linked to an account yet. Please complete your details.",
+      "submit": "Create account"
+    },
+    "errors": {
+      "title": "Sign-in failed",
+      "notFound": "Card not found.",
+      "secretMismatch": "Invalid {label}.",
+      "expired": "This card has expired.",
+      "emailNotVerified": "Please confirm your email address first.",
+      "cardAlreadyLinked": "This card is already linked to another account.",
+      "accountAlreadyHasCard": "This account already has a card linked to it.",
+      "forbidden": "Access denied.",
+      "serviceUnavailable": "The card service cannot be reached right now. Please try again later.",
+      "generic": "Sign-in failed. Please try again."
+    }
+  },
+  "cardLink": {
+    "success": {
+      "title": "Card linked",
+      "description": "Your card has been linked to your account.",
+      "hint": "From now on you can sign in with your card directly."
+    },
+    "failed": {
+      "errorCode": "Error code",
+      "expired": {
+        "title": "Link expired",
+        "description": "This confirmation link has expired.",
+        "hint": "Please start the linking process again."
+      },
+      "invalid": {
+        "title": "Link not valid",
+        "description": "This confirmation link is not valid.",
+        "hint": "Please start the linking process again."
+      },
+      "alreadyUsed": {
+        "title": "Link already used",
+        "description": "This confirmation link has already been redeemed."
+      },
+      "cardTaken": {
+        "title": "Card already linked",
+        "description": "This card now belongs to another account.",
+        "hint": "If the card is yours, please contact support."
+      },
+      "mismatch": {
+        "title": "Link does not match",
+        "description": "The link does not match the email address given."
+      },
+      "generic": {
+        "title": "Linking failed",
+        "description": "The card could not be linked.",
+        "hint": "Please try again or contact support."
+      }
+    }
+  },
+  "cardLinkVerification": {
+    "title": "Link card",
+    "description": "Check your email and follow the confirmation link to link your card to your account.",
+    "resendLink": "Send the confirmation link again",
+    "progress": {
+      "heading": "Linking your card...",
+      "description": "One moment while we link your card."
+    },
+    "action": {
+      "heading": "Link card",
+      "description": "Use the button below to link your card.",
+      "startVerification": "Link card",
+      "emailHint": "The card will be linked to this account"
+    },
+    "success": {
+      "heading": "Card linked",
+      "description": "Your card has been linked to your account. You can sign in with it now.",
+      "toLogin": "To sign-in"
+    },
+    "error": {
+      "heading": "Linking the card failed",
+      "alreadyLinkedHeading": "Card already linked",
+      "alreadyVerifiedHeading": "Card already confirmed",
+      "default": "Something went wrong while linking your card.",
+      "alreadyVerified": "This card is already linked to this account. You can sign in with it.",
+      "invalidToken": "That confirmation link is invalid or has expired. Please request a new one.",
+      "alreadyLinked": "This card is already linked to another account. Use a different card or contact support.",
+      "userNotFound": "That user could not be found. Please register again."
+    }
+  },
+  "price": {
+    "fromAmount": "from {amount}",
+    "intervalFrom": "from {value}",
+    "intervalTo": "up to {value}",
+    "free": "Free of charge",
+    "unknown": "No price available.",
+    "itemIsFree": "This item is free of charge.",
+    "flatRate": "Flat rate",
+    "information": "Price information",
+    "allInclVat": "(All prices include VAT.)",
+    "inclVat": "(incl. VAT)",
+    "vat": "VAT",
+    "total": "Total",
+    "duration": "Duration",
+    "quantity": "Quantity",
+    "independentOf": "This price applies regardless of the {unit} booked.",
+    "holidayHint": "(Prices may differ on public holidays.)",
+    "unitHour": "hrs",
+    "unitDay": "day(s)",
+    "unitItem": "item(s)",
+    "perHourCap": "Per hour",
+    "perDayCap": "Per day",
+    "perWeekCap": "Per week",
+    "perMonthCap": "Per month",
+    "perYearCap": "Per year",
+    "serviceFee": "Service fee",
+    "perHour": "per hour",
+    "perItem": "per item",
+    "perDay": "per day",
+    "perWeek": "per week",
+    "perMonth": "per month",
+    "perYear": "per year",
+    "noTicketOptions": "This event has no ticket options at the moment."
+  },
+  "bookableType": {
+    "event": "Event",
+    "room": "Room",
+    "eventLocation": "Event venue",
+    "resource": "Equipment",
+    "ticket": "Ticket",
+    "unknown": "Unknown"
+  },
+  "resources": {
+    "noResource": "No resource found",
+    "noResources": "No resources found"
   }
 }

@@ -6,7 +6,7 @@
           class="size-5 text-gray-400 dark:text-gray-500 mt-0.5"
       />
       <div>
-        <p class="text-xs text-gray-500 dark:text-gray-400">Ansprechpartner</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t("mobileKey.contactPerson") }}</p>
         <p class="font-medium text-gray-900 dark:text-white text-sm">
           {{ serviceInfo.name }}
         </p>
@@ -19,7 +19,7 @@
           class="size-5 text-gray-400 dark:text-gray-500 mt-0.5"
       />
       <div>
-        <p class="text-xs text-gray-500 dark:text-gray-400">Telefon (24/7)</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t("mobileKey.phone247") }}</p>
         <a
             :href="`tel:${serviceInfo.phone}`"
             class="font-medium text-gray-900 dark:text-white text-sm hover:text-primary transition-colors"
@@ -35,7 +35,7 @@
           class="size-5 text-gray-400 dark:text-gray-500 mt-0.5"
       />
       <div>
-        <p class="text-xs text-gray-500 dark:text-gray-400">E-Mail</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t("mobileKey.email") }}</p>
         <a
             :href="`mailto:${serviceInfo.email}`"
             class="font-medium text-gray-900 dark:text-white text-sm hover:text-primary transition-colors"
@@ -54,7 +54,7 @@
             class="size-4 text-amber-500 dark:text-amber-400"
         />
         <span class="text-sm text-gray-700 dark:text-gray-300">
-          Halten Sie bitte Ihre Buchungs-ID bereit:
+          {{ $t("mobileKey.keepBookingId") }}
         </span>
       </div>
       <span
@@ -67,6 +67,7 @@
 </template>
 
 <script setup>
+
 defineProps({
   serviceInfo: { type: Object, required: true },
   processId: { type: String, required: true },

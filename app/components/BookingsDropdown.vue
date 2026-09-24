@@ -1,11 +1,11 @@
 <template>
   <UButton
     variant="ghost"
-    class="flex items-center gap-2 outline-none cursor-pointer"
+    class="flex items-center gap-2 px-1 sm:px-2.5 outline-none"
     @click="() => goTo('/account/bookings')"
   >
     <UUser
-      name="Meine Buchungen"
+      :name="t('navigation.accountBookings')"
       :avatar="{
         icon: 'i-lucide-handbag',
       }"
@@ -24,9 +24,11 @@ import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const { tenantTo } = useTenantRoute();
 
-const { contrastToSecondary } = useContrastColor();
+const t = useI18n().t;
+
+const { contrastToPrimary } = useContrastColor();
 const nameColor = computed(() => {
-  if (contrastToSecondary.value === "#ffffff") {
+  if (contrastToPrimary.value === "#ffffff") {
     return "text-white hidden md:inline";
   } else {
     return "text-black hidden md:inline";

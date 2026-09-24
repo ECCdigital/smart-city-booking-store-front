@@ -52,15 +52,18 @@
   </UDropdownMenu>
 </template>
 <script setup>
+const { t } = useI18n();
+
 const emit = defineEmits(["setFilter"]);
 
 const bookingPeriodFilter = ref("all");
-const periodFilterOptions = [
-  { label: "Aktive", value: "active" },
-  { label: "Kommende", value: "upcoming" },
-  { label: "Vergangene", value: "past" },
-  { label: "Alle", value: "all" },
-];
+
+const periodFilterOptions = computed(() => [
+  { label: t("booking.filter.active"), value: "active" },
+  { label: t("booking.filter.upcoming"), value: "upcoming" },
+  { label: t("booking.filter.past"), value: "past" },
+  { label: t("booking.filter.all"), value: "all" },
+]);
 watch(bookingPeriodFilter, () => {
   onSetFilter();
 });
@@ -85,12 +88,12 @@ const hasFiltersApplied = computed(() => {
 
 const sortItems = () => [
   {
-    label: "Sortieren nach:",
+    label: t("booking.filter.sortBy"),
     class: "cursor-default font-bold opacity-50 hover:bg-transparent",
     disabled: true,
   },
   {
-    label: "Titel (aufsteigend)",
+    label: t("booking.sort.titleAsc"),
     icon: "i-lucide-arrow-down-a-z",
     value: "title-asc",
     class: sortOption.value === "title-asc" ? "bg-primary/20" : "",
@@ -100,7 +103,7 @@ const sortItems = () => [
     },
   },
   {
-    label: "Titel (absteigend)",
+    label: t("booking.sort.titleDesc"),
     icon: "i-lucide-arrow-down-z-a",
     value: "title-desc",
     class: sortOption.value === "title-desc" ? "bg-primary/20 mb-1" : "mb-1",
@@ -110,7 +113,7 @@ const sortItems = () => [
     },
   },
   {
-    label: "Zeitraum (frühste zuerst)",
+    label: t("booking.sort.periodAsc"),
     icon: "i-lucide-calendar-arrow-up",
     value: "date-asc",
     class: sortOption.value === "date-asc" ? "bg-primary/20 mb-1" : "mb-1",
@@ -120,7 +123,7 @@ const sortItems = () => [
     },
   },
   {
-    label: "Zeitraum (späteste zuerst)",
+    label: t("booking.sort.periodDesc"),
     icon: "i-lucide-calendar-arrow-down",
     value: "date-desc",
     class: sortOption.value === "date-desc" ? "bg-primary/20" : "",
@@ -130,7 +133,7 @@ const sortItems = () => [
     },
   },
   {
-    label: "Preis (aufsteigend)",
+    label: t("booking.sort.priceAsc"),
     icon: "i-lucide-banknote-arrow-up",
     value: "price-asc",
     class: sortOption.value === "price-asc" ? "bg-primary/20" : "",
@@ -140,7 +143,7 @@ const sortItems = () => [
     },
   },
   {
-    label: "Preis (absteigend)",
+    label: t("booking.sort.priceDesc"),
     icon: "i-lucide-banknote-arrow-down",
     value: "price-desc",
     class: sortOption.value === "price-desc" ? "bg-primary/20 mb-1" : "mb-1",
@@ -150,7 +153,7 @@ const sortItems = () => [
     },
   },
   {
-    label: "Buchungsdatum (neueste zuerst)",
+    label: t("booking.sort.bookedAtDesc"),
     icon: "i-lucide-clock-arrow-down",
     value: "bookingDate-desc",
     class: sortOption.value === "bookingDate-desc" ? "bg-primary/20" : "",
@@ -160,7 +163,7 @@ const sortItems = () => [
     },
   },
   {
-    label: "Buchungsdatum (älteste zuerst)",
+    label: t("booking.sort.bookedAtAsc"),
     icon: "i-lucide-clock-arrow-up",
     value: "bookingDate-asc",
     class:
@@ -174,12 +177,12 @@ const sortItems = () => [
 
 const statusFilterItems = () => [
   {
-    label: "Filtern nach:",
+    label: t("booking.filter.filterBy"),
     class: "cursor-default font-bold opacity-50 hover:bg-transparent mb-1",
     disabled: true,
   },
   /*{
-    label: "Aktive Buchungen",
+    label: t("booking.filter.activeBookings"),
     icon: "i-lucide-tv-minimal-play",
     type: "checkbox",
     checked: showActiveBookings.value,
@@ -190,12 +193,12 @@ const statusFilterItems = () => [
     },
   },*/
   {
-    label: "Status:",
+    label: t("booking.filter.status"),
     class: "cursor-default opacity-50 hover:bg-transparent",
     disabled: true,
   },
   {
-    label: "Bestätigt",
+    label: t("booking.filter.confirmed"),
     icon: "i-lucide-check",
     type: "checkbox",
     checked: showStatusConfirmed.value,
@@ -209,7 +212,7 @@ const statusFilterItems = () => [
     },
   },
   {
-    label: "Storniert / Abgelehnt",
+    label: t("booking.filter.cancelled"),
     icon: "i-lucide-x",
     type: "checkbox",
     checked: showStatusRejected.value,
@@ -223,7 +226,7 @@ const statusFilterItems = () => [
     },
   },
   {
-    label: "Ausstehend",
+    label: t("booking.filter.pending"),
     icon: "i-lucide-hourglass",
     type: "checkbox",
     checked: showStatusPending.value,
@@ -237,12 +240,12 @@ const statusFilterItems = () => [
     },
   },
   {
-    label: "Zahlungsstatus:",
+    label: t("booking.filter.paymentStatus"),
     class: "cursor-default opacity-50 hover:bg-transparent",
     disabled: true,
   },
   {
-    label: "Bezahlt",
+    label: t("booking.filter.paid"),
     icon: "i-lucide-check",
     type: "checkbox",
     checked: showPaymentsConfirmed.value,
@@ -256,7 +259,7 @@ const statusFilterItems = () => [
     },
   },
   {
-    label: "Nicht bezahlt",
+    label: t("booking.filter.unpaid"),
     icon: "i-lucide-hourglass",
     type: "checkbox",
     checked: showPaymentsUnconfirmed.value,

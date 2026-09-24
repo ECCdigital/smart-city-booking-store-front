@@ -2,6 +2,7 @@
   <div>
     <UCheckboxGroup
       v-model="model"
+      color="secondary"
       :items="sortedItems.slice(0, numberOfVisibleItems)"
       :ui="{ label: 'text-base' }"
       @change="onChange"
@@ -20,7 +21,8 @@
     <div v-if="props.useMoreButton" class="flex justify-center w-full mt-2">
       <UButton
         v-if="numberOfVisibleItems < items.length"
-        label="Alle anzeigen"
+        :label="$t('common.showAll')"
+        color="primary"
         variant="ghost"
         @click="
           () => {
@@ -30,7 +32,8 @@
       />
       <UButton
         v-if="numberOfVisibleItems === items.length"
-        label="Weniger anzeigen"
+        :label="$t('common.showLess')"
+        color="primary"
         variant="ghost"
         @click="
           () => {

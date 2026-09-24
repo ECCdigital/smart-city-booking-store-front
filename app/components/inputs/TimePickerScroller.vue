@@ -1,5 +1,5 @@
 <template>
-  <div class="ios-time-picker" role="group" aria-label="Uhrzeit">
+  <div class="ios-time-picker" role="group" :aria-label="$t('timePeriods.time')">
     <div class="ios-time-picker__highlight" aria-hidden="true" />
     <div
       class="ios-time-picker__fade ios-time-picker__fade--top"

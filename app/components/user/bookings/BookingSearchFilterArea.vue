@@ -5,7 +5,7 @@
       icon="i-lucide-search"
       size="md"
       variant="outline"
-      placeholder="Suchen..."
+      :placeholder="$t('common.searchPlaceholder')"
       class="w-full"
     />
     <BookingsFilter @set-filter="setFilter" />

@@ -11,7 +11,7 @@
             isDirectConnection ? 'px-5' : 'px-10',
             bookingDisabled
               ? 'bg-primary/60 cursor-not-allowed'
-              : 'cursor-pointer',
+              : '',
           ]"
           :color="bookingDisabled ? '' : 'primary'"
           :disabled="bookingDisabled"
@@ -28,7 +28,7 @@
     <!-- no registration -->
     <UTooltip
       v-if="!event.attendees.needsRegistration"
-      text="Dieses Event ist öffentlich und kann ohne Anmeldung besucht werden."
+      :text="$t('events.publicNoRegistration')"
     >
       <UButton
         :class="[
@@ -37,7 +37,7 @@
         ]"
         color=""
         disabled
-        label="Keine Anmeldung nötig"
+        :label="$t('events.noRegistrationNeeded')"
       />
     </UTooltip>
 
@@ -53,6 +53,9 @@
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 import EventTicketOptionsDialog from "~/components/events/EventTicketOptionsDialog.vue";
+
+const { t } = useI18n();
+
 
 const props = defineProps({
   event: {
@@ -82,9 +85,9 @@ const isPrivateEvent = computed(() => {
 
 const tooltipText = computed(() => {
   if (isPrivateEvent.value) {
-    return "Das Event ist nicht öffentlich und kann nicht gebucht werden.";
+    return t("events.notPublicShort");
   } else if (!hasEventTickets.value) {
-    return "Für dieses Event sind keine Tickets verfügbar.";
+    return t("price.noTicketOptions");
   } else {
     return "";
   }

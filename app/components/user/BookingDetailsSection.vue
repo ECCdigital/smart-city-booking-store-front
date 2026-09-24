@@ -3,21 +3,21 @@
     <!-- basis information -->
     <div class="flex mb-5">
       <div class="basis-1/2">
-        <p class="font-medium">Buchungsnummer</p>
+        <p class="font-medium">{{ $t("booking.number") }}</p>
         <p>{{ booking.id }}</p>
       </div>
       <div class="basis-1/2">
-        <p class="font-medium">Buchungsdatum</p>
+        <p class="font-medium">{{ $t("booking.bookedOn") }}</p>
         <p>{{ formatDate(booking.timeCreated) }}</p>
       </div>
     </div>
     <div class="flex mb-5">
       <div class="basis-1/2">
-        <p class="font-medium">Mandant</p>
+        <p class="font-medium">{{ $t("tenants.tenant") }}</p>
         <p>{{ getTenantName(booking.tenantId) }}</p>
       </div>
       <div class="">
-        <p class="font-medium">Status</p>
+        <p class="font-medium">{{ $t("booking.statusLabel") }}</p>
         <BookingStatusChip :booking="booking" />
       </div>
     </div>
@@ -29,16 +29,16 @@
     <div v-if="bookingTimeSlot || eventIds.length > 0" class="mb-5 flex">
       <div class="basis-1/2">
         <div class="flex space-x-1">
-          <p v-if="bookingTimeSlot" class="font-medium">Buchungszeitraum</p>
+          <p v-if="bookingTimeSlot" class="font-medium">{{ $t("booking.period") }}</p>
           <p v-else-if="eventIds.length > 0" class="font-medium">
-            Veranstaltungszeit
+            {{ $t("booking.eventTime") }}
           </p>
-          <UTooltip text="Als Termin herunterladen">
+          <UTooltip :text="$t('booking.downloadAppointmentTooltip')">
             <UButton
               icon="i-lucide-calendar-arrow-down"
               variant="soft"
               color="neutral"
-              class="text-gray-700 dark:text-gray-300 cursor-pointer"
+              class="text-gray-700 dark:text-gray-300"
               @click="downloadAppointment()"
             />
           </UTooltip>
@@ -68,7 +68,7 @@
       v-if="booking.bookableItems && booking.bookableItems.length > 0"
       class="mb-5"
     >
-      <p class="font-medium">Gebuchte Objekte</p>
+      <p class="font-medium">{{ $t("account.bookedItems") }}</p>
       <BookingDetailsBookableCard
         v-for="(bookable, i) in booking.bookableItems"
         :key="i"
@@ -78,19 +78,19 @@
 
     <!-- payment information  -->
     <div class="mb-5">
-      <p class="font-medium">Zahlungsinformationen</p>
+      <p class="font-medium">{{ $t("booking.paymentInformation") }}</p>
       <div class="md:flex bg-gray-200 dark:bg-gray-800 p-3 rounded mb-3">
         <div class="md:basis-1/3 mb-5 md:mb-0">
-          <p>Summe</p>
+          <p>{{ $t("booking.total") }}</p>
           <p class="font-bold text-primary">{{ bookingPrice }}</p>
         </div>
         <div class="flex md:basis-2/3">
           <div class="basis-1/2">
-            <p>Zahlungsmethode</p>
+            <p>{{ $t("booking.paymentMethod") }}</p>
             <p class="font-bold text-primary">{{ paymentMethod }}</p>
           </div>
           <div v-if="!isFree">
-            <p>Status</p>
+            <p>{{ $t("booking.statusLabel") }}</p>
             <BookingPayedChip :booking="booking" />
           </div>
         </div>
@@ -99,7 +99,7 @@
 
     <!-- invoices and receipts  -->
     <div v-if="paymentDocuments.length > 0" class="mb-5">
-      <p class="font-medium">Rechnungen und Zahlungsbelege</p>
+      <p class="font-medium">{{ $t("account.invoicesAndReceipts") }}</p>
       <BookingDetailsAttachmentCard
         v-for="(attachment, i) in paymentDocuments"
         :key="i"
@@ -112,7 +112,7 @@
 
     <!-- attachments  -->
     <div v-if="otherDocuments.length > 0" class="mb-5">
-      <p class="font-medium">Anhänge</p>
+      <p class="font-medium">{{ $t("account.attachments") }}</p>
       <BookingDetailsAttachmentCard
         v-for="(attachment, i) in otherDocuments"
         :key="i"
@@ -123,7 +123,7 @@
 
     <!-- comments  -->
     <div v-if="booking.comment" class="mb-5">
-      <p class="font-medium">Ihr Kommentar</p>
+      <p class="font-medium">{{ $t("booking.comment") }}</p>
       <p>{{ booking.comment }}</p>
     </div>
 
@@ -269,7 +269,7 @@ const paymentMethod = computed(() => {
   if (!isSettledBooking(props.booking)) {
     switch (props.booking.paymentProvider) {
       case "invoice": {
-        return "Rechnung";
+        return t("booking.payment.methods.invoice");
       }
       default: {
         return "–";
@@ -278,17 +278,17 @@ const paymentMethod = computed(() => {
   } else {
     switch (props.booking.paymentMethod) {
       case "CASH":
-        return "Bar";
+        return t("booking.payment.methods.cash");
       case "TRANSFER":
-        return "Überweisung";
+        return t("booking.payment.methods.transfer");
       case "CREDIT_CARD":
-        return "Kreditkarte";
+        return t("booking.payment.methods.creditCard");
       case "DEBIT_CARD":
-        return "EC-Karte";
+        return t("booking.payment.methods.debitCard");
       case "PAYPAL":
         return "PayPal";
       case "OTHER":
-        return "Sonstiges";
+        return t("booking.payment.methods.other");
       case "GIROPAY":
         return "Giropay";
       case "APPLE_PAY":
@@ -304,12 +304,12 @@ const paymentMethod = computed(() => {
       case "PAYDIRECT":
         return "paydirekt";
       case "SOFORT":
-        return "SOFORT-Überweisung";
+        return t("booking.payment.methods.sofort");
       case "BLUECODE":
         return "Bluecode";
     }
   }
-  return "Nicht angegeben";
+  return t("booking.payment.methods.notSpecified");
 });
 
 const paymentDocuments = computed(() => {

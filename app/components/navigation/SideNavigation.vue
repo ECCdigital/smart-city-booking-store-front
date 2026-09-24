@@ -16,9 +16,9 @@
           class="hidden md:block font-bold cursor-default"
           :class="i > 0 ? 'mt-2' : ''"
         >
-          {{ item.label }}
+          {{ $t(item.labelKey) }}
         </div>
-        <UTooltip v-else text="Coming soon..." :disabled="!item.disabled">
+        <UTooltip v-else :text="$t('common.comingSoon')" :disabled="!item.disabled">
           <NuxtLink
             class="grid sm:flex rounded p-2 w-full justify-center md:justify-start items-center text-center md:text-left"
             :class="getLinkClasses(item)"
@@ -27,7 +27,7 @@
             <div class="flex justify-center">
               <UIcon :name="item.icon" class="sm:mr-3 mt-1" />
             </div>
-            <div class="text-sm md:text-md mt-1 md:mt-0">{{ item.label }}</div>
+            <div class="text-sm md:text-md mt-1 md:mt-0">{{ $t(item.labelKey) }}</div>
           </NuxtLink>
         </UTooltip>
       </div>
@@ -62,7 +62,7 @@ const inactiveLinkStyle =
   "bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 hover:dark:bg-gray-800";
 const disabledLinkStyle =
   "cursor-not-allowed opacity-75 bg-gray-100 dark:bg-gray-900";
-const activeLinkStyle = "bg-primary/20 hover:bg-primary/40 font-semibold";
+const activeLinkStyle = "bg-secondary/20 hover:bg-secondary/40 font-semibold";
 
 const scrollContainer = ref(null);
 const showLeftHint = ref(false);

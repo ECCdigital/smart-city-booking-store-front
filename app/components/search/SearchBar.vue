@@ -11,7 +11,7 @@
           v-if="entryPageMode"
           v-model="_searchType"
           :items="types"
-          placeholder="Was suchen Sie?"
+          :placeholder="$t('filter.searchType')"
           size="lg"
           variant="ghost"
           class="basis-1/6 rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent focus:bg-white focus-within:ring-1 focus-within:ring-primary/40 data-[state=open]:ring-1 data-[state=open]:ring-primary/40"
@@ -29,7 +29,7 @@
         <InputText
           v-model="_term"
           icon="i-lucide-search"
-          placeholder="Stichwort"
+          :placeholder="$t('filter.keyword')"
           clearable
           class="rounded-md focus-within:ring-1 focus-within:ring-primary/40"
           :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
@@ -67,7 +67,7 @@
           @remove-date="removeSearchTimePeriod"
         />
         <UButton
-          label="Suchen"
+          :label="$t('common.search')"
           class="w-full justify-center"
           :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
           :style="{ color: contrastToPrimary }"
@@ -95,7 +95,7 @@
       v-model="_searchType"
       :items="types"
       icon="i-lucide-search"
-      placeholder="Was suchen Sie?"
+      :placeholder="$t('filter.searchType')"
       size="lg"
       variant="ghost"
       class="rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent"
@@ -114,7 +114,7 @@
     <InputText
       v-model="_term"
       icon="i-lucide-book-search"
-      placeholder="Stichwort"
+      :placeholder="$t('filter.keyword')"
       clearable
       :ui="{
         base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
@@ -141,7 +141,7 @@
       @remove-date="removeSearchTimePeriod"
     />
     <UButton
-      label="Suchen"
+      :label="$t('common.search')"
       class="w-full justify-center"
       :style="{ color: contrastToPrimary }"
       @click="onSearch"
@@ -153,6 +153,8 @@ import InputText from "~/components/inputs/InputText.vue";
 import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import AddressLookup from "~/components/inputs/AddressLookup.vue";
+
+const { t } = useI18n();
 
 const isInitialized = defineModel("isInitailized", {
   type: Boolean,
@@ -220,13 +222,13 @@ watch(
   },
 );
 
-const types = ref([
+const types = computed(() => [
   {
-    label: "Buchungsobjekte",
+    label: t("catalog.bookables"),
     value: "bookables",
   },
   {
-    label: "Veranstaltungen",
+    label: t("catalog.events"),
     value: "events",
   },
 ]);
@@ -275,8 +277,8 @@ function onSearch() {
   if (hasMissingType.value) {
     const notification = useNotification();
     notification.success(
-      "Bitte legen Sie fest, wonach Sie suchen möchten.",
-      "Unklare Suchanfrage",
+      t("filter.searchTypeRequired"),
+      t("results.unclearQuery"),
     );
     return;
   }

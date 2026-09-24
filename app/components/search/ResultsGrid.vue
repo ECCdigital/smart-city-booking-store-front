@@ -1,40 +1,53 @@
 <template>
-  <div>
+  <div ref="resultsRoot">
     <!-- Passende Ergebnisse & Default Anzeige -->
-    <UPageList v-if="suitableBookables.length > 0" class="my-2 md:my-5 space-y-5">
+    <UPageList v-if="pagedSuitable.length > 0" class="my-2 md:my-5 space-y-5">
       <ResultCard
-          v-for="(b, i) in suitableBookables"
-          :key="i"
-          :item="b.item"
-          :is-not-bookable="!b.isBookable"
-          :calculated-price="b.calculatedPrice"
-          :entry-page-mode="entryPageMode"
-          :eager="i === 0"
+        v-for="(b, i) in pagedSuitable"
+        :key="b.item?.id ?? i"
+        :item="b.item"
+        :is-not-bookable="!b.isBookable"
+        :calculated-price="b.calculatedPrice"
+        :entry-page-mode="entryPageMode"
+        :eager="i === 0"
       />
     </UPageList>
 
     <!-- Nicht passende Ergebnisse -->
-    <div v-if="nonSuitableBookables.length > 0" >
+    <div v-if="pagedNonSuitable.length > 0">
       <h2 v-if="includeNonSuitable" class="text-2xl font-bold my-5 mt-7">
-        Nicht passende Objekte
+        {{ $t("filter.nonSuitable") }}
       </h2>
       <UPageList class="my-5">
         <ResultCard
-            v-for="(b, i) in nonSuitableBookables"
-            :key="i"
-            :item="b.item"
-            :calculated-price="b.calculatedPrice"
-            is-not-suitable
-            class="mb-5"
+          v-for="(b, i) in pagedNonSuitable"
+          :key="b.item?.id ?? i"
+          :item="b.item"
+          :calculated-price="b.calculatedPrice"
+          is-not-suitable
+          class="mb-5"
         />
       </UPageList>
     </div>
 
-    <p v-if="bookables.length < 1">Keine Objekte gefunden.</p>
+    <ResultsPagination
+      v-model:page="page"
+      v-model:page-size="pageSize"
+      :total="total"
+      :items-per-page="itemsPerPage"
+      :page-count="pageCount"
+      :first-item-on-page="firstItemOnPage"
+      :last-item-on-page="lastItemOnPage"
+    />
+
+    <p v-if="bookables.length < 1">{{ $t("filter.noResults") }}</p>
   </div>
 </template>
 <script setup>
 import ResultCard from "~/components/search/ResultCard.vue";
+import ResultsPagination from "~/components/search/ResultsPagination.vue";
+import { useResultPagination } from "~/composables/search/useResultPagination.js";
+
 
 const props = defineProps({
   bookables: {
@@ -59,24 +72,45 @@ const props = defineProps({
   },
 });
 
+const resultsRoot = ref(null);
+
 const suitableBookables = computed(() =>
-    props.bookables.filter(
-        (b) => b.matchStatus === "match",
-    ),
+  props.bookables.filter((b) => b.matchStatus === "match"),
 );
 
 const nonSuitableBookables = computed(() =>
-    props.bookables
-        .filter(
-            (b) => b.matchStatus === "no-match" || b.matchStatus === "too-far",
-        )
-        .sort((a, b) =>
-            a.matchStatus === "too-far"
-                ? -1
-                : b.matchStatus === "too-far"
-                    ? 1
-                    : 0,
-        ),
+  props.bookables
+    .filter((b) => b.matchStatus === "no-match" || b.matchStatus === "too-far")
+    .sort((a, b) =>
+      a.matchStatus === "too-far" ? -1 : b.matchStatus === "too-far" ? 1 : 0,
+    ),
+);
+
+// One sequence in the order it is read: the matching results first, the ones
+// that missed the criteria behind them. The pagination slices exactly this, so
+// a page break may fall inside either group.
+const displayedBookables = computed(() => [
+  ...suitableBookables.value,
+  ...nonSuitableBookables.value,
+]);
+
+const {
+  page,
+  pageSize,
+  itemsPerPage,
+  pageCount,
+  total,
+  pagedItems,
+  firstItemOnPage,
+  lastItemOnPage,
+} = useResultPagination(displayedBookables, { scrollTarget: resultsRoot });
+
+const pagedSuitable = computed(() =>
+  pagedItems.value.filter((b) => b.matchStatus === "match"),
+);
+
+const pagedNonSuitable = computed(() =>
+  pagedItems.value.filter((b) => b.matchStatus !== "match"),
 );
 </script>
 

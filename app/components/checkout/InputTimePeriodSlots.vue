@@ -202,6 +202,7 @@
 
 <script setup>
 import { useBookables } from "~/composables/api/useBookables.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
 import { parseLocalDateIso } from "~/utils/localDate.js";
 
@@ -243,21 +244,11 @@ const effectiveNumDays = computed(() => (props.compact ? 4 : props.numDays));
 const { getBookableAvailability } = useBookables();
 const { t } = useI18n();
 
-const WEEKDAY_LABELS = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-const MONTH_LABELS = [
-  "Jan",
-  "Feb",
-  "Mär",
-  "Apr",
-  "Mai",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Okt",
-  "Nov",
-  "Dez",
-];
+const { monthNames, weekdayNames } = useFormatting();
+
+// Both from `Intl`, in the reading language.
+const WEEKDAY_LABELS = computed(() => weekdayNames("short"));
+const MONTH_LABELS = computed(() => monthNames("short"));
 
 function pad2(n) {
   return n.toString().padStart(2, "0");
@@ -522,9 +513,9 @@ const days = computed(() => {
       date: d,
       iso: localISODate(d),
       weekday,
-      weekdayLabel: WEEKDAY_LABELS[weekday],
+      weekdayLabel: WEEKDAY_LABELS.value[weekday],
       dayNumber: d.getDate(),
-      monthLabel: MONTH_LABELS[d.getMonth()],
+      monthLabel: MONTH_LABELS.value[d.getMonth()],
       hasMatchingPeriod,
       hasAvailability: hasFreeSlots,
     });
@@ -550,9 +541,9 @@ const selectedDay = computed(() => {
     date,
     iso: selectedDayIso.value,
     weekday: date.getDay(),
-    weekdayLabel: WEEKDAY_LABELS[date.getDay()],
+    weekdayLabel: WEEKDAY_LABELS.value[date.getDay()],
     dayNumber: date.getDate(),
-    monthLabel: MONTH_LABELS[date.getMonth()],
+    monthLabel: MONTH_LABELS.value[date.getMonth()],
     hasMatchingPeriod: true,
     hasAvailability: true,
   };
@@ -663,7 +654,7 @@ function dayHasAnyFreeSlot(
 
 function getDayClass(day) {
   if (isSelectedDay(day)) {
-    return "border-primary dark:border-primary bg-primary/10 ring-1 ring-primary dark:ring-primary cursor-pointer";
+    return "border-secondary dark:border-secondary bg-secondary/10 ring-1 ring-secondary dark:ring-secondary";
   }
   if (!day.hasAvailability) {
     if (day.hasMatchingPeriod) {
@@ -671,12 +662,12 @@ function getDayClass(day) {
     }
     return "border-dashed border-gray-200 dark:border-gray-800 opacity-50 cursor-not-allowed";
   }
-  return "border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary cursor-pointer";
+  return "border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary";
 }
 
 function getDayNumberClass(day) {
   if (isSelectedDay(day)) {
-    return "text-primary dark:text-primary";
+    return "text-secondary dark:text-secondary";
   }
   if (!day.hasAvailability) {
     if (day.hasMatchingPeriod) {
@@ -689,7 +680,7 @@ function getDayNumberClass(day) {
 
 function getDayWeekdayClass(day) {
   if (isSelectedDay(day)) {
-    return "text-primary/80 dark:text-primary/80";
+    return "text-secondary/80 dark:text-secondary/80";
   }
   if (!day.hasAvailability) {
     return "text-gray-400 dark:text-gray-500";
@@ -714,9 +705,9 @@ function getSlotClass(slot) {
     return "border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 text-gray-300 dark:text-gray-600 cursor-not-allowed";
   }
   if (isSlotSelected(slot)) {
-    return "border-primary dark:border-primary bg-primary/10 dark:bg-primary text-primary shadow-sm cursor-pointer ring-1 ring-primary dark:ring-primary";
+    return "border-secondary dark:border-secondary bg-secondary/10 dark:bg-secondary text-secondary shadow-sm ring-1 ring-secondary dark:ring-secondary";
   }
-  return "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary cursor-pointer";
+  return "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary";
 }
 
 function onSlotClick(slot) {

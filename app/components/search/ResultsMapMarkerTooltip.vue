@@ -17,7 +17,7 @@
       v-else-if="group.bookables?.length === 2 || group.bookables?.length === 3"
       class="rounded-2xl bg-white shadow-2xl p-2 space-y-1"
     >
-      <div v-for="bookable in group.bookables" :key="bookable.item.id" class="">
+      <div v-for="bookable in group.bookables" :key="bookable.item.id">
         <ResultStrip
           :item="bookable.item"
           :is-not-suitable="bookable.matchStatus !== 'match'"
@@ -31,7 +31,7 @@
 
     <div v-else class="rounded-2xl bg-white shadow-2xl p-2 w-80">
       <p class="text-md font-bold mb-2">
-        {{ group.bookables.length }} Ergebnisse an diesem Standort:
+        {{ group.bookables.length }} {{ $t("results.atThisLocation") }}
       </p>
       <div
         v-for="bookable in group.bookables"
@@ -49,7 +49,7 @@
         </div>
       </div>
 
-      <p class="text-center italic">[ Klick um Auswahl zu öffnen ]</p>
+      <p class="text-center italic">[ {{ $t("results.clickToOpen") }} ]</p>
     </div>
   </LTooltip>
 </template>
@@ -57,6 +57,7 @@
 import ResultStrip from "~/components/search/ResultStrip.vue";
 import ResultCard from "~/components/search/ResultCard.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
+
 
 defineProps({
   group: {
@@ -68,6 +69,9 @@ defineProps({
 
 <style>
 .leaflet-tooltip.clean-tooltip {
+  /* Leaflet setzt für .leaflet-tooltip white-space: nowrap – dadurch laufen
+     lange Adressen seitlich aus der Tooltip-Karte heraus. */
+  white-space: normal;
   background: transparent;
   border: none;
   border-radius: 50px;

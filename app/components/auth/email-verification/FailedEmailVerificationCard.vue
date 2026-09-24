@@ -8,12 +8,12 @@ defineProps({
 
 const t = useI18n().t;
 
-const errorMessages = {
+const errorMessages = computed(() => ({
   invalidToken: t("emailVerification.error.invalidToken"),
   userNotFound: t("emailVerification.error.userNotFound"),
   alreadyVerified: t("emailVerification.error.alreadyVerified"),
   default: t("emailVerification.error.default"),
-};
+}));
 </script>
 
 <template>

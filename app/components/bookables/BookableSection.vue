@@ -16,6 +16,10 @@
         />
       </div>
 
+      <div class="mt-8 lg:mt-6 flex">
+        <CatalogTypeSwitch />
+      </div>
+
       <div class="my-10 lg:my-5 sm:flex items-center">
         <span
           v-if="searchIsInitialized"
@@ -37,6 +41,7 @@
               :include-non-suitable="query.inclNoSuitable"
               :categories="query.cat"
               :cities="query.cities"
+              :tenants="query.tenants"
               :distance="query.distance"
               :price="query.price"
               :only-public-events="query.pubEv"
@@ -69,6 +74,7 @@
             :include-non-suitable="query.inclNoSuitable"
             :categories="query.cat"
             :cities="query.cities"
+            :tenants="query.tenants"
             :distance="query.distance"
             :price="query.price"
             :only-public-events="query.pubEv"
@@ -126,6 +132,7 @@ import FilterArea from "~/components/search/FilterArea.vue";
 import ResultsGrid from "~/components/search/ResultsGrid.vue";
 import ResultsList from "~/components/search/ResultsList.vue";
 import SearchBar from "~/components/search/SearchBar.vue";
+import CatalogTypeSwitch from "~/components/search/CatalogTypeSwitch.vue";
 import SortButton from "~/components/search/SortButton.vue";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 import ResultsMap from "~/components/search/ResultsMap.vue";

@@ -4,12 +4,12 @@
     v-if="isDev"
     class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2 rounded-full bg-neutral-900 text-white px-2 py-1 shadow-xl border border-yellow-400 font-mono text-xs select-none"
   >
-    <button class="px-2 py-1 rounded-full hover:bg-white/10 cursor-pointer" @click="cycle(-1)">←</button>
+    <button class="px-2 py-1 rounded-full hover:bg-white/10" @click="cycle(-1)">←</button>
     <span class="px-1">
       <span class="text-yellow-300">PROTOTYPE</span>
       · {{ current }}<span v-if="name"> ({{ name }})</span>
     </span>
-    <button class="px-2 py-1 rounded-full hover:bg-white/10 cursor-pointer" @click="cycle(1)">→</button>
+    <button class="px-2 py-1 rounded-full hover:bg-white/10" @click="cycle(1)">→</button>
   </div>
 </template>
 <script setup>
