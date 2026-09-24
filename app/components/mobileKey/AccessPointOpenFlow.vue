@@ -164,7 +164,7 @@
       :provider-id="accessPoint.provider ?? null"
       :access-point="accessPoint"
       :tenant-id="tenantId"
-      :booking-id="bookingId"
+      :booking="booking"
       :expanded="supportContactExpanded"
     />
 

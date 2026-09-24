@@ -94,7 +94,7 @@
         :provider-id="accessPoint?.provider ?? null"
         :access-point="accessPoint"
         :tenant-id="tenantId"
-        :booking-id="booking?.id ? String(booking.id) : null"
+        :booking="booking"
         expanded
       />
 

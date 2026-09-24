@@ -89,19 +89,29 @@
 
 <script setup>
 const props = defineProps({
-  tenantIds: {
+  /** The bookings on the page; each carries the tenant whose contact it offers. */
+  bookings: {
     type: Array,
     required: true,
   },
 });
 
-const uniqueTenantIds = computed(() => [...new Set(props.tenantIds)]);
-
 const showHelpContact = ref(false);
 
-const { getTenant } = useTenant();
+/**
+ * One entry per tenant, read from its first booking - the snapshot every
+ * booking of a tenant carries alike, so a tenant that is not public is named
+ * all the same. A tenant nobody names (a deleted one) gets no entry.
+ */
+const { getBookingTenant } = useTenant();
 const tenants = computed(() => {
-  return uniqueTenantIds.value.map((id) => getTenant(id));
+  const byId = new Map();
+  for (const booking of props.bookings) {
+    if (!byId.has(booking.tenantId)) {
+      byId.set(booking.tenantId, getBookingTenant(booking));
+    }
+  }
+  return [...byId.values()].filter(Boolean);
 });
 </script>
 <style scoped></style>
