@@ -192,10 +192,10 @@ function getInterval(start, end, priceType) {
   const suffix = getUnit(priceType);
   let interval = "";
   if (!start) {
-    interval = `bis ${end}`;
+    interval = t("price.intervalTo", { value: end });
   }
   if (!end) {
-    interval = `ab ${start}`;
+    interval = t("price.intervalFrom", { value: start });
   }
   if (start && end) {
     interval = `${start} - ${end}`;

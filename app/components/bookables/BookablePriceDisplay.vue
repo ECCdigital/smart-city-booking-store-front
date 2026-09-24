@@ -46,7 +46,8 @@
         v-if="duration"
         class="flex justify-end text-xs font-normal text-gray-600 dark:text-gray-300"
       >
-        ({{ duration }} <span class="hidden md:block ml-1"> {{ $t("price.unitHour") }}</span
+        ({{ duration }}
+        <span class="hidden md:block ml-1"> {{ $t("price.unitHour") }}</span
         ><span class="md:hidden ml-1"> h</span>)
       </div>
     </div>
@@ -126,8 +127,6 @@ function displayMinDefaultPrice() {
   if (categories.length === 0) {
     return null;
   }
-  const prefix = categories.length > 1 ? "ab " : "";
-
   const min = getMinPrice();
   if (min === null) {
     return t("price.free");
@@ -136,7 +135,9 @@ function displayMinDefaultPrice() {
   const includeTax = props.bookable.priceValueAddedTax
     ? min + (min * props.bookable.priceValueAddedTax) / 100
     : min;
-  return prefix + includeTax.toFixed(2).toString().replace(/\./g, ",") + " €";
+  const amount = includeTax.toFixed(2).toString().replace(/\./g, ",") + " €";
+
+  return categories.length > 1 ? t("price.fromAmount", { amount }) : amount;
 }
 
 function displayPrice(currentPrice) {

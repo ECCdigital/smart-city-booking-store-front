@@ -128,7 +128,6 @@ import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 
-
 const props = defineProps({
   bookable: {
     type: Object,

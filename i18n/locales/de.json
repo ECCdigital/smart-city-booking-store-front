@@ -1487,6 +1487,9 @@
     }
   },
   "price": {
+    "fromAmount": "ab {amount}",
+    "intervalFrom": "ab {value}",
+    "intervalTo": "bis {value}",
     "free": "Kostenlos",
     "unknown": "Kein Preis bekannt.",
     "itemIsFree": "Das Objekt ist kostenlos.",

@@ -175,8 +175,10 @@ import FullCalendar from "@fullcalendar/vue3";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import deLocale from "@fullcalendar/core/locales/de";
+import enLocale from "@fullcalendar/core/locales/en-gb";
 import { useMediaQuery } from "@vueuse/core";
 import { useBookables } from "~/composables/api/useBookables.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
 import InputTime from "~/components/inputs/InputTime.vue";
 import {
@@ -320,6 +322,15 @@ function onJumpDate(date) {
   if (api) api.gotoDate(d);
 }
 
+/* ── language ────────────────────────────────────────────── */
+const { locale } = useI18n();
+const { localeTag } = useFormatting();
+
+const CALENDAR_LOCALES = { de: deLocale, en: enLocale };
+const calendarLocale = computed(
+  () => CALENDAR_LOCALES[locale.value] ?? deLocale,
+);
+
 /* ── date range label ───────────────────────────────────── */
 const dateRangeLabel = computed(() => {
   if (!currentViewStart.value || !currentViewEnd.value) return "";
@@ -328,15 +339,14 @@ const dateRangeLabel = computed(() => {
   const end = new Date(currentViewEnd.value);
   end.setDate(end.getDate() - 1);
 
-  const fmtDate = (d) => {
-    const day = pad2(d.getDate());
-    const month = d
-      .toLocaleDateString("de-DE", { month: "short" })
-      .replace(/\.$/, "");
-    return `${day}. ${month}`;
-  };
+  // `Intl` orders the day and the month the way the language does -- "21. Sep."
+  // in German, "21 Sep" in English -- rather than the German shape built by hand.
+  const format = new Intl.DateTimeFormat(localeTag(locale.value), {
+    day: "2-digit",
+    month: "short",
+  });
 
-  return `${fmtDate(start)} – ${fmtDate(end)} ${end.getFullYear()}`;
+  return `${format.format(start)} – ${format.format(end)} ${end.getFullYear()}`;
 });
 
 /* ── availability cache + fetch ──────────────────────────── */
@@ -512,7 +522,7 @@ function renderEventContent(arg) {
 function renderDayHeader(arg) {
   const d = arg.date;
   const weekday = d
-    .toLocaleDateString("de-DE", { weekday: "short" })
+    .toLocaleDateString(localeTag(locale.value), { weekday: "short" })
     .replace(/\.$/, "");
   const day = d.getDate();
   const isToday = localISODate(d) === todayISO;
@@ -562,7 +572,7 @@ function handleDatesSet(info) {
 const calendarOptions = reactive({
   plugins: [timeGridPlugin, interactionPlugin],
   initialView: "timeGridWeek",
-  locale: deLocale,
+  locale: calendarLocale.value,
   firstDay: 1,
   headerToolbar: false,
   allDaySlot: false,
@@ -589,6 +599,12 @@ const calendarOptions = reactive({
   select: handleCalendarSelect,
   datesSet: handleDatesSet,
   validRange: { start: localISODate(getMonday(today)) },
+});
+
+// Changing the option re-renders the calendar, which also re-runs the day
+// header renderer above.
+watch(calendarLocale, (value) => {
+  calendarOptions.locale = value;
 });
 
 watch(calendarEvents, (events) => {

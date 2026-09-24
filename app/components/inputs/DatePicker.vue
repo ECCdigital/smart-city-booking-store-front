@@ -8,7 +8,7 @@
       v-model="model"
       format="dd.MM.yyyy"
       :min-date="new Date()"
-      locale="de"
+      :locale="pickerLocale"
       month-name-format="long"
       :range="props.range"
       inline
@@ -23,6 +23,7 @@
 <script setup>
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   range: {
@@ -32,6 +33,14 @@ const props = defineProps({
 });
 
 const model = defineModel();
+
+// The picker names its months and weekdays through `Intl`, so it only needs the
+// tag for the language being read. `locale` comes from `useI18n()` here rather
+// than from inside the composable, so the computed re-runs on a language switch.
+const { locale } = useI18n();
+const { localeTag } = useFormatting();
+const pickerLocale = computed(() => localeTag(locale.value));
+
 const mode = useColorMode();
 const isDark = computed(() => mode.value === "dark");
 

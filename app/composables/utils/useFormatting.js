@@ -15,10 +15,14 @@ const LOCALE_TAGS = {
   en: "en-GB",
 };
 
+function tagFor(code) {
+  return LOCALE_TAGS[code] ?? LOCALE_TAGS.de;
+}
+
 function currentTag() {
   try {
     const { locale } = useI18n();
-    return LOCALE_TAGS[locale.value] ?? LOCALE_TAGS.de;
+    return tagFor(locale.value);
   } catch {
     return LOCALE_TAGS.de;
   }
@@ -85,7 +89,20 @@ export function useFormatting() {
     );
   }
 
+  /**
+   * The BCP-47 tag behind an i18n locale code, for the places that hand a
+   * locale to someone else's formatter — the date picker, for one. This is the
+   * only copy of the mapping; pass the code to keep the caller's own reactivity
+   * intact, leave it out to read the current locale.
+   *
+   * @param code - an i18n locale code ("de", "en"), or nothing
+   */
+  function localeTag(code) {
+    return code === undefined ? currentTag() : tagFor(code);
+  }
+
   return {
+    localeTag,
     formatDate,
     formatTime,
     formatDateRange,
