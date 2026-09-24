@@ -4,9 +4,11 @@ import { hasAccessApps, withAccessApps } from "~/utils/emergencyHelp.js";
 export const useTenantStore = defineStore("tenant", {
   state: () => ({
     initialized: false,
+    /** @type {Array<{ id: string, name: string }>} */
     tenants: [],
     // Tenants the catalog does not list, known only through a direct link
     // to one of their offers. Kept apart so they never show up in a list.
+    /** @type {Array<{ id: string, name: string }>} */
     unlistedTenants: [],
     loadedFor: null,
     currentTenantID: null,
