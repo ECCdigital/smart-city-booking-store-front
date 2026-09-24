@@ -33,7 +33,7 @@ describe("backendErrorBodyOf", () => {
 });
 
 describe("resolveCheckoutFailureKey", () => {
-  it("names the refusal of a withdrawn or blocked offer", () => {
+  it("names the refusal of an offer that is withdrawn or whose tenant is not public", () => {
     expect(
       resolveCheckoutFailureKey(
         failure(409, {

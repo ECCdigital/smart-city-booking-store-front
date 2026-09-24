@@ -7,8 +7,9 @@ import {
 
 /**
  * Tenant supervision: a page that is already open needs no live refresh, but
- * every new entry to a detail page asks the backend again, so a blocked tenant
- * or a withdrawn approval is not shown from what the client still holds.
+ * every new entry to a detail page asks the backend again, so a tenant that is
+ * no longer public (pending approval or declined) or a withdrawn approval is
+ * not shown from what the client still holds.
  */
 describe("mayReuseLoadedDetail", () => {
   it("fetches a detail that has not been loaded", () => {

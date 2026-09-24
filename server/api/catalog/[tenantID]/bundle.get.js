@@ -70,6 +70,7 @@ export default createConditionalCachedHandler(
     return { ...result, ...items };
   },
   // Tenants and offers of the bundle carry a release (tenant supervision), so
-  // the answer is never cached: a block shows on the very next request.
+  // the answer is never cached: a tenant going non-public shows on the very
+  // next request.
   { releaseSensitive: true }
 );
