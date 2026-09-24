@@ -115,6 +115,10 @@ async function logout() {
       t("notifications.logoutSuccess.message"),
       t("notifications.logoutSuccess.title"),
     );
+    // Not through `tenantTo`: the tenant-routes module skips `/login`, so the
+    // sign-in page lives at the same address inside and outside a catalogue.
+    // No `redirect` either — whoever signs out means to leave the page.
+    await navigateTo("/login");
   } catch {
     notification.error(
       t("login.logoutErrorMessage.message"),
