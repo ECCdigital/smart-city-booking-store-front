@@ -85,8 +85,12 @@ const props = defineProps({
   tenantId: { type: String, required: true },
   /** The provider key of the door; without one the tenant's contact applies. */
   providerId: { type: String, default: null },
-  /** The booking to name to the hotline; nothing to name while none is known. */
-  bookingId: { type: String, default: null },
+  /**
+   * The booking the line speaks for: its tenant snapshot names the contact,
+   * its number is named to the hotline. While none is known (the scan page
+   * before its booking resolved) the public tenant is all there is.
+   */
+  booking: { type: Object, default: null },
   /**
    * The door as the per-booking projection sends it. A Provider with its own
    * process number (iFBS `externalBookingId`) has that named instead of the
@@ -102,11 +106,12 @@ const { t } = useI18n();
 const { supportContact, fetchCustomerServiceInfo } = useEmergencyHelp(
   toRef(props, "tenantId"),
   toRef(props, "providerId"),
+  toRef(props, "booking"),
 );
 
 /** What the hotline looks the person up by: the Provider's number, else ours. */
 const reference = computed(() =>
-  supportReferenceOf(props.accessPoint, props.bookingId),
+  supportReferenceOf(props.accessPoint, props.booking?.id),
 );
 
 const open = ref(props.expanded);

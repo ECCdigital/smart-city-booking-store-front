@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import { useTenantStore } from "~~/stores/tenant.js";
+import { useEmergencyHelp } from "~/composables/useEmergencyHelp.js";
 import { decideEmergencyHelp } from "~/utils/emergencyHelp.js";
 import EmergencyHelpContent from "~/components/mobileKey/EmergencyHelpContent.vue";
 
@@ -51,13 +51,15 @@ const props = defineProps({
 
 const isOpen = ref(false);
 
-// The contact comes from the public tenant projection; the store is empty on
-// a direct visit to the booking page, so make sure it is loaded first.
-const tenantStore = useTenantStore();
-await tenantStore.fetchTenants();
+// The contact comes from the booking's tenant snapshot. Only a booking
+// without one falls back to the public tenant, which is loaded for it then.
+const { tenant, fetchCustomerServiceInfo } = useEmergencyHelp(
+  toRef(props, "tenantId"),
+  null,
+  toRef(props, "booking"),
+);
+await fetchCustomerServiceInfo();
 
 /** Nothing to show - no confirmed compartment with a contact - means no accordion. */
-const help = computed(() =>
-  decideEmergencyHelp(tenantStore.getTenantById(props.tenantId), props.booking),
-);
+const help = computed(() => decideEmergencyHelp(tenant.value, props.booking));
 </script>

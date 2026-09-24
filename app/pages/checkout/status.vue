@@ -13,7 +13,6 @@ import {
   PAYMENT_DISPLAY_STATUS,
   resolveCheckoutPaymentState,
 } from "~/utils/bookingPaymentStatus.js";
-import { useTenants } from "~/composables/api/useTenants.js";
 import { useAuthStore } from "~~/stores/auth.js";
 
 definePageMeta({
@@ -42,7 +41,6 @@ const tenantId = computed(() => String(route.query.tenantId || "").trim());
 
 const { getStatus } = useBookings();
 const { fetchBookable } = useCheckout();
-const { fetchTenant } = useTenants();
 
 const bookable = ref(null);
 if (bookableId.value && tenantId.value) {
@@ -112,11 +110,6 @@ function stopAutoPollClock() {
   if (!import.meta.client || autoPollClockTimer == null) return;
   window.clearInterval(autoPollClockTimer);
   autoPollClockTimer = null;
-}
-
-async function getTenant() {
-  const Tenant = await fetchTenant(tenantId.value);
-  console.log("Tenant", Tenant);
 }
 
 function resetAutoPollingState() {
@@ -302,7 +295,6 @@ async function loadStatus({ background = false, resetPolling = false } = {}) {
 watch(
   [tenantId, bookingId],
   async () => {
-    getTenant();
     resetAutoPollingState();
     statusResponse.value = null;
     statusError.value = null;

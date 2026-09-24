@@ -3,19 +3,24 @@
  * do when a compartment or door fails, and for which booking there is
  * something to tell.
  *
- * The contact lives in the public tenant projection (`GET /api/tenants/public`
- * → `accessApps[].customerService`, backend 4.3), one per access provider -
- * never per door or per booking. This module reads that projection and the
- * booking's `accessInfo`; nothing here talks to the network, which is what
- * lets `useEmergencyHelp` stay a thin reader of the tenant store and what
- * lets `tests/emergencyHelp.test.js` pin the decisions.
+ * The contact is the tenant's `accessApps[].customerService`, one per access
+ * provider - never per door or per booking. It comes with the booking: every
+ * booking-bound customer route sends the booking's tenant snapshot
+ * (`booking.tenant`, backend ticket 18), whatever the tenant's standing, and
+ * `bookingTenantOf` (`~/utils/bookingTenant.js`) hands it here. Only an
+ * answer without a snapshot falls back to the public tenant projection
+ * (`GET /api/tenants/public`, backend 4.3) in the tenant store - a tenant
+ * pending approval or declined is absent from it. This module reads that
+ * tenant and the booking's `accessInfo`; nothing here talks to the network,
+ * which is what lets `useEmergencyHelp` stay a thin reader and what lets
+ * `tests/emergencyHelp.test.js` pin the decisions.
  */
 
 /**
  * The customer-service contact the tenant names for a provider.
  *
- * @param {Object|undefined} tenant A tenant from the store, or nothing when
- *   the store is empty
+ * @param {Object|null|undefined} tenant The tenant a booking speaks for
+ *   (`bookingTenantOf`), or nothing when nobody knows it
  * @param {string} providerId The provider key an access point carries
  *   (`ifbs`, `nuki`, …)
  * @returns {{ name?: string, phone?: string, email?: string }|null}
@@ -37,7 +42,8 @@ const isFilled = (value) => typeof value === "string" && value.trim() !== "";
  * of the three (the admin saves `{ name: "", email: "", phone: "" }` for
  * IFBS) falls back to the tenant's general contact. The two are never mixed.
  *
- * @param {Object|undefined} tenant A tenant from the store
+ * @param {Object|null|undefined} tenant The tenant a booking speaks for
+ *   (`bookingTenantOf`)
  * @param {string} providerId The provider key an access point carries
  * @returns {{ name: string, phone: string, email: string,
  *   source: "provider"|"tenant" }|null} `null` when nobody names anything
@@ -102,7 +108,8 @@ export function compartmentsOf(booking) {
  * no contact for (Pareva mails on its own) yields nothing - the accordion
  * then stays away rather than showing a contact with nothing to say.
  *
- * @param {Object|undefined} tenant A tenant from the store
+ * @param {Object|null|undefined} tenant The tenant the booking speaks for
+ *   (`bookingTenantOf`)
  * @param {Object|undefined} booking A booking as `/api/bookings/assigned`
  *   sends it
  * @returns {{ providerId: string, serviceInfo: Object, processId: string,
@@ -124,11 +131,13 @@ export function decideEmergencyHelp(tenant, booking) {
 }
 
 /**
- * Whether a tenant list carries the access apps at all. The catalog bundle
+ * Whether a tenant list carries the access apps at all - for the fallback
+ * alone: a booking with its tenant snapshot brings its own `accessApps`, and
+ * the store is read only for an answer without one. The catalog bundle
  * fills the tenant store with the catalog's own projection (id, name and the
- * general contact) and none of the access apps; the public tenant route is
- * the only source of `accessApps`. A list without them cannot answer for a
- * Provider Support Contact, however many tenants it holds.
+ * general contact) and none of the access apps; of the public routes, only
+ * the tenant route sends `accessApps`. A list without them cannot answer for
+ * a Provider Support Contact, however many tenants it holds.
  *
  * @param {Object[]|undefined} tenants Tenants as the store holds them
  * @returns {boolean}
@@ -143,11 +152,12 @@ export function hasAccessApps(tenants) {
 
 /**
  * Hands every tenant of the store its `accessApps` from the public tenant
- * list, by id, and changes nothing else: the list keeps its members and their
- * order, so what the catalog decided is visible stays decided. A tenant the
- * public list does not name gets an empty list, which is a fact ("no access
- * apps"), not a missing one. Nothing loaded before means the public list is
- * the store's list.
+ * list, by id - the fallback for an answer without a tenant snapshot, see
+ * `hasAccessApps` - and changes nothing else: the list keeps its members and
+ * their order, so what the catalog decided is visible stays decided. A tenant
+ * the public list does not name gets an empty list, which is a fact ("no
+ * access apps"), not a missing one. Nothing loaded before means the public
+ * list is the store's list.
  *
  * @param {Object[]} tenants Tenants as the store holds them
  * @param {Object[]} publicTenants Tenants as `GET /api/tenants` sends them

@@ -10,7 +10,7 @@
     </div>
 
     <!-- Help Information -->
-    <GeneralHelpSection :tenant-ids="bookings.map((b) => b.tenantId)" />
+    <GeneralHelpSection :bookings="bookings" />
 
     <!-- View Switch -->
     <div class="flex my-5 justify-between">
@@ -187,8 +187,9 @@ useAccessClock(doors, {
 });
 
 onMounted(() => {
-  // Nothing else fills the tenant store on a direct visit; the help section
-  // and the provider contacts read from it.
+  // Names and contacts come from each booking's tenant snapshot. The store is
+  // the fallback for an answer without one, and nothing else fills it on a
+  // direct visit; a tenant it does not list changes nothing.
   tenantStore.fetchTenants();
   loadBookings();
 });

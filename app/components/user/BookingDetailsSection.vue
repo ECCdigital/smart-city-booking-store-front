@@ -14,7 +14,7 @@
     <div class="flex mb-5">
       <div class="basis-1/2">
         <p class="font-medium">Mandant</p>
-        <p>{{ getTenantName(booking.tenantId) }}</p>
+        <p>{{ getBookingTenantName(booking) }}</p>
       </div>
       <div class="">
         <p class="font-medium">Status</p>
@@ -190,7 +190,7 @@ const eventStore = useEventStore();
 
 const { formatDate, formatPrice } = useFormatting();
 const { downloadBookingIcal } = useIcalDownload();
-const { getTenantName } = useTenant();
+const { getBookingTenantName } = useTenant();
 
 const { getAccessPoints } = useAccessPoints();
 
