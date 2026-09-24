@@ -35,7 +35,6 @@
           :only-registration-needed-events="onlyRegistrationNeededEvents"
           :custom-fields="customFields"
           use-as-dialog
-          :is-event="isEvent"
           @filter="onFilter"
         />
       </UCard>
@@ -51,10 +50,6 @@ defineProps({
   bookables: {
     type: Array,
     required: true,
-  },
-  isEvent: {
-    type: Boolean,
-    default: false,
   },
   includeNonSuitable: {
     type: Boolean,
@@ -82,7 +77,7 @@ defineProps({
   },
   onlyPublicEvents: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   onlyRegistrationNeededEvents: {
     type: Boolean,
@@ -105,7 +100,7 @@ const hasFilters = computed(() => {
     "regEv",
     "cities",
     "tenants",
-    "categories",
+    "cat",
     "price",
   ];
   return route.query && keysToCheck.some((key) => key in route.query);

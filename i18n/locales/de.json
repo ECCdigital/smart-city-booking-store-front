@@ -541,8 +541,11 @@
       "room": "Räume",
       "eventLocation": "Veranstaltungsorte",
       "resource": "Geräte",
-      "ticket": "Tickets"
+      "ticket": "Tickets",
+      "event": "Veranstaltungen"
     },
+    "eventsSection": "Veranstaltungen",
+    "customFieldsBookablesOnly": "Gilt für Buchungsobjekte.",
     "fittingResults": "passende Ergebnisse",
     "provider": "Anbieter"
   },

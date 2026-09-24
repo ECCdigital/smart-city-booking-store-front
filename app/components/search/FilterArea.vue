@@ -28,29 +28,33 @@
           :label="$t('filter.includeNonSuitable')"
           @change="instantFilter"
         />
-        <USwitch
-          v-if="isEvent"
-          v-model="_onlyPublicEvents"
-          color="secondary"
-          :label="$t('filter.onlyPublicEvents')"
-          @change="instantFilter"
-        />
-        <USwitch
-          v-if="isEvent"
-          v-model="_onlyRegistrationNeededEvents"
-          color="secondary"
-          :label="$t('filter.onlyRegistrationNeeded')"
-          @change="instantFilter"
-        />
       </div>
     </div>
 
-    <!-- Kategorie -->
-    <div v-if="!isEvent" class="my-7">
+    <!-- Kind: the bookable types and events, one facet -->
+    <div class="my-7">
       <p class="mb-3">{{ $t("filter.category") }}</p>
       <FilterCheckboxGroup
         v-model="_categories"
         :items="possibleCategories"
+        @change="instantFilter"
+      />
+    </div>
+
+    <!-- Events: the two switches narrow the events and nothing else, so they
+         only appear when there is an event to narrow -->
+    <div v-if="hasEvents" class="my-7 space-y-3">
+      <p class="mb-3">{{ $t("filter.eventsSection") }}</p>
+      <USwitch
+        v-model="_onlyPublicEvents"
+        color="secondary"
+        :label="$t('filter.onlyPublicEvents')"
+        @change="instantFilter"
+      />
+      <USwitch
+        v-model="_onlyRegistrationNeededEvents"
+        color="secondary"
+        :label="$t('filter.onlyRegistrationNeeded')"
         @change="instantFilter"
       />
     </div>
@@ -110,7 +114,10 @@
 
     <!-- Custom Field Filter -->
     <div v-if="sortedCustomFieldFilters.length > 0" class="my-7">
-      <p class="mb-3">{{ $t("filter.more") }}</p>
+      <p class="mb-1">{{ $t("filter.more") }}</p>
+      <p v-if="hasEvents" class="mb-3 text-sm text-gray-500">
+        {{ $t("filter.customFieldsBookablesOnly") }}
+      </p>
       <div class="space-y-4">
         <CustomFieldFilter
           v-for="cf in sortedCustomFieldFilters"
@@ -153,6 +160,11 @@ import CustomFieldFilter from "~/components/search/CustomFieldFilter.vue";
 import FilterHistogramSlider from "~/components/search/FilterHistogramSlider.vue";
 import FilterCheckboxGroup from "~/components/search/FilterCheckboxGroup.vue";
 import { useTenantStore } from "~~/stores/tenant.js";
+import {
+  OFFER_KINDS,
+  fromPriceOf,
+  isEventItem,
+} from "~/composables/search/offer";
 
 const { t } = useI18n();
 
@@ -163,10 +175,6 @@ const props = defineProps({
     required: true,
   },
   useAsDialog: {
-    type: Boolean,
-    default: false,
-  },
-  isEvent: {
     type: Boolean,
     default: false,
   },
@@ -196,7 +204,7 @@ const props = defineProps({
   },
   onlyPublicEvents: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   onlyRegistrationNeededEvents: {
     type: Boolean,
@@ -222,27 +230,33 @@ const _onlyRegistrationNeededEvents = ref(props.onlyRegistrationNeededEvents);
 const _categories = ref(props.categories);
 const _tenants = ref(props.tenants);
 
-//Kategorien
-//toDo - read from instance later !!!!
+const hasEvents = computed(() =>
+  props.bookables.some((b) => isEventItem(b.item)),
+);
+
+// The Kind facet: every Kind, counted from the matching results, none hidden
+// at zero — a Kind that vanishes on a search with no match reads as a bug.
+//toDo - read the bookable types from the instance later
+const KIND_LABEL_KEYS = {
+  room: "room",
+  "event-location": "eventLocation",
+  resource: "resource",
+  ticket: "ticket",
+  event: "event",
+};
 const possibleCategories = computed(() => {
-  return [
-    {
-      label: t("filter.categories.room"),
-      value: "room",
-    },
-    {
-      label: t("filter.categories.eventLocation"),
-      value: "event-location",
-    },
-    {
-      label: t("filter.categories.resource"),
-      value: "resource",
-    },
-    {
-      label: t("filter.categories.ticket"),
-      value: "ticket",
-    },
-  ];
+  const counts = {};
+  suitableBookables.value.forEach((b) => {
+    const kind = b.item?.type;
+    if (!kind) return;
+    counts[kind] = (counts[kind] || 0) + 1;
+  });
+
+  return OFFER_KINDS.map((kind) => ({
+    label: t(`filter.categories.${KIND_LABEL_KEYS[kind]}`),
+    value: kind,
+    count: counts[kind] || 0,
+  }));
 });
 
 // Anbieter: the tenants the current results come from, named from the tenant
@@ -317,9 +331,8 @@ const dynamicDistanceStep = computed(() => {
 
 //Price
 const priceValues = computed(() => {
-  const fn = props.isEvent ? getEventMinPrice : getBookableMinPrice;
   return suitableBookables.value
-    .map((b) => fn(b))
+    .map((b) => getMinPrice(b))
     .filter((p) => p != null && !isNaN(p));
 });
 
@@ -328,15 +341,9 @@ const possiblePriceRange = computed(() => {
     return [0, 100];
   }
 
-  let validPrices;
-  if (!props.isEvent) {
-    validPrices = suitableBookables.value.map((b) => getBookableMinPrice(b));
-  } else {
-    validPrices = suitableBookables.value.map((e) => getEventMinPrice(e));
-  }
-  validPrices = validPrices.filter(
-    (price) => price !== undefined && price !== null && !isNaN(price),
-  );
+  const validPrices = suitableBookables.value
+    .map((b) => getMinPrice(b))
+    .filter((price) => price !== undefined && price !== null && !isNaN(price));
 
   //set endpoints rounded to 5
   const minPrice =
@@ -391,46 +398,16 @@ watch(suitableBookables, () => {
   _price.value = [dynamicMinPrice.value, dynamicMaxPrice.value];
 });
 
-function getBookableMinPrice(bookable) {
-  if (bookable.matchStatus === "no-match") {
+// The price an Offer enters the histogram with: the calculated one once a
+// period has been searched, otherwise its "from" price, whatever its Kind.
+function getMinPrice(wrapper) {
+  if (wrapper.matchStatus === "no-match") {
     return null;
   }
-  //if search is initialized, return calculated price
-  if (searchIsInitialized.value && bookable.calculatedPrice) {
-    return bookable.calculatedPrice.userGrossPriceEur;
+  if (searchIsInitialized.value && wrapper.calculatedPrice) {
+    return wrapper.calculatedPrice.userGrossPriceEur;
   }
-
-  //else return min price from price categories but exclude holiday price categories
-  const pricesWithoutHolidays = bookable.item?.priceCategories?.filter(
-    (c) => !c.holidays || c.holidays.length === 0,
-  );
-  const minPrice = Math.min(
-    ...(pricesWithoutHolidays.map((cat) => cat.priceEur) || []),
-  );
-
-  return bookable.item.priceValueAddedTax
-    ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
-    : minPrice;
-}
-function getTicketMinPrice(ticket) {
-  const minPrice = Math.min(
-    ...ticket.priceCategories.map((cat) => cat.priceEur),
-  );
-  return ticket.priceValueAddedTax
-    ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
-    : minPrice;
-}
-function getEventMinPrice(event) {
-  if (event.matchStatus === "no-match") {
-    return null;
-  }
-  if (event.item.tickets && event.item.tickets.length > 0) {
-    return Math.min(
-      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket)),
-    );
-  } else {
-    return 0;
-  }
+  return fromPriceOf(wrapper.item);
 }
 
 //Locations

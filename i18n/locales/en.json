@@ -264,8 +264,11 @@
       "room": "Rooms",
       "eventLocation": "Event venues",
       "resource": "Equipment",
-      "ticket": "Tickets"
+      "ticket": "Tickets",
+      "event": "Events"
     },
+    "eventsSection": "Events",
+    "customFieldsBookablesOnly": "Applies to bookable items.",
     "fittingResults": "matching results",
     "provider": "Provider"
   },
