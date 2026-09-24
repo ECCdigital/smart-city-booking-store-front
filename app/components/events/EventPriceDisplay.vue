@@ -50,7 +50,10 @@ function displayMinDefaultPrice() {
   if (min === 0) {
     return t("price.free");
   }
-  return "ab " + min.toFixed(2).toString().replace(/\./g, ",") + " €";
+  const amount = min.toFixed(2).toString().replace(/\./g, ",") + " €";
+  // The figure is the cheapest of the event's tickets, not the price. The
+  // wording is a key so the prefix is not glued on in German.
+  return t("price.fromAmount", { amount });
 }
 </script>
 <style scoped></style>
