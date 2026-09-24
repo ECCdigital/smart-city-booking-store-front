@@ -75,6 +75,11 @@ export const useTenantStore = defineStore("tenant", {
   persist: {
     key: "tenant-store",
     storage: import.meta.client ?  localStorage : undefined,
-    paths: ["currentTenantID"],
+    pick: ["currentTenantID"],
+    // Earlier releases stored the whole store (tenant lists and contacts
+    // included). `pick` ignores those keys when reading, but the entry would
+    // stay until the next change; writing the picked state right after the
+    // start replaces it.
+    afterHydrate: ({ store }) => store.$persist(),
   },
 });
