@@ -39,14 +39,6 @@ function resolveReloadParams(route: ReturnType<typeof useRoute>): ReloadParams |
     return { slug, include: [], eventID };
   }
 
-  if (route.path.includes("/bookables")) {
-    return { slug, include: ["bookables", "events"] };
-  }
-
-  if (route.path.includes("/events")) {
-    return { slug, include: ["bookables", "events"] };
-  }
-
   return { slug, include: ["bookables", "events"] };
 }
 

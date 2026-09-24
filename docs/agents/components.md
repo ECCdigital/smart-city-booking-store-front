@@ -6,9 +6,10 @@
 app/
   pages/                 # File-based routing
     index.vue            # Home / catalog redirect
-    catalog/             # Catalog browsing & search
-    bookables/           # Bookable detail pages
-    events/              # Event detail pages
+    catalog/             # Catalog entry by slug
+    search/              # The Result Page: bookables and events in one list
+    bookables/           # Bookable detail pages (index.vue redirects to /search)
+    events/              # Event detail pages (index.vue redirects to /search?cat=event)
     checkout/            # Multi-step checkout flow
     account/               # User account (bookings, invoices, keys, settings)
     login.vue            # Auth pages

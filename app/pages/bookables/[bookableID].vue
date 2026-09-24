@@ -10,6 +10,7 @@ definePageMeta({
 });
 
 const route = useRoute();
+const { tenantTo } = useTenantRoute();
 const bookableStore = useBookableStore();
 const authStore = useAuthStore();
 
@@ -52,7 +53,7 @@ usePageTitle(() =>
     <div v-else class="text-center mt-10">
       <UIcon size="48" name="i-lucide-monitor-off" class="text-gray-400 mb-4" />
       <p class="text-gray-500">{{ $t("resources.noResource") }}</p>
-      <UButton :label="$t('common.back')" to="/bookables" class="mt-4" />
+      <UButton :label="$t('common.back')" :to="tenantTo('/search')" class="mt-4" />
     </div>
   </div>
 </template>

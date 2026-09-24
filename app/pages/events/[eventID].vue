@@ -10,6 +10,7 @@ definePageMeta({
 });
 
 const route = useRoute();
+const { tenantTo } = useTenantRoute();
 const eventStore = useEventStore();
 const authStore = useAuthStore();
 
@@ -56,7 +57,11 @@ usePageTitle(() =>
         class="text-gray-400 mb-4"
       />
       <p class="text-gray-500">{{ $t("events.noEvent") }}</p>
-      <UButton :label="$t('common.back')" to="/events" class="mt-4" />
+      <UButton
+        :label="$t('common.back')"
+        :to="tenantTo({ path: '/search', query: { cat: 'event' } })"
+        class="mt-4"
+      />
     </div>
   </div>
 </template>

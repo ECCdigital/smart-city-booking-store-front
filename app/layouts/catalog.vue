@@ -14,8 +14,8 @@ const isHeroPreview = computed(() => route.meta.hero === "preview");
 <template>
   <!-- Column layout so the footer sticks to the bottom of short pages -->
   <div class="flex min-h-screen flex-col bg-neutral-50 dark:bg-gray-950">
-    <!-- Bookables and events are chosen on the result pages, next to the search,
-         not in the bar. -->
+    <!-- The Kind of an Offer (bookable type or event) is a facet of the Result
+         Page's filter area, not a choice in the bar. -->
     <NavigationBar :inert="isHeroPreview || undefined" />
 
     <HeroSection />
