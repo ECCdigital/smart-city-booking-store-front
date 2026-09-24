@@ -883,6 +883,7 @@
   },
 
   "account": {
+    "unknownTenant": "Unbekannt",
     "invoices": {
       "title": "Ihre Rechnungen und Zahlungsbelege",
       "emptyTitle": "Keine Rechnungen vorhanden",

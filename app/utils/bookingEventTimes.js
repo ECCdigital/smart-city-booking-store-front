@@ -135,9 +135,10 @@ function isTicketBooking(booking) {
 /**
  * Loads the catalog's events for the booking list, and only when a ticket
  * booking is among `bookings`. Resolves `true` once the bundle answered and
- * `false` otherwise: the bundle is an extra, and a tenant that is no longer
- * public answers 404 (also the bundle proxy under `/t/:tenantID/...`), so a
- * failed load never rejects - the list renders without catalog extras.
+ * `false` otherwise: the bundle is an extra, so no failed load rejects - the
+ * 404 of a tenant that is no longer public (also the bundle proxy under
+ * `/t/:tenantID/...`) no more than a failing backend. The list renders
+ * without catalog extras.
  * `loadBundle` is injected so the decision can run outside Nuxt.
  */
 export async function loadCatalogEventsForBookings(bookings, loadBundle) {

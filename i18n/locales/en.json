@@ -541,6 +541,7 @@
   },
 
   "account": {
+    "unknownTenant": "Unknown",
     "invoices": {
       "title": "Your invoices and receipts",
       "emptyTitle": "No invoices available",
