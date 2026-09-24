@@ -27,35 +27,32 @@ import MainCategoryCard from "~/components/MainCategoryCard.vue";
 const { t } = useI18n();
 const { tenantTo } = useTenantRoute();
 
+// Each card opens the Result Page with its Kinds preset in the `cat` facet.
 //toDo - read categories from instance settings
 const tempCategories = computed(() => [
   {
-    value: "event-location",
+    cat: "event-location",
     title: t("catalog.categories.eventLocationTitle"),
     description: t("catalog.categories.eventLocationDescription"),
     icon: "i-lucide-building-2",
-    to: "/bookables",
   },
   {
-    value: "room",
+    cat: "room",
     title: t("catalog.categories.roomTitle"),
     description: t("catalog.categories.roomDescription"),
     icon: "i-lucide-door-open",
-    to: "/bookables",
   },
   {
-    value: "resource",
+    cat: "resource",
     title: t("catalog.categories.resourceTitle"),
     description: t("catalog.categories.resourceDescription"),
     icon: "i-lucide-wrench",
-    to: "/bookables",
   },
   {
-    value: "event",
+    cat: "event,ticket",
     title: t("catalog.categories.eventTitle"),
     description: t("catalog.categories.eventDescription"),
     icon: "i-lucide-calendar-check-2",
-    to: "/events",
   },
 ]);
 </script>

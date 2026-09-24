@@ -43,10 +43,9 @@ const { contrastToPrimary } = useContrastColor();
 const router = useRouter()
 
 function goToCategory() {
-  const route = useRoute()
-  route.query.cat = props.category.value
-
-  router.push(tenantTo(props.category.to))
+  router.push(
+    tenantTo({ path: "/search", query: { cat: props.category.cat } }),
+  );
 }
 </script>
 <style scoped>

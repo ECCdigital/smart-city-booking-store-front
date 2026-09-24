@@ -63,7 +63,7 @@ const numberOfVisibleEvents = computed(() => {
 
 function goToEventsPage() {
   const router = useRouter();
-  router.push(tenantTo(`events`));
+  router.push(tenantTo({ path: "/search", query: { cat: "event" } }));
 }
 </script>
 <style scoped></style>
