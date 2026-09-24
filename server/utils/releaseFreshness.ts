@@ -1,6 +1,7 @@
 /**
- * Tenant supervision: a tenant can be blocked and an offer's approval can be
- * withdrawn at any time, and the next request has to show it. The proxy
+ * Tenant supervision: a tenant can stop being public (pending approval or
+ * declined) and an offer's approval can be withdrawn at any time, and the next
+ * request has to show it. The proxy
  * answers below carry such a release, so no browser, CDN or reverse proxy may
  * store them.
  *

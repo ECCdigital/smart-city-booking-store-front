@@ -73,7 +73,8 @@ describe("the tenant information a resolved offer still needs", () => {
 
 /**
  * An offer the backend does not deliver is "not available" — never existed,
- * withdrawn or blocked alike. A backend that fails is a different answer.
+ * withdrawn or of a tenant that is not public (pending approval or declined)
+ * alike. A backend that fails is a different answer.
  */
 describe("whether a failed load means the offer is not available", () => {
   it("does for a 404 of the backend", () => {

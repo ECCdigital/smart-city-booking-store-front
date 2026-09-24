@@ -14,8 +14,8 @@ interface CacheOptions {
   /**
    * Marks an answer that carries a tenant or offer release (tenant
    * supervision): catalog bundles, tenants, bookables, events. Such an answer
-   * is never cached, whatever `NUXT_CACHE_ENABLED` says, so a block or a
-   * withdrawn approval shows on the very next request.
+   * is never cached, whatever `NUXT_CACHE_ENABLED` says, so a tenant going
+   * non-public or a withdrawn approval shows on the very next request.
    */
   releaseSensitive?: boolean;
 }

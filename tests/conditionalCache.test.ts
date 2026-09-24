@@ -4,9 +4,10 @@ import { resolveCachePolicy } from "~~/server/utils/conditionalCache";
 
 /**
  * Tenant supervision: an answer that carries a tenant or offer release must
- * show the new state on the very next request after a block or withdrawal, so
- * it is never kept in the server-side response cache — whatever the operator
- * set `NUXT_CACHE_ENABLED` to.
+ * show the new state on the very next request after its tenant goes non-public
+ * (pending approval or declined) or an approval is withdrawn, so it is never
+ * kept in the server-side response cache — whatever the operator set
+ * `NUXT_CACHE_ENABLED` to.
  */
 describe("resolveCachePolicy", () => {
   it("never caches a release-sensitive answer, even with the cache switched on", () => {

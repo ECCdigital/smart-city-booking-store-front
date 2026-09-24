@@ -95,9 +95,10 @@ setCookie(event, "access-token", accessToken, {
 
 Never cache an answer that carries a tenant or offer release (tenants,
 bookables, events, catalog bundles, availability, prices, checkout reads): with
-tenant supervision a block or a withdrawn approval has to show on the next
-request. Such a handler passes `{ releaseSensitive: true }` (or is a plain
-`defineEventHandler`), and its path belongs in
+tenant supervision a tenant going non-public (pending approval or declined) or
+a withdrawn approval has to show on the next request. Such a handler passes
+`{ releaseSensitive: true }` (or is a plain `defineEventHandler`), and its path
+belongs in
 `server/utils/releaseFreshness.ts`, which makes `server/middleware/release-freshness.ts`
 send `Cache-Control: no-store`.
 

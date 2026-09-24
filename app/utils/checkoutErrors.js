@@ -62,7 +62,8 @@ export function backendErrorBodyOf(error) {
  * The i18n key for a checkout request the backend refused with an error
  * status, null when the failure names no cause (an infrastructure error).
  * A 404 is an offer or tenant the backend no longer delivers; no distinction
- * between never existed, withdrawn and blocked.
+ * between never existed, withdrawn and a tenant that is not public (pending
+ * approval or declined).
  */
 export function resolveCheckoutFailureKey(error) {
   const body = backendErrorBodyOf(error);

@@ -42,8 +42,9 @@ export function missingTenantIdOf(item, knownTenants = []) {
 
 /**
  * Whether a failed load means "this offer is not (or no longer) available":
- * the backend answered 404. Never existed, withdrawn and blocked are one
- * answer; every other failure stays an error.
+ * the backend answered 404. Never existed, withdrawn and a tenant that is not
+ * public (pending approval or declined) are one answer; every other failure
+ * stays an error.
  */
 export function isNotAvailableError(error) {
   return (error?.statusCode ?? error?.status) === 404;

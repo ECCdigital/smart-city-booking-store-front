@@ -1,7 +1,8 @@
 /**
- * Tenant supervision: a tenant can be blocked and an offer's approval can be
- * withdrawn at any time. A page that is already open needs no live refresh,
- * but every new entry to a detail page has to ask the backend again.
+ * Tenant supervision: a tenant can stop being public (pending approval or
+ * declined) and an offer's approval can be withdrawn at any time. A page that
+ * is already open needs no live refresh, but every new entry to a detail page
+ * has to ask the backend again.
  */
 
 /**
