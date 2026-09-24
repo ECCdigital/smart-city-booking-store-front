@@ -163,9 +163,7 @@
     },
     "offersAndEvents": "Our offers and events",
     "showAllOffers": "View all offers",
-    "type": "What would you like to book?",
-    "bookables": "Bookable items",
-    "events": "Events"
+    "type": "What would you like to book?"
   },
   "tenants": {
     "heading": "Providers",
@@ -233,7 +231,6 @@
     "address": "Address",
     "period": "Time",
     "addressWithoutCoordinates": "Use this address without coordinates and radius search",
-    "searchTypeRequired": "Please choose what you are looking for.",
     "sort": {
       "button": "Sort by: {mode}",
       "distanceAsc": "Distance (nearest first)",
@@ -248,7 +245,7 @@
     "reset": "Reset filters",
     "remove": "Remove filters",
     "apply": "Apply filters",
-    "includeNonSuitable": "Show items that do not match.",
+    "includeNonSuitable": "Show offers that do not match.",
     "onlyPublicEvents": "Show public events only.",
     "onlyRegistrationNeeded": "Show events that need registration only.",
     "category": "Category",
@@ -256,9 +253,8 @@
     "distance": "Distance",
     "price": "Price",
     "more": "More filters",
-    "nonSuitable": "Items that do not match",
-    "noResults": "No items found.",
-    "searchType": "What are you looking for?",
+    "nonSuitable": "Offers that do not match",
+    "noResults": "No offers found.",
     "keyword": "Keyword",
     "categories": {
       "room": "Rooms",
@@ -1071,7 +1067,6 @@
     "noLocation": "No location given",
     "noOffers": "No offers found.",
     "noneInArea": "No results in this area.",
-    "unclearQuery": "Unclear search",
     "listView": "List view",
     "mapView": "Map view",
     "atThisLocation": "Results at this location:",

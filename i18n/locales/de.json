@@ -158,9 +158,7 @@
     },
     "offersAndEvents": "Unsere Angebote und Veranstaltungen",
     "showAllOffers": "Alle Angebote ansehen",
-    "type": "Was möchten Sie buchen?",
-    "bookables": "Buchungsobjekte",
-    "events": "Veranstaltungen"
+    "type": "Was möchten Sie buchen?"
   },
   "navigation": {
     "keys": "Schlüssel",
@@ -510,7 +508,6 @@
     "address": "Adresse",
     "period": "Zeitraum",
     "addressWithoutCoordinates": "Adresse ohne Koordinaten und Umkreissuche nutzen",
-    "searchTypeRequired": "Bitte legen Sie fest, wonach Sie suchen möchten.",
     "sort": {
       "button": "Sortieren: {mode}",
       "distanceAsc": "Distanz (aufsteigend)",
@@ -525,7 +522,7 @@
     "reset": "Filter zurücksetzen",
     "remove": "Filter entfernen",
     "apply": "Filter anwenden",
-    "includeNonSuitable": "Nicht passende Objekte anzeigen.",
+    "includeNonSuitable": "Nicht passende Angebote anzeigen.",
     "onlyPublicEvents": "Nur öffentliche Events anzeigen.",
     "onlyRegistrationNeeded": "Nur anmeldepflichte Events anzeigen.",
     "category": "Kategorie",
@@ -533,9 +530,8 @@
     "distance": "Distanz",
     "price": "Preis",
     "more": "Weitere Filter",
-    "nonSuitable": "Nicht passende Objekte",
-    "noResults": "Keine Objekte gefunden.",
-    "searchType": "Was suchen Sie?",
+    "nonSuitable": "Nicht passende Angebote",
+    "noResults": "Keine Angebote gefunden.",
     "keyword": "Stichwort",
     "categories": {
       "room": "Räume",
@@ -1509,7 +1505,6 @@
     "noLocation": "Ohne Ortsangabe",
     "noOffers": "Keine Angebote gefunden.",
     "noneInArea": "Keine Ergebnisse in diesem Bereich.",
-    "unclearQuery": "Unklare Suchanfrage",
     "listView": "Listenansicht",
     "mapView": "Kartenansicht",
     "atThisLocation": "Ergebnisse an diesem Standort:",

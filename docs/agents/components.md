@@ -134,10 +134,13 @@ Each step is a component in `app/components/checkout/`. State managed via compos
 
 ## Search & catalog
 
-Catalog browsing uses composables in `app/composables/search/`:
+The Result Page (`app/pages/search/index.vue`) lists every Offer — bookables and events — in one `ResultSection`. The Kind of an Offer (`room`, `event-location`, `resource`, `ticket`, `event`) is a value of the `cat` query parameter, not a page. `/bookables` and `/events` are redirects (`app/middleware/legacy-list-redirect.ts`).
 
-- `useBookableSearch.ts` — search, filter, sort logic
+Composables in `app/composables/search/`:
+
+- `offer.ts` — the per-Kind reading of an Offer (title, price, bookability), the merged source (`mergeOffers`, tickets reached through their event) and the period overlap rule
+- `useBookableSearch.ts` — search, filter, sort logic over a mixed list; every step reads the item's Kind
 - `useCatalogQueryState.ts` — URL query param sync for filters
-- `useCustomFieldFilters.js` — dynamic custom field filtering
+- `useCustomFieldFilters.js` — dynamic custom field filtering (bookables only)
 
-Results rendered via components in `app/components/search/` (grid, list, map views).
+Results rendered via components in `app/components/search/` (grid, list, map views). `ResultCard` and `ResultStrip` branch on `item.type === "event"`; their `mapDetailMode` / `mapMode` variants are the compact forms the map uses.
