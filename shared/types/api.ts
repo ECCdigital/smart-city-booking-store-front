@@ -19,18 +19,27 @@ export interface Branding {
 export interface PortalModeResponse {
   mode: PortalMode;
   portalUrl?: string;
-  branding: Branding;
 }
 
+/**
+ * The backend's Theme Bundle export. Everything that decides the look of the
+ * site travels here and nowhere else (storefront ADR 0001), which is why the
+ * catalog bundle and the portal mode carry no branding.
+ *
+ * The storefront never hands this to the client: `/api/theme/bundle` answers
+ * with the validated, sanitised `ThemeView` built from it.
+ */
 export interface ThemeBundle {
   theme?: Theme;
   visibility?: "public" | "private" | "unlisted";
   logoUrl?: string;
   faviconUrl?: string;
-  hero?: {
-    title?: string;
-    subtitle?: string;
-  };
+  /** The Catalog's name — the Portal Name for the instance catalog. */
+  name?: string;
+  /** Validated by `parseHeroLayout`; shapes are in `shared/types/hero.ts`. */
+  heroLayout?: unknown;
+  background?: unknown;
+  logo?: unknown;
 }
 
 export interface CatalogData {
@@ -41,15 +50,10 @@ export interface CatalogData {
   type: "instance" | "single";
   tenantId?: string;
   tenantIds?: string[];
-  hero?: {
-    title?: string;
-    subtitle?: string;
-  };
 }
 
 export interface OffersEnabledBundle {
   offersEnabled: true;
-  branding: Branding;
   portalUrl?: string;
   catalog: CatalogData;
   tenants: Array<{ id: string; name: string }>;
@@ -61,7 +65,6 @@ export interface OffersEnabledBundle {
 
 export interface PersonalBundle {
   offersEnabled: false;
-  branding: Branding;
   portalUrl?: string;
   catalog?: Partial<CatalogData>;
   tenants?: never[];
@@ -118,4 +121,82 @@ export interface BlockPeriodInstance {
 export interface BlockPeriodsResponse {
   title: string;
   blockPeriods: BlockPeriodInstance[];
+}
+
+/** One input of a card auth method, as the backend labels it. */
+export interface CardField {
+  label?: string;
+  placeholder?: string;
+  helpText?: string;
+}
+
+/** A card auth method offered by the instance, from `/auth/card-methods`. */
+export interface CardMethod {
+  id: string;
+  label?: string;
+  description?: string;
+  publicIdField: CardField;
+  secretField: CardField;
+}
+
+/** What the backend returns for a signed-in session. */
+export interface SsoSigninResponse {
+  user?: unknown;
+  permissions?: unknown;
+}
+
+/** The signed-in user as `GET /auth/me` returns it (`User.exportPublic()`). */
+export interface User {
+  /** The e-mail address, lowercased; there is no separate `email` field. */
+  id: string;
+  firstName: string;
+  lastName: string;
+  company: string;
+  phone: string;
+  address: string;
+  zipCode: string;
+  city: string;
+  /** ms epoch */
+  created: number;
+  isVerified: boolean;
+  isSuspended: boolean;
+  /** "local" | "keycloak" | … */
+  authType: string;
+  /** Date serialised */
+  idpEmailVerifiedAt: string | null;
+  idpEmailVerifiedProvider: string | null;
+}
+
+/** A key is only set when some role defines the dimension. */
+export interface ActionFlags {
+  create?: boolean;
+  readAny?: boolean;
+  readOwn?: boolean;
+  updateAny?: boolean;
+  updateOwn?: boolean;
+  deleteAny?: boolean;
+  deleteOwn?: boolean;
+}
+
+/** One row per tenant with an active membership, resolved through roles. */
+export interface TenantPermission {
+  tenantId: string;
+  isOwner: boolean;
+  /** Role enum plus "tenants" for owners. */
+  adminInterfaces: string[];
+  freeBookings: boolean;
+  manageUsers: ActionFlags;
+  manageRoles: ActionFlags;
+  manageBookables: ActionFlags;
+  manageBookings: ActionFlags;
+  manageCoupons: ActionFlags;
+  manageMedia: ActionFlags;
+}
+
+/** `permissions` of `GET /auth/me`; the storefront computes no rights itself. */
+export interface Permissions {
+  /** Active memberships only. */
+  tenants: TenantPermission[];
+  allowCreateTenant: boolean;
+  instanceOwner: boolean;
 }

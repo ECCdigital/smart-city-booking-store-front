@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "type": "image",
+  "image": {
+    "source": "media",
+    "mediaId": "66f1c2000000000000000003",
+    "url": "/api/v2/instance/media/66f1c2000000000000000003/file",
+    "width": 2400,
+    "height": 1350
+  },
+  "focalPoint": { "x": 50, "y": 35 },
+  "overlay": {
+    "light": { "color": "#000000", "opacity": 40 },
+    "dark": { "color": "#000000", "opacity": 60 }
+  }
+}

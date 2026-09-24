@@ -5,7 +5,16 @@ import { useTenantStore } from "~~/stores/tenant.js";
 import { usePortalStore } from "~~/stores/portal.js";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
-import { sendRedirect } from "h3";
+import {
+  mayReuseLoadedDetail,
+  withoutWithdrawnDetail,
+} from "~/utils/catalogFreshness.js";
+import {
+  isNotAvailableError,
+  missingTenantIdOf,
+  shouldLoadDetail,
+} from "~/utils/catalogDetail.js";
+import { sendRedirect, setResponseStatus } from "h3";
 
 function getAuthScope() {
   const authStore = useAuthStore();
@@ -48,15 +57,15 @@ export function useCatalogBundle() {
   const tenantStore = useTenantStore();
   const portalStore = usePortalStore();
   const { tenantID } = useTenant();
+  const nuxtApp = useNuxtApp();
 
   function applyBundleResponse(
     data,
     contextKey,
     { effectiveBookableID = null, effectiveEventID = null } = {},
   ) {
-    if (data?.branding) {
+    if (data?.portalUrl !== undefined) {
       portalStore.$patch({
-        branding: data.branding,
         portalUrl: data.portalUrl ?? null,
         loadedFor: contextKey,
       });
@@ -134,7 +143,10 @@ export function useCatalogBundle() {
       ? bookableStore.loadedDetailsFor[contextKey]
       : eventStore.loadedDetailsFor[contextKey];
 
-    return detailsForScope?.includes(detailId) ?? false;
+    return !shouldLoadDetail({
+      detailId,
+      loadedDetailIds: detailsForScope,
+    });
   }
 
   function invalidateBundle() {
@@ -161,10 +173,16 @@ export function useCatalogBundle() {
     );
   }
 
+  /**
+   * Loads one bookable or event by id, independent of the catalog list.
+   *
+   * @param {{ slug?: string | null, bookableID?: string | null, eventID?: string | null, tenantHint?: string | null, force?: boolean }} [params]
+   */
   async function loadDetail({
     slug = null,
     bookableID = null,
     eventID = null,
+    tenantHint = null,
     force = false,
   } = {}) {
     if (!bookableID && !eventID) {
@@ -175,9 +193,15 @@ export function useCatalogBundle() {
     const contextKey = buildContextKey(slug, tenantID.value, authScope);
     const detailId = bookableID ?? eventID;
 
+    // A new entry to a detail page asks the backend again (tenant
+    // supervision); only the SSR hand-over reuses what the store holds.
     if (
-      !force &&
-      isDetailLoadedForCurrentAuth({ slug, bookableID, eventID })
+      mayReuseLoadedDetail({
+        loaded: isDetailLoadedForCurrentAuth({ slug, bookableID, eventID }),
+        hydrating: Boolean(nuxtApp.isHydrating),
+        server: import.meta.server,
+        force,
+      })
     ) {
       return bookableID
         ? bookableStore.getBookableById(bookableID)
@@ -199,6 +223,14 @@ export function useCatalogBundle() {
       catalogType: catalogStore.catalog?.type ?? null,
       catalogTenantID: catalogStore.catalog?.tenantId ?? null,
       tenantIDs: tenantStore.tenants.map((tenant) => tenant.id),
+      tenantHint,
+    }).catch((error) => {
+      // Not available: the page shows its empty state and SSR answers 404.
+      // Every other failure stays an error.
+      if (!isNotAvailableError(error)) throw error;
+      const requestEvent = nuxtApp.ssrContext?.event;
+      if (requestEvent) setResponseStatus(requestEvent, 404);
+      return null;
     });
 
     if (data?.offersEnabled === false) {
@@ -214,9 +246,30 @@ export function useCatalogBundle() {
       effectiveEventID: eventID,
     });
 
-    return bookableID
+    // The backend no longer delivers the detail: do not show the copy an
+    // earlier list or detail load left in the store.
+    bookableStore.bookables = withoutWithdrawnDetail(
+      bookableStore.bookables,
+      bookableID,
+      data?.bookable,
+    );
+    eventStore.events = withoutWithdrawnDetail(
+      eventStore.events,
+      eventID,
+      data?.event,
+    );
+
+    const item = bookableID
       ? bookableStore.getBookableById(detailId)
       : eventStore.getEventById(detailId);
+
+    // An offer of a tenant the catalog does not list still shows its tenant.
+    const missingTenantId = missingTenantIdOf(item, tenantStore.tenants);
+    if (missingTenantId) {
+      await tenantStore.fetchUnlistedTenant(missingTenantId);
+    }
+
+    return item;
   }
 
   async function loadBundle({
@@ -279,7 +332,6 @@ export function useCatalogBundle() {
       }
 
       return {
-        branding: portalStore.branding,
         portalUrl: portalStore.portalUrl,
         catalog: catalogStore.catalog,
         tenants: tenantStore.tenants,
@@ -321,10 +373,13 @@ export function useCatalogBundle() {
       {
         server: true,
         dedupe: "defer",
+        // The SSR payload answers the hydrating client only; it must not
+        // outlive that hand-over and answer a later navigation (tenant
+        // supervision).
         getCachedData: force
           ? () => undefined
           : (key, nuxtApp) =>
-              nuxtApp.payload.data[key] ?? nuxtApp.static.data[key],
+              nuxtApp.isHydrating ? nuxtApp.payload.data[key] : undefined,
       },
     );
 

@@ -12,7 +12,7 @@
         >
           {{ bookable?.title }}
         </p>
-        <p>{{ tenantName }}</p>
+        <p>{{ getTenantName(bookable.tenantId) }}</p>
       </div>
 
       <!-- Adresse und Entfernung -->
@@ -97,7 +97,6 @@
   </div>
 </template>
 <script setup>
-import { useTenantStore } from "~~/stores/tenant.js";
 import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
@@ -141,9 +140,7 @@ const hasLongTitle = computed(() => {
   return (props.bookable?.title?.length ?? 0) > 60;
 });
 
-const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.bookable.tenantId).name;
-});
+const { getTenantName } = useTenant();
 
 const { contrastToPrimary } = useContrastColor();
 

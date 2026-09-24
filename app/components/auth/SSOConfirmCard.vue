@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-const props = defineProps({
+defineProps({
   userInfo: {
     type: Object as () => { name: string; email: string } | null,
     default: null,

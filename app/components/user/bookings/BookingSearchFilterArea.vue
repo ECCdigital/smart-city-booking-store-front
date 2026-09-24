@@ -18,6 +18,12 @@ import {
   isPaidBooking,
   isUnpaidBooking,
 } from "~/utils/bookingPaymentStatus.js";
+import {
+  BOOKING_STATUS,
+  isCommittedBooking,
+  isLiveBooking,
+  resolveBookingStatus,
+} from "~/utils/bookingStatus.js";
 
 const props = defineProps({
   bookings: {
@@ -163,13 +169,17 @@ function filterForStatus(bookings) {
   }
 
   return bookings.filter((b) => {
-    if (filters.value.statusRejected && b.isRejected) {
+    // One checkbox covers rejected and cancelled: neither booking lives on.
+    if (filters.value.statusRejected && !isLiveBooking(b)) {
       return true;
     }
-    if (filters.value.statusConfirmed && b.isCommitted && !b.isRejected) {
+    if (filters.value.statusConfirmed && isCommittedBooking(b)) {
       return true;
     }
-    if (filters.value.statusPending && !b.isCommitted && !b.isRejected) {
+    if (
+      filters.value.statusPending &&
+      resolveBookingStatus(b) === BOOKING_STATUS.REQUESTED
+    ) {
       return true;
     }
     return false;

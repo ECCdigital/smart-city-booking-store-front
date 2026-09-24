@@ -1,6 +1,8 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 import { loadBundleData } from "~~/server/api/utils/loadBundleData.ts";
+import { tenantMustBeListed } from "~~/server/api/utils/detailResolution.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
 export default createConditionalCachedHandler(
   async (event) => {
@@ -32,11 +34,7 @@ export default createConditionalCachedHandler(
     ]);
 
     if (error) {
-      throw createError({
-        statusCode: error.status || 500,
-        statusMessage: "Failed to fetch catalog bundle",
-        data: error.message,
-      });
+      throw createError(proxyErrorOf(error, "Failed to fetch catalog bundle"));
     }
 
     const slugCatalog =
@@ -44,7 +42,6 @@ export default createConditionalCachedHandler(
 
     const result = {
       offersEnabled: data.offersEnabled,
-      branding: slugRes?.data?.branding ?? data.branding,
       portalUrl: slugRes?.data?.portalUrl ?? data.portalUrl,
       catalog: slugCatalog ?? data.catalog,
       tenants: data.tenants ?? [],
@@ -54,7 +51,10 @@ export default createConditionalCachedHandler(
       return result;
     }
 
-    if (!result.tenants.some((t) => t.id === tenantID)) {
+    if (
+      tenantMustBeListed({ bookableId, eventId }) &&
+      !result.tenants.some((t) => t.id === tenantID)
+    ) {
       throw createError({ statusCode: 404, statusMessage: "Tenant Not Found" });
     }
 
@@ -69,28 +69,8 @@ export default createConditionalCachedHandler(
 
     return { ...result, ...items };
   },
-  {
-    maxAge: 300,
-    swr: true,
-    authScoped: true,
-    getKey: (event) => {
-      const token = getCookie(event, "access-token");
-      const scope = token ? "auth" : "anon";
-      const tenantID = getRouterParam(event, "tenantID") ?? "-";
-      const { slug, bookableId, eventId, include, base } = getQuery(event);
-      const inc = include
-        ? String(include).split(",").map((s) => s.trim()).sort().join(",")
-        : "";
-      return [
-        "catalog-bundle",
-        scope,
-        tenantID,
-        slug ?? "root",
-        bookableId ?? "-",
-        eventId ?? "-",
-        inc,
-        base === "false" ? "items" : "base",
-      ].join("::");
-    },
-  }
+  // Tenants and offers of the bundle carry a release (tenant supervision), so
+  // the answer is never cached: a tenant going non-public shows on the very
+  // next request.
+  { releaseSensitive: true }
 );

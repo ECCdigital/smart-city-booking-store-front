@@ -1,8 +1,15 @@
+import type { UpstreamError } from "~~/server/utils/upstreamError";
+import type { SsoSigninResponse } from "~~/shared/types/api";
+
 export default defineEventHandler(async (event) => {
     const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
     const pendingToken = getCookie(event, "kc-pending-token");
     const pendingRefresh = getCookie(event, "kc-pending-refresh");
-    const pendingRedirect = getCookie(event, "kc-pending-redirect") || "/";
+    // The cookie is readable and writable in the browser, so it is validated
+    // again here instead of being trusted as the callback wrote it.
+    const pendingRedirect = safeReturnTarget(
+        getCookie(event, "kc-pending-redirect")
+    );
 
     if (!pendingToken) {
         throw createError({
@@ -12,7 +19,7 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        const response: any = await $fetch(
+        const response = await $fetch<SsoSigninResponse>(
             `${API_BASE_URL}/auth/sso/signin`,
             {
                 method: "POST",
@@ -60,7 +67,8 @@ export default defineEventHandler(async (event) => {
                 redirect: pendingRedirect,
             },
         };
-    } catch (error: any) {
+    } catch (err) {
+        const error = err as UpstreamError;
         deleteCookie(event, "kc-pending-token");
         deleteCookie(event, "kc-pending-refresh");
         deleteCookie(event, "kc-pending-redirect");

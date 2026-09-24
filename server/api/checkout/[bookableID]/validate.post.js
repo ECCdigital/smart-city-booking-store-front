@@ -1,4 +1,5 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
 export default defineEventHandler(async (event) => {
   const bookableID = getRouterParam(event, "bookableID");
@@ -9,12 +10,12 @@ export default defineEventHandler(async (event) => {
     `/api/v2/${body.tenantID}/checkout/validate/${bookableID}`,
     {
       method: "POST",
-      body: await readBody(event),
+      body,
     }
   );
 
   if (error) {
-    throw createError({ statusCode: 400, statusMessage: error.message });
+    throw createError(proxyErrorOf(error));
   }
 
   return data;

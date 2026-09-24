@@ -1,6 +1,5 @@
-import {
-    getKeycloakConfig,
-} from "~~/server/utils/keycloak";
+import type { UpstreamError } from "~~/server/utils/upstreamError";
+import type { SsoSigninResponse } from "~~/shared/types/api";
 
 export default defineEventHandler(async (event) => {
     const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
@@ -28,7 +27,7 @@ export default defineEventHandler(async (event) => {
         });
 
         // 2. Direkt einloggen
-        const loginResponse: any = await $fetch(
+        const loginResponse = await $fetch<SsoSigninResponse>(
             `${API_BASE_URL}/auth/sso/signin`,
             {
                 method: "POST",
@@ -76,7 +75,8 @@ export default defineEventHandler(async (event) => {
                 permissions: loginResponse.permissions,
             },
         };
-    } catch (error: any) {
+    } catch (err) {
+        const error = err as UpstreamError;
         throw createError({
             statusCode: error.response?.status || 500,
             statusMessage: error.response?.statusText || "SSO registration failed",

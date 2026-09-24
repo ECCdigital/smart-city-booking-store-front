@@ -5,7 +5,7 @@
       <p class="font-bold" :class="hasLongTitle ? 'text-base line-clamp-3' : 'text-lg'">
         {{ event.information.name }}
       </p>
-      <p>{{ tenantName }}</p>
+      <p>{{ getTenantName(event.tenantId) }}</p>
 
       <!-- Adresse und Entfernung -->
       <div class="w-full my-5">
@@ -58,7 +58,6 @@
 </template>
 <script setup>
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
-import { useTenantStore } from "~~/stores/tenant.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import EventAdressInformation from "~/components/events/EventAdressInformation.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
@@ -85,6 +84,7 @@ const props = defineProps({
   },
 });
 
+const { getTenantName } = useTenant();
 const { sanitizeHtml } = useSanitizeHtml();
 const htmlTeaserText = computed(() => {
   return sanitizeHtml(props.event.information.teaserText || "");
@@ -92,10 +92,6 @@ const htmlTeaserText = computed(() => {
 
 const hasLongTitle = computed(() => {
   return (props.event?.information.name?.length ?? 0) > 60;
-});
-
-const tenantName = computed(() => {
-  return useTenantStore().getTenantById(props.event.tenantId).name;
 });
 </script>
 

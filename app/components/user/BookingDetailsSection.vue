@@ -14,15 +14,15 @@
     <div class="flex mb-5">
       <div class="basis-1/2">
         <p class="font-medium">Mandant</p>
-        <p>{{ tenantName }}</p>
+        <p>{{ getBookingTenant(booking)?.name || $t("account.unknownTenant") }}</p>
       </div>
       <div class="">
         <p class="font-medium">Status</p>
         <BookingStatusChip :booking="booking" />
       </div>
     </div>
-    <div v-if="booking.isRejected" class="mb-5">
-      <p class="font-medium">Ablehnungsgrund</p>
+    <div v-if="!isLive" class="mb-5">
+      <p class="font-medium">{{ reasonHeading }}</p>
       <p>{{ booking.rejectionReason }}</p>
     </div>
 
@@ -57,6 +57,14 @@
           >
             <span>{{ event.information.name }}</span>
             <EventTimeInformation :event="event" :use-icon="false" />
+          </div>
+        </div>
+        <div v-else-if="bookingEvent" class="space-y-0.5">
+          <div class="rounded-md bg-gray-200 p-1">
+            <span>{{ bookingEvent.title }}</span>
+            <p v-if="bookingEventTimeSlot">
+              {{ bookingEventTimeSlot[0] }} - {{ bookingEventTimeSlot[1] }}
+            </p>
           </div>
         </div>
       </div>
@@ -126,10 +134,28 @@
       <p class="font-medium">Ihr Kommentar</p>
       <p>{{ booking.comment }}</p>
     </div>
+
+    <!--
+      keys / access points - the same rows as on the Mobile Key, fed the
+      booking with the decision attached (`keyBooking`). A grey button gives
+      no reason of its own: the window line says too early / too late, the
+      status chip above says the rest. A cancelled or rejected booking keeps
+      the section, button grey, window line as it is.
+    -->
+    <div v-if="accessPoints.length > 0" class="mb-5">
+      <p class="font-medium">{{ t("mobileKey.accessPoint.sectionTitle") }}</p>
+      <AccessPointListRow
+        v-for="(accessPoint, i) in accessPoints"
+        :key="accessPoint.id"
+        :access-point="accessPoint"
+        :booking="keyBooking"
+        :show-separator="i < accessPoints.length - 1"
+        class="bg-gray-200 dark:bg-gray-800 p-2 rounded-sm"
+      />
+    </div>
   </div>
 </template>
 <script setup>
-import { useTenantStore } from "~~/stores/tenant.js";
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
 import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
@@ -138,7 +164,18 @@ import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { useEventStore } from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
-import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
+import { bookingEventFallback } from "~/utils/bookingEventTimes.js";
+import {
+  BOOKING_STATUS,
+  isFreeBooking,
+  isLiveBooking,
+  isSettledBooking,
+  resolveBookingStatus,
+} from "~/utils/bookingStatus.js";
+import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
+import { useAccessClock } from "~/composables/useAccessClock.js";
+import { readAccessPointsAnswer } from "~/utils/accessOpenFlow.js";
+import AccessPointListRow from "~/components/mobileKey/AccessPointListRow.vue";
 
 const { t } = useI18n();
 
@@ -153,15 +190,30 @@ const eventStore = useEventStore();
 
 const { formatDate, formatPrice } = useFormatting();
 const { downloadBookingIcal } = useIcalDownload();
+const { getBookingTenant } = useTenant();
 
-const tenantsStore = useTenantStore();
-const tenantName = computed(() => {
-  const tenant = tenantsStore.getTenantById(props.booking.tenantId);
-  if (tenant) {
-    return tenant.name;
-  }
-  return "Unbekannt";
-});
+const { getAccessPoints } = useAccessPoints();
+
+/**
+ * The last answer of the points route: the doors and the backend's decision
+ * for this booking (`readAccessPointsAnswer`). Empty until the first load,
+ * and back to empty where that load fails - no doors, no section.
+ */
+const accessAnswer = ref({ points: [], accessEligibility: null });
+const accessPoints = computed(() => accessAnswer.value.points);
+
+/**
+ * The booking as the shared key rows read it. The store's booking carries no
+ * `accessEligibility`; the points route delivers the decision as a sibling of
+ * the list, and attaching both to a local copy lets `remoteOperable`,
+ * `decideStage`, the window line and `findDoor` read the same shape as on
+ * the Mobile Key. `GET /api/bookings` stays as it is.
+ */
+const keyBooking = computed(() => ({
+  ...props.booking,
+  accessEligibility: accessAnswer.value.accessEligibility,
+  accessPoints: accessAnswer.value.points,
+}));
 
 const eventIds = computed(() => {
   return props.booking.bookableItems
@@ -190,14 +242,37 @@ watch(
   { immediate: true },
 );
 
-const bookingTimeSlot = computed(() => {
-  if (props.booking.timeBegin && props.booking.timeEnd) {
-    const beginn = formatDate(props.booking.timeBegin);
-    const end = formatDate(props.booking.timeEnd);
-    return [beginn, end];
+// Where the event store holds none of the booking's events (the tenant is no
+// longer public, the event left the catalog), the booking answer names it.
+const bookingEvent = computed(() =>
+  bookingEventFallback(props.booking, events.value),
+);
+
+const isLive = computed(() => isLiveBooking(props.booking));
+
+// The backend writes rejectionReason for both states; a booking the
+// customer cancelled themselves is not "rejected", so the heading follows
+// the state.
+const reasonHeading = computed(() =>
+  resolveBookingStatus(props.booking) === BOOKING_STATUS.REJECTED
+    ? t("account.bookingDetails.rejectionReason")
+    : t("account.bookingDetails.cancellationReason"),
+);
+
+function formatTimeSlot(timeBegin, timeEnd) {
+  if (timeBegin && timeEnd) {
+    return [formatDate(timeBegin), formatDate(timeEnd)];
   }
   return null;
-});
+}
+
+const bookingTimeSlot = computed(() =>
+  formatTimeSlot(props.booking.timeBegin, props.booking.timeEnd),
+);
+
+const bookingEventTimeSlot = computed(() =>
+  formatTimeSlot(bookingEvent.value?.timeBegin, bookingEvent.value?.timeEnd),
+);
 
 const isFree = computed(() => isFreeBooking(props.booking));
 
@@ -212,7 +287,7 @@ const paymentMethod = computed(() => {
   if (isFree.value) {
     return "–";
   }
-  if (!props.booking.isPayed) {
+  if (!isSettledBooking(props.booking)) {
     switch (props.booking.paymentProvider) {
       case "invoice": {
         return "Rechnung";
@@ -282,6 +357,64 @@ const bookableTitles = computed(() => {
 async function downloadAppointment() {
   await downloadBookingIcal(props.booking.id, props.booking.tenantId);
 }
+
+/** A load is under way; a silent reload does not double it. */
+let loadingAccessPoints = false;
+
+async function fetchAccessPoints() {
+  loadingAccessPoints = true;
+  try {
+    accessAnswer.value = readAccessPointsAnswer(
+      await getAccessPoints(props.booking.tenantId, props.booking.id),
+    );
+  } finally {
+    loadingAccessPoints = false;
+  }
+}
+
+async function loadAccessPoints() {
+  try {
+    await fetchAccessPoints();
+  } catch (error) {
+    console.error("Error fetching access points:", error);
+    accessAnswer.value = { points: [], accessEligibility: null };
+  }
+}
+
+/**
+ * The reload a window start asks for: only the server can put a door into
+ * the remote-operable list. Silent - the rows stay in place and the answer
+ * is swapped in; a reload that fails keeps the old state and says nothing.
+ */
+async function reloadSilently() {
+  if (loadingAccessPoints) {
+    return;
+  }
+
+  try {
+    await fetchAccessPoints();
+  } catch {
+    // The rows on the screen are still the truth from the last load.
+  }
+}
+
+watch(() => [props.booking.tenantId, props.booking.id], loadAccessPoints, {
+  immediate: true,
+});
+
+/**
+ * The page's clock, handed to every key row and to the sheet below
+ * (`useAccessNow`), as on the Mobile Key. A window end is client-side alone -
+ * line and button follow `now`. A window start reloads silently, as does a
+ * return to the tab after a boundary went by while it was hidden.
+ */
+useAccessClock(accessPoints, {
+  onCrossing({ starts, resumed }) {
+    if (starts > 0 || resumed) {
+      reloadSilently();
+    }
+  },
+});
 </script>
 
 <style scoped></style>

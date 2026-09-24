@@ -39,7 +39,7 @@
             }"
           >
             <UButton
-              icon="i-lucide-ellipsis"
+              icon="i-lucide-ellipsis-vertical"
               class="rounded-3xl"
               variant="soft"
               color="neutral"
@@ -97,7 +97,7 @@ import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue"
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
-import { isFreeBooking } from "~/utils/bookingPaymentStatus.js";
+import { isFreeBooking, isLiveBooking } from "~/utils/bookingStatus.js";
 
 const { t } = useI18n();
 
@@ -129,7 +129,7 @@ const { formatDate, formatPrice } = useFormatting();
 
 const currentTime = ref(new Date().getTime());
 const isActive = computed(() => {
-  if (props.booking.isRejected) {
+  if (!isLiveBooking(props.booking)) {
     return false;
   }
   if (props.booking.timeBegin && props.booking.timeEnd) {
@@ -146,13 +146,13 @@ const { downloadBookingIcal } = useIcalDownload();
 const actionOptions = computed(() => {
   const options = [];
 
-  if (props.booking.lockerInfo?.length > 0) {
+  /*if(props.booking.lockerInfo.length > 0){
     options.push({
       label: "Schlüssel anzeigen",
       icon: "i-lucide-lock",
       onSelect: openMobileKey,
     });
-  }
+  }*/
 
   if (isEvent.value || (props.booking.timeBegin && props.booking.timeEnd)) {
     options.push({
@@ -242,9 +242,5 @@ function openDetails() {
 }
 function onDownloadIcal() {
   downloadBookingIcal(props.booking.id, props.booking.tenantId);
-}
-function openMobileKey() {
-  const router = useRouter();
-  router.push({ path: `/account/keys/${props.booking.id}` });
 }
 </script>

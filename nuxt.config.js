@@ -1,4 +1,15 @@
 import "dotenv/config";
+import { HERO_PREVIEW_ROUTES } from "./shared/utils/heroPreviewRoutes";
+
+// The Hero's Live Preview is framed by the admin UI, so it alone drops
+// `X-Frame-Options` and is kept out of search indexes. Which origin may frame
+// it is only known at start-up and is added in
+// `server/plugins/hero-preview-headers.ts`; every other route keeps `'self'`.
+const heroPreviewRouteRule = {
+  headers: { "X-Robots-Tag": "noindex" },
+  security: { headers: { xFrameOptions: false } },
+};
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
@@ -9,6 +20,19 @@ export default defineNuxtConfig({
   },
 
   pages: true,
+
+  // Agent worktrees (Claude Code, Cursor) live under .claude/ inside the
+  // project and bring their own node_modules; the dev watcher would otherwise
+  // pick them up and run out of file descriptors (EMFILE on macOS).
+  ignore: [".claude/**"],
+
+  vite: {
+    server: {
+      // Dev-Tunnel (cloudflared/trycloudflare) fuer HTTPS-Tests am Handy:
+      // Vite blockt sonst fremde Host-Header mit "Blocked request".
+      allowedHosts: [".trycloudflare.com"],
+    },
+  },
 
   runtimeConfig: {
     adminBaseUrl: "",
@@ -27,6 +51,9 @@ export default defineNuxtConfig({
     // Colour mode is now in the SSR HTML (cookie + html class). A shared ISR
     // cache would serve one visitor's mode to the next for 300s.
     "/catalog/**": { ssr: true },
+    ...Object.fromEntries(
+      HERO_PREVIEW_ROUTES.map((route) => [route, heroPreviewRouteRule]),
+    ),
   },
 
   modules: [
@@ -34,7 +61,6 @@ export default defineNuxtConfig({
     "@nuxt/eslint",
     "@nuxt/fonts",
     "@nuxt/icon",
-    "@nuxt/image",
     "@nuxt/ui",
     "@nuxtjs/i18n",
     "@pinia/nuxt",
@@ -65,6 +91,7 @@ export default defineNuxtConfig({
     ],
     customRoutes: "page",
     defaultLocale: "de",
+    // The vue-i18n fallback lives in i18n/i18n.config.ts - see the comment there.
     strategy: "prefix_except_default",
     lazy: true,
     langDir: "locales/",
@@ -87,11 +114,27 @@ export default defineNuxtConfig({
       // HSTS + upgrade-insecure-requests break local HTTP dev in Safari (forces https://localhost).
       strictTransportSecurity:
         process.env.NODE_ENV === "development" ? false : undefined,
+      // OpenStreetMap's tile servers reject requests that carry no Referer and
+      // answer with a 403 "Access blocked" placeholder tile, so every map goes
+      // grey. nuxt-security defaults to `no-referrer`; the browser default only
+      // ever leaks the bare origin cross-origin, which is what OSM's tile usage
+      // policy asks an app to identify itself with.
+      referrerPolicy: "strict-origin-when-cross-origin",
       contentSecurityPolicy: {
         "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://www.orka-mv.de"],
-        "script-src": ["'self'", "https:", "'unsafe-inline'"],
+        // Mobile Key / QR-Scan: ohne 'wasm-unsafe-eval' verweigert der Browser die
+        // WebAssembly-Kompilierung des zxing-Decoders. Der Scanner startet dann stumm
+        // nicht — es gibt keine Fehlermeldung, nur ein leeres Bild. Die Decoder-Datei
+        // selbst liegt unter public/wasm/ und ist versionsgekoppelt (siehe README.md).
+        "script-src": ["'self'", "https:", "'unsafe-inline'", "'wasm-unsafe-eval'"],
         "upgrade-insecure-requests":
           process.env.NODE_ENV === "development" ? false : true,
+      },
+      // Mobile Key / QR-Scan: nuxt-security setzt per Default `camera=()` und sperrt
+      // getUserMedia damit auch für die eigene Herkunft. Der Scanner braucht
+      // ausdrücklich `camera=(self)`.
+      permissionsPolicy: {
+        camera: ["self"],
       },
     },
     nonce: true,

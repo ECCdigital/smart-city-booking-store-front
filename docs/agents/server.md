@@ -12,7 +12,7 @@ server/
     bookables/         # Bookable data, availability, pricing, occupancy
     events/            # Event listing, iCal export
     tenants/           # Tenant info, payment providers, user roles
-    theme/             # Tenant theming (CSS, logo, hero, favicon)
+    theme/             # Tenant theming (bundle, CSS, logo, favicon)
     instance/          # Global instance config
     memberships/       # User memberships
     user/              # User profile updates
@@ -65,10 +65,12 @@ import { serverFetch } from "../utils/serverFetch";
 
 export default defineEventHandler(async (event) => {
   const { data, error } = await serverFetch(event, "/bookables");
-  if (error) throw createError({ statusCode: error.status, statusMessage: error.message });
+  if (error) throw createError(proxyErrorOf(error, "Failed to fetch bookables"));
   return data;
 });
 ```
+
+`proxyErrorOf()` (`server/utils/proxyError.ts`) keeps the backend's status code and passes its error body on as `data`; a backend that did not answer is a 502. Never return a successful empty answer for a failed request. On the client the backend body is `error.data.data` (`backendErrorBodyOf()` in `app/utils/checkoutErrors.js`).
 
 ## Auth routes
 
@@ -91,7 +93,16 @@ setCookie(event, "access-token", accessToken, {
 
 ## Caching
 
-Use `createConditionalCachedHandler` for cacheable public/semi-public routes:
+Never cache an answer that carries a tenant or offer release (tenants,
+bookables, events, catalog bundles, availability, prices, checkout reads): with
+tenant supervision a tenant going non-public (pending approval or declined) or
+a withdrawn approval has to show on the next request. Such a handler passes
+`{ releaseSensitive: true }` (or is a plain `defineEventHandler`), and its path
+belongs in
+`server/utils/releaseFreshness.ts`, which makes `server/middleware/release-freshness.ts`
+send `Cache-Control: no-store`.
+
+Use `createConditionalCachedHandler` with a lifetime only for release-free public/semi-public routes (today: `catalog/mode`):
 
 ```typescript
 import { createConditionalCachedHandler } from "../../utils/conditionalCache";
@@ -108,6 +119,11 @@ export default createConditionalCachedHandler(
 ```
 
 Cache is disabled when `NUXT_CACHE_ENABLED=false`. Always use `authScoped: true` when response content depends on login state.
+
+Do not wrap the theme routes in it: they read the Theme Bundle from the store in
+`server/utils/themeBundleStore.ts`, which owns their freshness (ADR 0001). A
+cached handler would also overwrite the `Cache-Control` a versioned request has
+earned.
 
 ## Adding a new BFF route
 
@@ -127,6 +143,7 @@ Server-side config from environment variables (see `.env.example`):
 | `apiBaseUrl` | `NUXT_API_BASE_URL` | Backend API base URL |
 | `userBaseUrl` | `NUXT_USER_BASE_URL` | Storefront public URL |
 | `adminBaseUrl` | `NUXT_ADMIN_BASE_URL` | Admin portal URL |
+| `public.adminBaseUrl` | `NUXT_PUBLIC_ADMIN_BASE_URL` | Admin portal link; its origin (`shared/utils/adminOrigin.ts`) is the only one allowed to frame the Hero's Live Preview (`/preview/hero`) — see `server/plugins/hero-preview-headers.ts` |
 | `cacheEnabled` | `NUXT_CACHE_ENABLED` | Server-side SWR cache |
 
 Access via `useRuntimeConfig()` in server handlers, `useRuntimeConfig().public` for client-safe values.

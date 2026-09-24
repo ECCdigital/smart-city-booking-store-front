@@ -99,7 +99,7 @@
     <template #footer>
       <p class="text-sm text-center text-gray-500 dark:text-gray-400">
         {{ $t("register.haveAccount") }}
-        <NuxtLink to="/login" class="text-primary-500 hover:underline">
+        <NuxtLink :to="loginTo" class="text-primary-500 hover:underline">
           {{ $t("common.login") }}
         </NuxtLink>
       </p>
@@ -119,6 +119,11 @@ defineProps({
   loading: {
     type: Boolean,
     default: false,
+  },
+  // The login page, carrying the return target if there is one.
+  loginTo: {
+    type: String,
+    default: "/login",
   },
 });
 

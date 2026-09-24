@@ -209,7 +209,7 @@ const statusFilterItems = () => [
     },
   },
   {
-    label: "Storniert",
+    label: "Storniert / Abgelehnt",
     icon: "i-lucide-x",
     type: "checkbox",
     checked: showStatusRejected.value,

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useAuth } from "~/composables/auth/useAuth";
+import { useReturnTarget } from "~/composables/auth/useReturnTarget";
 import { useAuthStore } from "~~/stores/auth.js";
 import CardLoginCard from "~/components/auth/CardLoginCard";
+import type { CardMethod } from "~~/shared/types/api";
 
 definePageMeta({ layout: "default" });
 
@@ -12,17 +14,18 @@ usePageTitle(() => t("meta.pages.cardLogin"));
 const notification = useNotification();
 const authStore = useAuthStore();
 const { getCardAuthMethods } = useAuth();
+const { follow: followReturnTarget } = useReturnTarget();
 
 const appId = computed(() => route.params.appId as string);
 
-const cardMethod = ref<any | null>(null);
+const cardMethod = ref<CardMethod | null>(null);
 const loading = ref(true);
 
 const fetchCardMethod = async () => {
   loading.value = true;
   try {
     const methods = await getCardAuthMethods();
-    cardMethod.value = methods.find((m: any) => m.id === appId.value) || null;
+    cardMethod.value = methods.find((m) => m.id === appId.value) || null;
   } catch {
     cardMethod.value = null;
   } finally {
@@ -38,19 +41,14 @@ const onSuccess = async () => {
       "!",
       t("notifications.loginSuccess.title"),
   );
-  const redirect = route.query.redirect;
-  if (redirect && typeof redirect === "string") {
-    await navigateTo(redirect);
-  } else {
-    await navigateTo("/");
-  }
+  await followReturnTarget();
 };
 
 onMounted(fetchCardMethod);
 </script>
 
 <template>
-  <PageBackground variant="poly" :vignette="true" intensity="normal">
+  <PageBackground>
     <div class="hidden lg:flex w-3/5 items-center justify-center text-white">
       <div class="max-w-md text-center">
         <h1 class="text-4xl font-bold mb-4">

@@ -21,7 +21,17 @@
         <MainCategoryArea />
       </div>
 
-      <LatestEventsArea v-if="allEvents.length > 0" :items="allEvents" />
+      <!-- A failed load is not an empty catalog -->
+      <UAlert
+        v-if="error"
+        class="my-6"
+        color="error"
+        variant="subtle"
+        icon="i-lucide-triangle-alert"
+        :title="$t('errors.loadFailed.title')"
+        :description="$t('errors.loadFailed.message')"
+      />
+      <LatestEventsArea v-else-if="allEvents.length > 0" :items="allEvents" />
     </div>
   </div>
 </template>
@@ -36,12 +46,7 @@ import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.
 definePageMeta({
   layout: "catalog",
   middleware: ["catalog-auth", "catalog-guard"],
-  hero: {
-    height: "lg",
-    titleClass: "text-2xl",
-    subtitleClass: "text-xl md:text-5xl",
-    showOnMobile: true,
-  },
+  hero: "home",
 });
 
 usePageTitle();
@@ -57,9 +62,13 @@ const { error } = useLazyAsyncData("catalog-bundle-home", () =>
   loadBundle({ slug: catalogSlug.value, include: ["events"] }),
 );
 
-if (error.value) {
-  console.error("[index] loadBundle failed:", error.value);
-}
+watch(
+  error,
+  (failure) => {
+    if (failure) console.error("[index] loadBundle failed:", failure);
+  },
+  { immediate: true },
+);
 
 const allEvents = computed(() => eventStore.getEvents);
 const { state: query } = useCatalogQueryState();

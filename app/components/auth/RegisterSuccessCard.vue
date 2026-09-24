@@ -1,4 +1,18 @@
-<script setup></script>
+<script setup>
+defineProps({
+  // The login page, carrying the return target of the signup.
+  loginTo: {
+    type: String,
+    default: "/login",
+  },
+  resending: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+defineEmits(["resend"]);
+</script>
 
 <template>
   <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
@@ -29,8 +43,17 @@
         {{ $t("register.success.toHome") }}
       </UButton>
 
-      <UButton block variant="soft" to="/login">
+      <UButton block variant="soft" :to="loginTo">
         {{ $t("register.success.toLogin") }}
+      </UButton>
+
+      <UButton
+        block
+        variant="ghost"
+        :loading="resending"
+        @click="$emit('resend')"
+      >
+        {{ $t("emailVerification.resendLink") }}
       </UButton>
     </div>
   </UCard>

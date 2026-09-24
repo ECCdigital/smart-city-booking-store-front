@@ -11,18 +11,11 @@
           {{ title }}
         </h3>
       </div>
-      <Icon
-        name="i-lucide-arrow-right"
-        class="h-5 w-5 block md:hidden text-primary"
-      />
+      <Icon name="i-lucide-arrow-right" class="h-5 w-5 text-primary" />
     </div>
 
     <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
       {{ description }}
-    </div>
-
-    <div class="justify-end text-primary hidden md:flex">
-      <Icon name="i-lucide-arrow-right" class="h-5 w-5" />
     </div>
   </div>
 </template>

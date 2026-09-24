@@ -1,21 +1,22 @@
 <script setup lang="ts">
 import { ref, computed, reactive } from "vue";
 import { useAuth } from "~/composables/auth/useAuth";
-import { useAuthStore } from "~~/stores/auth.js";
 import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
+import type { CardMethod } from "~~/shared/types/api";
 
-interface CardField {
-  label?: string;
-  placeholder?: string;
-  helpText?: string;
-}
-
-interface CardMethod {
-  id: string;
-  label?: string;
-  description?: string;
-  publicIdField: CardField;
-  secretField: CardField;
+/**
+ * A BFF error as `$fetch` hands it to the browser: `createError` puts the
+ * route's own `data` payload one level down, and a thrown response repeats
+ * status and message inside `data`.
+ */
+interface BffError {
+  statusCode?: number;
+  statusMessage?: string;
+  data?: {
+    statusCode?: number;
+    statusMessage?: string;
+    data?: { reason?: string };
+  };
 }
 
 const props = defineProps<{
@@ -28,7 +29,6 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const notification = useNotification();
-const authStore = useAuthStore();
 const { cardSignup, cardLogin } = useAuth();
 
 const {
@@ -96,8 +96,8 @@ const submitCredentials = async () => {
 
     state.value = "success";
     setTimeout(() => emit("success"), 800);
-  } catch (error) {
-    handleError(error);
+  } catch (err) {
+    handleError(err as BffError);
   } finally {
     loading.value = false;
   }
@@ -141,14 +141,14 @@ const submitRegistration = async () => {
           t("cardLogin.awaitingVerification.title"),
       );
     }
-  } catch (error: any) {
-    handleError(error);
+  } catch (err) {
+    handleError(err as BffError);
   } finally {
     loading.value = false;
   }
 };
 
-const handleError = (error: any) => {
+const handleError = (error: BffError) => {
   state.value = "error";
   const reason = error.data?.data?.reason;
   const status = error.statusCode || error.data?.statusCode;

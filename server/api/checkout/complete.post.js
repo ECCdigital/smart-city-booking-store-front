@@ -1,4 +1,5 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -29,11 +30,7 @@ export default defineEventHandler(async (event) => {
   console.log("error", error);
 
   if (error) {
-    throw createError({
-      statusCode: error.status,
-      statusMessage: error.message,
-      data: error.data,
-    });
+    throw createError(proxyErrorOf(error));
   }
 
   return data;

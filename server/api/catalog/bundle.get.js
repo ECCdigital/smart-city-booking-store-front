@@ -1,6 +1,7 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
 import { loadBundleData } from "~~/server/api/utils/loadBundleData.ts";
 import { createConditionalCachedHandler } from "~~/server/utils/conditionalCache";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
 const errorMapping = {
   401: { statusCode: 401, statusMessage: "unauthorized" },
@@ -17,6 +18,7 @@ export default createConditionalCachedHandler(
       catalogType,
       catalogTenantId,
       tenantIds,
+      tenantHint,
     } = getQuery(event);
     const tenantsFromQuery = tenantIds
       ? String(tenantIds)
@@ -39,6 +41,7 @@ export default createConditionalCachedHandler(
         bookableId,
         eventId,
         include,
+        tenantHint: tenantHint ? String(tenantHint) : null,
       });
     }
 
@@ -57,11 +60,10 @@ export default createConditionalCachedHandler(
     ]);
 
     if (error) {
-      const mapped = errorMapping[error.status] || {
-        statusCode: error.status || 500,
-        statusMessage: error.message || "Error fetching catalog bundle",
-      };
-      throw createError(mapped);
+      throw createError(
+        errorMapping[error.status] ||
+          proxyErrorOf(error, "Error fetching catalog bundle"),
+      );
     }
 
     const slugCatalog =
@@ -69,7 +71,6 @@ export default createConditionalCachedHandler(
 
     const result = {
       offersEnabled: data.offersEnabled,
-      branding: slugRes?.data?.branding ?? data.branding,
       portalUrl: slugRes?.data?.portalUrl ?? data.portalUrl,
       catalog: slugCatalog ?? data.catalog,
       tenants: data.tenants ?? [],
@@ -85,34 +86,13 @@ export default createConditionalCachedHandler(
       bookableId,
       eventId,
       include,
+      tenantHint: tenantHint ? String(tenantHint) : null,
     });
 
     return { ...result, ...items };
   },
-  {
-    maxAge: 300,
-    swr: true,
-    authScoped: true,
-    getKey: (event) => {
-      const token = getCookie(event, "access-token");
-      const scope = token ? "auth" : "anon";
-      const { slug, bookableId, eventId, include } = getQuery(event);
-      const { base, catalogType, catalogTenantId, tenantIds } = getQuery(event);
-      const inc = include
-        ? String(include).split(",").map((s) => s.trim()).sort().join(",")
-        : "";
-      return [
-        "catalog-bundle",
-        scope,
-        slug ?? "root",
-        bookableId ?? "-",
-        eventId ?? "-",
-        inc,
-        base === "false" ? "items" : "base",
-        catalogType ?? "-",
-        catalogTenantId ?? "-",
-        tenantIds ?? "-",
-      ].join("::");
-    },
-  }
+  // Tenants and offers of the bundle carry a release (tenant supervision), so
+  // the answer is never cached: a tenant going non-public shows on the very
+  // next request.
+  { releaseSensitive: true }
 );

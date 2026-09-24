@@ -15,7 +15,17 @@ import CheckoutPaymentStep from "~/components/checkout/CheckoutPaymentStep.vue";
 import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useNotification } from "~/composables/useNotification.js";
-import { resolveCheckoutErrorKey } from "~/utils/checkoutErrors.js";
+import {
+  OFFER_NOT_REACHABLE,
+  backendErrorBodyOf,
+  resolveCheckoutErrorKey,
+  resolveCheckoutFailureKey,
+} from "~/utils/checkoutErrors.js";
+import { isNotAvailableError } from "~/utils/catalogDetail.js";
+import {
+  BOOKING_STATUS,
+  resolveBookingStatus,
+} from "~/utils/bookingStatus.js";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 
@@ -208,6 +218,12 @@ const {
 if (error.value) {
   console.error("Error loading checkout data:", error.value);
 }
+
+// A failing backend is not a missing offer: only a 404 (or an answer without
+// the bookable) is "not available".
+const checkoutLoadFailed = computed(
+  () => Boolean(error.value) && !isNotAvailableError(error.value),
+);
 
 const leadBookable = computed(() => data.value?.leadBookable || null);
 const tenant = computed(() => data.value?.tenant || null);
@@ -1206,7 +1222,11 @@ async function validateFixedCouponApplicabilityForAttempts({
 
     return { valid: true };
   } catch (error) {
-    return { valid: false, reason: "checkout.unknown_error", error };
+    return {
+      valid: false,
+      reason: resolveCheckoutFailureKey(error) ?? "checkout.unknown_error",
+      error,
+    };
   }
 }
 
@@ -1244,7 +1264,11 @@ async function validateFixedCouponApplicability({
     }
     return { valid: true };
   } catch (error) {
-    return { valid: false, reason: "checkout.unknown_error", error };
+    return {
+      valid: false,
+      reason: resolveCheckoutFailureKey(error) ?? "checkout.unknown_error",
+      error,
+    };
   }
 }
 
@@ -1343,7 +1367,8 @@ async function validateAll() {
       const row = results[i];
 
       if (row.error) {
-        const reason = "checkout.unknown_error";
+        const reason =
+          resolveCheckoutFailureKey(row.error) ?? "checkout.unknown_error";
         errorMap[id] = { reason, error: row.error, isLead };
         errors.push({ id, isLead, label, reason, error: row.error });
         continue;
@@ -1516,7 +1541,9 @@ async function validateGroupBookingAttempts() {
     if (myToken !== validationToken) return;
 
     if (batchResult.error) {
-      const reason = "checkout.unknown_error";
+      const reason =
+        resolveCheckoutFailureKey(batchResult.error) ??
+        "checkout.unknown_error";
       validationErrors.value = {
         [bookableID]: { reason, error: batchResult.error, isLead: true },
       };
@@ -2454,10 +2481,15 @@ async function handleFinish() {
       : await completeCheckout(payload);
 
     if (error) {
-      const body = error.data;
-      const apiErr =
-        body && typeof body === "object" && !Array.isArray(body) ? body : null;
-      notifyError(messageForCheckoutApiError(apiErr || {}));
+      // The offer was withdrawn or its tenant stopped being public (pending
+      // approval or declined) since the form was opened (404/409): say so
+      // instead of a generic failure.
+      const failureKey = resolveCheckoutFailureKey(error);
+      notifyError(
+        failureKey === OFFER_NOT_REACHABLE
+          ? t(OFFER_NOT_REACHABLE)
+          : messageForCheckoutApiError(backendErrorBodyOf(error) || {}),
+      );
       return;
     }
 
@@ -2488,8 +2520,9 @@ async function handleFinish() {
       return;
     }
 
+    const bookingStatus = resolveBookingStatus(booking);
     const goPayment =
-      booking?.isCommitted === true &&
+      bookingStatus === BOOKING_STATUS.PAYMENT_DUE &&
       payment &&
       typeof payment === "object" &&
       isExternalPaymentLinkProvider(payment.provider);
@@ -2511,7 +2544,7 @@ async function handleFinish() {
       bookableId: String(bookableID ?? ""),
       bookingId: bookingIds,
     };
-    if (booking?.isCommitted === false) {
+    if (bookingStatus === BOOKING_STATUS.REQUESTED) {
       statusQuery.pending = "1";
     }
     await router.push({ path: "/checkout/status", query: statusQuery });
@@ -2575,7 +2608,15 @@ function onReviewEdit(section) {
           name="i-lucide-shopping-cart"
           class="text-gray-400 mb-4"
         />
-        <p class="text-gray-500">{{ $t("checkout.noBookable") }}</p>
+        <template v-if="checkoutLoadFailed">
+          <p class="text-gray-700 dark:text-gray-200 font-medium">
+            {{ $t("errors.loadFailed.title") }}
+          </p>
+          <p class="text-gray-500">{{ $t("errors.loadFailed.message") }}</p>
+        </template>
+        <p v-else class="text-gray-500">
+          {{ $t("errors.offerNotAvailable") }}
+        </p>
       </div>
     </div>
 

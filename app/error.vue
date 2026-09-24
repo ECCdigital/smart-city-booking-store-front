@@ -7,33 +7,20 @@ const props = defineProps({
 
 const handleError = () => clearError({ redirect: "/" });
 
-const errorConfig: Record<
-  number,
-  { title: string; icon: string; message: string }
-> = {
-  404: {
-    title: "Seite nicht gefunden",
-    icon: "i-lucide-search",
-    message: "Die angeforderte Seite existiert nicht oder wurde verschoben.",
-  },
-  403: {
-    title: "Zugriff verweigert",
-    icon: "i-lucide-lock",
-    message: "Sie haben keine Berechtigung, diese Seite aufzurufen.",
-  },
-  500: {
-    title: "Serverfehler",
-    icon: "i-lucide-cog",
-    message:
-      "Ein interner Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
-  },
+// A 404 is neutral on purpose: a page that never existed and a tenant or
+// offer that is no longer available read the same, with no internal reason.
+const errorConfig: Record<number, { key: string; icon: string }> = {
+  404: { key: "errors.page.notAvailable", icon: "i-lucide-search" },
+  403: { key: "errors.page.forbidden", icon: "i-lucide-lock" },
+  500: { key: "errors.page.serverError", icon: "i-lucide-cog" },
+  502: { key: "errors.page.serverError", icon: "i-lucide-cog" },
+  503: { key: "errors.page.serverError", icon: "i-lucide-cog" },
 };
 
 const getErrorInfo = (code?: number) =>
   errorConfig[code ?? 500] ?? {
-    title: "Ein Fehler ist aufgetreten",
+    key: "errors.page.generic",
     icon: "i-lucide-bug",
-    message: "Etwas ist schiefgelaufen.",
   };
 
 const { t } = useI18n();
@@ -50,24 +37,35 @@ usePageTitle(pageTitle);
 </script>
 
 <template>
-  <PageBackground class="error-page" theme="dark" variant="poly" :vignette="true" intensity="normal" >
+  <!-- `dark` on the wrapper forces the dark palette whatever the visitor's colour mode -->
+  <PageBackground class="error-page dark">
     <div class="error-card">
       <UIcon
         size="48"
         :name="getErrorInfo(error?.statusCode).icon"
         class="mb-4"
       />
-      <h1 class="error-code">{{ error?.statusCode ?? "Fehler" }}</h1>
-      <h2 class="error-title">{{ getErrorInfo(error?.statusCode).title }}</h2>
-      <p class="error-message">{{ getErrorInfo(error?.statusCode).message }}</p>
+      <h1 class="error-code">
+        {{ error?.statusCode ?? $t("errors.page.code") }}
+      </h1>
+      <h2 class="error-title">
+        {{ $t(`${getErrorInfo(error?.statusCode).key}.title`) }}
+      </h2>
+      <p class="error-message">
+        {{ $t(`${getErrorInfo(error?.statusCode).key}.message`) }}
+      </p>
 
       <div class="error-details" v-if="error?.url">
         <code>{{ error.url }}</code>
       </div>
 
       <div class="error-actions">
-        <button class="btn-primary" @click="handleError">Zur Startseite</button>
-        <button class="btn-secondary" @click="$router.back()">Zurück</button>
+        <button class="btn-primary" @click="handleError">
+          {{ $t("errors.page.home") }}
+        </button>
+        <button class="btn-secondary" @click="$router.back()">
+          {{ $t("errors.page.back") }}
+        </button>
       </div>
     </div>
   </PageBackground>

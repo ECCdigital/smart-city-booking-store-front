@@ -11,6 +11,13 @@ export const useAuth = () => {
     return response;
   };
 
+  const resendVerification = async (email, nextUrl) => {
+    return await $fetch("/api/auth/resend-verification", {
+      method: "POST",
+      body: { email, nextUrl },
+    });
+  };
+
   const verifyEmail = async (token, id) => {
     const response = await $fetch("/api/auth/verify-email", {
       method: "POST",
@@ -52,17 +59,7 @@ export const useAuth = () => {
     return response.data;
   };
 
-  const cardSignup = async (
-    payload = {
-      appId,
-      publicId,
-      secret,
-      email,
-      firstName,
-      lastName,
-      company,
-    }
-  ) => {
+  const cardSignup = async (payload) => {
     const response = await $fetch("/api/auth/card/signup", {
       method: "POST",
       body: payload,
@@ -72,7 +69,7 @@ export const useAuth = () => {
 
   return {
     user: readonly(computed(() => authStore.user)),
-    permission: readonly(computed(() => authStore.permission)),
+    permissions: readonly(computed(() => authStore.permissions)),
     isLoggedIn: readonly(computed(() => authStore.isLoggedIn)),
     authChecked: readonly(computed(() => authStore.authChecked)),
     validateAuth: authStore.validateAuth,
@@ -80,6 +77,7 @@ export const useAuth = () => {
     login: authStore.login,
     logout: authStore.logout,
     register,
+    resendVerification,
     verifyEmail,
     verifyCardLink,
     changePassword,

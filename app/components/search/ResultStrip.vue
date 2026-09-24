@@ -21,20 +21,10 @@
         />
 
         <img
-          v-if="!isEvent && item?.imgUrl && !showImageErrorHint"
-          :src="`/api/img?url=${encodeURIComponent(item.imgUrl)}`"
+          v-if="image && !showImageErrorHint"
+          v-bind="image"
           alt=""
-          class="w-full h-full object-cover rounded-l-sm"
-          @error="onImageError"
-        />
-        <img
-          v-else-if="
-            isEvent && item?.information?.teaserImage && !showImageErrorHint
-          "
-          :src="`/api/img?url=${encodeURIComponent(
-            item.information.teaserImage,
-          )}`"
-          alt=""
+          :loading="eager ? 'eager' : 'lazy'"
           class="w-full h-full object-cover rounded-l-sm"
           @error="onImageError"
         />
@@ -90,8 +80,10 @@ import ResultStripBookableContent from "~/components/search/ResultStripBookableC
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
+import { useMediaImage } from "~/composables/utils/useMediaImage";
 
 const colorMode = useColorMode();
+const { coverImageOf, imageSource } = useMediaImage();
 
 const theme = computed(() => {
   if (colorMode.value === "dark") return "dark";
@@ -128,6 +120,12 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // The first strip of a list is above the fold and is usually the LCP
+  // element, so its image must not be deferred.
+  eager: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const { goToDetails } = useRedirection();
@@ -135,6 +133,10 @@ const { goToDetails } = useRedirection();
 const isEvent = computed(() => {
   return props.item.type === "event";
 });
+
+const image = computed(() =>
+  imageSource(coverImageOf(props.item, isEvent.value), "strip"),
+);
 
 const price = computed(() => {
   if (props.entryPageMode) {

@@ -1,34 +1,70 @@
 <template>
-  <div
-    class="bg-gray-300/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg rounded-md overflow-hidden w-full"
-    :style="{ aspectRatio }"
-  >
-    <img
-      v-if="imageUrl && !showImageErrorHint"
-      :src="imageUrl"
-      :alt="altText"
-      class="w-full h-full object-cover"
-      @error="onImageError"
-    />
-    <ClientOnly v-else>
-      <div
-        class="@container w-full h-full flex items-center justify-center relative"
-      >
-        <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-sm" />
-        <div v-if="showImageErrorHint" class="absolute text-center">
-          <UIcon
-            name="i-lucide-image-off"
-            :class="iconOnly ? 'w-8 h-8' : 'w-4 h-4'"
-          />
-          <p v-if="!iconOnly" class="text-xs">Nicht gefunden</p>
+  <div class="space-y-2">
+    <div
+      class="bg-gray-300/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg rounded-md overflow-hidden w-full"
+      :style="{ aspectRatio }"
+    >
+      <img
+        v-if="activeImage && !showImageErrorHint"
+        v-bind="activeImage"
+        :alt="altText"
+        class="w-full h-full object-cover"
+        @error="onImageError"
+      />
+      <ClientOnly v-else>
+        <div
+          class="@container w-full h-full flex items-center justify-center relative"
+        >
+          <ImagePlaceholder :theme="theme" class="w-full h-full rounded-l-sm" />
+          <div v-if="showImageErrorHint" class="absolute text-center">
+            <UIcon
+              name="i-lucide-image-off"
+              :class="iconOnly ? 'w-8 h-8' : 'w-4 h-4'"
+            />
+            <p v-if="!iconOnly" class="text-xs">
+              {{ $t("common.imageNotFound") }}
+            </p>
+          </div>
         </div>
-      </div>
-    </ClientOnly>
+      </ClientOnly>
+    </div>
+
+    <!-- The bookable's image list, cover first. Only shown once there is more
+         than one image to choose from. -->
+    <div
+      v-if="images.length > 1"
+      class="flex gap-2 overflow-x-auto"
+      :aria-label="$t('bookableDetail.gallery.label')"
+      role="group"
+    >
+      <button
+        v-for="(image, index) in images"
+        :key="index"
+        type="button"
+        class="w-20 h-20 shrink-0 rounded-md overflow-hidden border-2 transition-colors cursor-pointer"
+        :class="
+          index === activeIndex
+            ? 'border-primary'
+            : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+        "
+        :aria-label="$t('bookableDetail.gallery.showImage', { index: index + 1 })"
+        :aria-current="index === activeIndex"
+        @click="activeIndex = index"
+      >
+        <img
+          v-bind="thumbnailOf(image)"
+          alt=""
+          loading="lazy"
+          class="w-full h-full object-cover"
+        />
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
+import { useMediaImage } from "~/composables/utils/useMediaImage";
 
 const props = defineProps({
   item: {
@@ -45,15 +81,41 @@ const props = defineProps({
   },
 });
 
-const imageUrl = computed(() => {
-  if (props.isEvent && props.item.information?.teaserImage) {
-    return `/api/img?url=${encodeURIComponent(props.item.information.teaserImage)}`;
-  } else if (props.item?.imgUrl) {
-    return `/api/img?url=${encodeURIComponent(props.item.imgUrl)}`;
-  } else {
-    return "";
+const { coverImageOf, imageSource } = useMediaImage();
+
+/**
+ * The images to offer. A bookable's list carries its cover at position 0; an
+ * event's cover is its teaser image and `images` is a separate gallery, so the
+ * teaser is put in front. Empty positions drop out — the backend keeps them to
+ * preserve list indices.
+ */
+const images = computed(() => {
+  const list = (
+    Array.isArray(props.item?.images) ? props.item.images : []
+  ).filter((image) => (typeof image === "object" ? image?.url : image));
+
+  if (props.isEvent) {
+    const cover = coverImageOf(props.item, true);
+    return cover ? [cover, ...list] : list;
   }
+
+  if (list.length > 0) return list;
+
+  // A bookable the media import has not touched yet: only the single cover.
+  const cover = coverImageOf(props.item, false);
+  return cover ? [cover] : [];
 });
+
+const activeIndex = ref(0);
+
+const activeImage = computed(() =>
+  imageSource(images.value[activeIndex.value], "hero"),
+);
+
+function thumbnailOf(image) {
+  return imageSource(image, "thumbnail");
+}
+
 const altText = computed(() => {
   if (props.isEvent) {
     return props.item.information.name;
@@ -73,7 +135,14 @@ const theme = computed(() => {
 const showImageErrorHint = ref(false);
 
 function onImageError() {
-  console.log("*_** Image failed to load:", imageUrl.value);
   showImageErrorHint.value = true;
 }
+
+// A different image gets its own chance to load, and a new item starts over.
+watch(activeImage, () => {
+  showImageErrorHint.value = false;
+});
+watch(images, () => {
+  activeIndex.value = 0;
+});
 </script>

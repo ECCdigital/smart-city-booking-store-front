@@ -83,7 +83,7 @@ const { t } = useI18n();
 - **UI library:** Use Nuxt UI components (`UButton`, `UCard`, `UInput`, …) — check existing usage before adding custom HTML
 - **Styling:** Tailwind CSS utility classes — match existing patterns in the component's feature area
 - **Icons:** `@nuxt/icon` — use `<Icon name="…" />` (Heroicons by default)
-- **Images:** `@nuxt/image` — use `<NuxtImg>` for optimized images
+- **Images:** `useMediaImage()` — `v-bind` its `imageSource(reference, context)` onto a plain `<img>`. It builds `src`/`srcset`/`sizes` from the backend's media presets and routes every image through the `/api/img` proxy, so pages stay same-origin. Never assemble a proxy URL by hand
 - **Navigation:** Use `useTenantRoute().tenantTo()` for links in tenant context, `<NuxtLink>` otherwise
 
 ## Data loading

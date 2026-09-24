@@ -5,10 +5,6 @@ import EventSection from "~/components/events/EventSection.vue";
 
 definePageMeta({
   layout: "catalog",
-  hero: {
-    height: "sm",
-    showOnMobile: true,
-  },
 });
 
 const { t } = useI18n();

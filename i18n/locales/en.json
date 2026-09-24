@@ -1,5 +1,22 @@
 {
   "welcome": "Welcome!",
+  "hero": {
+    "fallbackSubtitle": "Discover our offers",
+    "preview": {
+      "moveToZone": "Move the selected Block to “{zone}”",
+      "zones": {
+        "top-left": "top left",
+        "top-center": "top centre",
+        "top-right": "top right",
+        "middle-left": "middle left",
+        "middle-center": "centre",
+        "middle-right": "middle right",
+        "bottom-left": "bottom left",
+        "bottom-center": "bottom centre",
+        "bottom-right": "bottom right"
+      }
+    }
+  },
   "meta": {
     "siteNameFallback": "Smart City Booking",
     "pages": {
@@ -24,6 +41,7 @@
       "accountFavorites": "Favorites",
       "accountSettings": "Settings",
       "accountAppearance": "Appearance",
+      "mobileKey": "Mobile Key",
       "cardLink": "Link card",
       "cardLinkSuccess": "Card linked",
       "cardLinkFailed": "Linking failed",
@@ -65,12 +83,84 @@
     "phone": "Phone",
     "address": "Street and number",
     "zipCode": "Postal code",
-    "city": "City"
+    "city": "City",
+    "imageNotFound": "Image not found"
+  },
+  "errors": {
+    "offerNotAvailable": "This offer is not (or no longer) available.",
+    "loadFailed": {
+      "title": "The content could not be loaded",
+      "message": "Please try again later."
+    },
+    "page": {
+      "notAvailable": {
+        "title": "Page not available",
+        "message": "The requested page does not exist or is not (or no longer) available."
+      },
+      "forbidden": {
+        "title": "Access denied",
+        "message": "You do not have permission to view this page."
+      },
+      "serverError": {
+        "title": "Server error",
+        "message": "An internal error occurred. Please try again later."
+      },
+      "generic": {
+        "title": "An error occurred",
+        "message": "Something went wrong."
+      },
+      "code": "Error",
+      "home": "Back to home",
+      "back": "Back"
+    },
+    "noCatalog": "No catalog was found",
+    "noTenantFound": {
+      "title": "No tenant found",
+      "message": "No tenant was found for this domain. Please check the URL or contact support."
+    }
+  },
+  "events": {
+    "noEvent": "No event found"
+  },
+  "resources": {
+    "noResource": "No resource found"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "bookings": "Bookings",
+    "resources": "Resources",
+    "user": "User",
+    "reports": "Reports",
+    "admin": "Admin area",
+    "offerSpaces": "Offer spaces",
+    "settings": "Settings",
+    "activities": "Activities",
+    "mobileKey": "Digital keys",
+    "invoices": "Invoices",
+    "account": "Account"
   },
   "footer": {
     "legalNotice": "Legal notice",
     "dataProtection": "Privacy policy",
-    "termsAndConditions": "Terms and conditions"
+    "termsAndConditions": "Terms and conditions",
+    "offerSpaces": "Offer spaces"
+  },
+  "rateLimit": {
+    "title": "Too many attempts",
+    "seconds": "Please try again in {count} second. | Please try again in {count} seconds.",
+    "minutes": "Please try again in {count} minute. | Please try again in {count} minutes.",
+    "later": "Please try again later."
+  },
+  "emailVerification": {
+    "resendLink": "Send confirmation link again"
+  },
+  "register": {
+    "success": {
+      "heading": "Please check your inbox",
+      "description": "If the address you entered can be used, you will shortly receive an e-mail with a confirmation link. Please use it to confirm your e-mail address and activate your account.",
+      "resent": "If the address belongs to an account that is not confirmed yet, we have sent the confirmation link again."
+    }
   },
   "colorMode": {
     "toggle": "Colour mode",
@@ -82,6 +172,7 @@
     "additionalObjects": "Additional Objects",
     "mandatoryObjects": "Mandatory Objects",
     "login_required": "Sign-in is required for this booking.",
+    "offer_not_reachable": "This offer is no longer available and cannot be booked.",
     "bookable_unavailable": "This object is not available for the selected time period.",
     "unknown_error": "An error occurred during validation.",
     "group_booking_disabled": "Recurring bookings are not allowed for this object.",
@@ -90,6 +181,7 @@
     "payment_failed": "Payment could not be started. Please try again or choose another payment method.",
     "payment_provider_unavailable": "The selected payment method is not available right now.",
     "locker_unavailable": "The booking could not be completed (locker reservation). Please check the time slot or your selection.",
+    "compartments_unavailable": "No compartment is left for the selected period. Please choose another period.",
     "invoice_payment_not_permitted": "Invoice payment is not enabled for your account.",
     "capacity_exceeded": "The maximum capacity for this object has been reached.",
     "time_conflict": "There is a time conflict with another booking for this object.",
@@ -380,7 +472,11 @@
     "moreInfo": "More information",
     "relatedTitle": "You might also like:",
     "cancellationTitle": "Cancellation policy",
-    "yes": "Yes"
+    "yes": "Yes",
+    "gallery": {
+      "label": "More images",
+      "showImage": "Show image {index}"
+    }
   },
 
   "detailsAvailability": {
@@ -426,6 +522,44 @@
       "free": "Free of charge",
       "paid": "Paid",
       "unpaid": "Unpaid"
+    },
+    "status": {
+      "requested": "Pending",
+      "requestedTooltip": "The booking still has to be approved by the provider.",
+      "payment_due": "Confirmed",
+      "confirmed": "Confirmed",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    }
+  },
+
+  "account": {
+    "bookingDetails": {
+      "rejectionReason": "Reason for rejection",
+      "cancellationReason": "Reason for cancellation"
+    }
+  },
+
+  "account": {
+    "unknownTenant": "Unknown",
+    "invoices": {
+      "title": "Your invoices and receipts",
+      "emptyTitle": "No invoices available",
+      "emptyDescription": "There are currently no invoices for your account. Once invoices have been created, they will appear here.",
+      "unknownBookable": "Unknown bookable",
+      "columns": {
+        "createdAt": "Created",
+        "title": "Title",
+        "type": "Document type",
+        "bookingId": "Booking ID",
+        "bookables": "Bookables",
+        "paid": "Paid"
+      },
+      "types": {
+        "invoice": "Invoice",
+        "receipt": "Receipt",
+        "unknown": "Unknown"
+      }
     }
   },
 
@@ -519,6 +653,61 @@
       "loginCta": "Sign in now",
       "missingRole": "Your account is not allowed to create recurring bookings for this item.",
       "checking": "Checking permission…"
+    }
+  },
+  "mobileKey": {
+    "accessPoint": {
+      "sectionTitle": "Keys",
+      "lockState": {
+        "open": "Open",
+        "closed": "Closed",
+        "unknown": "State unknown"
+      },
+      "window": {
+        "before": "Access from {from}",
+        "during": "Access possible until {to}",
+        "after": "Access ended at {to}",
+        "full": "Access possible from {from} to {to}"
+      },
+      "codeHint": "Enter the code at the door"
+    },
+    "errors": {
+      "too_early": {
+        "title": "Not yet",
+        "description": "Access possible from {date}. From then on you can open {label} here.",
+        "description_undated": "Your access has not begun yet. {label} cannot be opened yet."
+      },
+      "too_late": {
+        "title": "Access ended",
+        "description": "Your access ended on {date}. {label} can no longer be opened with it.",
+        "description_undated": "Your access has ended. {label} can no longer be opened with it."
+      }
+    },
+    "cooldown": {
+      "caption": {
+        "open": "Open possible in {n} s",
+        "close": "Lock possible in {n} s"
+      },
+      "seconds": "seconds",
+      "busy": "The lock was still busy. The wait starts over.",
+      "holding": "Hold …",
+      "reading": "Status …",
+      "aria": {
+        "open": "Open. Press and hold to check the lock status.",
+        "close": "Lock. Press and hold to check the lock status.",
+        "open_in": "Open possible in {n} seconds. Press and hold to check the lock status.",
+        "close_in": "Lock possible in {n} seconds. Press and hold to check the lock status.",
+        "reading": "Checking the lock status …"
+      }
+    },
+    "supportContact": {
+      "collapsed": "Problem at the door? Support:",
+      "name": "Contact person",
+      "phone": "Phone",
+      "email": "Email",
+      "booking_number": "Booking number",
+      "process_number": "Process number",
+      "booking_hint": "please have it ready"
     }
   }
 }

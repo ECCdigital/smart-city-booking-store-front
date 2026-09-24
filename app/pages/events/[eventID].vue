@@ -3,14 +3,11 @@ import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useEventStore } from "~~/stores/event.js";
 import { useAuthStore } from "~~/stores/auth.js";
 import DetailsArea from "~/components/search/DetailsArea.vue";
+import { tenantHintOf } from "~/utils/catalogDetail.js";
 
 definePageMeta({
   layout: "catalog",
   middleware: ["catalog-auth"],
-  hero: {
-    height: "sm",
-    showOnMobile: true,
-  },
 });
 
 const route = useRoute();
@@ -21,12 +18,11 @@ const catalogSlug = computed(() => route.params.catalogSlug);
 const eventID = computed(() => route.params.eventID);
 
 const { loadDetail } = useCatalogBundle();
+const { tenantPath } = useTenantRoute();
 
 const event = computed(() => eventStore.getEventById(eventID.value));
 
 async function refreshEventDetail({ force = false } = {}) {
-  return;
-  //TODO: rework
   if (import.meta.client) {
     await authStore.validateAuth(true);
   }
@@ -34,6 +30,7 @@ async function refreshEventDetail({ force = false } = {}) {
   await loadDetail({
     slug: catalogSlug.value || null,
     eventID: eventID.value,
+    tenantHint: tenantHintOf(route.query),
     force,
   });
 }
@@ -59,8 +56,8 @@ usePageTitle(() =>
         name="i-lucide-calendar-off"
         class="text-gray-400 mb-4"
       />
-      <p class="text-gray-500">{{ $t("events.noEvent") }}</p>
-      <UButton :label="$t('common.back')" to="/events" class="mt-4" />
+      <p class="text-gray-500">{{ $t("errors.offerNotAvailable") }}</p>
+      <UButton :label="$t('common.back')" :to="tenantPath('/events')" class="mt-4" />
     </div>
   </div>
 </template>

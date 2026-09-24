@@ -5,10 +5,6 @@ import BookableSection from "~/components/bookables/BookableSection.vue";
 
 definePageMeta({
   layout: "catalog",
-  hero: {
-    height: "sm",
-    showOnMobile: true,
-  },
 });
 
 const { t } = useI18n();

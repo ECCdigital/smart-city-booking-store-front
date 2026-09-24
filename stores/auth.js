@@ -6,10 +6,17 @@ import {
   isAccountPath,
 } from "~/utils/sharedAuthSync";
 
+/**
+ * @typedef {import("~~/shared/types/api").User} User
+ * @typedef {import("~~/shared/types/api").Permissions} Permissions
+ */
+
 export const useAuthStore = defineStore("auth", {
   state: () => ({
+    /** @type {User | null} */
     user: null,
-    permission: null,
+    /** @type {Permissions | null} */
+    permissions: null,
     tokenValid: false,
     authChecked: false,
   }),
@@ -18,14 +25,18 @@ export const useAuthStore = defineStore("auth", {
     getUser: (state) => state.user,
   },
   actions: {
+    /**
+     * @param {{ user?: User, permissions?: Permissions, permission?: Permissions, tokenValid?: boolean } | null} payload
+     *   `permission` (singular) is the legacy key of older callers.
+     */
     setAuthPayload(payload) {
       this.user = payload?.user || null;
-      this.permission = payload?.permission || null;
+      this.permissions = payload?.permissions || payload?.permission || null;
       this.tokenValid = !!payload?.tokenValid;
     },
     clearAuthPayload() {
       this.user = null;
-      this.permission = null;
+      this.permissions = null;
       this.tokenValid = false;
       this.authChecked = true;
     },
@@ -42,12 +53,12 @@ export const useAuthStore = defineStore("auth", {
 
         if (!data?.success) throw new Error("invalid");
         this.user = data.data?.user || null;
-        this.permission = data.data?.permissions || null;
+        this.permissions = data.data?.permissions || null;
         this.tokenValid = true;
         return true;
       } catch {
         this.user = null;
-        this.permission = null;
+        this.permissions = null;
         this.tokenValid = false;
         return false;
       } finally {
@@ -56,7 +67,7 @@ export const useAuthStore = defineStore("auth", {
     },
     _applyAuthPayload(data) {
       this.user = data?.user || null;
-      this.permission = data?.permissions || null;
+      this.permissions = data?.permissions || null;
       this.tokenValid = true;
       this.authChecked = true;
     },

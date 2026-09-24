@@ -1,6 +1,7 @@
 <script setup>
 import {useAuthStore} from "~~/stores/auth.js";
 import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
+import { useReturnTarget } from "~/composables/auth/useReturnTarget";
 
 definePageMeta({ layout: "default" });
 
@@ -10,6 +11,7 @@ const notification = useNotification();
 const loading = ref(false);
 const authStore = useAuthStore();
 const pendingRedirect = useCookie("kc-pending-redirect");
+const { follow: followReturnTarget } = useReturnTarget();
 
 const {
   documents: legalDocuments,
@@ -34,14 +36,14 @@ const handleRegister = async () => {
 
     if (response.success) {
       authStore.user = response.data.user;
-      authStore.permission = response.data.permissions;
+      authStore.permissions = response.data.permissions;
       authStore.tokenValid = true;
       authStore.authChecked = true;
 
       notification.success(t("notifications.registerSuccess.message"));
       const redirect = pendingRedirect.value || "/";
       pendingRedirect.value = null;
-      await navigateTo(redirect);
+      await followReturnTarget(redirect);
     }
   } catch (err) {
     notification.error(t("notifications.registerError.message"));
@@ -53,7 +55,7 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <PageBackground variant="poly" :vignette="true" intensity="normal">
+  <PageBackground>
     <div class="flex items-center justify-center p-6 w-full">
       <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
         <template #header>

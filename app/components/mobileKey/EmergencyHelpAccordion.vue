@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="serviceInfo && ifbsLockerInfo?.isConfirmed"
+    v-if="help"
     class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
   >
     <button
@@ -32,8 +32,8 @@
       class="border-t border-gray-200 dark:border-gray-700 p-4"
     >
       <EmergencyHelpContent
-        :service-info="serviceInfo"
-        :process-id="ifbsLockerInfo.processId"
+        :service-info="help.serviceInfo"
+        :process-id="help.processId"
       />
     </div>
   </div>
@@ -41,22 +41,25 @@
 
 <script setup>
 import { useEmergencyHelp } from "~/composables/useEmergencyHelp.js";
+import { decideEmergencyHelp } from "~/utils/emergencyHelp.js";
 import EmergencyHelpContent from "~/components/mobileKey/EmergencyHelpContent.vue";
 
 const props = defineProps({
   tenantId: { type: String, required: true },
-  bookingId: { type: String, required: true },
-  lockerInfo: { type: Array, required: true },
+  booking: { type: Object, required: true },
 });
 
 const isOpen = ref(false);
 
-const { serviceInfo, ifbsLockerInfo, fetchCustomerServiceInfo } =
-  useEmergencyHelp(
-    toRef(props, "tenantId"),
-    toRef(props, "bookingId"),
-    toRef(props, "lockerInfo")
-  );
-
+// The contact comes from the booking's tenant snapshot. Only a booking
+// without one falls back to the public tenant, which is loaded for it then.
+const { tenant, fetchCustomerServiceInfo } = useEmergencyHelp(
+  toRef(props, "tenantId"),
+  null,
+  toRef(props, "booking"),
+);
 await fetchCustomerServiceInfo();
+
+/** Nothing to show - no confirmed compartment with a contact - means no accordion. */
+const help = computed(() => decideEmergencyHelp(tenant.value, props.booking));
 </script>

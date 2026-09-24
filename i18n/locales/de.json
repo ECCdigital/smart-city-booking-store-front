@@ -1,5 +1,22 @@
 {
   "welcome": "Willkommen",
+  "hero": {
+    "fallbackSubtitle": "Entdecken Sie unsere Angebote",
+    "preview": {
+      "moveToZone": "Ausgewählten Block nach „{zone}“ verschieben",
+      "zones": {
+        "top-left": "oben links",
+        "top-center": "oben mittig",
+        "top-right": "oben rechts",
+        "middle-left": "mittig links",
+        "middle-center": "mittig",
+        "middle-right": "mittig rechts",
+        "bottom-left": "unten links",
+        "bottom-center": "unten mittig",
+        "bottom-right": "unten rechts"
+      }
+    }
+  },
   "meta": {
     "siteNameFallback": "Smart City Booking",
     "pages": {
@@ -24,6 +41,7 @@
       "accountFavorites": "Favoriten",
       "accountSettings": "Einstellungen",
       "accountAppearance": "Darstellung",
+      "mobileKey": "Mobile Key",
       "cardLink": "Karte verknüpfen",
       "cardLinkSuccess": "Karte verknüpft",
       "cardLinkFailed": "Verknüpfung fehlgeschlagen",
@@ -69,7 +87,8 @@
     "city": "Stadt",
     "clear": "Löschen",
     "backToLogin": "Zurück zur Anmeldung",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "imageNotFound": "Bild nicht gefunden"
   },
   "colorMode": {
     "toggle": "Farbmodus",
@@ -84,12 +103,24 @@
     "user": "Benutzer",
     "reports": "Berichte",
     "admin": "Admin-Bereich",
-    "settings": "Einstellungen"
+    "offerSpaces": "Angebote bereitstellen",
+    "settings": "Einstellungen",
+    "activities": "Aktivitäten",
+    "mobileKey": "Digitale Schlüssel",
+    "invoices": "Rechnungen",
+    "account": "Benutzerkonto"
   },
   "footer": {
     "legalNotice": "Impressum",
     "dataProtection": "Datenschutz",
-    "termsAndConditions": "AGB"
+    "termsAndConditions": "AGB",
+    "offerSpaces": "Angebote bereitstellen"
+  },
+  "rateLimit": {
+    "title": "Zu viele Versuche",
+    "seconds": "Bitte versuche es in {count} Sekunde erneut. | Bitte versuche es in {count} Sekunden erneut.",
+    "minutes": "Bitte versuche es in {count} Minute erneut. | Bitte versuche es in {count} Minuten erneut.",
+    "later": "Bitte versuche es später erneut."
   },
   "login": {
     "title": "Melden Sie sich in Ihrem Konto an",
@@ -155,8 +186,9 @@
       "number": "Mindestens eine Zahl (0-9)"
     },
     "success": {
-      "heading": "Registrierung erfolgreich!",
-      "description": "Wir haben dir eine E-Mail mit einem Bestätigungslink gesendet. Bitte öffne dein Postfach und bestätige deine E-Mail-Adresse, um dein Konto zu aktivieren.",
+      "heading": "Bitte prüfe dein Postfach",
+      "description": "Wenn die angegebene E-Mail-Adresse verwendet werden kann, erhältst du in Kürze eine E-Mail mit einem Bestätigungslink. Bitte bestätige darüber deine E-Mail-Adresse, um dein Konto zu aktivieren.",
+      "resent": "Wenn die E-Mail-Adresse zu einem noch nicht bestätigten Konto gehört, haben wir den Bestätigungslink erneut gesendet.",
       "spamHint": "Wenn du die E-Mail nicht findest, überprüfe bitte auch deinen Spam- oder Werbeordner.",
       "toHome": "Zur Startseite",
       "toLogin": "Zur Anmeldung"
@@ -248,6 +280,32 @@
   },
 
   "errors": {
+    "offerNotAvailable": "Dieses Angebot ist nicht (mehr) verfügbar.",
+    "loadFailed": {
+      "title": "Inhalte konnten nicht geladen werden",
+      "message": "Bitte versuchen Sie es später erneut."
+    },
+    "page": {
+      "notAvailable": {
+        "title": "Seite nicht verfügbar",
+        "message": "Die angeforderte Seite existiert nicht oder ist nicht (mehr) verfügbar."
+      },
+      "forbidden": {
+        "title": "Zugriff verweigert",
+        "message": "Sie haben keine Berechtigung, diese Seite aufzurufen."
+      },
+      "serverError": {
+        "title": "Serverfehler",
+        "message": "Ein interner Fehler ist aufgetreten. Bitte versuchen Sie es später erneut."
+      },
+      "generic": {
+        "title": "Ein Fehler ist aufgetreten",
+        "message": "Etwas ist schiefgelaufen."
+      },
+      "code": "Fehler",
+      "home": "Zur Startseite",
+      "back": "Zurück"
+    },
     "noCatalog": "Es wurde kein Katalog gefunden",
     "noTenantFound": {
       "title": "Kein Mandant gefunden",
@@ -281,10 +339,6 @@
     "registerError": {
       "title": "Registrierungsfehler",
       "message": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
-    },
-    "registerErrorEmailExists": {
-      "title": "Registrierungsfehler",
-      "message": "Die E-Mail-Adresse ist bereits registriert."
     },
     "forgotPasswordError": {
       "title": "Anfrage fehlgeschlagen",
@@ -337,7 +391,11 @@
     "moreInfo": "Weitere Informationen",
     "relatedTitle": "Könnte Sie auch interessieren:",
     "cancellationTitle": "Stornierungsbedingungen",
-    "yes": "Ja"
+    "yes": "Ja",
+    "gallery": {
+      "label": "Weitere Bilder",
+      "showImage": "Bild {index} anzeigen"
+    }
   },
 
   "resources": {
@@ -449,6 +507,7 @@
     "bad_request": "Ungültige Anfrage. Bitte überprüfen Sie Ihre Eingaben.",
     "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
     "bookable_not_found": "Das angeforderte Objekt wurde nicht gefunden.",
+    "offer_not_reachable": "Dieses Angebot ist nicht mehr verfügbar und kann nicht gebucht werden.",
     "bookable_not_bookable": "Dieses Objekt kann nicht gebucht werden.",
     "bookable_unavailable": "Dieses Objekt ist im gewählten Zeitraum nicht verfügbar.",
     "parent_unavailable": "Das übergeordnete Objekt ist im gewählten Zeitraum nicht verfügbar.",
@@ -478,6 +537,7 @@
     "payment_failed": "Die Zahlung konnte nicht gestartet werden. Bitte versuchen Sie es erneut oder wählen Sie eine andere Zahlungsart.",
     "payment_provider_unavailable": "Die gewählte Zahlungsart ist derzeit nicht verfügbar.",
     "locker_unavailable": "Die Buchung konnte nicht abgeschlossen werden (Schließfach-Reservierung). Bitte Zeitraum oder Auswahl prüfen.",
+    "compartments_unavailable": "Für den gewählten Zeitraum ist kein Fach mehr frei. Bitte wählen Sie einen anderen Zeitraum.",
     "invoice_payment_not_permitted": "Zahlung auf Rechnung ist für Ihr Konto nicht freigeschaltet.",
     "capacity_exceeded": "Die maximale Kapazität für dieses Objekt wurde erreicht.",
     "time_conflict": "Für dieses Objekt besteht ein Zeitkonflikt mit einer anderen Buchung.",
@@ -804,6 +864,44 @@
       "free": "Kostenfrei",
       "paid": "Bezahlt",
       "unpaid": "Nicht bezahlt"
+    },
+    "status": {
+      "requested": "Ausstehend",
+      "requestedTooltip": "Die Buchung muss noch vom Anbieter freigegeben werden.",
+      "payment_due": "Bestätigt",
+      "confirmed": "Bestätigt",
+      "rejected": "Abgelehnt",
+      "cancelled": "Storniert"
+    }
+  },
+
+  "account": {
+    "bookingDetails": {
+      "rejectionReason": "Ablehnungsgrund",
+      "cancellationReason": "Stornierungsgrund"
+    }
+  },
+
+  "account": {
+    "unknownTenant": "Unbekannt",
+    "invoices": {
+      "title": "Ihre Rechnungen und Zahlungsbelege",
+      "emptyTitle": "Keine Rechnungen vorhanden",
+      "emptyDescription": "Aktuell sind für Ihr Konto keine Rechnungen verfügbar. Sobald Rechnungen erstellt wurden, werden diese hier angezeigt.",
+      "unknownBookable": "Unbekanntes Buchungsobjekt",
+      "columns": {
+        "createdAt": "Erstelldatum",
+        "title": "Titel",
+        "type": "Dokumenttyp",
+        "bookingId": "Buchungs-ID",
+        "bookables": "Buchungsobjekte",
+        "paid": "Bezahlt"
+      },
+      "types": {
+        "invoice": "Rechnung",
+        "receipt": "Zahlungsbeleg",
+        "unknown": "Unbekannt"
+      }
     }
   },
 
@@ -907,6 +1005,181 @@
       "loginCta": "Jetzt anmelden",
       "missingRole": "Ihr Konto ist nicht berechtigt, Serienbuchungen für dieses Objekt zu erstellen.",
       "checking": "Berechtigung wird geprüft …"
+    }
+  },
+  "mobileKey": {
+    "accessPoint": {
+      "sectionTitle": "Schlüssel",
+      "lockState": {
+        "open": "Offen",
+        "closed": "Zu",
+        "unknown": "Zustand unbekannt"
+      },
+      "window": {
+        "before": "Zugang ab {from}",
+        "during": "Zugang möglich bis {to}",
+        "after": "Zugang endete um {to}",
+        "full": "Zugang möglich von {from} bis {to}"
+      },
+      "codeHint": "Code an der Tür eingeben"
+    },
+    "stages": {
+      "loading": {
+        "title": "Status wird geprüft …"
+      },
+      "opening": {
+        "title": "{label} wird geöffnet …"
+      },
+      "closing": {
+        "title": "{label} wird geschlossen …"
+      },
+      "can_open": {
+        "title": "Tippen Sie zum Öffnen von {label}",
+        "evidence_confirmed": "✓ Nachweis erbracht"
+      },
+      "can_close": {
+        "title": "{label} ist geöffnet",
+        "description": "Tippen Sie zum Abschließen von {label}"
+      },
+      "opened": {
+        "title": "Geöffnet",
+        "description": "{label} wurde geöffnet."
+      },
+      "closed": {
+        "title": "Abgeschlossen",
+        "description": "{label} wurde abgeschlossen."
+      }
+    },
+    "errors": {
+      "stale_scan_code": {
+        "title": "Aufkleber veraltet",
+        "description": "Dieser QR-Code wurde ersetzt und ist nicht mehr gültig. Bitte informieren Sie die Verwaltung, damit der Aufkleber erneuert wird."
+      },
+      "unknown_scan_code": {
+        "title": "Code unbekannt",
+        "description": "Dieser QR-Code gehört zu keinem Zugang dieses Mandanten. Möglicherweise ist der Link unvollständig."
+      },
+      "no_booking": {
+        "title": "Keine passende Buchung",
+        "description": "Für Sie wurde keine Buchung gefunden, die zu {label} gehört."
+      },
+      "payment_required": {
+        "title": "Buchung noch nicht bezahlt",
+        "description": "Erst nach Zahlungseingang lässt sich {label} öffnen."
+      },
+      "too_early": {
+        "title": "Noch nicht so weit",
+        "description": "Zugang möglich ab {date}. Ab dann können Sie {label} hier öffnen.",
+        "description_undated": "Ihr Zugang hat noch nicht begonnen. {label} lässt sich noch nicht öffnen."
+      },
+      "too_late": {
+        "title": "Zugang beendet",
+        "description": "Ihr Zugang endete am {date}. {label} lässt sich damit nicht mehr öffnen.",
+        "description_undated": "Ihr Zugang ist beendet. {label} lässt sich damit nicht mehr öffnen."
+      },
+      "door_unreachable": {
+        "title": "{label} nicht erreichbar",
+        "description": "Das Schloss antwortet gerade nicht. Das kann an der Verbindung vor Ort liegen."
+      },
+      "open_unconfirmed": {
+        "title": "Öffnen nicht bestätigt",
+        "description": "Der Befehl wurde übermittelt, {label} hat sich aber nicht zurückgemeldet. Bitte prüfen Sie vor Ort, ob offen ist."
+      },
+      "close_failed": {
+        "title": "Abschließen fehlgeschlagen",
+        "description": "{label} konnte nicht abgeschlossen werden. Bitte prüfen Sie vor Ort, ob noch offen ist."
+      },
+      "status_unavailable": {
+        "title": "Status unbekannt",
+        "description": "Der Zustand von {label} lässt sich gerade nicht abrufen."
+      },
+      "evidence_rule_unavailable": {
+        "title": "Öffnen zurzeit nicht möglich",
+        "description": "{label} ist fehlerhaft konfiguriert. Bitte kontaktieren Sie die Verwaltung – Ihre Buchung bleibt gültig."
+      },
+      "evidence_invalid": {
+        "title": "Aufkleber prüfen",
+        "description": "Der gescannte Code gehört nicht zu {label}. Bitte prüfen Sie den Aufkleber und informieren Sie die Verwaltung."
+      },
+      "evidence_missing": {
+        "title": "Vor Ort scannen",
+        "description": "{label} lässt sich nur öffnen, wenn Sie den QR-Code direkt davor scannen."
+      },
+      "generic": {
+        "title": "Öffnen nicht möglich",
+        "description": "{label} konnte nicht geöffnet werden. Bitte versuchen Sie es später erneut."
+      }
+    },
+    "blocking_reasons": {
+      "rejected": "Ihre Buchung wurde abgelehnt.",
+      "not_committed": "Ihre Buchung ist noch nicht bestätigt.",
+      "payment_required": "Die Zahlung steht noch aus.",
+      "authorization_revoked": "Ihre Berechtigung für diesen Zugang wurde widerrufen.",
+      "outside_access_window": "Der Zugang liegt außerhalb des gebuchten Zeitfensters.",
+      "not_provisioned": "Der Zugang ist noch nicht freigegeben.",
+      "no_remote_access": "Dieser Zugang lässt sich nicht aus der Ferne öffnen.",
+      "evidence_missing": "Der Nachweis fehlt – bitte vor Ort den QR-Code scannen.",
+      "evidence_invalid": "Der Nachweis ist ungültig – bitte den Aufkleber prüfen.",
+      "evidence_rule_unavailable": "Der Zugang ist zurzeit nicht prüfbar – bitte die Verwaltung kontaktieren."
+    },
+    "actions": {
+      "retry": "Erneut versuchen",
+      "check_status": "Status prüfen",
+      "pay_now": "Jetzt bezahlen",
+      "rebook": "Erneut buchen",
+      "book_now": "Jetzt buchen",
+      "open_again": "Erneut öffnen"
+    },
+    "cooldown": {
+      "caption": {
+        "open": "Öffnen in {n} s möglich",
+        "close": "Abschließen in {n} s möglich"
+      },
+      "seconds": "Sekunden",
+      "busy": "Das Schloss war noch beschäftigt. Die Wartezeit beginnt von vorn.",
+      "holding": "Halten …",
+      "reading": "Status …",
+      "aria": {
+        "open": "Öffnen. Gedrückt halten, um den Status des Schlosses abzufragen.",
+        "close": "Abschließen. Gedrückt halten, um den Status des Schlosses abzufragen.",
+        "open_in": "Öffnen in {n} Sekunden möglich. Gedrückt halten, um den Status des Schlosses abzufragen.",
+        "close_in": "Abschließen in {n} Sekunden möglich. Gedrückt halten, um den Status des Schlosses abzufragen.",
+        "reading": "Status des Schlosses wird abgefragt …"
+      }
+    },
+    "supportContact": {
+      "collapsed": "Problem an der Tür? Support:",
+      "name": "Kontaktperson",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "booking_number": "Buchungsnummer",
+      "process_number": "Vorgangsnummer",
+      "booking_hint": "bitte bereithalten"
+    },
+    "evidence": {
+      "step_verify": "Vor Ort nachweisen",
+      "step_open": "Tür öffnen",
+      "hint": "Scannen Sie den QR-Code an {label}.",
+      "fallback_link": "Kamera nicht möglich? Mit der Kamera-App scannen",
+      "back_to_camera": "Zurück zur Kamera",
+      "torch": "Taschenlampe",
+      "wrong_door": {
+        "title": "Anderer Zugang",
+        "description": "Der gescannte Code gehört zu {scanned}, nicht zu {label}.",
+        "action": "Zu {scanned} wechseln",
+        "unnamed": "einem anderen Zugang"
+      },
+      "wrong_tenant": {
+        "title": "Anderer Anbieter",
+        "description": "Dieser QR-Code gehört zu einem anderen Anbieter."
+      },
+      "camera": {
+        "description": "Öffnen Sie den QR-Code an {label} mit der Kamera-App Ihres Telefons — der Aufkleber führt Sie direkt hierher zurück.",
+        "unsupported": "Kamera hier nicht verfügbar",
+        "denied": "Kamerazugriff verweigert",
+        "not_found": "Keine Kamera gefunden",
+        "not_readable": "Kamera wird bereits benutzt"
+      }
     }
   }
 }

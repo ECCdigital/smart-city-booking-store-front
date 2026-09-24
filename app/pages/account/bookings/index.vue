@@ -9,15 +9,17 @@
         icon="i-lucide-key-round"
         title="Digitale Schlüssel"
         description="Öffnen Sie Türen, Schließfächer oder Fahrradboxen mit Ihrem Smartphone."
-        to="/account/keys"
+        to="/mobile-key"
       />
 
+      <!--
       <QuickAccessCard
         icon="i-lucide-book-heart"
         title="Favoriten"
         description="Häufig genutzte und gemerkte Buchungsobjekte schnell wieder buchen."
         to="/account/favorites"
       />
+      -->
 
       <QuickAccessCard
         icon="i-lucide-wallet-cards"
@@ -27,6 +29,8 @@
       />
     </div>
 
+    <!--
+    toDo - bisher nur IFBS! Später noch für weitere Access Points erweitern
     <div v-if="activeBookingsWithLocking?.length">
       <h2 class="text-xl font-bold">
         Aktuelle Buchungen mit Schließberechtigung
@@ -36,6 +40,7 @@
         :use-pagination="activeBookingsWithLocking.length > 10"
       />
     </div>
+    -->
     <div class="md:flex justify-between items-center w-full mb-4">
       <h2 class="mt-5 text-xl font-bold">Meine Buchungen</h2>
       <BookingSearchFilterArea
@@ -44,7 +49,7 @@
       />
     </div>
 
-    <BookingsSkeleton v-if="pending || isLoading" :skeleton-count="9" />
+    <BookingsSkeleton v-if="pending" :skeleton-count="9" />
     <BookingSection
       v-else-if="filteredBookings?.length"
       :bookings="filteredBookings"
@@ -59,6 +64,7 @@ import BookingsSkeleton from "~/components/user/bookings/BookingsSkeleton.vue";
 import BookingEmptyState from "~/components/user/bookings/BookingEmptyState.vue";
 import BookingSearchFilterArea from "~/components/user/bookings/BookingSearchFilterArea.vue";
 import { useEvents } from "~/composables/api/useEvents.js";
+import { enrichBookingsWithEventDateTimes } from "~/utils/bookingEventTimes.js";
 import { computed } from "vue";
 import QuickAccessCard from "~/components/user/bookings/QuickAccessCard.vue";
 
@@ -78,105 +84,36 @@ const { data: enrichedBookings, pending } = useAsyncData(
   "bookings",
   async () => {
     await bookingsStore.fetchBookings();
-    return await enrichBookingsWithEventDateTimes(bookingsStore.getBookings);
+    return await enrichBookingsWithEventDateTimes(
+      bookingsStore.getBookings,
+      fetchEventById,
+    );
   },
 );
-const isLoading = ref(false);
 
-const bookings = ref(bookingsStore.getBookings);
-watch(enrichedBookings, (val) => {
-  bookings.value = val;
-});
+// Derived from the async data, not copied out of the store: a `ref` of the
+// store array plus watchers never updates during SSR (watchers do not run on
+// the server), so the server rendered the empty state while the client
+// rendered the cards. Vue keeps the server's classes on such a mismatched
+// node, which left the card grid inside a stale empty-state/skeleton wrapper.
+const bookings = computed(() => enrichedBookings.value ?? []);
 
 const sortedBookings = computed(() =>
   [...bookings.value].sort((a, b) => b.timeCreated - a.timeCreated),
 );
 
-const filteredBookings = ref(null);
-
-watch(
-  sortedBookings,
-  (val) => {
-    filteredBookings.value = val;
-  },
-  { immediate: true },
+// `null` while no search/filter has narrowed the list.
+const searchedBookings = ref(null);
+const filteredBookings = computed(
+  () => searchedBookings.value ?? sortedBookings.value,
 );
 
-function buildEventDateTime(date, time) {
-  if (!date) {
-    return null;
-  }
-
-  const dateTime = time ? `${date}T${time}` : `${date}T00:00:00`;
-  const timestamp = new Date(dateTime).getTime();
-
-  return Number.isNaN(timestamp) ? null : timestamp;
-}
-
-async function enrichBookingsWithEventDateTimes(bookings) {
-  if (!Array.isArray(bookings) || bookings.length === 0) {
-    return bookings;
-  }
-
-  isLoading.value = true;
-  const eventCache = new Map();
-
-  const temp = await Promise.all(
-    bookings.map(async (booking) => {
-      const hasTimeBegin =
-        booking.timeBegin !== null &&
-        booking.timeBegin !== undefined &&
-        booking.timeBegin !== "";
-      const hasTimeEnd =
-        booking.timeEnd !== null &&
-        booking.timeEnd !== undefined &&
-        booking.timeEnd !== "";
-
-      if (hasTimeBegin && hasTimeEnd) {
-        return booking;
-      }
-
-      const eventId = booking?.bookableItems?.[0]?._bookableUsed?.eventId;
-
-      if (!eventId) {
-        return booking;
-      }
-
-      if (!eventCache.has(eventId)) {
-        eventCache.set(
-          eventId,
-          await fetchEventById(booking.tenantId, eventId),
-        );
-      }
-
-      const event = eventCache.get(eventId);
-      const eventInformation = event?.information;
-
-      if (!eventInformation) {
-        return booking;
-      }
-
-      return {
-        ...booking,
-        eventBegin: buildEventDateTime(
-          eventInformation.startDate,
-          eventInformation.startTime,
-        ),
-        eventEnd: buildEventDateTime(
-          eventInformation.endDate,
-          eventInformation.endTime,
-        ),
-      };
-    }),
-  );
-  isLoading.value = false;
-  return temp;
-}
-
 function setFilteredBookings(newBookings) {
-  filteredBookings.value = newBookings.map((b) => ({ ...b }));
+  searchedBookings.value = newBookings.map((b) => ({ ...b }));
 }
 
+//    toDo - bisher nur IFBS! Später noch für weitere Access Points erweitern
+/*
 const activeBookingsWithLocking = computed(() => {
   const withLockerInfo = sortedBookings.value.filter(
     (booking) =>
@@ -193,7 +130,8 @@ const activeBookingsWithLocking = computed(() => {
       b.timeEnd + twoHoursMs > currentTime &&
       b.isRejected === false,
   );
-});
+})
+ */
 </script>
 
 <style scoped></style>
