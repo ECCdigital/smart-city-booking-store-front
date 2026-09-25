@@ -1,17 +1,35 @@
 <template>
+  <!-- Without its label the badge says what it is on hover instead. The
+       wrapper takes the attributes so the tooltip anchors to the badge where
+       the parent placed it. -->
+  <UTooltip v-if="iconOnly" :text="category.label">
+    <UBadge
+      v-bind="$attrs"
+      class="z-10 px-2"
+      :color="neutral ? 'neutral' : color"
+      size="md"
+      :icon="category.icon"
+      :aria-label="category.label"
+      :ui="neutral ? NEUTRAL_UI : undefined"
+      :style="neutral ? undefined : { color: contrastToPrimary }"
+    />
+  </UTooltip>
   <UBadge
+    v-else
+    v-bind="$attrs"
     class="z-10"
     :color="neutral ? 'neutral' : color"
     size="md"
-    :label="iconOnly ? '' : category.label"
+    :label="category.label"
     :icon="category.icon"
-    :class="iconOnly ? 'pl-2' : ''"
     :ui="neutral ? NEUTRAL_UI : undefined"
     :style="neutral ? undefined : { color: contrastToPrimary }"
   />
 </template>
 <script setup>
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+
+defineOptions({ inheritAttrs: false });
 
 const { t } = useI18n();
 
@@ -34,10 +52,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  // A badge away from the tenant's colours — on a card of its own rather than
-  // on an image. It takes a grey surface, and its text follows the colour mode
-  // instead of the contrast to the primary colour, which says nothing about a
-  // surface that is not the primary colour.
   neutral: {
     type: Boolean,
     default: false,

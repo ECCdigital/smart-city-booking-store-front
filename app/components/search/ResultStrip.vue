@@ -19,7 +19,7 @@
         <BookableTypeBadge
           :type="item?.type"
           :is-event="isEvent"
-          :icon-only="iconOnly"
+          :icon-only="mapListMode ? true : iconOnly"
           class="absolute z-10"
           :class="mapMode ? 'top-1 left-1' : 'top-2 left-2'"
         />
@@ -172,7 +172,11 @@ const showImageErrorHint = ref(false);
 function onImageError() {
   showImageErrorHint.value = true;
 }
+// In the map's list the row as a whole is the link and the list decides
+// where it opens (a new tab); a strip that also navigated on its own would
+// open the page twice. Everywhere else the picture and the title navigate.
 function onOpenDetails(id, type) {
+  if (props.mapListMode) return;
   goToDetails(id, type);
 }
 </script>

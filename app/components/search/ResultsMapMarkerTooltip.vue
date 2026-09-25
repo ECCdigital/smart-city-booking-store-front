@@ -1,5 +1,10 @@
 <template>
-  <LTooltip :options="{ className: 'clean-tooltip' }" class="hidden md:block">
+  <!-- Interactive, so the pointer may move from the pin into the tooltip: the
+       strips and the icon badges in it have hover states of their own. -->
+  <LTooltip
+    :options="{ className: 'clean-tooltip', interactive: true }"
+    class="hidden md:block"
+  >
     <div
       v-if="group.bookables?.length === 1"
       class="overflow-hidden rounded-2xl shadow-2xl"
