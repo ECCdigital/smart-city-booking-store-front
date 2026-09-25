@@ -9,10 +9,11 @@
   >
     <div
       class="w-24 shrink-0 @sm:basis-1/4 flex"
-      :class="listMode ? 'items-stretch' : 'items-center'"
+      :class="fillsRow ? 'items-stretch' : 'items-center'"
     >
       <div
         class="basis-9/10 w-full h-full relative cursor-pointer"
+        :class="mapListMode ? 'min-h-24' : ''"
         @click="onOpenDetails(item?.id, item?.type)"
       >
         <BookableTypeBadge
@@ -29,19 +30,13 @@
           alt=""
           :loading="eager ? 'eager' : 'lazy'"
           class="w-full object-cover rounded-l-sm"
-          :class="
-            mapListMode
-              ? 'h-24'
-              : listMode
-                ? 'absolute inset-0 h-full'
-                : 'h-full'
-          "
+          :class="fillsRow ? 'absolute inset-0 h-full' : 'h-full'"
           @error="onImageError"
         />
         <ClientOnly v-else>
           <div
             class="@container w-full h-full flex items-center justify-center"
-            :class="listMode ? 'absolute inset-0' : 'relative'"
+            :class="fillsRow ? 'absolute inset-0' : 'relative'"
           >
             <ImagePlaceholder
               :theme="theme"
@@ -52,7 +47,9 @@
                 name="i-lucide-image-off"
                 :class="iconOnly ? 'w-8 h-8' : 'w-4 h-4'"
               />
-              <p v-if="!iconOnly" class="text-xs">{{ $t("bookableDetail.notFound") }}</p>
+              <p v-if="!iconOnly" class="text-xs">
+                {{ $t("bookableDetail.notFound") }}
+              </p>
             </div>
           </div>
         </ClientOnly>
@@ -96,7 +93,6 @@ import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
 import { useMediaImage } from "~/composables/utils/useMediaImage";
-
 
 const colorMode = useColorMode();
 const { coverImageOf, imageSource } = useMediaImage();
@@ -158,6 +154,7 @@ const isEvent = computed(() => {
 // are compact and size themselves to their content, which is what keeps the
 // strips of one pin from painting over each other.
 const listMode = computed(() => !props.mapMode && !props.mapListMode);
+const fillsRow = computed(() => listMode.value || props.mapListMode);
 
 const image = computed(() =>
   imageSource(coverImageOf(props.item, isEvent.value), "strip"),

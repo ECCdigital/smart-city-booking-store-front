@@ -1,10 +1,4 @@
 <template>
-  <!--
-    In the map's compact modes (tooltip strip, map list) this is the bookable
-    strip's skeleton: title, provider, then the time line where the bookable
-    shows its address, and the price. Teaser, organiser, flags and the buttons
-    belong to the full list only.
-  -->
   <div
     class="basis-3/4 flex flex-col justify-between gap-2"
     :class="mapMode ? 'p-2' : 'p-4'"
@@ -27,7 +21,11 @@
 
       <!-- Zeitpunkt, Adresse und Entfernung -->
       <div class="w-full flex flex-col gap-1">
-        <EventTimeInformation :event="event" class="w-full text-sm" />
+        <EventTimeInformation
+          :event="event"
+          :use-icon="!mapListMode"
+          :class="mapListMode ? 'w-full text-xs' : 'w-full text-sm'"
+        />
         <EventAdressInformation
           v-if="!mapMode"
           :event="event"
@@ -49,7 +47,7 @@
     </div>
 
     <div
-      v-if="mapMode"
+      v-if="mapMode && !mapListMode"
       class="flex justify-end text-sm font-bold"
     >
       <EventPriceDisplay
@@ -59,7 +57,7 @@
       />
     </div>
 
-    <div v-else class="flex gap-2 justify-between items-end">
+    <div v-else-if="!mapMode" class="flex gap-2 justify-between items-end">
       <!-- Veranstalter & Eigenschaften -->
       <div
         v-if="organizerName || hasFlags"
@@ -110,7 +108,6 @@ import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue"
 import EventAdressInformation from "~/components/events/EventAdressInformation.vue";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import EventBookingButton from "~/components/events/EventBookingButton.vue";
-
 
 const props = defineProps({
   event: {
