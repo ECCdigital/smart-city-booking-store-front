@@ -32,7 +32,7 @@
       class="mt-4 pt-3 border-t border-dashed border-gray-300 dark:border-gray-600"
     >
       <p
-        class="mb-2 flex items-center gap-1 text-xs uppercase tracking-wide text-gray-500"
+        class="mb-2 flex items-center gap-1 text-xs tracking-wide text-gray-500"
       >
         <UIcon name="i-lucide-map-pin-off" class="size-3.5" />
         {{ $t("results.noLocation") }}
@@ -55,7 +55,6 @@
 </template>
 <script setup>
 import ResultStrip from "~/components/search/ResultStrip.vue";
-
 
 const currentBookable = defineModel({
   type: Object,
