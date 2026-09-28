@@ -3,6 +3,7 @@ import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useEventStore } from "~~/stores/event.js";
 import { useAuthStore } from "~~/stores/auth.js";
 import DetailsArea from "~/components/search/DetailsArea.vue";
+import CatalogBreadcrumb from "~/components/navigation/CatalogBreadcrumb.vue";
 
 definePageMeta({
   layout: "catalog",
@@ -47,6 +48,7 @@ usePageTitle(() =>
 
 <template>
   <div class="container">
+    <CatalogBreadcrumb class="pt-4" />
     <div v-if="event">
       <DetailsArea :item="event" is-event />
     </div>

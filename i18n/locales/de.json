@@ -160,6 +160,11 @@
     "showAllOffers": "Alle Angebote ansehen",
     "type": "Was möchten Sie buchen?"
   },
+  "breadcrumb": {
+    "offers": "Angebote",
+    "bookable": "Buchungsobjekt",
+    "event": "Veranstaltung"
+  },
   "navigation": {
     "keys": "Schlüssel",
     "activities": "Aktivitäten",

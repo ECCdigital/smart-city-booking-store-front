@@ -172,6 +172,11 @@
     "tenants": "Tenants",
     "clearSelection": "Clear selection"
   },
+  "breadcrumb": {
+    "offers": "Offers",
+    "bookable": "Bookable",
+    "event": "Event"
+  },
   "navigation": {
     "keys": "Keys",
     "home": "Home",

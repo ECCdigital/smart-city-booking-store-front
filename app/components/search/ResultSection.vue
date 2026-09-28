@@ -21,7 +21,10 @@
         />
       </div>
 
-      <div class="my-10 lg:my-5 sm:flex items-center">
+      <!-- Below the search bar: the bar overlaps the Hero's lower edge. -->
+      <CatalogBreadcrumb class="mt-5" />
+
+      <div class="mt-4 mb-10 lg:mb-5 sm:flex items-center">
         <span
           v-if="searchIsInitialized"
           class="text-black dark:text-white lg:font-bold"
@@ -137,6 +140,7 @@ import SortButton from "~/components/search/SortButton.vue";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 import ResultsMap from "~/components/search/ResultsMap.vue";
 import ResultViewButton from "~/components/search/ResultViewButton.vue";
+import CatalogBreadcrumb from "~/components/navigation/CatalogBreadcrumb.vue";
 
 const props = defineProps({
   /** The merged Offers, bookables and events, as `mergeOffers()` builds them. */

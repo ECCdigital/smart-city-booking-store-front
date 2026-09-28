@@ -25,7 +25,7 @@ app/
     events/              # Event display components
     user/                # Account area (bookings, settings)
     mobileKey/           # Mobile key access
-    navigation/          # Nav bar, side nav, auth actions
+    navigation/          # Nav bar, breadcrumb, side nav, auth actions
     inputs/              # Reusable form inputs (date, time, text, address)
   layouts/
     default.vue          # Standard page layout
