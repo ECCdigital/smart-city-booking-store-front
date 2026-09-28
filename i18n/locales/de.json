@@ -163,7 +163,8 @@
   "breadcrumb": {
     "offers": "Angebote",
     "bookable": "Buchungsobjekt",
-    "event": "Veranstaltung"
+    "event": "Veranstaltung",
+    "quotedTitle": "„{title}“"
   },
   "navigation": {
     "keys": "Schlüssel",

@@ -3,6 +3,7 @@ import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useEventStore } from "~~/stores/event.js";
 import { useAuthStore } from "~~/stores/auth.js";
 import DetailsArea from "~/components/search/DetailsArea.vue";
+import { titleOf } from "~/composables/search/offer";
 import CatalogBreadcrumb from "~/components/navigation/CatalogBreadcrumb.vue";
 
 definePageMeta({
@@ -23,8 +24,6 @@ const { loadDetail } = useCatalogBundle();
 const event = computed(() => eventStore.getEventById(eventID.value));
 
 async function refreshEventDetail({ force = false } = {}) {
-  return;
-  //TODO: rework
   if (import.meta.client) {
     await authStore.validateAuth(true);
   }
@@ -40,8 +39,8 @@ await refreshEventDetail();
 
 const { t } = useI18n();
 usePageTitle(() =>
-  event.value?.title
-    ? t("meta.pages.eventDetail", { title: event.value.title })
+  event.value && titleOf(event.value)
+    ? t("meta.pages.eventDetail", { title: titleOf(event.value) })
     : t("meta.pages.events"),
 );
 </script>

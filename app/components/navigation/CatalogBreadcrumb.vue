@@ -2,6 +2,7 @@
 import { useTenantStore } from "~~/stores/tenant.js";
 import { useBookableStore } from "~~/stores/bookable.js";
 import { useEventStore } from "~~/stores/event.js";
+import { titleOf } from "~/composables/search/offer";
 
 /**
  * The breadcrumb under the Hero.
@@ -23,15 +24,17 @@ const eventStore = useEventStore();
 const offer = computed(() => {
   const bookableID = route.params.bookableID;
   if (bookableID) {
+    const bookable = bookableStore.getBookableById(bookableID);
     return {
-      title: bookableStore.getBookableById(bookableID)?.title,
+      title: bookable ? titleOf(bookable) : "",
       fallback: t("breadcrumb.bookable"),
     };
   }
   const eventID = route.params.eventID;
   if (eventID) {
+    const event = eventStore.getEventById(eventID);
     return {
-      title: eventStore.getEventById(eventID)?.title,
+      title: event ? titleOf(event) : "",
       fallback: t("breadcrumb.event"),
     };
   }
@@ -50,7 +53,12 @@ const items = computed(() => {
   ];
 
   if (offer.value) {
-    crumbs.push({ label: offer.value.title || offer.value.fallback });
+    // A real title is quoted in the language's own marks
+    crumbs.push({
+      label: offer.value.title
+        ? t("breadcrumb.quotedTitle", { title: offer.value.title })
+        : offer.value.fallback,
+    });
   }
 
   const current = crumbs[crumbs.length - 1];

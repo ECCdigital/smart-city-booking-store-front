@@ -175,7 +175,8 @@
   "breadcrumb": {
     "offers": "Offers",
     "bookable": "Bookable",
-    "event": "Event"
+    "event": "Event",
+    "quotedTitle": "“{title}”"
   },
   "navigation": {
     "keys": "Keys",
