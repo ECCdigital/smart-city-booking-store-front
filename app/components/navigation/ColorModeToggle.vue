@@ -1,7 +1,7 @@
 <template>
   <UTooltip :text="actionLabel">
     <UButton
-      :icon="actionIcon"
+      :icon="stateIcon"
       variant="ghost"
       color="neutral"
       class="flex h-12 items-center px-2 sm:px-3 hover:bg-current/15! active:bg-current/20!"
@@ -24,12 +24,11 @@ const { t } = useI18n();
 const colorMode = useColorMode();
 const isDark = computed(() => colorMode.value === "dark");
 
-// Icon and tooltip announce the action, not the current state: in light mode
-// the button shows a moon and the tooltip reads "dark theme", because that is
-// where a click leads. The accessible name is stable ("colour mode");
-// aria-pressed carries the state.
-const actionIcon = computed(() =>
-  isDark.value ? "i-lucide-sun" : "i-lucide-moon",
+// The icon shows the current state: a sun in light mode, a moon in dark mode.
+// The tooltip announces the action a click performs. The accessible name is
+// stable ("colour mode"); aria-pressed carries the state.
+const stateIcon = computed(() =>
+  isDark.value ? "i-lucide-moon" : "i-lucide-sun",
 );
 const actionLabel = computed(() =>
   isDark.value ? t("colorMode.switchToLight") : t("colorMode.switchToDark"),

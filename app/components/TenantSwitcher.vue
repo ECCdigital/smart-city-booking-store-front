@@ -36,37 +36,46 @@ const selectedTenant = computed(() => {
 
 const isBar = computed(() => props.variant === "bar");
 
+// Laid out like the user menu: a bold heading over the list, a leading icon on
+// every entry, and the way out -- clearing the selection -- in a group of its
+// own at the bottom, where the user menu keeps "sign out". The tenant in use
+// is `active` and carries a check mark -- a mark, not a colour, because the
+// theme's primary is the same dark tone in both colour modes and would read as
+// disabled on the dark panel.
 const tenantOptions = computed(() => {
-  const items = [];
+  const sections = [
+    [
+      {
+        type: "label",
+        label: t("tenants.heading"),
+        class: "font-bold",
+      },
+      ...tenants.value.map((tenant) => ({
+        label: tenant.name,
+        icon: "i-lucide-building-2",
+        onSelect: () => onSelect(tenant),
+        ...(tenant.id === selectedTenant.value?.id ? { active: true } : {}),
+      })),
+    ],
+  ];
 
   if (selectedTenant.value) {
-    items.push({
-      label: t("tenants.clearSelection"),
-      id: null,
-      onSelect: onClear,
-    });
-
-    items.push({
-      type: "separator",
-    });
+    sections.push([
+      {
+        label: t("tenants.clearSelection"),
+        icon: "i-lucide-x",
+        onSelect: onClear,
+      },
+    ]);
   }
 
-  items.push(
-    ...tenants.value.map((tenant) => ({
-      label: tenant.name,
-      id: tenant.id,
-      onSelect: () => onSelect(tenant),
-      slot: "prefix",
-    })),
-  );
-
-  return items;
+  return sections;
 });
 
 // In the bar the switcher is the site's identity, so it only shows once there is
 // a name to show; in the footer it is the control itself and stays.
 const isVisible = computed(() => {
-  if (tenantOptions.value.length === 0) return false;
+  if (tenants.value.length === 0) return false;
   return isBar.value ? !!selectedTenant.value : true;
 });
 
@@ -74,37 +83,31 @@ const label = computed(
   () => selectedTenant.value?.name ?? t("tenants.selectTenant"),
 );
 
-function onSelect(tenant) {
-  const { path, query, hash } = route;
-  const pathWithoutTenant = path.replace(/^\/t\/[^/]+/, "") || "/";
+function pathWithoutTenant() {
+  return route.path.replace(/^\/t\/[^/]+/, "") || "/";
+}
 
-  if (tenant.id === selectedTenant.value?.id) {
-    tenantStore.setCurrentTenantID(null);
-    return navigateTo({
-      path: pathWithoutTenant,
-      query,
-      hash,
-    });
-  } else {
-    tenantStore.setCurrentTenantID(tenant.id);
-    const targetPath =
-      pathWithoutTenant === "/"
-        ? `/t/${tenant.id}`
-        : `/t/${tenant.id}${pathWithoutTenant}`;
-    return navigateTo({
-      path: targetPath,
-      query,
-      hash,
-    });
-  }
+// Like the user menu, an entry does what it says: choosing the tenant already in
+// use only closes the menu. Leaving the tenant is the clear entry's job.
+function onSelect(tenant) {
+  if (tenant.id === selectedTenant.value?.id) return;
+
+  const { query, hash } = route;
+  const rest = pathWithoutTenant();
+
+  tenantStore.setCurrentTenantID(tenant.id);
+  return navigateTo({
+    path: rest === "/" ? `/t/${tenant.id}` : `/t/${tenant.id}${rest}`,
+    query,
+    hash,
+  });
 }
 
 function onClear() {
-  const { path, query, hash } = route;
-  const pathWithoutTenant = path.replace(/^\/t\/[^/]+/, "") || "/";
+  const { query, hash } = route;
 
   return navigateTo({
-    path: pathWithoutTenant,
+    path: pathWithoutTenant(),
     query,
     hash,
   });
@@ -112,12 +115,15 @@ function onClear() {
 
 const { contrastToPrimary } = useContrastColor();
 
-// In the bar the name gives way before the actions do: it shrinks and clips
+// In the bar the trigger is the user menu's ghost button -- same padding, same
+// (primary, hence invisible on the primary bar) hover -- with the name in place
+// of the avatar. The name gives way before the actions do: it shrinks and clips
 // rather than pushing the language and colour mode buttons off a phone's line.
+// In the footer it keeps room on both sides so it does not hug its label.
 const buttonClass = computed(() =>
   isBar.value
-    ? "h-12 min-w-0 px-2 sm:px-3 font-medium hover:!bg-current/15 active:!bg-current/20"
-    : "px-0 text-gray-700 dark:text-gray-300",
+    ? "flex min-w-0 items-center gap-2 px-1 sm:px-2.5 outline-none"
+    : "px-4 text-gray-700 dark:text-gray-300",
 );
 </script>
 
@@ -129,12 +135,12 @@ const buttonClass = computed(() =>
     :ui="{
       content: 'ring-0 shadow-lg glass',
       itemLeadingIcon: 'mt-1',
-      item: ' before:bg-transparent data-highlighted:before:bg-transparent',
+      item: 'before:bg-transparent data-highlighted:before:bg-transparent',
     }"
   >
     <UButton
       variant="ghost"
-      color="neutral"
+      :color="isBar ? 'primary' : 'neutral'"
       :icon="isBar ? undefined : 'i-lucide-building-2'"
       trailing-icon="i-lucide-chevron-down"
       :label="label"
@@ -142,6 +148,14 @@ const buttonClass = computed(() =>
       :ui="isBar ? { label: 'truncate', trailingIcon: 'shrink-0' } : undefined"
       :style="isBar ? { color: contrastToPrimary } : undefined"
     />
+
+    <template #item-trailing="{ item }">
+      <UIcon
+        v-if="item.active"
+        name="i-lucide-check"
+        class="size-5 shrink-0"
+      />
+    </template>
   </UDropdownMenu>
 </template>
 

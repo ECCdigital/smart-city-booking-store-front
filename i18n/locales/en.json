@@ -115,8 +115,8 @@
   },
   "colorMode": {
     "toggle": "Colour mode",
-    "switchToDark": "Dark theme",
-    "switchToLight": "Light theme"
+    "switchToDark": "Switch to dark theme",
+    "switchToLight": "Switch to light theme"
   },
   "language": {
     "toggle": "Language",
@@ -140,6 +140,7 @@
     "events": "Events"
   },
   "tenants": {
+    "heading": "Providers",
     "selectTenant": "Select tenant",
     "tenant": "Tenant",
     "tenants": "Tenants",
