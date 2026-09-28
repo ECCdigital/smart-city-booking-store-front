@@ -107,6 +107,9 @@ export const useAuthStore = defineStore("auth", {
       } finally {
         this.invalidateAuth({ broadcast: true });
       }
+      // The broadcast only reaches other tabs and the route middleware only
+      // runs on navigation, so this tab has to leave the account area itself.
+      await this.leaveAccountArea();
     },
     invalidateAuth({ broadcast = false } = {}) {
       this.clearAuthPayload();
@@ -126,7 +129,10 @@ export const useAuthStore = defineStore("auth", {
       const wasLoggedIn = this.isLoggedIn || this.tokenValid;
       this.invalidateAuth({ broadcast: false });
       if (!import.meta.client || !redirect || !wasLoggedIn) return;
-
+      await this.leaveAccountArea();
+    },
+    /** Sends the user to the login page if they are on an `/account/*` route. */
+    async leaveAccountArea() {
       const path = useRoute().path;
       if (isAccountPath(path)) {
         await navigateTo(`/login?redirect=${encodeURIComponent(path)}`);

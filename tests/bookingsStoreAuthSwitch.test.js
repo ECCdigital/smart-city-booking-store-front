@@ -17,12 +17,14 @@ const bookingsByUser = {
 
 // The user the fake backend currently considers logged in (via cookie).
 let cookieUser = null;
+// The route the app is currently on.
+let currentPath = "/";
 
 globalThis.defineStore = defineStore;
 globalThis.useCookie = () => ({ value: "local" });
 globalThis.createError = (e) => Object.assign(new Error(e.statusMessage), e);
 globalThis.useRequestHeaders = () => ({});
-globalThis.useRoute = () => ({ path: "/" });
+globalThis.useRoute = () => ({ path: currentPath });
 globalThis.navigateTo = vi.fn();
 globalThis.$fetch = vi.fn(async (url, opts = {}) => {
   if (url === "/api/auth/login") {
@@ -54,6 +56,8 @@ describe("bookings store across a user switch", () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     cookieUser = null;
+    currentPath = "/";
+    globalThis.navigateTo.mockClear();
   });
 
   it("shows user B their own bookings after A logged out", async () => {
@@ -69,5 +73,27 @@ describe("bookings store across a user switch", () => {
     // The account pages call this without `force`, exactly like the app does.
     const seen = await bookings.fetchBookings();
     expect(seen.map((b) => b.id)).toEqual(["b-1"]);
+  });
+
+  it("leaves the account area when the user logs out from it", async () => {
+    const auth = useAuthStore();
+    await auth.login({ id: "a" });
+    currentPath = "/account/bookings";
+
+    await auth.logout();
+
+    expect(globalThis.navigateTo).toHaveBeenCalledWith(
+      expect.stringMatching(/^\/login/),
+    );
+  });
+
+  it("stays put when the user logs out from a public page", async () => {
+    const auth = useAuthStore();
+    await auth.login({ id: "a" });
+    currentPath = "/catalog";
+
+    await auth.logout();
+
+    expect(globalThis.navigateTo).not.toHaveBeenCalled();
   });
 });
