@@ -63,11 +63,19 @@ interface UseBookableSearchOptions<TItem> {
   ) => Promise<{ userGrossPriceEur: number } | null>;
 }
 
-/*
-  Performs the address search using Nominatim API, handling loading state and
-  errors gracefully. Standalone so the map can use it without a search.
+/**
+ * What the geocoder answered per address, so a search, its re-runs on a
+ * reloaded bundle and the map's centring ask Nominatim once per address. An
+ * address it could not place is remembered as null; a failed request is not.
  */
+const resolvedAddresses = new Map<string, [number, number] | null>();
+
 export async function searchAddress(address: string) {
+  const key = address.trim().toLowerCase();
+  if (resolvedAddresses.has(key)) {
+    return resolvedAddresses.get(key) ?? undefined;
+  }
+
   try {
     const params = new URLSearchParams({
       q: address,
@@ -88,11 +96,36 @@ export async function searchAddress(address: string) {
 
     const data = await response.json();
     if (data && data.length > 0) {
-      return [parseFloat(data[0].lon), parseFloat(data[0].lat)];
+      const points: [number, number] = [
+        parseFloat(data[0].lon),
+        parseFloat(data[0].lat),
+      ];
+      resolvedAddresses.set(key, points);
+      return points;
     }
+    resolvedAddresses.set(key, null);
   } catch (error) {
     console.error("Adress-Lookup fehlgeschlagen:", error);
   }
+}
+
+const DEFAULT_DISTANCE_KM = 20;
+
+/**
+ * A location that arrives as text, as it does from the URL, becomes a place
+ * with coordinates when the geocoder knows it; the search then measures
+ * distances exactly as for a place picked in the search bar. Text the
+ * geocoder cannot place stays text and is matched against the addresses.
+ */
+async function resolveLocation(
+  location: string | SearchLocation,
+): Promise<string | SearchLocation> {
+  if (typeof location !== "string" || !location.trim()) return location;
+
+  const points = await searchAddress(location);
+  if (!points) return location;
+
+  return { display_address: location, coordinates: { points } };
 }
 
 /**
@@ -224,7 +257,9 @@ export function useBookableSearch<TItem extends SearchableItem>(
     }
 
     if (Array.isArray(query.tenants) && query.tenants.length > 0) {
-      filtered = filtered.filter((b) => query.tenants.includes(b.item.tenantId));
+      filtered = filtered.filter((b) =>
+        query.tenants.includes(b.item.tenantId),
+      );
     }
 
     const maxDistance = query.distance;
@@ -431,6 +466,13 @@ export function useBookableSearch<TItem extends SearchableItem>(
   }) {
     setSearchQueryParams(criteria);
 
+    // The URL carries the place as text; the search wants coordinates.
+    const location = await resolveLocation(criteria.location);
+    const distance =
+      typeof location === "object" && location.coordinates
+        ? (criteria.distance ?? DEFAULT_DISTANCE_KM)
+        : criteria.distance;
+
     //enrich items with status and location coordinates for the following search steps
     let enrichedItems: SearchResultItem[] = enrichItems(() =>
       toValue(sourceItems),
@@ -449,21 +491,14 @@ export function useBookableSearch<TItem extends SearchableItem>(
       bookableItems,
     );
 
-    bookableItems = await searchForLocation(
-      criteria.location,
-      bookableItems,
-      criteria.distance,
-    );
+    bookableItems = await searchForLocation(location, bookableItems, distance);
 
     updatedItems.value = await updateItemStatus(enrichedItems, bookableItems, {
       start: criteria.timeStart,
       end: criteria.timeEnd,
     });
 
-    updatedItems.value = updateDistanceToLocation(
-      updatedItems.value,
-      criteria.location,
-    );
+    updatedItems.value = updateDistanceToLocation(updatedItems.value, location);
 
     searchIsInitialized.value = true;
   }
@@ -551,13 +586,14 @@ export function useBookableSearch<TItem extends SearchableItem>(
         hasCoordinates(item.item),
       );
 
-      // search for items without coordinates
-      const searchString =
-        (searchLocation.display_address ?? "")
-          .split(",")
-          .slice(0, -1)
-          .join(",")
-          .trim() || "";
+      // search for items without coordinates: a geocoder address loses its
+      // trailing country, a bare place name is searched as it is
+      const addressParts = (searchLocation.display_address ?? "").split(",");
+      const searchString = (
+        addressParts.length > 1
+          ? addressParts.slice(0, -1).join(",")
+          : addressParts[0]
+      ).trim();
 
       searchForLocationString(searchString, itemsWithoutCoordinates).forEach(
         (r) => results.push(r),

@@ -1,8 +1,11 @@
 <template>
-  <div v-if="!fetchedCoordinates && !hasBounds">
-    <USkeleton class="w-full h-[80vh] my-2 rounded" />
-  </div>
-  <div v-else class="results-map flex w-full">
+  <!--
+    The map stays mounted whatever the results are. Swapping it for a
+    skeleton while Leaflet is still initialising left Leaflet without its
+    container ("Map container not found"), and a search with no placeable
+    result then never got a map to centre on the address.
+  -->
+  <div class="results-map flex w-full">
     <div
       class="w-full lg:flex-1 lg:min-w-0 h-[80vh] z-10 my-2 mr-0.5 rounded overflow-hidden"
     >
@@ -11,8 +14,8 @@
           ref="mapRef"
           class="h-full w-full"
           :use-global-leaflet="false"
-          :center="[51.2, 9.4]"
-          :zoom="8"
+          :center="START_CENTER"
+          :zoom="START_ZOOM"
           @ready="onMapReady"
           @moveend="updateMapBounds"
           @zoomend="updateMapBounds"
@@ -110,7 +113,16 @@ const route = useRoute();
 const mapRef = ref(null);
 const mapReady = ref(false);
 
-const fetchedCoordinates = ref(false);
+// The start view, before the results or the searched place move the map.
+const START_CENTER = [51.2, 9.4];
+const START_ZOOM = 8;
+
+// The two view changes below are deferred; a view toggle can unmount the map
+// in between, and Leaflet throws when a removed map is moved.
+let unmounted = false;
+onBeforeUnmount(() => {
+  unmounted = true;
+});
 
 const showMultiPinItems = ref(false);
 const currentMultiPinGroup = ref(null);
@@ -170,10 +182,6 @@ const initialBounds = computed(() => {
   ];
 });
 const currentBounds = ref(initialBounds.value);
-
-const hasBounds = computed(() => {
-  return Array.isArray(initialBounds.value) && initialBounds.value.length === 2;
-});
 
 const showCurrentBookable = ref(false);
 const currentBookable = ref(null);
@@ -253,8 +261,6 @@ async function getCenterCoordinates(addressString) {
     return [53.5, 10.0];
   }
 
-  fetchedCoordinates.value = false;
-
   try {
     const searchCoordinates = await searchAddress(addressString);
 
@@ -263,8 +269,6 @@ async function getCenterCoordinates(addressString) {
     }
   } catch (e) {
     console.error(e);
-  } finally {
-    fetchedCoordinates.value = true;
   }
 
   return [53.5, 10.0];
@@ -357,6 +361,8 @@ watch(
     await nextTick();
 
     setTimeout(() => {
+      if (unmounted) return;
+
       map.invalidateSize(true);
 
       map.fitBounds(newBounds, {
@@ -370,10 +376,13 @@ watch(
   },
 );
 
-//watch for location search and set map center accordingly
+// Centre on the searched place, once the map exists to be centred: on a
+// direct load the address is in the URL before Leaflet is ready.
 watch(
-  () => route.query.loc,
-  async (newLoc) => {
+  [mapReady, () => route.query.loc],
+  async ([ready, newLoc]) => {
+    if (!ready) return;
+
     const map = mapRef.value?.leafletObject;
 
     if (!map) return;
@@ -385,7 +394,9 @@ watch(
       const center = await getCenterCoordinates(decodeURIComponent(newLoc));
 
       setTimeout(() => {
-        map.setView(center, 8, {
+        if (unmounted) return;
+
+        map.setView(center, START_ZOOM, {
           animate: false,
         });
       }, 200);
@@ -394,8 +405,10 @@ watch(
     }
 
     // show all results if no location search
-    if (bounds.value) {
+    if (initialBounds.value) {
       setTimeout(() => {
+        if (unmounted) return;
+
         map.fitBounds(initialBounds.value, {
           padding: [20, 20],
           animate: false,
