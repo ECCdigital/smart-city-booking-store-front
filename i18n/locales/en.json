@@ -1,5 +1,31 @@
 {
   "welcome": "Welcome!",
+  "home": {
+    "howItWorks": {
+      "title": "How booking works",
+      "steps": {
+        "search": {
+          "title": "Search and compare",
+          "text": "Search by keyword, place or period. Narrow the results with the other filters. Compare what the providers offer."
+        },
+        "book": {
+          "title": "Pick a time and book",
+          "text": "Choose a free time slot. Sign in or book as a guest. Complete the booking with a few details."
+        },
+        "confirm": {
+          "title": "Receive your confirmation",
+          "text": "The confirmation and the invoice arrive by email. Signed-in users find all their bookings under “My bookings” at any time."
+        }
+      },
+      "sample": {
+        "keyword": "Seminar room",
+        "place": "Musterstadt · 10 km",
+        "period": "{date}, {start} – {end}",
+        "roomLine": "Seminar room 2 “Weitblick” · 3 h",
+        "extraLine": "Projector (optional) · 1 pc."
+      }
+    }
+  },
   "hero": {
     "fallbackSubtitle": "Discover our offers",
     "preview": {
@@ -135,6 +161,7 @@
       "eventDescription": "Events and courses near you"
     },
     "offersAndEvents": "Our offers and events",
+    "showAllOffers": "View all offers",
     "type": "What would you like to book?",
     "bookables": "Bookable items",
     "events": "Events"

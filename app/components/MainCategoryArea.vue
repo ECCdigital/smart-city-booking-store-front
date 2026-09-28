@@ -1,22 +1,31 @@
 <template>
-  <div
-      class="grid sm:grid-cols-2 lg:flex gap-5"
-      style="padding: 50px 0"
-  >
-    <div
-        v-for="(category,i) in tempCategories"
+  <div style="padding: 50px 0">
+    <div class="flex items-center mb-5">
+      <h2 class="text-2xl font-bold">{{ $t("catalog.type") }}</h2>
+      <div class="flex-1" />
+      <UButton
+        variant="ghost"
+        :label="$t('catalog.showAllOffers')"
+        trailing-icon="i-lucide-chevron-right"
+        :to="tenantTo('bookables')"
+      />
+    </div>
+    <div class="grid sm:grid-cols-2 lg:flex gap-5">
+      <div
+        v-for="(category, i) in tempCategories"
         :key="i"
         class="rounded-b-xl w-full lg:flex-1"
-    >
-      <MainCategoryCard :category="category"/>
+      >
+        <MainCategoryCard :category="category" />
+      </div>
     </div>
   </div>
 </template>
 <script setup>
 import MainCategoryCard from "~/components/MainCategoryCard.vue";
 
-
 const { t } = useI18n();
+const { tenantTo } = useTenantRoute();
 
 //toDo - read categories from instance settings
 const tempCategories = computed(() => [

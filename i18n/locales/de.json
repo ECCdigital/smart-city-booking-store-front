@@ -1,5 +1,31 @@
 {
   "welcome": "Willkommen",
+  "home": {
+    "howItWorks": {
+      "title": "So funktioniert das Buchen",
+      "steps": {
+        "search": {
+          "title": "Suchen und vergleichen",
+          "text": "Suchen Sie nach Begriffen, Orten oder Zeiträumen. Filtern Sie mit verschiedenen weiteren Optionen. Vergleichen Sie die Angebote der Anbieter."
+        },
+        "book": {
+          "title": "Zeitraum wählen und buchen",
+          "text": "Wählen Sie ein freies Zeitfenster. Melden Sie sich an oder buchen Sie als Gast. Schließen Sie die Buchung mit wenigen Angaben ab."
+        },
+        "confirm": {
+          "title": "Bestätigung erhalten",
+          "text": "Die Bestätigung und die Rechnung erhalten Sie per E-Mail. Angemeldete User finden alle Buchungen jederzeit unter „Meine Buchungen“."
+        }
+      },
+      "sample": {
+        "keyword": "Seminarraum",
+        "place": "Musterstadt · 10 km",
+        "period": "{date}, {start} – {end} Uhr",
+        "roomLine": "Seminarraum 2 „Weitblick“ · 3 Std.",
+        "extraLine": "Beamer (optional) · 1 Stk."
+      }
+    }
+  },
   "hero": {
     "fallbackSubtitle": "Entdecken Sie unsere Angebote",
     "preview": {
@@ -130,6 +156,7 @@
       "eventDescription": "Events & Kurse in Ihrer Nähe"
     },
     "offersAndEvents": "Unsere Angebote und Veranstaltungen",
+    "showAllOffers": "Alle Angebote ansehen",
     "type": "Was möchten Sie buchen?",
     "bookables": "Buchungsobjekte",
     "events": "Veranstaltungen"
