@@ -4,8 +4,8 @@
 
 ### Issue tracker
 
-Issues, specs and wayfinder maps live as local markdown under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+GitHub ECC, Produkt-Repo: Tickets liegen als Issues in `ECCdigital/tickets`, nicht hier. Bevor du an einem Ticket arbeitest, etwa mit `/implement <URL>`, lies `docs/agents/issue-tracker.md`: Übernehmen, Zustand im Board Arbeit, Branch und Pull Request stehen dort.
 
 ### Domain docs
 
-Single-context: the glossary is `CONTEXT.md` at the repo root; ADRs go to `docs/adr/` when one is warranted.
+Single-context: one `CONTEXT.md` plus `docs/adr/` at the root. See `docs/agents/domain.md`.
