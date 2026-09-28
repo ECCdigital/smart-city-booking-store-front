@@ -124,6 +124,7 @@
           <ResultsMap
             v-if="currentView === 'map' && sortedOffers.length > 0"
             :bookables="sortedOffers"
+            :include-non-suitable="query.inclNoSuitable"
           />
         </div>
       </div>

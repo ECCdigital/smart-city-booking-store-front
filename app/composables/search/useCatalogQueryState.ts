@@ -76,7 +76,7 @@ export function useCatalogQueryState() {
     start: parseNumberOrNull(route.query.start),
     end: parseNumberOrNull(route.query.end),
 
-    inclNoSuitable: route.query.inclNoSuitable === "false",
+    inclNoSuitable: route.query.inclNoSuitable === "true",
     pubEv: route.query.pubEv === "true",
     regEv: route.query.regEv === "true",
 

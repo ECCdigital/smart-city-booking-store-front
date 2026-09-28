@@ -92,7 +92,17 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  includeNonSuitable: {
+    type: Boolean,
+    default: false,
+  },
 });
+
+const shownBookables = computed(() =>
+  props.includeNonSuitable
+    ? props.bookables
+    : props.bookables.filter((b) => b.matchStatus === "match"),
+);
 
 const { goToDetailsNewTab } = useRedirection();
 
@@ -107,7 +117,7 @@ const currentMultiPinGroup = ref(null);
 const groupedBookables = computed(() => {
   const groups = new Map();
 
-  props.bookables.forEach((bookable) => {
+  shownBookables.value.forEach((bookable) => {
     if (!hasCoordinates(bookable.item)) return;
 
     const [lat, lng] = getCoordinatesForBookable(bookable.item);
@@ -134,7 +144,7 @@ const groupedBookables = computed(() => {
 });
 
 const initialBounds = computed(() => {
-  const withCoords = props.bookables.filter((b) => hasCoordinates(b.item));
+  const withCoords = shownBookables.value.filter((b) => hasCoordinates(b.item));
   const matches = withCoords.filter((b) => b.matchStatus === "match");
   const coords = (matches.length ? matches : withCoords).map((b) =>
     getCoordinatesForBookable(b.item),
@@ -171,7 +181,7 @@ const currentBookable = ref(null);
 // Not on the map, so not in the map's own list either; they get their own
 // block at the end of it.
 const withoutLocation = computed(() =>
-  props.bookables
+  shownBookables.value
     .filter((b) => !hasCoordinates(b.item))
     .sort((a, b) => {
       const aIsMatch = a.matchStatus === "match" ? 0 : 1;
@@ -182,10 +192,10 @@ const withoutLocation = computed(() =>
 
 const visibleBookables = computed(() => {
   if (!currentBounds.value) {
-    return props.bookables.filter((b) => hasCoordinates(b.item));
+    return shownBookables.value.filter((b) => hasCoordinates(b.item));
   }
 
-  return props.bookables
+  return shownBookables.value
     .filter((b) => {
       if (!hasCoordinates(b.item)) return false;
 
@@ -333,7 +343,7 @@ function onMapReady() {
 
 // watch for bookables or bounds change and fit map to show all results if no location search
 watch(
-  [mapReady, () => initialBounds.value, () => props.bookables.length],
+  [mapReady, () => initialBounds.value, () => shownBookables.value.length],
   async ([ready, newBounds, count]) => {
     if (!ready) return;
     if (!newBounds) return;

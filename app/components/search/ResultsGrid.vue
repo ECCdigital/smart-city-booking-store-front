@@ -15,7 +15,7 @@
 
     <!-- Nicht passende Ergebnisse -->
     <div v-if="pagedNonSuitable.length > 0">
-      <h2 v-if="includeNonSuitable" class="text-2xl font-bold my-5 mt-7">
+      <h2 class="text-2xl font-bold my-5 mt-7">
         {{ $t("filter.nonSuitable") }}
       </h2>
       <UPageList class="my-5">
@@ -87,7 +87,7 @@ const nonSuitableBookables = computed(() =>
 // a page break may fall inside either group.
 const displayedBookables = computed(() => [
   ...suitableBookables.value,
-  ...nonSuitableBookables.value,
+  ...(props.includeNonSuitable ? nonSuitableBookables.value : []),
 ]);
 
 const {
