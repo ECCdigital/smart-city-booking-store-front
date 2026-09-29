@@ -17,23 +17,15 @@ import type {
 } from "~/types/catalogParams";
 import haversine from "haversine-distance";
 import {
-  getCustomFieldValue,
-  scalarCustomFieldValues,
-} from "~/composables/search/useCustomFieldFilters";
+  applyCatalogFilters,
+  MatchStatus,
+  type CustomFieldDefinition,
+} from "~/composables/search/catalogFilters";
 
 /** A place the search can measure a distance from or to. */
 interface SearchLocation {
   display_address?: string;
   coordinates?: { points?: [number, number] };
-}
-
-/** A custom field definition, as an item carries it. */
-interface CustomFieldDefinition {
-  id?: string;
-  type?: string;
-  inputType?: string;
-  options?: { value: unknown }[];
-  usageOptions?: { catalogFilterType?: string };
 }
 
 /** What the search reads off an Offer, bookable or event. */
@@ -150,12 +142,6 @@ export function useBookableSearch<TItem extends SearchableItem>(
 
   const isMounted = ref(false);
 
-  const MatchStatus = Object.freeze({
-    MATCH: "match",
-    NO_MATCH: "no-match",
-    TOO_FAR: "too-far",
-  });
-
   const bookableSearchTermOptions = {
     keys: ["item.title", "item.description", "item.flags", "item.tags"],
     includeScore: true,
@@ -198,119 +184,24 @@ export function useBookableSearch<TItem extends SearchableItem>(
     threshold: 0.2,
   };
 
-  const filteredItems = computed(() => {
-    let filtered = updatedItems.value;
-
-    if (!query.inclNoSuitable) {
-      filtered = filtered.filter((b) => b.matchStatus !== MatchStatus.NO_MATCH);
-    }
-
-    // The two event switches narrow the events and leave every other Offer
-    // in place: "only public events" says nothing about rooms.
-    if (query.pubEv) {
-      filtered = filtered.filter(
-        (e) => !isEventItem(e.item) || e.item.attendees?.publicEvent === true,
-      );
-    }
-
-    if (query.regEv) {
-      filtered = filtered.filter(
-        (e) =>
-          !isEventItem(e.item) || e.item.attendees?.needsRegistration === true,
-      );
-    }
-
-    // Custom fields exist on bookables only; an event passes a custom-field
-    // filter untouched rather than vanishing from a facet it has no say in.
-    if (query.customFields && typeof query.customFields === "object") {
-      for (const [fieldId, filterValue] of Object.entries(query.customFields)) {
-        if (isEmptyFilterValue(filterValue)) continue;
-
-        const def = getCustomFieldDef(updatedItems.value, fieldId);
-        if (!def) continue;
-
-        const filterType = def?.usageOptions?.catalogFilterType;
-
-        filtered = filtered.filter((b) => {
-          if (isEventItem(b.item)) return true;
-          const itemValue = getCustomFieldValue(b.item, fieldId);
-          return matchesCustomField(itemValue, filterValue, filterType, def);
-        });
-      }
-    }
-
-    // The Kind facet: `event` is one value next to the bookable types.
-    if (Array.isArray(query.cat) && query.cat.length > 0) {
-      filtered = filtered.filter((b) => query.cat.includes(b.item.type ?? ""));
-    }
-
-    if (Array.isArray(query.cities) && query.cities.length > 0) {
-      filtered = filtered.filter((b) => {
-        const location = b.item.location;
-        if (!location || typeof location === "string") return false;
-        const city = location.address?.city || location.display_address;
-        if (!city) return false;
-        return query.cities.some((c) =>
-          city.toLowerCase().includes(c.toLowerCase()),
-        );
-      });
-    }
-
-    if (Array.isArray(query.tenants) && query.tenants.length > 0) {
-      filtered = filtered.filter((b) =>
-        query.tenants.includes(b.item.tenantId),
-      );
-    }
-
-    const maxDistance = query.distance;
-    if (query.location && maxDistance !== null) {
-      filtered = filtered.filter((b) => {
-        if (
-          b.matchStatus === MatchStatus.MATCH &&
-          (!b.item.location || b.item.distanceMeter === undefined)
-        ) {
-          return true;
-        } else if (b.matchStatus === MatchStatus.NO_MATCH) {
-          return false;
-        }
-
-        if ((b.item.distanceMeter ?? Infinity) <= maxDistance * 1000) {
-          b.matchStatus = MatchStatus.MATCH;
-
-          return true;
-        }
-        b.matchStatus = MatchStatus.TOO_FAR;
-        return false;
-      });
-    }
-
-    const priceRange = query.price;
-    if (Array.isArray(priceRange) && priceRange.length === 2) {
-      const [minRaw, maxRaw] = priceRange;
-      const min = typeof minRaw === "number" ? minRaw : -Infinity;
-      const max = typeof maxRaw === "number" ? maxRaw : Infinity;
-
-      filtered = filtered.filter((i) => {
-        const price = getMinPrice(i) ?? 0;
-        return price >= (min === 0 ? -1 : min) && price <= max;
-      });
-    }
-
-    return updatedItems.value.map((i) => {
-      if (filtered.some((f) => f.item.id === i.item.id)) {
-        return i;
-      } else {
-        return {
-          ...i,
-          isBookable: i.isBookable,
-          matchStatus:
-            i.matchStatus === MatchStatus.TOO_FAR
-              ? MatchStatus.TOO_FAR
-              : MatchStatus.NO_MATCH,
-        };
-      }
-    });
-  });
+  const filteredItems = computed(() =>
+    applyCatalogFilters(
+      updatedItems.value,
+      {
+        inclNoSuitable: query.inclNoSuitable,
+        pubEv: query.pubEv,
+        regEv: query.regEv,
+        cat: query.cat,
+        cities: query.cities,
+        tenants: query.tenants,
+        distance: query.distance,
+        hasLocation: !!query.location,
+        price: query.price,
+        customFields: query.customFields,
+      },
+      { getMinPrice },
+    ),
+  );
 
   function getPrice(item: SearchResultItem) {
     if (item.calculatedPrice) {
@@ -896,78 +787,6 @@ export function useBookableSearch<TItem extends SearchableItem>(
       });
     }
   });
-
-  function getCustomFieldDef(wrappers: SearchResultItem[], fieldId: string) {
-    for (const w of wrappers) {
-      const def = w?.item?.customFields?.find((f) => f.id === fieldId);
-      if (def) return def;
-    }
-    return null;
-  }
-
-  function isEmptyFilterValue(v: unknown) {
-    if (v == null) return true;
-    if (Array.isArray(v) && v.length === 0) return true;
-    if (v === false) return true; // inaktive checkbox
-    return false;
-  }
-
-  function matchesCustomField(
-    itemValue: unknown,
-    filterValue: unknown,
-    filterType: string | undefined,
-    filterDef: CustomFieldDefinition = { inputType: "" },
-  ) {
-    const itemValues = scalarCustomFieldValues(itemValue);
-    if (itemValues.length === 0) {
-      return false;
-    }
-
-    if (filterType === "select") {
-      if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
-      if (filterDef.inputType === "numeric") {
-        return filterValue.some((v) =>
-          itemValues.some((iv) => Number(v) === iv),
-        );
-      }
-      return filterValue.some((v) => itemValues.includes(v));
-    }
-
-    if (filterType === "checkbox") {
-      if (filterValue !== true) return true;
-      return itemValue === true || itemValue === "true";
-    }
-
-    if (filterType === "slider") {
-      let n;
-      if (filterDef && filterDef.inputType === "select") {
-        const temp =
-          filterDef.options?.findIndex((o) => o.value === itemValue) + 1;
-        n = temp;
-      } else {
-        n = Number(itemValue);
-      }
-
-      if (Number.isNaN(n)) return false;
-      return n <= Number(filterValue);
-    }
-
-    if (filterType === "range") {
-      let n;
-      if (filterDef && filterDef.inputType === "select") {
-        n = filterDef.options?.findIndex((o) => o.value === itemValue) + 1;
-      } else {
-        n = Number(itemValue);
-      }
-
-      if (Number.isNaN(n)) return false;
-
-      const [min, max] = filterValue as [number, number];
-      return n >= min && n <= max;
-    }
-
-    return true;
-  }
 
   return {
     query,

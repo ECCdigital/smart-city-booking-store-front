@@ -91,7 +91,9 @@ export interface OfferItem {
   distanceMeter?: number;
 }
 
-export function isEventItem(item: OfferItem | null | undefined): boolean {
+export function isEventItem(
+  item: Pick<OfferItem, "type"> | null | undefined,
+): boolean {
   return item?.type === "event";
 }
 
