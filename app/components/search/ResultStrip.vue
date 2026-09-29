@@ -4,7 +4,7 @@
     class="@container bg-white dark:bg-gray-700 flex flex-row rounded-sm shadow-lg"
     :class="[
       isNotSuitable ? 'opacity-70' : ' ',
-      listMode ? (isEvent ? 'max-h-100 h-100' : 'min-h-48') : '',
+      listMode ? (isEvent ? 'min-h-56' : 'min-h-48') : '',
     ]"
   >
     <div

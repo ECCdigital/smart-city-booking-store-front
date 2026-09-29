@@ -30,7 +30,7 @@
           v-if="!mapMode"
           :item="event"
           show-distance
-          class="w-full text-sm"
+          class="w-full text-sm mb-2"
         />
         <div
           v-if="hasTeaserText && !mapMode"
@@ -63,8 +63,11 @@
         v-if="organizerName || hasFlags"
         class="basis-3/5 min-w-0 self-center flex flex-col gap-1"
       >
-        <p v-if="organizerName" class="w-full">
-          {{ $t("bookableDetail.organiser") }} {{ organizerName }}
+        <p v-if="organizerName" class="w-full my-1">
+          <span class="font-semibold"
+            >{{ $t("bookableDetail.organiser") }}
+          </span>
+          {{ organizerName }}
         </p>
         <BookableFlagDisplay
           v-if="hasFlags"

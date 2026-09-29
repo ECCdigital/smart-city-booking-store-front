@@ -6,11 +6,11 @@
       </div>
       <div
         v-if="location.length"
-        class="p-3 min-w-0 whitespace-normal break-words"
+        class="px-3 min-w-0 whitespace-normal break-words"
       >
         {{ location }}
       </div>
-      <div v-else class="italic p-3 min-w-0 whitespace-normal">
+      <div v-else class="italic px-3 min-w-0 whitespace-normal">
         {{ $t("bookableDetail.noAddress") }}
       </div>
       <div class="flex-1" />
@@ -60,10 +60,7 @@ const hasLocationParam = computed(() => {
 const location = computed(() => {
   if (typeof props.item.location === "string") {
     return props.item.location;
-  } else if (
-    props.item.location &&
-    typeof props.item.location === "object"
-  ) {
+  } else if (props.item.location && typeof props.item.location === "object") {
     return props.item.location.display_address || "";
   } else {
     return "";

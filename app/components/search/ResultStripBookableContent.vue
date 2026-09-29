@@ -30,7 +30,7 @@
           :item="bookable"
           show-distance
           class="w-full"
-          :class="mapMode ? 'text-sm' : ''"
+          :class="mapMode ? 'text-sm' : 'mb-2'"
         />
         <div
           v-if="hasDescription && !mapMode"
