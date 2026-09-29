@@ -5,9 +5,21 @@
     container ("Map container not found"), and a search with no placeable
     result then never got a map to centre on the address.
   -->
-  <div class="results-map flex w-full">
+  <div
+    class="results-map"
+    :class="
+      isFullscreen
+        ? 'fixed inset-0 z-[1000] bg-neutral-50 dark:bg-gray-950'
+        : 'flex w-full'
+    "
+  >
     <div
-      class="w-full lg:flex-1 lg:min-w-0 h-[80vh] z-10 my-2 mr-0.5 rounded overflow-hidden"
+      class="z-10 overflow-hidden"
+      :class="
+        isFullscreen
+          ? 'absolute inset-0'
+          : 'relative w-full lg:flex-1 lg:min-w-0 h-[80vh] my-2 mr-0.5 rounded'
+      "
     >
       <ClientOnly>
         <LMap
@@ -16,6 +28,7 @@
           :use-global-leaflet="false"
           :center="START_CENTER"
           :zoom="START_ZOOM"
+          :options="{ zoomControl: false }"
           @ready="onMapReady"
           @moveend="updateMapBounds"
           @zoomend="updateMapBounds"
@@ -69,15 +82,105 @@
         @open-details="openBookableDetails"
         @close-details="closeBookableDetails"
       />
+
+      <!--
+        Full screen: the map alone fills the viewport. The filter area is
+        gone; its button, the count and the list toggle float on the map.
+      -->
+      <div
+        v-if="!isFullscreen"
+        class="glass absolute top-3 right-3 z-1001 rounded-xl p-1.5 shadow-md"
+      >
+        <UButton
+          :label="$t('results.fullscreen')"
+          icon="i-lucide-maximize-2"
+          color="neutral"
+          variant="soft"
+          class="rounded-lg py-2 px-3"
+          @click="setFullscreen(true)"
+        />
+      </div>
+      <div
+        v-else
+        class="absolute inset-x-4 top-4 z-1001 flex items-start justify-between gap-2 pointer-events-none"
+      >
+        <div class="glass rounded-xl p-1.5 shadow-md pointer-events-auto">
+          <UButton
+            :label="$t('results.exitFullscreen')"
+            icon="i-lucide-minimize-2"
+            color="neutral"
+            variant="soft"
+            class="rounded-lg py-2 px-3"
+            @click="setFullscreen(false)"
+          />
+        </div>
+        <div
+          class="glass flex items-center gap-3 rounded-xl p-1.5 pl-4 shadow-md pointer-events-auto"
+        >
+          <span
+            v-if="suitableCount !== null"
+            class="hidden sm:inline text-sm font-bold text-black dark:text-white"
+          >
+            {{ suitableCount }} {{ $t("filter.fittingResults") }}
+          </span>
+          <UButton
+            :label="$t('results.list')"
+            icon="i-lucide-list"
+            :color="showList ? 'primary' : 'neutral'"
+            variant="soft"
+            :aria-pressed="showList"
+            class="hidden lg:inline-flex rounded-lg py-2 px-3"
+            @click="showList = !showList"
+          />
+          <slot name="filter" />
+        </div>
+      </div>
+
+      <!--
+        Leaflet's own zoom control is off; these two buttons zoom instead,
+        drawn like the full-screen and filter buttons
+      -->
+      <div
+        class="glass absolute z-1001 flex flex-col gap-1 rounded-xl p-1.5 shadow-md"
+        :class="isFullscreen ? 'top-20 left-4' : 'top-3 left-3'"
+      >
+        <UButton
+          icon="i-lucide-plus"
+          color="neutral"
+          variant="soft"
+          class="rounded-lg p-2"
+          :aria-label="$t('results.zoomIn')"
+          :disabled="currentZoom >= maxZoom"
+          @click="zoomBy(1)"
+        />
+        <UButton
+          icon="i-lucide-minus"
+          color="neutral"
+          variant="soft"
+          class="rounded-lg p-2"
+          :aria-label="$t('results.zoomOut')"
+          :disabled="currentZoom <= minZoom"
+          @click="zoomBy(-1)"
+        />
+      </div>
     </div>
 
     <!-- List of visible Offers, then the ones the map cannot place -->
-    <ResultsMapList
-      v-model="currentBookable"
-      :bookables="visibleBookables"
-      :without-location="withoutLocation"
-      @open-details="openBookableDetails"
-    />
+    <Transition
+      enter-active-class="transition duration-200 ease-out motion-reduce:transition-none"
+      enter-from-class="translate-x-4 opacity-0"
+      leave-active-class="transition duration-150 ease-in motion-reduce:transition-none"
+      leave-to-class="translate-x-4 opacity-0"
+    >
+      <ResultsMapList
+        v-if="!isFullscreen || showList"
+        v-model="currentBookable"
+        :bookables="visibleBookables"
+        :without-location="withoutLocation"
+        :floating="isFullscreen"
+        @open-details="openBookableDetails"
+      />
+    </Transition>
   </div>
 </template>
 <script setup>
@@ -98,6 +201,10 @@ const props = defineProps({
   includeNonSuitable: {
     type: Boolean,
     default: false,
+  },
+  suitableCount: {
+    type: Number,
+    default: null,
   },
 });
 
@@ -122,6 +229,43 @@ const START_ZOOM = 8;
 let unmounted = false;
 onBeforeUnmount(() => {
   unmounted = true;
+  window.removeEventListener("keydown", onKeydown);
+  document.body.classList.remove("overflow-hidden");
+});
+
+// Full screen is a fixed overlay, not the Fullscreen API
+const isFullscreen = ref(false);
+const showList = ref(true);
+
+async function setFullscreen(on) {
+  isFullscreen.value = on;
+  showList.value = true;
+  document.body.classList.toggle("overflow-hidden", on);
+
+  await nextTick();
+
+  const map = mapRef.value?.leafletObject;
+
+  if (!map) return;
+
+  setTimeout(() => {
+    if (unmounted) return;
+
+    map.invalidateSize();
+    // A bigger map shows more Offers; the list follows the new bounds.
+    updateMapBounds();
+  }, 50);
+}
+
+// Escape leaves full screen, unless an open dialog (the filter) takes it.
+function onKeydown(event) {
+  if (event.key !== "Escape" || !isFullscreen.value) return;
+  if (document.querySelector('[role="dialog"][data-state="open"]')) return;
+
+  setFullscreen(false);
+}
+onMounted(() => {
+  window.addEventListener("keydown", onKeydown);
 });
 
 const showMultiPinItems = ref(false);
@@ -274,10 +418,27 @@ async function getCenterCoordinates(addressString) {
   return [53.5, 10.0];
 }
 
+// The zoom buttons in the template replace Leaflet's control; they grey out
+// at either end of the range, which the map knows once it is ready.
+const currentZoom = ref(START_ZOOM);
+const minZoom = ref(0);
+const maxZoom = ref(Infinity);
+
+function zoomBy(delta) {
+  const map = mapRef.value?.leafletObject;
+
+  if (!map) return;
+
+  if (delta > 0) map.zoomIn();
+  else map.zoomOut();
+}
+
 function updateMapBounds() {
   const map = mapRef.value?.leafletObject;
 
   if (!map) return;
+
+  currentZoom.value = map.getZoom();
 
   const mapBounds = map.getBounds();
 
@@ -343,6 +504,14 @@ function closeBookableDetails() {
 
 function onMapReady() {
   mapReady.value = true;
+
+  const map = mapRef.value?.leafletObject;
+
+  if (!map) return;
+
+  currentZoom.value = map.getZoom();
+  minZoom.value = map.getMinZoom();
+  maxZoom.value = map.getMaxZoom();
 }
 
 // watch for bookables or bounds change and fit map to show all results if no location search

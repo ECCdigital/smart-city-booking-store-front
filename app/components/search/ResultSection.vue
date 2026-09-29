@@ -127,7 +127,25 @@
             v-if="currentView === 'map' && sortedOffers.length > 0"
             :bookables="sortedOffers"
             :include-non-suitable="query.inclNoSuitable"
-          />
+            :suitable-count="suitableCount"
+          >
+            <template #filter>
+              <FilterButton
+                v-model:is-initailized="searchIsInitialized"
+                :bookables="searchedOffers"
+                :include-non-suitable="query.inclNoSuitable"
+                :categories="query.cat"
+                :cities="query.cities"
+                :tenants="query.tenants"
+                :distance="query.distance"
+                :price="query.price"
+                :only-public-events="query.pubEv"
+                :only-registration-needed-events="query.regEv"
+                :custom-fields="query.customFields"
+                @filter="setFilterQueryParams"
+              />
+            </template>
+          </ResultsMap>
         </div>
       </div>
     </div>
@@ -146,7 +164,6 @@ import ResultViewButton from "~/components/search/ResultViewButton.vue";
 import CatalogBreadcrumb from "~/components/navigation/CatalogBreadcrumb.vue";
 
 const props = defineProps({
-  /** The merged Offers, bookables and events, as `mergeOffers()` builds them. */
   offers: {
     type: Array,
     required: true,
