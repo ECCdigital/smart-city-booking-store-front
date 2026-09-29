@@ -42,10 +42,18 @@ const copyright = computed(() =>
         </nav>
       </div>
 
-      <!-- Partner logos are out of scope for now (no instance field, no admin
-           form). The slot keeps them a matter of data rather than a rebuild. -->
-      <div v-if="$slots.logos" class="flex items-center gap-4">
-        <slot name="logos" />
+      <div class="flex items-center gap-4 sm:gap-6">
+        <!-- Partner logos are out of scope for now (no instance field, no admin
+             form). The slot keeps them a matter of data rather than a rebuild. -->
+        <div v-if="$slots.logos" class="flex items-center gap-4">
+          <slot name="logos" />
+        </div>
+
+        <!-- The one place the tenant is always chosen; the bar only names the
+             one already in use. It closes the row on the right. -->
+        <ClientOnly>
+          <TenantSwitcher variant="footer" />
+        </ClientOnly>
       </div>
     </div>
   </footer>

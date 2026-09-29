@@ -1,4 +1,5 @@
 import type { CustomFieldValue } from "~/types/catalogParams";
+import { isEventItem } from "~/composables/search/offer";
 import {
   getCustomFieldValue,
   scalarCustomFieldValues,
@@ -24,11 +25,15 @@ export interface CustomFieldDefinition {
 export interface FilterableItem {
   item: {
     id: string;
+    tenantId?: string;
     type?: string;
-    location?: {
-      address?: { city?: string };
-      display_address?: string;
-    } | null;
+    location?:
+      | {
+          address?: { city?: string };
+          display_address?: string;
+        }
+      | string
+      | null;
     distanceMeter?: number;
     attendees?: { publicEvent?: boolean; needsRegistration?: boolean };
     customFields?: CustomFieldDefinition[];
@@ -43,6 +48,7 @@ export interface CatalogFilterCriteria {
   regEv: boolean;
   cat: string[];
   cities: string[];
+  tenants: string[];
   /** Maximum distance in km; only applied when `hasLocation` is set. */
   distance: number | null;
   hasLocation: boolean;
@@ -59,12 +65,12 @@ export interface CatalogFilterCriteria {
 export type CatalogFilterDimension =
   | "cat"
   | "cities"
+  | "tenants"
   | "distance"
   | "price"
   | `cf:${string}`;
 
 export interface CatalogFilterOptions<T extends FilterableItem> {
-  isEvent: boolean;
   /** The price the price filter compares; `null` counts as 0. */
   getMinPrice: (wrapper: T) => number | null | undefined;
   skip?: CatalogFilterDimension;
@@ -81,7 +87,7 @@ export function applyCatalogFilters<T extends FilterableItem>(
   criteria: CatalogFilterCriteria,
   options: CatalogFilterOptions<T>,
 ): T[] {
-  const { isEvent, getMinPrice, skip } = options;
+  const { getMinPrice, skip } = options;
   let filtered: T[] = items;
   const tooFar = new Set<string>();
 
@@ -89,15 +95,23 @@ export function applyCatalogFilters<T extends FilterableItem>(
     filtered = filtered.filter((b) => b.matchStatus !== MatchStatus.NO_MATCH);
   }
 
-  if (isEvent && criteria.pubEv) {
-    filtered = filtered.filter((e) => e.item.attendees?.publicEvent === true);
-  }
-
-  if (isEvent && criteria.regEv) {
+  // The two event switches narrow the events and leave every other Offer
+  // in place: "only public events" says nothing about rooms.
+  if (criteria.pubEv) {
     filtered = filtered.filter(
-      (e) => e.item.attendees?.needsRegistration === true,
+      (e) => !isEventItem(e.item) || e.item.attendees?.publicEvent === true,
     );
   }
+
+  if (criteria.regEv) {
+    filtered = filtered.filter(
+      (e) =>
+        !isEventItem(e.item) || e.item.attendees?.needsRegistration === true,
+    );
+  }
+
+  // Custom fields exist on bookables only; an event passes a custom-field
+  // filter untouched rather than vanishing from a facet it has no say in.
 
   if (criteria.customFields && typeof criteria.customFields === "object") {
     for (const [fieldId, filterValue] of Object.entries(
@@ -112,15 +126,16 @@ export function applyCatalogFilters<T extends FilterableItem>(
       const filterType = def.usageOptions?.catalogFilterType;
 
       filtered = filtered.filter((b) => {
+        if (isEventItem(b.item)) return true;
         const itemValue = getCustomFieldValue(b.item, fieldId);
         return matchesCustomField(itemValue, filterValue, filterType, def);
       });
     }
   }
 
+  // The Kind facet: `event` is one value next to the bookable types.
   if (
     skip !== "cat" &&
-    !isEvent &&
     Array.isArray(criteria.cat) &&
     criteria.cat.length > 0
   ) {
@@ -141,6 +156,16 @@ export function applyCatalogFilters<T extends FilterableItem>(
         city.toLowerCase().includes(c.toLowerCase()),
       );
     });
+  }
+
+  if (
+    skip !== "tenants" &&
+    Array.isArray(criteria.tenants) &&
+    criteria.tenants.length > 0
+  ) {
+    filtered = filtered.filter(
+      (b) => b.item.tenantId != null && criteria.tenants.includes(b.item.tenantId),
+    );
   }
 
   if (
@@ -202,7 +227,7 @@ export function applyCatalogFilters<T extends FilterableItem>(
 /** The city string the city filter matches against. */
 export function itemCity(wrapper: FilterableItem) {
   const location = wrapper.item.location;
-  if (!location) return "";
+  if (!location || typeof location === "string") return "";
   return location.address?.city || location.display_address || "";
 }
 

@@ -22,6 +22,8 @@
       </div>
 
       <LatestEventsArea v-if="allEvents.length > 0" :items="allEvents" />
+
+      <HowBookingWorksArea />
     </div>
   </div>
 </template>
@@ -31,6 +33,7 @@ import SearchBar from "~/components/search/SearchBar.vue";
 import { useEventStore } from "~~/stores/event.js";
 import MainCategoryArea from "~/components/MainCategoryArea.vue";
 import LatestEventsArea from "~/components/LatestEventsArea.vue";
+import HowBookingWorksArea from "~/components/home/HowBookingWorksArea.vue";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 
 definePageMeta({
@@ -76,10 +79,8 @@ async function goToListview(searchParams) {
     query.loc = searchParams.location;
   }
 
-  const path = searchParams.searchType === "events" ? "events" : "bookables";
-
   await router.push({
-    ...tenantTo(path),
+    ...tenantTo("search"),
     query,
   });
 }

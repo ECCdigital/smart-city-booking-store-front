@@ -53,7 +53,7 @@
         block
         variant="soft"
         icon="i-lucide-refresh-cw"
-        class="mt-3 cursor-pointer"
+        class="mt-3"
         :loading="flow.reading"
         @click="flow.refreshStatus('Button')"
       >

@@ -157,7 +157,7 @@ function isSegmentActive(index) {
       <UButton
         v-if="!hideBackOnFirst || !isFirstStep"
         variant="ghost"
-        color="neutral"
+        color="primary"
         :disabled="!canGoBack || isFirstStep || loading"
         icon="i-lucide-arrow-left"
         @click="goBack"

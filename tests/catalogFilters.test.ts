@@ -26,6 +26,7 @@ function wrap(
   {
     city,
     type = "room",
+    tenant = "t1",
     price,
     distanceKm,
     status = MatchStatus.MATCH,
@@ -33,6 +34,7 @@ function wrap(
   }: {
     city: string;
     type?: string;
+    tenant?: string;
     price: number;
     distanceKm?: number;
     status?: string;
@@ -43,6 +45,7 @@ function wrap(
     matchStatus: status,
     item: {
       id,
+      tenantId: tenant,
       type,
       price,
       location: { address: { city } },
@@ -57,7 +60,13 @@ const ITEMS: Wrapper[] = [
   wrap("a", { city: "Bad Homburg", price: 10, distanceKm: 2, size: "s" }),
   wrap("b", { city: "Bad Homburg", price: 40, distanceKm: 8, size: "l" }),
   wrap("c", { city: "Frankfurt", price: 20, distanceKm: 20, size: "s" }),
-  wrap("d", { city: "Frankfurt", type: "resource", price: 60, distanceKm: 25 }),
+  wrap("d", {
+    city: "Frankfurt",
+    type: "resource",
+    tenant: "t2",
+    price: 60,
+    distanceKm: 25,
+  }),
   wrap("e", {
     city: "Oberursel",
     price: 5,
@@ -72,6 +81,7 @@ const NONE: CatalogFilterCriteria = {
   regEv: false,
   cat: [],
   cities: [],
+  tenants: [],
   distance: null,
   hasLocation: false,
   price: [],
@@ -79,7 +89,6 @@ const NONE: CatalogFilterCriteria = {
 };
 
 const OPTIONS = {
-  isEvent: false,
   getMinPrice: (w: Wrapper) =>
     w.matchStatus === MatchStatus.NO_MATCH ? null : w.item.price,
 };
@@ -119,6 +128,39 @@ describe("applyCatalogFilters", () => {
     expect(matches({ cities: ["frankfurt"], cat: ["room"] })).toEqual(["c"]);
     expect(matches({ price: [15, 45] })).toEqual(["b", "c"]);
     expect(matches({ customFields: { size: ["s"] } })).toEqual(["a", "c"]);
+    expect(matches({ tenants: ["t2"] })).toEqual(["d"]);
+  });
+
+  it("narrows only the events by the event switches and custom fields", () => {
+    const event = (id: string, attendees: object): Wrapper => ({
+      matchStatus: MatchStatus.MATCH,
+      item: {
+        id,
+        type: "event",
+        price: 0,
+        location: { address: { city: "Frankfurt" } },
+        attendees,
+      },
+    });
+    const mixed = [
+      ...ITEMS,
+      event("pub", { publicEvent: true, needsRegistration: false }),
+      event("reg", { publicEvent: false, needsRegistration: true }),
+    ];
+    const ids = (criteria: Partial<CatalogFilterCriteria>) =>
+      applyCatalogFilters(mixed, { ...NONE, ...criteria }, OPTIONS)
+        .filter((w) => w.matchStatus === MatchStatus.MATCH)
+        .map((w) => w.item.id);
+
+    expect(ids({ pubEv: true })).toEqual(["a", "b", "c", "d", "pub"]);
+    expect(ids({ regEv: true })).toEqual(["a", "b", "c", "d", "reg"]);
+    expect(ids({ customFields: { size: ["s"] } })).toEqual([
+      "a",
+      "c",
+      "pub",
+      "reg",
+    ]);
+    expect(ids({ cat: ["event"] })).toEqual(["pub", "reg"]);
   });
 
   it("marks items beyond the distance too-far without touching the source", () => {
@@ -192,6 +234,12 @@ describe("applyCatalogFilters", () => {
       expect(matches(criteria)).toEqual(["b"]);
       expect(matches(criteria, "cf:size")).toEqual(["a", "b", "c"]);
       expect(matches(criteria, "cf:other")).toEqual(["b"]);
+    });
+
+    it("skips the tenants for the provider facet", () => {
+      const criteria = { tenants: ["t2"], cat: ["room", "resource"] };
+      expect(matches(criteria)).toEqual(["d"]);
+      expect(matches(criteria, "tenants")).toEqual(["a", "b", "c", "d"]);
     });
 
     it("skips the distance for the distance histogram", () => {

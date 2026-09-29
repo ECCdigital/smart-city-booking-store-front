@@ -19,7 +19,7 @@
 
     <UButton
       v-if="collapsible && isTruncatable"
-      :label="expanded ? collapseLabel : expandLabel"
+      :label="expanded ? collapseText : expandText"
       :icon="
         expanded
           ? 'i-lucide-chevron-up'
@@ -37,6 +37,9 @@
 
 <script setup>
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
+
+const { t } = useI18n();
+
 
 const props = defineProps({
   /** Roher HTML-String, der angezeigt werden soll. Wird vor dem Rendern sanitized. */
@@ -85,15 +88,15 @@ const props = defineProps({
     type: Number,
     default: 2,
   },
-  /** Label für den Aufklapp-Button. */
+  /** Label für den Aufklapp-Button. Leer = übersetzter Standard. */
   expandLabel: {
     type: String,
-    default: "Mehr anzeigen",
+    default: "",
   },
-  /** Label für den Zuklapp-Button. */
+  /** Label für den Zuklapp-Button. Leer = übersetzter Standard. */
   collapseLabel: {
     type: String,
-    default: "Weniger anzeigen",
+    default: "",
   },
   /** Erzwingt den expandierten Zustand (z. B. bei externer Steuerung). */
   forceExpanded: {
@@ -101,6 +104,16 @@ const props = defineProps({
     default: false,
   },
 });
+
+// `defineProps` is hoisted above setup, so its defaults cannot call `t()`.
+// The labels fall back to the translation here, where `t` exists and stays
+// reactive to a language switch.
+const expandText = computed(
+  () => props.expandLabel || t("bookableDetail.showMore"),
+);
+const collapseText = computed(
+  () => props.collapseLabel || t("common.showLess"),
+);
 
 const { sanitizeHtml } = useSanitizeHtml();
 

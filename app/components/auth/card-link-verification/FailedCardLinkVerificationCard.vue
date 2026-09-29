@@ -8,12 +8,12 @@ defineProps({
 
 const t = useI18n().t;
 
-const errorMessages = {
+const errorMessages = computed(() => ({
   invalidToken: t("cardLinkVerification.error.invalidToken"),
   userNotFound: t("cardLinkVerification.error.userNotFound"),
   alreadyVerified: t("cardLinkVerification.error.alreadyVerified"),
   default: t("cardLinkVerification.error.default"),
-};
+}));
 
 defineEmits(["backToLogin"]);
 </script>
@@ -33,20 +33,17 @@ defineEmits(["backToLogin"]);
       {{ errorMessages[errorType] }}
     </p>
 
-    <div class=" w-full">
-
+    <div class="w-full">
       <UButton
-      color="neutral"
-      variant="outline"
-      block
-      to="/login"
-      icon="i-lucide-arrow-left"
+        color="neutral"
+        variant="outline"
+        block
+        to="/login"
+        icon="i-lucide-arrow-left"
       >
-      {{ $t("common.backToLogin") }}
+        {{ $t("common.backToLogin") }}
       </UButton>
     </div>
-
-
   </UCard>
 </template>
 

@@ -7,32 +7,12 @@
         :class="entryPageMode ? 'p-5 space-x-1 -mt-10' : 'p-2 -mt-5'"
         :style="entryPageMode ? 'height: 100px' : undefined"
       >
-        <USelect
-          v-if="entryPageMode"
-          v-model="_searchType"
-          :items="types"
-          placeholder="Was suchen Sie?"
-          size="lg"
-          variant="ghost"
-          class="basis-1/6 rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent focus:bg-white focus-within:ring-1 focus-within:ring-primary/40 data-[state=open]:ring-1 data-[state=open]:ring-primary/40"
-          :ui="{
-            placeholder: hasMissingType
-              ? 'text-red-500 font-bold'
-              : 'text-gray-400 dark:text-gray-200/60',
-          }"
-        />
-        <USeparator
-          v-if="entryPageMode"
-          orientation="vertical"
-          :ui="{ border: 'border-gray-300' }"
-        />
         <InputText
           v-model="_term"
           icon="i-lucide-search"
-          placeholder="Stichwort"
+          :placeholder="$t('filter.keyword')"
           clearable
-          class="rounded-md focus-within:ring-1 focus-within:ring-primary/40"
-          :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
+          class="basis-1/5 rounded-md focus-within:ring-1 focus-within:ring-primary/40"
           :ui="{
             base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
             leadingIcon: 'text-gray-400 dark:text-gray-200',
@@ -46,8 +26,7 @@
         <AddressLookup
           v-model="_location"
           :distance="_distance"
-          class="basis-1/4 rounded-md focus-within:ring-1 focus-within:ring-primary/40"
-          :class="entryPageMode ? 'basis-2/6' : 'basis-2/5'"
+          class="basis-2/5 rounded-md focus-within:ring-1 focus-within:ring-primary/40"
           :ui="{
             base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
             leadingIcon: 'text-gray-400 dark:text-gray-200',
@@ -62,14 +41,13 @@
         <InputDateTimePeriod
           v-model:time-period="_timePeriod"
           variant="bar"
-          :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
+          class="basis-1/5"
           @select-date="setSearchTimePeriod"
           @remove-date="removeSearchTimePeriod"
         />
         <UButton
-          label="Suchen"
-          class="w-full justify-center"
-          :class="entryPageMode ? 'basis-1/6' : 'basis-1/5'"
+          :label="$t('common.search')"
+          class="w-full basis-1/5 justify-center"
           :style="{ color: contrastToPrimary }"
           @click="onSearch"
         />
@@ -90,31 +68,10 @@
     :ui="{ root: 'p-0', body: 'p-0' }"
     style="position: relative"
   >
-    <USelect
-      v-if="entryPageMode"
-      v-model="_searchType"
-      :items="types"
-      icon="i-lucide-search"
-      placeholder="Was suchen Sie?"
-      size="lg"
-      variant="ghost"
-      class="rounded-md w-full bg-white dark:bg-gray-700 hover:bg-transparent"
-      :ui="{
-        placeholder: hasMissingType
-          ? 'text-red-500 font-bold'
-          : 'text-gray-400 dark:text-gray-200/60',
-        leadingIcon: 'text-gray-400 dark:text-gray-200',
-      }"
-    />
-    <USeparator
-      v-if="entryPageMode"
-      class="w-full"
-      :ui="{ border: 'border-gray-300' }"
-    />
     <InputText
       v-model="_term"
       icon="i-lucide-book-search"
-      placeholder="Stichwort"
+      :placeholder="$t('filter.keyword')"
       clearable
       :ui="{
         base: 'placeholder:text-gray-400 dark:text-gray-200 hover:bg-transparent',
@@ -141,7 +98,7 @@
       @remove-date="removeSearchTimePeriod"
     />
     <UButton
-      label="Suchen"
+      :label="$t('common.search')"
       class="w-full justify-center"
       :style="{ color: contrastToPrimary }"
       @click="onSearch"
@@ -168,10 +125,6 @@ const props = defineProps({
   entryPageMode: {
     type: Boolean,
     default: false,
-  },
-  searchType: {
-    type: String,
-    default: null,
   },
   term: {
     type: String,
@@ -202,7 +155,6 @@ const props = defineProps({
 const desktopPanelHost = ref(null);
 provide("searchBarDatetimePanelHost", desktopPanelHost);
 
-const _searchType = ref(props.searchType || "bookables");
 const _term = ref(props.term);
 const _location = ref(props.location);
 const _distance = ref(props.distance || 20);
@@ -220,19 +172,6 @@ watch(
   },
 );
 
-const types = ref([
-  {
-    label: "Buchungsobjekte",
-    value: "bookables",
-  },
-  {
-    label: "Veranstaltungen",
-    value: "events",
-  },
-]);
-const hasMissingType = computed(
-  () => isInitialized.value && !_searchType.value,
-);
 const hasSearchCiteria = computed(
   () =>
     !!_term.value ||
@@ -272,14 +211,6 @@ function removeSearchTimePeriod() {
 }
 
 function onSearch() {
-  if (hasMissingType.value) {
-    const notification = useNotification();
-    notification.success(
-      "Bitte legen Sie fest, wonach Sie suchen möchten.",
-      "Unklare Suchanfrage",
-    );
-    return;
-  }
   if (_timePeriod.value) {
     if (!_timePeriod.value.end && _timePeriod.value.start) {
       _timePeriod.value.end = _timePeriod.value.start;
@@ -296,7 +227,6 @@ function onSearch() {
   isInitialized.value = true;
 
   emit("search", {
-    searchType: _searchType.value,
     term: _term.value,
     location: _location.value,
     distance:

@@ -56,14 +56,34 @@ _Avoid_: Filter, cleanup, post-processing
 The whole deployment; owns the Branding (colours, logo, favicon) that every Catalog and Tenant inherits.
 
 **Catalog**:
-A public listing of bookables and events. The instance-wide Catalog carries the Hero Layout.
+A public listing of Offers. The instance-wide Catalog carries the Hero Layout.
+
+**Offer** (de: „Angebot"):
+One entry of a Catalog: a Bookable or an Event. What the Result Page lists, the search bar searches and the filter area narrows. The German result copy says „Angebote"; „Objekte" is retired because it collides with „Buchungsobjekt".
+_Avoid_: Objekt, item, listing, resource
+
+**Bookable** (de: „Buchungsobjekt"):
+An Offer with a booking calendar: a room, an event location, a resource or a ticket. Booked for a period through the checkout.
+_Avoid_: Resource (that is one of its Kinds), object
+
+**Event** (de: „Veranstaltung"):
+An Offer that happens at a fixed time and place; its tickets are Bookables that belong to it and are reached through it, not listed on their own.
+_Avoid_: Ticket (that is the Bookable sold for it)
+
+**Kind** (UI label: „Kategorie"):
+Which sort of Offer an Offer is: one of the bookable types (Raum, Veranstaltungsort, Gerät, Ticket) or Event. The one facet the Result Page narrows Offers by.
+_Avoid_: Type (the code's field), search type, object type, category (in prose; the UI label keeps it)
+
+**Result Page**:
+The one page listing every Offer of the Catalog in list, grid or map view, narrowed by the search bar and the filter area. Replaces the former separate bookables and events pages.
+_Avoid_: Bookables page, events page, search page, catalog page (that is the Catalog's entry)
 
 **Media Library**:
 The backend's managed store of uploaded files; the only source of images a Block or Background may reference.
 _Avoid_: Uploads, assets, attachments
 
 **Compact Hero**:
-The reduced form of the Hero shown on the catalog sub-pages (bookables, events): same Background, its own height, Blocks flagged "home only" hidden. The panel pages, Mobile Key among them, show no Hero.
+The reduced form of the Hero shown on the catalog sub-pages (the Result Page, the detail pages): same Background, its own height, Blocks flagged "home only" hidden. The panel pages, Mobile Key among them, show no Hero.
 _Avoid_: Small hero, sub-page header
 
 **Default Hero Layout**:

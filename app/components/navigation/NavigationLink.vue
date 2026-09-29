@@ -6,7 +6,7 @@
       :name="tab.icon"
       :class="iconClass"
       :style="
-        isActive ? { color: contrastToPrimary } : { color: contrastToSecondary }
+        isActive ? { color: contrastToSecondary } : { color: contrastToPrimary }
       "
     />
     <span
@@ -14,7 +14,7 @@
       class="hidden sm:block"
       :class="labelClass"
       :style="
-        isActive ? { color: contrastToPrimary } : { color: contrastToSecondary }
+        isActive ? { color: contrastToSecondary } : { color: contrastToPrimary }
       "
       >{{ tab.label }}</span
     >
@@ -23,14 +23,14 @@
       class="hidden sm:inline"
       :class="labelClass"
       :style="
-        isActive ? { color: contrastToPrimary } : { color: contrastToSecondary }
+        isActive ? { color: contrastToSecondary } : { color: contrastToPrimary }
       "
       >{{ tab.label }}</span
     >
   </NuxtLink>
 </template>
 <script setup>
-import { useContrastColor } from "../../composables/utils/useContrastColor.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const props = defineProps({
   tab: {
@@ -50,12 +50,12 @@ const { contrastToPrimary, contrastToSecondary } = useContrastColor();
 const linkClass = computed(() => [
   "flex items-center px-4 relative h-12",
   isActive.value
-    ? "text-[var(--color-on-primary)] bg-[var(--color-primary)]"
+    ? "text-[var(--color-on-secondary)] bg-[var(--color-secondary)]"
     : "bg-transparent",
 ]);
 const stripeClass = computed(() => [
   "absolute top-0 left-0 w-full h-1",
-  isActive.value ? "bg-[var(--color-secondary)]/40" : "bg-transparent",
+  isActive.value ? "bg-[var(--color-primary)]/40" : "bg-transparent",
 ]);
 const iconClass = computed(() => {
   if (props.tab.label) {

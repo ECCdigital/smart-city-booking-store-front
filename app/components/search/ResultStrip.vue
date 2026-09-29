@@ -4,19 +4,23 @@
     class="@container bg-white dark:bg-gray-700 flex flex-row rounded-sm shadow-lg"
     :class="[
       isNotSuitable ? 'opacity-70' : ' ',
-      isEvent ? 'max-h-100 h-100' : mapMode ? '' : 'max-h-74 h-74',
+      listMode ? (isEvent ? 'min-h-56' : 'min-h-48') : '',
     ]"
   >
-    <div class="w-24 shrink-0 @sm:basis-1/4 flex items-center">
+    <div
+      class="w-24 shrink-0 @sm:basis-1/4 flex"
+      :class="fillsRow ? 'items-stretch' : 'items-center'"
+    >
       <div
         class="basis-9/10 w-full h-full relative cursor-pointer"
+        :class="mapListMode ? 'min-h-24' : ''"
         @click="onOpenDetails(item?.id, item?.type)"
       >
         <BookableTypeBadge
           :type="item?.type"
           :is-event="isEvent"
-          :icon-only="iconOnly"
-          class="absolute"
+          :icon-only="mapListMode ? true : iconOnly"
+          class="absolute z-10"
           :class="mapMode ? 'top-1 left-1' : 'top-2 left-2'"
         />
 
@@ -25,12 +29,14 @@
           v-bind="image"
           alt=""
           :loading="eager ? 'eager' : 'lazy'"
-          class="w-full h-full object-cover rounded-l-sm"
+          class="w-full object-cover rounded-l-sm"
+          :class="fillsRow ? 'absolute inset-0 h-full' : 'h-full'"
           @error="onImageError"
         />
         <ClientOnly v-else>
           <div
-            class="@container w-full h-full flex items-center justify-center relative"
+            class="@container w-full h-full flex items-center justify-center"
+            :class="fillsRow ? 'absolute inset-0' : 'relative'"
           >
             <ImagePlaceholder
               :theme="theme"
@@ -41,12 +47,13 @@
                 name="i-lucide-image-off"
                 :class="iconOnly ? 'w-8 h-8' : 'w-4 h-4'"
               />
-              <p v-if="!iconOnly" class="text-xs">Nicht gefunden</p>
+              <p v-if="!iconOnly" class="text-xs">
+                {{ $t("bookableDetail.notFound") }}
+              </p>
             </div>
           </div>
         </ClientOnly>
       </div>
-
       <USeparator
         orientation="vertical"
         color="primary"
@@ -62,6 +69,8 @@
       :is-not-bookable="isNotBookable"
       :entry-page-mode="entryPageMode"
       :map-mode="mapMode"
+      :map-list-mode="mapListMode"
+      class="w-auto"
       @open-details="onOpenDetails"
     />
     <ResultStripEventContent
@@ -70,6 +79,9 @@
       :is-not-suitable="isNotSuitable"
       :is-not-bookable="isNotBookable"
       :entry-page-mode="entryPageMode"
+      :map-mode="mapMode"
+      :map-list-mode="mapListMode"
+      class="w-auto"
       @open-details="onOpenDetails"
     />
   </div>
@@ -116,6 +128,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  mapListMode: {
+    type: Boolean,
+    default: false,
+  },
   iconOnly: {
     type: Boolean,
     default: false,
@@ -134,6 +150,12 @@ const isEvent = computed(() => {
   return props.item.type === "event";
 });
 
+// The plain list reserves a height per Kind; the map tooltip and the map list
+// are compact and size themselves to their content, which is what keeps the
+// strips of one pin from painting over each other.
+const listMode = computed(() => !props.mapMode && !props.mapListMode);
+const fillsRow = computed(() => listMode.value || props.mapListMode);
+
 const image = computed(() =>
   imageSource(coverImageOf(props.item, isEvent.value), "strip"),
 );
@@ -150,7 +172,11 @@ const showImageErrorHint = ref(false);
 function onImageError() {
   showImageErrorHint.value = true;
 }
+// In the map's list the row as a whole is the link and the list decides
+// where it opens (a new tab); a strip that also navigated on its own would
+// open the page twice. Everywhere else the picture and the title navigate.
 function onOpenDetails(id, type) {
+  if (props.mapListMode) return;
   goToDetails(id, type);
 }
 </script>

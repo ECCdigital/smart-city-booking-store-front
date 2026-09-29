@@ -1,6 +1,6 @@
 <template>
   <div class="w-full container-md pb-24">
-    <PageHeader title="Einstellungen" class="mb-5" />
+    <PageHeader :title="$t('common.settings')" class="mb-5" />
 
     <SettingsSection v-if="user" :user="user" />
 

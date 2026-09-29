@@ -19,18 +19,21 @@
   </div>
 </template>
 <script setup>
+
+const { t } = useI18n();
+
 const { tenantTo, isActivePath } = useTenantRoute();
 
 const settingsNavigation = computed(() => [
   {
     value: "/account/settings",
-    label: "Persönliche Daten",
+    label: t("account.settingsPersonalData"),
     icon: "i-lucide-user-round-pen",
     disabled: false,
   },
   {
     value: "/account/settings/appearance",
-    label: "Darstellung",
+    label: t("account.settingsAppearance"),
     icon: "i-lucide-paintbrush",
     disabled: false,
   },
