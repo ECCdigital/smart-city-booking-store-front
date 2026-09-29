@@ -7,6 +7,10 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ## [Unreleased]
 
+### Fixed
+
+- Inside a tenant, opening an Offer from the Result Page failed with „Bookable not found“, and the tenant's lists came back empty: the single-tenant branch of the catalog bundle expected the backend to wrap bookables and events (`{ bookable }`, `{ bookables }`), but it returns them bare
+
 ### Changed
 
 - `EventAdressInformation` and `BookableAdressInformation`, identical but for their prop name, are merged into one `AddressInformation` taking an `item`

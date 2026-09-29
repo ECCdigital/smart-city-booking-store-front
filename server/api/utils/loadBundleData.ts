@@ -126,34 +126,34 @@ export async function loadBundleData(
     }
 
     if (bookableId) {
-      const { data, error } = (await serverFetch<{ bookable?: unknown }>(
+      const { data, error } = (await serverFetch<unknown>(
         event,
         `/json/${tenantId}/bookables/${bookableId}`,
         { method: "GET" }
-      )) as FetchResult<{ bookable?: unknown }>;
-      if (error || !data?.bookable) {
+      )) as FetchResult<unknown>;
+      if (error || !data) {
         throw createError({
           statusCode: 404,
           statusMessage: "Bookable not found",
         });
       }
-      result.bookable = data.bookable;
+      result.bookable = data;
       return result;
     }
 
     if (eventId) {
-      const { data, error } = (await serverFetch<{ event?: unknown }>(
+      const { data, error } = (await serverFetch<unknown>(
         event,
         `/json/${tenantId}/events/${eventId}`,
         { method: "GET" }
-      )) as FetchResult<{ event?: unknown }>;
-      if (error || !data?.event) {
+      )) as FetchResult<unknown>;
+      if (error || !data) {
         throw createError({
           statusCode: 404,
           statusMessage: "Event not found",
         });
       }
-      result.event = data.event;
+      result.event = data;
       return result;
     }
 
@@ -161,13 +161,11 @@ export async function loadBundleData(
     if (includes.includes("bookables")) {
       tasks.push(
         (
-          serverFetch<{ bookables?: unknown[] }>(
-            event,
-            `/json/${tenantId}/bookables/`,
-            { method: "GET" }
-          ) as Promise<FetchResult<{ bookables?: unknown[] }>>
+          serverFetch<unknown[]>(event, `/json/${tenantId}/bookables/`, {
+            method: "GET",
+          }) as Promise<FetchResult<unknown[]>>
         ).then(({ data, error }) => {
-          if (!error) result.bookables = data?.bookables ?? [];
+          if (!error) result.bookables = Array.isArray(data) ? data : [];
         })
       );
     }
