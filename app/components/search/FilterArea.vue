@@ -135,6 +135,11 @@
 <script setup>
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState";
 import { useCustomFieldFilters } from "~/composables/search/useCustomFieldFilters";
+import {
+  applyCatalogFilters,
+  MatchStatus,
+} from "~/composables/search/catalogFilters";
+import { computeSliderStep } from "~/utils/sliderStep";
 import CustomFieldFilter from "~/components/search/CustomFieldFilter.vue";
 import FilterHistogramSlider from "~/components/search/FilterHistogramSlider.vue";
 import FilterCheckboxGroup from "~/components/search/FilterCheckboxGroup.vue";
@@ -188,8 +193,9 @@ const props = defineProps({
 });
 const emit = defineEmits(["filter"]);
 
-const suitableBookables = computed(() =>
-  props.bookables.filter((b) => b.matchStatus === "match"),
+// Results the search itself kept. Options and slider bounds derive from this
+const searchResults = computed(() =>
+  props.bookables.filter((b) => b.matchStatus !== MatchStatus.NO_MATCH),
 );
 
 //Filter Variables
@@ -202,25 +208,33 @@ const _categories = ref(props.categories);
 
 //Kategorien
 //toDo - read from instance later !!!!
+const categoryDefinitions = [
+  {
+    label: "Räume",
+    value: "room",
+  },
+  {
+    label: "Veranstaltungsorte",
+    value: "event-location",
+  },
+  {
+    label: "Geräte",
+    value: "resource",
+  },
+  {
+    label: "Tickets",
+    value: "ticket",
+  },
+];
 const possibleCategories = computed(() => {
-  return [
-    {
-      label: "Räume",
-      value: "room",
-    },
-    {
-      label: "Veranstaltungsorte",
-      value: "event-location",
-    },
-    {
-      label: "Geräte",
-      value: "resource",
-    },
-    {
-      label: "Tickets",
-      value: "ticket",
-    },
-  ];
+  const counts = {};
+  for (const b of facetMatches("cat")) {
+    counts[b.item.type] = (counts[b.item.type] || 0) + 1;
+  }
+  return categoryDefinitions.map((c) => ({
+    ...c,
+    count: counts[c.value] || 0,
+  }));
 });
 
 //Distanz
@@ -238,7 +252,10 @@ const distanceRange = computed(() => {
   }
 
   const distances = props.bookables
-    .filter((b) => b.matchStatus !== "no-match" && b.item.distanceMeter != null)
+    .filter(
+      (b) =>
+        b.matchStatus !== MatchStatus.NO_MATCH && b.item.distanceMeter != null,
+    )
     .map((b) => b.item.distanceMeter);
 
   if (distances.length === 0) {
@@ -254,21 +271,17 @@ const distanceRange = computed(() => {
   }
 });
 
-const dynamicDistanceStep = computed(() => {
-  if (distanceRange.value[1] === 0) {
-    return 0;
-  }
-
-  let step = Math.ceil(distanceRange.value[1] / 20); // 20 steps max
-  step = Math.max(5, Math.ceil(step / 5) * 5);
-  return step;
-});
+const dynamicDistanceStep = computed(() =>
+  computeSliderStep(0, distanceRange.value[1], { minStep: 5 }),
+);
 
 //Price
+const getMinPrice = (b) =>
+  props.isEvent ? getEventMinPrice(b) : getBookableMinPrice(b);
+
 const priceValues = computed(() => {
-  const fn = props.isEvent ? getEventMinPrice : getBookableMinPrice;
-  return suitableBookables.value
-    .map((b) => fn(b))
+  return facetMatches("price")
+    .map((b) => getMinPrice(b))
     .filter((p) => p != null && !isNaN(p));
 });
 
@@ -277,15 +290,9 @@ const possiblePriceRange = computed(() => {
     return [0, 100];
   }
 
-  let validPrices;
-  if (!props.isEvent) {
-    validPrices = suitableBookables.value.map((b) => getBookableMinPrice(b));
-  } else {
-    validPrices = suitableBookables.value.map((e) => getEventMinPrice(e));
-  }
-  validPrices = validPrices.filter(
-    (price) => price !== undefined && price !== null && !isNaN(price),
-  );
+  const validPrices = searchResults.value
+    .map((b) => getMinPrice(b))
+    .filter((price) => price !== undefined && price !== null && !isNaN(price));
 
   //set endpoints rounded to 5
   const minPrice =
@@ -296,16 +303,11 @@ const possiblePriceRange = computed(() => {
   return [minPrice, maxPrice];
 });
 
-const dynamicPriceStep = computed(() => {
-  const range = possiblePriceRange.value[1] - possiblePriceRange.value[0];
-  if (range === 0) {
-    return possiblePriceRange.value[0];
-  }
-
-  let step = Math.ceil(range / 20); // 20 steps max
-  step = Math.max(5, Math.ceil(step / 5) * 5);
-  return step;
-});
+const dynamicPriceStep = computed(() =>
+  computeSliderStep(possiblePriceRange.value[0], possiblePriceRange.value[1], {
+    minStep: 5,
+  }),
+);
 const dynamicMaxPrice = computed(() => {
   if (possiblePriceRange.value[1] === 0) {
     return 0;
@@ -329,19 +331,24 @@ const _price = ref(
     ? props.price
     : [dynamicMinPrice.value, dynamicMaxPrice.value],
 );
-watch(
-  () => dynamicMaxPrice.value,
-  (newVal) => {
-    _price.value = [dynamicMinPrice.value, newVal];
-  },
-);
-
-watch(suitableBookables, () => {
-  _price.value = [dynamicMinPrice.value, dynamicMaxPrice.value];
+// When the bounds move (a new search changes the prices), an untouched
+// selection follows them and a narrowed one is clamped into them, so the
+// user's price choice survives a search while other filters keep counting.
+watch([dynamicMinPrice, dynamicMaxPrice], ([min, max], [oldMin, oldMax]) => {
+  const [lo, hi] = _price.value;
+  if (lo === oldMin && hi === oldMax) {
+    _price.value = [min, max];
+    return;
+  }
+  const nextLo = Math.min(Math.max(lo, min), max);
+  const nextHi = Math.max(Math.min(hi, max), min);
+  if (nextLo !== lo || nextHi !== hi) {
+    _price.value = [nextLo, nextHi];
+  }
 });
 
 function getBookableMinPrice(bookable) {
-  if (bookable.matchStatus === "no-match") {
+  if (bookable.matchStatus === MatchStatus.NO_MATCH) {
     return null;
   }
   //if search is initialized, return calculated price
@@ -370,7 +377,7 @@ function getTicketMinPrice(ticket) {
     : minPrice;
 }
 function getEventMinPrice(event) {
-  if (event.matchStatus === "no-match") {
+  if (event.matchStatus === MatchStatus.NO_MATCH) {
     return null;
   }
   if (event.item.tickets && event.item.tickets.length > 0) {
@@ -384,34 +391,42 @@ function getEventMinPrice(event) {
 
 //Locations
 const distanceValues = computed(() => {
-  return props.bookables
-    .filter((b) => b.matchStatus !== "no-match" && b.item.distanceMeter != null)
+  return facetBase("distance")
+    .filter(
+      (b) =>
+        b.matchStatus !== MatchStatus.NO_MATCH && b.item.distanceMeter != null,
+    )
     .map((b) => b.item.distanceMeter / 1000);
 });
+
+function countCities(wrappers) {
+  const cityCount = {};
+  for (const b of wrappers) {
+    const city = extractCity(b.item.location);
+    if (city) {
+      cityCount[city] = (cityCount[city] || 0) + 1;
+    }
+  }
+  return cityCount;
+}
+
+// The list and its order come from every result the search kept; the count
+// per city comes from the results the other filters leave over.
 const possibleCities = computed(() => {
   if (!props.bookables || props.bookables.length === 0) {
     return [];
   }
 
-  const cityCount = {};
-  props.bookables.forEach((b) => {
-    let city = "";
-    if (b.matchStatus === "match") {
-      city = extractCity(b.item.location);
-    }
+  const allCounts = countCities(searchResults.value);
+  const facetCounts = countCities(facetMatches("cities"));
 
-    if (city) {
-      cityCount[city] = (cityCount[city] || 0) + 1;
-    }
-  });
-
-  return Object.entries(cityCount)
-    .map(([value, count]) => ({
-      label: value,
-      value: value.toLowerCase(),
-      count,
-    }))
-    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+  return Object.entries(allCounts)
+    .sort(([a, ac], [b, bc]) => bc - ac || a.localeCompare(b))
+    .map(([city]) => ({
+      label: city,
+      value: city.toLowerCase(),
+      count: facetCounts[city] || 0,
+    }));
 });
 
 function extractCity(location) {
@@ -457,6 +472,41 @@ function extractCityFromString(location) {
   return words.join(" ");
 }
 
+// Facet counts: each filter counts against the results every *other* filter
+// leaves over. The local values are used so the dialog reflects a pending
+//  selection before it is applied.
+const priceCriteria = computed(() => {
+  const sameAsPossible =
+    _price.value?.length === 2 &&
+    _price.value[0] === possiblePriceRange.value[0] &&
+    _price.value[1] === possiblePriceRange.value[1];
+  return sameAsPossible ? [] : _price.value;
+});
+
+const localCriteria = computed(() => ({
+  inclNoSuitable: _includeNonSuitable.value,
+  pubEv: _onlyPublicEvents.value,
+  regEv: _onlyRegistrationNeededEvents.value,
+  cat: _categories.value,
+  cities: _cities.value,
+  distance: _distance.value,
+  hasLocation: props.distance != null,
+  price: priceCriteria.value,
+  customFields: _customFieldValues.value,
+}));
+
+function facetBase(skip) {
+  return applyCatalogFilters(props.bookables, localCriteria.value, {
+    isEvent: props.isEvent,
+    getMinPrice,
+    skip,
+  });
+}
+
+function facetMatches(skip) {
+  return facetBase(skip).filter((b) => b.matchStatus === MatchStatus.MATCH);
+}
+
 function instantFilter() {
   if (!props.useAsDialog) {
     onFilter();
@@ -469,18 +519,13 @@ function onFilter() {
     _price.value = possiblePriceRange.value.slice();
   }
 
-  const sameAsPossible =
-    _price.value?.length === 2 &&
-    _price.value[0] === possiblePriceRange.value[0] &&
-    _price.value[1] === possiblePriceRange.value[1];
-
   filter.inclNoSuitable = _includeNonSuitable.value;
   filter.pubEv = _onlyPublicEvents.value;
   filter.regEv = _onlyRegistrationNeededEvents.value;
   filter.cat = _categories.value;
   filter.cities = _cities.value;
   filter.distance = _distance.value;
-  filter.price = sameAsPossible ? [] : _price.value;
+  filter.price = priceCriteria.value;
   filter.customFields = _customFieldValues.value;
 
   emit("filter", filter);
@@ -518,10 +563,13 @@ function removeFilter() {
 }
 
 // Custom Field Filter
-const bookablesRef = computed(() => props.bookables);
-const { aggregated: customFieldFilters } = useCustomFieldFilters(bookablesRef, {
-  position: "sidebar",
-});
+const { aggregated: customFieldFilters } = useCustomFieldFilters(
+  searchResults,
+  {
+    position: "sidebar",
+    facetItems: (fieldId) => facetMatches(`cf:${fieldId}`),
+  },
+);
 const sortedCustomFieldFilters = computed(() =>
   customFieldFilters.value.slice().sort((a, b) => {
     if (a.filterType === "checkbox" && b.filterType !== "checkbox") return -1;
