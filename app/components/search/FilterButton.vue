@@ -7,7 +7,7 @@
         color="neutral"
         variant="soft"
         class="rounded-full py-2 px-3"
-        @click="() => (isOpenSlideover = true)"
+        @click="() => (isOpen = true)"
       />
     </UChip>
 
@@ -19,7 +19,7 @@
             variant="ghost"
             icon="i-lucide-x"
             class="rounded-xl"
-            @click="() => (isOpenSlideover = false)"
+            @click="() => (isOpen = false)"
           />
         </div>
         <FilterArea
