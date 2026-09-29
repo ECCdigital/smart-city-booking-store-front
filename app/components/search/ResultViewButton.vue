@@ -1,23 +1,27 @@
 <template>
   <UFieldGroup orientation="horizontal" class="rounded-lg overflow-hidden">
-    <UButton
+    <UTooltip
       v-for="option in viewOptions"
       :key="option.value"
-      :label="option.label"
-      :icon="option.icon"
-      :color="view === option.value ? 'secondary' : 'neutral'"
-      :variant="view === option.value ? 'solid' : 'soft'"
-      class="first:rounded-l-lg last:rounded-r-lg px-3"
-      :style="
-        view === option.value ? { color: contrastToSecondary } : undefined
-      "
-      @click="selectView(option.value)"
-    />
+      :text="option.label"
+    >
+      <UButton
+        :icon="option.icon"
+        :color="view === option.value ? 'secondary' : 'neutral'"
+        :variant="view === option.value ? 'solid' : 'soft'"
+        class="first:rounded-l-lg last:rounded-r-lg px-3"
+        :style="
+          view === option.value ? { color: contrastToSecondary } : undefined
+        "
+        @click="selectView(option.value)"
+      />
+    </UTooltip>
   </UFieldGroup>
 </template>
 
 <script setup>
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+const { t } = useI18n();
 
 const { contrastToSecondary } = useContrastColor();
 
@@ -31,12 +35,12 @@ const emit = defineEmits(["setView"]);
 const viewOptions = computed(() => [
   {
     value: "list",
-    //label: t("results.listView"),
+    label: t("results.listView"),
     icon: "i-lucide-list",
   },
   {
     value: "map",
-    //label: t("results.mapView"),
+    label: t("results.mapView"),
     icon: "i-lucide-map-pin",
   },
 ]);
