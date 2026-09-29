@@ -7,6 +7,10 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ## [Unreleased]
 
+### Changed
+
+- `EventAdressInformation` and `BookableAdressInformation`, identical but for their prop name, are merged into one `AddressInformation` taking an `item`
+
 ### Added
 
 - A location search survives a reload and a shared link: the search resolves the address the URL carries into coordinates itself (with the search bar's 20 km default when the URL names no distance) instead of matching the text against the addresses, which found nothing for a place that is not at the start of an address. Geocoder answers are remembered per address, so the map's centring does not ask again. The map stays mounted whatever the results are: the skeleton that replaced it left Leaflet without its container („Map container not found") and a search without placeable results never got a map, and the map now centres on the searched place also on a direct load

@@ -26,15 +26,15 @@
           :use-icon="!mapListMode"
           :class="mapListMode ? 'w-full text-xs' : 'w-full text-sm'"
         />
-        <EventAdressInformation
+        <AddressInformation
           v-if="!mapMode"
-          :event="event"
+          :item="event"
           show-distance
           class="w-full text-sm"
         />
         <div
           v-if="hasTeaserText && !mapMode"
-          class="line-clamp-3"
+          class="text-sm line-clamp-3"
           v-html="htmlTeaserText"
         />
       </div>
@@ -105,7 +105,7 @@
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import EventPriceDisplay from "~/components/events/EventPriceDisplay.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
-import EventAdressInformation from "~/components/events/EventAdressInformation.vue";
+import AddressInformation from "~/components/AddressInformation.vue";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import EventBookingButton from "~/components/events/EventBookingButton.vue";
 

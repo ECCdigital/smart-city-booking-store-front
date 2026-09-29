@@ -23,8 +23,8 @@
 
       <!-- Adresse und Entfernung -->
       <div class="w-full" :class="mapDetailMode ? '' : 'my-5'">
-        <BookableAdressInformation
-          :bookable="bookable"
+        <AddressInformation
+          :item="bookable"
           show-distance
           class="whitespace-normal break-before-auto"
           :class="mapDetailMode ? 'text-sm' : ''"
@@ -59,7 +59,7 @@
   </div>
 </template>
 <script setup>
-import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
+import AddressInformation from "~/components/AddressInformation.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 

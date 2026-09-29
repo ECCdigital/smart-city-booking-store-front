@@ -26,8 +26,8 @@
       <!-- Adresse, Entfernung und Beschreibung; the compact map strips show
            neither the address (the pin says where) nor the description -->
       <div v-if="!mapListMode" class="w-full flex flex-col gap-1">
-        <BookableAdressInformation
-          :bookable="bookable"
+        <AddressInformation
+          :item="bookable"
           show-distance
           class="w-full"
           :class="mapMode ? 'text-sm' : ''"
@@ -118,7 +118,7 @@
   </div>
 </template>
 <script setup>
-import BookableAdressInformation from "~/components/bookables/BookableAdressInformation.vue";
+import AddressInformation from "~/components/AddressInformation.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";

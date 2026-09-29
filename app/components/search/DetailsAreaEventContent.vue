@@ -20,7 +20,7 @@
     <div class="md:flex">
       <div class="md:mr-20 mb-10 basis-2/3">
         <EventTimeInformation :event="item" class="mt-5" />
-        <EventsEventAdressInformation :event="item" class="mb-5" />
+        <AddressInformation :item="item" class="mb-5" />
 
         <BookableFlagDisplay
           :flags="item?.information.flags"

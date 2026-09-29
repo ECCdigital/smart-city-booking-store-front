@@ -31,9 +31,9 @@
         <p>{{ $t("booking.quantity") }} {{ bookable.amount }}x</p>
       </div>
     </div>
-    <BookablesBookableAdressInformation
+    <AddressInformation
       v-if="bookable._bookableUsed.location.display_address"
-      :bookable="bookable._bookableUsed"
+      :item="bookable._bookableUsed"
       class="text-sm"
     />
   </div>

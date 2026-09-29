@@ -15,7 +15,7 @@
       </p>
       <p class="text-sm">{{ getTenantName(event.tenantId) }}</p>
       <EventTimeInformation :event="event" class="text-sm mt-1" />
-      <EventAdressInformation :event="event" class="text-sm" />
+      <AddressInformation :item="event" class="text-sm" />
     </div>
     <div v-else class="w-full">
       <!-- Title -->
@@ -27,7 +27,7 @@
       <!-- Adresse und Entfernung -->
       <div class="w-full my-5">
         <EventTimeInformation :event="event" />
-        <EventAdressInformation :event="event" />
+        <AddressInformation :item="event" />
       </div>
       <div class="my-5 line-clamp-3" v-html="htmlTeaserText" />
       <USeparator
@@ -77,7 +77,7 @@
 <script setup>
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
-import EventAdressInformation from "~/components/events/EventAdressInformation.vue";
+import AddressInformation from "~/components/AddressInformation.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import EventPriceDisplay from "~/components/events/EventPriceDisplay.vue";
 import EventTicketOptionsDialog from "~/components/events/EventTicketOptionsDialog.vue";

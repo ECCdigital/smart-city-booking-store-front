@@ -8,14 +8,8 @@
     </div>
     <div v-else />
 
-    <EventsEventAdressInformation
-      v-if="props.isEvent"
-      :event="item"
-      enable-copy-button
-    />
-    <BookablesBookableAdressInformation
-      v-else
-      :bookable="item"
+    <AddressInformation
+      :item="item"
       enable-copy-button
     />
   </div>
