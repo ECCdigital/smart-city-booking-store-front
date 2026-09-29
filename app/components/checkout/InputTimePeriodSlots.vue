@@ -55,7 +55,6 @@
         >
           <UIcon name="i-lucide-chevron-left" />
         </button>
-
         <div
           class="flex-1 grid gap-1.5"
           :class="
@@ -175,6 +174,7 @@
               : 'px-4 py-3 rounded-lg border text-center font-medium tabular-nums transition-all focus:outline-none',
             getSlotClass(slot),
           ]"
+          :style="getSlotStyle(slot)"
           @click="onSlotClick(slot)"
         >
           <span :class="!slot.available ? 'line-through' : ''">
@@ -203,6 +203,7 @@
 <script setup>
 import { useBookables } from "~/composables/api/useBookables.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
 import { parseLocalDateIso } from "~/utils/localDate.js";
 
@@ -243,6 +244,7 @@ const effectiveNumDays = computed(() => (props.compact ? 4 : props.numDays));
 
 const { getBookableAvailability } = useBookables();
 const { t } = useI18n();
+const { contrastToSecondary } = useContrastColor();
 
 const { monthNames, weekdayNames } = useFormatting();
 
@@ -705,9 +707,14 @@ function getSlotClass(slot) {
     return "border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 text-gray-300 dark:text-gray-600 cursor-not-allowed";
   }
   if (isSlotSelected(slot)) {
-    return "border-secondary dark:border-secondary bg-secondary/10 dark:bg-secondary text-secondary shadow-sm ring-1 ring-secondary dark:ring-secondary";
+    return "border-secondary dark:border-secondary bg-secondary shadow-sm ring-1 ring-secondary dark:ring-secondary";
   }
   return "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary dark:hover:border-primary";
+}
+
+function getSlotStyle(slot) {
+  if (!slot.available || !isSlotSelected(slot)) return undefined;
+  return { color: contrastToSecondary.value };
 }
 
 function onSlotClick(slot) {
