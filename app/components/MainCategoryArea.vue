@@ -7,7 +7,7 @@
         variant="ghost"
         :label="$t('catalog.showAllOffers')"
         trailing-icon="i-lucide-chevron-right"
-        :to="tenantTo('bookables')"
+        :to="tenantTo('/search')"
       />
     </div>
     <div class="grid sm:grid-cols-2 lg:flex gap-5">
