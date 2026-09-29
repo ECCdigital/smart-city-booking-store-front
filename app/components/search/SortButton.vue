@@ -2,20 +2,23 @@
   <UDropdownMenu
     :items="sortOptions"
     :ui="{
-      content: 'w-48',
+      content: '',
     }"
   >
     <UButton
-      :label="$t('filter.sort.button', { mode: displaySortMode() })"
       icon="i-lucide-arrow-up-down"
       color="neutral"
       variant="soft"
-      class="rounded-full py-2 px-3"
-    />
+      class="rounded-lg py-2 px-3"
+    >
+      {{ $t("filter.sort.button") }}
+      <span class="text-xs">
+        {{ displaySortMode() }}
+      </span>
+    </UButton>
   </UDropdownMenu>
 </template>
 <script setup>
-
 const { t } = useI18n();
 
 const emit = defineEmits(["sort"]);

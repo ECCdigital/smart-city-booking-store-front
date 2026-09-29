@@ -138,7 +138,7 @@
         icon="i-lucide-trash"
         color="primary"
         variant="soft"
-        class="rounded-full py-2 px-3"
+        class="rounded-lg py-2 px-3"
         @click="removeFilter"
       />
       <div v-else class="flex-1" />
@@ -147,7 +147,7 @@
         icon="i-lucide-funnel"
         color="primary"
         variant="soft"
-        class="rounded-full py-2 px-3"
+        class="rounded-lg py-2 px-3"
         @click="onFilter"
       />
     </div>

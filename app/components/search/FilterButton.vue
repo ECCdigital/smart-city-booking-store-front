@@ -6,7 +6,7 @@
         icon="i-lucide-funnel"
         color="neutral"
         variant="soft"
-        class="rounded-full py-2 px-3"
+        class="rounded-lg py-2 px-3"
         @click="() => (isOpen = true)"
       />
     </UChip>

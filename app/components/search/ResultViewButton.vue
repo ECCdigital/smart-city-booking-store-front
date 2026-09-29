@@ -1,5 +1,5 @@
 <template>
-  <UFieldGroup orientation="horizontal" class="rounded-full overflow-hidden">
+  <UFieldGroup orientation="horizontal" class="rounded-lg overflow-hidden">
     <UButton
       v-for="option in viewOptions"
       :key="option.value"
@@ -7,7 +7,7 @@
       :icon="option.icon"
       :color="view === option.value ? 'secondary' : 'neutral'"
       :variant="view === option.value ? 'solid' : 'soft'"
-      class="first:rounded-l-full last:rounded-r-full"
+      class="first:rounded-l-lg last:rounded-r-lg px-3"
       :style="
         view === option.value ? { color: contrastToSecondary } : undefined
       "
@@ -19,11 +19,6 @@
 <script setup>
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
-const { t } = useI18n();
-
-// Only the selected button is filled with the secondary colour, so only it
-// needs that colour's contrast; the other one keeps the neutral foreground
-// Nuxt UI picks against the page. The icon follows through `currentColor`.
 const { contrastToSecondary } = useContrastColor();
 
 const view = defineModel({
@@ -33,17 +28,15 @@ const view = defineModel({
 
 const emit = defineEmits(["setView"]);
 
-// Computed, not a plain array: `t()` read once at setup would freeze the labels
-// in the language the toggle was mounted in.
 const viewOptions = computed(() => [
   {
     value: "list",
-    label: t("results.listView"),
+    //label: t("results.listView"),
     icon: "i-lucide-list",
   },
   {
     value: "map",
-    label: t("results.mapView"),
+    //label: t("results.mapView"),
     icon: "i-lucide-map-pin",
   },
 ]);
