@@ -27,7 +27,7 @@
         <component :is="current" :flow="flow" />
       </div>
       <div class="px-4 pb-4">
-        <UButton variant="ghost" block class="cursor-pointer">Schließen</UButton>
+        <UButton variant="ghost" block>Schließen</UButton>
       </div>
     </div>
 

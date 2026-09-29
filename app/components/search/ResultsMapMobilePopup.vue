@@ -8,7 +8,7 @@
         @click="emit('closeDetails')"
     >
       <div
-          class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+          class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl"
           @click.stop="emit('openDetails',currentBookable, true)"
       >
         <ResultCard
@@ -30,7 +30,7 @@
         @click="emit('closeDetails')"
     >
       <div
-          class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+          class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl"
           @click.stop
       >
         <UCarousel

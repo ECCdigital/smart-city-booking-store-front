@@ -69,6 +69,7 @@ The `tenant-routes` module duplicates all pages under `/t/:tenantID/...`:
 
 ```
 /catalog/my-catalog          →  /t/:tenantID/catalog/my-catalog
+/search                      →  /t/:tenantID/search
 /bookables/:bookableID       →  /t/:tenantID/bookables/:bookableID
 ```
 

@@ -22,7 +22,7 @@
             v-if="isActive"
             class="bg-primary/60 text-gray-800 dark:text-gray-200 text-xs font-semibold px-2 py-1 rounded-full"
           >
-            Aktiv
+            {{ $t("booking.active") }}
           </div>
         </div>
         <div @click.stop>
@@ -61,9 +61,9 @@
       >
         <UIcon name="i-lucide-clock" class="w-4 h-4 mr-1" />
         <span v-if="isEvent && !booking.timeBegin && !booking.timeEnd">
-          Veranstaltungszeit
+          {{ $t("booking.eventTime") }}
         </span>
-        <span v-else> Zeitraum </span>
+        <span v-else> {{ $t("filter.period") }} </span>
       </div>
       <div class="text-lg text-primary font-semibold leading-tight h-14">
         {{ bookingTimeSlot }}
@@ -78,14 +78,14 @@
       <!-- Zusatzinformationen -->
       <div class="space-y-1">
         <div class="text-sm text-gray-500 dark:text-gray-400">
-          Preis:
+          {{ $t("booking.priceLabel") }}
           <span class="font-medium text-gray-700 dark:text-gray-200">
             {{ bookingPrice }}
           </span>
         </div>
 
         <div class="text-sm text-gray-500 dark:text-gray-400">
-          Gebucht am: {{ booking.displayBookingDate }}
+          {{ $t("booking.bookedAt") }} {{ booking.displayBookingDate }}
         </div>
       </div>
     </div>
@@ -156,7 +156,7 @@ const actionOptions = computed(() => {
 
   if (isEvent.value || (props.booking.timeBegin && props.booking.timeEnd)) {
     options.push({
-      label: "Termin herunterladen",
+      label: t("booking.downloadAppointment"),
       icon: "i-lucide-calendar-arrow-down",
       onSelect: onDownloadIcal,
     });

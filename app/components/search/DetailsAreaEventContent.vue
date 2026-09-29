@@ -20,7 +20,7 @@
     <div class="md:flex">
       <div class="md:mr-20 mb-10 basis-2/3">
         <EventTimeInformation :event="item" class="mt-5" />
-        <EventsEventAdressInformation :event="item" class="mb-5" />
+        <AddressInformation :item="item" class="mb-5" />
 
         <BookableFlagDisplay
           :flags="item?.information.flags"
@@ -33,7 +33,7 @@
           <div class="line-clamp-3 md:line-clamp-none" v-html="htmlText" />
           <div class="flex justify-end md:hidden">
             <UButton
-              label="Alles ansehen"
+              :label="$t('bookableDetail.viewAll')"
               variant="ghost"
               class="mt-2"
               @click="showFullDescription = true"
@@ -54,7 +54,7 @@
         </div>
 
         <div class="mt-5">
-          <span class="font-bold"> Veranstalter: </span>
+          <span class="font-bold"> {{ $t("bookableDetail.organiser") }} </span>
           {{ item.eventOrganizer.name }}
         </div>
         <USeparator
@@ -68,11 +68,11 @@
 
         <!-- Availability -->
         <div>
-          <h3 class="text-xl font-bold mb-5">Ticketoptionen & Verfügbarkeit</h3>
+          <h3 class="text-xl font-bold mb-5">{{ $t("events.ticketOptionsAndAvailability") }}</h3>
           <div v-if="hasTimeRelatedPrices" class="">
             <UAlert
               v-if="!timePeriod || (!timePeriod.start && !timePeriod.end)"
-              title="Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen."
+              :title="$t('events.selectDatesHint')"
               icon="i-lucide-info"
               variant="ghost"
               class="p-2 text-info w-full"
@@ -95,7 +95,7 @@
             }}</span>
             <div class="flex-1" />
             <UButton
-              label="Beim Anbieter buchen"
+              :label="$t('events.bookAtProvider')"
               class="justify-center px-5"
               :style="{ color: contrastToPrimary }"
               @click="goToExternalCheckout()"
@@ -105,15 +105,15 @@
           <!-- private Events -->
           <EventInfoDisplay
             v-if="!item.attendees.publicEvent"
-            title="Kein öffentliches Event."
-            description="Das Event ist keine öffentliche Veranstaltung und kann deshalb nicht gebucht werden."
+            :title="$t('events.notPublicTitle')"
+            :description="$t('events.notPublicDescription')"
           />
 
           <!-- Events ohne Anmeldepflicht-->
           <EventInfoDisplay
             v-if="!item.attendees.needsRegistration"
-            title="Keine Anmeldung nötig."
-            description="Für dieses Event ist keine Anmeldung notwendig. Sie können auch ohne vorherige Anmeldung an der Veranstaltung teilnehmen."
+            :title="$t('events.noRegistrationTitle')"
+            :description="$t('events.noRegistrationDescription')"
           />
 
           <!-- keine Tickets hinterlegt -->
@@ -123,8 +123,8 @@
               item.attendees.needsRegistration &&
               item.tickets.length === 0
             "
-            title="Keine Tickets verfügbar."
-            description="Für dieses Event sind derzeit keine Ticketoptionen hinterlegt."
+            :title="$t('events.noTicketsTitle')"
+            :description="$t('events.noTicketsDescription')"
           />
 
           <!-- Auflistung der Ticketoptionen -->
@@ -159,6 +159,7 @@ import AddressInformationArea from "~/components/AddressInformationArea.vue";
 import PriceInformationArea from "~/components/PriceInformationArea.vue";
 import EventBookingButton from "~/components/events/EventBookingButton.vue";
 
+
 const props = defineProps({
   item: {
     type: Object,
@@ -177,7 +178,7 @@ const {
   updatedItems: events,
   runSearch,
   resetResults,
-} = useBookableSearch({ isEvent: true, sourceItems: [props.item] });
+} = useBookableSearch({ sourceItems: [props.item] });
 
 const currentEvent = computed(() => {
   if (events.value.length === 1) {
@@ -214,7 +215,6 @@ onMounted(async () => {
       location: "",
       timeStart: timePeriod.value.start,
       timeEnd: timePeriod.value.end,
-      isEvent: true,
     });
   }
 });
@@ -228,7 +228,6 @@ async function setSearchTimePeriod(tp) {
     location: "",
     timeStart: timePeriod.value.start,
     timeEnd: timePeriod.value.end,
-    isEvent: false,
   });
 }
 function removeSearchTimePeriod() {

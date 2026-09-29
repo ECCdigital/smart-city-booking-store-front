@@ -1,8 +1,5 @@
 <template>
-  <UCard
-    variant="soft"
-    class="w-full max-w-md rounded-xl glass"
-  >
+  <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
     <template #header>
       <h2 class="text-2xl font-semibold text-center">
         {{ $t("forgotPassword.title") }}
@@ -13,7 +10,7 @@
       </p>
     </template>
 
-    <UForm :state="userData" @submit="submitForm" class="flex flex-col gap-2">
+    <UForm :state="userData" class="flex flex-col gap-2" @submit="submitForm">
       <UFormField :label="$t('common.email')" required>
         <UInput
           v-model="userData.email"
@@ -29,6 +26,7 @@
         color="primary"
         block
         :loading="loading"
+        :style="{ color: contrastToPrimary }"
         class="mt-2"
       >
         {{ $t("forgotPassword.submit") }}
@@ -47,6 +45,8 @@
 </template>
 
 <script setup>
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+
 defineProps({
   loading: {
     type: Boolean,
@@ -60,6 +60,8 @@ const userData = defineModel("userData", {
 });
 
 const emit = defineEmits(["submit"]);
+
+const { contrastToPrimary } = useContrastColor();
 
 function submitForm() {
   emit("submit");

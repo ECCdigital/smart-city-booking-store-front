@@ -5,15 +5,15 @@ import { useMemberships } from "~/composables/api/useMemberships.js";
 
 const { tenantTo } = useTenantRoute();
 
-const t = useI18n().t;
+const { t } = useI18n();
 
 const config = useRuntimeConfig();
 const authStore = useAuthStore();
 const notification = useNotification();
 
-const { contrastToSecondary } = useContrastColor();
+const { contrastToPrimary } = useContrastColor();
 const nameColor = computed(() => {
-  if (contrastToSecondary.value === "#ffffff") {
+  if (contrastToPrimary.value === "#ffffff") {
     return "text-white hidden md:inline";
   } else {
     return "text-black hidden md:inline";
@@ -59,21 +59,21 @@ const items = computed(() => {
     ...adminSection,
     [
       {
-        label: "Aktivitäten",
+        label: t("navigation.activities"),
         class: "font-bold cursor-default hover:bg-transparent",
       },
       {
-        label: "Buchungen",
+        label: t("navigation.bookings"),
         icon: "i-lucide-book-marked",
         onSelect: () => goTo("/account/bookings"),
       },
       {
-        label: "Digitale Schlüssel",
+        label: t("navigation.digitalKeys"),
         icon: "i-lucide-key-round",
         onSelect: () => goTo("/mobile-key"),
       },
       {
-        label: "Rechnungen",
+        label: t("navigation.invoices"),
         icon: "i-lucide-wallet-cards",
         onSelect: () => goTo("/account/invoices"),
       },
@@ -86,7 +86,7 @@ const items = computed(() => {
     ],
     [
       {
-        label: "Benutzerkonto",
+        label: t("navigation.account"),
         class: "font-bold cursor-default hover:bg-transparent",
       },
       {
@@ -115,6 +115,10 @@ async function logout() {
       t("notifications.logoutSuccess.message"),
       t("notifications.logoutSuccess.title"),
     );
+    // Not through `tenantTo`: the tenant-routes module skips `/login`, so the
+    // sign-in page lives at the same address inside and outside a catalogue.
+    // No `redirect` either — whoever signs out means to leave the page.
+    await navigateTo("/login");
   } catch {
     notification.error(
       t("login.logoutErrorMessage.message"),
@@ -137,7 +141,7 @@ async function logout() {
   >
     <UButton
       variant="ghost"
-      class="flex items-center gap-2 outline-none cursor-pointer"
+      class="flex items-center gap-2 px-1 sm:px-2.5 outline-none"
     >
       <UUser
         :name="userName"

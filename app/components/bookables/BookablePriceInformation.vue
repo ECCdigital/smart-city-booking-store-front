@@ -41,7 +41,7 @@
           <div v-else-if="priceCategory.fixedPrice" class="flex justify-end">
             <UTooltip :text="fixedPriceHint">
               <UBadge class="ml-2" color="secondary" variant="outline">
-                Pauschalpreis
+                {{ $t("price.flatRate") }}
               </UBadge>
             </UTooltip>
           </div>
@@ -75,6 +75,13 @@
 </template>
 
 <script setup>
+import { useFormatting } from "~/composables/utils/useFormatting.js";
+
+const { t } = useI18n();
+
+
+const { weekdayNames } = useFormatting();
+
 const props = defineProps({
   item: {
     type: Object,
@@ -109,7 +116,7 @@ const forFreeHint = computed(() => {
     internal.length === 1 &&
     (internal[0].priceEur === 0 || !internal[0].priceEur)
   ) {
-    return "Das Objekt ist kostenlos.";
+    return t("price.itemIsFree");
   }
   return "";
 });
@@ -117,9 +124,9 @@ const forFreeHint = computed(() => {
 const fixedPriceHint = computed(() => {
   const unit =
     props.item.priceType === "per-hour" || props.item.priceType === "per-day"
-      ? "Dauer"
-      : "Menge";
-  return "Dieser Preis gilt unabhängig von der gebuchten " + unit + ".";
+      ? t("price.duration")
+      : t("price.quantity");
+  return t("price.independentOf", { unit });
 });
 
 const holidayHint = computed(() => {
@@ -130,7 +137,7 @@ const holidayHint = computed(() => {
         !isExternalCategory(category) && category.holidays.length > 0,
     )
   ) {
-    return "(An Feiertagen können abweichende Preise gelten.)";
+    return t("price.holidayHint");
   }
   return "";
 });
@@ -160,23 +167,23 @@ function getGrossPrice(price) {
 function getUnit() {
   const type = props.item.priceType;
   if (type === "per-hour") {
-    return "Std.";
+    return t("price.unitHour");
   } else if (type === "per-day") {
-    return "Tag(e)";
+    return t("price.unitDay");
   } else if (type === "per-square-meter") return "m²";
   else {
-    return "Stück";
+    return t("price.unitItem");
   }
 }
 
 function getExternalUnitLabel(unit) {
   const labels = {
-    hour: "Pro Stunde",
-    day: "Pro Tag",
-    week: "Pro Woche",
-    month: "Pro Monat",
-    year: "Pro Jahr",
-    "service-fee": "Servicegebühr",
+    hour: t("price.perHourCap"),
+    day: t("price.perDayCap"),
+    week: t("price.perWeekCap"),
+    month: t("price.perMonthCap"),
+    year: t("price.perYearCap"),
+    "service-fee": t("price.serviceFee"),
   };
   return labels[unit] || unit;
 }
@@ -185,10 +192,10 @@ function getInterval(start, end, priceType) {
   const suffix = getUnit(priceType);
   let interval = "";
   if (!start) {
-    interval = `bis ${end}`;
+    interval = t("price.intervalTo", { value: end });
   }
   if (!end) {
-    interval = `ab ${start}`;
+    interval = t("price.intervalFrom", { value: start });
   }
   if (start && end) {
     interval = `${start} - ${end}`;
@@ -197,16 +204,8 @@ function getInterval(start, end, priceType) {
 }
 
 function getWeekdayName(dayNumber) {
-  const days = [
-    "Sonntag",
-    "Montag",
-    "Dienstag",
-    "Mittwoch",
-    "Donnerstag",
-    "Freitag",
-    "Samstag",
-  ];
-  return days[dayNumber];
+  // From `Intl`, indexed the way `Date.prototype.getDay()` counts.
+  return weekdayNames("long")[dayNumber];
 }
 </script>
 

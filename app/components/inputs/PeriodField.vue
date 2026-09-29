@@ -9,13 +9,13 @@
     >
       <template #anchor>
         <!--date version -->
-        <UTooltip v-if="version === 'date'" text="Kalender öffnen">
+        <UTooltip v-if="version === 'date'" :text="$t('timePeriods.openCalendar')">
           <button
             type="button"
             tabindex="-1"
             class="shrink-0 p-1 rounded text-gray-400 flex items-center hover:text-primary transition-colors"
-            :class="disabled ? 'cursor-not-allowed' : 'cursor-pointer'"
-            aria-label="Kalender öffnen"
+            :class="disabled ? 'cursor-not-allowed' : ''"
+            :aria-label="$t('timePeriods.openCalendar')"
             :disabled="disabled"
             @click.stop="onOpenCalender"
           >
@@ -23,13 +23,13 @@
           </button>
         </UTooltip>
         <!-- time version -->
-        <UTooltip v-if="version === 'time'" text="Uhrzeit wählen">
+        <UTooltip v-if="version === 'time'" :text="$t('timePeriods.selectTime')">
           <button
             type="button"
             tabindex="-1"
             class="shrink-0 p-1 rounded text-gray-400 hover:text-primary transition-colors"
-            :class="disabled ? 'cursor-not-allowed' : 'cursor-pointer'"
-            aria-label="Uhrzeit wählen"
+            :class="disabled ? 'cursor-not-allowed' : ''"
+            :aria-label="$t('timePeriods.selectTime')"
             :disabled="disabled"
             @click.stop="onOpenTimeScroller"
           >

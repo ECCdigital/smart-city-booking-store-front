@@ -9,29 +9,14 @@ const route = useRoute();
 // frame would take the editor's Draft with it. The Hero itself stays live —
 // the preview reports its Block clicks.
 const isHeroPreview = computed(() => route.meta.hero === "preview");
-
-const catalogTabs = [
-  {
-    label: "Buchungsobjekte",
-    icon: "i-lucide-shopping-basket",
-    value: "/bookables",
-  },
-  {
-    label: "Veranstaltungen",
-    icon: "i-lucide-calendar",
-    value: "/events",
-  },
-];
 </script>
 
 <template>
   <!-- Column layout so the footer sticks to the bottom of short pages -->
   <div class="flex min-h-screen flex-col bg-neutral-50 dark:bg-gray-950">
-    <NavigationBar :tabs="catalogTabs" :inert="isHeroPreview || undefined">
-      <template #actions>
-        <TenantSwitcher />
-      </template>
-    </NavigationBar>
+    <!-- The Kind of an Offer (bookable type or event) is a facet of the Result
+         Page's filter area, not a choice in the bar. -->
+    <NavigationBar :inert="isHeroPreview || undefined" />
 
     <HeroSection />
 

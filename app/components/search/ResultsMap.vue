@@ -1,8 +1,11 @@
 <template>
-  <div v-if="!fetchedCoordinates && !hasBounds">
-    <USkeleton class="w-full h-[80vh] my-2 rounded" />
-  </div>
-  <div v-else class="flex w-full">
+  <!--
+    The map stays mounted whatever the results are. Swapping it for a
+    skeleton while Leaflet is still initialising left Leaflet without its
+    container ("Map container not found"), and a search with no placeable
+    result then never got a map to centre on the address.
+  -->
+  <div class="results-map flex w-full">
     <div
       class="w-full lg:flex-1 lg:min-w-0 h-[80vh] z-10 my-2 mr-0.5 rounded overflow-hidden"
     >
@@ -11,8 +14,8 @@
           ref="mapRef"
           class="h-full w-full"
           :use-global-leaflet="false"
-          :center="[51.2, 9.4]"
-          :zoom="8"
+          :center="START_CENTER"
+          :zoom="START_ZOOM"
           @ready="onMapReady"
           @moveend="updateMapBounds"
           @zoomend="updateMapBounds"
@@ -68,17 +71,18 @@
       />
     </div>
 
-    <!-- List of visible bookables -->
+    <!-- List of visible Offers, then the ones the map cannot place -->
     <ResultsMapList
       v-model="currentBookable"
       :bookables="visibleBookables"
+      :without-location="withoutLocation"
       @open-details="openBookableDetails"
     />
   </div>
 </template>
 <script setup>
 import { useRedirection } from "~/composables/utils/useRedirection.js";
-import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
+import { searchAddress } from "~/composables/search/useBookableSearch.js";
 import { nextTick } from "vue";
 import ResultsMapMarkerIcon from "~/components/search/ResultsMapMarkerIcon.vue";
 import ResultsMapMarkerPopup from "~/components/search/ResultsMapMarkerPopup.vue";
@@ -91,26 +95,41 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  includeNonSuitable: {
+    type: Boolean,
+    default: false,
+  },
 });
 
+const shownBookables = computed(() =>
+  props.includeNonSuitable
+    ? props.bookables
+    : props.bookables.filter((b) => b.matchStatus === "match"),
+);
+
 const { goToDetailsNewTab } = useRedirection();
-const { searchAddress } = useBookableSearch({
-  isEvent: false,
-  sourceItems: props.bookables,
-});
 
 const route = useRoute();
 const mapRef = ref(null);
 const mapReady = ref(false);
 
-const fetchedCoordinates = ref(false);
+// The start view, before the results or the searched place move the map.
+const START_CENTER = [51.2, 9.4];
+const START_ZOOM = 8;
+
+// The two view changes below are deferred; a view toggle can unmount the map
+// in between, and Leaflet throws when a removed map is moved.
+let unmounted = false;
+onBeforeUnmount(() => {
+  unmounted = true;
+});
 
 const showMultiPinItems = ref(false);
 const currentMultiPinGroup = ref(null);
 const groupedBookables = computed(() => {
   const groups = new Map();
 
-  props.bookables.forEach((bookable) => {
+  shownBookables.value.forEach((bookable) => {
     if (!hasCoordinates(bookable.item)) return;
 
     const [lat, lng] = getCoordinatesForBookable(bookable.item);
@@ -137,7 +156,7 @@ const groupedBookables = computed(() => {
 });
 
 const initialBounds = computed(() => {
-  const withCoords = props.bookables.filter((b) => hasCoordinates(b.item));
+  const withCoords = shownBookables.value.filter((b) => hasCoordinates(b.item));
   const matches = withCoords.filter((b) => b.matchStatus === "match");
   const coords = (matches.length ? matches : withCoords).map((b) =>
     getCoordinatesForBookable(b.item),
@@ -164,17 +183,27 @@ const initialBounds = computed(() => {
 });
 const currentBounds = ref(initialBounds.value);
 
-const hasBounds = computed(() => {
-  return Array.isArray(initialBounds.value) && initialBounds.value.length === 2;
-});
-
 const showCurrentBookable = ref(false);
 const currentBookable = ref(null);
 
-const visibleBookables = computed(() => {
-  if (!currentBounds.value) return props.bookables;
+// Not on the map, so not in the map's own list either; they get their own
+// block at the end of it.
+const withoutLocation = computed(() =>
+  shownBookables.value
+    .filter((b) => !hasCoordinates(b.item))
+    .sort((a, b) => {
+      const aIsMatch = a.matchStatus === "match" ? 0 : 1;
+      const bIsMatch = b.matchStatus === "match" ? 0 : 1;
+      return aIsMatch - bIsMatch;
+    }),
+);
 
-  return props.bookables
+const visibleBookables = computed(() => {
+  if (!currentBounds.value) {
+    return shownBookables.value.filter((b) => hasCoordinates(b.item));
+  }
+
+  return shownBookables.value
     .filter((b) => {
       if (!hasCoordinates(b.item)) return false;
 
@@ -232,8 +261,6 @@ async function getCenterCoordinates(addressString) {
     return [53.5, 10.0];
   }
 
-  fetchedCoordinates.value = false;
-
   try {
     const searchCoordinates = await searchAddress(addressString);
 
@@ -242,8 +269,6 @@ async function getCenterCoordinates(addressString) {
     }
   } catch (e) {
     console.error(e);
-  } finally {
-    fetchedCoordinates.value = true;
   }
 
   return [53.5, 10.0];
@@ -322,7 +347,7 @@ function onMapReady() {
 
 // watch for bookables or bounds change and fit map to show all results if no location search
 watch(
-  [mapReady, () => initialBounds.value, () => props.bookables.length],
+  [mapReady, () => initialBounds.value, () => shownBookables.value.length],
   async ([ready, newBounds, count]) => {
     if (!ready) return;
     if (!newBounds) return;
@@ -336,6 +361,8 @@ watch(
     await nextTick();
 
     setTimeout(() => {
+      if (unmounted) return;
+
       map.invalidateSize(true);
 
       map.fitBounds(newBounds, {
@@ -349,10 +376,13 @@ watch(
   },
 );
 
-//watch for location search and set map center accordingly
+// Centre on the searched place, once the map exists to be centred: on a
+// direct load the address is in the URL before Leaflet is ready.
 watch(
-  () => route.query.loc,
-  async (newLoc) => {
+  [mapReady, () => route.query.loc],
+  async ([ready, newLoc]) => {
+    if (!ready) return;
+
     const map = mapRef.value?.leafletObject;
 
     if (!map) return;
@@ -364,7 +394,9 @@ watch(
       const center = await getCenterCoordinates(decodeURIComponent(newLoc));
 
       setTimeout(() => {
-        map.setView(center, 8, {
+        if (unmounted) return;
+
+        map.setView(center, START_ZOOM, {
           animate: false,
         });
       }, 200);
@@ -373,8 +405,10 @@ watch(
     }
 
     // show all results if no location search
-    if (bounds.value) {
+    if (initialBounds.value) {
       setTimeout(() => {
+        if (unmounted) return;
+
         map.fitBounds(initialBounds.value, {
           padding: [20, 20],
           animate: false,
@@ -388,4 +422,12 @@ watch(
 );
 </script>
 
-<style></style>
+<style>
+/* The map follows the colour mode. The CSP allows tiles from OpenStreetMap
+   only, so the dark basemap is the same tiles inverted and hue-rotated, not
+   a second provider. */
+.dark .results-map .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.9)
+    saturate(0.7);
+}
+</style>

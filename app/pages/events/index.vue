@@ -1,28 +1,14 @@
 <script setup>
-import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
-import { useEventStore } from "~~/stores/event.js";
-import EventSection from "~/components/events/EventSection.vue";
-
+/**
+ * The former events list. It redirects to the Result Page, query included;
+ * see middleware/legacy-list-redirect.ts.
+ */
 definePageMeta({
   layout: "catalog",
-});
-
-const { t } = useI18n();
-usePageTitle(() => t("meta.pages.events"));
-
-const route = useRoute();
-const { loadBundle } = useCatalogBundle();
-const eventStore = useEventStore();
-
-const catalogSlug = computed(() => route.params.catalogSlug || null);
-
-await loadBundle({ slug: catalogSlug.value, include: ["events"] });
-
-const allEvents = computed(() => {
-  return eventStore.getEvents;
+  middleware: ["legacy-list-redirect"],
 });
 </script>
 
 <template>
-  <EventSection :events="allEvents" />
+  <div />
 </template>

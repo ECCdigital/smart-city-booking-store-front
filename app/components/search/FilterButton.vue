@@ -1,13 +1,13 @@
 <template>
   <UModal v-model:open="isOpen">
-    <UChip :show="hasFilters" inset>
+    <UChip :show="hasFilters" color="secondary" inset>
       <UButton
-        label="Filtern"
+        :label="$t('filter.open')"
         icon="i-lucide-funnel"
         color="neutral"
         variant="soft"
-        class="rounded-full py-2 px-3"
-        @click="() => (isOpenSlideover = true)"
+        class="rounded-lg py-2 px-3"
+        @click="() => (isOpen = true)"
       />
     </UChip>
 
@@ -19,7 +19,7 @@
             variant="ghost"
             icon="i-lucide-x"
             class="rounded-xl"
-            @click="() => (isOpenSlideover = false)"
+            @click="() => (isOpen = false)"
           />
         </div>
         <FilterArea
@@ -28,13 +28,13 @@
           :include-non-suitable="includeNonSuitable"
           :categories="categories"
           :cities="cities"
+          :tenants="tenants"
           :distance="distance"
           :price="price"
           :only-public-events="onlyPublicEvents"
           :only-registration-needed-events="onlyRegistrationNeededEvents"
           :custom-fields="customFields"
           use-as-dialog
-          :is-event="isEvent"
           @filter="onFilter"
         />
       </UCard>
@@ -51,10 +51,6 @@ defineProps({
     type: Array,
     required: true,
   },
-  isEvent: {
-    type: Boolean,
-    default: false,
-  },
   includeNonSuitable: {
     type: Boolean,
     default: false,
@@ -64,6 +60,10 @@ defineProps({
     default: () => [],
   },
   cities: {
+    type: Array,
+    default: () => [],
+  },
+  tenants: {
     type: Array,
     default: () => [],
   },
@@ -77,7 +77,7 @@ defineProps({
   },
   onlyPublicEvents: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   onlyRegistrationNeededEvents: {
     type: Boolean,
@@ -99,7 +99,8 @@ const hasFilters = computed(() => {
     "pubEv",
     "regEv",
     "cities",
-    "categories",
+    "tenants",
+    "cat",
     "price",
   ];
   return route.query && keysToCheck.some((key) => key in route.query);

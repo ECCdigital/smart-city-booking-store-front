@@ -31,7 +31,7 @@
         <UInput
           v-model="userData.company"
           type="text"
-          placeholder="Meine Firma GmbH"
+          placeholder="Firma GmbH"
           class="w-full"
         />
       </UFormField>
@@ -90,6 +90,7 @@
         color="primary"
         block
         :loading="loading"
+        :style="{ color: contrastToPrimary }"
         class="mt-2"
       >
         {{ $t("common.register") }}
@@ -111,6 +112,7 @@
 import PasswordInput from "~/components/auth/PasswordInput.vue";
 import PasswordProgress from "~/components/auth/PasswordProgress.vue";
 import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const { t } = useI18n();
 const notification = useNotification();
@@ -128,6 +130,8 @@ const userData = defineModel("userData", {
 });
 
 const emit = defineEmits(["submit"]);
+
+const { contrastToPrimary } = useContrastColor();
 
 const {
   documents: legalDocuments,

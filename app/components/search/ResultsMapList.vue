@@ -1,32 +1,59 @@
 <template>
   <div
-      class="bg-auto w-[280px] shrink-0 h-[80vh] z-20 my-2 ml-2 overflow-auto p-2 border border-gray-200 rounded hidden lg:block"
+    class="bg-auto w-[280px] shrink-0 h-[80vh] z-20 my-2 ml-2 overflow-auto p-2 border border-gray-200 rounded hidden lg:block"
   >
     <TransitionGroup name="list" tag="div" class="space-y-1">
       <div
-          v-for="bookable in bookables"
-          :key="bookable.item.id"
-          @mouseenter="currentBookable = bookable"
-          @mouseleave="currentBookable = null"
+        v-for="bookable in bookables"
+        :key="bookable.item.id"
+        @mouseenter="currentBookable = bookable"
+        @mouseleave="currentBookable = null"
       >
         <ResultStrip
-            class="cursor-pointer"
-            :item="bookable.item"
-            :is-not-suitable="bookable.matchStatus !== 'match'"
-            :calculated-price="bookable.calculatedPrice"
-            map-mode
-            @click="emit('openDetails',bookable, true)"
+          class="cursor-pointer"
+          :item="bookable.item"
+          :is-not-suitable="bookable.matchStatus !== 'match'"
+          :calculated-price="bookable.calculatedPrice"
+          map-mode
+          map-list-mode
+          @click="emit('openDetails', bookable, true)"
         />
       </div>
       <div v-if="!bookables || bookables.length === 0" key="empty-state">
         <p class="text-center text-gray-500 mt-10">
-          Keine Ergebnisse in diesem Bereich.
+          {{ $t("results.noneInArea") }}
         </p>
       </div>
     </TransitionGroup>
+
+    <!-- Offers the map cannot place: not on it, but not lost either -->
+    <div
+      v-if="withoutLocation.length > 0"
+      class="mt-4 pt-3 border-t border-dashed border-gray-300 dark:border-gray-600"
+    >
+      <p
+        class="mb-2 flex items-center gap-1 text-xs tracking-wide text-gray-500"
+      >
+        <UIcon name="i-lucide-map-pin-off" class="size-3.5" />
+        {{ $t("results.noLocation") }}
+      </p>
+      <div class="space-y-1 opacity-70">
+        <ResultStrip
+          v-for="bookable in withoutLocation"
+          :key="bookable.item.id"
+          class="cursor-pointer"
+          :item="bookable.item"
+          :is-not-suitable="bookable.matchStatus !== 'match'"
+          :calculated-price="bookable.calculatedPrice"
+          map-mode
+          map-list-mode
+          @click="emit('openDetails', bookable, true)"
+        />
+      </div>
+    </div>
   </div>
 </template>
-<script setup >
+<script setup>
 import ResultStrip from "~/components/search/ResultStrip.vue";
 
 const currentBookable = defineModel({
@@ -39,11 +66,14 @@ defineProps({
     type: Array,
     required: true,
   },
+  withoutLocation: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const emit = defineEmits(["openDetails"]);
 </script>
-
 
 <style scoped>
 .list-move, /* apply transition to moving elements */

@@ -24,7 +24,7 @@
           </div>
         </div>
       </template>
-      <template v-else> Zeitraum </template>
+      <template v-else> {{ $t("filter.period") }} </template>
     </UButton>
 
     <ClearButton :show-clear-button="hasAnyValue" @clear="onDeleteTimePeriod" />
@@ -40,7 +40,7 @@
             <div
               class="text-xs font-semibold text-muted shrink-0 w-12 h-10 flex items-center"
             >
-              Beginn
+              {{ $t("timePeriods.start") }}
             </div>
             <InputTime
               v-model:date="startDate"
@@ -54,7 +54,7 @@
               <template #buttons>
                 <div class="my-2">
                   <UButton
-                    label="Jetzt"
+                    :label="$t('timePeriods.now')"
                     color="primary"
                     variant="soft"
                     size="xs"
@@ -71,7 +71,7 @@
             <div
               class="text-xs font-semibold text-muted shrink-0 w-8 h-10 flex items-center"
             >
-              Ende
+              {{ $t("timePeriods.end") }}
             </div>
             <InputTime
               v-model:date="endDate"
@@ -115,25 +115,25 @@
             v-if="missingValues.start.includes('date')"
             class="text-red-500 text-sm mt-2"
           >
-            Bitte wählen Sie ein Datum für den Beginn.
+            {{ $t("timePeriods.needStartDate") }}
           </p>
           <p
             v-if="missingValues.start.includes('time')"
             class="text-red-500 text-sm mt-2"
           >
-            Bitte geben Sie eine Startuhrzeit an.
+            {{ $t("timePeriods.needStartTime") }}
           </p>
           <p
             v-if="missingValues.end.includes('time')"
             class="text-red-500 text-sm mt-2"
           >
-            Bitte geben Sie eine Enduhrzeit an.
+            {{ $t("timePeriods.needEndTime") }}
           </p>
           <p
             v-if="invalidTimeslot || invalidDateSlot"
             class="text-red-500 text-sm mt-2"
           >
-            Die Endzeit muss nach der Startzeit liegen.
+            {{ $t("timePeriods.endBeforeStart") }}
           </p>
         </div>
       </div>
@@ -145,8 +145,8 @@
       v-model:open="isOpen"
       side="bottom"
       inset
-      title="Zeitraum auswählen"
-      description="Beginn und Ende der Buchung festlegen."
+      :title="$t('timePeriods.selectPeriod')"
+      :description="$t('timePeriods.selectPeriodDescription')"
       :ui="{
         overlay: 'bg-black/60',
         content: 'w-[94vw] mx-auto rounded-t-2xl shadow-lg max-h-[85vh] pb-2',
@@ -157,7 +157,7 @@
     >
       <template #header>
         <div class="flex items-center justify-between w-full gap-2">
-          <p class="text-base font-semibold">Zeitraum auswählen</p>
+          <p class="text-base font-semibold">{{ $t("timePeriods.selectPeriod") }}</p>
           <UButton
             color="neutral"
             variant="ghost"
@@ -179,7 +179,7 @@
           >
             <template #quickAccessButtons>
               <UButton
-                label="Jetzt"
+                :label="$t('timePeriods.now')"
                 color="primary"
                 variant="soft"
                 size="xs"
@@ -216,25 +216,25 @@
             "
             class="text-red-500 text-sm mt-2"
           >
-            Bitte wählen Sie ein Datum für den Beginn.
+            {{ $t("timePeriods.needStartDate") }}
           </p>
           <p
             v-if="missingValues.start.includes('time')"
             class="text-red-500 text-sm mt-2"
           >
-            Bitte geben Sie eine Startuhrzeit an.
+            {{ $t("timePeriods.needStartTime") }}
           </p>
           <p
             v-if="missingValues.end.includes('time')"
             class="text-red-500 text-sm mt-2"
           >
-            Bitte geben Sie eine Enduhrzeit an.
+            {{ $t("timePeriods.needEndTime") }}
           </p>
           <p
             v-if="invalidTimeslot || invalidDateSlot"
             class="text-red-500 text-sm mt-2"
           >
-            Die Endzeit muss nach der Startzeit liegen.
+            {{ $t("timePeriods.endBeforeStart") }}
           </p>
         </div>
       </template>
@@ -242,7 +242,7 @@
       <template #footer>
         <div class="flex gap-2 w-full">
           <UButton
-            label="Abbrechen"
+            :label="$t('common.cancel')"
             color="neutral"
             variant="soft"
             class="flex-1 justify-center"
@@ -260,6 +260,7 @@ import ClearButton from "~/components/inputs/ClearButton.vue";
 import PeriodFieldCompact from "~/components/inputs/PeriodFieldCompact.vue";
 import InputTime from "~/components/inputs/InputTime.vue";
 import type { TimePeriod } from "~/types/catalogParams";
+
 
 type TimeHM = { hours: number | null; minutes: number | null } | null;
 type MissingValues = { start: string[]; end: string[] };

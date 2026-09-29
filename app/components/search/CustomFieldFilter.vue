@@ -3,6 +3,7 @@
     <UCheckbox
       v-if="filterType === 'checkbox'"
       v-model="localValue"
+      color="secondary"
       :label="definition.caption"
       @change="emitChange"
     />

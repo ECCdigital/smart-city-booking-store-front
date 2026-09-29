@@ -25,7 +25,6 @@ export function useBookableDetailContent(itemSource, isEvent) {
     runSearch,
     resetResults,
   } = useBookableSearch({
-    isEvent: false,
     sourceItems: computed(() => (item.value ? [item.value] : [])),
   });
 

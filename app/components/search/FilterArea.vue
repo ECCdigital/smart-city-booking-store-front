@@ -7,14 +7,14 @@
     "
   >
     <div class="flex justify-between items-center">
-      <p class="my-4 font-bold">Ergebnisse filtern</p>
-      <UTooltip v-if="!useAsDialog" text="Filter zurücksetzen">
+      <p class="my-4 font-bold">{{ $t("filter.title") }}</p>
+      <UTooltip v-if="!useAsDialog" :text="$t('filter.reset')">
         <UButton
           v-if="!useAsDialog && isFilterActive"
           icon="i-lucide-trash"
+          color="primary"
           variant="ghost"
           class="rounded-full py-2 px-3"
-          :class="isFilterActive ? '' : ''"
           @click="removeFilter"
         />
       </UTooltip>
@@ -24,27 +24,16 @@
       <div class="space-y-3">
         <USwitch
           v-model="_includeNonSuitable"
-          label="Nicht passende Objekte anzeigen."
-          @change="instantFilter"
-        />
-        <USwitch
-          v-if="isEvent"
-          v-model="_onlyPublicEvents"
-          label="Nur öffentliche Events anzeigen."
-          @change="instantFilter"
-        />
-        <USwitch
-          v-if="isEvent"
-          v-model="_onlyRegistrationNeededEvents"
-          label="Nur anmeldepflichte Events anzeigen."
+          color="secondary"
+          :label="$t('filter.includeNonSuitable')"
           @change="instantFilter"
         />
       </div>
     </div>
 
-    <!-- Kategorie -->
-    <div v-if="!isEvent" class="my-7">
-      <p class="mb-3">Kategorie</p>
+    <!-- Kind: the bookable types and events, one facet -->
+    <div class="my-7">
+      <p class="mb-3">{{ $t("filter.category") }}</p>
       <FilterCheckboxGroup
         v-model="_categories"
         :items="possibleCategories"
@@ -52,9 +41,38 @@
       />
     </div>
 
+    <!-- Events: the two switches narrow the events and nothing else, so they
+         only appear when there is an event to narrow -->
+    <div v-if="hasEvents" class="my-7 space-y-3">
+      <p class="mb-3">{{ $t("filter.eventsSection") }}</p>
+      <USwitch
+        v-model="_onlyPublicEvents"
+        color="secondary"
+        :label="$t('filter.onlyPublicEvents')"
+        @change="instantFilter"
+      />
+      <USwitch
+        v-model="_onlyRegistrationNeededEvents"
+        color="secondary"
+        :label="$t('filter.onlyRegistrationNeeded')"
+        @change="instantFilter"
+      />
+    </div>
+
+    <!-- Anbieter -->
+    <div v-if="possibleTenants.length > 1" class="my-7">
+      <p class="mb-3">{{ $t("filter.provider") }}</p>
+      <FilterCheckboxGroup
+        v-model="_tenants"
+        :items="possibleTenants"
+        use-more-button
+        @change="instantFilter"
+      />
+    </div>
+
     <!-- Orte -->
     <div v-if="possibleCities && possibleCities.length" class="my-7">
-      <p class="mb-3">Orte</p>
+      <p class="mb-3">{{ $t("filter.cities") }}</p>
       <FilterCheckboxGroup
         v-model="_cities"
         :items="possibleCities"
@@ -65,7 +83,7 @@
 
     <!-- Distanz -->
     <div v-if="distance != null" class="my-7">
-      <p class="mb-3">Distanz</p>
+      <p class="mb-3">{{ $t("filter.distance") }}</p>
       <p class="mb-3">0 km - {{ _distance }} km</p>
       <FilterHistogramSlider
         v-model="_distance"
@@ -80,7 +98,7 @@
 
     <!-- Price-->
     <div class="my-7">
-      <p class="mb-3">Preis</p>
+      <p class="mb-3">{{ $t("filter.price") }}</p>
       <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
 
       <FilterHistogramSlider
@@ -96,7 +114,10 @@
 
     <!-- Custom Field Filter -->
     <div v-if="sortedCustomFieldFilters.length > 0" class="my-7">
-      <p class="mb-3">Weitere Filter</p>
+      <p class="mb-1">{{ $t("filter.more") }}</p>
+      <p v-if="hasEvents" class="mb-3 text-sm text-gray-500">
+        {{ $t("filter.customFieldsBookablesOnly") }}
+      </p>
       <div class="space-y-4">
         <CustomFieldFilter
           v-for="cf in sortedCustomFieldFilters"
@@ -113,20 +134,20 @@
     <div v-if="useAsDialog" class="flex justify-between">
       <UButton
         v-if="isFilterActive"
-        label="Filter entfernen"
+        :label="$t('filter.remove')"
         icon="i-lucide-trash"
-        color="neutral"
+        color="primary"
         variant="soft"
-        class="rounded-full py-2 px-3"
+        class="rounded-lg py-2 px-3"
         @click="removeFilter"
       />
       <div v-else class="flex-1" />
       <UButton
-        label="Filter anwenden"
+        :label="$t('filter.apply')"
         icon="i-lucide-funnel"
-        color="neutral"
+        color="primary"
         variant="soft"
-        class="rounded-full py-2 px-3"
+        class="rounded-lg py-2 px-3"
         @click="onFilter"
       />
     </div>
@@ -138,6 +159,14 @@ import { useCustomFieldFilters } from "~/composables/search/useCustomFieldFilter
 import CustomFieldFilter from "~/components/search/CustomFieldFilter.vue";
 import FilterHistogramSlider from "~/components/search/FilterHistogramSlider.vue";
 import FilterCheckboxGroup from "~/components/search/FilterCheckboxGroup.vue";
+import { useTenantStore } from "~~/stores/tenant.js";
+import {
+  OFFER_KINDS,
+  fromPriceOf,
+  isEventItem,
+} from "~/composables/search/offer";
+
+const { t } = useI18n();
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -146,10 +175,6 @@ const props = defineProps({
     required: true,
   },
   useAsDialog: {
-    type: Boolean,
-    default: false,
-  },
-  isEvent: {
     type: Boolean,
     default: false,
   },
@@ -165,6 +190,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  tenants: {
+    type: Array,
+    default: () => [],
+  },
   distance: {
     type: Number,
     default: null,
@@ -175,7 +204,7 @@ const props = defineProps({
   },
   onlyPublicEvents: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   onlyRegistrationNeededEvents: {
     type: Boolean,
@@ -199,28 +228,64 @@ const _cities = ref(props.cities);
 const _onlyPublicEvents = ref(props.onlyPublicEvents);
 const _onlyRegistrationNeededEvents = ref(props.onlyRegistrationNeededEvents);
 const _categories = ref(props.categories);
+const _tenants = ref(props.tenants);
 
-//Kategorien
-//toDo - read from instance later !!!!
+const hasEvents = computed(() =>
+  props.bookables.some((b) => isEventItem(b.item)),
+);
+
+// The Kind facet: every Kind, counted from the matching results, none hidden
+// at zero — a Kind that vanishes on a search with no match reads as a bug.
+//toDo - read the bookable types from the instance later
+const KIND_LABEL_KEYS = {
+  room: "room",
+  "event-location": "eventLocation",
+  resource: "resource",
+  ticket: "ticket",
+  event: "event",
+};
 const possibleCategories = computed(() => {
-  return [
-    {
-      label: "Räume",
-      value: "room",
-    },
-    {
-      label: "Veranstaltungsorte",
-      value: "event-location",
-    },
-    {
-      label: "Geräte",
-      value: "resource",
-    },
-    {
-      label: "Tickets",
-      value: "ticket",
-    },
-  ];
+  const counts = {};
+  suitableBookables.value.forEach((b) => {
+    const kind = b.item?.type;
+    if (!kind) return;
+    counts[kind] = (counts[kind] || 0) + 1;
+  });
+
+  return OFFER_KINDS.map((kind) => ({
+    label: t(`filter.categories.${KIND_LABEL_KEYS[kind]}`),
+    value: kind,
+    count: counts[kind] || 0,
+  }));
+});
+
+// Anbieter: the tenants the current results come from, named from the tenant
+// store and counted like the other facets. A tenant the store has not loaded
+// falls back to its id rather than dropping out of the list.
+const tenantStore = useTenantStore();
+
+const possibleTenants = computed(() => {
+  if (!props.bookables || props.bookables.length === 0) {
+    return [];
+  }
+
+  const tenantCount = {};
+  props.bookables.forEach((b) => {
+    if (b.matchStatus !== "match") return;
+
+    const tenantId = b.item?.tenantId;
+    if (!tenantId) return;
+
+    tenantCount[tenantId] = (tenantCount[tenantId] || 0) + 1;
+  });
+
+  return Object.entries(tenantCount)
+    .map(([value, count]) => ({
+      label: tenantStore.getTenantById(value)?.name ?? value,
+      value,
+      count,
+    }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 });
 
 //Distanz
@@ -266,9 +331,8 @@ const dynamicDistanceStep = computed(() => {
 
 //Price
 const priceValues = computed(() => {
-  const fn = props.isEvent ? getEventMinPrice : getBookableMinPrice;
   return suitableBookables.value
-    .map((b) => fn(b))
+    .map((b) => getMinPrice(b))
     .filter((p) => p != null && !isNaN(p));
 });
 
@@ -277,15 +341,9 @@ const possiblePriceRange = computed(() => {
     return [0, 100];
   }
 
-  let validPrices;
-  if (!props.isEvent) {
-    validPrices = suitableBookables.value.map((b) => getBookableMinPrice(b));
-  } else {
-    validPrices = suitableBookables.value.map((e) => getEventMinPrice(e));
-  }
-  validPrices = validPrices.filter(
-    (price) => price !== undefined && price !== null && !isNaN(price),
-  );
+  const validPrices = suitableBookables.value
+    .map((b) => getMinPrice(b))
+    .filter((price) => price !== undefined && price !== null && !isNaN(price));
 
   //set endpoints rounded to 5
   const minPrice =
@@ -340,46 +398,16 @@ watch(suitableBookables, () => {
   _price.value = [dynamicMinPrice.value, dynamicMaxPrice.value];
 });
 
-function getBookableMinPrice(bookable) {
-  if (bookable.matchStatus === "no-match") {
+// The price an Offer enters the histogram with: the calculated one once a
+// period has been searched, otherwise its "from" price, whatever its Kind.
+function getMinPrice(wrapper) {
+  if (wrapper.matchStatus === "no-match") {
     return null;
   }
-  //if search is initialized, return calculated price
-  if (searchIsInitialized.value && bookable.calculatedPrice) {
-    return bookable.calculatedPrice.userGrossPriceEur;
+  if (searchIsInitialized.value && wrapper.calculatedPrice) {
+    return wrapper.calculatedPrice.userGrossPriceEur;
   }
-
-  //else return min price from price categories but exclude holiday price categories
-  const pricesWithoutHolidays = bookable.item?.priceCategories?.filter(
-    (c) => !c.holidays || c.holidays.length === 0,
-  );
-  const minPrice = Math.min(
-    ...(pricesWithoutHolidays.map((cat) => cat.priceEur) || []),
-  );
-
-  return bookable.item.priceValueAddedTax
-    ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
-    : minPrice;
-}
-function getTicketMinPrice(ticket) {
-  const minPrice = Math.min(
-    ...ticket.priceCategories.map((cat) => cat.priceEur),
-  );
-  return ticket.priceValueAddedTax
-    ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
-    : minPrice;
-}
-function getEventMinPrice(event) {
-  if (event.matchStatus === "no-match") {
-    return null;
-  }
-  if (event.item.tickets && event.item.tickets.length > 0) {
-    return Math.min(
-      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket)),
-    );
-  } else {
-    return 0;
-  }
+  return fromPriceOf(wrapper.item);
 }
 
 //Locations
@@ -479,6 +507,7 @@ function onFilter() {
   filter.regEv = _onlyRegistrationNeededEvents.value;
   filter.cat = _categories.value;
   filter.cities = _cities.value;
+  filter.tenants = _tenants.value;
   filter.distance = _distance.value;
   filter.price = sameAsPossible ? [] : _price.value;
   filter.customFields = _customFieldValues.value;
@@ -492,6 +521,7 @@ function removeFilter() {
   _onlyRegistrationNeededEvents.value = false;
   _cities.value = [];
   _categories.value = [];
+  _tenants.value = [];
   _price.value = possiblePriceRange.value.slice();
   _distance.value = distanceRange.value[1];
   _customFieldValues.value = {};
@@ -503,6 +533,7 @@ function removeFilter() {
   filter.regEv = _onlyRegistrationNeededEvents.value;
   filter.cat = _categories.value;
   filter.cities = _cities.value;
+  filter.tenants = _tenants.value;
   filter.distance = distanceRange.value[1];
 
   const sameAsPossible =

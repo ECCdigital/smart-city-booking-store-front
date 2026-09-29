@@ -1,5 +1,9 @@
 <template>
-  <div ref="wrapperRef" class="@container space-y-5">
+  <div
+    ref="wrapperRef"
+    class="@container space-y-5"
+    :style="{ '--selection-text-color': contrastToSecondary }"
+  >
     <div class="grid grid-cols-1 @lg:flex @lg:flex-wrap gap-4">
       <div class="md:flex items-center space-x-1">
         <label
@@ -137,7 +141,7 @@
           </span>
           <span class="flex items-center gap-1.5">
             <span
-              class="inline-block w-4 h-3 rounded-sm bg-primary/90 dark:bg-primary/10"
+              class="inline-block w-4 h-3 rounded-sm bg-secondary/90 dark:bg-secondary/10"
             />
             {{ $t("scheduleSelection.yourSelection") }}
           </span>
@@ -175,8 +179,11 @@ import FullCalendar from "@fullcalendar/vue3";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import deLocale from "@fullcalendar/core/locales/de";
+import enLocale from "@fullcalendar/core/locales/en-gb";
 import { useMediaQuery } from "@vueuse/core";
 import { useBookables } from "~/composables/api/useBookables.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
 import InputTime from "~/components/inputs/InputTime.vue";
 import {
@@ -320,6 +327,16 @@ function onJumpDate(date) {
   if (api) api.gotoDate(d);
 }
 
+/* ── language ────────────────────────────────────────────── */
+const { t, locale } = useI18n();
+const { localeTag } = useFormatting();
+const { contrastToSecondary } = useContrastColor();
+
+const CALENDAR_LOCALES = { de: deLocale, en: enLocale };
+const calendarLocale = computed(
+  () => CALENDAR_LOCALES[locale.value] ?? deLocale,
+);
+
 /* ── date range label ───────────────────────────────────── */
 const dateRangeLabel = computed(() => {
   if (!currentViewStart.value || !currentViewEnd.value) return "";
@@ -328,15 +345,14 @@ const dateRangeLabel = computed(() => {
   const end = new Date(currentViewEnd.value);
   end.setDate(end.getDate() - 1);
 
-  const fmtDate = (d) => {
-    const day = pad2(d.getDate());
-    const month = d
-      .toLocaleDateString("de-DE", { month: "short" })
-      .replace(/\.$/, "");
-    return `${day}. ${month}`;
-  };
+  // `Intl` orders the day and the month the way the language does -- "21. Sep."
+  // in German, "21 Sep" in English -- rather than the German shape built by hand.
+  const format = new Intl.DateTimeFormat(localeTag(locale.value), {
+    day: "2-digit",
+    month: "short",
+  });
 
-  return `${fmtDate(start)} – ${fmtDate(end)} ${end.getFullYear()}`;
+  return `${format.format(start)} – ${format.format(end)} ${end.getFullYear()}`;
 });
 
 /* ── availability cache + fetch ──────────────────────────── */
@@ -502,7 +518,7 @@ function renderEventContent(arg) {
   return {
     html: `
       <div>
-        <div class="font-bold">Ihre Auswahl</div>${arg.event.title}
+        <div class="font-bold">${t("scheduleSelection.yourSelection")}</div>${arg.event.title}
       </div>
     `,
   };
@@ -512,7 +528,7 @@ function renderEventContent(arg) {
 function renderDayHeader(arg) {
   const d = arg.date;
   const weekday = d
-    .toLocaleDateString("de-DE", { weekday: "short" })
+    .toLocaleDateString(localeTag(locale.value), { weekday: "short" })
     .replace(/\.$/, "");
   const day = d.getDate();
   const isToday = localISODate(d) === todayISO;
@@ -562,7 +578,7 @@ function handleDatesSet(info) {
 const calendarOptions = reactive({
   plugins: [timeGridPlugin, interactionPlugin],
   initialView: "timeGridWeek",
-  locale: deLocale,
+  locale: calendarLocale.value,
   firstDay: 1,
   headerToolbar: false,
   allDaySlot: false,
@@ -589,6 +605,12 @@ const calendarOptions = reactive({
   select: handleCalendarSelect,
   datesSet: handleDatesSet,
   validRange: { start: localISODate(getMonday(today)) },
+});
+
+// Changing the option re-renders the calendar, which also re-runs the day
+// header renderer above.
+watch(calendarLocale, (value) => {
+  calendarOptions.locale = value;
 });
 
 watch(calendarEvents, (events) => {
@@ -966,15 +988,22 @@ watch(
 }
 
 /* ── User selection event ────────────────────────────────── */
+/* The block is filled with the secondary colour, so its text takes that
+   colour's contrast instead of FullCalendar's fixed white. Overriding
+   `--fc-event-text-color` rather than `color` alone: FullCalendar sets the
+   colour again on `.fc-event-main` from that variable, which would otherwise
+   win over anything inherited from the event. */
 :deep(.fc-event.fc-user-selection) {
-  background-color: var(--color-primary, #6366f1) !important;
+  --fc-event-text-color: var(--selection-text-color, #fff);
+  background-color: var(--color-secondary, #6366f1) !important;
+  color: var(--selection-text-color, #fff) !important;
   opacity: 0.9;
   border-radius: 3px !important;
   box-shadow: none !important;
 }
 
 :is(.dark) :deep(.fc-event.fc-user-selection) {
-  background-color: var(--color-primary, #6366f1) !important;
+  background-color: var(--color-secondary, #6366f1) !important;
 }
 
 :deep(.fc-user-selection .fc-event-main) {
@@ -983,11 +1012,19 @@ watch(
 
 /* ── Selection highlight (while dragging) ────────────────── */
 :deep(.fc-highlight) {
-  background-color: rgba(99, 102, 241, 0.15) !important;
+  background-color: color-mix(
+    in oklab,
+    var(--color-secondary, #6366f1) 15%,
+    transparent
+  ) !important;
 }
 
 :is(.dark) :deep(.fc-highlight) {
-  background-color: rgba(99, 102, 241, 0.2) !important;
+  background-color: color-mix(
+    in oklab,
+    var(--color-secondary, #6366f1) 20%,
+    transparent
+  ) !important;
 }
 
 /* ── Now-indicator line ──────────────────────────────────── */

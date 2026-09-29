@@ -1,26 +1,30 @@
 <template>
-  <UDropdownMenu :items="viewOptions">
-    <UButton
-        :label="currentViewLabel"
-        icon="i-lucide-chevron-down"
-        color="neutral"
-        variant="soft"
-        class="rounded-full py-2 px-3"
-        :content="{
-              align: 'start',
-              side: 'bottom',
-              sideOffset: 8,
-            }"
-        :ui="{
-              itemLeadingIcon: 'mt-1',
-              itemTrailingIcon: 'mt-1 mr-1',
-              item: 'hover:bg-primary/10 bg-pink-500',
-              content: 'w-48',
-            }"
-    />
-  </UDropdownMenu>
+  <UFieldGroup orientation="horizontal" class="rounded-lg overflow-hidden">
+    <UTooltip
+      v-for="option in viewOptions"
+      :key="option.value"
+      :text="option.label"
+    >
+      <UButton
+        :icon="option.icon"
+        :color="view === option.value ? 'secondary' : 'neutral'"
+        :variant="view === option.value ? 'solid' : 'soft'"
+        class="first:rounded-l-lg last:rounded-r-lg px-3"
+        :style="
+          view === option.value ? { color: contrastToSecondary } : undefined
+        "
+        @click="selectView(option.value)"
+      />
+    </UTooltip>
+  </UFieldGroup>
 </template>
-<script setup >
+
+<script setup>
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+const { t } = useI18n();
+
+const { contrastToSecondary } = useContrastColor();
+
 const view = defineModel({
   type: String,
   required: true,
@@ -28,43 +32,33 @@ const view = defineModel({
 
 const emit = defineEmits(["setView"]);
 
-const viewOptions = [
+const viewOptions = computed(() => [
   {
     value: "list",
-    label: "Listenansicht",
+    label: t("results.listView"),
     icon: "i-lucide-list",
-    onSelect() {
-      view.value = "list";
-      emit("setView", "list");
-    },
   },
   {
     value: "map",
-    label: "Kartenansicht",
+    label: t("results.mapView"),
     icon: "i-lucide-map-pin",
-    onSelect() {
-      view.value = "map";
-      emit("setView", "map");
-    },
   },
-];
+]);
 
-const currentViewLabel = computed(() => {
-  const option = viewOptions.find((opt) => opt.value === view.value);
-  return option ? option.label : "";
-});
+const selectView = (value) => {
+  view.value = value;
+  emit("setView", value);
+};
 
 onMounted(() => {
-  if(!viewOptions.some(opt => opt.value === view.value)) {
-    console.log("Invalid view detected, defaulting to 'list'. Current value:", view.value);
-    view.value = 'list';
-    emit("setView", "list");
+  if (!viewOptions.value.some((opt) => opt.value === view.value)) {
+    console.log(
+      "Invalid view detected, defaulting to 'list'. Current value:",
+      view.value,
+    );
+    selectView("list");
   }
-})
+});
 </script>
 
-
-
-<style scoped>
-
-</style>
+<style scoped></style>

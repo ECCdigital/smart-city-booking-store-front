@@ -444,9 +444,9 @@ const validatedCount = computed(() => {
 
 function getWeekDayCardClass(wd) {
   if (weeklyByWeekday?.value.includes(wd)) {
-    return "border-primary dark:border-primary bg-primary/5 dark:bg-primary/10 ring-1 ring-primary dark:ring-primary cursor-pointer";
+    return "border-secondary dark:border-secondary bg-secondary/5 dark:bg-secondary/10 ring-1 ring-secondary dark:ring-secondary";
   }
-  return "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-primary dark:hover:border-primary cursor-pointer";
+  return "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-primary dark:hover:border-primary";
 }
 </script>
 
@@ -567,7 +567,7 @@ function getWeekDayCardClass(wd) {
               v-model="monthlyMode"
               type="radio"
               value="day-of-month"
-              class="accent-primary"
+              class="accent-secondary"
             />
             {{ $t("groupBooking.fields.monthlyByDay") }}
           </label>
@@ -576,7 +576,7 @@ function getWeekDayCardClass(wd) {
               v-model="monthlyMode"
               type="radio"
               value="weekday-of-month"
-              class="accent-primary"
+              class="accent-secondary"
             />
             {{ $t("groupBooking.fields.monthlyByWeekday") }}
           </label>

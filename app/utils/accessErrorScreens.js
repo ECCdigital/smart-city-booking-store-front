@@ -20,7 +20,9 @@
 import { ACCESS_ERRORS } from "~/utils/accessOpenFlow.js";
 import { bookingWindow, doorWindow, findDoor } from "~/utils/accessWindow.js";
 
-const bookablesPath = (tenantId) => `/t/${tenantId}/bookables`;
+const searchPath = (tenantId) => `/t/${tenantId}/search`;
+const bookableDetailPath = (tenantId, bookableId) =>
+  `/t/${tenantId}/bookables/${bookableId}`;
 
 /**
  * The appearance of every failure.
@@ -54,7 +56,7 @@ export const ACCESS_ERROR_SCREENS = Object.freeze({
     icon: "i-lucide-search-x",
     color: "error",
     action: "book_now",
-    to: ({ tenantId }) => (tenantId ? bookablesPath(tenantId) : null),
+    to: ({ tenantId }) => (tenantId ? searchPath(tenantId) : null),
   },
   [ACCESS_ERRORS.PAYMENT_REQUIRED]: {
     icon: "i-lucide-credit-card",
@@ -74,7 +76,7 @@ export const ACCESS_ERROR_SCREENS = Object.freeze({
     to: ({ tenantId, booking }) => {
       const leadBookableId = booking?.leadBookable?.id;
       return tenantId && leadBookableId
-        ? `${bookablesPath(tenantId)}/${leadBookableId}`
+        ? bookableDetailPath(tenantId, leadBookableId)
         : null;
     },
   },
