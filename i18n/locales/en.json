@@ -193,7 +193,8 @@
     "reports": "Reports",
     "admin": "Admin area",
     "settings": "Settings",
-    "backToHome": "Back to the home page"
+    "backToHome": "Back to the home page",
+    "toOffers": "To Offers"
   },
   "events": {
     "forThisEvent": "For this event, {status}.",

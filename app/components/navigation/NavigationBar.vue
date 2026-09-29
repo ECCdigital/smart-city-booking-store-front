@@ -7,6 +7,15 @@
             :tab="{ value: '/', icon: 'i-lucide-home', label: '' }"
           />
         </UTooltip>
+        <UTooltip :text="$t('navigation.toOffers')">
+          <NavigationLink
+            :tab="{
+              value: '/search',
+              icon: 'i-lucide-shopping-bag',
+              label: '',
+            }"
+          />
+        </UTooltip>
 
         <ClientOnly>
           <TenantSwitcher class="text-lg font-bold" />
