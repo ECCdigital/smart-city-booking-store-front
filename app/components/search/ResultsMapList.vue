@@ -2,7 +2,7 @@
   <div
     :class="
       floating
-        ? 'absolute right-4 top-20 bottom-4 w-80 z-20 hidden lg:flex flex-col rounded-lg bg-white dark:bg-gray-800 shadow-xl overflow-hidden'
+        ? 'absolute right-4 top-20 bottom-4 w-80 z-20 hidden lg:flex flex-col rounded-lg bg-white dark:bg-gray-800 shadow-xl overflow-hidden glass'
         : 'bg-auto w-[280px] shrink-0 h-[80vh] z-20 my-2 ml-2 overflow-auto p-2 border border-gray-200 rounded hidden lg:block'
     "
   >

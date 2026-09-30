@@ -102,26 +102,25 @@
                 : $t('results.fullscreen')
             "
             :icon="isFullscreen ? 'i-lucide-minimize-2' : 'i-lucide-maximize-2'"
-            color="neutral"
-            variant="soft"
-            class="rounded-lg py-2 px-3 shadow-md"
+            class="rounded-lg py-2 px-3 shadow-md glass text-black dark:text-white"
             @click="setFullscreen(!isFullscreen)"
           />
           <template v-if="isFullscreen">
             <span
               v-if="suitableCount !== null"
-              class="hidden sm:inline text-sm font-bold text-black dark:text-white bg-slate-50/80 dark:bg-gray-900/80 rounded-lg py-2 px-3 shadow-md"
+              class="hidden sm:inline text-sm font-bold text-black dark:text-white rounded-lg py-2 px-3 shadow-md glass"
             >
               {{ suitableCount }} {{ $t("filter.fittingResults") }}
             </span>
             <UButton
               :label="$t('results.list')"
               icon="i-lucide-list"
-              :color="showList ? 'primary' : 'neutral'"
-              :variant="showList ? 'solid' : 'soft'"
               :aria-pressed="showList"
-              :style="showList ? { color: contrastToPrimary } : undefined"
               class="hidden lg:inline-flex rounded-lg py-2 px-3 shadow-md"
+              :class="
+                showList ? 'bg-primary/80' : 'glass text-black dark:text-white'
+              "
+              :style="showList ? { color: contrastToPrimary } : undefined"
               @click="showList = !showList"
             />
             <slot name="filter" />
@@ -137,18 +136,14 @@
       >
         <UButton
           icon="i-lucide-plus"
-          color="neutral"
-          variant="soft"
-          class="rounded-lg p-2 shadow-md"
+          class="rounded-lg p-2 shadow-md glass text-black dark:text-white"
           :aria-label="$t('results.zoomIn')"
           :disabled="currentZoom >= maxZoom"
           @click="zoomBy(1)"
         />
         <UButton
           icon="i-lucide-minus"
-          color="neutral"
-          variant="soft"
-          class="rounded-lg p-2 shadow-md"
+          class="rounded-lg p-2 shadow-md glass text-black dark:text-white"
           :aria-label="$t('results.zoomOut')"
           :disabled="currentZoom <= minZoom"
           @click="zoomBy(-1)"

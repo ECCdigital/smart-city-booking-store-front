@@ -142,7 +142,7 @@
                 :only-public-events="query.pubEv"
                 :only-registration-needed-events="query.regEv"
                 :custom-fields="query.customFields"
-                class="shadow-md"
+                class="shadow-md glass rounded-xl"
                 @filter="setFilterQueryParams"
               />
             </template>
