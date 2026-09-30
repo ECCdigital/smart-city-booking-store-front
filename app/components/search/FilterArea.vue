@@ -516,7 +516,7 @@ function onFilter() {
 }
 
 function removeFilter() {
-  _includeNonSuitable.value = true;
+  _includeNonSuitable.value = false;
   _onlyPublicEvents.value = false;
   _onlyRegistrationNeededEvents.value = false;
   _cities.value = [];
