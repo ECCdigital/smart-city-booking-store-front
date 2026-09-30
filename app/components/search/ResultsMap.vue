@@ -83,16 +83,9 @@
         @close-details="closeBookableDetails"
       />
 
-      <!--
-        The map's own controls, at the same spots in both views: zoom top
-        left, the toolbar top right with the full-screen toggle as its last
-        item, so the toggle never moves. In full screen the filter area is
-        gone and the toolbar also holds the count, the list toggle and the
-        filter button, above Leaflet's own panes (z 1000).
-      -->
       <div class="absolute right-4 top-4 z-1001">
         <div
-          class="flex items-center gap-3 rounded-xl p-1.5"
+          class="flex items-center gap-3 rounded-xl py-1.5"
           :class="isFullscreen ? 'pl-4' : ''"
         >
           <UButton
