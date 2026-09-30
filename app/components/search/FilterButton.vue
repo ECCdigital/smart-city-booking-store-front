@@ -13,15 +13,6 @@
 
     <template #content>
       <UCard>
-        <div class="flex justify-end items-center">
-          <UButton
-            color="neutral"
-            variant="ghost"
-            icon="i-lucide-x"
-            class="rounded-xl"
-            @click="() => (isOpen = false)"
-          />
-        </div>
         <FilterArea
           v-model:is-initailized="isInitialized"
           :bookables="bookables"
@@ -36,6 +27,7 @@
           :custom-fields="customFields"
           use-as-dialog
           @filter="onFilter"
+          @close="() => (isOpen = false)"
         />
       </UCard>
     </template>

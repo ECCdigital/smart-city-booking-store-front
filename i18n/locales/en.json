@@ -78,7 +78,8 @@
       "notFound": "Page not found",
       "forbidden": "Access denied",
       "serverError": "Server error",
-      "error": "Error"
+      "error": "Error",
+      "close": "Close"
     }
   },
   "common": {

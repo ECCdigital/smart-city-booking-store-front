@@ -78,7 +78,8 @@
       "notFound": "Seite nicht gefunden",
       "forbidden": "Zugriff verweigert",
       "serverError": "Serverfehler",
-      "error": "Fehler"
+      "error": "Fehler",
+      "close": "Schließen"
     }
   },
   "common": {
