@@ -1,9 +1,7 @@
 <template>
   <div
     :class="
-      useAsDialog
-        ? 'overflow-auto max-h-[80vh]'
-        : 'my-2 p-2 border border-gray-200 rounded'
+      useAsDialog ? 'max-h-[80vh]' : 'my-2 p-2 border border-gray-200 rounded'
     "
   >
     <div class="flex justify-between items-center">
@@ -18,116 +16,126 @@
           @click="removeFilter"
         />
       </UTooltip>
+      <UTooltip v-else :text="$t('meta.pages.close')">
+        <UButton
+          color="neutral"
+          variant="ghost"
+          icon="i-lucide-x"
+          class="rounded-xl"
+          @click="() => emit('close')"
+        />
+      </UTooltip>
     </div>
     <USeparator v-if="!useAsDialog" class="border-gray-200" />
-    <div class="my-4 space-y-3">
-      <div class="space-y-3">
-        <USwitch
-          v-model="_includeNonSuitable"
-          color="secondary"
-          :label="$t('filter.includeNonSuitable')"
+    <div :class="useAsDialog ? 'overflow-auto max-h-[70vh] mb-2' : ''">
+      <div class="my-4 space-y-3">
+        <div class="space-y-3">
+          <USwitch
+            v-model="_includeNonSuitable"
+            color="secondary"
+            :label="$t('filter.includeNonSuitable')"
+            @change="instantFilter"
+          />
+        </div>
+      </div>
+
+      <!-- Typ -->
+      <div class="my-7">
+        <p class="mb-3">{{ $t("filter.category") }}</p>
+        <FilterCheckboxGroup
+          v-model="_categories"
+          :items="possibleCategories"
           @change="instantFilter"
         />
       </div>
-    </div>
 
-    <!-- Kind: the bookable types and events, one facet -->
-    <div class="my-7">
-      <p class="mb-3">{{ $t("filter.category") }}</p>
-      <FilterCheckboxGroup
-        v-model="_categories"
-        :items="possibleCategories"
-        @change="instantFilter"
-      />
-    </div>
-
-    <!-- Events: the two switches narrow the events and nothing else, so they
-         only appear when there is an event to narrow -->
-    <div v-if="hasEvents" class="my-7 space-y-3">
-      <p class="mb-3">{{ $t("filter.eventsSection") }}</p>
-      <USwitch
-        v-model="_onlyPublicEvents"
-        color="secondary"
-        :label="$t('filter.onlyPublicEvents')"
-        @change="instantFilter"
-      />
-      <USwitch
-        v-model="_onlyRegistrationNeededEvents"
-        color="secondary"
-        :label="$t('filter.onlyRegistrationNeeded')"
-        @change="instantFilter"
-      />
-    </div>
-
-    <!-- Anbieter -->
-    <div v-if="possibleTenants.length > 1" class="my-7">
-      <p class="mb-3">{{ $t("filter.provider") }}</p>
-      <FilterCheckboxGroup
-        v-model="_tenants"
-        :items="possibleTenants"
-        use-more-button
-        @change="instantFilter"
-      />
-    </div>
-
-    <!-- Orte -->
-    <div v-if="possibleCities && possibleCities.length" class="my-7">
-      <p class="mb-3">{{ $t("filter.cities") }}</p>
-      <FilterCheckboxGroup
-        v-model="_cities"
-        :items="possibleCities"
-        use-more-button
-        @change="instantFilter"
-      />
-    </div>
-
-    <!-- Distanz -->
-    <div v-if="distance != null" class="my-7">
-      <p class="mb-3">{{ $t("filter.distance") }}</p>
-      <p class="mb-3">0 km - {{ _distance }} km</p>
-      <FilterHistogramSlider
-        v-model="_distance"
-        mode="single"
-        :min="0"
-        :max="distanceRange[1]"
-        :step="dynamicDistanceStep"
-        :values="distanceValues"
-        @change="instantFilter"
-      />
-    </div>
-
-    <!-- Price-->
-    <div class="my-7">
-      <p class="mb-3">{{ $t("filter.price") }}</p>
-      <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
-
-      <FilterHistogramSlider
-        v-model="_price"
-        mode="range"
-        :min="dynamicMinPrice"
-        :max="dynamicMaxPrice"
-        :step="dynamicPriceStep"
-        :values="priceValues"
-        @change="instantFilter"
-      />
-    </div>
-
-    <!-- Custom Field Filter -->
-    <div v-if="sortedCustomFieldFilters.length > 0" class="my-7">
-      <p class="mb-1">{{ $t("filter.more") }}</p>
-      <p v-if="hasEvents" class="mb-3 text-sm text-gray-500">
-        {{ $t("filter.customFieldsBookablesOnly") }}
-      </p>
-      <div class="space-y-4">
-        <CustomFieldFilter
-          v-for="cf in sortedCustomFieldFilters"
-          :key="cf.definition.id"
-          v-model="_customFieldValues[cf.definition.id]"
-          :definition="cf.definition"
-          :filter-type="cf.filterType"
-          :meta="cf.meta"
-          @change="onCustomFieldChange"
+      <!-- Events -->
+      <div v-if="hasEvents" class="my-7 space-y-3">
+        <p class="mb-3">{{ $t("filter.eventsSection") }}</p>
+        <USwitch
+          v-model="_onlyPublicEvents"
+          color="secondary"
+          :label="$t('filter.onlyPublicEvents')"
+          @change="instantFilter"
         />
+        <USwitch
+          v-model="_onlyRegistrationNeededEvents"
+          color="secondary"
+          :label="$t('filter.onlyRegistrationNeeded')"
+          @change="instantFilter"
+        />
+      </div>
+
+      <!-- Anbieter -->
+      <div v-if="possibleTenants.length > 1" class="my-7">
+        <p class="mb-3">{{ $t("filter.provider") }}</p>
+        <FilterCheckboxGroup
+          v-model="_tenants"
+          :items="possibleTenants"
+          use-more-button
+          @change="instantFilter"
+        />
+      </div>
+
+      <!-- Orte -->
+      <div v-if="possibleCities && possibleCities.length" class="my-7">
+        <p class="mb-3">{{ $t("filter.cities") }}</p>
+        <FilterCheckboxGroup
+          v-model="_cities"
+          :items="possibleCities"
+          use-more-button
+          @change="instantFilter"
+        />
+      </div>
+
+      <!-- Distanz -->
+      <div v-if="distance != null" class="my-7">
+        <p class="mb-3">{{ $t("filter.distance") }}</p>
+        <p class="mb-3">0 km - {{ _distance }} km</p>
+        <FilterHistogramSlider
+          v-model="_distance"
+          mode="single"
+          :min="0"
+          :max="distanceRange[1]"
+          :step="dynamicDistanceStep"
+          :values="distanceValues"
+          @change="instantFilter"
+        />
+      </div>
+
+      <!-- Price-->
+      <div class="my-7">
+        <p class="mb-3">{{ $t("filter.price") }}</p>
+        <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
+
+        <FilterHistogramSlider
+          v-model="_price"
+          mode="range"
+          :min="dynamicMinPrice"
+          :max="dynamicMaxPrice"
+          :step="dynamicPriceStep"
+          :values="priceValues"
+          @change="instantFilter"
+        />
+      </div>
+
+      <!-- Custom Field Filter -->
+      <div v-if="sortedCustomFieldFilters.length > 0" class="my-7">
+        <p class="mb-1">{{ $t("filter.more") }}</p>
+        <p v-if="hasEvents" class="mb-3 text-sm text-gray-500">
+          {{ $t("filter.customFieldsBookablesOnly") }}
+        </p>
+        <div class="space-y-4">
+          <CustomFieldFilter
+            v-for="cf in sortedCustomFieldFilters"
+            :key="cf.definition.id"
+            v-model="_customFieldValues[cf.definition.id]"
+            :definition="cf.definition"
+            :filter-type="cf.filterType"
+            :meta="cf.meta"
+            @change="onCustomFieldChange"
+          />
+        </div>
       </div>
     </div>
 
@@ -220,7 +228,7 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-const emit = defineEmits(["filter"]);
+const emit = defineEmits(["filter", "close"]);
 
 // Results the search itself kept. Options and slider bounds derive from this
 const searchResults = computed(() =>
@@ -567,7 +575,7 @@ function onFilter() {
 }
 
 function removeFilter() {
-  _includeNonSuitable.value = true;
+  _includeNonSuitable.value = false;
   _onlyPublicEvents.value = false;
   _onlyRegistrationNeededEvents.value = false;
   _cities.value = [];

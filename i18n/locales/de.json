@@ -78,7 +78,8 @@
       "notFound": "Seite nicht gefunden",
       "forbidden": "Zugriff verweigert",
       "serverError": "Serverfehler",
-      "error": "Fehler"
+      "error": "Fehler",
+      "close": "Schließen"
     }
   },
   "common": {
@@ -1512,6 +1513,13 @@
     "noLocation": "Ohne Ortsangabe",
     "noOffers": "Keine Angebote gefunden.",
     "noneInArea": "Keine Ergebnisse in diesem Bereich.",
+    "fullscreen": "Vollbild",
+    "exitFullscreen": "Vollbild beenden",
+    "list": "Liste",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "inMapView": "Im Kartenausschnitt",
+    "inMapViewCount": "keine Angebote | {count} Angebot | {count} Angebote",
     "listView": "Listenansicht",
     "mapView": "Kartenansicht",
     "atThisLocation": "Ergebnisse an diesem Standort:",

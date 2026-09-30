@@ -78,7 +78,8 @@
       "notFound": "Page not found",
       "forbidden": "Access denied",
       "serverError": "Server error",
-      "error": "Error"
+      "error": "Error",
+      "close": "Close"
     }
   },
   "common": {
@@ -1074,6 +1075,13 @@
     "noLocation": "No location given",
     "noOffers": "No offers found.",
     "noneInArea": "No results in this area.",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen",
+    "list": "List",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "inMapView": "In the map view",
+    "inMapViewCount": "no offers | {count} offer | {count} offers",
     "listView": "List view",
     "mapView": "Map view",
     "atThisLocation": "Results at this location:",

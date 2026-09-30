@@ -4,24 +4,15 @@
       <UButton
         :label="$t('filter.open')"
         icon="i-lucide-funnel"
-        color="neutral"
-        variant="soft"
-        class="rounded-lg py-2 px-3"
+        :color="useCustomStyle ? '' : 'neutral'"
+        :variant="useCustomStyle ? '' : 'soft'"
+        :class="useCustomStyle ? 'py-2 px-3' : 'rounded-lg py-2 px-3'"
         @click="() => (isOpen = true)"
       />
     </UChip>
 
     <template #content>
       <UCard>
-        <div class="flex justify-end items-center">
-          <UButton
-            color="neutral"
-            variant="ghost"
-            icon="i-lucide-x"
-            class="rounded-xl"
-            @click="() => (isOpen = false)"
-          />
-        </div>
         <FilterArea
           v-model:is-initailized="isInitialized"
           :bookables="bookables"
@@ -36,6 +27,7 @@
           :custom-fields="customFields"
           use-as-dialog
           @filter="onFilter"
+          @close="() => (isOpen = false)"
         />
       </UCard>
     </template>
@@ -86,6 +78,10 @@ defineProps({
   customFields: {
     type: Object,
     default: () => ({}),
+  },
+  useCustomStyle: {
+    type: Boolean,
+    default: false,
   },
 });
 
