@@ -1080,7 +1080,7 @@
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
     "inMapView": "In the map view",
-    "inMapViewCount": "no offers | {count} offer, {matches} matching | {count} offers, {matches} matching",
+    "inMapViewCount": "no offers | {count} offer | {count} offers",
     "listView": "List view",
     "mapView": "Map view",
     "atThisLocation": "Results at this location:",

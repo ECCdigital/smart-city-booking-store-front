@@ -1518,7 +1518,7 @@
     "zoomIn": "Vergrößern",
     "zoomOut": "Verkleinern",
     "inMapView": "Im Kartenausschnitt",
-    "inMapViewCount": "keine Angebote | {count} Angebot, {matches} passend | {count} Angebote, {matches} passend",
+    "inMapViewCount": "keine Angebote | {count} Angebot | {count} Angebote",
     "listView": "Listenansicht",
     "mapView": "Kartenansicht",
     "atThisLocation": "Ergebnisse an diesem Standort:",

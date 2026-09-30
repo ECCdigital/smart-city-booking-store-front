@@ -15,7 +15,7 @@
         {{
           $t(
             "results.inMapViewCount",
-            { count: bookables.length, matches: matchCount },
+            { count: bookables.length },
             bookables.length,
           )
         }}
