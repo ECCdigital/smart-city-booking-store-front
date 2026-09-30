@@ -84,71 +84,62 @@
       />
 
       <!--
-        Full screen: the map alone fills the viewport. The filter area is
-        gone; its button, the count and the list toggle float on the map.
+        The map's own controls, at the same spots in both views: zoom top
+        left, the toolbar top right with the full-screen toggle as its last
+        item, so the toggle never moves. In full screen the filter area is
+        gone and the toolbar also holds the count, the list toggle and the
+        filter button, above Leaflet's own panes (z 1000).
       -->
-      <div
-        v-if="!isFullscreen"
-        class="glass absolute top-3 right-3 z-1001 rounded-xl p-1.5 shadow-md"
-      >
-        <UButton
-          :label="$t('results.fullscreen')"
-          icon="i-lucide-maximize-2"
-          color="neutral"
-          variant="soft"
-          class="rounded-lg py-2 px-3"
-          @click="setFullscreen(true)"
-        />
-      </div>
-      <div
-        v-else
-        class="absolute inset-x-4 top-4 z-1001 flex items-start justify-between gap-2 pointer-events-none"
-      >
-        <div class="glass rounded-xl p-1.5 shadow-md pointer-events-auto">
+      <div class="absolute right-4 top-4 z-1001">
+        <div
+          class="flex items-center gap-3 rounded-xl p-1.5"
+          :class="isFullscreen ? 'pl-4' : ''"
+        >
           <UButton
-            :label="$t('results.exitFullscreen')"
-            icon="i-lucide-minimize-2"
+            :label="
+              isFullscreen
+                ? $t('results.exitFullscreen')
+                : $t('results.fullscreen')
+            "
+            :icon="isFullscreen ? 'i-lucide-minimize-2' : 'i-lucide-maximize-2'"
             color="neutral"
             variant="soft"
-            class="rounded-lg py-2 px-3"
-            @click="setFullscreen(false)"
+            class="rounded-lg py-2 px-3 shadow-md"
+            @click="setFullscreen(!isFullscreen)"
           />
-        </div>
-        <div
-          class="glass flex items-center gap-3 rounded-xl p-1.5 pl-4 shadow-md pointer-events-auto"
-        >
-          <span
-            v-if="suitableCount !== null"
-            class="hidden sm:inline text-sm font-bold text-black dark:text-white"
-          >
-            {{ suitableCount }} {{ $t("filter.fittingResults") }}
-          </span>
-          <UButton
-            :label="$t('results.list')"
-            icon="i-lucide-list"
-            :color="showList ? 'primary' : 'neutral'"
-            variant="soft"
-            :aria-pressed="showList"
-            class="hidden lg:inline-flex rounded-lg py-2 px-3"
-            @click="showList = !showList"
-          />
-          <slot name="filter" />
+          <template v-if="isFullscreen">
+            <span
+              v-if="suitableCount !== null"
+              class="hidden sm:inline text-sm font-bold text-black dark:text-white bg-slate-50/80 dark:bg-gray-900/80 rounded-lg py-2 px-3 shadow-md"
+            >
+              {{ suitableCount }} {{ $t("filter.fittingResults") }}
+            </span>
+            <UButton
+              :label="$t('results.list')"
+              icon="i-lucide-list"
+              :color="showList ? 'primary' : 'neutral'"
+              :variant="showList ? 'solid' : 'soft'"
+              :aria-pressed="showList"
+              :style="showList ? { color: contrastToPrimary } : undefined"
+              class="hidden lg:inline-flex rounded-lg py-2 px-3 shadow-md"
+              @click="showList = !showList"
+            />
+            <slot name="filter" />
+          </template>
         </div>
       </div>
 
       <!--
-        Leaflet's own zoom control is off; these two buttons zoom instead,
-        drawn like the full-screen and filter buttons
+        Leaflet's own zoom control is off; these two buttons zoom instead.
       -->
       <div
-        class="glass absolute z-1001 flex flex-col gap-1 rounded-xl p-1.5 shadow-md"
-        :class="isFullscreen ? 'top-20 left-4' : 'top-3 left-3'"
+        class="absolute top-4 left-4 z-1001 flex flex-col gap-1 rounded-xl p-1.5"
       >
         <UButton
           icon="i-lucide-plus"
           color="neutral"
           variant="soft"
-          class="rounded-lg p-2"
+          class="rounded-lg p-2 shadow-md"
           :aria-label="$t('results.zoomIn')"
           :disabled="currentZoom >= maxZoom"
           @click="zoomBy(1)"
@@ -157,7 +148,7 @@
           icon="i-lucide-minus"
           color="neutral"
           variant="soft"
-          class="rounded-lg p-2"
+          class="rounded-lg p-2 shadow-md"
           :aria-label="$t('results.zoomOut')"
           :disabled="currentZoom <= minZoom"
           @click="zoomBy(-1)"
@@ -192,6 +183,9 @@ import ResultsMapMarkerPopup from "~/components/search/ResultsMapMarkerPopup.vue
 import ResultsMapMarkerTooltip from "~/components/search/ResultsMapMarkerTooltip.vue";
 import ResultsMapMobilePopup from "~/components/search/ResultsMapMobilePopup.vue";
 import ResultsMapList from "~/components/search/ResultsMapList.vue";
+import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+
+const { contrastToPrimary } = useContrastColor();
 
 const props = defineProps({
   bookables: {
