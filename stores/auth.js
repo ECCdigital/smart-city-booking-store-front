@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useUsers } from "~/composables/api/useUsers.js";
 import { useBookingStore } from "~~/stores/bookings.js";
+import { useFavoritesStore } from "~~/stores/favorites.js";
 import { useAuth } from "~/composables/auth/useAuth.js";
 import {
   broadcastSessionEnded,
@@ -57,6 +58,7 @@ export const useAuthStore = defineStore("auth", {
     },
     _applyAuthPayload(data) {
       useBookingStore().$reset();
+      useFavoritesStore().$reset();
       this.user = data?.user || null;
       this.permission = data?.permissions || null;
       this.tokenValid = true;
@@ -114,6 +116,7 @@ export const useAuthStore = defineStore("auth", {
     invalidateAuth({ broadcast = false } = {}) {
       this.clearAuthPayload();
       useBookingStore().$reset();
+      useFavoritesStore().$reset();
       if (import.meta.client) {
         localStorage.removeItem("auth-store");
         if (broadcast) {

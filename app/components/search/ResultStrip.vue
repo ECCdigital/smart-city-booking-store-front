@@ -23,6 +23,14 @@
           class="absolute z-10"
           :class="mapMode ? 'top-1 left-1' : 'top-2 left-2'"
         />
+        <FavoriteButton
+          v-if="!mapMode"
+          :item="item"
+          :is-event="isEvent"
+          overlay
+          class="absolute z-10"
+          :class="mapListMode ? 'top-1 right-1' : 'top-2 right-2'"
+        />
 
         <img
           v-if="image && !showImageErrorHint"
@@ -91,6 +99,7 @@ import ResultStripEventContent from "~/components/search/ResultStripEventContent
 import ResultStripBookableContent from "~/components/search/ResultStripBookableContent.vue";
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
+import FavoriteButton from "~/components/favorites/FavoriteButton.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
 import { useMediaImage } from "~/composables/utils/useMediaImage";
 

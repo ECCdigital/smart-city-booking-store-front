@@ -78,6 +78,14 @@ _Avoid_: Type (the code's field), search type, object type, category (in prose; 
 The one page listing every Offer of the Catalog in list, grid or map view, narrowed by the search bar and the filter area. Replaces the former separate bookables and events pages.
 _Avoid_: Bookables page, events page, search page, catalog page (that is the Catalog's entry)
 
+**Favorite** (de: „Favorit"):
+An Offer a signed-in user has marked with the heart, in the catalog or in the detail view. Held by the backend per user as a reference (tenant, target type, target id); the storefront only colours the heart from that list and never keeps a favorite of its own. Anonymous visitors have none.
+_Avoid_: Bookmark, like, saved item, watchlist
+
+**Favorites List** (de: „Favoritenliste"):
+The references of a user's Favorites across every tenant, loaded once per session and updated from the answer of every mark or removal, never reloaded per card.
+_Avoid_: Wishlist, merkliste (in code and prose; the German UI says „Favoriten")
+
 **Media Library**:
 The backend's managed store of uploaded files; the only source of images a Block or Background may reference.
 _Avoid_: Uploads, assets, attachments

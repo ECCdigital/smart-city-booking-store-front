@@ -1413,5 +1413,15 @@
   "resources": {
     "noResource": "No resource found",
     "noResources": "No resources found"
+  },
+  "favorites": {
+    "add": "Save as favourite",
+    "remove": "Remove from favourites",
+    "signInToMark": "Sign in to save offers as favourites",
+    "limitReachedTitle": "Limit reached",
+    "limitReached": "You can save at most {limit} favourites. Remove one to save a new offer.",
+    "limitReachedShort": "You have reached the maximum number of favourites. Remove one to save a new offer.",
+    "notAvailable": "This offer cannot be saved as a favourite right now.",
+    "failed": "The favourite could not be saved. Please try again."
   }
 }
