@@ -108,7 +108,7 @@ Nuxt maps `runtimeConfig` fields to `NUXT_*` environment variables. Values with 
 | -------- | -------- | ----------- | ------- |
 | `NUXT_API_BASE_URL` | **Yes** | Base URL of the backend API (server-side) | `https://api.booking.example.com` |
 | `NUXT_PUBLIC_API_BASE_URL` | No | Public backend URL, if needed by the client | `https://api.booking.example.com` |
-| `NUXT_USER_BASE_URL` | **Yes** | Public URL of this storefront (auth emails, server-side) | `https://booking.example.com` |
+| `NUXT_USER_BASE_URL` | **Yes** | Public URL of this storefront (auth emails, Keycloak SSO redirect URIs, server-side) | `https://booking.example.com` |
 | `NUXT_PUBLIC_USER_BASE_URL` | **Yes** | Same URL for client-side redirects (e.g. password reset) | `https://booking.example.com` |
 | `NUXT_ADMIN_BASE_URL` | No | Admin portal URL (server-side) | `https://admin.booking.example.com` |
 | `NUXT_PUBLIC_ADMIN_BASE_URL` | No | Admin portal link in navigation (users with memberships); needed for the Live Preview of the Hero, which only this origin may frame (`/preview/hero` answers 404 without it) | `https://admin.booking.example.com` |
@@ -241,7 +241,7 @@ Both containers should be on the same network; the reverse proxy terminates TLS 
 
 - The app listens on `PORT` (default `3000`).
 - Ensure the backend is reachable at `NUXT_API_BASE_URL` — without the backend, catalog, checkout, and auth will not work.
-- Set `NUXT_USER_BASE_URL` / `NUXT_PUBLIC_USER_BASE_URL` to the publicly reachable URL (including scheme, no trailing slash) so auth links in emails are correct.
+- Set `NUXT_USER_BASE_URL` / `NUXT_PUBLIC_USER_BASE_URL` to the publicly reachable URL (including scheme, no trailing slash) so auth links in emails and the Keycloak SSO redirect URIs are correct. Behind a TLS-terminating proxy the storefront sees plain HTTP, so without it Keycloak gets an `http://` redirect URI.
 
 ### Logging
 
