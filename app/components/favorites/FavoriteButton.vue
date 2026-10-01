@@ -10,7 +10,7 @@
         :loading="pending"
         color="neutral"
         :variant="overlay ? 'ghost' : 'outline'"
-        :size="overlay ? 'sm' : 'xl'"
+        :size="overlay ? 'lg' : 'xl'"
         :class="[
           overlay
             ? 'rounded-full bg-white/85 dark:bg-gray-800/85 shadow hover:bg-white dark:hover:bg-gray-800'
