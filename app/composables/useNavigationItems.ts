@@ -16,13 +16,12 @@ export const navigationPresets = {
       icon: "i-lucide-key-round",
       disabled: false,
     },
-
-    /*{
+    {
       value: "/account/favorites",
-      label: "Favoriten",
+      labelKey: "navigation.favorites",
       icon: "i-lucide-book-heart",
-      disabled: true,
-    },*/
+      disabled: false,
+    },
     {
       value: "/account/invoices",
       labelKey: "navigation.invoices",

@@ -183,7 +183,8 @@
     "user": "Benutzer",
     "reports": "Berichte",
     "admin": "Admin-Bereich",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "favorites": "Favoriten"
   },
   "footer": {
     "legalNotice": "Impressum",
@@ -1118,7 +1119,6 @@
   },
 
   "account": {
-    "favoritesEmpty": "Aktuell gibt es hier noch nichts zu sehen. Gespeicherte Inhalte werden künftig an dieser Stelle angezeigt.",
     "contactData": "Kontaktdaten",
     "security": "Sicherheit",
     "accountVerified": "Account verifiziert?",
@@ -1146,11 +1146,10 @@
     "activities": "Meine Aktivitäten",
     "digitalKeys": "Digitale Schlüssel",
     "digitalKeysDescription": "Öffnen Sie Türen, Schließfächer oder Fahrradboxen mit Ihrem Smartphone.",
-    "quickBookDescription": "Häufig genutzte und gemerkte Buchungsobjekte schnell wieder buchen.",
+    "quickBookDescription": "Gemerkte Angebote schnell wiederfinden und buchen.",
     "invoicesShortDescription": "Alle Rechnungen und Belege an einem Ort.",
     "invoicesDescription": "Hier finden Sie Ihre Rechnungen und Zahlungsbelege.",
     "favoritesTitle": "Ihre Favoriten",
-    "favoritesSoon": "Ihre Favoriten kommen bald",
     "appearanceDescription": "Verwalten Sie die Darstellung der Anwendung. Sie können beispielsweise zwischen einem hellen und einem dunklen Design wechseln. Optional können Sie auch die Sprache der Benutzeroberfläche anpassen.",
     "bookedItems": "Gebuchte Objekte",
     "invoicesAndReceipts": "Rechnungen und Zahlungsbelege",
@@ -1580,6 +1579,23 @@
     "limitReached": "Sie können höchstens {limit} Favoriten merken. Entfernen Sie einen Favoriten, um ein neues Angebot zu merken.",
     "limitReachedShort": "Sie haben die Obergrenze an Favoriten erreicht. Entfernen Sie einen Favoriten, um ein neues Angebot zu merken.",
     "notAvailable": "Dieses Angebot kann derzeit nicht als Favorit gemerkt werden.",
-    "failed": "Der Favorit konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+    "failed": "Der Favorit konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "removeFailed": "Der Favorit konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
+    "page": {
+      "description": "Alle Angebote, die Sie als Favorit gemerkt haben, über alle Anbieter hinweg.",
+      "count": "Keine Favoriten | Ein Favorit | {count} Favoriten",
+      "filterByTenant": "Nach Anbieter filtern",
+      "allTenants": "Alle Anbieter",
+      "unavailable": "Nicht verfügbar",
+      "unavailableHint": "Dieses Angebot ist derzeit nicht erreichbar. Es bleibt gemerkt, bis Sie es entfernen.",
+      "deleted": "Gelöschtes Angebot",
+      "deletedHint": "Dieses Angebot gibt es nicht mehr.",
+      "removeEntry": "Entfernen",
+      "emptyTitle": "Noch keine Favoriten",
+      "emptyDescription": "Markieren Sie Angebote im Katalog oder in der Detailansicht mit dem Herz, um sie hier wiederzufinden.",
+      "browseOffers": "Angebote entdecken",
+      "emptyForTenant": "Bei diesem Anbieter haben Sie keine Favoriten gemerkt.",
+      "loadFailed": "Ihre Favoriten konnten nicht geladen werden."
+    }
   }
 }

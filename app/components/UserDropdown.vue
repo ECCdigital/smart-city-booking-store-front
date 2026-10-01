@@ -77,12 +77,11 @@ const items = computed(() => {
         icon: "i-lucide-wallet-cards",
         onSelect: () => goTo("/account/invoices"),
       },
-      /*{
-        label: "Favoriten",
+      {
+        label: t("navigation.favorites"),
         icon: "i-lucide-book-heart",
         onSelect: () => goTo("/account/favorites"),
-        disabled: true,
-      },*/
+      },
     ],
     [
       {

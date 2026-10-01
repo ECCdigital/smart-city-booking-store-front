@@ -12,14 +12,12 @@
         to="/mobile-key"
       />
 
-      <!--
       <QuickAccessCard
         icon="i-lucide-book-heart"
         :title="$t('account.favoritesTitle')"
         :description="$t('account.quickBookDescription')"
         to="/account/favorites"
       />
-      -->
 
       <QuickAccessCard
         icon="i-lucide-wallet-cards"

@@ -195,7 +195,8 @@
     "admin": "Admin area",
     "settings": "Settings",
     "backToHome": "Back to the home page",
-    "toOffers": "To Offers"
+    "toOffers": "To Offers",
+    "favorites": "Favourites"
   },
   "events": {
     "forThisEvent": "For this event, {status}.",
@@ -763,7 +764,6 @@
     }
   },
   "account": {
-    "favoritesEmpty": "Nothing to see here yet. Anything you save will appear here.",
     "contactData": "Contact details",
     "security": "Security",
     "accountVerified": "Account verified?",
@@ -791,11 +791,10 @@
     "activities": "My activity",
     "digitalKeys": "Digital keys",
     "digitalKeysDescription": "Open doors, lockers and bike boxes with your phone.",
-    "quickBookDescription": "Book the items you use and save often, again in moments.",
+    "quickBookDescription": "Find and book the offers you saved, in moments.",
     "invoicesShortDescription": "Every invoice and receipt in one place.",
     "invoicesDescription": "Here you will find your invoices and payment receipts.",
     "favoritesTitle": "Your favourites",
-    "favoritesSoon": "Your favourites are coming soon",
     "appearanceDescription": "Manage how the app looks. You can switch between a light and a dark theme, and change the language of the interface.",
     "bookedItems": "Booked items",
     "invoicesAndReceipts": "Invoices and receipts",
@@ -1422,6 +1421,23 @@
     "limitReached": "You can save at most {limit} favourites. Remove one to save a new offer.",
     "limitReachedShort": "You have reached the maximum number of favourites. Remove one to save a new offer.",
     "notAvailable": "This offer cannot be saved as a favourite right now.",
-    "failed": "The favourite could not be saved. Please try again."
+    "failed": "The favourite could not be saved. Please try again.",
+    "removeFailed": "The favourite could not be removed. Please try again.",
+    "page": {
+      "description": "Every offer you saved as a favourite, across all providers.",
+      "count": "No favourites | One favourite | {count} favourites",
+      "filterByTenant": "Filter by provider",
+      "allTenants": "All providers",
+      "unavailable": "Not available",
+      "unavailableHint": "This offer cannot be reached right now. It stays saved until you remove it.",
+      "deleted": "Deleted offer",
+      "deletedHint": "This offer no longer exists.",
+      "removeEntry": "Remove",
+      "emptyTitle": "No favourites yet",
+      "emptyDescription": "Tap the heart on an offer in the catalogue or on its detail page to find it here again.",
+      "browseOffers": "Browse offers",
+      "emptyForTenant": "You have no favourites saved with this provider.",
+      "loadFailed": "Your favourites could not be loaded."
+    }
   }
 }
