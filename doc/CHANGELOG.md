@@ -14,6 +14,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ### Changed
 
+- Comments at the SSO routes name the two places outside this repo that know their paths `/api/auth/sso/callback` and `/api/auth/sso/login` fixed: the Admin UI's guide in the tab „Single Sign-On“ and the backend's „Realm prüfen“ (row 10). Changing a path needs both changed (ECCdigital/tickets#102). No behaviour change
 - `EventAdressInformation` and `BookableAdressInformation`, identical but for their prop name, are merged into one `AddressInformation` taking an `item`
 
 ### Added

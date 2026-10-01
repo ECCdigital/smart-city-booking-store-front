@@ -48,6 +48,7 @@ export default defineEventHandler(async (event) => {
         return sendRedirect(event, `/login?error=missing_params`);
     }
 
+    // Fixed path, known to the Admin UI and the backend: see login.get.ts.
     const redirectUri = `${getPublicOrigin(event)}/api/auth/sso/callback`;
 
     try {

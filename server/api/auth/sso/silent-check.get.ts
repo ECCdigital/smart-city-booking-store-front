@@ -44,6 +44,7 @@ export default defineEventHandler(async (event) => {
     setCookie(event, "kc-state", state, cookieOptions);
     setCookie(event, "kc-redirect", redirect, cookieOptions);
 
+    // Fixed path, known to the Admin UI and the backend: see login.get.ts.
     const redirectUri = `${getPublicOrigin(event)}/api/auth/sso/callback`;
 
     const authUrl = new URL(endpoints.authorization);
