@@ -111,6 +111,7 @@
     "firstName": "Vorname",
     "lastName": "Nachname",
     "company": "Unternehmen",
+    "vatId": "Umsatzsteuer-ID",
     "login": "Anmelden",
     "logout": "Abmelden",
     "register": "Registrieren",

@@ -112,6 +112,7 @@
     "firstName": "First Name",
     "lastName": "Last Name",
     "company": "Company",
+    "vatId": "VAT ID",
     "login": "Login",
     "logout": "Logout",
     "register": "Register",
