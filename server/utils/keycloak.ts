@@ -52,6 +52,16 @@ export async function getKeycloakConfig(
     return keycloakApp;
 }
 
+/**
+ * Public origin for URLs we hand to Keycloak. Behind a TLS-terminating
+ * proxy the request looks like http, so the configured userBaseUrl wins.
+ */
+export function getPublicOrigin(event: H3Event): string {
+    const { userBaseUrl } = useRuntimeConfig();
+    if (userBaseUrl) return new URL(userBaseUrl).origin;
+    return getRequestURL(event).origin;
+}
+
 export function getKeycloakEndpoints(serverUrl: string, realm: string) {
     const base = `${serverUrl}/realms/${realm}/protocol/openid-connect`;
     return {

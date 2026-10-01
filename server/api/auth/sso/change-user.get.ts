@@ -1,6 +1,7 @@
 import {
     getKeycloakConfig,
     getKeycloakEndpoints,
+    getPublicOrigin,
 } from "~~/server/utils/keycloak";
 
 export default defineEventHandler(async (event) => {
@@ -16,7 +17,7 @@ export default defineEventHandler(async (event) => {
     deleteCookie(event, "kc-pending-refresh");
     deleteCookie(event, "kc-pending-redirect");
 
-    const ssoLoginUrl = `${getRequestURL(event).origin}/api/auth/sso/login?redirect=${encodeURIComponent(redirect)}`;
+    const ssoLoginUrl = `${getPublicOrigin(event)}/api/auth/sso/login?redirect=${encodeURIComponent(redirect)}`;
 
     const logoutUrl = new URL(endpoints.logout);
     logoutUrl.searchParams.set("client_id", config.publicClient);

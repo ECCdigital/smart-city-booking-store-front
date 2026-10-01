@@ -9,6 +9,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ### Fixed
 
+- Keycloak SSO behind a TLS-terminating reverse proxy: the storefront sent `http://…/api/auth/sso/callback` as `redirect_uri` (and an `http://` `post_logout_redirect_uri` on „change user“), because it took the origin from the request. It now takes it from `NUXT_USER_BASE_URL`, falling back to the request when that is empty, so a Keycloak client that allows only HTTPS redirect URIs accepts the login
 - Inside a tenant, opening an Offer from the Result Page failed with „Bookable not found“, and the tenant's lists came back empty: the single-tenant branch of the catalog bundle expected the backend to wrap bookables and events (`{ bookable }`, `{ bookables }`), but it returns them bare
 
 ### Changed
