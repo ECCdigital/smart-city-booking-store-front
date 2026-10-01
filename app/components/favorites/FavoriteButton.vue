@@ -13,7 +13,7 @@
         :size="overlay ? 'lg' : 'xl'"
         :class="[
           overlay
-            ? 'rounded-full bg-white/85 dark:bg-gray-800/85 shadow hover:bg-white dark:hover:bg-gray-800'
+            ? 'rounded-full bg-gray-100/85 dark:bg-gray-800/85 shadow hover:bg-white dark:hover:bg-gray-800'
             : 'justify-center px-3',
           active
             ? 'text-red-500 dark:text-red-400'
