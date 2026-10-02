@@ -1415,7 +1415,11 @@
   },
   "favorites": {
     "add": "Save as favourite",
+    "addTitle": "Add to favourites",
+    "addMessage": "This offer has been added to your favourites.",
     "remove": "Remove from favourites",
+    "removeTitle": "Removed from favourites",
+    "removeMessage": "This offer has been removed from your favourites.",
     "signInToMark": "Sign in to save offers as favourites",
     "limitReachedTitle": "Limit reached",
     "limitReached": "You can save at most {limit} favourites. Remove one to save a new offer.",

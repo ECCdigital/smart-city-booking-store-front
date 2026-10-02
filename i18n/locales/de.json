@@ -1573,7 +1573,11 @@
   },
   "favorites": {
     "add": "Als Favorit merken",
+    "addTitle": "Angebot gemerkt",
+    "addMessage": "Dieses Angebot wurde zu Ihren Favoriten hinzugefügt.",
     "remove": "Aus Favoriten entfernen",
+    "removeTitle": "Angebot entfernt",
+    "removeMessage": "Dieses Angebot wurde aus Ihren Favoriten entfernt.",
     "signInToMark": "Anmelden, um Angebote als Favorit zu merken",
     "limitReachedTitle": "Obergrenze erreicht",
     "limitReached": "Sie können höchstens {limit} Favoriten merken. Entfernen Sie einen Favoriten, um ein neues Angebot zu merken.",

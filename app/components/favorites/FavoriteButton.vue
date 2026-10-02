@@ -97,8 +97,13 @@ async function toggle() {
   try {
     if (active.value) {
       await favoritesStore.unmark(reference.value);
+      notification.info(
+        t("favorites.removeMessage"),
+        t("favorites.removeTitle"),
+      );
     } else {
       await favoritesStore.mark(reference.value);
+      notification.info(t("favorites.addMessage"), t("favorites.addTitle"));
     }
   } catch (error) {
     report(error);
