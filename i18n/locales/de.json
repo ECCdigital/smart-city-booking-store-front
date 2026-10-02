@@ -1165,6 +1165,8 @@
       "emptyTitle": "Keine Rechnungen vorhanden",
       "emptyDescription": "Aktuell sind für Ihr Konto keine Rechnungen verfügbar. Sobald Rechnungen erstellt wurden, werden diese hier angezeigt.",
       "unknownBookable": "Unbekanntes Buchungsobjekt",
+      "searchPlaceholder": "Nach Buchungsobjekt suchen",
+      "noMatches": "Keine Rechnung passt zu Ihrer Suche.",
       "columns": {
         "createdAt": "Erstelldatum",
         "title": "Titel",

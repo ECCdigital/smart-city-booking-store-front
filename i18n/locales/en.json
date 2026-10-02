@@ -810,6 +810,8 @@
       "emptyTitle": "No invoices available",
       "emptyDescription": "There are currently no invoices for your account. Once invoices have been created, they will appear here.",
       "unknownBookable": "Unknown bookable",
+      "searchPlaceholder": "Search by bookable",
+      "noMatches": "No invoice matches your search.",
       "columns": {
         "createdAt": "Created",
         "title": "Title",

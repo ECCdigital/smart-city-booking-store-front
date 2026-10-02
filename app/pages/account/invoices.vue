@@ -19,10 +19,32 @@
     </div>
 
     <div v-else class="w-full">
+      <!-- The search reads the bookables a document belongs to, so a typed
+           name finds every invoice and receipt of that room or device. -->
+      <div class="flex justify-end mb-4">
+        <UInput
+          v-model="searchQuery"
+          icon="i-lucide-search"
+          size="md"
+          variant="outline"
+          :placeholder="$t('account.invoices.searchPlaceholder')"
+          :aria-label="$t('account.invoices.searchPlaceholder')"
+          class="w-full md:w-[40%]"
+        />
+      </div>
+
+      <p
+        v-if="!pending && shownDocuments.length === 0"
+        class="py-10 text-center text-gray-500"
+      >
+        {{ t("account.invoices.noMatches") }}
+      </p>
+
       <UTable
+        v-else
         v-model:sorting="sorting"
         v-model:pagination="pagination"
-        :data="paymentDocuments"
+        :data="shownDocuments"
         :columns="columns"
         :loading="pending"
         :pagination-options="{
@@ -97,13 +119,13 @@
       </UTable>
 
       <div
-        v-if="paymentDocuments.length > pagination.pageSize"
+        v-if="shownDocuments.length > pagination.pageSize"
         class="flex justify-center mt-4 mb-10"
       >
         <UPagination
           v-model:page="currentPage"
           :items-per-page="pagination.pageSize"
-          :total="paymentDocuments.length"
+          :total="shownDocuments.length"
           :sibling-count="1"
           show-edges
         >
@@ -124,6 +146,7 @@ import { useBookingStore } from "~~/stores/bookings.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import { resolveBookingPaymentChip } from "~/utils/bookingPaymentStatus.js";
+import { includesText } from "~/utils/textSearch.js";
 
 definePageMeta({
   layout: "panel",
@@ -235,6 +258,19 @@ const paymentDocuments = computed(() => {
         booking,
       }));
   });
+});
+
+const searchQuery = ref("");
+
+const shownDocuments = computed(() =>
+  paymentDocuments.value.filter((document) =>
+    includesText(document.bookableNames, searchQuery.value),
+  ),
+);
+
+// A new search gives a different list: the reader expects its first page.
+watch(searchQuery, () => {
+  pagination.value = { ...pagination.value, pageIndex: 0 };
 });
 
 function documentTypeLabel(type) {

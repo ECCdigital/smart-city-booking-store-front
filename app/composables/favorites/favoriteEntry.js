@@ -8,6 +8,7 @@
 
 import { favoriteKey } from "./favoriteReference.js";
 import { OFFER_KINDS } from "../search/offer";
+import { includesText } from "../../utils/textSearch.js";
 
 export const FAVORITE_STATUS = Object.freeze({
   AVAILABLE: "available",
@@ -68,19 +69,7 @@ export function tenantsOf(entries) {
  * same on the card. An empty query keeps everything.
  */
 export function searchByTitle(entries, query) {
-  const needle = normalize(query);
-  if (!needle) return entries ?? [];
-  return (entries ?? []).filter((entry) =>
-    normalize(titleOf(entry)).includes(needle),
-  );
-}
-
-function normalize(text) {
-  return String(text ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
+  return (entries ?? []).filter((entry) => includesText(titleOf(entry), query));
 }
 
 /**
