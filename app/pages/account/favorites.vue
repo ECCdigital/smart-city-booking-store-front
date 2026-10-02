@@ -1,7 +1,7 @@
 <template>
   <div class="w-full">
     <PageHeader
-      :title="$t('account.favoritesTitle')"
+      :title="$t('favorites.page.title')"
       :description="$t('favorites.page.description')"
     />
 

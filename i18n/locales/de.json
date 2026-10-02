@@ -168,7 +168,7 @@
     "quotedTitle": "„{title}“"
   },
   "navigation": {
-    "keys": "Schlüssel",
+    "keys": "Digitale Schlüssel",
     "activities": "Aktivitäten",
     "digitalKeys": "Digitale Schlüssel",
     "invoices": "Rechnungen",
@@ -1149,7 +1149,7 @@
     "quickBookDescription": "Gemerkte Angebote schnell wiederfinden und buchen.",
     "invoicesShortDescription": "Alle Rechnungen und Belege an einem Ort.",
     "invoicesDescription": "Hier finden Sie Ihre Rechnungen und Zahlungsbelege.",
-    "favoritesTitle": "Ihre Favoriten",
+    "favoritesTitle": "Favoriten",
     "appearanceDescription": "Verwalten Sie die Darstellung der Anwendung. Sie können beispielsweise zwischen einem hellen und einem dunklen Design wechseln. Optional können Sie auch die Sprache der Benutzeroberfläche anpassen.",
     "bookedItems": "Gebuchte Objekte",
     "invoicesAndReceipts": "Rechnungen und Zahlungsbelege",
@@ -1582,7 +1582,8 @@
     "failed": "Der Favorit konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     "removeFailed": "Der Favorit konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
     "page": {
-      "description": "Alle Angebote, die Sie als Favorit gemerkt haben, über alle Anbieter hinweg.",
+      "title": "Ihre Favoriten",
+      "description": "Hier finden Sie alle Angebote, die Sie als Favorit gemerkt haben.",
       "count": "Keine Favoriten | Ein Favorit | {count} Favoriten",
       "filterByTenant": "Nach Anbieter filtern",
       "allTenants": "Alle Anbieter",

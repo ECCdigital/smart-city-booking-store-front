@@ -73,14 +73,14 @@ const items = computed(() => {
         onSelect: () => goTo("/mobile-key"),
       },
       {
-        label: t("navigation.invoices"),
-        icon: "i-lucide-wallet-cards",
-        onSelect: () => goTo("/account/invoices"),
-      },
-      {
         label: t("navigation.favorites"),
         icon: "i-lucide-book-heart",
         onSelect: () => goTo("/account/favorites"),
+      },
+      {
+        label: t("navigation.invoices"),
+        icon: "i-lucide-wallet-cards",
+        onSelect: () => goTo("/account/invoices"),
       },
     ],
     [
@@ -90,7 +90,7 @@ const items = computed(() => {
       },
       {
         label: t("navigation.settings"),
-        icon: "i-lucide-settings",
+        icon: "i-lucide-user-round-pen",
         onSelect: () => goTo("/account/settings"),
       },
       {
