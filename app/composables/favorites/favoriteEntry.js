@@ -7,15 +7,13 @@
  */
 
 import { favoriteKey } from "./favoriteReference.js";
+import { OFFER_KINDS } from "../search/offer";
 
 export const FAVORITE_STATUS = Object.freeze({
   AVAILABLE: "available",
   UNAVAILABLE: "unavailable",
   DELETED: "deleted",
 });
-
-/** The value of the tenant filter that narrows to nothing. */
-export const ALL_TENANTS = "*";
 
 export function isAvailable(entry) {
   return entry?.status === FAVORITE_STATUS.AVAILABLE && !!entry.offer;
@@ -64,9 +62,54 @@ export function tenantsOf(entries) {
   return [...seen.values()];
 }
 
-export function filterByTenant(entries, tenantId) {
-  if (!tenantId || tenantId === ALL_TENANTS) return entries ?? [];
-  return (entries ?? []).filter((entry) => entry.tenantId === tenantId);
+/**
+ * The entries whose title holds the searched text, case and accents aside:
+ * a plain substring match, so a typed word finds exactly what reads the
+ * same on the card. An empty query keeps everything.
+ */
+export function searchByTitle(entries, query) {
+  const needle = normalize(query);
+  if (!needle) return entries ?? [];
+  return (entries ?? []).filter((entry) =>
+    normalize(titleOf(entry)).includes(needle),
+  );
+}
+
+function normalize(text) {
+  return String(text ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+/**
+ * The Kind of an entry: an event is one by its target type; a bookable
+ * carries its Kind only while available, since the snapshot holds none.
+ */
+export function kindOf(entry) {
+  if (entry?.targetType === "event") return "event";
+  return offerOf(entry)?.type ?? null;
+}
+
+/** The Kinds the entries have, each once, in the catalog's order. */
+export function kindsOf(entries) {
+  const present = new Set((entries ?? []).map(kindOf).filter(Boolean));
+  return OFFER_KINDS.filter((kind) => present.has(kind));
+}
+
+/**
+ * The entries that pass the filter: with providers chosen, one of them;
+ * with Kinds chosen, one of them. An empty choice narrows nothing. A
+ * bookable that is not available has no Kind and so stays out of a Kind
+ * choice.
+ */
+export function filterEntries(entries, { tenantIds = [], kinds = [] } = {}) {
+  return (entries ?? []).filter(
+    (entry) =>
+      (tenantIds.length === 0 || tenantIds.includes(entry.tenantId)) &&
+      (kinds.length === 0 || kinds.includes(kindOf(entry))),
+  );
 }
 
 /**

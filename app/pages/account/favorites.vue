@@ -1,6 +1,7 @@
 <template>
   <div class="w-full">
     <PageHeader
+      ref="header"
       :title="$t('favorites.page.title')"
       :description="$t('favorites.page.description')"
     />
@@ -9,16 +10,26 @@
       v-if="entries.length"
       class="md:flex justify-between items-center w-full mb-4 gap-4"
     >
-      <p class="text-gray-600 dark:text-gray-300">
+      <p class="text-gray-600 dark:text-gray-300 whitespace-nowrap">
         {{ $t("favorites.page.count", shown.length, { count: shown.length }) }}
       </p>
-      <USelect
-        v-model="tenantFilter"
-        :items="tenantItems"
-        :aria-label="$t('favorites.page.filterByTenant')"
-        icon="i-lucide-building-2"
-        class="w-full md:w-64 mt-2 md:mt-0"
-      />
+      <div class="w-full md:w-[40%] flex mt-2 md:mt-0">
+        <UInput
+          v-model="searchQuery"
+          icon="i-lucide-search"
+          size="md"
+          variant="outline"
+          :placeholder="$t('favorites.page.searchPlaceholder')"
+          :aria-label="$t('favorites.page.searchPlaceholder')"
+          class="w-full"
+        />
+        <FavoritesFilter
+          :tenants="tenants"
+          :kinds="kinds"
+          class="ml-1"
+          @set-filter="setFilter"
+        />
+      </div>
     </div>
 
     <div
@@ -37,15 +48,24 @@
       <UButton :label="$t('common.retry')" @click="refresh()" />
     </div>
 
-    <div
-      v-else-if="shown.length"
-      class="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-10"
-    >
-      <FavoriteEntryCard
-        v-for="entry in shown"
-        :key="favoriteKey(entry)"
-        :entry="entry"
-        @remove="remove"
+    <div v-else-if="shown.length" class="w-full">
+      <div class="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <FavoriteEntryCard
+          v-for="entry in pagedItems"
+          :key="favoriteKey(entry)"
+          :entry="entry"
+          @remove="remove"
+        />
+      </div>
+      <ResultsPagination
+        v-model:page="page"
+        v-model:page-size="pageSize"
+        :total="total"
+        :items-per-page="itemsPerPage"
+        :page-count="pageCount"
+        :first-item-on-page="firstItemOnPage"
+        :last-item-on-page="lastItemOnPage"
+        :page-size-options="FAVORITES_PAGE_SIZES"
       />
     </div>
 
@@ -54,7 +74,7 @@
       class="flex flex-col items-center justify-center py-16 text-center"
     >
       <UIcon name="i-lucide-filter-x" class="text-6xl text-gray-400 mb-4" />
-      <p class="text-gray-500">{{ $t("favorites.page.emptyForTenant") }}</p>
+      <p class="text-gray-500">{{ $t("favorites.page.noMatches") }}</p>
     </div>
 
     <div
@@ -78,19 +98,25 @@
 </template>
 <script setup>
 import FavoriteEntryCard from "~/components/favorites/FavoriteEntryCard.vue";
+import FavoritesFilter from "~/components/favorites/FavoritesFilter.vue";
+import ResultsPagination from "~/components/search/ResultsPagination.vue";
 import { useFavorites } from "~/composables/api/useFavorites.js";
 import {
-  ALL_TENANTS,
-  filterByTenant,
+  filterEntries,
+  kindsOf,
+  searchByTitle,
   stillMarked,
   tenantsOf,
 } from "~/composables/favorites/favoriteEntry.js";
 import { favoriteKey } from "~/composables/favorites/favoriteReference.js";
+import {
+  ALL_ITEMS,
+  useResultPagination,
+} from "~/composables/search/useResultPagination.js";
 import { useFavoritesStore } from "~~/stores/favorites.js";
 
 /**
- * The favorites page: every favorite of the signed-in user across all
- * tenants, each in its state, narrowed to one tenant on request. The
+ * The favorites page: every favorite of the signed-in. The
  * hydrated list is loaded for this visit; whether an entry is still marked
  * is the store's word, so a removal — from the heart of an available Offer
  * or the button of an unavailable or deleted one — takes the entry out at
@@ -137,28 +163,43 @@ const entries = computed(() =>
   stillMarked(loaded.value, favoritesStore.keys, favoritesStore.initialized),
 );
 
-const tenantFilter = ref(ALL_TENANTS);
-const tenantItems = computed(() => [
-  { label: t("favorites.page.allTenants"), value: ALL_TENANTS },
-  ...tenantsOf(entries.value).map(({ id, name }) => ({
-    label: name,
-    value: id,
-  })),
-]);
+// The filter offers providers and Kinds.
+const tenants = computed(() => tenantsOf(entries.value));
+const kinds = computed(() => kindsOf(entries.value));
+const filter = ref({ tenantIds: [], kinds: [] });
 
-watch(tenantItems, (items) => {
-  if (!items.some((item) => item.value === tenantFilter.value)) {
-    tenantFilter.value = ALL_TENANTS;
-  }
+function setFilter(newFilter) {
+  filter.value = newFilter;
+}
+
+const searchQuery = ref("");
+
+const shown = computed(() =>
+  filterEntries(searchByTitle(entries.value, searchQuery.value), filter.value),
+);
+
+const FAVORITES_PAGE_SIZES = [12, 24, 48, 96, ALL_ITEMS];
+
+const header = useTemplateRef("header");
+const scrollTarget = computed(() => header.value?.$el ?? null);
+const {
+  page,
+  pageSize,
+  itemsPerPage,
+  pageCount,
+  total,
+  pagedItems,
+  firstItemOnPage,
+  lastItemOnPage,
+} = useResultPagination(shown, {
+  scrollTarget,
+  initialPageSize: FAVORITES_PAGE_SIZES[0],
 });
-
-const shown = computed(() => filterByTenant(entries.value, tenantFilter.value));
 
 async function remove(entry) {
   try {
     await favoritesStore.unmark(entry);
   } catch (err) {
-    // A dead session is handled by the API client itself.
     if (err?.statusCode === 401) return;
     notification.error(t("favorites.removeFailed"));
   }

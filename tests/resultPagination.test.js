@@ -27,6 +27,17 @@ describe("the result pagination", () => {
     expect(total.value).toBe(45);
   });
 
+  it("opens with the page size a view asks for", () => {
+    const { pageSize, pagedItems, pageCount } = useResultPagination(
+      computed(() => results(45)),
+      { initialPageSize: 12 },
+    );
+
+    expect(pageSize.value).toBe(12);
+    expect(pagedItems.value).toHaveLength(12);
+    expect(pageCount.value).toBe(4);
+  });
+
   it("slices the page the reader is on, the last one short", () => {
     const { page, pagedItems, firstItemOnPage, lastItemOnPage } =
       useResultPagination(computed(() => results(45)));

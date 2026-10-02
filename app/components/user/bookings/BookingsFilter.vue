@@ -176,11 +176,14 @@ const sortItems = () => [
 ];
 
 const statusFilterItems = () => [
-  {
-    label: t("booking.filter.filterBy"),
-    class: "cursor-default font-bold opacity-50 hover:bg-transparent mb-1",
-    disabled: true,
-  },
+  [
+    {
+      label: t("booking.filter.filterBy"),
+      class: "cursor-default font-bold opacity-50 hover:bg-transparent mb-1",
+      disabled: true,
+    },
+  ],
+
   /*{
     label: t("booking.filter.activeBookings"),
     icon: "i-lucide-tv-minimal-play",
@@ -192,86 +195,90 @@ const statusFilterItems = () => [
       onSetFilter();
     },
   },*/
-  {
-    label: t("booking.filter.status"),
-    class: "cursor-default opacity-50 hover:bg-transparent",
-    disabled: true,
-  },
-  {
-    label: t("booking.filter.confirmed"),
-    icon: "i-lucide-check",
-    type: "checkbox",
-    checked: showStatusConfirmed.value,
-    class: showStatusConfirmed.value ? "bg-primary/20" : "",
-    onUpdateChecked(checked) {
-      showStatusConfirmed.value = checked;
-      onSetFilter();
+  [
+    {
+      label: t("booking.filter.status"),
+      class: "cursor-default opacity-50 hover:bg-transparent",
+      disabled: true,
     },
-    onSelect(e) {
-      e.preventDefault();
+    {
+      label: t("booking.filter.confirmed"),
+      icon: "i-lucide-check",
+      type: "checkbox",
+      checked: showStatusConfirmed.value,
+      class: showStatusConfirmed.value ? "bg-primary/20" : "",
+      onUpdateChecked(checked) {
+        showStatusConfirmed.value = checked;
+        onSetFilter();
+      },
+      onSelect(e) {
+        e.preventDefault();
+      },
     },
-  },
-  {
-    label: t("booking.filter.cancelled"),
-    icon: "i-lucide-x",
-    type: "checkbox",
-    checked: showStatusRejected.value,
-    class: showStatusRejected.value ? "bg-primary/20" : "",
-    onUpdateChecked(checked) {
-      showStatusRejected.value = checked;
-      onSetFilter();
+    {
+      label: t("booking.filter.cancelled"),
+      icon: "i-lucide-x",
+      type: "checkbox",
+      checked: showStatusRejected.value,
+      class: showStatusRejected.value ? "bg-primary/20" : "",
+      onUpdateChecked(checked) {
+        showStatusRejected.value = checked;
+        onSetFilter();
+      },
+      onSelect(e) {
+        e.preventDefault();
+      },
     },
-    onSelect(e) {
-      e.preventDefault();
+    {
+      label: t("booking.filter.pending"),
+      icon: "i-lucide-hourglass",
+      type: "checkbox",
+      checked: showStatusPending.value,
+      class: showStatusPending.value ? "bg-primary/20 mb-1" : "mb-1",
+      onUpdateChecked(checked) {
+        showStatusPending.value = checked;
+        onSetFilter();
+      },
+      onSelect(e) {
+        e.preventDefault();
+      },
     },
-  },
-  {
-    label: t("booking.filter.pending"),
-    icon: "i-lucide-hourglass",
-    type: "checkbox",
-    checked: showStatusPending.value,
-    class: showStatusPending.value ? "bg-primary/20 mb-1" : "mb-1",
-    onUpdateChecked(checked) {
-      showStatusPending.value = checked;
-      onSetFilter();
+  ],
+  [
+    {
+      label: t("booking.filter.paymentStatus"),
+      class: "cursor-default opacity-50 hover:bg-transparent",
+      disabled: true,
     },
-    onSelect(e) {
-      e.preventDefault();
+    {
+      label: t("booking.filter.paid"),
+      icon: "i-lucide-check",
+      type: "checkbox",
+      checked: showPaymentsConfirmed.value,
+      class: showPaymentsConfirmed.value ? "bg-primary/20" : "",
+      onUpdateChecked(checked) {
+        showPaymentsConfirmed.value = checked;
+        onSetFilter();
+      },
+      onSelect(e) {
+        e.preventDefault();
+      },
     },
-  },
-  {
-    label: t("booking.filter.paymentStatus"),
-    class: "cursor-default opacity-50 hover:bg-transparent",
-    disabled: true,
-  },
-  {
-    label: t("booking.filter.paid"),
-    icon: "i-lucide-check",
-    type: "checkbox",
-    checked: showPaymentsConfirmed.value,
-    class: showPaymentsConfirmed.value ? "bg-primary/20" : "",
-    onUpdateChecked(checked) {
-      showPaymentsConfirmed.value = checked;
-      onSetFilter();
+    {
+      label: t("booking.filter.unpaid"),
+      icon: "i-lucide-hourglass",
+      type: "checkbox",
+      checked: showPaymentsUnconfirmed.value,
+      class: showPaymentsUnconfirmed.value ? "bg-primary/20" : "",
+      onUpdateChecked(checked) {
+        showPaymentsUnconfirmed.value = checked;
+        onSetFilter();
+      },
+      onSelect(e) {
+        e.preventDefault();
+      },
     },
-    onSelect(e) {
-      e.preventDefault();
-    },
-  },
-  {
-    label: t("booking.filter.unpaid"),
-    icon: "i-lucide-hourglass",
-    type: "checkbox",
-    checked: showPaymentsUnconfirmed.value,
-    class: showPaymentsUnconfirmed.value ? "bg-primary/20" : "",
-    onUpdateChecked(checked) {
-      showPaymentsUnconfirmed.value = checked;
-      onSetFilter();
-    },
-    onSelect(e) {
-      e.preventDefault();
-    },
-  },
+  ],
 ];
 
 function getSortIconByValue(value) {

@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  ALL_TENANTS,
   detailPathOf,
-  filterByTenant,
+  filterEntries,
   isAvailable,
+  kindOf,
+  kindsOf,
   offerOf,
+  searchByTitle,
   stillMarked,
   tenantsOf,
   titleOf,
@@ -76,11 +78,22 @@ describe("an entry of the favorites list", () => {
   });
 });
 
-describe("the tenant filter of the favorites page", () => {
+describe("the filter of the favorites page", () => {
   const entries = [
     entry(),
-    entry({ targetId: "b-2", tenantId: "sports", tenantName: "Sportamt" }),
-    entry({ targetId: "b-3" }),
+    entry({
+      targetId: "b-2",
+      tenantId: "sports",
+      tenantName: "Sportamt",
+      offer: { id: "b-2", type: "resource", title: "Ball" },
+    }),
+    entry({ targetId: "b-3", status: "deleted", offer: undefined }),
+    entry({
+      targetType: "event",
+      targetId: "e-1",
+      status: "unavailable",
+      offer: undefined,
+    }),
   ];
 
   it("lists each tenant once, named from the snapshot", () => {
@@ -93,10 +106,64 @@ describe("the tenant filter of the favorites page", () => {
     ]);
   });
 
-  it("narrows to one tenant and to none", () => {
-    expect(filterByTenant(entries, "sports").map((e) => e.targetId)).toEqual(["b-2"]);
-    expect(filterByTenant(entries, ALL_TENANTS)).toHaveLength(3);
-    expect(filterByTenant(entries, null)).toHaveLength(3);
+  it("knows the Kind of an available bookable and of every event", () => {
+    expect(kindOf(entries[0])).toBe("room");
+    expect(kindOf(entries[1])).toBe("resource");
+    expect(kindOf(entries[2])).toBeNull();
+    expect(kindOf(entries[3])).toBe("event");
+  });
+
+  it("lists the Kinds present in the catalog's order", () => {
+    expect(kindsOf(entries)).toEqual(["room", "resource", "event"]);
+    expect(kindsOf([])).toEqual([]);
+  });
+
+  it("narrows by providers, by Kinds, by both, and by nothing", () => {
+    const ids = (list) => list.map((e) => e.targetId);
+
+    expect(ids(filterEntries(entries, { tenantIds: ["sports"] }))).toEqual(["b-2"]);
+    expect(ids(filterEntries(entries, { kinds: ["room", "event"] }))).toEqual([
+      "b-1",
+      "e-1",
+    ]);
+    expect(
+      ids(filterEntries(entries, { tenantIds: ["default"], kinds: ["event"] })),
+    ).toEqual(["e-1"]);
+    expect(filterEntries(entries, {})).toHaveLength(4);
+    expect(filterEntries(entries)).toHaveLength(4);
+  });
+
+  it("keeps a bookable without a Kind out of a Kind choice", () => {
+    expect(filterEntries(entries, { kinds: ["room"] })).not.toContain(entries[2]);
+    expect(filterEntries(entries, { tenantIds: ["default"] })).toContain(entries[2]);
+  });
+});
+
+describe("the title search of the favorites page", () => {
+  const entries = [
+    entry(),
+    entry({ targetId: "b-2", status: "deleted", offer: undefined, title: "Nähmaschine" }),
+    entry({
+      targetType: "event",
+      targetId: "e-1",
+      offer: { id: "e-1", information: { name: "Stadtfest" } },
+    }),
+  ];
+
+  it("finds a title by a part of it, whatever the case and accents", () => {
+    expect(searchByTitle(entries, "saal").map((e) => e.targetId)).toEqual(["b-1"]);
+    expect(searchByTitle(entries, "nahm").map((e) => e.targetId)).toEqual(["b-2"]);
+    expect(searchByTitle(entries, "FEST").map((e) => e.targetId)).toEqual(["e-1"]);
+  });
+
+  it("reads the current title of an available entry, not the snapshot", () => {
+    expect(searchByTitle(entries, "damals")).toEqual([]);
+  });
+
+  it("keeps everything for an empty or blank query", () => {
+    expect(searchByTitle(entries, "")).toHaveLength(3);
+    expect(searchByTitle(entries, "   ")).toHaveLength(3);
+    expect(searchByTitle(entries, undefined)).toHaveLength(3);
   });
 });
 

@@ -1423,12 +1423,15 @@
     "notAvailable": "This offer cannot be saved as a favourite right now.",
     "failed": "The favourite could not be saved. Please try again.",
     "removeFailed": "The favourite could not be removed. Please try again.",
+    "filter": {
+      "filterBy": "Filter by:",
+      "tenant": "Provider:",
+      "kind": "Type:"
+    },
     "page": {
       "title": "Favourites",
       "description": "Here you will find all the offers you have saved as favourites.",
       "count": "No favourites | One favourite | {count} favourites",
-      "filterByTenant": "Filter by provider",
-      "allTenants": "All providers",
       "unavailable": "Not available",
       "unavailableHint": "This offer cannot be reached right now. It stays saved until you remove it.",
       "deleted": "Deleted offer",
@@ -1437,7 +1440,8 @@
       "emptyTitle": "No favourites yet",
       "emptyDescription": "Tap the heart on an offer in the catalogue or on its detail page to find it here again.",
       "browseOffers": "Browse offers",
-      "emptyForTenant": "You have no favourites saved with this provider.",
+      "searchPlaceholder": "Search by title",
+      "noMatches": "No favourite matches your search or the chosen filters.",
       "loadFailed": "Your favourites could not be loaded."
     }
   }
