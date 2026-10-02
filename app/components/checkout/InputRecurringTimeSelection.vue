@@ -732,7 +732,10 @@ function getWeekDayCardClass(wd) {
               class="text-xs text-red-700 dark:text-red-300 mt-0.5"
             >
               {{
-                $t(statusFor(attempt.start)?.reason || "checkout.unknown_error")
+                $t(
+                  statusFor(attempt.start)?.reason || "checkout.unknown_error",
+                  statusFor(attempt.start)?.params || {},
+                )
               }}
             </p>
           </div>
