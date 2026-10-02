@@ -49,14 +49,24 @@
     </div>
 
     <div v-else-if="shown.length" class="w-full">
-      <div class="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <!-- A card whose undo window has run out fades out and the rest
+           close the gap -->
+      <TransitionGroup
+        name="favorites"
+        tag="div"
+        class="relative w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+        @before-leave="holdInPlace"
+      >
         <FavoriteEntryCard
           v-for="entry in pagedItems"
           :key="favoriteKey(entry)"
           :entry="entry"
+          :removing="removingKeys.includes(favoriteKey(entry))"
+          :undo-window-ms="UNDO_WINDOW_MS"
           @remove="remove"
+          @undo="undoRemoval"
         />
-      </div>
+      </TransitionGroup>
       <ResultsPagination
         v-model:page="page"
         v-model:page-size="pageSize"
@@ -196,14 +206,100 @@ const {
   initialPageSize: FAVORITES_PAGE_SIZES[0],
 });
 
-async function remove(entry) {
+/**
+ * Removing is undoable: the card stays in place, greyed out, and offers
+ * „Rückgängig" while a bar runs down the undo window. Only when the window
+ * has run out does the removal go to the backend and the card leave, so a
+ * slip of the hand costs nothing and an unavailable or deleted entry comes
+ * back without being marked anew. Leaving the page sends every removal
+ * still waiting.
+ */
+const UNDO_WINDOW_MS = 6000;
+const pendingRemovals = new Map();
+const removingKeys = ref([]);
+
+function remove(entry) {
+  const key = favoriteKey(entry);
+  if (pendingRemovals.has(key)) return;
+
+  removingKeys.value = [...removingKeys.value, key];
+  const timer = setTimeout(() => commitRemoval(key), UNDO_WINDOW_MS);
+  pendingRemovals.set(key, { entry, timer });
+}
+
+function undoRemoval(entry) {
+  const key = favoriteKey(entry);
+  const pending = pendingRemovals.get(key);
+  if (!pending) return;
+  clearTimeout(pending.timer);
+  pendingRemovals.delete(key);
+  settle(key);
+}
+
+async function commitRemoval(key) {
+  const pending = pendingRemovals.get(key);
+  if (!pending) return;
+  pendingRemovals.delete(key);
   try {
-    await favoritesStore.unmark(entry);
+    await favoritesStore.unmark(pending.entry);
   } catch (err) {
-    if (err?.statusCode === 401) return;
-    notification.error(t("favorites.removeFailed"));
+    // A dead session is handled by the API client itself.
+    if (err?.statusCode !== 401) {
+      notification.error(t("favorites.removeFailed"));
+    }
+  } finally {
+    // Gone from the store, or back in the list after a refused removal.
+    settle(key);
   }
+}
+
+function settle(key) {
+  removingKeys.value = removingKeys.value.filter((entry) => entry !== key);
+}
+
+onBeforeUnmount(() => {
+  for (const [key, pending] of pendingRemovals) {
+    clearTimeout(pending.timer);
+    pendingRemovals.delete(key);
+    favoritesStore.unmark(pending.entry).catch(() => {});
+  }
+});
+
+// Pins a leaving card to its place and size, so the grid can close the gap
+// around it while it fades.
+function holdInPlace(el) {
+  const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = el;
+  Object.assign(el.style, {
+    left: `${offsetLeft}px`,
+    top: `${offsetTop}px`,
+    width: `${offsetWidth}px`,
+    height: `${offsetHeight}px`,
+  });
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+/* The leaving card fades first; the rest slide into the gap right after,
+   long enough to be seen. */
+.favorites-enter-active,
+.favorites-leave-active {
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.favorites-move {
+  transition: transform 0.45s ease 0.1s;
+}
+
+.favorites-enter-from,
+.favorites-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.favorites-leave-active {
+  position: absolute;
+  pointer-events: none;
+}
+</style>

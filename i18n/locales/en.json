@@ -1441,6 +1441,7 @@
       "deleted": "Deleted offer",
       "deletedHint": "This offer no longer exists.",
       "removeEntry": "Remove",
+      "undo": "Undo",
       "emptyTitle": "No favourites yet",
       "emptyDescription": "Tap the heart on an offer in the catalogue or on its detail page to find it here again.",
       "browseOffers": "Browse offers",
