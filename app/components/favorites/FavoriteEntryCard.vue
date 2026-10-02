@@ -30,7 +30,7 @@
         loading="lazy"
         class="w-full h-full object-cover"
         @error="imageFailed = true"
-      >
+      />
       <ClientOnly v-else>
         <ImagePlaceholder :theme="theme" class="w-full h-full" />
       </ClientOnly>
@@ -50,7 +50,7 @@
       <UBadge
         :label="stateLabel"
         :icon="deleted ? 'i-lucide-trash-2' : 'i-lucide-eye-off'"
-        color="neutral"
+        color="error"
         variant="subtle"
         class="mb-3"
       />
@@ -137,9 +137,7 @@ watch(
 );
 
 const stateLabel = computed(() =>
-  deleted.value
-    ? t("favorites.page.deleted")
-    : t("favorites.page.unavailable"),
+  deleted.value ? t("favorites.page.deleted") : t("favorites.page.unavailable"),
 );
 const stateHint = computed(() =>
   deleted.value
