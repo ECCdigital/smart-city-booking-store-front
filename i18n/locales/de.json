@@ -1119,6 +1119,11 @@
   },
 
   "account": {
+    "listFilter": {
+      "filterBy": "Filtern nach:",
+      "tenant": "Anbieter:",
+      "kind": "Typ:"
+    },
     "contactData": "Kontaktdaten",
     "security": "Sicherheit",
     "accountVerified": "Account verifiziert?",
@@ -1334,6 +1339,8 @@
     "scannedDescription": "Sie haben den Code an der Tür gescannt.",
     "whichBooking": "Welche Buchung?",
     "noKeysFound": "Keine Schlüssel gefunden",
+    "searchPlaceholder": "Suchen",
+    "noMatches": "Kein Schlüssel passt zu Ihrer Suche oder den gewählten Filtern.",
     "lockSystemInfo": "Informationen und Status des Schließsystems",
     "openAction": "Öffnen",
     "accessPoint": {
@@ -1587,11 +1594,6 @@
     "notAvailable": "Dieses Angebot kann derzeit nicht als Favorit gemerkt werden.",
     "failed": "Der Favorit konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     "removeFailed": "Der Favorit konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
-    "filter": {
-      "filterBy": "Filtern nach:",
-      "tenant": "Anbieter:",
-      "kind": "Typ:"
-    },
     "page": {
       "title": "Ihre Favoriten",
       "description": "Hier finden Sie alle Angebote, die Sie als Favorit gemerkt haben.",

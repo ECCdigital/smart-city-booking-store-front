@@ -1,7 +1,9 @@
 <template>
   <!--
-    The filter of the favorites page: one button with a chip while a filter
-    is on, a dropdown behind it: for provider or type.
+    The filter of the account lists (favorites, mobile keys): one button
+    with a chip while a filter is on, a dropdown behind it, for provider and
+    type. The groups are drawn from the entries themselves; a list without
+    Kinds shows no type group.
   -->
   <UDropdownMenu
     arrow
@@ -14,6 +16,7 @@
       item: 'hover:bg-primary/10',
       content: 'w-56',
     }"
+    :disabled="isDisabled"
   >
     <UChip :show="hasFiltersApplied" inset>
       <UButton
@@ -21,8 +24,9 @@
         size="md"
         variant="outline"
         color="neutral"
-        :aria-label="$t('favorites.filter.filterBy')"
+        :aria-label="$t('account.listFilter.filterBy')"
         class="h-full"
+        :class="isDisabled ? 'opacity-80' : ''"
       />
     </UChip>
   </UDropdownMenu>
@@ -38,6 +42,10 @@ const props = defineProps({
   kinds: {
     type: Array,
     default: () => [],
+  },
+  isDisabled: {
+    type: Boolean,
+    default: false,
   },
 });
 const emit = defineEmits(["setFilter"]);
@@ -109,9 +117,9 @@ const checkbox = ({ label, icon, checked, last, onChecked }) => ({
 });
 
 const filterItems = () => [
-  [heading(t("favorites.filter.filterBy"), "font-bold mb-1")],
+  [heading(t("account.listFilter.filterBy"), "font-bold mb-1")],
   [
-    heading(t("favorites.filter.tenant")),
+    heading(t("account.listFilter.tenant")),
     ...props.tenants.map((tenant, index) =>
       checkbox({
         label: tenant.name,
@@ -128,19 +136,27 @@ const filterItems = () => [
       }),
     ),
   ],
-  [
-    heading(t("favorites.filter.kind")),
-    ...props.kinds.map((kind) =>
-      checkbox({
-        label: t(KIND_ITEMS[kind]?.labelKey ?? "bookableType.unknown"),
-        icon: KIND_ITEMS[kind]?.icon ?? "i-lucide-file-exclamation-point",
-        checked: selectedKinds.value.includes(kind),
-        onChecked: (checked) => {
-          selectedKinds.value = toggled(selectedKinds.value, kind, checked);
-        },
-      }),
-    ),
-  ],
+  ...(props.kinds.length
+    ? [
+        [
+          heading(t("account.listFilter.kind")),
+          ...props.kinds.map((kind) =>
+            checkbox({
+              label: t(KIND_ITEMS[kind]?.labelKey ?? "bookableType.unknown"),
+              icon: KIND_ITEMS[kind]?.icon ?? "i-lucide-file-exclamation-point",
+              checked: selectedKinds.value.includes(kind),
+              onChecked: (checked) => {
+                selectedKinds.value = toggled(
+                  selectedKinds.value,
+                  kind,
+                  checked,
+                );
+              },
+            }),
+          ),
+        ],
+      ]
+    : []),
 ];
 
 function toggled(list, value, on) {

@@ -764,6 +764,11 @@
     }
   },
   "account": {
+    "listFilter": {
+      "filterBy": "Filter by:",
+      "tenant": "Provider:",
+      "kind": "Type:"
+    },
     "contactData": "Contact details",
     "security": "Security",
     "accountVerified": "Account verified?",
@@ -976,6 +981,8 @@
     "scannedDescription": "You scanned the code at the door.",
     "whichBooking": "Which booking?",
     "noKeysFound": "No keys found",
+    "searchPlaceholder": "Search",
+    "noMatches": "No key matches your search or the chosen filters.",
     "lockSystemInfo": "Information and status of the locking system",
     "openAction": "Open",
     "accessPoint": {
@@ -1429,11 +1436,6 @@
     "notAvailable": "This offer cannot be saved as a favourite right now.",
     "failed": "The favourite could not be saved. Please try again.",
     "removeFailed": "The favourite could not be removed. Please try again.",
-    "filter": {
-      "filterBy": "Filter by:",
-      "tenant": "Provider:",
-      "kind": "Type:"
-    },
     "page": {
       "title": "Favourites",
       "description": "Here you will find all the offers you have saved as favourites.",

@@ -23,7 +23,7 @@
           :aria-label="$t('favorites.page.searchPlaceholder')"
           class="w-full"
         />
-        <FavoritesFilter
+        <ListFilter
           :tenants="tenants"
           :kinds="kinds"
           class="ml-1"
@@ -52,7 +52,7 @@
       <!-- A card whose undo window has run out fades out and the rest
            close the gap -->
       <TransitionGroup
-        name="favorites"
+        name="card-list"
         tag="div"
         class="relative w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
         @before-leave="holdInPlace"
@@ -108,7 +108,7 @@
 </template>
 <script setup>
 import FavoriteEntryCard from "~/components/favorites/FavoriteEntryCard.vue";
-import FavoritesFilter from "~/components/favorites/FavoritesFilter.vue";
+import ListFilter from "~/components/user/ListFilter.vue";
 import ResultsPagination from "~/components/search/ResultsPagination.vue";
 import { useFavorites } from "~/composables/api/useFavorites.js";
 import {
@@ -279,26 +279,10 @@ function holdInPlace(el) {
 </script>
 
 <style scoped>
-/* The leaving card fades first; the rest slide into the gap right after,
-   long enough to be seen. */
-.favorites-enter-active,
-.favorites-leave-active {
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease;
-}
-
-.favorites-move {
-  transition: transform 0.45s ease 0.1s;
-}
-
-.favorites-enter-from,
-.favorites-leave-to {
-  opacity: 0;
-  transform: scale(0.95);
-}
-
-.favorites-leave-active {
+/* The shared list transition (main.css), plus what only this grid needs: the
+   leaving card is taken out of the flow at the place `holdInPlace` pinned,
+   so the rest close the gap while it still fades. */
+.card-list-leave-active {
   position: absolute;
   pointer-events: none;
 }
