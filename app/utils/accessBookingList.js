@@ -30,14 +30,18 @@ export function filterAccessBookingsByTenant(bookings, tenantIds = []) {
 
 /**
  * The providers the bookings belong to, each once, in the order they first
- * appear, named by the caller (the tenant store knows the names).
+ * appear, named by the caller from the booking (its tenant snapshot knows the
+ * name, also for a tenant that is not public).
  */
-export function tenantsOfAccessBookings(bookings, nameOf = (id) => id) {
+export function tenantsOfAccessBookings(
+  bookings,
+  nameOf = (booking) => booking.tenantId,
+) {
   const seen = new Map();
   for (const booking of bookings ?? []) {
     const id = booking?.tenantId;
     if (!id || seen.has(id)) continue;
-    seen.set(id, { id, name: nameOf(id) || id });
+    seen.set(id, { id, name: nameOf(booking) || id });
   }
   return [...seen.values()];
 }

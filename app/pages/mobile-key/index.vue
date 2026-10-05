@@ -142,10 +142,13 @@ function setFilter(newFilter) {
   filter.value = newFilter;
 }
 
+// Named like the cards below: the booking's tenant snapshot, the store only
+// for an answer without one.
+const { getBookingTenant } = useTenant();
 const tenants = computed(() =>
   tenantsOfAccessBookings(
     bookings.value,
-    (id) => tenantStore.getTenantById(id)?.name,
+    (booking) => getBookingTenant(booking)?.name,
   ),
 );
 

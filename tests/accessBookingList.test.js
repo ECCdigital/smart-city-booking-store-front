@@ -52,7 +52,7 @@ describe("the search of the key list", () => {
 describe("the provider filter of the key list", () => {
   it("lists each provider once, named by the caller", () => {
     expect(
-      tenantsOfAccessBookings(bookings, (id) => (id === "diz" ? "Testmandant" : "")),
+      tenantsOfAccessBookings(bookings, (b) => (b.tenantId === "diz" ? "Testmandant" : "")),
     ).toEqual([
       { id: "diz", name: "Testmandant" },
       { id: "sports", name: "sports" },
