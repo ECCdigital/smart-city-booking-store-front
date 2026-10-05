@@ -17,6 +17,7 @@ export default defineEventHandler(async (event) => {
     deleteCookie(event, "kc-pending-refresh");
     deleteCookie(event, "kc-pending-redirect");
 
+    // Fixed path, known to the Admin UI and the backend: see login.get.ts.
     const ssoLoginUrl = `${getPublicOrigin(event)}/api/auth/sso/login?redirect=${encodeURIComponent(redirect)}`;
 
     const logoutUrl = new URL(endpoints.logout);

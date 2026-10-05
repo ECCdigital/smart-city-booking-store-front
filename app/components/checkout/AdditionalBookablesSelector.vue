@@ -211,6 +211,7 @@ function getErrorForItem(itemId) {
               $t(
                 getErrorForItem(entry.item.id).reason ||
                   "checkout.bookable_unavailable",
+                getErrorForItem(entry.item.id).params || {},
               )
             }}
           </span>
