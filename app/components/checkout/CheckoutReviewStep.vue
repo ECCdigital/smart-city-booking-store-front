@@ -494,12 +494,6 @@ const bookingDiscountDescription = computed(() => {
   }
   return t("checkout.review.bookingDiscountAppliedDescriptionGeneric");
 });
-
-const submitButtonLabel = computed(() =>
-  props.requiresManualApproval
-    ? t("checkout.review.sendBookingRequest")
-    : t("checkout.review.commitBooking"),
-);
 </script>
 
 <template>
@@ -937,7 +931,7 @@ const submitButtonLabel = computed(() =>
               :loading="isSubmitting"
               @click="onFinish"
             >
-              {{ submitButtonLabel }}
+              {{ $t("checkout.review.commitBooking") }}
             </UButton>
             <div class="text-center">
               <UButton
