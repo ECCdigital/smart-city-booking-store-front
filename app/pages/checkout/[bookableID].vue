@@ -17,6 +17,10 @@ import { useAuthStore } from "~~/stores/auth.js";
 import { useNotification } from "~/composables/useNotification.js";
 import { resolveCheckoutErrorKey } from "~/utils/checkoutErrors.js";
 import {
+  resolveMaxAmount,
+  resolvePerBookingLimit,
+} from "~/utils/amountLimits";
+import {
   BOOKING_STATUS,
   resolveBookingStatus,
 } from "~/utils/bookingStatus.js";
@@ -137,14 +141,6 @@ function checkoutCustomFieldsFromBookable(bookable) {
   const list = bookable?.customFields;
   if (!Array.isArray(list)) return [];
   return list.filter((f) => f?.usageOptions?.context === "checkout");
-}
-
-/** Configured max quantity from bookable.amount; null = unlimited. */
-function resolveMaxAmount(bookable) {
-  if (!bookable) return null;
-  const n = Number(bookable.amount);
-  if (!Number.isFinite(n) || n <= 0) return null;
-  return Math.trunc(n);
 }
 
 function clampBookableAmount(amount, { min = 1, max = null } = {}) {
@@ -442,8 +438,21 @@ const maxAmounts = computed(() => {
   const map = {};
   for (const b of bookablesInCheckout.value) {
     if (!b?.id) continue;
-    const max = resolveMaxAmount(b);
+    const mandatory = mandatoryBookableIds.value.includes(b.id);
+    const max = resolveMaxAmount(b, { mandatory });
     if (max != null) map[b.id] = max;
+  }
+  return map;
+});
+
+/** Per-booking limits, so the summary can tell them from capacity. */
+const maxAmountsPerBooking = computed(() => {
+  const map = {};
+  for (const b of bookablesInCheckout.value) {
+    if (!b?.id) continue;
+    const mandatory = mandatoryBookableIds.value.includes(b.id);
+    const limit = resolvePerBookingLimit(b, { mandatory });
+    if (limit != null) map[b.id] = limit;
   }
   return map;
 });
@@ -2671,6 +2680,7 @@ function onReviewEdit(section) {
             :is-validating="isValidating"
             :amounts="amounts"
             :max-amounts="maxAmounts"
+            :max-amounts-per-booking="maxAmountsPerBooking"
             :lead-bookable-id="bookableID"
             :mandatory-ids="mandatoryBookableIds"
             @update:amount="handleAmountUpdate"
@@ -2727,7 +2737,12 @@ function onReviewEdit(section) {
                     {{ leadBookable?.title }}
                   </p>
                   <p class="text-sm text-red-700 dark:text-red-300 mt-1">
-                    {{ $t(leadBookableError.reason) }}
+                    {{
+                      $t(
+                        leadBookableError.reason,
+                        leadBookableError.params || {},
+                      )
+                    }}
                   </p>
                   <p
                     v-if="leadBookableError.params?.remaining !== undefined"

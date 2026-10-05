@@ -2,7 +2,7 @@
   <div>
     <div :key="formVersion">
       <!-- Contact Information Section -->
-      <div class="mb-10 space-y-5">
+      <div class="mb-10 space-y-6">
         <div class="flex justify-between md:justify-normal mb-2 md:mb-5">
           <h3 class="text-xl font-bold">{{ $t("account.contactData") }}</h3>
         </div>
@@ -27,8 +27,16 @@
         <div class="md:flex space-y-2 md:space-y-0 my-3">
           <SettingsInputField
             field-id="company"
-            :label="$t('common.company')"
+            :label="$t('common.company') + ' (' + $t('common.optional') + ')'"
             :value="currentUser.company"
+            icon="i-lucide-building-2"
+            class="basis-1/2"
+            @update="updateUser"
+          />
+          <SettingsInputField
+            field-id="vatId"
+            :label="$t('common.vatId') + ' (' + $t('common.optional') + ')'"
+            :value="currentUser.vatId"
             icon="i-lucide-building-2"
             class="basis-1/2"
             @update="updateUser"

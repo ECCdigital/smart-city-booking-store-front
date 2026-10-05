@@ -13,6 +13,18 @@ function generateCodeChallenge(verifier: string): string {
     return crypto.createHash("sha256").update(verifier).digest("base64url");
 }
 
+/**
+ * SSO sign-in: sends the browser to Keycloak with `/api/auth/sso/callback`
+ * as `redirect_uri`.
+ *
+ * The paths of these SSO routes are known fixed outside this repo. The
+ * Admin UI's guide (tab „Single Sign-On“) lists `/api/auth/sso/callback`
+ * and `/api/auth/sso/login*` („Benutzer wechseln“) as the Storefront's
+ * Rücksprungadressen for the realm, and the backend's live check („Realm
+ * prüfen“, row 10) calls `/api/auth/sso/login` under the Portal-URL.
+ * Changing one of these paths needs both changed: see
+ * smart-city-booking-vue-app docs/agents/keycloak-realm.md.
+ */
 export default defineEventHandler(async (event) => {
     const config = await getKeycloakConfig(event);
     console.log("Starting SSO login flow with Keycloak config:", {
