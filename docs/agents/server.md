@@ -11,6 +11,7 @@ server/
     bookings/          # User bookings, invoices, receipts, mobile keys
     bookables/         # Bookable data, availability, pricing, occupancy
     events/            # Event listing, iCal export
+    favorites/         # The user's favorites: references list, mark, remove
     tenants/           # Tenant info, payment providers, user roles
     theme/             # Tenant theming (bundle, CSS, logo, favicon)
     instance/          # Global instance config

@@ -10,6 +10,7 @@
           <BackButton />
         </template>
         <template #actions>
+          <FavoriteButton :item="item" :is-event="isEvent" />
           <DetailsAreaButtonBooking :item="item" :is-event="isEvent" />
           <DetailsAreaButtonMoreActions :item="item" :is-event="isEvent" />
         </template>
@@ -70,6 +71,7 @@
 </template>
 <script setup>
 import DetailsAreaTitleBlock from "~/components/detailsArea/DetailsAreaTitleBlock.vue";
+import FavoriteButton from "~/components/favorites/FavoriteButton.vue";
 import { useBookableDetailContent } from "~/composables/bookables/useBookableDetailContent.js";
 import DetailsAreaImage from "~/components/detailsArea/DetailsAreaImage.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";

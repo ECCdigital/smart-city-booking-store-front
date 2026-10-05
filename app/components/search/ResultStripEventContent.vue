@@ -4,8 +4,12 @@
     :class="mapMode ? 'p-2' : 'p-4'"
   >
     <div class="flex flex-col gap-2">
-      <!-- Title -->
-      <div class="cursor-pointer" @click="openDetails()">
+      <!-- Title; room on the right for the heart in the strip's corner -->
+      <div
+        class="cursor-pointer"
+        :class="mapMode ? '' : 'pr-8'"
+        @click="openDetails()"
+      >
         <p
           class="font-bold"
           :class="

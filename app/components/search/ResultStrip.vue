@@ -1,12 +1,22 @@
 <template>
   <div
     v-if="props.item"
-    class="@container bg-white dark:bg-gray-700 flex flex-row rounded-sm shadow-lg"
+    class="@container relative bg-white dark:bg-gray-700 flex flex-row rounded-sm shadow-lg"
     :class="[
       isNotSuitable ? 'opacity-70' : ' ',
       listMode ? (isEvent ? 'min-h-56' : 'min-h-48') : '',
     ]"
   >
+    <!-- The heart sits in the strip's own corner, not the picture's; the
+         map tooltip is hover-only, so it carries none. -->
+    <FavoriteButton
+      v-if="!mapMode"
+      :item="item"
+      :is-event="isEvent"
+      overlay
+      class="absolute z-10"
+      :class="mapListMode ? 'top-1 right-1' : 'top-2 right-2'"
+    />
     <div
       class="w-24 shrink-0 @sm:basis-1/4 flex"
       :class="fillsRow ? 'items-stretch' : 'items-center'"
@@ -91,6 +101,7 @@ import ResultStripEventContent from "~/components/search/ResultStripEventContent
 import ResultStripBookableContent from "~/components/search/ResultStripBookableContent.vue";
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
+import FavoriteButton from "~/components/favorites/FavoriteButton.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
 import { useMediaImage } from "~/composables/utils/useMediaImage";
 

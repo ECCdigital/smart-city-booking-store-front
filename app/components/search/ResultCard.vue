@@ -9,7 +9,6 @@
   >
     <div
       id="header"
-      class=""
       :class="mapDetailMode ? 'h-28' : 'flex flex-col h-48 shrink-0'"
     >
       <div class="flex h-9/10 relative">
@@ -17,6 +16,12 @@
           :type="item?.type"
           :is-event="isEvent"
           class="absolute top-2 left-2"
+        />
+        <FavoriteButton
+          :item="item"
+          :is-event="isEvent"
+          overlay
+          class="absolute top-2 right-2 z-10"
         />
         <img
           v-if="image && !showImageErrorHint"
@@ -71,6 +76,7 @@ import ResultCardBookableContent from "~/components/search/ResultCardBookableCon
 import ResultCardEventContent from "~/components/search/ResultCardEventContent.vue";
 import ImagePlaceholder from "~/components/placeholder/ImagePlaceholder.vue";
 import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
+import FavoriteButton from "~/components/favorites/FavoriteButton.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
 import { useMediaImage } from "~/composables/utils/useMediaImage";
 

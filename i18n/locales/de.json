@@ -1597,5 +1597,15 @@
     "resource": "Gerät",
     "ticket": "Ticket",
     "unknown": "Unbekannt"
+  },
+  "favorites": {
+    "add": "Als Favorit merken",
+    "remove": "Aus Favoriten entfernen",
+    "signInToMark": "Anmelden, um Angebote als Favorit zu merken",
+    "limitReachedTitle": "Obergrenze erreicht",
+    "limitReached": "Sie können höchstens {limit} Favoriten merken. Entfernen Sie einen Favoriten, um ein neues Angebot zu merken.",
+    "limitReachedShort": "Sie haben die Obergrenze an Favoriten erreicht. Entfernen Sie einen Favoriten, um ein neues Angebot zu merken.",
+    "notAvailable": "Dieses Angebot kann derzeit nicht als Favorit gemerkt werden.",
+    "failed": "Der Favorit konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
   }
 }
