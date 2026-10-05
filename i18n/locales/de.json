@@ -91,7 +91,6 @@
     "unsavedChangesLeave": "Sie haben nicht gespeicherte Änderungen. Bitte speichern oder verwerfen Sie diese, bevor Sie die Seite verlassen.",
     "save": "Speichern",
     "reset": "Zurücksetzen",
-    "toHome": "Zur Startseite",
     "showAll": "Alle anzeigen",
     "showLess": "Weniger anzeigen",
     "clearEntry": "Eintrag löschen",
@@ -184,13 +183,21 @@
     "user": "Benutzer",
     "reports": "Berichte",
     "admin": "Admin-Bereich",
+    "offerSpaces": "Angebote bereitstellen",
     "settings": "Einstellungen",
     "favorites": "Favoriten"
   },
   "footer": {
     "legalNotice": "Impressum",
     "dataProtection": "Datenschutz",
-    "termsAndConditions": "AGB"
+    "termsAndConditions": "AGB",
+    "offerSpaces": "Angebote bereitstellen"
+  },
+  "rateLimit": {
+    "title": "Zu viele Versuche",
+    "seconds": "Bitte versuche es in {count} Sekunde erneut. | Bitte versuche es in {count} Sekunden erneut.",
+    "minutes": "Bitte versuche es in {count} Minute erneut. | Bitte versuche es in {count} Minuten erneut.",
+    "later": "Bitte versuche es später erneut."
   },
   "login": {
     "logoutErrorMessage": {
@@ -260,8 +267,9 @@
       "number": "Mindestens eine Zahl (0-9)"
     },
     "success": {
-      "heading": "Registrierung erfolgreich!",
-      "description": "Wir haben dir eine E-Mail mit einem Bestätigungslink gesendet. Bitte öffne dein Postfach und bestätige deine E-Mail-Adresse, um dein Konto zu aktivieren.",
+      "heading": "Bitte prüfe dein Postfach",
+      "description": "Wenn die angegebene E-Mail-Adresse verwendet werden kann, erhältst du in Kürze eine E-Mail mit einem Bestätigungslink. Bitte bestätige darüber deine E-Mail-Adresse, um dein Konto zu aktivieren.",
+      "resent": "Wenn die E-Mail-Adresse zu einem noch nicht bestätigten Konto gehört, haben wir den Bestätigungslink erneut gesendet.",
       "spamHint": "Wenn du die E-Mail nicht findest, überprüfe bitte auch deinen Spam- oder Werbeordner.",
       "toHome": "Zur Startseite",
       "toLogin": "Zur Anmeldung"
@@ -354,15 +362,32 @@
   },
 
   "errors": {
-    "notFoundTitle": "Seite nicht gefunden",
-    "notFoundMessage": "Die angeforderte Seite existiert nicht oder wurde verschoben.",
-    "forbiddenTitle": "Zugriff verweigert",
-    "forbiddenMessage": "Sie haben keine Berechtigung, diese Seite aufzurufen.",
-    "serverTitle": "Serverfehler",
-    "serverMessage": "Ein interner Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
-    "genericTitle": "Ein Fehler ist aufgetreten",
-    "genericMessage": "Etwas ist schiefgelaufen.",
-    "label": "Fehler",
+    "offerNotAvailable": "Dieses Angebot ist nicht (mehr) verfügbar.",
+    "loadFailed": {
+      "title": "Inhalte konnten nicht geladen werden",
+      "message": "Bitte versuchen Sie es später erneut."
+    },
+    "page": {
+      "notAvailable": {
+        "title": "Seite nicht verfügbar",
+        "message": "Die angeforderte Seite existiert nicht oder ist nicht (mehr) verfügbar."
+      },
+      "forbidden": {
+        "title": "Zugriff verweigert",
+        "message": "Sie haben keine Berechtigung, diese Seite aufzurufen."
+      },
+      "serverError": {
+        "title": "Serverfehler",
+        "message": "Ein interner Fehler ist aufgetreten. Bitte versuchen Sie es später erneut."
+      },
+      "generic": {
+        "title": "Ein Fehler ist aufgetreten",
+        "message": "Etwas ist schiefgelaufen."
+      },
+      "code": "Fehler",
+      "home": "Zur Startseite",
+      "back": "Zurück"
+    },
     "noCatalog": "Es wurde kein Katalog gefunden",
     "noTenantFound": {
       "title": "Kein Mandant gefunden",
@@ -397,10 +422,6 @@
     "registerError": {
       "title": "Registrierungsfehler",
       "message": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
-    },
-    "registerErrorEmailExists": {
-      "title": "Registrierungsfehler",
-      "message": "Die E-Mail-Adresse ist bereits registriert."
     },
     "forgotPasswordError": {
       "title": "Anfrage fehlgeschlagen",
@@ -648,6 +669,7 @@
     "bad_request": "Ungültige Anfrage. Bitte überprüfen Sie Ihre Eingaben.",
     "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
     "bookable_not_found": "Das angeforderte Objekt wurde nicht gefunden.",
+    "offer_not_reachable": "Dieses Angebot ist nicht mehr verfügbar und kann nicht gebucht werden.",
     "bookable_not_bookable": "Dieses Objekt kann nicht gebucht werden.",
     "bookable_unavailable": "Dieses Objekt ist im gewählten Zeitraum nicht verfügbar.",
     "parent_unavailable": "Das übergeordnete Objekt ist im gewählten Zeitraum nicht verfügbar.",
@@ -1168,6 +1190,7 @@
       "rejectionReason": "Ablehnungsgrund",
       "cancellationReason": "Stornierungsgrund"
     },
+    "unknownTenant": "Unbekannt",
     "invoices": {
       "title": "Ihre Rechnungen und Zahlungsbelege",
       "emptyTitle": "Keine Rechnungen vorhanden",

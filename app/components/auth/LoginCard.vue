@@ -101,7 +101,7 @@
           block
           icon="i-lucide-credit-card"
           class="mt-2"
-          :to="`/card-login/${method.id}`"
+          :to="appendReturnTarget(`/card-login/${method.id}`, returnTarget)"
         >
           {{ method.label }}
         </UButton>
@@ -111,7 +111,10 @@
     <template #footer>
       <p class="text-sm text-center text-gray-500 dark:text-gray-400">
         {{ $t("login.noAccount") }}
-        <NuxtLink to="/register" class="text-primary-500 hover:underline">
+        <NuxtLink
+          :to="appendReturnTarget('/register', returnTarget)"
+          class="text-primary-500 hover:underline"
+        >
           {{ $t("login.registerHere") }}
         </NuxtLink>
       </p>
@@ -123,11 +126,14 @@
 import { ref, computed } from "vue";
 import { useAuth } from "~/composables/auth/useAuth.js";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import { appendReturnTarget } from "~~/shared/utils/returnTarget";
 
 const props = defineProps({
   loading: { type: Boolean, default: false },
   ssoEnabled: { type: Boolean, default: false },
   ssoError: { type: String, default: null },
+  // The validated return target, handed on to signup and card login.
+  returnTarget: { type: String, default: null },
 });
 
 const userData = defineModel("userData", {

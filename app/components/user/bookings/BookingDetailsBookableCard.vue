@@ -50,6 +50,12 @@ const props = defineProps({
 
 const bookableTitle = computed(() => props.bookable._bookableUsed.title);
 const eventId = computed(() => props.bookable._bookableUsed.eventId);
+// Names the tenant of the booked offer, so the detail link also finds an
+// offer of a tenant the catalog does not list.
+const tenantHintQuery = computed(() => {
+  const tenantId = props.bookable._bookableUsed.tenantId;
+  return tenantId ? { tenantId } : {};
+});
 
 const { formatPrice } = useFormatting();
 
@@ -64,7 +70,7 @@ function goToBookable(bookableId) {
   const router = useRouter();
   const routeData = router.resolve({
     path: `/bookables/${bookableId}`,
-    query: {},
+    query: tenantHintQuery.value,
   });
   window.open(routeData.href, "_blank");
 }
@@ -72,7 +78,7 @@ function goToEvent() {
   const router = useRouter();
   const routeData = router.resolve({
     path: `/events/${eventId.value}`,
-    query: {},
+    query: tenantHintQuery.value,
   });
   window.open(routeData.href, "_blank");
 }

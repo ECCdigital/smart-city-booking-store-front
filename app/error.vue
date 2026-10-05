@@ -9,31 +9,20 @@ const handleError = () => clearError({ redirect: "/" });
 
 const { t } = useI18n();
 
-const errorConfig = computed<
-  Record<number, { title: string; icon: string; message: string }>
->(() => ({
-  404: {
-    title: t("errors.notFoundTitle"),
-    icon: "i-lucide-search",
-    message: t("errors.notFoundMessage"),
-  },
-  403: {
-    title: t("errors.forbiddenTitle"),
-    icon: "i-lucide-lock",
-    message: t("errors.forbiddenMessage"),
-  },
-  500: {
-    title: t("errors.serverTitle"),
-    icon: "i-lucide-cog",
-    message: t("errors.serverMessage"),
-  },
-}));
+// A 404 is neutral on purpose: a page that never existed and a tenant or
+// offer that is no longer available read the same, with no internal reason.
+const errorConfig: Record<number, { key: string; icon: string }> = {
+  404: { key: "errors.page.notAvailable", icon: "i-lucide-search" },
+  403: { key: "errors.page.forbidden", icon: "i-lucide-lock" },
+  500: { key: "errors.page.serverError", icon: "i-lucide-cog" },
+  502: { key: "errors.page.serverError", icon: "i-lucide-cog" },
+  503: { key: "errors.page.serverError", icon: "i-lucide-cog" },
+};
 
 const getErrorInfo = (code?: number) =>
-  errorConfig.value[code ?? 500] ?? {
-    title: t("errors.genericTitle"),
+  errorConfig[code ?? 500] ?? {
+    key: "errors.page.generic",
     icon: "i-lucide-bug",
-    message: t("errors.genericMessage"),
   };
 
 const pageTitle = computed(() => {
@@ -56,9 +45,15 @@ usePageTitle(pageTitle);
         :name="getErrorInfo(error?.statusCode).icon"
         class="mb-4"
       />
-      <h1 class="error-code">{{ error?.statusCode ?? $t("errors.label") }}</h1>
-      <h2 class="error-title">{{ getErrorInfo(error?.statusCode).title }}</h2>
-      <p class="error-message">{{ getErrorInfo(error?.statusCode).message }}</p>
+      <h1 class="error-code">
+        {{ error?.statusCode ?? $t("errors.page.code") }}
+      </h1>
+      <h2 class="error-title">
+        {{ $t(`${getErrorInfo(error?.statusCode).key}.title`) }}
+      </h2>
+      <p class="error-message">
+        {{ $t(`${getErrorInfo(error?.statusCode).key}.message`) }}
+      </p>
 
       <div v-if="error?.url" class="error-details">
         <code>{{ error.url }}</code>
@@ -66,10 +61,10 @@ usePageTitle(pageTitle);
 
       <div class="error-actions">
         <button class="btn-primary" @click="handleError">
-          {{ $t("common.toHome") }}
+          {{ $t("errors.page.home") }}
         </button>
         <button class="btn-secondary" @click="$router.back()">
-          {{ $t("common.back") }}
+          {{ $t("errors.page.back") }}
         </button>
       </div>
     </div>

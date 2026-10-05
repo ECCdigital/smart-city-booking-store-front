@@ -4,6 +4,7 @@ import { useAuthStore } from "~~/stores/auth.js";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import DetailsArea from "~/components/search/DetailsArea.vue";
 import CatalogBreadcrumb from "~/components/navigation/CatalogBreadcrumb.vue";
+import { tenantHintOf } from "~/utils/catalogDetail.js";
 
 definePageMeta({
   layout: "catalog",
@@ -32,6 +33,7 @@ async function refreshBookableDetail({ force = false } = {}) {
   await loadDetail({
     slug: catalogSlug.value || null,
     bookableID: bookableID.value,
+    tenantHint: tenantHintOf(route.query),
     force,
   });
 }
@@ -54,7 +56,7 @@ usePageTitle(() =>
     </div>
     <div v-else class="text-center mt-10">
       <UIcon size="48" name="i-lucide-monitor-off" class="text-gray-400 mb-4" />
-      <p class="text-gray-500">{{ $t("resources.noResource") }}</p>
+      <p class="text-gray-500">{{ $t("errors.offerNotAvailable") }}</p>
       <UButton :label="$t('common.back')" :to="tenantTo('/search')" class="mt-4" />
     </div>
   </div>

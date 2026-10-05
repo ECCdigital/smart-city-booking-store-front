@@ -1,3 +1,5 @@
+import { throwIfRateLimited } from "~~/server/utils/rateLimit";
+
 export default defineEventHandler(async (event) => {
   const { id, password } = await readBody(event);
   const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
@@ -36,6 +38,7 @@ export default defineEventHandler(async (event) => {
       },
     };
   } catch (error) {
+    throwIfRateLimited(event, error);
     throw createError({
       success: false,
       statusCode: error.response?.status || 500,

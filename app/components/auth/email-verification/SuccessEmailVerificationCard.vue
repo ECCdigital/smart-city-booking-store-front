@@ -1,5 +1,11 @@
 <script setup>
-
+defineProps({
+  // The login page, carrying the return target of the signup.
+  loginTo: {
+    type: String,
+    default: "/login",
+  },
+});
 </script>
 
 <template>
@@ -26,7 +32,7 @@
     </p>
 
     <div class="flex flex-col gap-3 w-full">
-      <UButton color="primary" block to="/">
+      <UButton color="primary" block :to="loginTo">
         {{ $t("emailVerification.success.toLogin") }}
       </UButton>
 

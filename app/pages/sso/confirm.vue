@@ -1,6 +1,7 @@
 <script setup>
 import { useAuthStore } from "~~/stores/auth";
 import SSOConfirmCard from "~/components/auth/SSOConfirmCard.vue";
+import { useReturnTarget } from "~/composables/auth/useReturnTarget";
 
 definePageMeta({
   layout: "default",
@@ -16,6 +17,7 @@ const userInfo = ref(null);
 const hasError = ref(false);
 
 const pendingRedirect = useCookie("kc-pending-redirect");
+const { withTarget, follow: followReturnTarget } = useReturnTarget();
 
 onMounted(async () => {
   try {
@@ -51,7 +53,7 @@ const handleConfirm = async () => {
     const redirect = response?.data?.redirect || redirectTarget || "/";
     pendingRedirect.value = null;
 
-    await navigateTo(redirect);
+    await followReturnTarget(redirect);
   } catch {
     notification.error(
       t("notifications.loginError.message"),
@@ -71,12 +73,7 @@ const handleChangeUser = async () => {
 };
 
 const handleBack = () => {
-  const redirect = pendingRedirect.value;
-  if (redirect) {
-    navigateTo(`/login?redirect=${encodeURIComponent(redirect)}`);
-    return;
-  }
-  navigateTo("/login");
+  navigateTo(withTarget("/login", pendingRedirect.value));
 };
 </script>
 

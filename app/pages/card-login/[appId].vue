@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useAuth } from "~/composables/auth/useAuth";
+import { useReturnTarget } from "~/composables/auth/useReturnTarget";
 import { useAuthStore } from "~~/stores/auth.js";
 import CardLoginCard from "~/components/auth/CardLoginCard";
 import type { CardMethod } from "~~/shared/types/api";
@@ -13,6 +14,7 @@ usePageTitle(() => t("meta.pages.cardLogin"));
 const notification = useNotification();
 const authStore = useAuthStore();
 const { getCardAuthMethods } = useAuth();
+const { follow: followReturnTarget } = useReturnTarget();
 
 const appId = computed(() => route.params.appId as string);
 
@@ -39,12 +41,7 @@ const onSuccess = async () => {
       "!",
       t("notifications.loginSuccess.title"),
   );
-  const redirect = route.query.redirect;
-  if (redirect && typeof redirect === "string") {
-    await navigateTo(redirect);
-  } else {
-    await navigateTo("/");
-  }
+  await followReturnTarget();
 };
 
 onMounted(fetchCardMethod);

@@ -5,6 +5,7 @@ import { useAuthStore } from "~~/stores/auth.js";
 import DetailsArea from "~/components/search/DetailsArea.vue";
 import { titleOf } from "~/composables/search/offer";
 import CatalogBreadcrumb from "~/components/navigation/CatalogBreadcrumb.vue";
+import { tenantHintOf } from "~/utils/catalogDetail.js";
 
 definePageMeta({
   layout: "catalog",
@@ -31,6 +32,7 @@ async function refreshEventDetail({ force = false } = {}) {
   await loadDetail({
     slug: catalogSlug.value || null,
     eventID: eventID.value,
+    tenantHint: tenantHintOf(route.query),
     force,
   });
 }
@@ -57,7 +59,7 @@ usePageTitle(() =>
         name="i-lucide-calendar-off"
         class="text-gray-400 mb-4"
       />
-      <p class="text-gray-500">{{ $t("events.noEvent") }}</p>
+      <p class="text-gray-500">{{ $t("errors.offerNotAvailable") }}</p>
       <UButton
         :label="$t('common.back')"
         :to="tenantTo({ path: '/search', query: { cat: 'event' } })"

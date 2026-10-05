@@ -1,4 +1,5 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
 export default defineEventHandler(async (event) => {
   const tenantID = getRouterParam(event, "tenantID");
@@ -16,7 +17,7 @@ export default defineEventHandler(async (event) => {
 
   if (error) {
     console.error("Error fetching booking status:", error);
-    throw error;
+    throw createError(proxyErrorOf(error, "Failed to fetch booking status"));
   }
   return data;
 });

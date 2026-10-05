@@ -17,5 +17,9 @@ export default createConditionalCachedHandler(
 
     return data;
   },
+  // Stays cached: the answer is the portal mode, the portal URL and the
+  // instance branding — no tenant, no offer, nothing a tenant supervision
+  // decision changes. It is read on every SSR request, which is what the
+  // cache is for.
   { maxAge: 300, swr: true }
 );

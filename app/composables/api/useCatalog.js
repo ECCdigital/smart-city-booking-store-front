@@ -28,6 +28,7 @@ export function useCatalog() {
     catalogType = null,
     catalogTenantID = null,
     tenantIDs = [],
+    tenantHint = null,
   } = {}) => {
     const api = useApiClient();
     const url = tenantID
@@ -44,6 +45,7 @@ export function useCatalog() {
         catalogType: catalogType || undefined,
         catalogTenantId: catalogTenantID || undefined,
         tenantIds: tenantIDs.length ? tenantIDs.join(",") : undefined,
+        tenantHint: tenantHint || undefined,
       },
     });
     if (error) {

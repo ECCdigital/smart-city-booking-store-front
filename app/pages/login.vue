@@ -4,7 +4,8 @@ import { useAuth } from "~/composables/auth/useAuth";
 import LoginCard from "~/components/auth/LoginCard.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useInstanceStore } from "~~/stores/instance";
-import { getSafeRedirectPath } from "~/utils/safeRedirect";
+import { useReturnTarget } from "~/composables/auth/useReturnTarget";
+import { useRateLimitNotice } from "~/composables/auth/useRateLimitNotice";
 import AuthTitleSection from "~/components/auth/AuthTitleSection.vue";
 
 definePageMeta({
@@ -22,6 +23,8 @@ const { login } = useAuth();
 const notification = useNotification();
 const authStore = useAuthStore();
 const instanceStore = useInstanceStore();
+const { target: returnTarget, follow: followReturnTarget } = useReturnTarget();
+const { notifyRateLimited } = useRateLimitNotice();
 
 const user = computed(() => authStore.getUser);
 const userName = computed(() => user.value?.firstName || "");
@@ -37,13 +40,14 @@ const handleLogin = async () => {
       t("notifications.loginSuccess.message") + ", " + userName.value + "!",
       t("notifications.loginSuccess.title"),
     );
-    const redirect = getSafeRedirectPath(route.query.redirect);
-    await navigateTo(redirect);
+    await followReturnTarget();
   } catch (err) {
-    notification.error(
-      t("notifications.loginError.message"),
-      t("notifications.loginError.title"),
-    );
+    if (!notifyRateLimited(err)) {
+      notification.error(
+        t("notifications.loginError.message"),
+        t("notifications.loginError.title"),
+      );
+    }
     console.error("Login failed:", err);
   } finally {
     loading.value = false;
@@ -51,7 +55,7 @@ const handleLogin = async () => {
 };
 
 const handleSsoLogin = () => {
-  const redirect = (route.query.redirect as string) || "/";
+  const redirect = returnTarget.value || "/";
   window.location.href = `/api/auth/sso/login?redirect=${encodeURIComponent(redirect)}`;
 };
 </script>
@@ -71,6 +75,7 @@ const handleSsoLogin = () => {
         :loading="loading"
         :sso-enabled="ssoEnabled"
         :sso-error="ssoError"
+        :return-target="returnTarget ?? undefined"
         @submit="handleLogin"
         @sso-login="handleSsoLogin"
       />
