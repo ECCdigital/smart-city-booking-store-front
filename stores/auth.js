@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useUsers } from "~/composables/api/useUsers.js";
+import { useBookingStore } from "~~/stores/bookings.js";
 import { useAuth } from "~/composables/auth/useAuth.js";
 import {
   broadcastSessionEnded,
@@ -66,6 +67,7 @@ export const useAuthStore = defineStore("auth", {
       }
     },
     _applyAuthPayload(data) {
+      useBookingStore().$reset();
       this.user = data?.user || null;
       this.permissions = data?.permissions || null;
       this.tokenValid = true;
@@ -116,9 +118,13 @@ export const useAuthStore = defineStore("auth", {
       } finally {
         this.invalidateAuth({ broadcast: true });
       }
+      // The broadcast only reaches other tabs and the route middleware only
+      // runs on navigation, so this tab has to leave the account area itself.
+      await this.leaveAccountArea();
     },
     invalidateAuth({ broadcast = false } = {}) {
       this.clearAuthPayload();
+      useBookingStore().$reset();
       if (import.meta.client) {
         localStorage.removeItem("auth-store");
         if (broadcast) {
@@ -134,7 +140,10 @@ export const useAuthStore = defineStore("auth", {
       const wasLoggedIn = this.isLoggedIn || this.tokenValid;
       this.invalidateAuth({ broadcast: false });
       if (!import.meta.client || !redirect || !wasLoggedIn) return;
-
+      await this.leaveAccountArea();
+    },
+    /** Sends the user to the login page if they are on an `/account/*` route. */
+    async leaveAccountArea() {
       const path = useRoute().path;
       if (isAccountPath(path)) {
         await navigateTo(`/login?redirect=${encodeURIComponent(path)}`);

@@ -32,7 +32,7 @@ function buildBundleKey({
 }) {
   const sortedInclude = Array.isArray(include)
     ? [...include].sort().join(",")
-    : include ?? "";
+    : (include ?? "");
   return [
     "catalog-bundle",
     authScope ?? "anon",
@@ -112,7 +112,7 @@ export function useCatalogBundle() {
       });
     }
     if (data?.event) {
-      eventStore.addOrUpdate(data.event);
+      eventStore.addOrUpdate({ ...data.event, type: "event" });
       eventStore.$patch((state) => {
         const details = state.loadedDetailsFor[contextKey] ?? [];
         const id = data.event.id ?? effectiveEventID;
@@ -210,7 +210,7 @@ export function useCatalogBundle() {
 
     const canSkipBase = Boolean(
       catalogStore.catalog?.type &&
-        (catalogStore.catalog?.tenantId || tenantStore.tenants.length > 0),
+      (catalogStore.catalog?.tenantId || tenantStore.tenants.length > 0),
     );
 
     const data = await fetchCatalogBundle({
@@ -309,9 +309,7 @@ export function useCatalogBundle() {
       bookableID &&
       isDetailLoadedForCurrentAuth({ slug, bookableID });
     const eventKnown =
-      !force &&
-      eventID &&
-      isDetailLoadedForCurrentAuth({ slug, eventID });
+      !force && eventID && isDetailLoadedForCurrentAuth({ slug, eventID });
     const effectiveBookableID =
       bookableID && !bookableKnown ? bookableID : null;
     const effectiveEventID = eventID && !eventKnown ? eventID : null;
@@ -335,12 +333,12 @@ export function useCatalogBundle() {
         portalUrl: portalStore.portalUrl,
         catalog: catalogStore.catalog,
         tenants: tenantStore.tenants,
-        bookables: bookableStore.loadedFor === contextKey
-          ? bookableStore.bookables
-          : undefined,
-        events: eventStore.loadedFor === contextKey
-          ? eventStore.events
-          : undefined,
+        bookables:
+          bookableStore.loadedFor === contextKey
+            ? bookableStore.bookables
+            : undefined,
+        events:
+          eventStore.loadedFor === contextKey ? eventStore.events : undefined,
       };
     }
 

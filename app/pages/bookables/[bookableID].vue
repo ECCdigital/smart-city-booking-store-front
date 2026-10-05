@@ -3,6 +3,7 @@ import { useBookableStore } from "~~/stores/bookable.js";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import DetailsArea from "~/components/search/DetailsArea.vue";
+import CatalogBreadcrumb from "~/components/navigation/CatalogBreadcrumb.vue";
 import { tenantHintOf } from "~/utils/catalogDetail.js";
 
 definePageMeta({
@@ -11,6 +12,7 @@ definePageMeta({
 });
 
 const route = useRoute();
+const { tenantTo } = useTenantRoute();
 const bookableStore = useBookableStore();
 const authStore = useAuthStore();
 
@@ -18,7 +20,6 @@ const catalogSlug = computed(() => route.params.catalogSlug);
 const bookableID = computed(() => route.params.bookableID);
 
 const { loadDetail } = useCatalogBundle();
-const { tenantPath } = useTenantRoute();
 
 const bookable = computed(() =>
   bookableStore.getBookableById(bookableID.value),
@@ -49,13 +50,14 @@ usePageTitle(() =>
 
 <template>
   <div class="container">
+    <CatalogBreadcrumb class="pt-4" />
     <div v-if="bookable">
       <DetailsArea :item="bookable" />
     </div>
     <div v-else class="text-center mt-10">
       <UIcon size="48" name="i-lucide-monitor-off" class="text-gray-400 mb-4" />
       <p class="text-gray-500">{{ $t("errors.offerNotAvailable") }}</p>
-      <UButton :label="$t('common.back')" :to="tenantPath('/bookables')" class="mt-4" />
+      <UButton :label="$t('common.back')" :to="tenantTo('/search')" class="mt-4" />
     </div>
   </div>
 </template>

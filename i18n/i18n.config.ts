@@ -1,7 +1,7 @@
-// vue-i18n falls back to nothing by default, and en.json carries a single key.
-// Without this, a browser that gets redirected to /en would show the raw key
-// path on the screen in front of the door - a half translation is worse than
-// an honestly missing one, but a key path is worse than both.
+// vue-i18n falls back to nothing by default, and en.json still covers only part
+// of the app. Without this, a visitor whose browser asks for English would meet
+// raw key paths on the screen in front of the door - a half translation is worse
+// than an honestly missing one, but a key path is worse than both.
 //
 // This has to live here rather than in `nuxt.config.js`: `fallbackLocale` is
 // not a module option of @nuxtjs/i18n (there it belongs to

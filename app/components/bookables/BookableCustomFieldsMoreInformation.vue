@@ -12,8 +12,8 @@
         :key="field.id"
         class="flex justify-between gap-2"
       >
-        <dt>{{ field.caption }}</dt>
-        <dd class="text-right">
+        <dt class="shrink-0">{{ field.caption }}</dt>
+        <dd class="text-right min-w-0 break-words">
           <template v-if="field.inputType === 'boolean'">
             {{ $t("bookableDetail.yes") }}
           </template>

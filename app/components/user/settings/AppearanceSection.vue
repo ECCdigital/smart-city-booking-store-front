@@ -1,20 +1,22 @@
 <template>
   <div>
     <div class="mb-5">
-      <h3 class="text-xl font-bold mb-2">Optische Darstellung</h3>
+      <h3 class="text-xl font-bold mb-2">
+        {{ $t("account.appearanceTitle") }}
+      </h3>
       <p class="mt-2 mb-5">
-        Verwalten Sie die Darstellung der Anwendung. Sie können beispielsweise
-        zwischen einem hellen und einem dunklen Design wechseln. Optional können
-        Sie auch die Sprache der Benutzeroberfläche anpassen.
+        {{ $t("account.appearanceDescription") }}
       </p>
 
       <div class="md:flex items-center">
-        <div class="basis-1/5 text-sm font-semibold">Farbgestaltung</div>
+        <div class="basis-1/5 text-sm font-semibold">
+          {{ $t("account.appearanceColorScheme") }}
+        </div>
         <UFieldGroup class="flex justify-center">
           <UButton
             :color="isDark ? 'primary' : 'neutral'"
             :variant="isDark ? 'solid' : 'soft'"
-            label="Dunkel"
+            :label="$t('account.appearanceDark')"
             icon="i-lucide-moon"
             :class="colorButtonClasses"
             @click="() => (isDark = true)"
@@ -22,7 +24,7 @@
           <UButton
             :color="!isDark ? 'primary' : 'neutral'"
             :variant="!isDark ? 'solid' : 'soft'"
-            label="Hell"
+            :label="$t('account.appearanceLight')"
             icon="i-lucide-sun"
             :class="colorButtonClasses"
             @click="() => (isDark = false)"
@@ -31,25 +33,28 @@
       </div>
     </div>
     <div>
-      <h3 class="text-xl font-bold mb-2">Sprache</h3>
+      <h3 class="text-xl font-bold mb-2">
+        {{ $t("account.appearanceLanguage") }}
+      </h3>
       <div class="md:flex items-center">
-        <div class="basis-1/5 text-sm font-semibold">Anzeigesprache</div>
-        <UTooltip text="Diese Funktion ist derzeit nicht verfügbar.">
-          <USelect
-            v-model="language"
-            :items="languageOptions"
-            :class="languageSelectClasses"
-            :ui="{
-              itemLabel: 'text-lg md:text-md',
-            }"
-            disabled
-          />
-        </UTooltip>
+        <div class="basis-1/5 text-sm font-semibold">
+          {{ $t("account.appearanceDisplayLanguage") }}
+        </div>
+        <USelect
+          v-model="language"
+          :items="languageOptions"
+          :class="languageSelectClasses"
+          :ui="{
+            itemLabel: 'text-lg md:text-md',
+          }"
+        />
       </div>
     </div>
   </div>
 </template>
 <script setup>
+const { t, te, locale, locales, setLocale } = useI18n();
+
 const colorMode = useColorMode();
 const isDark = computed({
   get() {
@@ -63,13 +68,25 @@ const colorButtonClasses = ref(
   "w-[50%] md:w-30 h-12 sm:h-8 text-lg sm:text-md flex justify-center items-center",
 );
 
-const language = ref("de");
-const languageOptions = [
-  { label: "Deutsch", value: "de" },
-  { label: "Englisch", value: "en" },
-  { label: "Französisch", value: "fr" },
-  { label: "Spanisch", value: "es" },
-];
+// The select switches the language, the same way the button in the navigation
+// bar does: `setLocale` writes the `i18n_redirected` cookie and re-renders the
+// page in place.
+const language = computed({
+  get: () => locale.value,
+  set: (code) => {
+    setLocale(code);
+  },
+});
+
+const languageOptions = computed(() =>
+  locales.value.map((entry) => {
+    const key = `account.languages.${entry.code}`;
+    return {
+      label: te(key) ? t(key) : entry.name || entry.code,
+      value: entry.code,
+    };
+  }),
+);
 const languageSelectClasses = ref(
   "w-full md:w-60 h-12 sm:h-8 text-lg sm:text-md",
 );

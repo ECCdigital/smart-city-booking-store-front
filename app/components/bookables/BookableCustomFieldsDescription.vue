@@ -6,7 +6,7 @@
       class="flex gap-2"
     >
       <dt class="font-semibold md:shrink-0">{{ field.caption }}:</dt>
-      <dd>
+      <dd class="min-w-0 break-words">
         <template v-if="field.inputType === 'boolean'">
           {{ $t("bookableDetail.yes") }}
         </template>

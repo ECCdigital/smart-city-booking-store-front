@@ -16,10 +16,11 @@
     </div>
 
     <div class="text-center text-sm">
-      <p class="mb-1">Laden...</p>
+      <p class="mb-1">{{ $t("mobileKey.loading") }}</p>
     </div>
   </div>
 </template>
-<script setup></script>
+<script setup>
+</script>
 
 <style scoped></style>

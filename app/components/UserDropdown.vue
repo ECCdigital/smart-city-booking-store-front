@@ -5,15 +5,15 @@ import { adminEntry } from "~/utils/authEntryFlow";
 
 const { tenantTo } = useTenantRoute();
 
-const t = useI18n().t;
+const { t } = useI18n();
 
 const config = useRuntimeConfig();
 const authStore = useAuthStore();
 const notification = useNotification();
 
-const { contrastToSecondary } = useContrastColor();
+const { contrastToPrimary } = useContrastColor();
 const nameColor = computed(() => {
-  if (contrastToSecondary.value === "#ffffff") {
+  if (contrastToPrimary.value === "#ffffff") {
     return "text-white hidden md:inline";
   } else {
     return "text-black hidden md:inline";
@@ -66,7 +66,7 @@ const items = computed(() => {
         onSelect: () => goTo("/account/bookings"),
       },
       {
-        label: t("navigation.mobileKey"),
+        label: t("navigation.digitalKeys"),
         icon: "i-lucide-key-round",
         onSelect: () => goTo("/mobile-key"),
       },
@@ -113,6 +113,10 @@ async function logout() {
       t("notifications.logoutSuccess.message"),
       t("notifications.logoutSuccess.title"),
     );
+    // Not through `tenantTo`: the tenant-routes module skips `/login`, so the
+    // sign-in page lives at the same address inside and outside a catalogue.
+    // No `redirect` either — whoever signs out means to leave the page.
+    await navigateTo("/login");
   } catch {
     notification.error(
       t("login.logoutErrorMessage.message"),
@@ -135,7 +139,7 @@ async function logout() {
   >
     <UButton
       variant="ghost"
-      class="flex items-center gap-2 outline-none cursor-pointer"
+      class="flex items-center gap-2 px-1 sm:px-2.5 outline-none"
     >
       <UUser
         :name="userName"

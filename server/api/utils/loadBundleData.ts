@@ -183,14 +183,12 @@ export async function loadBundleData(
     if (includes.includes("bookables")) {
       tasks.push(
         (
-          serverFetch<{ bookables?: unknown[] }>(
-            event,
-            `/json/${tenantId}/bookables/`,
-            { method: "GET" }
-          ) as Promise<FetchResult<{ bookables?: unknown[] }>>
+          serverFetch<unknown[]>(event, `/json/${tenantId}/bookables/`, {
+            method: "GET",
+          }) as Promise<FetchResult<unknown[]>>
         ).then(({ data, error }) => {
           failOnBackendFailure(error, "Failed to fetch bookables");
-          if (!error) result.bookables = data?.bookables ?? [];
+          if (!error) result.bookables = Array.isArray(data) ? data : [];
         })
       );
     }

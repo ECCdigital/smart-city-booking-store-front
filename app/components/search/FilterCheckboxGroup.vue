@@ -2,7 +2,8 @@
   <div>
     <UCheckboxGroup
       v-model="model"
-      :items="sortedItems.slice(0, numberOfVisibleItems)"
+      color="secondary"
+      :items="visibleItems"
       :ui="{ label: 'text-base' }"
       @change="onChange"
     >
@@ -20,7 +21,8 @@
     <div v-if="props.useMoreButton" class="flex justify-center w-full mt-2">
       <UButton
         v-if="numberOfVisibleItems < items.length"
-        label="Alle anzeigen"
+        :label="$t('common.showAll')"
+        color="primary"
         variant="ghost"
         @click="
           () => {
@@ -30,7 +32,8 @@
       />
       <UButton
         v-if="numberOfVisibleItems === items.length"
-        label="Weniger anzeigen"
+        :label="$t('common.showLess')"
+        color="primary"
         variant="ghost"
         @click="
           () => {
@@ -59,15 +62,23 @@ const props = defineProps({
 });
 const emit = defineEmits(["change"]);
 
-const sortedItems = computed(() => {
-  return [...props.items].sort((a, b) => {
-    if (a.count !== null && b.count !== null) {
-      return b.count - a.count; // Descending by count
-    }
-    return a.label.localeCompare(b.label); // Ascending by label
-  });
-});
 const numberOfVisibleItems = ref(5);
+
+function isSelected(value) {
+  return Array.isArray(model.value)
+    ? model.value.includes(value)
+    : model.value === value;
+}
+
+// Items keep the order they arrive in, so the list does not jump. An option
+// without hits is greyed out unless it is selected, so it can still
+// be deselected.
+const visibleItems = computed(() =>
+  props.items.slice(0, numberOfVisibleItems.value).map((item) => ({
+    ...item,
+    disabled: item.count === 0 && !isSelected(item.value),
+  })),
+);
 
 function onChange() {
   emit("change", model.value);

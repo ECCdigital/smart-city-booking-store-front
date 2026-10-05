@@ -3,6 +3,8 @@ import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useEventStore } from "~~/stores/event.js";
 import { useAuthStore } from "~~/stores/auth.js";
 import DetailsArea from "~/components/search/DetailsArea.vue";
+import { titleOf } from "~/composables/search/offer";
+import CatalogBreadcrumb from "~/components/navigation/CatalogBreadcrumb.vue";
 import { tenantHintOf } from "~/utils/catalogDetail.js";
 
 definePageMeta({
@@ -11,6 +13,7 @@ definePageMeta({
 });
 
 const route = useRoute();
+const { tenantTo } = useTenantRoute();
 const eventStore = useEventStore();
 const authStore = useAuthStore();
 
@@ -18,7 +21,6 @@ const catalogSlug = computed(() => route.params.catalogSlug);
 const eventID = computed(() => route.params.eventID);
 
 const { loadDetail } = useCatalogBundle();
-const { tenantPath } = useTenantRoute();
 
 const event = computed(() => eventStore.getEventById(eventID.value));
 
@@ -39,14 +41,15 @@ await refreshEventDetail();
 
 const { t } = useI18n();
 usePageTitle(() =>
-  event.value?.title
-    ? t("meta.pages.eventDetail", { title: event.value.title })
+  event.value && titleOf(event.value)
+    ? t("meta.pages.eventDetail", { title: titleOf(event.value) })
     : t("meta.pages.events"),
 );
 </script>
 
 <template>
   <div class="container">
+    <CatalogBreadcrumb class="pt-4" />
     <div v-if="event">
       <DetailsArea :item="event" is-event />
     </div>
@@ -57,7 +60,11 @@ usePageTitle(() =>
         class="text-gray-400 mb-4"
       />
       <p class="text-gray-500">{{ $t("errors.offerNotAvailable") }}</p>
-      <UButton :label="$t('common.back')" :to="tenantPath('/events')" class="mt-4" />
+      <UButton
+        :label="$t('common.back')"
+        :to="tenantTo({ path: '/search', query: { cat: 'event' } })"
+        class="mt-4"
+      />
     </div>
   </div>
 </template>

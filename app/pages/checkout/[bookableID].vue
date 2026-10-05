@@ -23,6 +23,10 @@ import {
 } from "~/utils/checkoutErrors.js";
 import { isNotAvailableError } from "~/utils/catalogDetail.js";
 import {
+  resolveMaxAmount,
+  resolvePerBookingLimit,
+} from "~/utils/amountLimits";
+import {
   BOOKING_STATUS,
   resolveBookingStatus,
 } from "~/utils/bookingStatus.js";
@@ -32,6 +36,10 @@ import "splitpanes/dist/splitpanes.css";
 definePageMeta({
   layout: "checkout",
 });
+
+// Declared before anything that reads it: `t` was used further up the file
+// than it was bound, which throws during setup and takes the whole page down.
+const { t, te, locale } = useI18n();
 
 const CONTACT_FIELD_KEYS = [
   "firstName",
@@ -139,14 +147,6 @@ function checkoutCustomFieldsFromBookable(bookable) {
   const list = bookable?.customFields;
   if (!Array.isArray(list)) return [];
   return list.filter((f) => f?.usageOptions?.context === "checkout");
-}
-
-/** Configured max quantity from bookable.amount; null = unlimited. */
-function resolveMaxAmount(bookable) {
-  if (!bookable) return null;
-  const n = Number(bookable.amount);
-  if (!Number.isFinite(n) || n <= 0) return null;
-  return Math.trunc(n);
 }
 
 function clampBookableAmount(amount, { min = 1, max = null } = {}) {
@@ -298,22 +298,22 @@ const requiresManualApproval = computed(() => {
   return v === false || v === "false" || v === 0 || v === "0";
 });
 
-const TYPE_LABELS = {
-  room: "Raumbuchung",
-  resource: "Ressourcen-Buchung",
-  ticket: "Ticketbuchung",
-  event: "Eventbuchung",
-};
+const typeLabels = computed(() => ({
+  room: t("booking.typeRoom"),
+  resource: t("booking.typeResource"),
+  ticket: t("booking.typeTicket"),
+  event: t("booking.typeEvent"),
+}));
 
 const checkoutNavTab = useState("checkoutNavTab", () => {});
 
 watch(
-  leadBookable,
-  (b) => {
+  [leadBookable, () => locale.value],
+  ([b]) => {
     const type = b?.type;
     const bookableID = route.params.bookableID;
     const tenantID = route.query.tenantId;
-    const label = TYPE_LABELS[type] || type || "";
+    const label = typeLabels.value[type] || type || "";
 
     if (!bookableID || !tenantID) {
       checkoutNavTab.value = { label, url: "" };
@@ -354,7 +354,6 @@ const selectedAdditionalBookables = ref([]);
 
 const amounts = ref({});
 
-const { t, te } = useI18n();
 usePageTitle(() =>
   leadBookable.value?.title
     ? t("meta.pages.checkoutDetail", { title: leadBookable.value.title })
@@ -451,8 +450,21 @@ const maxAmounts = computed(() => {
   const map = {};
   for (const b of bookablesInCheckout.value) {
     if (!b?.id) continue;
-    const max = resolveMaxAmount(b);
+    const mandatory = mandatoryBookableIds.value.includes(b.id);
+    const max = resolveMaxAmount(b, { mandatory });
     if (max != null) map[b.id] = max;
+  }
+  return map;
+});
+
+/** Per-booking limits, so the summary can tell them from capacity. */
+const maxAmountsPerBooking = computed(() => {
+  const map = {};
+  for (const b of bookablesInCheckout.value) {
+    if (!b?.id) continue;
+    const mandatory = mandatoryBookableIds.value.includes(b.id);
+    const limit = resolvePerBookingLimit(b, { mandatory });
+    if (limit != null) map[b.id] = limit;
   }
   return map;
 });
@@ -1362,7 +1374,7 @@ async function validateAll() {
       const label = isLead
         ? leadBookable.value?.title
         : additionalBookables.value.find((b) => b.item.id === id)?.item.title ||
-          "Zusatzbuchung";
+          t("booking.typeAdditional");
 
       const row = results[i];
 
@@ -2704,6 +2716,7 @@ function onReviewEdit(section) {
             :is-validating="isValidating"
             :amounts="amounts"
             :max-amounts="maxAmounts"
+            :max-amounts-per-booking="maxAmountsPerBooking"
             :lead-bookable-id="bookableID"
             :mandatory-ids="mandatoryBookableIds"
             @update:amount="handleAmountUpdate"
@@ -2760,7 +2773,12 @@ function onReviewEdit(section) {
                     {{ leadBookable?.title }}
                   </p>
                   <p class="text-sm text-red-700 dark:text-red-300 mt-1">
-                    {{ $t(leadBookableError.reason) }}
+                    {{
+                      $t(
+                        leadBookableError.reason,
+                        leadBookableError.params || {},
+                      )
+                    }}
                   </p>
                   <p
                     v-if="leadBookableError.params?.remaining !== undefined"
@@ -2971,7 +2989,7 @@ function onReviewEdit(section) {
                 </UButton>
                 <UButton
                   v-else-if="!requiresLoginForCheckout"
-                  color="neutral"
+                  color="primary"
                   variant="soft"
                   icon="i-lucide-log-out"
                   :loading="isLoggingOut"
@@ -3107,7 +3125,7 @@ function onReviewEdit(section) {
 }
 
 .checkout-splitpanes :deep(.splitpanes__splitter:hover::before) {
-  background-color: var(--color-primary-500, #6366f1);
+  background-color: var(--color-primary, #6366f1);
   width: 3px;
 }
 
@@ -3117,7 +3135,7 @@ function onReviewEdit(section) {
 }
 
 :root.dark .checkout-splitpanes :deep(.splitpanes__splitter:hover::before) {
-  background-color: var(--color-primary-400, #818cf8);
+  background-color: var(--color-primary, #818cf8);
 }
 
 /* ── Responsive: stack vertically on small screens ── */

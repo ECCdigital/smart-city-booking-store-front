@@ -12,7 +12,7 @@
     <template #content>
       <UCard variant="soft" class="w-72" style="height: 370px">
         <div class="flex justify-between items-center">
-          <p class="text-lg font-bold">Uhrzeit auswählen</p>
+          <p class="text-lg font-bold">{{ $t("timePeriods.selectTimeTitle") }}</p>
           <UButton
             color="neutral"
             variant="ghost"

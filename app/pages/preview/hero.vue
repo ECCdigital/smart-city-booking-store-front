@@ -1,12 +1,14 @@
 <script setup>
 import SearchBar from "~/components/search/SearchBar.vue";
 import MainCategoryArea from "~/components/MainCategoryArea.vue";
-import BookableSection from "~/components/bookables/BookableSection.vue";
+import ResultSection from "~/components/search/ResultSection.vue";
+import { mergeOffers } from "~/composables/search/offer";
 import { useCatalogBundle } from "~/composables/useCatalogBundle.js";
 import { useHeroMode } from "~/composables/useHeroMode";
 import { useHeroPreviewOverride } from "~/composables/useThemeBundle";
 import { handleError } from "~/utils/handleError";
 import { useBookableStore } from "~~/stores/bookable.js";
+import { useEventStore } from "~~/stores/event.js";
 import { usePortalStore } from "~~/stores/portal.js";
 import { adminOrigin } from "~~/shared/utils/adminOrigin";
 
@@ -50,6 +52,7 @@ onBeforeUnmount(() => {
 const mode = useHeroMode();
 const { loadBundle } = useCatalogBundle();
 const bookableStore = useBookableStore();
+const eventStore = useEventStore();
 const portalStore = usePortalStore();
 
 // Only the sub-page arrangement lists anything. In personal mode the bundle
@@ -60,14 +63,16 @@ const portalStore = usePortalStore();
 // the editor.
 if (mode.value === "compact" && !portalStore.isPersonalMode) {
   try {
-    await loadBundle({ include: ["bookables"] });
+    await loadBundle({ include: ["bookables", "events"] });
   } catch (error) {
     console.warn("[preview/hero] catalog bundle unavailable:", error);
   }
 }
 
-const bookables = computed(() =>
-  portalStore.isPersonalMode ? [] : bookableStore.getBookables,
+const offers = computed(() =>
+  portalStore.isPersonalMode
+    ? []
+    : mergeOffers(bookableStore.getBookables, eventStore.getEvents),
 );
 </script>
 
@@ -105,8 +110,8 @@ const bookables = computed(() =>
         </div>
       </div>
 
-      <!-- Mirrors the bookables page: search bar and results list -->
-      <BookableSection v-else :bookables="bookables" />
+      <!-- Mirrors the Result Page: search bar and the results of every Kind -->
+      <ResultSection v-else :offers="offers" />
     </div>
   </div>
 </template>

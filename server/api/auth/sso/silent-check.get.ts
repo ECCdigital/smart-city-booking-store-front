@@ -1,6 +1,7 @@
 import {
     getKeycloakConfig,
     getKeycloakEndpoints,
+    getPublicOrigin,
 } from "~~/server/utils/keycloak";
 import crypto from "crypto";
 
@@ -43,7 +44,8 @@ export default defineEventHandler(async (event) => {
     setCookie(event, "kc-state", state, cookieOptions);
     setCookie(event, "kc-redirect", redirect, cookieOptions);
 
-    const redirectUri = `${getRequestURL(event).origin}/api/auth/sso/callback`;
+    // Fixed path, known to the Admin UI and the backend: see login.get.ts.
+    const redirectUri = `${getPublicOrigin(event)}/api/auth/sso/callback`;
 
     const authUrl = new URL(endpoints.authorization);
     authUrl.searchParams.set("client_id", config.publicClient);

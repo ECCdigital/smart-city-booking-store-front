@@ -6,12 +6,13 @@
         {{ showDate() }}
       </span>
       <span v-else class="italic p-3" :class="useIcon ? 'p-3' : ''"
-        >Keine Zeitangaben</span
+        >{{ $t("timePeriods.noTimes") }}</span
       >
     </p>
   </div>
 </template>
 <script setup>
+
 const props = defineProps({
   event: { type: Object, required: true },
   useIcon: { type: Boolean, default: true },

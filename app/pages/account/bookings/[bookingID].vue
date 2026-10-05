@@ -2,18 +2,8 @@
   <div>
     <div class="flex justify-between mt-5 md:mt-0" style="max-width: 800px">
       <BackButton />
-      <!--
-      toDo - später Routing zu Schlüsseln ergänzen!
-      <OpenIfbsKeyButton
-        v-if="hasIfbsLockerInfo"
-        :locker-info="booking.lockerInfo"
-        :booking-id="booking.id"
-        :tenant-id="booking.tenantId"
-        :is-active="isActive"
-      />
-      -->
     </div>
-    <PageHeader title="Buchungsdetails" class="my-5" />
+    <PageHeader :title="$t('meta.pages.accountBookingDetail')" class="my-5" />
     <EmergencyHelpAccordion
       v-if="booking"
       :tenant-id="booking.tenantId"
@@ -57,6 +47,5 @@ usePageTitle(() => {
     ? t("meta.pages.bookableDetail", { title: itemTitle })
     : t("meta.pages.accountBookingDetail");
 });
-
 </script>
 <style scoped></style>

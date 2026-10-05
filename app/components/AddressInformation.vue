@@ -1,16 +1,22 @@
 <template>
   <div>
     <div class="flex">
-      <div class="grid place-content-center">
+      <div class="grid place-content-center shrink-0">
         <UIcon name="i-lucide-map-pin" class="size-5" />
       </div>
-      <div v-if="location.length" class="p-3">{{ location }}</div>
-      <div v-else class="italic p-3">Keine Adresse bekannt.</div>
-
+      <div
+        v-if="location.length"
+        class="px-3 min-w-0 whitespace-normal break-words"
+      >
+        {{ location }}
+      </div>
+      <div v-else class="italic px-3 min-w-0 whitespace-normal">
+        {{ $t("bookableDetail.noAddress") }}
+      </div>
       <div class="flex-1" />
       <div
         v-if="location.length && enableCopyButton"
-        class="grid place-content-center"
+        class="grid place-content-center shrink-0"
       >
         <UIcon
           name="i-lucide-copy"
@@ -19,19 +25,20 @@
         />
       </div>
     </div>
-
     <p v-if="showDistance && hasLocationParam && location.length">
       <UIcon name="i-lucide-navigation" class="size-5" />
-      <span v-if="distance" class="p-3">{{ distance }} km </span>
-      <span v-else class="italic p-3">Distanz nicht ermittelbar. </span>
+      <span v-if="distance != null" class="p-3">{{ distance }} km </span>
+      <span v-else class="italic p-3">{{ $t("common.distanceUnknown") }} </span>
     </p>
   </div>
 </template>
 <script setup>
 import { useRoute } from "#imports";
 
+const { t } = useI18n();
+
 const props = defineProps({
-  event: {
+  item: {
     type: Object,
     required: true,
   },
@@ -51,18 +58,18 @@ const hasLocationParam = computed(() => {
 });
 
 const location = computed(() => {
-  if (typeof props.event.location === "string") {
-    return props.event.location;
-  } else if (props.event.location && typeof props.event.location === "object") {
-    return props.event.location.display_address || "";
+  if (typeof props.item.location === "string") {
+    return props.item.location;
+  } else if (props.item.location && typeof props.item.location === "object") {
+    return props.item.location.display_address || "";
   } else {
     return "";
   }
 });
 
 const distance = computed(() => {
-  if (props.event.distanceMeter == null) return null;
-  return (props.event.distanceMeter / 1000)
+  if (props.item.distanceMeter == null) return null;
+  return (props.item.distanceMeter / 1000)
     .toFixed(2)
     .replace(".", ",")
     .replace(/,00$/, "");
@@ -73,8 +80,8 @@ const copyAddressToClipboard = async () => {
     await navigator.clipboard.writeText(location.value);
     const notification = useNotification();
     notification.success(
-      "Die Adresse wurde in Ihre Zwischenablage kopiert.",
-      "Adresse erfolgreich kopiert!",
+      t("bookableDetail.addressCopiedMessage"),
+      t("bookableDetail.addressCopiedTitle"),
     );
   }
 };

@@ -41,6 +41,11 @@ function getValue(id) {
   return values.value?.[id];
 }
 
+function getMultiselectValue(id) {
+  const value = values.value?.[id];
+  return Array.isArray(value) ? value : [];
+}
+
 function getBoolValue(id) {
   return !!values.value?.[id];
 }
@@ -90,6 +95,16 @@ function getBoolValue(id) {
             :placeholder="field.placeholder || $t('checkout.data.customFieldSelectPlaceholder')"
             class="w-full"
             @update:model-value="updateField(field.id, $event)"
+          />
+
+          <USelect
+            v-else-if="field.inputType === 'multiselect'"
+            multiple
+            :model-value="getMultiselectValue(field.id)"
+            :items="selectItemsForField(field)"
+            :placeholder="field.placeholder || $t('checkout.data.customFieldSelectPlaceholder')"
+            class="w-full"
+            @update:model-value="updateField(field.id, $event ?? [])"
           />
 
           <UTextarea

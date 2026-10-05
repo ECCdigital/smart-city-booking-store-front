@@ -46,7 +46,8 @@
         v-if="duration"
         class="flex justify-end text-xs font-normal text-gray-600 dark:text-gray-300"
       >
-        ({{ duration }} <span class="hidden md:block ml-1"> Std.</span
+        ({{ duration }}
+        <span class="hidden md:block ml-1"> {{ $t("price.unitHour") }}</span
         ><span class="md:hidden ml-1"> h</span>)
       </div>
     </div>
@@ -126,24 +127,24 @@ function displayMinDefaultPrice() {
   if (categories.length === 0) {
     return null;
   }
-  const prefix = categories.length > 1 ? "ab " : "";
-
   const min = getMinPrice();
   if (min === null) {
-    return "Kostenlos";
+    return t("price.free");
   }
 
   const includeTax = props.bookable.priceValueAddedTax
     ? min + (min * props.bookable.priceValueAddedTax) / 100
     : min;
-  return prefix + includeTax.toFixed(2).toString().replace(/\./g, ",") + " €";
+  const amount = includeTax.toFixed(2).toString().replace(/\./g, ",") + " €";
+
+  return categories.length > 1 ? t("price.fromAmount", { amount }) : amount;
 }
 
 function displayPrice(currentPrice) {
   if (currentPrice === null) {
-    return "Kein Preis bekannt.";
+    return t("price.unknown");
   } else if (currentPrice === 0) {
-    return "Kostenlos";
+    return t("price.free");
   } else {
     currentPrice = currentPrice.toFixed(2);
     return "€ " + currentPrice.toString().replace(/\./g, ",");
@@ -171,26 +172,26 @@ function displayPricePerUnit() {
 
   let includeTaxes = "";
   if (props.bookable.priceValueAddedTax > 0) {
-    includeTaxes = "(inkl. MwSt.)";
+    includeTaxes = t("price.inclVat");
   }
 
   switch (priceType) {
     case "per-hour":
-      return " pro Stunde " + includeTaxes;
+      return ` ${t("price.perHour")} ` + includeTaxes;
     case "per-item":
-      return " pro Stück " + includeTaxes;
+      return ` ${t("price.perItem")} ` + includeTaxes;
     case "per-day":
-      return " pro Tag " + includeTaxes;
+      return ` ${t("price.perDay")} ` + includeTaxes;
     case "hour":
-      return " pro Stunde " + includeTaxes;
+      return ` ${t("price.perHour")} ` + includeTaxes;
     case "day":
-      return " pro Tag " + includeTaxes;
+      return ` ${t("price.perDay")} ` + includeTaxes;
     case "week":
-      return " pro Woche " + includeTaxes;
+      return ` ${t("price.perWeek")} ` + includeTaxes;
     case "month":
-      return " pro Monat " + includeTaxes;
+      return ` ${t("price.perMonth")} ` + includeTaxes;
     case "year":
-      return " pro Jahr " + includeTaxes;
+      return ` ${t("price.perYear")} ` + includeTaxes;
   }
 }
 </script>

@@ -6,9 +6,10 @@
 app/
   pages/                 # File-based routing
     index.vue            # Home / catalog redirect
-    catalog/             # Catalog browsing & search
-    bookables/           # Bookable detail pages
-    events/              # Event detail pages
+    catalog/             # Catalog entry by slug
+    search/              # The Result Page: bookables and events in one list
+    bookables/           # Bookable detail pages (index.vue redirects to /search)
+    events/              # Event detail pages (index.vue redirects to /search?cat=event)
     checkout/            # Multi-step checkout flow
     account/               # User account (bookings, invoices, keys, settings)
     login.vue            # Auth pages
@@ -24,7 +25,7 @@ app/
     events/              # Event display components
     user/                # Account area (bookings, settings)
     mobileKey/           # Mobile key access
-    navigation/          # Nav bar, side nav, auth actions
+    navigation/          # Nav bar, breadcrumb, side nav, auth actions
     inputs/              # Reusable form inputs (date, time, text, address)
   layouts/
     default.vue          # Standard page layout
@@ -133,10 +134,13 @@ Each step is a component in `app/components/checkout/`. State managed via compos
 
 ## Search & catalog
 
-Catalog browsing uses composables in `app/composables/search/`:
+The Result Page (`app/pages/search/index.vue`) lists every Offer — bookables and events — in one `ResultSection`. The Kind of an Offer (`room`, `event-location`, `resource`, `ticket`, `event`) is a value of the `cat` query parameter, not a page. `/bookables` and `/events` are redirects (`app/middleware/legacy-list-redirect.ts`).
 
-- `useBookableSearch.ts` — search, filter, sort logic
+Composables in `app/composables/search/`:
+
+- `offer.ts` — the per-Kind reading of an Offer (title, price, bookability), the merged source (`mergeOffers`, tickets reached through their event) and the period overlap rule
+- `useBookableSearch.ts` — search, filter, sort logic over a mixed list; every step reads the item's Kind
 - `useCatalogQueryState.ts` — URL query param sync for filters
-- `useCustomFieldFilters.js` — dynamic custom field filtering
+- `useCustomFieldFilters.js` — dynamic custom field filtering (bookables only)
 
-Results rendered via components in `app/components/search/` (grid, list, map views).
+Results rendered via components in `app/components/search/` (grid, list, map views). `ResultCard` and `ResultStrip` branch on `item.type === "event"`; their `mapDetailMode` / `mapMode` variants are the compact forms the map uses.

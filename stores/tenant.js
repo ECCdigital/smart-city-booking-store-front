@@ -74,9 +74,14 @@ export const useTenantStore = defineStore("tenant", {
       this.currentTenantID = tenantID;
     },
   },
+  // Only the chosen tenant survives a reload. The tenant list itself comes
+  // from every catalog bundle and must not be restored from an earlier
+  // session: a stale list would steer the bundle requests (`tenantIds`) to
+  // tenants that no longer exist. pinia-plugin-persistedstate v4 reads
+  // `pick`; the former `paths` option is ignored and would persist everything.
   persist: {
     key: "tenant-store",
-    storage: import.meta.client ?  localStorage : undefined,
+    storage: import.meta.client ? localStorage : undefined,
     pick: ["currentTenantID"],
     // Earlier releases stored the whole store (tenant lists and contacts
     // included). `pick` ignores those keys when reading, but the entry would

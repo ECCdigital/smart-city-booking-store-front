@@ -16,10 +16,10 @@
       <div class="flex md:block justify-end md:content-center">
         <UTooltip
           :disabled="ticketsAvailable"
-          text="Dieser Tickettyp ist ausverkauft."
+          :text="$t('events.soldOut')"
         >
           <UButton
-            label="Buchen"
+            :label="$t('booking.book')"
             class="justify-center px-5"
             :style="{ color: contrastToPrimary }"
             :disabled="!ticketsAvailable"
@@ -34,6 +34,7 @@
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
+
 
 const props = defineProps({
   ticket: {

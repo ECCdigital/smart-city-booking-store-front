@@ -7,6 +7,8 @@ const props = defineProps({
 
 const handleError = () => clearError({ redirect: "/" });
 
+const { t } = useI18n();
+
 // A 404 is neutral on purpose: a page that never existed and a tenant or
 // offer that is no longer available read the same, with no internal reason.
 const errorConfig: Record<number, { key: string; icon: string }> = {
@@ -22,8 +24,6 @@ const getErrorInfo = (code?: number) =>
     key: "errors.page.generic",
     icon: "i-lucide-bug",
   };
-
-const { t } = useI18n();
 
 const pageTitle = computed(() => {
   const code = props.error?.statusCode;
@@ -55,7 +55,7 @@ usePageTitle(pageTitle);
         {{ $t(`${getErrorInfo(error?.statusCode).key}.message`) }}
       </p>
 
-      <div class="error-details" v-if="error?.url">
+      <div v-if="error?.url" class="error-details">
         <code>{{ error.url }}</code>
       </div>
 
@@ -78,7 +78,10 @@ usePageTitle(pageTitle);
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 .error-card {

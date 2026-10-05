@@ -1,4 +1,6 @@
 <script setup>
+import { reachedPerBookingLimit } from "~/utils/amountLimits";
+
 const props = defineProps({
   summary: {
     type: Object,
@@ -25,6 +27,11 @@ const props = defineProps({
     default: () => ({}),
   },
   maxAmounts: {
+    type: Object,
+    default: () => ({}),
+  },
+  /** Per-booking limit by id; tells it apart from capacity in `maxAmounts`. */
+  maxAmountsPerBooking: {
     type: Object,
     default: () => ({}),
   },
@@ -149,10 +156,21 @@ function handleDirectInput(id, event) {
   emit("update:amount", { id, amount: clamped });
 }
 
+/** Shown at the stepper once the per-booking limit, not capacity, stops it. */
+function perBookingHint(id) {
+  const max = reachedPerBookingLimit(
+    currentAmount(id),
+    maxAmount(id),
+    props.maxAmountsPerBooking?.[id],
+  );
+  if (max == null) return null;
+  return t("checkout.maxAmountPerBookingHint", { max });
+}
+
 function maxHint(id) {
   const max = maxAmount(id);
   if (max == null) return undefined;
-  return t("checkout.maxAmountHint", { max });
+  return perBookingHint(id) ?? t("checkout.maxAmountHint", { max });
 }
 
 function itemLabel(id) {
@@ -278,7 +296,12 @@ const hasContent = computed(() => {
               {{ err.label }}
             </span>
             <span class="block text-xs text-red-600 dark:text-red-400 mt-0.5">
-              {{ $t(err.reason || "checkout.bookable_unavailable") }}
+              {{
+                $t(
+                  err.reason || "checkout.bookable_unavailable",
+                  err.params || {},
+                )
+              }}
             </span>
           </div>
 
@@ -327,9 +350,17 @@ const hasContent = computed(() => {
           :key="item.id"
           class="flex items-center gap-3 text-sm md:text-base text-gray-700 dark:text-gray-200"
         >
-          <span :title="item.label" class="line-clamp-2 flex-1 min-w-0">{{
-            item.label
-          }}</span>
+          <div class="flex-1 min-w-0">
+            <span :title="item.label" class="line-clamp-2">{{
+              item.label
+            }}</span>
+            <span
+              v-if="!item.skipQuantity && perBookingHint(item.id)"
+              class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+            >
+              {{ perBookingHint(item.id) }}
+            </span>
+          </div>
 
           <div
             v-if="!item.skipQuantity && isQuantityFixed(item.id)"
@@ -397,7 +428,7 @@ const hasContent = computed(() => {
           v-if="summary.taxAmount > 0"
           class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400"
         >
-          <span>MwSt.</span>
+          <span>{{ $t("price.vat") }}</span>
           <span class="tabular-nums whitespace-nowrap">
             {{ formatEur(summary.taxAmount) }}
           </span>
@@ -409,7 +440,7 @@ const hasContent = computed(() => {
           <span
             class="text-base md:text-lg font-bold text-gray-900 dark:text-white"
           >
-            Gesamt
+            {{ $t("price.total") }}
           </span>
           <span
             v-if="summary.total > 0"
@@ -417,7 +448,7 @@ const hasContent = computed(() => {
           >
             {{ formatEur(summary.total) }}
           </span>
-          <span v-else class="text-gray-400">Kostenlos</span>
+          <span v-else class="text-gray-400">{{ $t("price.free") }}</span>
         </div>
       </template>
     </div>

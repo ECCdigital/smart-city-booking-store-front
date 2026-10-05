@@ -57,9 +57,11 @@ const emit = defineEmits(["openDetails", "closeGroup"]);
 
 <style>
 .leaflet-popup-content-wrapper {
-  /*background: transparent !important;*/
-  /*box-shadow: none !important;*/
   padding: 5px !important;
+  /* Leaflet paints white with dark grey text; the cards inside follow the
+     colour mode, so the wrapper does too. */
+  background: var(--ui-bg-elevated);
+  color: var(--ui-text);
 }
 
 .leaflet-popup-content {

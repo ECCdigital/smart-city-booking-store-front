@@ -25,7 +25,6 @@ export function useBookableDetailContent(itemSource, isEvent) {
     runSearch,
     resetResults,
   } = useBookableSearch({
-    isEvent: false,
     sourceItems: computed(() => (item.value ? [item.value] : [])),
   });
 
@@ -48,6 +47,9 @@ export function useBookableDetailContent(itemSource, isEvent) {
       if (field.inputType === "boolean") {
         return field.value === true || field.value === "true";
       }
+      if (Array.isArray(field.value)) {
+        return field.value.length > 0;
+      }
       return (
         field.value !== null && field.value !== undefined && field.value !== ""
       );
@@ -66,12 +68,24 @@ export function useBookableDetailContent(itemSource, isEvent) {
   );
   const moreInfoFields = computed(() => fieldsByPosition("moreInfo"));
 
+  function optionCaption(field, value) {
+    const option = (field.options || []).find(
+      (opt) => String(opt.value) === String(value),
+    );
+    return option?.caption ?? value;
+  }
+
   function customFieldValueText(field) {
     if (field.inputType === "select") {
-      const option = (field.options || []).find(
-        (opt) => String(opt.value) === String(field.value),
-      );
-      return option?.caption ?? field.value;
+      return optionCaption(field, field.value);
+    }
+    if (field.inputType === "multiselect") {
+      const values = Array.isArray(field.value)
+        ? field.value
+        : field.value != null && field.value !== ""
+          ? [field.value]
+          : [];
+      return values.map((value) => optionCaption(field, value)).join(", ");
     }
     return field.value;
   }

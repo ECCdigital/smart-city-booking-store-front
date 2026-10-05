@@ -1,132 +1,161 @@
 <template>
   <div
     :class="
-      useAsDialog
-        ? 'overflow-auto max-h-[80vh]'
-        : 'my-2 p-2 border border-gray-200 rounded'
+      useAsDialog ? 'max-h-[80vh]' : 'my-2 p-2 border border-gray-200 rounded'
     "
   >
     <div class="flex justify-between items-center">
-      <p class="my-4 font-bold">Ergebnisse filtern</p>
-      <UTooltip v-if="!useAsDialog" text="Filter zurücksetzen">
+      <p class="my-4 font-bold">{{ $t("filter.title") }}</p>
+      <UTooltip v-if="!useAsDialog" :text="$t('filter.reset')">
         <UButton
           v-if="!useAsDialog && isFilterActive"
           icon="i-lucide-trash"
+          color="primary"
           variant="ghost"
           class="rounded-full py-2 px-3"
-          :class="isFilterActive ? '' : ''"
           @click="removeFilter"
+        />
+      </UTooltip>
+      <UTooltip v-else :text="$t('meta.pages.close')">
+        <UButton
+          color="neutral"
+          variant="ghost"
+          icon="i-lucide-x"
+          class="rounded-xl"
+          @click="() => emit('close')"
         />
       </UTooltip>
     </div>
     <USeparator v-if="!useAsDialog" class="border-gray-200" />
-    <div class="my-4 space-y-3">
-      <div class="space-y-3">
-        <USwitch
-          v-model="_includeNonSuitable"
-          label="Nicht passende Objekte anzeigen."
-          @change="instantFilter"
-        />
-        <USwitch
-          v-if="isEvent"
-          v-model="_onlyPublicEvents"
-          label="Nur öffentliche Events anzeigen."
-          @change="instantFilter"
-        />
-        <USwitch
-          v-if="isEvent"
-          v-model="_onlyRegistrationNeededEvents"
-          label="Nur anmeldepflichte Events anzeigen."
+    <div :class="useAsDialog ? 'overflow-auto max-h-[70vh] mb-2' : ''">
+      <div class="my-4 space-y-3">
+        <div class="space-y-3">
+          <USwitch
+            v-model="_includeNonSuitable"
+            color="secondary"
+            :label="$t('filter.includeNonSuitable')"
+            @change="instantFilter"
+          />
+        </div>
+      </div>
+
+      <!-- Typ -->
+      <div class="my-7">
+        <p class="mb-3">{{ $t("filter.category") }}</p>
+        <FilterCheckboxGroup
+          v-model="_categories"
+          :items="possibleCategories"
           @change="instantFilter"
         />
       </div>
-    </div>
 
-    <!-- Kategorie -->
-    <div v-if="!isEvent" class="my-7">
-      <p class="mb-3">Kategorie</p>
-      <FilterCheckboxGroup
-        v-model="_categories"
-        :items="possibleCategories"
-        @change="instantFilter"
-      />
-    </div>
-
-    <!-- Orte -->
-    <div v-if="possibleCities && possibleCities.length" class="my-7">
-      <p class="mb-3">Orte</p>
-      <FilterCheckboxGroup
-        v-model="_cities"
-        :items="possibleCities"
-        use-more-button
-        @change="instantFilter"
-      />
-    </div>
-
-    <!-- Distanz -->
-    <div v-if="distance != null" class="my-7">
-      <p class="mb-3">Distanz</p>
-      <p class="mb-3">0 km - {{ _distance }} km</p>
-      <FilterHistogramSlider
-        v-model="_distance"
-        mode="single"
-        :min="0"
-        :max="distanceRange[1]"
-        :step="dynamicDistanceStep"
-        :values="distanceValues"
-        @change="instantFilter"
-      />
-    </div>
-
-    <!-- Price-->
-    <div class="my-7">
-      <p class="mb-3">Preis</p>
-      <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
-
-      <FilterHistogramSlider
-        v-model="_price"
-        mode="range"
-        :min="dynamicMinPrice"
-        :max="dynamicMaxPrice"
-        :step="dynamicPriceStep"
-        :values="priceValues"
-        @change="instantFilter"
-      />
-    </div>
-
-    <!-- Custom Field Filter -->
-    <div v-if="sortedCustomFieldFilters.length > 0" class="my-7">
-      <p class="mb-3">Weitere Filter</p>
-      <div class="space-y-4">
-        <CustomFieldFilter
-          v-for="cf in sortedCustomFieldFilters"
-          :key="cf.definition.id"
-          v-model="_customFieldValues[cf.definition.id]"
-          :definition="cf.definition"
-          :filter-type="cf.filterType"
-          :meta="cf.meta"
-          @change="onCustomFieldChange"
+      <!-- Events -->
+      <div v-if="hasEvents" class="my-7 space-y-3">
+        <p class="mb-3">{{ $t("filter.eventsSection") }}</p>
+        <USwitch
+          v-model="_onlyPublicEvents"
+          color="secondary"
+          :label="$t('filter.onlyPublicEvents')"
+          @change="instantFilter"
         />
+        <USwitch
+          v-model="_onlyRegistrationNeededEvents"
+          color="secondary"
+          :label="$t('filter.onlyRegistrationNeeded')"
+          @change="instantFilter"
+        />
+      </div>
+
+      <!-- Anbieter -->
+      <div v-if="possibleTenants.length > 1" class="my-7">
+        <p class="mb-3">{{ $t("filter.provider") }}</p>
+        <FilterCheckboxGroup
+          v-model="_tenants"
+          :items="possibleTenants"
+          use-more-button
+          @change="instantFilter"
+        />
+      </div>
+
+      <!-- Orte -->
+      <div v-if="possibleCities && possibleCities.length" class="my-7">
+        <p class="mb-3">{{ $t("filter.cities") }}</p>
+        <FilterCheckboxGroup
+          v-model="_cities"
+          :items="possibleCities"
+          use-more-button
+          @change="instantFilter"
+        />
+      </div>
+
+      <!-- Distanz -->
+      <div v-if="distance != null" class="my-7">
+        <p class="mb-3">{{ $t("filter.distance") }}</p>
+        <p class="mb-3">0 km - {{ _distance }} km</p>
+        <FilterHistogramSlider
+          v-model="_distance"
+          mode="single"
+          :min="0"
+          :max="distanceRange[1]"
+          :step="dynamicDistanceStep"
+          :values="distanceValues"
+          @change="instantFilter"
+        />
+      </div>
+
+      <!-- Price-->
+      <div class="my-7">
+        <p class="mb-3">{{ $t("filter.price") }}</p>
+        <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
+
+        <FilterHistogramSlider
+          v-model="_price"
+          mode="range"
+          :min="dynamicMinPrice"
+          :max="dynamicMaxPrice"
+          :step="dynamicPriceStep"
+          :values="priceValues"
+          @change="instantFilter"
+        />
+      </div>
+
+      <!-- Custom Field Filter -->
+      <div v-if="sortedCustomFieldFilters.length > 0" class="my-7">
+        <p class="mb-1">{{ $t("filter.more") }}</p>
+        <p v-if="hasEvents" class="mb-3 text-sm text-gray-500">
+          {{ $t("filter.customFieldsBookablesOnly") }}
+        </p>
+        <div class="space-y-4">
+          <CustomFieldFilter
+            v-for="cf in sortedCustomFieldFilters"
+            :key="cf.definition.id"
+            v-model="_customFieldValues[cf.definition.id]"
+            :definition="cf.definition"
+            :filter-type="cf.filterType"
+            :meta="cf.meta"
+            @change="onCustomFieldChange"
+          />
+        </div>
       </div>
     </div>
 
     <div v-if="useAsDialog" class="flex justify-between">
       <UButton
         v-if="isFilterActive"
-        label="Filter entfernen"
+        :label="$t('filter.remove')"
         icon="i-lucide-trash"
-        color="neutral"
+        color="primary"
         variant="soft"
-        class="rounded-full py-2 px-3"
+        class="rounded-lg py-2 px-3"
         @click="removeFilter"
       />
       <div v-else class="flex-1" />
       <UButton
-        label="Filter anwenden"
+        :label="$t('filter.apply')"
         icon="i-lucide-funnel"
-        color="neutral"
+        color="primary"
         variant="soft"
-        class="rounded-full py-2 px-3"
+        class="rounded-lg py-2 px-3"
         @click="onFilter"
       />
     </div>
@@ -135,9 +164,22 @@
 <script setup>
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState";
 import { useCustomFieldFilters } from "~/composables/search/useCustomFieldFilters";
+import {
+  applyCatalogFilters,
+  MatchStatus,
+} from "~/composables/search/catalogFilters";
+import { computeSliderStep } from "~/utils/sliderStep";
 import CustomFieldFilter from "~/components/search/CustomFieldFilter.vue";
 import FilterHistogramSlider from "~/components/search/FilterHistogramSlider.vue";
 import FilterCheckboxGroup from "~/components/search/FilterCheckboxGroup.vue";
+import { useTenantStore } from "~~/stores/tenant.js";
+import {
+  OFFER_KINDS,
+  fromPriceOf,
+  isEventItem,
+} from "~/composables/search/offer";
+
+const { t } = useI18n();
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({
@@ -146,10 +188,6 @@ const props = defineProps({
     required: true,
   },
   useAsDialog: {
-    type: Boolean,
-    default: false,
-  },
-  isEvent: {
     type: Boolean,
     default: false,
   },
@@ -165,6 +203,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  tenants: {
+    type: Array,
+    default: () => [],
+  },
   distance: {
     type: Number,
     default: null,
@@ -175,7 +217,7 @@ const props = defineProps({
   },
   onlyPublicEvents: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   onlyRegistrationNeededEvents: {
     type: Boolean,
@@ -186,10 +228,11 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-const emit = defineEmits(["filter"]);
+const emit = defineEmits(["filter", "close"]);
 
-const suitableBookables = computed(() =>
-  props.bookables.filter((b) => b.matchStatus === "match"),
+// Results the search itself kept. Options and slider bounds derive from this
+const searchResults = computed(() =>
+  props.bookables.filter((b) => b.matchStatus !== MatchStatus.NO_MATCH),
 );
 
 //Filter Variables
@@ -199,28 +242,74 @@ const _cities = ref(props.cities);
 const _onlyPublicEvents = ref(props.onlyPublicEvents);
 const _onlyRegistrationNeededEvents = ref(props.onlyRegistrationNeededEvents);
 const _categories = ref(props.categories);
+const _tenants = ref(props.tenants);
 
-//Kategorien
-//toDo - read from instance later !!!!
+const hasEvents = computed(() =>
+  props.bookables.some((b) => isEventItem(b.item)),
+);
+
+// The Kind facet: every Kind, in a fixed order, none hidden at zero — a Kind
+// that vanishes on a search with no match reads as a bug.
+//toDo - read the bookable types from the instance later
+const KIND_LABEL_KEYS = {
+  room: "room",
+  "event-location": "eventLocation",
+  resource: "resource",
+  ticket: "ticket",
+  event: "event",
+};
 const possibleCategories = computed(() => {
-  return [
-    {
-      label: "Räume",
-      value: "room",
-    },
-    {
-      label: "Veranstaltungsorte",
-      value: "event-location",
-    },
-    {
-      label: "Geräte",
-      value: "resource",
-    },
-    {
-      label: "Tickets",
-      value: "ticket",
-    },
-  ];
+  const counts = {};
+  for (const b of facetMatches("cat")) {
+    const kind = b.item?.type;
+    if (!kind) continue;
+    counts[kind] = (counts[kind] || 0) + 1;
+  }
+
+  return OFFER_KINDS.map((kind) => ({
+    label: t(`filter.categories.${KIND_LABEL_KEYS[kind]}`),
+    value: kind,
+    count: counts[kind] || 0,
+  }));
+});
+
+// Anbieter: the tenants the results come from, named from the tenant store.
+// A tenant the store has not loaded falls back to its id rather than dropping
+// out of the list. Like the cities, the list and its order come from every
+// result the search kept; the count comes from the other filters' results.
+const tenantStore = useTenantStore();
+
+function countTenants(wrappers) {
+  const tenantCount = {};
+  for (const b of wrappers) {
+    const tenantId = b.item?.tenantId;
+    if (tenantId) {
+      tenantCount[tenantId] = (tenantCount[tenantId] || 0) + 1;
+    }
+  }
+  return tenantCount;
+}
+
+const possibleTenants = computed(() => {
+  if (!props.bookables || props.bookables.length === 0) {
+    return [];
+  }
+
+  const allCounts = countTenants(searchResults.value);
+  const facetCounts = countTenants(facetMatches("tenants"));
+
+  const tenantName = (id) => tenantStore.getTenantById(id)?.name ?? id;
+
+  return Object.entries(allCounts)
+    .sort(
+      ([a, ac], [b, bc]) =>
+        bc - ac || tenantName(a).localeCompare(tenantName(b)),
+    )
+    .map(([value]) => ({
+      label: tenantName(value),
+      value,
+      count: facetCounts[value] || 0,
+    }));
 });
 
 //Distanz
@@ -238,7 +327,10 @@ const distanceRange = computed(() => {
   }
 
   const distances = props.bookables
-    .filter((b) => b.matchStatus !== "no-match" && b.item.distanceMeter != null)
+    .filter(
+      (b) =>
+        b.matchStatus !== MatchStatus.NO_MATCH && b.item.distanceMeter != null,
+    )
     .map((b) => b.item.distanceMeter);
 
   if (distances.length === 0) {
@@ -254,21 +346,14 @@ const distanceRange = computed(() => {
   }
 });
 
-const dynamicDistanceStep = computed(() => {
-  if (distanceRange.value[1] === 0) {
-    return 0;
-  }
-
-  let step = Math.ceil(distanceRange.value[1] / 20); // 20 steps max
-  step = Math.max(5, Math.ceil(step / 5) * 5);
-  return step;
-});
+const dynamicDistanceStep = computed(() =>
+  computeSliderStep(0, distanceRange.value[1], { minStep: 5 }),
+);
 
 //Price
 const priceValues = computed(() => {
-  const fn = props.isEvent ? getEventMinPrice : getBookableMinPrice;
-  return suitableBookables.value
-    .map((b) => fn(b))
+  return facetMatches("price")
+    .map((b) => getMinPrice(b))
     .filter((p) => p != null && !isNaN(p));
 });
 
@@ -277,15 +362,9 @@ const possiblePriceRange = computed(() => {
     return [0, 100];
   }
 
-  let validPrices;
-  if (!props.isEvent) {
-    validPrices = suitableBookables.value.map((b) => getBookableMinPrice(b));
-  } else {
-    validPrices = suitableBookables.value.map((e) => getEventMinPrice(e));
-  }
-  validPrices = validPrices.filter(
-    (price) => price !== undefined && price !== null && !isNaN(price),
-  );
+  const validPrices = searchResults.value
+    .map((b) => getMinPrice(b))
+    .filter((price) => price !== undefined && price !== null && !isNaN(price));
 
   //set endpoints rounded to 5
   const minPrice =
@@ -296,16 +375,11 @@ const possiblePriceRange = computed(() => {
   return [minPrice, maxPrice];
 });
 
-const dynamicPriceStep = computed(() => {
-  const range = possiblePriceRange.value[1] - possiblePriceRange.value[0];
-  if (range === 0) {
-    return possiblePriceRange.value[0];
-  }
-
-  let step = Math.ceil(range / 20); // 20 steps max
-  step = Math.max(5, Math.ceil(step / 5) * 5);
-  return step;
-});
+const dynamicPriceStep = computed(() =>
+  computeSliderStep(possiblePriceRange.value[0], possiblePriceRange.value[1], {
+    minStep: 5,
+  }),
+);
 const dynamicMaxPrice = computed(() => {
   if (possiblePriceRange.value[1] === 0) {
     return 0;
@@ -329,89 +403,72 @@ const _price = ref(
     ? props.price
     : [dynamicMinPrice.value, dynamicMaxPrice.value],
 );
-watch(
-  () => dynamicMaxPrice.value,
-  (newVal) => {
-    _price.value = [dynamicMinPrice.value, newVal];
-  },
-);
-
-watch(suitableBookables, () => {
-  _price.value = [dynamicMinPrice.value, dynamicMaxPrice.value];
+// When the bounds move (a new search changes the prices), an untouched
+// selection follows them and a narrowed one is clamped into them, so the
+// user's price choice survives a search while other filters keep counting.
+watch([dynamicMinPrice, dynamicMaxPrice], ([min, max], [oldMin, oldMax]) => {
+  const [lo, hi] = _price.value;
+  if (lo === oldMin && hi === oldMax) {
+    _price.value = [min, max];
+    return;
+  }
+  const nextLo = Math.min(Math.max(lo, min), max);
+  const nextHi = Math.max(Math.min(hi, max), min);
+  if (nextLo !== lo || nextHi !== hi) {
+    _price.value = [nextLo, nextHi];
+  }
 });
 
-function getBookableMinPrice(bookable) {
-  if (bookable.matchStatus === "no-match") {
+// The price an Offer enters the histogram with: the calculated one once a
+// period has been searched, otherwise its "from" price, whatever its Kind.
+function getMinPrice(wrapper) {
+  if (wrapper.matchStatus === MatchStatus.NO_MATCH) {
     return null;
   }
-  //if search is initialized, return calculated price
-  if (searchIsInitialized.value && bookable.calculatedPrice) {
-    return bookable.calculatedPrice.userGrossPriceEur;
+  if (searchIsInitialized.value && wrapper.calculatedPrice) {
+    return wrapper.calculatedPrice.userGrossPriceEur;
   }
-
-  //else return min price from price categories but exclude holiday price categories
-  const pricesWithoutHolidays = bookable.item?.priceCategories?.filter(
-    (c) => !c.holidays || c.holidays.length === 0,
-  );
-  const minPrice = Math.min(
-    ...(pricesWithoutHolidays.map((cat) => cat.priceEur) || []),
-  );
-
-  return bookable.item.priceValueAddedTax
-    ? minPrice + (minPrice * bookable.item.priceValueAddedTax) / 100
-    : minPrice;
-}
-function getTicketMinPrice(ticket) {
-  const minPrice = Math.min(
-    ...ticket.priceCategories.map((cat) => cat.priceEur),
-  );
-  return ticket.priceValueAddedTax
-    ? minPrice + (minPrice * ticket.priceValueAddedTax) / 100
-    : minPrice;
-}
-function getEventMinPrice(event) {
-  if (event.matchStatus === "no-match") {
-    return null;
-  }
-  if (event.item.tickets && event.item.tickets.length > 0) {
-    return Math.min(
-      ...event.item.tickets.map((ticket) => getTicketMinPrice(ticket)),
-    );
-  } else {
-    return 0;
-  }
+  return fromPriceOf(wrapper.item);
 }
 
 //Locations
 const distanceValues = computed(() => {
-  return props.bookables
-    .filter((b) => b.matchStatus !== "no-match" && b.item.distanceMeter != null)
+  return facetBase("distance")
+    .filter(
+      (b) =>
+        b.matchStatus !== MatchStatus.NO_MATCH && b.item.distanceMeter != null,
+    )
     .map((b) => b.item.distanceMeter / 1000);
 });
+
+function countCities(wrappers) {
+  const cityCount = {};
+  for (const b of wrappers) {
+    const city = extractCity(b.item.location);
+    if (city) {
+      cityCount[city] = (cityCount[city] || 0) + 1;
+    }
+  }
+  return cityCount;
+}
+
+// The list and its order come from every result the search kept; the count
+// per city comes from the results the other filters leave over.
 const possibleCities = computed(() => {
   if (!props.bookables || props.bookables.length === 0) {
     return [];
   }
 
-  const cityCount = {};
-  props.bookables.forEach((b) => {
-    let city = "";
-    if (b.matchStatus === "match") {
-      city = extractCity(b.item.location);
-    }
+  const allCounts = countCities(searchResults.value);
+  const facetCounts = countCities(facetMatches("cities"));
 
-    if (city) {
-      cityCount[city] = (cityCount[city] || 0) + 1;
-    }
-  });
-
-  return Object.entries(cityCount)
-    .map(([value, count]) => ({
-      label: value,
-      value: value.toLowerCase(),
-      count,
-    }))
-    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+  return Object.entries(allCounts)
+    .sort(([a, ac], [b, bc]) => bc - ac || a.localeCompare(b))
+    .map(([city]) => ({
+      label: city,
+      value: city.toLowerCase(),
+      count: facetCounts[city] || 0,
+    }));
 });
 
 function extractCity(location) {
@@ -457,6 +514,41 @@ function extractCityFromString(location) {
   return words.join(" ");
 }
 
+// Facet counts: each filter counts against the results every *other* filter
+// leaves over. The local values are used so the dialog reflects a pending
+//  selection before it is applied.
+const priceCriteria = computed(() => {
+  const sameAsPossible =
+    _price.value?.length === 2 &&
+    _price.value[0] === possiblePriceRange.value[0] &&
+    _price.value[1] === possiblePriceRange.value[1];
+  return sameAsPossible ? [] : _price.value;
+});
+
+const localCriteria = computed(() => ({
+  inclNoSuitable: _includeNonSuitable.value,
+  pubEv: _onlyPublicEvents.value,
+  regEv: _onlyRegistrationNeededEvents.value,
+  cat: _categories.value,
+  cities: _cities.value,
+  tenants: _tenants.value,
+  distance: _distance.value,
+  hasLocation: props.distance != null,
+  price: priceCriteria.value,
+  customFields: _customFieldValues.value,
+}));
+
+function facetBase(skip) {
+  return applyCatalogFilters(props.bookables, localCriteria.value, {
+    getMinPrice,
+    skip,
+  });
+}
+
+function facetMatches(skip) {
+  return facetBase(skip).filter((b) => b.matchStatus === MatchStatus.MATCH);
+}
+
 function instantFilter() {
   if (!props.useAsDialog) {
     onFilter();
@@ -469,29 +561,26 @@ function onFilter() {
     _price.value = possiblePriceRange.value.slice();
   }
 
-  const sameAsPossible =
-    _price.value?.length === 2 &&
-    _price.value[0] === possiblePriceRange.value[0] &&
-    _price.value[1] === possiblePriceRange.value[1];
-
   filter.inclNoSuitable = _includeNonSuitable.value;
   filter.pubEv = _onlyPublicEvents.value;
   filter.regEv = _onlyRegistrationNeededEvents.value;
   filter.cat = _categories.value;
   filter.cities = _cities.value;
+  filter.tenants = _tenants.value;
   filter.distance = _distance.value;
-  filter.price = sameAsPossible ? [] : _price.value;
+  filter.price = priceCriteria.value;
   filter.customFields = _customFieldValues.value;
 
   emit("filter", filter);
 }
 
 function removeFilter() {
-  _includeNonSuitable.value = true;
+  _includeNonSuitable.value = false;
   _onlyPublicEvents.value = false;
   _onlyRegistrationNeededEvents.value = false;
   _cities.value = [];
   _categories.value = [];
+  _tenants.value = [];
   _price.value = possiblePriceRange.value.slice();
   _distance.value = distanceRange.value[1];
   _customFieldValues.value = {};
@@ -503,6 +592,7 @@ function removeFilter() {
   filter.regEv = _onlyRegistrationNeededEvents.value;
   filter.cat = _categories.value;
   filter.cities = _cities.value;
+  filter.tenants = _tenants.value;
   filter.distance = distanceRange.value[1];
 
   const sameAsPossible =
@@ -518,10 +608,13 @@ function removeFilter() {
 }
 
 // Custom Field Filter
-const bookablesRef = computed(() => props.bookables);
-const { aggregated: customFieldFilters } = useCustomFieldFilters(bookablesRef, {
-  position: "sidebar",
-});
+const { aggregated: customFieldFilters } = useCustomFieldFilters(
+  searchResults,
+  {
+    position: "sidebar",
+    facetItems: (fieldId) => facetMatches(`cf:${fieldId}`),
+  },
+);
 const sortedCustomFieldFilters = computed(() =>
   customFieldFilters.value.slice().sort((a, b) => {
     if (a.filterType === "checkbox" && b.filterType !== "checkbox") return -1;

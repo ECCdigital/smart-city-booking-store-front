@@ -2,6 +2,7 @@ import type { H3Event } from "h3";
 import {
     getKeycloakConfig,
     getKeycloakEndpoints,
+    getPublicOrigin,
 } from "~~/server/utils/keycloak";
 import type { KeycloakTokenResponse } from "~~/server/utils/keycloak";
 import type { UpstreamError } from "~~/server/utils/upstreamError";
@@ -55,7 +56,8 @@ export default defineEventHandler(async (event) => {
         return sendRedirect(event, loginError("missing_params"));
     }
 
-    const redirectUri = `${getRequestURL(event).origin}/api/auth/sso/callback`;
+    // Fixed path, known to the Admin UI and the backend: see login.get.ts.
+    const redirectUri = `${getPublicOrigin(event)}/api/auth/sso/callback`;
 
     try {
         const tokenResponse = await $fetch<KeycloakTokenResponse>(endpoints.token, {

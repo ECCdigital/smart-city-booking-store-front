@@ -4,8 +4,9 @@
       v-if="canGoBack"
       :label="$t('common.back')"
       icon="i-lucide-arrow-left"
-      class="justify-center px-5 bg-gray-300 text-black"
-      :style="{ cursor: 'pointer' }"
+      color="primary"
+      variant="outline"
+      class="justify-center px-5"
       @click="$router.back()"
     />
   </div>
