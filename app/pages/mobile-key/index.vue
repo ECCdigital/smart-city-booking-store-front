@@ -6,7 +6,6 @@
         :description="$t('mobileKey.yourKeysDescription')"
         class="mb-3 md:mb-0"
       />
-      <!-- toDo - Suchleiste für Schlüssel??? -->
     </div>
 
     <!-- Help Information -->
@@ -19,7 +18,7 @@
           icon="i-lucide-list"
           :variant="viewMode === 'list' ? 'subtle' : 'ghost'"
           :label="$t('mobileKey.viewList')"
-          class="p-3"
+          class="px-3"
           @click="() => (viewMode = 'list')"
         />
         <!--
@@ -33,26 +32,51 @@
         />
         -->
       </div>
-      <USelect
-        v-model="bookingFilter"
-        :items="filterOptions"
-        :content="{
-          align: 'center',
-          side: 'bottom',
-          sideOffset: 8,
-        }"
-        class="w-28 lg:w-36"
-      />
+
+      <div class="flex space-x-2">
+        <USelect
+          v-model="bookingFilter"
+          :items="filterOptions"
+          :content="{
+            align: 'center',
+            side: 'bottom',
+            sideOffset: 8,
+          }"
+          class="w-28 lg:w-36"
+        />
+        <!-- The search reads the bookable's title, the booking id and the
+           address.-->
+        <UInput
+          v-model="searchQuery"
+          icon="i-lucide-search"
+          size="md"
+          variant="outline"
+          :placeholder="$t('mobileKey.searchPlaceholder')"
+          :aria-label="$t('mobileKey.searchPlaceholder')"
+        />
+        <ListFilter
+          :tenants="tenants"
+          :is-disabled="!shownBookings.length"
+          @set-filter="setFilter"
+        />
+      </div>
     </div>
 
     <div v-if="viewMode === 'list'" class="space-y-3 mb-15">
-      <!--
-        `loadingKey` and `errorMessage` were already kept up to date by
-        `withLoading`; they just had no way into the template. The list is the
-        one place that decides between skeleton, failure, emptiness and content.
-      -->
+      <UCard v-if="bookings.length && !shownBookings.length">
+        <div class="flex flex-col items-center justify-center py-10">
+          <UIcon
+            name="i-lucide-filter-x"
+            class="w-12 h-12 text-neutral-400 mb-3"
+          />
+          <p class="text-sm text-neutral-500">
+            {{ $t("mobileKey.noMatches") }}
+          </p>
+        </div>
+      </UCard>
       <MobileKeyBookingList
-        :bookings="bookings"
+        v-else
+        :bookings="shownBookings"
         :loading="loadingKey === 'bookings'"
         :error="errorMessage"
       />
@@ -70,6 +94,12 @@ import { useTenantStore } from "~~/stores/tenant.js";
 import { compareByAccessWindow } from "~/utils/accessWindow.js";
 import GeneralHelpSection from "~/components/mobileKey/GeneralHelpSection.vue";
 import MobileKeyBookingList from "~/components/mobileKey/MobileKeyBookingList.vue";
+import ListFilter from "~/components/user/ListFilter.vue";
+import {
+  filterAccessBookingsByTenant,
+  searchAccessBookings,
+  tenantsOfAccessBookings,
+} from "~/utils/accessBookingList.js";
 
 definePageMeta({
   requiresAuth: true,
@@ -85,9 +115,6 @@ const tenantStore = useTenantStore();
 
 const viewMode = ref("list");
 
-// `computed`, not a plain array: a `t()` call evaluated once at setup keeps the
-// language that happened to be active when the component was created and never
-// follows a switch.
 const filterOptions = computed(() => [
   { label: t("booking.filter.active"), value: "active" },
   { label: t("booking.filter.upcoming"), value: "upcoming" },
@@ -106,25 +133,44 @@ const includeEligibility = ref(true);
 
 const bookings = ref([]);
 
+// Search and provider filter over the loaded list, both client-side; the
+// period select above reloads from the backend as before.
+const searchQuery = ref("");
+const filter = ref({ tenantIds: [] });
+
+function setFilter(newFilter) {
+  filter.value = newFilter;
+}
+
+// Named like the cards below: the booking's tenant snapshot, the store only
+// for an answer without one.
+const { getBookingTenant } = useTenant();
+const tenants = computed(() =>
+  tenantsOfAccessBookings(
+    bookings.value,
+    (booking) => getBookingTenant(booking)?.name,
+  ),
+);
+
+const shownBookings = computed(() =>
+  filterAccessBookingsByTenant(
+    searchAccessBookings(bookings.value, searchQuery.value),
+    filter.value.tenantIds,
+  ),
+);
+
 const accessPointsByBooking = ref({});
 
 const lastResponse = ref(null);
 const errorMessage = ref("");
-/**
- * Already loading on the first paint: `onMounted` below fetches unconditionally,
- * so the fetch is a fact before it starts. Starting empty would let the list
- * say "Keine Schlüssel gefunden" for the tick between render and mount - the
- * very sentence this is here to prevent.
- */
+
 const loadingKey = ref("bookings");
 
 const responsePayload = (response) => response?.data ?? response;
 
 /**
  * Fetches the list and puts it in place, sorted by the booking envelope from
- * the eligibility (`accessWindow`, backend 4.3): active, upcoming, past -
- * see `compareByAccessWindow`. The 60-minute buffer the sort used to guess
- * is gone; the envelope is the buffer the backend actually applied.
+ * the eligibility: active, upcoming, past.
  */
 const fetchBookings = async () => {
   const response = await getAccessBookings({

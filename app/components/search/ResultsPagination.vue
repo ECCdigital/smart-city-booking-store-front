@@ -52,7 +52,7 @@ import {
 const page = defineModel("page", { type: Number, required: true });
 const pageSize = defineModel("pageSize", { type: Number, required: true });
 
-defineProps({
+const props = defineProps({
   total: {
     type: Number,
     required: true,
@@ -73,16 +73,18 @@ defineProps({
     type: Number,
     required: true,
   },
+  pageSizeOptions: {
+    type: Array,
+    default: () => PAGE_SIZE_OPTIONS,
+  },
 });
 
 const { t } = useI18n();
 
-// Unique per instance: the list and the grid render at the same time, only one
-// of them visible, so a shared id would tie both labels to the same select.
 const selectId = `results-per-page-${useId()}`;
 
 const pageSizeOptions = computed(() =>
-  PAGE_SIZE_OPTIONS.map((size) => ({
+  props.pageSizeOptions.map((size) => ({
     label: size === ALL_ITEMS ? t("results.pagination.all") : String(size),
     value: size,
   })),

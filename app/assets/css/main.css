@@ -365,3 +365,27 @@ body {
 .container-edge-right {
     padding-right: max(20px, calc((100% - 1400px) / 2 + 20px));
 }
+
+/*
+ * The one transition of the account lists — bookings, mobile keys, invoices,
+ * favorites: an entry fades and shrinks a little on its way in and out, and
+ * the rest slide into the gap right after, long enough to be seen. A grid
+ * that wants the gap closed while the entry still fades takes it out of the
+ * flow itself.
+ */
+.card-list-enter-active,
+.card-list-leave-active {
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease;
+}
+
+.card-list-move {
+    transition: transform 0.45s ease 0.1s;
+}
+
+.card-list-enter-from,
+.card-list-leave-to {
+    opacity: 0;
+    transform: scale(0.95);
+}

@@ -33,8 +33,8 @@
     </div>
   </UCard>
 
-  <!-- else -->
-  <template v-else>
+  <!-- else: the cards come, go and move with the shared list transition -->
+  <TransitionGroup v-else name="card-list" tag="div" class="space-y-3">
     <UCard v-for="booking in bookings" :key="booking.id">
       <template #header>
         <!-- Status -->
@@ -131,7 +131,7 @@
         :show-separator="i < booking.accessPoints.length - 1"
       />
     </UCard>
-  </template>
+  </TransitionGroup>
 </template>
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";

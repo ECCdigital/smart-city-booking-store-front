@@ -55,6 +55,13 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // A view that removes in its own way — the favorites page, which takes
+  // the card out with a chance to undo — hands the removal over here; the
+  // button then neither writes nor notifies on an active heart.
+  removeWith: {
+    type: Function,
+    default: null,
+  },
 });
 
 const { t } = useI18n();
@@ -95,10 +102,17 @@ async function toggle() {
   if (pending.value) return;
 
   try {
-    if (active.value) {
+    if (active.value && props.removeWith) {
+      props.removeWith(reference.value);
+    } else if (active.value) {
       await favoritesStore.unmark(reference.value);
+      notification.info(
+        t("favorites.removeMessage"),
+        t("favorites.removeTitle"),
+      );
     } else {
       await favoritesStore.mark(reference.value);
+      notification.info(t("favorites.addMessage"), t("favorites.addTitle"));
     }
   } catch (error) {
     report(error);

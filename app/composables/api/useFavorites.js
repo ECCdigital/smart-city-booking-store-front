@@ -13,6 +13,16 @@ export function useFavorites() {
     return Array.isArray(data) ? data : [];
   };
 
+  // The hydrated list for the favorites page: every entry with its state.
+  const fetchFavoriteOffers = async () => {
+    const api = useApiClient();
+    const { data, error } = await api.get("/api/favorites/offers");
+    if (error) {
+      throw error;
+    }
+    return Array.isArray(data) ? data : [];
+  };
+
   const markFavorite = async (reference) => {
     const api = useApiClient();
     const { data, error } = await api.put(pathOf(reference));
@@ -30,5 +40,5 @@ export function useFavorites() {
     }
   };
 
-  return { fetchFavorites, markFavorite, removeFavorite };
+  return { fetchFavorites, fetchFavoriteOffers, markFavorite, removeFavorite };
 }

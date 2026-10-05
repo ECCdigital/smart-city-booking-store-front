@@ -1,12 +1,18 @@
 <template>
   <div class="w-full">
-    <div class="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6">
+    <!-- The cards come, go and move with the shared list transition when a
+         search, a filter or a page turn changes the list. -->
+    <TransitionGroup
+      name="card-list"
+      tag="div"
+      class="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6"
+    >
       <BookingCard
         v-for="booking in paginatedBookings"
         :key="booking.id"
         :booking="booking"
       />
-    </div>
+    </TransitionGroup>
 
     <div v-if="usePagination" class="flex justify-center mt-2 mb-10">
       <UPagination

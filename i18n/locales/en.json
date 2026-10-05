@@ -193,7 +193,7 @@
     "bookings": "Bookings",
     "accountBookings": "My bookings",
     "activities": "Activities",
-    "digitalKeys": "Digital keys",
+    "digitalKeys": "Keys",
     "invoices": "Invoices",
     "account": "Account",
     "resources": "Resources",
@@ -203,7 +203,8 @@
     "offerSpaces": "Offer spaces",
     "settings": "Settings",
     "backToHome": "Back to the home page",
-    "toOffers": "To Offers"
+    "toOffers": "To Offers",
+    "favorites": "Favourites"
   },
   "events": {
     "forThisEvent": "For this event, {status}.",
@@ -795,7 +796,11 @@
     }
   },
   "account": {
-    "favoritesEmpty": "Nothing to see here yet. Anything you save will appear here.",
+    "listFilter": {
+      "filterBy": "Filter by:",
+      "tenant": "Provider:",
+      "kind": "Type:"
+    },
     "contactData": "Contact details",
     "security": "Security",
     "accountVerified": "Account verified?",
@@ -823,11 +828,10 @@
     "activities": "My activity",
     "digitalKeys": "Digital keys",
     "digitalKeysDescription": "Open doors, lockers and bike boxes with your phone.",
-    "quickBookDescription": "Book the items you use and save often, again in moments.",
+    "quickBookDescription": "Find and book the offers you saved, in moments.",
     "invoicesShortDescription": "Every invoice and receipt in one place.",
     "invoicesDescription": "Here you will find your invoices and payment receipts.",
-    "favoritesTitle": "Your favourites",
-    "favoritesSoon": "Your favourites are coming soon",
+    "favoritesTitle": "Favourites",
     "appearanceDescription": "Manage how the app looks. You can switch between a light and a dark theme, and change the language of the interface.",
     "bookedItems": "Booked items",
     "invoicesAndReceipts": "Invoices and receipts",
@@ -844,6 +848,8 @@
       "emptyTitle": "No invoices available",
       "emptyDescription": "There are currently no invoices for your account. Once invoices have been created, they will appear here.",
       "unknownBookable": "Unknown bookable",
+      "searchPlaceholder": "Search by bookable",
+      "noMatches": "No invoice matches your search.",
       "columns": {
         "createdAt": "Created",
         "title": "Title",
@@ -1008,6 +1014,8 @@
     "scannedDescription": "You scanned the code at the door.",
     "whichBooking": "Which booking?",
     "noKeysFound": "No keys found",
+    "searchPlaceholder": "Search",
+    "noMatches": "No key matches your search or the chosen filters.",
     "lockSystemInfo": "Information and status of the locking system",
     "openAction": "Open",
     "accessPoint": {
@@ -1450,12 +1458,34 @@
   },
   "favorites": {
     "add": "Save as favourite",
+    "addTitle": "Add to favourites",
+    "addMessage": "This offer has been added to your favourites.",
     "remove": "Remove from favourites",
+    "removeTitle": "Removed from favourites",
+    "removeMessage": "This offer has been removed from your favourites.",
     "signInToMark": "Sign in to save offers as favourites",
     "limitReachedTitle": "Limit reached",
     "limitReached": "You can save at most {limit} favourites. Remove one to save a new offer.",
     "limitReachedShort": "You have reached the maximum number of favourites. Remove one to save a new offer.",
     "notAvailable": "This offer cannot be saved as a favourite right now.",
-    "failed": "The favourite could not be saved. Please try again."
+    "failed": "The favourite could not be saved. Please try again.",
+    "removeFailed": "The favourite could not be removed. Please try again.",
+    "page": {
+      "title": "Favourites",
+      "description": "Here you will find all the offers you have saved as favourites.",
+      "count": "No favourites | One favourite | {count} favourites",
+      "unavailable": "Not available",
+      "unavailableHint": "This offer cannot be reached right now. It stays saved until you remove it.",
+      "deleted": "Deleted offer",
+      "deletedHint": "This offer no longer exists.",
+      "removeEntry": "Remove",
+      "undo": "Undo",
+      "emptyTitle": "No favourites yet",
+      "emptyDescription": "Tap the heart on an offer in the catalogue or on its detail page to find it here again.",
+      "browseOffers": "Browse offers",
+      "searchPlaceholder": "Search by title",
+      "noMatches": "No favourite matches your search or the chosen filters.",
+      "loadFailed": "Your favourites could not be loaded."
+    }
   }
 }

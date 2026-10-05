@@ -168,7 +168,7 @@
     "quotedTitle": "„{title}“"
   },
   "navigation": {
-    "keys": "Schlüssel",
+    "keys": "Digitale Schlüssel",
     "activities": "Aktivitäten",
     "digitalKeys": "Digitale Schlüssel",
     "invoices": "Rechnungen",
@@ -184,7 +184,8 @@
     "reports": "Berichte",
     "admin": "Admin-Bereich",
     "offerSpaces": "Angebote bereitstellen",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "favorites": "Favoriten"
   },
   "footer": {
     "legalNotice": "Impressum",
@@ -1143,7 +1144,11 @@
   },
 
   "account": {
-    "favoritesEmpty": "Aktuell gibt es hier noch nichts zu sehen. Gespeicherte Inhalte werden künftig an dieser Stelle angezeigt.",
+    "listFilter": {
+      "filterBy": "Filtern nach:",
+      "tenant": "Anbieter:",
+      "kind": "Typ:"
+    },
     "contactData": "Kontaktdaten",
     "security": "Sicherheit",
     "accountVerified": "Account verifiziert?",
@@ -1171,11 +1176,10 @@
     "activities": "Meine Aktivitäten",
     "digitalKeys": "Digitale Schlüssel",
     "digitalKeysDescription": "Öffnen Sie Türen, Schließfächer oder Fahrradboxen mit Ihrem Smartphone.",
-    "quickBookDescription": "Häufig genutzte und gemerkte Buchungsobjekte schnell wieder buchen.",
+    "quickBookDescription": "Gemerkte Angebote schnell wiederfinden und buchen.",
     "invoicesShortDescription": "Alle Rechnungen und Belege an einem Ort.",
     "invoicesDescription": "Hier finden Sie Ihre Rechnungen und Zahlungsbelege.",
-    "favoritesTitle": "Ihre Favoriten",
-    "favoritesSoon": "Ihre Favoriten kommen bald",
+    "favoritesTitle": "Favoriten",
     "appearanceDescription": "Verwalten Sie die Darstellung der Anwendung. Sie können beispielsweise zwischen einem hellen und einem dunklen Design wechseln. Optional können Sie auch die Sprache der Benutzeroberfläche anpassen.",
     "bookedItems": "Gebuchte Objekte",
     "invoicesAndReceipts": "Rechnungen und Zahlungsbelege",
@@ -1192,6 +1196,8 @@
       "emptyTitle": "Keine Rechnungen vorhanden",
       "emptyDescription": "Aktuell sind für Ihr Konto keine Rechnungen verfügbar. Sobald Rechnungen erstellt wurden, werden diese hier angezeigt.",
       "unknownBookable": "Unbekanntes Buchungsobjekt",
+      "searchPlaceholder": "Nach Buchungsobjekt suchen",
+      "noMatches": "Keine Rechnung passt zu Ihrer Suche.",
       "columns": {
         "createdAt": "Erstelldatum",
         "title": "Titel",
@@ -1359,6 +1365,8 @@
     "scannedDescription": "Sie haben den Code an der Tür gescannt.",
     "whichBooking": "Welche Buchung?",
     "noKeysFound": "Keine Schlüssel gefunden",
+    "searchPlaceholder": "Suchen",
+    "noMatches": "Kein Schlüssel passt zu Ihrer Suche oder den gewählten Filtern.",
     "lockSystemInfo": "Informationen und Status des Schließsystems",
     "openAction": "Öffnen",
     "accessPoint": {
@@ -1600,12 +1608,34 @@
   },
   "favorites": {
     "add": "Als Favorit merken",
+    "addTitle": "Angebot gemerkt",
+    "addMessage": "Dieses Angebot wurde zu Ihren Favoriten hinzugefügt.",
     "remove": "Aus Favoriten entfernen",
+    "removeTitle": "Angebot entfernt",
+    "removeMessage": "Dieses Angebot wurde aus Ihren Favoriten entfernt.",
     "signInToMark": "Anmelden, um Angebote als Favorit zu merken",
     "limitReachedTitle": "Obergrenze erreicht",
     "limitReached": "Sie können höchstens {limit} Favoriten merken. Entfernen Sie einen Favoriten, um ein neues Angebot zu merken.",
     "limitReachedShort": "Sie haben die Obergrenze an Favoriten erreicht. Entfernen Sie einen Favoriten, um ein neues Angebot zu merken.",
     "notAvailable": "Dieses Angebot kann derzeit nicht als Favorit gemerkt werden.",
-    "failed": "Der Favorit konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+    "failed": "Der Favorit konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "removeFailed": "Der Favorit konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
+    "page": {
+      "title": "Ihre Favoriten",
+      "description": "Hier finden Sie alle Angebote, die Sie als Favorit gemerkt haben.",
+      "count": "Keine Favoriten | Ein Favorit | {count} Favoriten",
+      "unavailable": "Nicht verfügbar",
+      "unavailableHint": "Dieses Angebot ist derzeit nicht erreichbar. Es bleibt gemerkt, bis Sie es entfernen.",
+      "deleted": "Gelöschtes Angebot",
+      "deletedHint": "Dieses Angebot gibt es nicht mehr.",
+      "removeEntry": "Entfernen",
+      "undo": "Rückgängig",
+      "emptyTitle": "Noch keine Favoriten",
+      "emptyDescription": "Markieren Sie Angebote im Katalog oder in der Detailansicht mit dem Herz, um sie hier wiederzufinden.",
+      "browseOffers": "Angebote entdecken",
+      "searchPlaceholder": "Nach Titel suchen",
+      "noMatches": "Kein Favorit passt zu Ihrer Suche oder den gewählten Filtern.",
+      "loadFailed": "Ihre Favoriten konnten nicht geladen werden."
+    }
   }
 }

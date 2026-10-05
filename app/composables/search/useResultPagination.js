@@ -16,12 +16,19 @@ export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100, ALL_ITEMS];
  * and the counter never disagrees with what is on screen.
  *
  * @param {import('vue').MaybeRefOrGetter<Array>} items the full, ordered result list
- * @param {{ scrollTarget?: import('vue').Ref<HTMLElement | null> }} [options]
- *   the element to bring back into view after a page turn
+ * @param {{
+ *   scrollTarget?: import('vue').Ref<HTMLElement | null>,
+ *   initialPageSize?: number,
+ * }} [options]
+ *   the element to bring back into view after a page turn, and the page size
+ *   to open with when the view's rows ask for another than the default
  */
-export function useResultPagination(items, { scrollTarget } = {}) {
+export function useResultPagination(
+  items,
+  { scrollTarget, initialPageSize = DEFAULT_PAGE_SIZE } = {},
+) {
   const page = ref(1);
-  const pageSize = ref(DEFAULT_PAGE_SIZE);
+  const pageSize = ref(initialPageSize);
 
   const total = computed(() => toValue(items).length);
 
