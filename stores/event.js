@@ -6,6 +6,8 @@ export const useEventStore = defineStore("event", {
     events: [],
     loadedFor: null,
     loadedDetailsFor: {},
+    // A failed list load, so an empty list is not mistaken for a success.
+    error: null,
   }),
   getters: {
     getEvents: (state) => state.events,
@@ -18,10 +20,13 @@ export const useEventStore = defineStore("event", {
       try {
         this.events = await fetchEvents(tenantID);
         this.initialized = true;
+        this.error = null;
         return this.events;
       } catch (error) {
         console.error("Error fetching events:", error);
         this.events = [];
+        this.error = error;
+        return this.events;
       }
     },
     async getEventTimeById(eventId) {

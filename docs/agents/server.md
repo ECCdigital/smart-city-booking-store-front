@@ -65,10 +65,12 @@ import { serverFetch } from "../utils/serverFetch";
 
 export default defineEventHandler(async (event) => {
   const { data, error } = await serverFetch(event, "/bookables");
-  if (error) throw createError({ statusCode: error.status, statusMessage: error.message });
+  if (error) throw createError(proxyErrorOf(error, "Failed to fetch bookables"));
   return data;
 });
 ```
+
+`proxyErrorOf()` (`server/utils/proxyError.ts`) keeps the backend's status code and passes its error body on as `data`; a backend that did not answer is a 502. Never return a successful empty answer for a failed request. On the client the backend body is `error.data.data` (`backendErrorBodyOf()` in `app/utils/checkoutErrors.js`).
 
 ## Auth routes
 
@@ -91,7 +93,16 @@ setCookie(event, "access-token", accessToken, {
 
 ## Caching
 
-Use `createConditionalCachedHandler` for cacheable public/semi-public routes:
+Never cache an answer that carries a tenant or offer release (tenants,
+bookables, events, catalog bundles, availability, prices, checkout reads): with
+tenant supervision a tenant going non-public (pending approval or declined) or
+a withdrawn approval has to show on the next request. Such a handler passes
+`{ releaseSensitive: true }` (or is a plain `defineEventHandler`), and its path
+belongs in
+`server/utils/releaseFreshness.ts`, which makes `server/middleware/release-freshness.ts`
+send `Cache-Control: no-store`.
+
+Use `createConditionalCachedHandler` with a lifetime only for release-free public/semi-public routes (today: `catalog/mode`):
 
 ```typescript
 import { createConditionalCachedHandler } from "../../utils/conditionalCache";

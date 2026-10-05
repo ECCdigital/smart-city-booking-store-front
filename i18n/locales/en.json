@@ -92,7 +92,6 @@
     "unsavedChangesLeave": "You have unsaved changes. Save or discard them before you leave the page.",
     "save": "Save",
     "reset": "Reset",
-    "toHome": "To the home page",
     "showAll": "Show all",
     "showLess": "Show less",
     "clearEntry": "Clear entry",
@@ -140,7 +139,14 @@
   "footer": {
     "legalNotice": "Legal notice",
     "dataProtection": "Privacy policy",
-    "termsAndConditions": "Terms and conditions"
+    "termsAndConditions": "Terms and conditions",
+    "offerSpaces": "Offer spaces"
+  },
+  "rateLimit": {
+    "title": "Too many attempts",
+    "seconds": "Please try again in {count} second. | Please try again in {count} seconds.",
+    "minutes": "Please try again in {count} minute. | Please try again in {count} minutes.",
+    "later": "Please try again later."
   },
   "colorMode": {
     "toggle": "Colour mode",
@@ -186,7 +192,7 @@
     "dashboard": "Dashboard",
     "bookings": "Bookings",
     "accountBookings": "My bookings",
-    "activities": "Activity",
+    "activities": "Activities",
     "digitalKeys": "Digital keys",
     "invoices": "Invoices",
     "account": "Account",
@@ -194,6 +200,7 @@
     "user": "User",
     "reports": "Reports",
     "admin": "Admin area",
+    "offerSpaces": "Offer spaces",
     "settings": "Settings",
     "backToHome": "Back to the home page",
     "toOffers": "To Offers"
@@ -225,16 +232,37 @@
     "noEvents": "No events found"
   },
   "errors": {
-    "notFoundTitle": "Page not found",
-    "notFoundMessage": "The page you asked for does not exist or has moved.",
-    "forbiddenTitle": "Access denied",
-    "forbiddenMessage": "You do not have permission to open this page.",
-    "serverTitle": "Server error",
-    "serverMessage": "Something went wrong on our side. Please try again later.",
-    "genericTitle": "Something went wrong",
-    "genericMessage": "Something went wrong.",
-    "label": "Error",
-    "noCatalog": "No catalogue found"
+    "offerNotAvailable": "This offer is not (or no longer) available.",
+    "loadFailed": {
+      "title": "The content could not be loaded",
+      "message": "Please try again later."
+    },
+    "page": {
+      "notAvailable": {
+        "title": "Page not available",
+        "message": "The requested page does not exist or is not (or no longer) available."
+      },
+      "forbidden": {
+        "title": "Access denied",
+        "message": "You do not have permission to view this page."
+      },
+      "serverError": {
+        "title": "Server error",
+        "message": "An internal error occurred. Please try again later."
+      },
+      "generic": {
+        "title": "An error occurred",
+        "message": "Something went wrong."
+      },
+      "code": "Error",
+      "home": "Back to home",
+      "back": "Back"
+    },
+    "noCatalog": "No catalog was found",
+    "noTenantFound": {
+      "title": "No tenant found",
+      "message": "No tenant was found for this domain. Please check the URL or contact support."
+    }
   },
   "filter": {
     "address": "Address",
@@ -282,6 +310,7 @@
     "additionalObjects": "Additional Objects",
     "mandatoryObjects": "Mandatory Objects",
     "login_required": "Sign-in is required for this booking.",
+    "offer_not_reachable": "This offer is no longer available and cannot be booked.",
     "bookable_unavailable": "This object is not available for the selected time period.",
     "unknown_error": "An error occurred during validation.",
     "group_booking_disabled": "Recurring bookings are not allowed for this object.",
@@ -809,6 +838,7 @@
       "rejectionReason": "Reason for rejection",
       "cancellationReason": "Reason for cancellation"
     },
+    "unknownTenant": "Unknown",
     "invoices": {
       "title": "Your invoices and receipts",
       "emptyTitle": "No invoices available",
@@ -1155,8 +1185,9 @@
       "number": "At least one digit (0-9)"
     },
     "success": {
-      "heading": "Registration complete",
-      "description": "We have sent you an email with a confirmation link. Open your inbox and confirm your address to activate your account.",
+      "heading": "Please check your inbox",
+      "description": "If the address you entered can be used, you will shortly receive an e-mail with a confirmation link. Please use it to confirm your e-mail address and activate your account.",
+      "resent": "If the address belongs to an account that is not confirmed yet, we have sent the confirmation link again.",
       "spamHint": "If you cannot find the email, check your spam or promotions folder.",
       "toHome": "To the home page",
       "toLogin": "To sign-in"
@@ -1188,7 +1219,7 @@
   "emailVerification": {
     "title": "Confirm your email address",
     "description": "Check your email and follow the confirmation link to verify your address.",
-    "resendLink": "Send the confirmation link again",
+    "resendLink": "Send confirmation link again",
     "progress": {
       "heading": "Confirming your email...",
       "description": "One moment while we confirm your email address."

@@ -1,6 +1,7 @@
 <script setup>
 import { useLegalDocuments } from "~/composables/useLegalDocuments.js";
 import { copyrightLine } from "~/utils/copyrightLine.js";
+import { offerSpacesEntryUrl } from "~/utils/authEntryFlow";
 import { useInstanceStore } from "~~/stores/instance.js";
 
 const documents = useLegalDocuments();
@@ -15,6 +16,14 @@ const year = new Date().getFullYear();
 const copyright = computed(() =>
   copyrightLine(year, instanceStore.instance?.copyright),
 );
+
+// Public entry "Offer spaces": leads to the admin UI's onboarding, which
+// handles login itself. Shown only when an admin UI is configured and the
+// public instance says that every user may create a tenant.
+const adminBaseUrl = useRuntimeConfig().public.adminBaseUrl;
+const offerSpacesUrl = computed(() =>
+  offerSpacesEntryUrl(adminBaseUrl, instanceStore.instance),
+);
 </script>
 
 <template>
@@ -28,7 +37,10 @@ const copyright = computed(() =>
           {{ copyright }}
         </span>
 
-        <nav v-if="documents.length" class="flex flex-wrap gap-x-6 gap-y-2">
+        <nav
+          v-if="documents.length || offerSpacesUrl"
+          class="flex flex-wrap gap-x-6 gap-y-2"
+        >
           <a
             v-for="doc in documents"
             :key="doc.key"
@@ -38,6 +50,13 @@ const copyright = computed(() =>
             class="text-gray-700 hover:underline dark:text-gray-300"
           >
             {{ $t(`footer.${doc.key}`) }}
+          </a>
+          <a
+            v-if="offerSpacesUrl"
+            :href="offerSpacesUrl"
+            class="text-gray-700 hover:underline dark:text-gray-300"
+          >
+            {{ $t("footer.offerSpaces") }}
           </a>
         </nav>
       </div>

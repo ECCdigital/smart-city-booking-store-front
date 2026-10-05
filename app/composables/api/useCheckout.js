@@ -1,3 +1,5 @@
+import { backendErrorBodyOf } from "~/utils/checkoutErrors.js";
+
 export function useCheckout() {
   const fetchBookable = async (bookableID, tenantID) => {
     const api = useApiClient();
@@ -126,7 +128,7 @@ export function useCheckout() {
     const api = useApiClient();
     const { data, error } = await api.get(`/api/checkout/${bookableID}/permissions/?tenantID=${tenantID}`);
     if (error) {
-      const payload = error?.data;
+      const payload = backendErrorBodyOf(error);
       if (
         payload?.success === false &&
         payload?.error?.checkType === "permissions"

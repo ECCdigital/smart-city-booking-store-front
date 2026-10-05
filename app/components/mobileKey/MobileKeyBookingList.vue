@@ -68,7 +68,7 @@
             </h2>
             <p class="text-sm text-neutral-500">
               #{{ booking.id }} &middot; Tenant:
-              {{ getTenantName(booking.tenantId) }}
+              {{ getBookingTenant(booking)?.name || $t("account.unknownTenant") }}
             </p>
           </div>
         </div>
@@ -175,7 +175,7 @@ defineProps({
  */
 const SKELETON_CARDS = 2;
 
-const { getTenantName } = useTenant();
+const { getBookingTenant } = useTenant();
 const { formatDate } = useFormatting();
 const now = useAccessNow();
 

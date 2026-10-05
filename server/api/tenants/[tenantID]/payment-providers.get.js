@@ -1,4 +1,5 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
 
 export default defineEventHandler(async (event) => {
@@ -12,11 +13,7 @@ export default defineEventHandler(async (event) => {
 
     if (error) {
         console.log(error);
-        throw createError({
-            statusCode: error.status || 500,
-            statusMessage: "Failed to fetch Payment Apps",
-            data: error.message,
-        });
+        throw createError(proxyErrorOf(error, "Failed to fetch Payment Apps"));
     }
 
     return data;

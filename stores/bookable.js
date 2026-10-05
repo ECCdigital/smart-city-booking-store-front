@@ -6,6 +6,8 @@ export const useBookableStore = defineStore("bookable", {
     bookables: [],
     loadedFor: null,
     loadedDetailsFor: {},
+    // A failed list load, so an empty list is not mistaken for a success.
+    error: null,
   }),
   getters: {
     getBookables: (state) => state.bookables,
@@ -27,10 +29,13 @@ export const useBookableStore = defineStore("bookable", {
       try {
         this.bookables = await fetchBookables(tenantID);
         this.initialized = true;
+        this.error = null;
         return this.bookables;
       } catch (error) {
         console.error("Error fetching bookables:", error);
         this.bookables = [];
+        this.error = error;
+        return this.bookables;
       }
     },
     addOrUpdate(bookable) {

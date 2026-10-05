@@ -1,4 +1,5 @@
 import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
 export default defineEventHandler(async (event) => {
   const tenantID = getRouterParam(event, "tenantID");
@@ -13,11 +14,7 @@ export default defineEventHandler(async (event) => {
   );
 
   if (error) {
-    throw createError({
-      statusCode: error.status || 500,
-      statusMessage: "Failed to fetch event data",
-      data: error.message,
-    });
+    throw createError(proxyErrorOf(error, "Failed to fetch event data"));
   }
   return data;
 });

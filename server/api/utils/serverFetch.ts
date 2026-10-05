@@ -1,6 +1,6 @@
 import type { H3Event } from "h3";
-import type { FetchError } from "ofetch";
 import type { NitroFetchOptions, NitroFetchRequest } from "nitropack";
+import { upstreamErrorOf } from "~~/server/utils/proxyError";
 
 type Result<T> =
   | { data: T; error: null }
@@ -28,14 +28,7 @@ export async function serverFetch<T>(
 
     return { data, error: null };
   } catch (err) {
-    const error = err as FetchError;
-    return {
-      data: null,
-      error: {
-        status: error.statusCode ?? 500,
-        message: error.statusMessage ?? "Unknown error",
-        data: error.data,
-      },
-    };
+    // The backend's status and error body; 502 when it did not answer.
+    return { data: null, error: upstreamErrorOf(err) };
   }
 }
