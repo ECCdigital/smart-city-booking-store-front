@@ -14,7 +14,7 @@
         :is-not-bookable="!group.bookables[0].isBookable"
         :calculated-price="group.bookables[0].calculatedPrice"
         map-detail-mode
-        class="w-[300px] break-normal"
+        class="w-[300px] max-h-[300px] break-normal"
       />
     </div>
 
