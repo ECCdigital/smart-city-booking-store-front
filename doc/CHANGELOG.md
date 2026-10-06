@@ -3,7 +3,7 @@
 Notable changes for the Smart City Booking Storefront.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).  
-Releases are tagged `v1.x.x` from branch `version/1.x`.
+Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major>.<minor>.x`. Work and pull requests go to the newest `version/<major>.<minor>.x`, fixes to the oldest maintained one and from there forward; `develop` only follows the newest, so switch a pull request's base from `develop` by hand. See [Versions & Branches](../README.md#versions--branches).
 
 ## [Unreleased]
 
@@ -14,6 +14,7 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 
 ### Changed
 
+- Docs name the branch rule without a version number (ECCdigital/tickets#224): work and pull requests go to the newest `version/<major>.<minor>.x`, fixes to the oldest maintained one and are merged forward, `develop` stays the default branch but only follows the newest; a pull request's base is switched from `develop` by hand. README, `AGENTS.md` and `docs/agents/architecture.md` no longer name `version/1.x`, which is gone. No code change
 - Comments at the SSO routes name the two places outside this repo that know their paths `/api/auth/sso/callback` and `/api/auth/sso/login` fixed: the Admin UI's guide in the tab „Single Sign-On“ and the backend's „Realm prüfen“ (row 10). Changing a path needs both changed (ECCdigital/tickets#102). No behaviour change
 - `EventAdressInformation` and `BookableAdressInformation`, identical but for their prop name, are merged into one `AddressInformation` taking an `item`
 
