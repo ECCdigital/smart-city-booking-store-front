@@ -114,7 +114,8 @@ without a purge. See [ADR 0001](../adr/0001-theme-bundle-revalidation-instead-of
 
 | Branch | Version | Notes |
 |--------|---------|-------|
-| `develop` | v1.x dev | Active development |
-| `version/1.x` | v1.x stable | Production releases |
+| newest `version/<major>.<minor>.x` | next minor | All work and pull requests |
+| older `version/<major>.<minor>.x` | maintained lines | Fixes, merged forward |
+| `develop` | default branch | Follows the newest, nothing directly |
 
-Work on `develop` unless told otherwise. Storefront v1.x requires backend v4.x.
+Work on the newest `version/<major>.<minor>.x` unless told otherwise, and switch a pull request's base from `develop` to it by hand. Rule in full: [README.md](../../README.md#versions--branches). Storefront v1.x requires backend v4.x.
