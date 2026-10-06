@@ -42,17 +42,26 @@ More details: [smart-city-booking-backend/docs/architecture.md](https://github.c
 
 This repository has its **own release line** (currently **v1.x**). It requires the **v4.x** backend API and admin UI — there is no v3 storefront.
 
-| Branch | Version line | Purpose |
-|--------|--------------|---------|
-| `develop` | **v1.x** (latest) | Active development and integration |
-| `version/1.x` | **v1.x** (stable) | Maintenance, security fixes, production tag source |
+| Branch | Purpose |
+|--------|---------|
+| newest `version/<major>.<minor>.x` | Target of all work and pull requests; the next minor release is tagged here |
+| older `version/<major>.<minor>.x` | Fixes for a line that is still maintained; its patches are tagged here |
+| `develop` | Default branch; follows the newest `version/…` branch, gets nothing directly |
+
+- **Work and pull requests** go to the newest `version/<major>.<minor>.x`.
+- **Fixes** go to the oldest maintained branch that has the bug and are merged forward regularly, branch by branch, up to the newest.
+- **Maintained** are the `version/<major>.<minor>.x` branches of the current major version. A line that is no longer maintained loses its branch; its tags stay.
+- **Opening a pull request:** GitHub proposes `develop` as the base. Switch it by hand to the `version/…` branch named above.
+- **`develop`** is brought up to the newest `version/…` branch by hand: when new branches are cut, and at every release candidate and release of the newest version. A patch of an older version does not move it; the fix arrives with the next catch-up.
+- **Tags:** every release `v<major>.<minor>.<patch>` is tagged on its `version/<major>.<minor>.x`.
+
+The newest branch: `git branch -r --list 'origin/version/[0-9]*.[0-9]*.x' --sort=-v:refname | head -1`.
 
 | Backend / Admin UI | Storefront |
 |--------------------|------------|
 | v3.x (`version/3.x`) | Not supported — use the admin UI for public booking |
-| v4.x (`develop` / `version/4.x`) | Supported (this repository) |
+| v4.x | Supported (this repository) |
 
-- v1.x releases: tags `v1.x.x` from `version/1.x`
 - Breaking API changes: [smart-city-booking-backend/docs/CHANGELOG.md](https://github.com/ECCdigital/smart-city-booking-backend/blob/develop/docs/CHANGELOG.md)
 
 ---
@@ -74,6 +83,8 @@ cd smart-city-booking-store-front
 npm install
 cp .env.example .env
 ```
+
+`develop` carries the newest state. To **contribute**, switch to the newest `version/<major>.<minor>.x` (fixes: the oldest maintained one) and open pull requests against it; GitHub proposes `develop` as the base, so switch it by hand. See [Versions & Branches](#versions--branches).
 
 Configure at minimum the following values in `.env`:
 
@@ -287,7 +298,7 @@ npm run release:major    # Major release
 npm run release:rc       # Release candidate
 ```
 
-Published GitHub releases trigger the Docker build workflow (`.github/workflows/docker-publish.yml`). Production tags `v1.x.x` are cut from `version/1.x`.
+Published GitHub releases trigger the Docker build workflow (`.github/workflows/docker-publish.yml`). Every release tag `v<major>.<minor>.<patch>` is cut from its `version/<major>.<minor>.x`, see [Versions & Branches](#versions--branches).
 
 ---
 

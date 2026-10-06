@@ -64,9 +64,17 @@ Details: [docs/agents/coding-standards.md](docs/agents/coding-standards.md)
 | Vue components & pages | [docs/agents/components.md](docs/agents/components.md) |
 | i18n | [docs/agents/i18n.md](docs/agents/i18n.md) |
 
+## Branches
+
+- Work and pull requests go to the newest `version/<major>.<minor>.x`; fixes go to the oldest maintained `version/<major>.<minor>.x` that has the bug and are merged forward from there
+- `develop` is the default branch but gets nothing directly; it is brought up to the newest `version/…` branch by hand
+- When opening a pull request, switch its base by hand from `develop` to the `version/…` branch named above
+
+Rule in full: [README.md](README.md#versions--branches)
+
 ## Guardrails
 
-- Do **not** change version branches (`version/1.x`) unless explicitly asked
+- Do **not** push to, merge into or reset `develop` or a `version/…` branch unless explicitly asked
 - Do **not** commit without being asked
 - Do **not** add dependencies without good reason
 - Prefer extending existing composables/stores/server routes over duplicating logic
