@@ -10,7 +10,7 @@
           class="font-bold"
           :class="
             mapListMode
-              ? 'text-base line-clamp-2'
+              ? 'text-base line-clamp-2 pr-2'
               : hasLongTitle
                 ? 'text-base line-clamp-2'
                 : 'text-lg'
