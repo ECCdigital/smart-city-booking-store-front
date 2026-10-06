@@ -1528,6 +1528,7 @@
     "atThisLocation": "Ergebnisse an diesem Standort:",
     "clickToOpen": "Klick um Auswahl zu öffnen",
     "clickToSeeAll": "Klick um Alle anzusehen",
+    "goToOffer": "Zu Angebot {n}",
     "pagination": {
       "itemsPerPage": "Pro Seite",
       "all": "Alle",

@@ -1090,6 +1090,7 @@
     "atThisLocation": "Results at this location:",
     "clickToOpen": "Click to open the selection",
     "clickToSeeAll": "Click to see all",
+    "goToOffer": "Go to offer {n}",
     "pagination": {
       "itemsPerPage": "Per page",
       "all": "All",
