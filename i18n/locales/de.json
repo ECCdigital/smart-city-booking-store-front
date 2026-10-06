@@ -1582,6 +1582,7 @@
     "mapView": "Kartenansicht",
     "atThisLocation": "Ergebnisse an diesem Standort:",
     "clickToOpen": "Klick um Auswahl zu öffnen",
+    "clickToSeeAll": "Klick um Alle anzusehen",
     "pagination": {
       "itemsPerPage": "Pro Seite",
       "all": "Alle",
