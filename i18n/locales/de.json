@@ -1528,7 +1528,9 @@
     "atThisLocation": "Ergebnisse an diesem Standort:",
     "clickToOpen": "Klick um Auswahl zu öffnen",
     "clickToSeeAll": "Klick um Alle anzusehen",
-    "goToOffer": "Zu Angebot {n}",
+    "offerPosition": "Angebot {n} von {total}",
+    "previousOffer": "Vorheriges Angebot",
+    "nextOffer": "Nächstes Angebot",
     "pagination": {
       "itemsPerPage": "Pro Seite",
       "all": "Alle",

@@ -10,12 +10,12 @@ Releases are tagged `v1.x.x` from branch `version/1.x`.
 ### Fixed
 
 - The map tooltip for a place with many Offers no longer grows past the map: its list is capped in height and fades out at the bottom, and the hint under it then reads „Klick um Alle anzusehen“ (`results.clickToSeeAll`) instead of „Klick um Auswahl zu öffnen“
-- The dots under the map popup's card carousel stay on one line however many Offers a pin holds: a window of 13 dots slides along with the active one, visibly, and only when it reaches the window's edge, with chevrons at both ends when more dots lie beyond; before, a pin with many Offers wrapped them into several rows over the card. Key `results.goToOffer` for the dots' labels
 - Keycloak SSO behind a TLS-terminating reverse proxy: the storefront sent `http://…/api/auth/sso/callback` as `redirect_uri` (and an `http://` `post_logout_redirect_uri` on „change user“), because it took the origin from the request. It now takes it from `NUXT_USER_BASE_URL`, falling back to the request when that is empty, so a Keycloak client that allows only HTTPS redirect URIs accepts the login
 - Inside a tenant, opening an Offer from the Result Page failed with „Bookable not found“, and the tenant's lists came back empty: the single-tenant branch of the catalog bundle expected the backend to wrap bookables and events (`{ bookable }`, `{ bookables }`), but it returns them bare
 
 ### Changed
 
+- The map popup for a pin with several Offers has a header above the card instead of prev/next arrows over its image and text: a pin icon with „{n} Angebote an diesem Ort", the active card's position „2 / 4" and a joined pair of chevron buttons. The dots under the card are gone, the counter takes their place. Keys `results.offersAtThisLocation`, `results.offerPosition`, `results.previousOffer`, `results.nextOffer`; `results.goToOffer` is removed
 - Comments at the SSO routes name the two places outside this repo that know their paths `/api/auth/sso/callback` and `/api/auth/sso/login` fixed: the Admin UI's guide in the tab „Single Sign-On“ and the backend's „Realm prüfen“ (row 10). Changing a path needs both changed (ECCdigital/tickets#102). No behaviour change
 - `EventAdressInformation` and `BookableAdressInformation`, identical but for their prop name, are merged into one `AddressInformation` taking an `item`
 
