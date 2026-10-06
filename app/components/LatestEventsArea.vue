@@ -3,13 +3,21 @@
     <div class="flex items-end mb-5">
       <h2 class="text-2xl font-bold mt-7">{{ $t("events.upcoming") }}</h2>
       <div class="flex-1" />
-      <p
+      <!--<p
         v-if="latestEvents.length > 3"
         class="text-primary text-bold cursor-pointer"
         @click="goToEventsPage()"
       >
         {{ $t("events.showAllEvents") }}
       </p>
+      -->
+      <UButton
+        v-if="latestEvents.length > 3"
+        variant="ghost"
+        :label="$t('events.showAllEvents')"
+        trailing-icon="i-lucide-chevron-right"
+        @click="goToEventsPage()"
+      />
     </div>
     <div class="md:flex md:space-x-2">
       <div
@@ -32,7 +40,6 @@
 import ResultCard from "~/components/search/ResultCard.vue";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 
-
 const props = defineProps({
   items: {
     type: Array,
@@ -49,7 +56,7 @@ const latestEvents = computed(() => {
   return events.sort(
     (a, b) =>
       new Date(a.information.startDate).getTime() -
-      new Date(b.information.startDate).getTime()
+      new Date(b.information.startDate).getTime(),
   );
 });
 
