@@ -1,21 +1,13 @@
 <template>
   <div style="padding: 50px 0">
-    <div class="flex items-end mb-5">
+    <div class="md:flex items-center justify-between md:mb-5">
       <h2 class="text-2xl font-bold mt-7">{{ $t("events.upcoming") }}</h2>
-      <div class="flex-1" />
-      <!--<p
-        v-if="latestEvents.length > 3"
-        class="text-primary text-bold cursor-pointer"
-        @click="goToEventsPage()"
-      >
-        {{ $t("events.showAllEvents") }}
-      </p>
-      -->
       <UButton
         v-if="latestEvents.length > 3"
         variant="ghost"
         :label="$t('events.showAllEvents')"
         trailing-icon="i-lucide-chevron-right"
+        class="my-2 md:my-0"
         @click="goToEventsPage()"
       />
     </div>
