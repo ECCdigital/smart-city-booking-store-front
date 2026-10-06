@@ -1089,6 +1089,7 @@
     "mapView": "Map view",
     "atThisLocation": "Results at this location:",
     "clickToOpen": "Click to open the selection",
+    "clickToSeeAll": "Click to see all",
     "pagination": {
       "itemsPerPage": "Per page",
       "all": "All",

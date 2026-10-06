@@ -40,37 +40,53 @@
       </div>
     </div>
 
-    <div v-else class="rounded-2xl bg-white dark:bg-gray-800 shadow-2xl p-2 w-80">
+    <div
+      v-else
+      class="@container rounded-2xl bg-white dark:bg-gray-800 shadow-2xl p-2 w-80"
+    >
       <p class="text-md font-bold mb-2">
         {{ group.bookables.length }} {{ $t("results.atThisLocation") }}
       </p>
-      <div
-        v-for="bookable in group.bookables"
-        :key="bookable.item.id"
-        class="bg-gray-200 dark:bg-gray-700 rounded-sm mb-2 last:mb-0 p-1 flex"
-        :class="bookable.matchStatus !== 'match' ? 'opacity-70' : ''"
-      >
-        <div class="basis-1/8 flex items-center">
-          <BookableTypeBadge
-            :type="bookable.item?.type"
-            :is-event="bookable.item?.type === 'event'"
-            icon-only
-          />
-        </div>
-        <div class="basis-7/8 flex flex-col justify-center min-w-0">
-          <div class="font-semibold wrap-break-word whitespace-normal">
-            {{ titleOf(bookable.item) }}
+      <!-- For many Offers at one place the list is capped and fades out at the bottom. -->
+      <div ref="listRef" class="relative max-h-80 overflow-hidden">
+        <div
+          v-for="bookable in group.bookables"
+          :key="bookable.item.id"
+          class="bg-gray-200 dark:bg-gray-700 rounded-sm mb-2 last:mb-0 p-1 flex"
+          :class="bookable.matchStatus !== 'match' ? 'opacity-70' : ''"
+        >
+          <div class="basis-1/8 flex items-center">
+            <BookableTypeBadge
+              :type="bookable.item?.type"
+              :is-event="bookable.item?.type === 'event'"
+              icon-only
+            />
           </div>
-          <EventTimeInformation
-            v-if="bookable.item?.type === 'event'"
-            :event="bookable.item"
-            :use-icon="false"
-            class="text-xs text-gray-600 dark:text-gray-300"
-          />
+          <div class="basis-7/8 flex flex-col justify-center min-w-0">
+            <div class="font-semibold wrap-break-word whitespace-normal">
+              {{ titleOf(bookable.item) }}
+            </div>
+            <EventTimeInformation
+              v-if="bookable.item?.type === 'event'"
+              :event="bookable.item"
+              :use-icon="false"
+              class="text-xs text-gray-600 dark:text-gray-300"
+            />
+          </div>
         </div>
+        <div
+          v-if="listOverflows"
+          class="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white dark:from-gray-800 to-transparent"
+        />
       </div>
 
-      <p class="text-center italic">[ {{ $t("results.clickToOpen") }} ]</p>
+      <p class="text-center italic mt-2">
+        [
+        {{
+          $t(listOverflows ? "results.clickToSeeAll" : "results.clickToOpen")
+        }}
+        ]
+      </p>
     </div>
   </LTooltip>
 </template>
@@ -81,12 +97,18 @@ import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import { titleOf } from "~/composables/search/offer";
 
-
 defineProps({
   group: {
     type: Object,
     required: true,
   },
+});
+
+const listRef = ref(null);
+const listOverflows = ref(false);
+useResizeObserver(listRef, ([entry]) => {
+  const el = entry.target;
+  listOverflows.value = el.scrollHeight > el.clientHeight;
 });
 </script>
 
