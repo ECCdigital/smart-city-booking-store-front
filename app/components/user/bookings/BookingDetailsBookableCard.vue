@@ -60,10 +60,9 @@ const tenantHintQuery = computed(() => {
 const { formatPrice } = useFormatting();
 
 const bookingPrice = computed(() => {
-  if (props.bookable.userGrossPriceEur > 0) {
-    return formatPrice(props.bookable.userGrossPriceEur);
-  }
-  return "0,00 €";
+  return formatPrice(
+    props.bookable.userGrossPriceEur > 0 ? props.bookable.userGrossPriceEur : 0,
+  );
 });
 
 function goToBookable(bookableId) {

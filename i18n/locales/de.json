@@ -554,7 +554,7 @@
     "apply": "Filter anwenden",
     "includeNonSuitable": "Nicht passende Angebote anzeigen.",
     "onlyPublicEvents": "Nur öffentliche Events anzeigen.",
-    "onlyRegistrationNeeded": "Nur anmeldepflichte Events anzeigen.",
+    "onlyRegistrationNeeded": "Nur anmeldepflichtige Events anzeigen.",
     "category": "Kategorie",
     "cities": "Orte",
     "distance": "Distanz",
@@ -572,7 +572,7 @@
     },
     "eventsSection": "Veranstaltungen",
     "customFieldsBookablesOnly": "Gilt für Buchungsobjekte.",
-    "fittingResults": "passende Ergebnisse",
+    "fittingResults": "{count} passendes Ergebnis | {count} passende Ergebnisse",
     "provider": "Anbieter"
   },
 

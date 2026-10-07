@@ -6,9 +6,10 @@
  * from i18n; the mapping is explicit because `en` alone gives US ordering
  * (month first, 12-hour clock), which reads wrong next to a German original.
  *
- * `useI18n()` is called lazily inside each function: the composable is also
- * used from plain helpers that run outside a component's setup, where reading
- * it eagerly would throw.
+ * Called in a component's setup, the composable keeps that component's locale,
+ * so a handler or watcher that formats later still gets the page's language.
+ * Called from a plain helper outside setup, where `useI18n()` throws, it reads
+ * the locale lazily inside each function instead.
  */
 const LOCALE_TAGS = {
   de: "de-DE",
@@ -19,16 +20,25 @@ function tagFor(code) {
   return LOCALE_TAGS[code] ?? LOCALE_TAGS.de;
 }
 
-function currentTag() {
+function setupLocale() {
   try {
-    const { locale } = useI18n();
-    return tagFor(locale.value);
+    return useI18n().locale;
   } catch {
-    return LOCALE_TAGS.de;
+    return null;
   }
 }
 
 export function useFormatting() {
+  const locale = setupLocale();
+
+  function currentTag() {
+    if (locale) {
+      return tagFor(locale.value);
+    }
+    const lazy = setupLocale();
+    return lazy ? tagFor(lazy.value) : LOCALE_TAGS.de;
+  }
+
   function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString(currentTag(), {
       day: "2-digit",
@@ -36,6 +46,20 @@ export function useFormatting() {
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+    });
+  }
+
+  /**
+   * A day without its time: 20.10.2026 or 20/10/2026.
+   *
+   * @param options - Intl options that replace or add to the default parts
+   */
+  function formatDay(dateString, options = {}) {
+    return new Date(dateString).toLocaleDateString(currentTag(), {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      ...options,
     });
   }
 
@@ -64,6 +88,11 @@ export function useFormatting() {
       style: "currency",
       currency: "EUR",
     }).format(price);
+  }
+
+  /** A plain number, such as a distance, with the language's separators. */
+  function formatNumber(value, options = {}) {
+    return new Intl.NumberFormat(currentTag(), options).format(value);
   }
 
   /**
@@ -104,9 +133,11 @@ export function useFormatting() {
   return {
     localeTag,
     formatDate,
+    formatDay,
     formatTime,
     formatDateRange,
     formatPrice,
+    formatNumber,
     formateDateToTimestamp,
     monthNames,
     weekdayNames,

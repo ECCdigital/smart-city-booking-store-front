@@ -62,7 +62,10 @@
   </div>
 </template>
 <script setup>
+import { useFormatting } from "~/composables/utils/useFormatting.js";
+
 const { t } = useI18n();
+const { formatPrice } = useFormatting();
 
 const props = defineProps({
   bookable: {
@@ -135,7 +138,7 @@ function displayMinDefaultPrice() {
   const includeTax = props.bookable.priceValueAddedTax
     ? min + (min * props.bookable.priceValueAddedTax) / 100
     : min;
-  const amount = includeTax.toFixed(2).toString().replace(/\./g, ",") + " €";
+  const amount = formatPrice(includeTax);
 
   return categories.length > 1 ? t("price.fromAmount", { amount }) : amount;
 }
@@ -146,8 +149,7 @@ function displayPrice(currentPrice) {
   } else if (currentPrice === 0) {
     return t("price.free");
   } else {
-    currentPrice = currentPrice.toFixed(2);
-    return "€ " + currentPrice.toString().replace(/\./g, ",");
+    return formatPrice(currentPrice);
   }
 }
 

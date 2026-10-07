@@ -302,7 +302,7 @@
     },
     "eventsSection": "Events",
     "customFieldsBookablesOnly": "Applies to bookable items.",
-    "fittingResults": "matching results",
+    "fittingResults": "{count} matching result | {count} matching results",
     "provider": "Provider"
   },
   "checkout": {

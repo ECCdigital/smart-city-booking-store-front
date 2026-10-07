@@ -183,6 +183,7 @@
 <script setup>
 import { useBookables } from "~/composables/api/useBookables.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   tenantId: { type: String, default: null },
@@ -204,6 +205,7 @@ const navButtonClass = computed(() =>
 );
 
 const { t, locale } = useI18n();
+const { formatPrice } = useFormatting();
 const { getBlockPeriods } = useBookables();
 
 function buildMonthLabels(monthStyle) {
@@ -229,12 +231,7 @@ function toDateParam(date) {
 
 function formatEur(value) {
   if (value === null || value === undefined) return "–";
-  return (
-    value.toLocaleString(locale.value === "en" ? "en-GB" : "de-DE", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + " €"
-  );
+  return formatPrice(value);
 }
 
 function formatTime(date) {
