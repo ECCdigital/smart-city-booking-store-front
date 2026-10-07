@@ -8,6 +8,7 @@
         <UTooltip :text="$t('booking.goToBookable')" class="ml-2">
           <UButton
             icon="i-lucide-square-arrow-out-up-right"
+            :aria-label="$t('booking.goToBookable')"
             variant="soft"
             class="text-gray-700 dark:text-gray-300"
             @click="goToBookable(bookable.bookableId)"
