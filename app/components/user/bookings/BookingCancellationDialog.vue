@@ -1,10 +1,17 @@
 <template>
-  <UModal
+  <!--
+    One body, two frames: a modal from `sm` up, a sheet sliding up from the
+    bottom edge below it, like the door panel on the mobile key page. Both
+    take the same props and slots. Closed, neither renders anything, so the
+    server's choice (no window width) never clashes with the client's.
+  -->
+  <component
+    :is="overlay"
     v-model:open="open"
     :title="title"
     :description="subtitle"
     :dismissible="!submitting"
-    :ui="{ title: ' font-bold', footer: 'justify-end' }"
+    v-bind="overlayProps"
   >
     <template #body>
       <!-- Two bars under the header: which of the two steps this is. -->
@@ -38,10 +45,7 @@
           <UIcon name="i-lucide-check" class="w-6 h-6" />
         </span>
         <p class="text-sm text-gray-600 dark:text-gray-300 max-w-sm mt-1">
-          <i18n-t
-            :keypath="doneTextKey"
-            scope="global"
-          >
+          <i18n-t :keypath="doneTextKey" scope="global">
             <template #fee>
               <b>{{ formatPrice(preview.data?.cancellationFeeEur) }}</b>
             </template>
@@ -446,12 +450,14 @@
         </UButton>
       </template>
     </template>
-  </UModal>
+  </component>
 </template>
 
 <script setup>
+import { UModal, USlideover } from "#components";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import { useBookings } from "~/composables/api/useBookings.js";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useAuthStore } from "~~/stores/auth";
 import { useBookingStore } from "~~/stores/bookings.js";
@@ -496,6 +502,21 @@ const open = defineModel("open", { type: Boolean, default: false });
 const emit = defineEmits(["cancelled"]);
 
 const { t } = useI18n();
+const { isGreaterThanSm } = useBreakpointCheck();
+
+const overlay = computed(() => (isGreaterThanSm.value ? UModal : USlideover));
+const overlayProps = computed(() =>
+  isGreaterThanSm.value
+    ? { ui: { title: "font-bold", footer: "justify-end" } }
+    : {
+        side: "bottom",
+        ui: {
+          title: "font-bold",
+          footer: "justify-end",
+          content: "w-[90vw] mx-auto rounded-t-2xl shadow-lg",
+        },
+      },
+);
 const { formatDate, formatPrice } = useFormatting();
 const { getBookingTenant } = useTenant();
 const { getCancellationRefundPreview, cancelBooking } = useBookings();
@@ -535,7 +556,11 @@ const feeDue = computed(
 );
 /** The receipt's last line: the refund, or the fee still to pay. */
 const receiptTotalLabel = computed(() =>
-  t(isPaid.value ? "booking.cancellation.refund" : "booking.cancellation.dueNow"),
+  t(
+    isPaid.value
+      ? "booking.cancellation.refund"
+      : "booking.cancellation.dueNow",
+  ),
 );
 const receiptTotal = computed(() =>
   isPaid.value
