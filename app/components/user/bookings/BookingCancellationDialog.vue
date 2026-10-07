@@ -4,7 +4,7 @@
     :title="title"
     :description="subtitle"
     :dismissible="!submitting"
-    :ui="{ footer: 'justify-end' }"
+    :ui="{ title: ' font-bold', footer: 'justify-end' }"
   >
     <template #body>
       <!-- Two bars under the header: which of the two steps this is. -->
@@ -96,19 +96,19 @@
       <div v-else-if="step === 1" class="flex flex-col gap-5">
         <div class="flex justify-between items-start gap-3">
           <div>
-            <p class="font-semibold">{{ bookingTitle }}</p>
+            <p class="text-lg font-bold tabular-nums text-primary">
+              #{{ booking.id }}
+            </p>
+            <p class="font-medium mt-0.5">{{ bookingTitle }}</p>
             <p v-if="period" class="text-sm text-gray-500 dark:text-gray-400">
               {{ period }}
             </p>
           </div>
-          <div class="flex gap-1.5 shrink-0">
-            <span
-              class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full"
-            >
-              #{{ booking.id }}
-            </span>
-            <BookingPayedChip v-if="!isFree" :booking="booking" />
-          </div>
+          <BookingPayedChip
+            v-if="!isFree"
+            :booking="booking"
+            class="shrink-0"
+          />
         </div>
 
         <p v-if="isFree" class="text-sm text-gray-600 dark:text-gray-300">
@@ -117,15 +117,21 @@
 
         <div v-else-if="preview.loading" aria-busy="true">
           <dl class="text-sm">
-            <div class="flex justify-between py-2.5 border-b border-gray-100 dark:border-gray-800">
+            <div
+              class="flex justify-between py-2.5 border-b border-gray-100 dark:border-gray-800"
+            >
               <dt>{{ $t("booking.cancellation.originalAmount") }}</dt>
               <dd><USkeleton class="h-4 w-14" /></dd>
             </div>
-            <div class="flex justify-between py-2.5 border-b border-gray-100 dark:border-gray-800">
+            <div
+              class="flex justify-between py-2.5 border-b border-gray-100 dark:border-gray-800"
+            >
               <dt>{{ $t("booking.cancellation.fee") }}</dt>
               <dd><USkeleton class="h-4 w-16" /></dd>
             </div>
-            <div class="flex justify-between pt-3 mt-0.5 border-t border-gray-300 dark:border-gray-600 font-semibold">
+            <div
+              class="flex justify-between pt-3 mt-0.5 border-t border-gray-300 dark:border-gray-600 font-semibold"
+            >
               <dt>{{ $t("booking.cancellation.refund") }}</dt>
               <dd><USkeleton class="h-5 w-20" /></dd>
             </div>
@@ -135,7 +141,9 @@
 
         <div v-else-if="preview.data">
           <dl class="text-sm">
-            <div class="flex justify-between gap-3 py-2.5 border-b border-gray-100 dark:border-gray-800">
+            <div
+              class="flex justify-between gap-3 py-2.5 border-b border-gray-100 dark:border-gray-800"
+            >
               <dt class="text-gray-700 dark:text-gray-300">
                 {{ $t("booking.cancellation.originalAmount") }}
               </dt>
@@ -143,18 +151,26 @@
                 {{ formatPrice(preview.data.originalAmountEur) }}
               </dd>
             </div>
-            <div class="flex justify-between gap-3 py-2.5 border-b border-gray-100 dark:border-gray-800">
+            <div
+              class="flex justify-between gap-3 py-2.5 border-b border-gray-100 dark:border-gray-800"
+            >
               <dt class="text-gray-700 dark:text-gray-300">
                 {{ $t("booking.cancellation.fee") }}
                 <span v-if="feePercent !== null" class="text-gray-400 ml-1.5">
-                  {{ $t("booking.cancellation.feePercent", { percent: feePercent }) }}
+                  {{
+                    $t("booking.cancellation.feePercent", {
+                      percent: feePercent,
+                    })
+                  }}
                 </span>
               </dt>
               <dd class="tabular-nums">
                 − {{ formatPrice(preview.data.cancellationFeeEur) }}
               </dd>
             </div>
-            <div class="flex justify-between gap-3 pt-3 mt-0.5 border-t border-gray-300 dark:border-gray-600 text-base font-semibold">
+            <div
+              class="flex justify-between gap-3 pt-3 mt-0.5 border-t border-gray-300 dark:border-gray-600 text-base font-semibold"
+            >
               <dt>{{ $t("booking.cancellation.refund") }}</dt>
               <dd class="tabular-nums">
                 {{ formatPrice(preview.data.refundAmountEur) }}
@@ -296,7 +312,10 @@
         </div>
 
         <p class="flex gap-2.5 text-sm text-gray-600 dark:text-gray-300">
-          <UIcon name="i-lucide-triangle-alert" class="w-4.5 h-4.5 shrink-0 mt-0.5 text-gray-500" />
+          <UIcon
+            name="i-lucide-triangle-alert"
+            class="w-4.5 h-4.5 shrink-0 mt-0.5 text-gray-500"
+          />
           <span>
             <i18n-t keypath="booking.cancellation.immediateNote" scope="global">
               <template #mail>
@@ -436,7 +455,10 @@ const mail = computed(
 const bookingTitle = computed(() => {
   const items = props.booking.bookableItems;
   if (Array.isArray(items) && items.length > 0) {
-    return items.map((item) => item._bookableUsed?.title).filter(Boolean).join(", ");
+    return items
+      .map((item) => item._bookableUsed?.title)
+      .filter(Boolean)
+      .join(", ");
   }
   return props.booking.objectName || t("booking.unknownBookable");
 });
@@ -571,7 +593,12 @@ function reset() {
 
 async function send() {
   reasonTouched.value = true;
-  if (submitting.value || reasonMissing.value || ibanError.value || bicError.value) {
+  if (
+    submitting.value ||
+    reasonMissing.value ||
+    ibanError.value ||
+    bicError.value
+  ) {
     return;
   }
   submitting.value = true;
