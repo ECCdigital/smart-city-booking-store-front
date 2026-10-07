@@ -8,6 +8,7 @@
         <UTooltip :text="$t('booking.goToBookable')" class="ml-2">
           <UButton
             icon="i-lucide-square-arrow-out-up-right"
+            :aria-label="$t('booking.goToBookable')"
             variant="soft"
             class="text-gray-700 dark:text-gray-300"
             @click="goToBookable(bookable.bookableId)"
@@ -60,10 +61,9 @@ const tenantHintQuery = computed(() => {
 const { formatPrice } = useFormatting();
 
 const bookingPrice = computed(() => {
-  if (props.bookable.userGrossPriceEur > 0) {
-    return formatPrice(props.bookable.userGrossPriceEur);
-  }
-  return "0,00 €";
+  return formatPrice(
+    props.bookable.userGrossPriceEur > 0 ? props.bookable.userGrossPriceEur : 0,
+  );
 });
 
 function goToBookable(bookableId) {

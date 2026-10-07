@@ -47,8 +47,8 @@ export default defineEventHandler(async (event) => {
       body: {
         id: sanitizedEmail,
         password,
-        firstname: sanitizedFirstname,
-        lastname: sanitizedLastname,
+        firstName: sanitizedFirstname,
+        lastName: sanitizedLastname,
         company: sanitizedCompany,
         verifyUrl: `${USER_BASE_URL}/register/email-verify`,
         ...(returnTarget ? { nextUrl: returnTarget } : {}),
