@@ -106,7 +106,9 @@
       <!-- Price-->
       <div class="my-7">
         <p class="mb-3">{{ $t("filter.price") }}</p>
-        <p class="mb-3">€ {{ _price[0] }} - € {{ _price[1] }}</p>
+        <p class="mb-3">
+          {{ formatPrice(_price[0]) }} - {{ formatPrice(_price[1]) }}
+        </p>
 
         <FilterHistogramSlider
           v-model="_price"
@@ -178,8 +180,10 @@ import {
   fromPriceOf,
   isEventItem,
 } from "~/composables/search/offer";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const { t } = useI18n();
+const { formatPrice } = useFormatting();
 
 const searchIsInitialized = defineModel("isInitailized", { type: Boolean });
 const props = defineProps({

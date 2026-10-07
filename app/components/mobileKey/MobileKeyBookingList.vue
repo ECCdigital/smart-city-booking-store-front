@@ -67,7 +67,7 @@
               {{ booking.leadBookable?.title || "Unbekanntes Buchungsobjekt" }}
             </h2>
             <p class="text-sm text-neutral-500">
-              #{{ booking.id }} &middot; Tenant:
+              #{{ booking.id }} &middot; {{ $t("tenants.tenant") }}:
               {{ getBookingTenant(booking)?.name || $t("account.unknownTenant") }}
             </p>
           </div>
@@ -176,7 +176,7 @@ defineProps({
 const SKELETON_CARDS = 2;
 
 const { getBookingTenant } = useTenant();
-const { formatDate } = useFormatting();
+const { formatDate, formatDay, formatTime } = useFormatting();
 const now = useAccessNow();
 
 /**
@@ -264,19 +264,8 @@ function getTimeRange(startTimestamp, endTimestamp) {
     begin.getMonth() === end.getMonth() &&
     begin.getDate() === end.getDate();
 
-  const dateFmt = new Intl.DateTimeFormat("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-  const timeFmt = new Intl.DateTimeFormat("de-DE", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
   if (sameDay) {
-    return `${dateFmt.format(begin)}, ${timeFmt.format(begin)}-${timeFmt.format(end)}`;
+    return `${formatDay(begin)}, ${formatTime(begin)}-${formatTime(end)}`;
   }
 
   return `${formatDate(begin)} - ${formatDate(end)}`;

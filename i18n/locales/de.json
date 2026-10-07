@@ -555,7 +555,7 @@
     "apply": "Filter anwenden",
     "includeNonSuitable": "Nicht passende Angebote anzeigen.",
     "onlyPublicEvents": "Nur öffentliche Events anzeigen.",
-    "onlyRegistrationNeeded": "Nur anmeldepflichte Events anzeigen.",
+    "onlyRegistrationNeeded": "Nur anmeldepflichtige Events anzeigen.",
     "category": "Kategorie",
     "cities": "Orte",
     "distance": "Distanz",
@@ -573,7 +573,7 @@
     },
     "eventsSection": "Veranstaltungen",
     "customFieldsBookablesOnly": "Gilt für Buchungsobjekte.",
-    "fittingResults": "passende Ergebnisse",
+    "fittingResults": "{count} passendes Ergebnis | {count} passende Ergebnisse",
     "provider": "Anbieter"
   },
 
@@ -668,8 +668,7 @@
     "login_required": "Für diese Buchung ist eine Anmeldung erforderlich.",
     "bad_request": "Ungültige Anfrage. Bitte überprüfen Sie Ihre Eingaben.",
     "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
-    "bookable_not_found": "Das angeforderte Objekt wurde nicht gefunden.",
-    "offer_not_reachable": "Dieses Angebot ist nicht mehr verfügbar und kann nicht gebucht werden.",
+    "bookable_not_found": "Dieses Angebot ist nicht mehr verfügbar und kann nicht gebucht werden.",
     "bookable_not_bookable": "Dieses Objekt kann nicht gebucht werden.",
     "bookable_unavailable": "Dieses Objekt ist im gewählten Zeitraum nicht verfügbar.",
     "parent_unavailable": "Das übergeordnete Objekt ist im gewählten Zeitraum nicht verfügbar.",
@@ -951,6 +950,7 @@
     "start": "Beginn",
     "end": "Ende",
     "now": "Jetzt",
+    "datePlaceholder": "tt.mm.jjjj",
     "needStartDate": "Bitte wählen Sie ein Datum für den Beginn.",
     "needStartTime": "Bitte geben Sie eine Startuhrzeit an.",
     "needEndTime": "Bitte geben Sie eine Enduhrzeit an.",
@@ -1078,6 +1078,7 @@
       "unknown": "Unbekannter Anhangstyp"
     },
     "download": {
+      "label": "{type} herunterladen",
       "failedTitle": "Download fehlgeschlagen",
       "failedMessage": "Das Dokument konnte nicht heruntergeladen werden."
     },

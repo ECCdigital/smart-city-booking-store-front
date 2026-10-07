@@ -40,6 +40,7 @@
     <div class="grid content-center">
       <UButton
         icon="i-lucide-download"
+        :aria-label="$t('booking.download.label', { type: attachmentType })"
         variant="soft"
         size="lg"
         class="text-gray-700 dark:text-gray-300"

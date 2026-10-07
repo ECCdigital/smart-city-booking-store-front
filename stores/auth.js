@@ -6,6 +6,7 @@ import {
   broadcastSessionEnded,
   isAccountPath,
 } from "~/utils/sharedAuthSync";
+import { relayAuthCookies } from "~/utils/ssrAuthCookies";
 
 /**
  * @typedef {import("~~/shared/types/api").User} User
@@ -49,8 +50,9 @@ export const useAuthStore = defineStore("auth", {
         const headers = import.meta.server
           ? useRequestHeaders(["cookie"])
           : undefined;
+        const onResponse = relayAuthCookies();
 
-        const data = await $fetch("/api/auth/me", { headers });
+        const data = await $fetch("/api/auth/me", { headers, onResponse });
 
         if (!data?.success) throw new Error("invalid");
         this.user = data.data?.user || null;
