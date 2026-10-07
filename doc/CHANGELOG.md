@@ -12,6 +12,10 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 - Keycloak SSO behind a TLS-terminating reverse proxy: the storefront sent `http://…/api/auth/sso/callback` as `redirect_uri` (and an `http://` `post_logout_redirect_uri` on „change user“), because it took the origin from the request. It now takes it from `NUXT_USER_BASE_URL`, falling back to the request when that is empty, so a Keycloak client that allows only HTTPS redirect URIs accepts the login
 - Inside a tenant, opening an Offer from the Result Page failed with „Bookable not found“, and the tenant's lists came back empty: the single-tenant branch of the catalog bundle expected the backend to wrap bookables and events (`{ bookable }`, `{ bookables }`), but it returns them bare
 
+### Security
+
+- Critical findings of `npm audit --omit=dev` lifted within their major version (ECCdigital/tickets#284): `nuxt` 4.2.1 → 4.5.1 (route rules bypass, island endpoint), `@nuxt/kit` along with it, `h3` 1.15.4 → 1.15.11 (path traversal in `serveStatic`), and through them `@nuxt/devtools` 3.4.2, `seroval` 1.6.8, `shell-quote` 1.12.0, `tar` 7.5.22. `simple-git` (dev tools only) stays critical: no 3.x release fixes it. Nuxt 4.5 builds with Vite 8, which ignores nuxt-security's `removeLoggers`, so `console` calls stay in the production bundle
+
 ### Changed
 
 - Docs name the branch rule without a version number (ECCdigital/tickets#224): work and pull requests go to the newest `version/<major>.<minor>.x`, fixes to the oldest maintained one and are merged forward, `develop` stays the default branch but only follows the newest; a pull request's base is switched from `develop` by hand. README, `AGENTS.md` and `docs/agents/architecture.md` no longer name `version/1.x`, which is gone. No code change
