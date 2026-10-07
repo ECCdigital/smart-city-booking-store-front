@@ -950,6 +950,7 @@
     "start": "Beginn",
     "end": "Ende",
     "now": "Jetzt",
+    "datePlaceholder": "tt.mm.jjjj",
     "needStartDate": "Bitte wählen Sie ein Datum für den Beginn.",
     "needStartTime": "Bitte geben Sie eine Startuhrzeit an.",
     "needEndTime": "Bitte geben Sie eine Enduhrzeit an.",

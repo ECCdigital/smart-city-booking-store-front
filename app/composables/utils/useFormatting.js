@@ -20,7 +20,7 @@ function tagFor(code) {
   return LOCALE_TAGS[code] ?? LOCALE_TAGS.de;
 }
 
-function setupLocale() {
+function i18nLocaleOrNull() {
   try {
     return useI18n().locale;
   } catch {
@@ -29,13 +29,13 @@ function setupLocale() {
 }
 
 export function useFormatting() {
-  const locale = setupLocale();
+  const locale = i18nLocaleOrNull();
 
   function currentTag() {
     if (locale) {
       return tagFor(locale.value);
     }
-    const lazy = setupLocale();
+    const lazy = i18nLocaleOrNull();
     return lazy ? tagFor(lazy.value) : LOCALE_TAGS.de;
   }
 

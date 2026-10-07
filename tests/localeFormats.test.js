@@ -89,7 +89,8 @@ const PINNED_GERMAN = [
     "a decimal point swapped for a comma",
     /replace\(\s*(["']\.["']|\/\\\.\/g?)\s*,\s*["'],["']\s*\)/,
   ],
-  ["a euro sign glued on by hand", /["'] €["']|\}\}\s*€/],
+  ["a euro sign glued on by hand", /["'] €["']|\}\}\s*€|€\s*\{\{/],
+  ["a date put together from its parts", /\$\{[^}]*\}\.\$\{/],
 ];
 
 describe("no component pins prices or dates to German", () => {
@@ -144,6 +145,13 @@ describe("texts of the result page", () => {
     expect(translator("de")("filter.onlyRegistrationNeeded")).toBe(
       "Nur anmeldepflichtige Events anzeigen.",
     );
+  });
+});
+
+describe("the date field of a search period", () => {
+  it("shows its placeholder in the order of the language", () => {
+    expect(translator("de")("timePeriods.datePlaceholder")).toBe("tt.mm.jjjj");
+    expect(translator("en")("timePeriods.datePlaceholder")).toBe("dd/mm/yyyy");
   });
 });
 

@@ -205,7 +205,7 @@ const navButtonClass = computed(() =>
 );
 
 const { t, locale } = useI18n();
-const { formatPrice } = useFormatting();
+const { formatDay, formatPrice } = useFormatting();
 const { getBlockPeriods } = useBookables();
 
 function buildMonthLabels(monthStyle) {
@@ -268,7 +268,7 @@ function formatBlockRangeFull(timeBegin, timeEnd) {
   const weekday = (d) => t(`bookingTimeWindowSelection.weekdays.${d.getDay()}`);
   const start = new Date(timeBegin);
   const end = new Date(timeEnd);
-  const datePart = (d) => `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.`;
+  const datePart = (d) => formatDay(d, { year: undefined });
 
   return `${weekday(start)}, ${datePart(start)} ${formatTime(start)} – ${weekday(end)}, ${datePart(end)} ${formatTime(end)}`;
 }
