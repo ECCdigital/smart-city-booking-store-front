@@ -279,6 +279,7 @@
             v-model="form.bankMode"
             :items="bankModeItems"
             variant="card"
+            color="secondary"
             :disabled="submitting"
             :ui="{ description: 'w-full' }"
           >
@@ -291,10 +292,7 @@
                 "
                 class="flex flex-col gap-3 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
               >
-                <UFormField
-                  :label="$t('booking.cancellation.accountHolder')"
-                  :hint="$t('common.optional')"
-                >
+                <UFormField :label="$t('booking.cancellation.accountHolder')">
                   <UInput
                     v-model="form.accountHolder"
                     autocomplete="name"
@@ -304,7 +302,6 @@
                 </UFormField>
                 <UFormField
                   :label="$t('booking.cancellation.iban')"
-                  :hint="$t('common.optional')"
                   :error="ibanError"
                 >
                   <UInput
@@ -318,8 +315,12 @@
                 </UFormField>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <UFormField
-                    :label="$t('booking.cancellation.bic')"
-                    :hint="$t('common.optional')"
+                    :label="
+                      $t('booking.cancellation.bic') +
+                      ' (' +
+                      $t('common.optional') +
+                      ')'
+                    "
                     :error="bicError"
                   >
                     <UInput
@@ -332,8 +333,12 @@
                     />
                   </UFormField>
                   <UFormField
-                    :label="$t('booking.cancellation.bankName')"
-                    :hint="$t('common.optional')"
+                    :label="
+                      $t('booking.cancellation.bankName') +
+                      ' (' +
+                      $t('common.optional') +
+                      ')'
+                    "
                   >
                     <UInput
                       v-model="form.bankName"
