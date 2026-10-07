@@ -32,7 +32,7 @@ describe("the backend error a proxy passes on", () => {
   it("keeps the structured checkout refusal of a 409", () => {
     const body = {
       success: false,
-      error: { reason: "checkout.offer_not_reachable", checkType: "supervision" },
+      error: { reason: "checkout.bookable_unavailable", checkType: "availability" },
     };
 
     const upstream = upstreamErrorOf({
