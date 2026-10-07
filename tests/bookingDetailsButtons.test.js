@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import * as Vue from "vue";
-import { compileTemplate, parse } from "@vue/compiler-sfc";
-import { renderToString } from "@vue/server-renderer";
+import { compileTemplate, parse } from "vue/compiler-sfc";
+import { renderToString } from "vue/server-renderer";
 import { JSDOM } from "jsdom";
 import { describe, expect, it } from "vitest";
 import { createI18n } from "vue-i18n";
@@ -14,6 +14,9 @@ import en from "~~/i18n/locales/en.json";
 // The icon-only buttons of the booking details carry a tooltip, which a
 // screen reader does not read as the button's name (ECCdigital/tickets#271).
 // Each one needs an `aria-label` in the language of the page.
+//
+// Nuxt is not booted (see vitest.config.ts): only a component's template is
+// compiled and rendered, with i18n and the state its script would provide.
 
 /** The template of a component under `app/`, compiled to a render function. */
 function renderFunctionOf(path) {
@@ -49,8 +52,16 @@ async function buttonsOf(path, locale, state) {
   for (const [name, component] of Object.entries(stubs)) {
     app.component(name, component);
   }
-  app.config.warnHandler = () => {};
+  // Unknown child components are expected; a name the template reads but the
+  // state lacks means the state no longer matches the component.
+  const missing = [];
+  app.config.warnHandler = (message) => {
+    if (message.includes("was accessed during render")) {
+      missing.push(message);
+    }
+  };
   const html = await renderToString(app, {});
+  expect(missing).toEqual([]);
   const { document } = new JSDOM(html).window;
   return [...document.querySelectorAll("button")];
 }
@@ -133,7 +144,7 @@ describe("buttons in the booking details have an accessible name", () => {
   it.each([
     ["de", "Zum Buchungsobjekt gehen"],
     ["en", "Go to the bookable item"],
-  ])("names the button that opens the offer (%s)", async (locale, name) => {
+  ])("names the button that opens the booked bookable (%s)", async (locale, name) => {
     const [button] = await buttonsOf(
       "components/user/bookings/BookingDetailsBookableCard.vue",
       locale,
