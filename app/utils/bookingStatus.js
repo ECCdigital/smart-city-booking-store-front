@@ -22,7 +22,6 @@ const BOOKING_STATUS_I18N = {
   PAYMENT_EXPECTED: "status.payment_expected",
   PAID_COMPLETED: "status.paid_completed",
   REJECTED: "status.rejected",
-  /** Committed (and not rejected), no payable amount or no payment step required */
   CONFIRMED_WITHOUT_PAYMENT: "status.confirmed_without_payment",
 };
 

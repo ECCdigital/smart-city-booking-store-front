@@ -119,7 +119,10 @@
           v-else-if="!isPaid"
           class="flex gap-2.5 text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 rounded-md px-3.5 py-2.5"
         >
-          <UIcon name="i-lucide-info" class="w-4.5 h-4.5 shrink-0 mt-0.5 text-gray-500" />
+          <UIcon
+            name="i-lucide-info"
+            class="w-4.5 h-4.5 shrink-0 mt-0.5 text-gray-500"
+          />
           <span>
             {{
               $t("booking.cancellation.unpaidBooking", {
@@ -473,12 +476,6 @@ const form = reactive({
 });
 
 const isFree = computed(() => isFreeBooking(props.booking));
-/**
- * Money has flowed: only then is there a refund to preview and somewhere
- * for it to go. A priced booking that is not paid yet (requested, payment
- * due) is cancelled without a refund, and the dialog says so instead of
- * asking the backend for a preview.
- */
 const isPaid = computed(() => !isFree.value && isSettledBooking(props.booking));
 const requiresBankDetails = isPaid;
 
@@ -521,6 +518,7 @@ const tierHint = computed(() => {
     tierDays: data.appliedTierDays ?? days,
     tenant: tenantName.value,
     percent: data.appliedRefundPercentage ?? 0,
+    feePercent: feePercent.value ?? 100,
   });
 });
 
