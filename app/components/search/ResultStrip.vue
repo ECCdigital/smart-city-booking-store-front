@@ -12,7 +12,7 @@
       :class="fillsRow ? 'items-stretch' : 'items-center'"
     >
       <div
-        class="basis-9/10 w-full h-full relative cursor-pointer"
+        class="basis-9/10 w-full h-full relative isolate cursor-pointer"
         :class="mapListMode ? 'min-h-24' : ''"
         @click="onOpenDetails(item?.id, item?.type)"
       >
