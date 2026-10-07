@@ -7,6 +7,10 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ## [Unreleased]
 
+### Security
+
+- Account settings, „Passwort ändern“ asks for the current password (ECCdigital/tickets#264): `POST /api/auth/change-password` takes `{ currentPassword, password }`, hands both on to `POST /auth/resetpassword` with the session and no longer names the account; a wrong current password shows „Das bisherige Passwort stimmt nicht.“, and a failed change no longer reports success. Requires backend 4.3.1, which accepts the change only signed in and with the current password; deploy them together
+
 ### Fixed
 
 - Keycloak SSO behind a TLS-terminating reverse proxy: the storefront sent `http://…/api/auth/sso/callback` as `redirect_uri` (and an `http://` `post_logout_redirect_uri` on „change user“), because it took the origin from the request. It now takes it from `NUXT_USER_BASE_URL`, falling back to the request when that is empty, so a Keycloak client that allows only HTTPS redirect URIs accepts the login

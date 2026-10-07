@@ -161,14 +161,19 @@ export const useAuthStore = defineStore("auth", {
         this.user = null;
       }
     },
-    async changePassword(id, newPassword) {
+    /**
+     * The own password change, with the current password. Answers whether
+     * it went through and, if not, the status of the refusal (403: the
+     * current password is wrong).
+     */
+    async changePassword(currentPassword, newPassword) {
       const { changePassword } = useAuth();
       try {
-        await changePassword(id, newPassword);
-        return true;
+        await changePassword(currentPassword, newPassword);
+        return { success: true };
       } catch (error) {
         console.error("Error changing password:", error);
-        return false;
+        return { success: false, statusCode: error?.statusCode };
       }
     },
   },
