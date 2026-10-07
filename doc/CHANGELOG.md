@@ -9,6 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- The checkout of an offer that is no longer reachable said „Das angeforderte Objekt wurde nicht gefunden.“ and had no English wording (ECCdigital/tickets#262): the backend refuses it with `checkout.bookable_not_found`, which now reads „Dieses Angebot ist nicht mehr verfügbar und kann nicht gebucht werden.“ / “This offer is no longer available and cannot be booked.”, as does a `404` of the backend at the checkout. The key `checkout.offer_not_reachable`, a reason the backend no longer sends, is gone
 - Keycloak SSO behind a TLS-terminating reverse proxy: the storefront sent `http://…/api/auth/sso/callback` as `redirect_uri` (and an `http://` `post_logout_redirect_uri` on „change user“), because it took the origin from the request. It now takes it from `NUXT_USER_BASE_URL`, falling back to the request when that is empty, so a Keycloak client that allows only HTTPS redirect URIs accepts the login
 - Inside a tenant, opening an Offer from the Result Page failed with „Bookable not found“, and the tenant's lists came back empty: the single-tenant branch of the catalog bundle expected the backend to wrap bookables and events (`{ bookable }`, `{ bookables }`), but it returns them bare
 

@@ -16,7 +16,7 @@ import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useNotification } from "~/composables/useNotification.js";
 import {
-  OFFER_NOT_REACHABLE,
+  BOOKABLE_NOT_FOUND,
   backendErrorBodyOf,
   resolveCheckoutErrorKey,
   resolveCheckoutFailureKey,
@@ -2498,8 +2498,8 @@ async function handleFinish() {
       // instead of a generic failure.
       const failureKey = resolveCheckoutFailureKey(error);
       notifyError(
-        failureKey === OFFER_NOT_REACHABLE
-          ? t(OFFER_NOT_REACHABLE)
+        failureKey === BOOKABLE_NOT_FOUND
+          ? t(BOOKABLE_NOT_FOUND)
           : messageForCheckoutApiError(backendErrorBodyOf(error) || {}),
       );
       return;
