@@ -16,7 +16,7 @@ import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useNotification } from "~/composables/useNotification.js";
 import {
-  OFFER_NOT_REACHABLE,
+  BOOKABLE_NOT_FOUND,
   backendErrorBodyOf,
   resolveCheckoutErrorKey,
   resolveCheckoutFailureKey,
@@ -2494,12 +2494,12 @@ async function handleFinish() {
 
     if (error) {
       // The offer was withdrawn or its tenant stopped being public (pending
-      // approval or declined) since the form was opened (404/409): say so
+      // approval or declined) since the form was opened (404): say so
       // instead of a generic failure.
       const failureKey = resolveCheckoutFailureKey(error);
       notifyError(
-        failureKey === OFFER_NOT_REACHABLE
-          ? t(OFFER_NOT_REACHABLE)
+        failureKey === BOOKABLE_NOT_FOUND
+          ? t(BOOKABLE_NOT_FOUND)
           : messageForCheckoutApiError(backendErrorBodyOf(error) || {}),
       );
       return;
