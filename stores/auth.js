@@ -173,6 +173,10 @@ export const useAuthStore = defineStore("auth", {
         return { success: true };
       } catch (error) {
         console.error("Error changing password:", error);
+        // A 401 is a session the BFF could not renew, whose cookies it has
+        // cleared: sign the store out too (tickets#108). A wrong current
+        // password is 403 and leaves the session alone.
+        if (error?.statusCode === 401) await this.validateAuth(true);
         return { success: false, statusCode: error?.statusCode };
       }
     },

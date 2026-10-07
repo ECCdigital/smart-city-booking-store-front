@@ -9,7 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Security
 
-- Account settings, „Passwort ändern“ asks for the current password (ECCdigital/tickets#264): `POST /api/auth/change-password` takes `{ currentPassword, password }`, hands both on to `POST /auth/resetpassword` with the session and no longer names the account; a wrong current password shows „Das bisherige Passwort stimmt nicht.“, and a failed change no longer reports success. Requires backend 4.3.1, which accepts the change only signed in and with the current password; deploy them together
+- Account settings, „Passwort ändern“ asks for the current password (ECCdigital/tickets#264): `POST /api/auth/change-password` takes `{ currentPassword, password }`, hands both on to `POST /auth/resetpassword` with the session and no longer names the account; a wrong current password shows „Das bisherige Passwort stimmt nicht.“, and a failed change no longer reports success; a `401` (the session could not be renewed) signs the person out. Requires backend 4.3.1, which accepts the change only signed in and with the current password; deploy them together
 
 ### Fixed
 
