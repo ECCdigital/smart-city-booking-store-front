@@ -1100,7 +1100,7 @@
       "bankName": "Bank",
       "ibanInvalid": "Diese IBAN ist ungültig.",
       "bicInvalid": "Dieser BIC ist ungültig.",
-      "immediateNote": "Die Buchung wird sofort storniert. Das lässt sich nicht rückgängig machen. Die Bestätigung geht an {mail}.",
+      "immediateNote": "Die Buchung wird sofort storniert. Der Vorgang lässt sich nicht rückgängig machen. Sie erhalten eine Bestätigung an {mail}.",
       "next": "Weiter",
       "nextAnyway": "Trotzdem weiter",
       "back": "Zurück",

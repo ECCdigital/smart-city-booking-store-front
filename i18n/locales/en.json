@@ -753,7 +753,7 @@
       "bankName": "Bank",
       "ibanInvalid": "This IBAN is not valid.",
       "bicInvalid": "This BIC is not valid.",
-      "immediateNote": "The booking is cancelled immediately. This cannot be undone. The confirmation goes to {mail}.",
+      "immediateNote": "The booking is cancelled immediately. This cannot be undone. You will receive a confirmation at {mail}.",
       "next": "Continue",
       "nextAnyway": "Continue anyway",
       "back": "Back",
