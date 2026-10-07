@@ -34,8 +34,10 @@ import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import { resolveBookingPaymentSearchLabel } from "~/utils/bookingPaymentStatus.js";
 import { resolveBookingStatusSearchLabel } from "~/utils/bookingStatus.js";
 import { loadCatalogEventsForBookings } from "~/utils/bookingEventTimes.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const { t } = useI18n();
+const { formatDate } = useFormatting();
 
 const props = defineProps({
   bookings: {
@@ -52,13 +54,7 @@ const props = defineProps({
 const allBookings = computed(() =>
   [...props.bookings].map((b) => ({
     ...b,
-    displayBookingDate: new Date(b.timeCreated).toLocaleDateString("de-DE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
+    displayBookingDate: formatDate(b.timeCreated),
     statusLabel: resolveBookingStatusSearchLabel(b, t),
     payedLabel: resolveBookingPaymentSearchLabel(b, t),
   })),

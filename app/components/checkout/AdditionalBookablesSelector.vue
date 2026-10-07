@@ -1,5 +1,6 @@
 <script setup>
 import { useMediaImage } from "~/composables/utils/useMediaImage";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   items: {
@@ -17,6 +18,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["update:modelValue"]);
+
+const { formatPrice } = useFormatting();
 
 const { imageSource } = useMediaImage();
 
@@ -71,7 +74,7 @@ function getMinPrice(bookable) {
 function formatPriceLabel(value) {
   if (value === null || value === undefined || value === 0)
     return $t("common.freeOfCharge");
-  return "+ " + value.toFixed(2).replace(".", ",") + " €";
+  return "+ " + formatPrice(value);
 }
 
 function getBookableIcon(bookable) {
