@@ -513,7 +513,8 @@ const overlayProps = computed(() =>
         ui: {
           title: "font-bold",
           footer: "justify-end",
-          content: "w-[90vw] mx-auto rounded-t-2xl shadow-lg",
+          content:
+            "w-[90vw] mx-auto min-h-[50dvh] max-h-[90dvh] rounded-t-2xl shadow-lg",
         },
       },
 );
