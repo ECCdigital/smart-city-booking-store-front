@@ -9,6 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- Signing up in the storefront lost first and last name (ECCdigital/tickets#198): `/api/auth/signup` sent them to the backend as `firstname` and `lastname`, which it does not read, so the account came out without a name. They now go as `firstName` and `lastName`, as from the other clients. Accounts signed up before stay without a name until the person enters it under account settings
 - Keycloak SSO behind a TLS-terminating reverse proxy: the storefront sent `http://…/api/auth/sso/callback` as `redirect_uri` (and an `http://` `post_logout_redirect_uri` on „change user“), because it took the origin from the request. It now takes it from `NUXT_USER_BASE_URL`, falling back to the request when that is empty, so a Keycloak client that allows only HTTPS redirect URIs accepts the login
 - Inside a tenant, opening an Offer from the Result Page failed with „Bookable not found“, and the tenant's lists came back empty: the single-tenant branch of the catalog bundle expected the backend to wrap bookables and events (`{ bookable }`, `{ bookables }`), but it returns them bare
 
