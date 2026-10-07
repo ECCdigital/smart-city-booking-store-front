@@ -268,6 +268,7 @@ import ClearButton from "~/components/inputs/ClearButton.vue";
 import PeriodFieldCompact from "~/components/inputs/PeriodFieldCompact.vue";
 import InputTime from "~/components/inputs/InputTime.vue";
 import type { TimePeriod } from "~/types/catalogParams";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { isDayBefore } from "~/utils/localDate.js";
 
 
@@ -287,6 +288,8 @@ const emit = defineEmits<{
   (e: "removeDate"): void;
   (e: "update:open", v: boolean): void;
 }>();
+
+const { formatDay } = useFormatting();
 
 const variant = computed(() => props.variant ?? "bar");
 const panelHost = inject("searchBarDatetimePanelHost", null);
@@ -496,11 +499,7 @@ function dateToTimestampWithTime(
 
 function formatDate(dateStr: string | number | Date) {
   if (!dateStr) return "";
-  const date = new Date(dateStr);
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}.${month}.${year}`;
+  return formatDay(dateStr);
 }
 
 function formatTime(

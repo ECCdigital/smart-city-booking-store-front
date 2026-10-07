@@ -1,4 +1,5 @@
-import { backendErrorBodyOf } from "~/utils/checkoutErrors.js";
+import { permissionCheckOfFailure } from "~/utils/checkoutLogin.js";
+import { useAuthStore } from "~~/stores/auth";
 
 export function useCheckout() {
   const fetchBookable = async (bookableID, tenantID) => {
@@ -128,36 +129,13 @@ export function useCheckout() {
     const api = useApiClient();
     const { data, error } = await api.get(`/api/checkout/${bookableID}/permissions/?tenantID=${tenantID}`);
     if (error) {
-      const payload = backendErrorBodyOf(error);
-      if (
-        payload?.success === false &&
-        payload?.error?.checkType === "permissions"
-      ) {
-        return payload;
-      }
-
-      const status = error?.statusCode ?? error?.status ?? error?.response?.status;
-      if (status === 401) {
-        return {
-          success: false,
-          error: {
-            checkType: "permissions",
-            reason: "checkout.login_required",
-          },
-        };
-      }
-
-      if (status !== 403) {
-        throw error;
-      }
-
-      return {
-        success: false,
-        error: {
-          checkType: "permissions",
-          reason: "checkout.permission_denied",
-        },
-      };
+      // The same rule as at the completion: a 401 asks for a sign-in when it
+      // carries the reason or nobody is signed in any more (tickets#108).
+      const check = permissionCheckOfFailure(error, {
+        isLoggedIn: useAuthStore().isLoggedIn,
+      });
+      if (check) return check;
+      throw error;
     }
     return data;
   }

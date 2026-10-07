@@ -1,5 +1,6 @@
 import type { H3Event } from "h3";
 import type { NitroFetchOptions, NitroFetchRequest } from "nitropack";
+import AuthService from "~~/server/service/AuthService.js";
 import { upstreamErrorOf } from "~~/server/utils/proxyError";
 
 type Result<T> =
@@ -9,12 +10,11 @@ type Result<T> =
       error: { status: number; message: string; data?: unknown };
     };
 
-export async function serverFetch<T>(
-  event: H3Event,
+async function backendFetch<T>(
   path: string,
-  options: NitroFetchOptions<NitroFetchRequest> = {}
+  options: NitroFetchOptions<NitroFetchRequest>,
+  token: string | null | undefined
 ): Promise<Result<T>> {
-  const token = getCookie(event, "access-token");
   const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
 
   try {
@@ -31,4 +31,28 @@ export async function serverFetch<T>(
     // The backend's status and error body; 502 when it did not answer.
     return { data: null, error: upstreamErrorOf(err) };
   }
+}
+
+/**
+ * Calls the backend with the session's access token. (Inside a Nitro cached
+ * handler the request carries only the headers in `varies`, so no cookie and
+ * no token: such a call is anonymous and never renews.)
+ *
+ * A `401` to a token it sent means the token has expired or is no longer
+ * valid (ECCdigital/tickets#108, #109): the call renews the token and asks
+ * exactly once more. When the renewal fails, the session is over, its cookies
+ * are cleared and the caller gets the backend's `401`.
+ */
+export async function serverFetch<T>(
+  event: H3Event,
+  path: string,
+  options: NitroFetchOptions<NitroFetchRequest> = {}
+): Promise<Result<T>> {
+  const token = getCookie(event, "access-token");
+  const result = await backendFetch<T>(path, options, token);
+  if (!token || result.error?.status !== 401) return result;
+
+  const renewedToken = await AuthService.renewAccessToken(event);
+  if (!renewedToken) return result;
+  return backendFetch<T>(path, options, renewedToken);
 }

@@ -105,6 +105,7 @@
     "confirmPassword": "Confirm Password",
     "repeatPassword": "Repeat Password",
     "newPassword": "New Password",
+    "currentPassword": "Current Password",
     "username": "Username",
     "email": "Email",
     "name": "Name",
@@ -302,7 +303,7 @@
     },
     "eventsSection": "Events",
     "customFieldsBookablesOnly": "Applies to bookable items.",
-    "fittingResults": "matching results",
+    "fittingResults": "{count} matching result | {count} matching results",
     "provider": "Provider"
   },
   "checkout": {
@@ -310,7 +311,7 @@
     "additionalObjects": "Additional Objects",
     "mandatoryObjects": "Mandatory Objects",
     "login_required": "Sign-in is required for this booking.",
-    "offer_not_reachable": "This offer is no longer available and cannot be booked.",
+    "bookable_not_found": "This offer is no longer available and cannot be booked.",
     "bookable_unavailable": "This object is not available for the selected time period.",
     "unknown_error": "An error occurred during validation.",
     "group_booking_disabled": "Recurring bookings are not allowed for this object.",
@@ -575,6 +576,7 @@
     "start": "Start",
     "end": "End",
     "now": "Now",
+    "datePlaceholder": "dd/mm/yyyy",
     "needStartDate": "Please pick a start date.",
     "needStartTime": "Please enter a start time.",
     "needEndTime": "Please enter an end time.",
@@ -732,6 +734,7 @@
       "unknown": "Unknown attachment type"
     },
     "download": {
+      "label": "Download {type}",
       "failedTitle": "Download failed",
       "failedMessage": "The document could not be downloaded."
     },
@@ -822,6 +825,9 @@
     "changesSavedMessage": "Your changes have been saved.",
     "passwordMismatch": "The passwords you entered do not match.",
     "passwordChangeFailed": "Password change failed",
+    "passwordChangeFailedMessage": "Your password could not be changed. Please try again.",
+    "currentPasswordRequired": "Please enter your current password.",
+    "currentPasswordWrong": "The current password is not correct.",
     "activities": "My activity",
     "digitalKeys": "Digital keys",
     "digitalKeysDescription": "Open doors, lockers and bike boxes with your phone.",

@@ -9,10 +9,9 @@
   >
     <div
       id="header"
-      class=""
       :class="mapDetailMode ? 'h-28' : 'flex flex-col h-48 shrink-0'"
     >
-      <div class="flex h-9/10 relative">
+      <div class="flex h-9/10 relative isolate">
         <BookableTypeBadge
           :type="item?.type"
           :is-event="isEvent"
