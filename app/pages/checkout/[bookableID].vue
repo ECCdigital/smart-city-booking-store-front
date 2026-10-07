@@ -2494,7 +2494,7 @@ async function handleFinish() {
 
     if (error) {
       // The offer was withdrawn or its tenant stopped being public (pending
-      // approval or declined) since the form was opened (404/409): say so
+      // approval or declined) since the form was opened (404): say so
       // instead of a generic failure.
       const failureKey = resolveCheckoutFailureKey(error);
       notifyError(

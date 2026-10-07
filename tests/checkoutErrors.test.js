@@ -109,17 +109,16 @@ describe("the wording of an offer that is no longer available", () => {
     en: "This offer is no longer available and cannot be booked.",
   };
 
-  it.each([
+  const locales = [
     ["de", de],
     ["en", en],
-  ])("%s names checkout.bookable_not_found as no longer available", (locale, messages) => {
+  ];
+
+  it.each(locales)("%s names checkout.bookable_not_found as no longer available", (locale, messages) => {
     expect(messages.checkout.bookable_not_found).toBe(wording[locale]);
   });
 
-  it.each([
-    ["de", de],
-    ["en", en],
-  ])("%s carries no key for the removed checkout.offer_not_reachable", (_locale, messages) => {
+  it.each(locales)("%s carries no key for the removed checkout.offer_not_reachable", (_locale, messages) => {
     expect(messages.checkout).not.toHaveProperty("offer_not_reachable");
   });
 });
