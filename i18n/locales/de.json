@@ -1081,7 +1081,7 @@
       "feePercent": "{percent} %",
       "refund": "Erstattung",
       "daysBeforeStart": "am Tag des Beginns der Buchung | {n} Tag vor Beginn der Buchung | {n} Tage vor Beginn der Buchung",
-      "tierHint": "Sie stornieren {when}. Ab {tierDays} Tagen vor Beginn erstattet {tenant} {percent} % des Betrags. Es fallen somit {feePercent} % Stornogebühr an. Der endgültige Betrag steht im Stornobeleg.",
+      "tierHint": "Sie stornieren {when}. Bis {tierDays} Tage vor Beginn der Buchung erstattet {tenant} {percent} % des Betrags. Es fallen somit {feePercent} % Stornogebühr an. Der endgültige Betrag steht im Stornobeleg.",
       "previewFailedTitle": "Die Erstattung lässt sich gerade nicht berechnen.",
       "previewFailedText": "Buchungsbetrag {amount}. Die Gebühr richtet sich nach den Stornobedingungen von {tenant}; den Betrag erfahren Sie mit dem Stornobeleg.",
       "recalculate": "Erneut berechnen",

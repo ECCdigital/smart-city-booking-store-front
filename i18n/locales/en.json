@@ -734,7 +734,7 @@
       "feePercent": "{percent} %",
       "refund": "Refund",
       "daysBeforeStart": "on the day the booking starts | {n} day before the booking starts | {n} days before the booking starts",
-      "tierHint": "You are cancelling {when}. From {tierDays} days before the start, {tenant} refunds {percent} % of the amount. This leaves a cancellation fee of {feePercent} %. The final amount is stated in the cancellation receipt.",
+      "tierHint": "You are cancelling {when}. Up to {tierDays} days before the start, {tenant} refunds {percent} % of the amount. This leaves a cancellation fee of {feePercent} %. The final amount is stated in the cancellation receipt.",
       "previewFailedTitle": "The refund cannot be calculated right now.",
       "previewFailedText": "Booking amount {amount}. The fee follows the cancellation terms of {tenant}; you will learn the amount with the cancellation receipt.",
       "recalculate": "Calculate again",
