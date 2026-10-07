@@ -39,13 +39,12 @@
         </span>
         <p class="text-sm text-gray-600 dark:text-gray-300 max-w-sm mt-1">
           <i18n-t
-            :keypath="
-              isFree
-                ? 'booking.cancellation.doneText'
-                : 'booking.cancellation.doneTextPriced'
-            "
+            :keypath="doneTextKey"
             scope="global"
           >
+            <template #fee>
+              <b>{{ formatPrice(preview.data?.cancellationFeeEur) }}</b>
+            </template>
             <template #mail>
               <b>{{ mail }}</b>
             </template>
@@ -115,23 +114,6 @@
           {{ $t("booking.cancellation.freeBooking") }}
         </p>
 
-        <p
-          v-else-if="!isPaid"
-          class="flex gap-2.5 text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 rounded-md px-3.5 py-2.5"
-        >
-          <UIcon
-            name="i-lucide-info"
-            class="w-4.5 h-4.5 shrink-0 mt-0.5 text-gray-500"
-          />
-          <span>
-            {{
-              $t("booking.cancellation.unpaidBooking", {
-                amount: formatPrice(booking.priceEur),
-              })
-            }}
-          </span>
-        </p>
-
         <div v-else-if="preview.loading" aria-busy="true">
           <dl class="text-sm">
             <div
@@ -149,14 +131,49 @@
             <div
               class="flex justify-between pt-3 mt-0.5 border-t border-gray-300 dark:border-gray-600 font-semibold"
             >
-              <dt>{{ $t("booking.cancellation.refund") }}</dt>
+              <dt>{{ receiptTotalLabel }}</dt>
               <dd><USkeleton class="h-5 w-20" /></dd>
             </div>
           </dl>
           <USkeleton class="h-3.5 w-full mt-4" />
         </div>
 
+        <!-- Unpaid and no fee by the tiers: nothing to refund, nothing to pay. -->
+        <p
+          v-else-if="preview.data && !isPaid && !feeDue"
+          class="flex gap-2.5 text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 rounded-md px-3.5 py-2.5"
+        >
+          <UIcon
+            name="i-lucide-info"
+            class="w-4.5 h-4.5 shrink-0 mt-0.5 text-gray-500"
+          />
+          <span>
+            {{
+              $t("booking.cancellation.unpaidBooking", {
+                amount: formatPrice(booking.priceEur),
+              })
+            }}
+          </span>
+        </p>
+
+        <!-- Paid: the refund. Unpaid with a fee by the tiers: the fee still to pay. -->
         <div v-else-if="preview.data">
+          <p
+            v-if="feeDue"
+            class="flex gap-2.5 text-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950 rounded-md px-3.5 py-2.5 mb-4"
+          >
+            <UIcon
+              name="i-lucide-triangle-alert"
+              class="w-4.5 h-4.5 shrink-0 mt-0.5"
+            />
+            <span>
+              {{
+                $t("booking.cancellation.unpaidFeeDue", {
+                  fee: formatPrice(preview.data.cancellationFeeEur),
+                })
+              }}
+            </span>
+          </p>
           <dl class="text-sm">
             <div
               class="flex justify-between gap-3 py-2.5 border-b border-gray-100 dark:border-gray-800"
@@ -182,15 +199,16 @@
                 </span>
               </dt>
               <dd class="tabular-nums">
-                − {{ formatPrice(preview.data.cancellationFeeEur) }}
+                {{ isPaid ? "−" : "" }}
+                {{ formatPrice(preview.data.cancellationFeeEur) }}
               </dd>
             </div>
             <div
               class="flex justify-between gap-3 pt-3 mt-0.5 border-t border-gray-300 dark:border-gray-600 text-base font-semibold"
             >
-              <dt>{{ $t("booking.cancellation.refund") }}</dt>
+              <dt>{{ receiptTotalLabel }}</dt>
               <dd class="tabular-nums">
-                {{ formatPrice(preview.data.refundAmountEur) }}
+                {{ formatPrice(receiptTotal) }}
               </dd>
             </div>
           </dl>
@@ -204,12 +222,20 @@
           color="warning"
           variant="soft"
           icon="i-lucide-triangle-alert"
-          :title="$t('booking.cancellation.previewFailedTitle')"
+          :title="
+            $t(
+              isPaid
+                ? 'booking.cancellation.previewFailedTitle'
+                : 'booking.cancellation.previewFailedTitleUnpaid',
+            )
+          "
           :description="
-            $t('booking.cancellation.previewFailedText', {
-              amount: formatPrice(booking.priceEur),
-              tenant: tenantName,
-            })
+            $t(
+              isPaid
+                ? 'booking.cancellation.previewFailedText'
+                : 'booking.cancellation.previewFailedTextUnpaid',
+              { amount: formatPrice(booking.priceEur), tenant: tenantName },
+            )
           "
           :actions="[
             {
@@ -226,13 +252,24 @@
       <!-- Step 2: the reason, bank details for a paid booking, the consequence. -->
       <div v-else class="flex flex-col gap-5">
         <div
-          v-if="preview.data && isPaid"
-          class="flex justify-between items-center text-sm bg-gray-100 dark:bg-gray-800 rounded-md px-3.5 py-2.5"
+          v-if="preview.data && (isPaid || feeDue)"
+          class="flex justify-between items-center text-sm rounded-md px-3.5 py-2.5"
+          :class="
+            feeDue
+              ? 'bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200'
+              : 'bg-gray-100 dark:bg-gray-800'
+          "
         >
-          <span>{{ $t("booking.cancellation.expectedRefund") }}</span>
-          <b class="tabular-nums">
-            {{ formatPrice(preview.data.refundAmountEur) }}
-          </b>
+          <span>
+            {{
+              $t(
+                isPaid
+                  ? "booking.cancellation.expectedRefund"
+                  : "booking.cancellation.dueNow",
+              )
+            }}
+          </span>
+          <b class="tabular-nums">{{ formatPrice(receiptTotal) }}</b>
         </div>
 
         <UAlert
@@ -381,7 +418,7 @@
         </UButton>
         <UButton color="primary" :disabled="preview.loading" @click="step = 2">
           {{
-            preview.data || !isPaid
+            preview.data || isFree
               ? $t("booking.cancellation.next")
               : $t("booking.cancellation.nextAnyway")
           }}
@@ -481,8 +518,35 @@ const form = reactive({
 });
 
 const isFree = computed(() => isFreeBooking(props.booking));
+/**
+ * Money has flowed: only then is there a refund and somewhere for it to go.
+ * A priced booking that is not paid yet (requested, payment due) gets no
+ * refund; the preview still matters for it, because the fee the tiers name
+ * stays due and has to be paid after the cancellation.
+ */
 const isPaid = computed(() => !isFree.value && isSettledBooking(props.booking));
 const requiresBankDetails = isPaid;
+/** Unpaid, and the tiers name a fee: it is still to pay. */
+const feeDue = computed(
+  () =>
+    !isFree.value &&
+    !isPaid.value &&
+    Number(preview.data?.cancellationFeeEur) > 0,
+);
+/** The receipt's last line: the refund, or the fee still to pay. */
+const receiptTotalLabel = computed(() =>
+  t(isPaid.value ? "booking.cancellation.refund" : "booking.cancellation.dueNow"),
+);
+const receiptTotal = computed(() =>
+  isPaid.value
+    ? preview.data?.refundAmountEur
+    : preview.data?.cancellationFeeEur,
+);
+const doneTextKey = computed(() => {
+  if (isFree.value) return "booking.cancellation.doneText";
+  if (feeDue.value) return "booking.cancellation.doneTextFeeDue";
+  return "booking.cancellation.doneTextPriced";
+});
 
 const tenantName = computed(
   () => getBookingTenant(props.booking)?.name || t("account.unknownTenant"),
@@ -599,7 +663,7 @@ const subtitle = computed(() => {
 });
 
 async function loadPreview() {
-  if (!isPaid.value) return;
+  if (isFree.value) return;
   preview.loading = true;
   preview.data = null;
   try {
