@@ -23,6 +23,10 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 - Keycloak SSO behind a TLS-terminating reverse proxy: the storefront sent `http://…/api/auth/sso/callback` as `redirect_uri` (and an `http://` `post_logout_redirect_uri` on „change user“), because it took the origin from the request. It now takes it from `NUXT_USER_BASE_URL`, falling back to the request when that is empty, so a Keycloak client that allows only HTTPS redirect URIs accepts the login
 - Inside a tenant, opening an Offer from the Result Page failed with „Bookable not found“, and the tenant's lists came back empty: the single-tenant branch of the catalog bundle expected the backend to wrap bookables and events (`{ bookable }`, `{ bookables }`), but it returns them bare
 
+### Security
+
+- Critical findings of `npm audit --omit=dev` lifted within their major version (ECCdigital/tickets#284): `nuxt` 4.2.1 → 4.5.1 with `@nuxt/kit` (route rules bypass, island endpoint), `h3` 1.15.4 → 1.15.11 (path traversal in `serveStatic`), and through them `@nuxt/devtools`, `seroval`, `shell-quote` and `tar`. `npm audit --omit=dev` still reports 6 critical findings, all from `simple-git` and its `@simple-git/argv-parser`: `nuxt` itself depends on `@nuxt/devtools`, which pulls them in, so they sit in the production dependency tree and `--omit=dev` does not drop them. They are not in the build output (`.output`) and run only with `nuxt dev`. Only `simple-git` 4.0.2 fixes them, which `@nuxt/devtools` 3.x does not take. Nuxt 4.5 builds with Vite 8, which ignores nuxt-security's `removeLoggers`; the client bundle now drops `console` and `debugger` through the Oxc minifier, the server bundle keeps them
+
 ### Changed
 
 - Docs name the branch rule without a version number (ECCdigital/tickets#224): work and pull requests go to the newest `version/<major>.<minor>.x`, fixes to the oldest maintained one and are merged forward, `develop` stays the default branch but only follows the newest; a pull request's base is switched from `develop` by hand. README, `AGENTS.md` and `docs/agents/architecture.md` no longer name `version/1.x`, which is gone. No code change
