@@ -72,6 +72,16 @@ export function formatLocalDateIso(date) {
 }
 
 /**
+ * Whether a typed YYYY-MM-DD lies before the local day of `minDate`, e.g.
+ * today for a booking (ECCdigital/tickets#188). No date or no minimum is not
+ * before.
+ */
+export function isIsoDateBefore(iso, minDate) {
+  if (!iso || !minDate) return false;
+  return String(iso) < formatLocalDateIso(minDate);
+}
+
+/**
  * Parse YYYY-MM-DD into a local midnight JS Date.
  *
  * Uses CalendarDate instead of `new Date(y, m - 1, d)` so years below 100 are
