@@ -12,15 +12,27 @@ const ACCESS_TOKEN_MAX_AGE = 60 * 60 * 24;
 const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 7;
 
 /**
- * How long the outcome of a renewal stays at hand for requests that still
- * carry the refresh token it used. The backend revokes a refresh token when it
- * is used, so a second renewal with it fails and ends the session. Requests
- * the browser sends side by side all carry the same cookies; they share one
- * renewal while it runs and take its tokens for a few seconds after.
+ * How long the tokens of a renewal stay at hand for requests that still carry
+ * the refresh token it used. The backend revokes a refresh token when it is
+ * used, so a second renewal with it fails and ends the session. Requests the
+ * browser sends side by side all carry the same cookies; they share one
+ * renewal while it runs and take its tokens for a while after, long enough to
+ * cover a slow call (a lock command) the browser waits on meanwhile.
  */
-const SHARED_RENEWAL_MS = 10_000;
+const SHARED_RENEWAL_MS = 60_000;
 
-/** @type {Map<string, Promise<{ accessToken: string, refreshToken?: string } | null>>} */
+/** A renewal that hangs would hold up every request of the session. */
+const RENEWAL_TIMEOUT_MS = 10_000;
+
+/** What the backend or Keycloak answer when they refuse the refresh token. */
+const REFUSED_STATUSES = new Set([400, 401, 403]);
+
+/**
+ * @typedef {{ accessToken: string, refreshToken?: string }} RenewedTokens
+ * @typedef {RenewedTokens | "refused" | "unavailable"} RenewalOutcome
+ */
+
+/** @type {Map<string, Promise<RenewalOutcome>>} */
 const renewals = new Map();
 
 async function requestLocalTokens(refreshToken) {
@@ -28,6 +40,7 @@ async function requestLocalTokens(refreshToken) {
   const response = await $fetch(`${API_BASE_URL}/auth/refresh`, {
     method: "POST",
     body: { refreshToken },
+    timeout: RENEWAL_TIMEOUT_MS,
   });
   return {
     accessToken: response.accessToken,
@@ -46,6 +59,7 @@ async function requestKeycloakTokens(refreshToken) {
       client_id: config.publicClient,
       refresh_token: refreshToken,
     }).toString(),
+    timeout: RENEWAL_TIMEOUT_MS,
   });
   return {
     accessToken: response.access_token,
@@ -53,26 +67,28 @@ async function requestKeycloakTokens(refreshToken) {
   };
 }
 
-/** One renewal per refresh token, shared by every request that carries it. */
+/**
+ * One renewal per refresh token, shared by every request that carries it.
+ * @returns {Promise<RenewalOutcome>}
+ */
 function sharedRenewal(refreshToken, authType) {
-  const key = `${authType === "keycloak" ? "keycloak" : "local"}:${refreshToken}`;
+  const kind = authType === "keycloak" ? "keycloak" : "local";
+  const key = `${kind}:${refreshToken}`;
   let renewal = renewals.get(key);
   if (renewal) return renewal;
 
   renewal = (
-    authType === "keycloak"
+    kind === "keycloak"
       ? requestKeycloakTokens(refreshToken)
       : requestLocalTokens(refreshToken)
   ).catch((error) => {
-    logger.warn(
-      { status: error?.statusCode, authType: authType || "local" },
-      "Token renewal failed",
-    );
-    return null;
+    const status = error?.statusCode;
+    logger.warn({ status, authType: kind }, "Token renewal failed");
+    return REFUSED_STATUSES.has(status) ? "refused" : "unavailable";
   });
   renewals.set(key, renewal);
-  renewal.then((tokens) => {
-    if (!tokens) {
+  renewal.then((outcome) => {
+    if (typeof outcome === "string") {
       renewals.delete(key);
       return;
     }
@@ -88,19 +104,18 @@ class AuthService {
    * Keycloak, and sets the new cookies on the request's answer.
    *
    * @param {import("h3").H3Event} event
-   * @returns {Promise<string | null>} The new access token. `null` when the
-   *   request has no refresh token, or when the renewal failed: then the
-   *   session is over and its cookies are cleared.
+   * @returns {Promise<string | null>} The new access token, or `null`:
+   *   - without a refresh token, or when the backend or Keycloak refuse it,
+   *     the session is over and its cookies are cleared;
+   *   - when they cannot be reached or fail, the cookies stay for a later try.
    */
   static async renewAccessToken(event) {
     const refreshToken = getCookie(event, "refresh-token");
-    if (!refreshToken) return null;
-
-    const tokens = await sharedRenewal(
-      refreshToken,
-      getCookie(event, "auth-type"),
-    );
-    if (!tokens) {
+    const tokens = refreshToken
+      ? await sharedRenewal(refreshToken, getCookie(event, "auth-type"))
+      : "refused";
+    if (tokens === "unavailable") return null;
+    if (tokens === "refused") {
       clearAuthCookies(event);
       return null;
     }

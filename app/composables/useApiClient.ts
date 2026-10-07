@@ -30,9 +30,7 @@ async function handleAuthFailure(url: string, statusCode: number) {
 export function useApiClient() {
   const requestFetch = useRequestFetch();
   // A BFF call during server rendering may renew the session's token.
-  const onResponse = relayAuthCookies(
-    import.meta.server ? useRequestEvent() : undefined
-  );
+  const onResponse = relayAuthCookies();
 
   async function request<T>(
     url: string,

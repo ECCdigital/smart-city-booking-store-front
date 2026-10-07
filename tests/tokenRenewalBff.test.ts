@@ -19,7 +19,6 @@ vi.mock("~~/server/api/utils/logger.js", () => ({
 const { default: permissionsRoute } = await import(
   "~~/server/api/checkout/[bookableID]/permissions.get.js"
 );
-const { default: modeRoute } = await import("~~/server/api/catalog/mode.get.js");
 
 const PERMISSIONS = "/api/checkout/bookable-1/permissions?tenantID=tenant-1";
 const routes = { "/api/checkout/:bookableID/permissions": permissionsRoute };
@@ -60,6 +59,18 @@ describe("a BFF route whose token cannot be renewed", () => {
     expect(browser.cookies.has("access-token")).toBe(false);
     expect(browser.cookies.has("refresh-token")).toBe(false);
     expect(permissionCalls(backend)).toHaveLength(1);
+  });
+
+  it("ends a session that has no refresh token to renew with", async () => {
+    const backend = createBackend();
+    const storefront = createStorefront(backend, routes);
+    const browser = createBrowser({ "access-token": backend.token("access", 0) });
+
+    const answer = await browser.call(storefront, PERMISSIONS);
+
+    expect(answer.status).toBe(401);
+    expect(browser.cookies.has("access-token")).toBe(false);
+    expect(backend.state.refreshCalls).toBe(0);
   });
 
   it("asks the backend exactly once more when the renewed token is refused too", async () => {
@@ -160,20 +171,19 @@ describe("an SSO session with an expired token", () => {
   });
 });
 
-describe("a cached route whose token the backend rejects", () => {
-  it("keeps the session cookies out of the cache, so no other visitor gets them", async () => {
+describe("a renewal the backend cannot answer right now", () => {
+  it("keeps the session, so the next call can renew, and passes the 401 on", async () => {
     const backend = createBackend();
-    const storefront = createStorefront(backend, { "/api/catalog/mode": modeRoute });
-    const visitor = createBrowser(backend.expiredSession());
-    const next = createBrowser({ "access-token": "someone-else", "refresh-token": "theirs" });
+    backend.state.refreshUnavailable = true;
+    const storefront = createStorefront(backend, routes);
+    const browser = createBrowser(backend.expiredSession());
 
-    const first = await visitor.call(storefront, "/api/catalog/mode");
-    const second = await next.call(storefront, "/api/catalog/mode");
+    const answer = await browser.call(storefront, PERMISSIONS);
+    expect(answer.status).toBe(401);
+    expect(browser.cookies.get("refresh-token")).toBe(backend.token("refresh", 1));
 
-    expect(first).toMatchObject({ status: 200, body: { mode: "portal" } });
-    expect(second).toMatchObject({ status: 200, body: { mode: "portal" } });
-    expect(first.setCookies).toEqual([]);
-    expect(second.setCookies).toEqual([]);
-    expect(backend.state.refreshCalls).toBe(0);
+    backend.state.refreshUnavailable = false;
+    const retried = await browser.call(storefront, PERMISSIONS);
+    expect(retried).toMatchObject({ status: 200, body: { success: true } });
   });
 });

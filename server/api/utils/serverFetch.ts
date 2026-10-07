@@ -34,7 +34,9 @@ async function backendFetch<T>(
 }
 
 /**
- * Calls the backend with the session's access token.
+ * Calls the backend with the session's access token. (Inside a Nitro cached
+ * handler the request carries only the headers in `varies`, so no cookie and
+ * no token: such a call is anonymous and never renews.)
  *
  * A `401` to a token it sent means the token has expired or is no longer
  * valid (ECCdigital/tickets#108, #109): the call renews the token and asks
@@ -49,13 +51,6 @@ export async function serverFetch<T>(
   const token = getCookie(event, "access-token");
   const result = await backendFetch<T>(path, options, token);
   if (!token || result.error?.status !== 401) return result;
-
-  if (event.context.cache) {
-    // Inside a cached handler (`createConditionalCachedHandler`) Nitro keeps
-    // the answer with its cookies and hands it to other visitors: no session
-    // cookies here. The answer is the same for everyone, so ask anonymously.
-    return backendFetch<T>(path, options, null);
-  }
 
   const renewedToken = await AuthService.renewAccessToken(event);
   if (!renewedToken) return result;

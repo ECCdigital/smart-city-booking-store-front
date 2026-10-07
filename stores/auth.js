@@ -50,9 +50,7 @@ export const useAuthStore = defineStore("auth", {
         const headers = import.meta.server
           ? useRequestHeaders(["cookie"])
           : undefined;
-        const onResponse = relayAuthCookies(
-          import.meta.server ? useRequestEvent() : undefined,
-        );
+        const onResponse = relayAuthCookies();
 
         const data = await $fetch("/api/auth/me", { headers, onResponse });
 

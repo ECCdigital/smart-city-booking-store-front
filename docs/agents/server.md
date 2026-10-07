@@ -89,8 +89,8 @@ setCookie(event, "access-token", accessToken, {
 - Login/signup set both `access-token` and `refresh-token` cookies
 - Logout clears cookies
 - SSO routes handle Keycloak redirect/callback flow (`server/api/auth/sso/`)
-- Token refresh in `AuthService.renewAccessToken()` (backend or Keycloak, by `auth-type`), used by `/api/auth/me`, `POST /api/auth/refresh` and `serverFetch()`. Calls with the same refresh token share one renewal: the backend revokes a refresh token on use
-- `serverFetch()` answers a backend `401` to the token it sent by renewing the token and asking exactly once more. Inside a cached handler it asks anonymously instead, since Nitro would hand the cookies to other visitors
+- Token refresh in `AuthService.renewAccessToken()` (backend or Keycloak, by `auth-type`), used by `/api/auth/me`, `POST /api/auth/refresh` and `serverFetch()`. Calls with the same refresh token share one renewal and its tokens for 60 s, because the backend revokes a refresh token on use. A refused or missing refresh token clears the cookies; a renewal that cannot be reached leaves them
+- `serverFetch()` answers a backend `401` to the token it sent by renewing the token and asking exactly once more. A cached handler sees no cookies (Nitro passes only the `varies` headers), so it never renews
 - During server rendering, `useApiClient()` and `validateAuth()` pass the session cookies a BFF call set on to the page's answer and to the rest of the render (`app/utils/ssrAuthCookies.ts`). A new in-process call to `/api/*` that may renew the token needs the same hook
 
 ## Caching

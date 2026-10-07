@@ -19,7 +19,6 @@ import {
   getRequestHeaders,
   readBody,
   setResponseStatus,
-  splitCookiesString,
   toWebHandler,
   type EventHandler,
   type H3Event,
@@ -48,39 +47,6 @@ g.useRuntimeConfig = () => ({ apiBaseUrl: "http://backend", public: {} });
 g.useRoute = () => ({ path: "/" });
 g.navigateTo = () => undefined;
 g.useCookie = () => ({ value: undefined });
-
-/** Nitro's `cachedEventHandler`, as far as the storefront relies on it: it
- * flags the event as cached and replays the stored answer, cookies included,
- * to every later request with the same key. */
-const cacheEntries = new Map<string, { status: number; headers: Record<string, unknown>; body: unknown }>();
-g.cachedEventHandler = (
-  handler: EventHandler,
-  opts: { getKey: (event: H3Event) => string },
-) =>
-  eventHandler(async (event) => {
-    const key = await opts.getKey(event);
-    let entry = cacheEntries.get(key);
-    if (!entry) {
-      event.context.cache = { options: opts };
-      const body = await handler(event);
-      entry = {
-        status: event.node.res.statusCode,
-        headers: { ...event.node.res.getHeaders() },
-        body,
-      };
-      cacheEntries.set(key, entry);
-      return body;
-    }
-    for (const [name, value] of Object.entries(entry.headers)) {
-      if (name === "set-cookie") {
-        event.node.res.appendHeader(name, splitCookiesString(value as string[]));
-      } else {
-        event.node.res.setHeader(name, value as string);
-      }
-    }
-    setResponseStatus(event, entry.status);
-    return entry.body;
-  });
 
 export const USER = { id: "user-1", firstName: "Ada" };
 export const LOGIN_REQUIRED = {
@@ -119,6 +85,8 @@ export function createBackend({ rejectsBadTokenOnPublicRoutes = true }: BackendO
     refreshGate: null as Promise<void> | null,
     /** While set, every token is refused, a renewed one too ("User not found"). */
     userGone: false,
+    /** While set, `/auth/refresh` fails with a 503, as if the backend were briefly down. */
+    refreshUnavailable: false,
   };
 
   function issue() {
@@ -164,6 +132,10 @@ export function createBackend({ rejectsBadTokenOnPublicRoutes = true }: BackendO
         const { refreshToken } = await readBody(event);
         state.refreshCalls += 1;
         if (state.refreshGate) await state.refreshGate;
+        if (state.refreshUnavailable) {
+          setResponseStatus(event, 503);
+          return { success: false, message: "Service unavailable" };
+        }
         if (!validRefresh.delete(refreshToken)) {
           setResponseStatus(event, 401);
           return { success: false, message: "Invalid refresh token" };
@@ -191,14 +163,6 @@ export function createBackend({ rejectsBadTokenOnPublicRoutes = true }: BackendO
         const principal = publicPrincipal(event);
         if (principal && "message" in principal) return principal;
         return principal ? { success: true } : LOGIN_REQUIRED;
-      }),
-    )
-    .get(
-      "/api/catalog/mode",
-      eventHandler((event) => {
-        const principal = publicPrincipal(event);
-        if (principal && "message" in principal) return principal;
-        return { mode: "portal" };
       }),
     )
     .get(

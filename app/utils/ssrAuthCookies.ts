@@ -1,6 +1,6 @@
 import type { H3Event } from "h3";
 
-/** The cookies of the session, as `server/utils/authCookies.ts` names them. */
+/** The cookies of the session, as `server/utils/authCookies.ts` sets and clears them. */
 const AUTH_COOKIES = new Set(["access-token", "refresh-token", "auth-type"]);
 
 type SetCookie = { name: string; value: string; cleared: boolean };
@@ -20,7 +20,8 @@ function parseSetCookie(line: string): SetCookie | null {
   };
 }
 
-function nameOf(line: string) {
+/** The name in a `Set-Cookie` line or in a `name=value` pair of a `Cookie` header. */
+function cookieNameOf(line: string) {
   return line.slice(0, line.indexOf("=")).trim();
 }
 
@@ -30,7 +31,7 @@ function passToBrowser(event: H3Event, name: string, line: string) {
   if (res.headersSent) return;
   const current = res.getHeader("set-cookie");
   const lines = current === undefined ? [] : Array.isArray(current) ? current : [String(current)];
-  res.setHeader("set-cookie", [...lines.filter((l) => nameOf(l) !== name), line]);
+  res.setHeader("set-cookie", [...lines.filter((l) => cookieNameOf(l) !== name), line]);
 }
 
 /** Puts the cookie on the page's request, which every later BFF call of the render forwards. */
@@ -39,7 +40,7 @@ function passToRequest(event: H3Event, name: string, value: string | null) {
   const pairs = (req.headers.cookie ?? "")
     .split(";")
     .map((p) => p.trim())
-    .filter((p) => p && nameOf(p) !== name);
+    .filter((p) => p && cookieNameOf(p) !== name);
   if (value !== null) pairs.push(`${name}=${value}`);
   req.headers.cookie = pairs.join("; ");
 }
@@ -52,11 +53,16 @@ function passToRequest(event: H3Event, name: string, value: string | null) {
  * page's answer for the browser, and to the page's request, so the rest of the
  * render sends the renewed token too.
  *
- * @param event - The page's request, `useRequestEvent()`. Without one, in the
- *   browser, the hook does nothing: there the browser keeps the cookies itself.
+ * Call it where the request is made, in the Nuxt context, like `useRequestFetch()`.
+ *
+ * @param event - The page's request; `useRequestEvent()` during server
+ *   rendering. In the browser there is none and the hook does nothing: there
+ *   the browser keeps the cookies itself.
  * @returns An ofetch `onResponse` hook.
  */
-export function relayAuthCookies(event: H3Event | undefined) {
+export function relayAuthCookies(
+  event: H3Event | undefined = import.meta.server ? useRequestEvent() : undefined
+) {
   return ({ response }: { response: Response }) => {
     if (!event) return;
     for (const line of response.headers.getSetCookie()) {

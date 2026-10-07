@@ -86,3 +86,29 @@ describe("the checkout in the browser with an expired access token", () => {
     expect(browser.cookies.has("refresh-token")).toBe(false);
   });
 });
+
+describe("the session check in the browser", () => {
+  it("ends a session whose expired token has no refresh token", async () => {
+    const backend = createBackend();
+    const storefront = createStorefront(backend, routes);
+    const browser = createBrowser({ "access-token": backend.token("access", 0) });
+    runInBrowser(storefront, browser);
+
+    expect(await useAuthStore().validateAuth(true)).toBe(false);
+    expect(browser.cookies.has("access-token")).toBe(false);
+  });
+
+  it("keeps the session when the renewal cannot be answered right now", async () => {
+    const backend = createBackend();
+    backend.state.refreshUnavailable = true;
+    const storefront = createStorefront(backend, routes);
+    const browser = createBrowser(backend.expiredSession());
+    runInBrowser(storefront, browser);
+
+    expect(await useAuthStore().validateAuth(true)).toBe(false);
+    expect(browser.cookies.get("refresh-token")).toBe(backend.token("refresh", 1));
+
+    backend.state.refreshUnavailable = false;
+    expect(await useAuthStore().validateAuth(true)).toBe(true);
+  });
+});
