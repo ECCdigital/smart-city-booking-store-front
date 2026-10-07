@@ -14,7 +14,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Security
 
-- Critical findings of `npm audit --omit=dev` lifted within their major version (ECCdigital/tickets#284): `nuxt` 4.2.1 → 4.5.1 with `@nuxt/kit` (route rules bypass, island endpoint), `h3` 1.15.4 → 1.15.11 (path traversal in `serveStatic`), and through them `@nuxt/devtools`, `seroval`, `shell-quote` and `tar`. `simple-git` and its `@simple-git/argv-parser` (dev tools only) stay critical: no 3.x release fixes them. Nuxt 4.5 builds with Vite 8, which ignores nuxt-security's `removeLoggers`; the client bundle now drops `console` and `debugger` through the Oxc minifier, the server bundle keeps them
+- Critical findings of `npm audit --omit=dev` lifted within their major version (ECCdigital/tickets#284): `nuxt` 4.2.1 → 4.5.1 with `@nuxt/kit` (route rules bypass, island endpoint), `h3` 1.15.4 → 1.15.11 (path traversal in `serveStatic`), and through them `@nuxt/devtools`, `seroval`, `shell-quote` and `tar`. `npm audit --omit=dev` still reports 6 critical findings, all from `simple-git` and its `@simple-git/argv-parser`: `nuxt` itself depends on `@nuxt/devtools`, which pulls them in, so they sit in the production dependency tree and `--omit=dev` does not drop them. They are not in the build output (`.output`) and run only with `nuxt dev`. Only `simple-git` 4.0.2 fixes them, which `@nuxt/devtools` 3.x does not take. Nuxt 4.5 builds with Vite 8, which ignores nuxt-security's `removeLoggers`; the client bundle now drops `console` and `debugger` through the Oxc minifier, the server bundle keeps them
 
 ### Changed
 
