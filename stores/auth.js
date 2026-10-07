@@ -163,14 +163,23 @@ export const useAuthStore = defineStore("auth", {
         this.user = null;
       }
     },
-    async changePassword(id, newPassword) {
+    /**
+     * The own password change, with the current password. Answers whether
+     * it went through and, if not, the status of the refusal (403: the
+     * current password is wrong).
+     */
+    async changePassword(currentPassword, newPassword) {
       const { changePassword } = useAuth();
       try {
-        await changePassword(id, newPassword);
-        return true;
+        await changePassword(currentPassword, newPassword);
+        return { success: true };
       } catch (error) {
         console.error("Error changing password:", error);
-        return false;
+        // A 401 is a session the BFF could not renew, whose cookies it has
+        // cleared: sign the store out too (tickets#108). A wrong current
+        // password is 403 and leaves the session alone.
+        if (error?.statusCode === 401) await this.validateAuth(true);
+        return { success: false, statusCode: error?.statusCode };
       }
     },
   },
