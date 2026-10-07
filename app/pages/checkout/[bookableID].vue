@@ -23,6 +23,13 @@ import {
 } from "~/utils/checkoutErrors.js";
 import { isNotAvailableError } from "~/utils/catalogDetail.js";
 import {
+  LOGIN_REQUIRED,
+  checkoutAuthOffer,
+  checkoutRequiresLogin,
+  isLoginRefusal,
+  isLoginRequiredPermissionError,
+} from "~/utils/checkoutLogin.js";
+import {
   resolveMaxAmount,
   resolvePerBookingLimit,
 } from "~/utils/amountLimits";
@@ -233,16 +240,18 @@ const paymentProviders = computed(() => {
 });
 const permissionCheck = computed(() => data.value?.permissionCheck || null);
 
-function isLoginRequiredPermissionError(result) {
-  if (result?.success !== false || result?.error?.checkType !== "permissions") {
-    return false;
-  }
-  const reason = result?.error?.reason;
-  return reason === "checkout.login_required" || reason === "login_required";
-}
+// The backend refused the completion for want of a sign-in (tickets#123).
+const loginRefusedAtCompletion = ref(false);
 
+// An offer behind a login needs a sign-in whatever the pre-check answered:
+// for a signed-in person it passes, and the guest booking must not be
+// offered then (tickets#107).
 const requiresLoginForCheckout = computed(() =>
-  isLoginRequiredPermissionError(permissionCheck.value),
+  checkoutRequiresLogin({
+    permissionCheck: permissionCheck.value,
+    bookables: bookablesInCheckout.value,
+    refusedAtCompletion: loginRefusedAtCompletion.value,
+  }),
 );
 
 function hasCheckoutPermissionError(result) {
@@ -361,6 +370,12 @@ usePageTitle(() =>
 );
 const { error: notifyError } = useNotification();
 const isLoggedIn = computed(() => authStore.isLoggedIn);
+const authOffer = computed(() =>
+  checkoutAuthOffer({
+    isLoggedIn: isLoggedIn.value,
+    requiresLogin: requiresLoginForCheckout.value,
+  }),
+);
 const isLoggingOut = ref(false);
 const isSwitchingToGuest = ref(false);
 
@@ -2492,6 +2507,11 @@ async function handleFinish() {
       ? await completeGroupCheckout(payload)
       : await completeCheckout(payload);
 
+    if (isLoginRefusal(error) || isLoginRefusal(data)) {
+      offerLoginAfterRefusal();
+      return;
+    }
+
     if (error) {
       // The offer was withdrawn or its tenant stopped being public (pending
       // approval or declined) since the form was opened (404/409): say so
@@ -2566,6 +2586,17 @@ async function handleFinish() {
   } finally {
     checkoutSubmitting.value = false;
   }
+}
+
+/**
+ * The backend refused the completion for want of a sign-in (tickets#123):
+ * back to the data step, which now offers the sign-in. The form survives
+ * the way through the login page in the session storage.
+ */
+function offerLoginAfterRefusal() {
+  loginRefusedAtCompletion.value = true;
+  notifyError(t(LOGIN_REQUIRED));
+  currentStep.value = stepNumberByKey("data") ?? currentStep.value;
 }
 
 function onReviewBack() {
@@ -2979,7 +3010,7 @@ function onReviewEdit(section) {
                   </p>
                 </div>
                 <UButton
-                  v-if="!isLoggedIn"
+                  v-if="authOffer === 'login'"
                   color="primary"
                   :variant="requiresLoginForCheckout ? 'solid' : 'soft'"
                   icon="i-lucide-log-in"
@@ -2988,7 +3019,7 @@ function onReviewEdit(section) {
                   {{ $t("checkout.data.loginAction") }}
                 </UButton>
                 <UButton
-                  v-else-if="!requiresLoginForCheckout"
+                  v-else-if="authOffer === 'guest'"
                   color="primary"
                   variant="soft"
                   icon="i-lucide-log-out"
