@@ -10,16 +10,20 @@
       <!-- Two bars under the header: which of the two steps this is. -->
       <div
         v-if="outcome !== OUTCOME.POLICY"
-        class="flex gap-1.5 w-48 mb-5"
+        class="flex gap-1.5 w-full mb-5"
         aria-hidden="true"
       >
         <span
           class="h-1 flex-1 rounded-full"
-          :class="stepsDone >= 1 ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'"
+          :class="
+            stepsDone >= 1 ? 'bg-secondary' : 'bg-gray-200 dark:bg-gray-700'
+          "
         />
         <span
           class="h-1 flex-1 rounded-full"
-          :class="stepsDone >= 2 ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'"
+          :class="
+            stepsDone >= 2 ? 'bg-secondary' : 'bg-gray-200 dark:bg-gray-700'
+          "
         />
       </div>
 
