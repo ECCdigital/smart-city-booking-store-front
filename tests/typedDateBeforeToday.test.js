@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isIsoDateBefore } from "~/utils/localDate.js";
+import { isDayBefore, isIsoDateBefore } from "~/utils/localDate.js";
 import de from "~~/i18n/locales/de.json";
 import en from "~~/i18n/locales/en.json";
 
@@ -25,6 +25,28 @@ describe("isIsoDateBefore", () => {
   it("is false without a date or without a minimum", () => {
     expect(isIsoDateBefore("", NOW)).toBe(false);
     expect(isIsoDateBefore("2024-06-14", null)).toBe(false);
+  });
+});
+
+/**
+ * The period field on the detail page takes no start before today either
+ * (ECCdigital/tickets#188), also when the start came from the search and
+ * was not typed.
+ */
+describe("isDayBefore", () => {
+  it("is true for a start on a day before today", () => {
+    expect(isDayBefore(new Date(2024, 5, 14, 10, 0), NOW)).toBe(true);
+    expect(isDayBefore(new Date(2026, 9, 6, 23, 59), NOW)).toBe(true);
+  });
+
+  it("is false for a start earlier today and for later days", () => {
+    expect(isDayBefore(new Date(2026, 9, 7, 8, 0), NOW)).toBe(false);
+    expect(isDayBefore(new Date(2026, 9, 8, 8, 0), NOW)).toBe(false);
+  });
+
+  it("is false without a start or without a minimum", () => {
+    expect(isDayBefore(null, NOW)).toBe(false);
+    expect(isDayBefore(new Date(2024, 5, 14), null)).toBe(false);
   });
 });
 

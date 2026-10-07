@@ -45,6 +45,7 @@
             <InputTime
               v-model:date="startDate"
               v-model:time="startTime"
+              :min-date="minDate"
               :missing-values="missingValues.start"
               :is-invalid-date="invalidDateSlot"
               :is-invalid-time="invalidTimeslot"
@@ -76,6 +77,7 @@
             <InputTime
               v-model:date="endDate"
               v-model:time="endTime"
+              :min-date="minDate"
               :missing-values="missingValues.end"
               :is-invalid-date="invalidDateSlot"
               :is-invalid-time="invalidTimeslot"
@@ -134,6 +136,9 @@
             class="text-red-500 text-sm mt-2"
           >
             {{ $t("timePeriods.endBeforeStart") }}
+          </p>
+          <p v-if="startBeforeMin" class="text-red-500 text-sm mt-2">
+            {{ $t("timePeriods.dateBeforeToday") }}
           </p>
         </div>
       </div>
@@ -236,6 +241,9 @@
           >
             {{ $t("timePeriods.endBeforeStart") }}
           </p>
+          <p v-if="startBeforeMin" class="text-red-500 text-sm mt-2">
+            {{ $t("timePeriods.dateBeforeToday") }}
+          </p>
         </div>
       </template>
 
@@ -260,6 +268,7 @@ import ClearButton from "~/components/inputs/ClearButton.vue";
 import PeriodFieldCompact from "~/components/inputs/PeriodFieldCompact.vue";
 import InputTime from "~/components/inputs/InputTime.vue";
 import type { TimePeriod } from "~/types/catalogParams";
+import { isDayBefore } from "~/utils/localDate.js";
 
 
 type TimeHM = { hours: number | null; minutes: number | null } | null;
@@ -269,6 +278,8 @@ const props = defineProps<{
   timePeriod?: TimePeriod;
   compact?: boolean;
   variant?: "bar" | "modal";
+  /** The earliest day to take, e.g. today for a booking (tickets#188). */
+  minDate?: Date | null;
 }>();
 
 const emit = defineEmits<{
@@ -301,6 +312,8 @@ const endDateAutoSet = ref(false);
 const endTimeAutoSet = ref(false);
 
 const missingValues = ref<MissingValues>({ start: [], end: [] });
+// A start before `minDate`, e.g. taken over from the search (tickets#188).
+const startBeforeMin = ref(false);
 const durationPresets = [60, 120, 240];
 
 const now = computed(() => new Date());
@@ -561,6 +574,7 @@ function closeAndReset() {
 
   syncInFromModel(confirmedPeriod.value);
   missingValues.value = { start: [], end: [] };
+  startBeforeMin.value = false;
 }
 
 function addToTime(time: TimeHM, addedMinutes: number): TimeHM {
@@ -661,6 +675,9 @@ function onSelect() {
 
   if (invalidTimeslot.value || invalidDateSlot.value) return;
 
+  startBeforeMin.value = isDayBefore(dateRange.value[0], props.minDate);
+  if (startBeforeMin.value) return;
+
   const result = buildTimestampsFromState();
   isOpen.value = false;
   emit("update:timePeriod", result);
@@ -671,6 +688,7 @@ function onDeleteTimePeriod() {
   dateRange.value = [];
   timeRange.value = { start: null, end: null };
   missingValues.value = { start: [], end: [] };
+  startBeforeMin.value = false;
   isOpen.value = false;
 
   startDate.value = null;

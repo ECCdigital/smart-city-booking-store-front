@@ -13,6 +13,7 @@
       <InputDateTimePeriod
         :time-period="timePeriod"
         class="border border-gray-400 dark:border-gray-600 rounded-lg mt-2 mb-5 w-full"
+        :min-date="today"
         @select-date="setSearchTimePeriod"
         @remove-date="removeSearchTimePeriod"
       />
@@ -81,6 +82,9 @@ const props = defineProps({
     required: true,
   },
 });
+
+// The period for a booking takes no start before today (ECCdigital/tickets#188).
+const today = new Date();
 
 const {
   tickets,
