@@ -730,6 +730,7 @@
       "unknown": "Unknown attachment type"
     },
     "download": {
+      "label": "Download {type}",
       "failedTitle": "Download failed",
       "failedMessage": "The document could not be downloaded."
     },

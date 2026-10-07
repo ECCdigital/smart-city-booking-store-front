@@ -1077,6 +1077,7 @@
       "unknown": "Unbekannter Anhangstyp"
     },
     "download": {
+      "label": "{type} herunterladen",
       "failedTitle": "Download fehlgeschlagen",
       "failedMessage": "Das Dokument konnte nicht heruntergeladen werden."
     },
