@@ -12,13 +12,14 @@
   </div>
 </template>
 <script setup>
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   event: { type: Object, required: true },
   useIcon: { type: Boolean, default: true },
 });
 
-const LOCALE = "de-DE";
+const { localeTag } = useFormatting();
 const TIME_ZONE = "Europe/Berlin";
 
 function isoLocal(date, time) {
@@ -29,21 +30,21 @@ function isoLocal(date, time) {
 }
 
 function fmtDate(date) {
-  return new Intl.DateTimeFormat(LOCALE, {
+  return new Intl.DateTimeFormat(localeTag(), {
     dateStyle: "short",
     timeZone: TIME_ZONE,
   }).format(date);
 }
 
 function fmtTime(date) {
-  return new Intl.DateTimeFormat(LOCALE, {
+  return new Intl.DateTimeFormat(localeTag(), {
     timeStyle: "short",
     timeZone: TIME_ZONE,
   }).format(date);
 }
 
 function fmtDateTime(date) {
-  return new Intl.DateTimeFormat(LOCALE, {
+  return new Intl.DateTimeFormat(localeTag(), {
     dateStyle: "short",
     timeStyle: "short",
     timeZone: TIME_ZONE,
