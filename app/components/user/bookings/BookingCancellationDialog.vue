@@ -115,6 +115,20 @@
           {{ $t("booking.cancellation.freeBooking") }}
         </p>
 
+        <p
+          v-else-if="!isPaid"
+          class="flex gap-2.5 text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 rounded-md px-3.5 py-2.5"
+        >
+          <UIcon name="i-lucide-info" class="w-4.5 h-4.5 shrink-0 mt-0.5 text-gray-500" />
+          <span>
+            {{
+              $t("booking.cancellation.unpaidBooking", {
+                amount: formatPrice(booking.priceEur),
+              })
+            }}
+          </span>
+        </p>
+
         <div v-else-if="preview.loading" aria-busy="true">
           <dl class="text-sm">
             <div
@@ -209,7 +223,7 @@
       <!-- Step 2: the reason, bank details for a paid booking, the consequence. -->
       <div v-else class="flex flex-col gap-5">
         <div
-          v-if="preview.data && !isFree"
+          v-if="preview.data && isPaid"
           class="flex justify-between items-center text-sm bg-gray-100 dark:bg-gray-800 rounded-md px-3.5 py-2.5"
         >
           <span>{{ $t("booking.cancellation.expectedRefund") }}</span>
@@ -359,7 +373,7 @@
         </UButton>
         <UButton color="primary" :disabled="preview.loading" @click="step = 2">
           {{
-            preview.data || isFree
+            preview.data || !isPaid
               ? $t("booking.cancellation.next")
               : $t("booking.cancellation.nextAnyway")
           }}
@@ -459,9 +473,14 @@ const form = reactive({
 });
 
 const isFree = computed(() => isFreeBooking(props.booking));
-const requiresBankDetails = computed(
-  () => !isFree.value && isSettledBooking(props.booking),
-);
+/**
+ * Money has flowed: only then is there a refund to preview and somewhere
+ * for it to go. A priced booking that is not paid yet (requested, payment
+ * due) is cancelled without a refund, and the dialog says so instead of
+ * asking the backend for a preview.
+ */
+const isPaid = computed(() => !isFree.value && isSettledBooking(props.booking));
+const requiresBankDetails = isPaid;
 
 const tenantName = computed(
   () => getBookingTenant(props.booking)?.name || t("account.unknownTenant"),
@@ -577,7 +596,7 @@ const subtitle = computed(() => {
 });
 
 async function loadPreview() {
-  if (isFree.value) return;
+  if (!isPaid.value) return;
   preview.loading = true;
   preview.data = null;
   try {

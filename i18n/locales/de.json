@@ -1075,6 +1075,7 @@
       "openRequestShort": "Stornoanfrage per E-Mail offen",
       "openRequestSince": "Seit {date} ist für diese Buchung eine Stornoanfrage per E-Mail offen. Sie können die Buchung hier trotzdem direkt stornieren.",
       "freeBooking": "Diese Buchung ist kostenfrei. Es wird nichts erstattet.",
+      "unpaidBooking": "Für diese Buchung wurde noch nichts bezahlt (Buchungsbetrag {amount}). Die Stornierung erfolgt daher ohne Erstattung.",
       "originalAmount": "Buchungsbetrag",
       "fee": "Stornogebühr",
       "feePercent": "{percent} %",

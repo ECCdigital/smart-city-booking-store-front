@@ -728,6 +728,7 @@
       "openRequestShort": "Cancellation request by email open",
       "openRequestSince": "A cancellation request by email has been open for this booking since {date}. You can still cancel the booking here directly.",
       "freeBooking": "This booking is free of charge. Nothing will be refunded.",
+      "unpaidBooking": "Nothing has been paid for this booking yet (booking amount {amount}). It is therefore cancelled without a refund.",
       "originalAmount": "Booking amount",
       "fee": "Cancellation fee",
       "feePercent": "{percent} %",
