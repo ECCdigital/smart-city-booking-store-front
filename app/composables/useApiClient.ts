@@ -1,6 +1,7 @@
 import type { FetchError } from "ofetch";
 import type { NitroFetchOptions, NitroFetchRequest } from "nitropack";
 import { useAuthStore } from "~~/stores/auth";
+import { relayAuthCookies } from "~/utils/ssrAuthCookies";
 
 type Result<T> =
   | { data: T; error: null }
@@ -28,6 +29,10 @@ async function handleAuthFailure(url: string, statusCode: number) {
 
 export function useApiClient() {
   const requestFetch = useRequestFetch();
+  // A BFF call during server rendering may renew the session's token.
+  const onResponse = relayAuthCookies(
+    import.meta.server ? useRequestEvent() : undefined
+  );
 
   async function request<T>(
     url: string,
@@ -37,6 +42,7 @@ export function useApiClient() {
       const data = await requestFetch<T>(url, {
         ...opts,
         credentials: "include",
+        onResponse,
       });
 
       return { data, error: null };
