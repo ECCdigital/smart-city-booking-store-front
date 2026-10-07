@@ -9,7 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
-- „Benutzer wechseln“ after an SSO sign-in no longer puts the Keycloak refresh token in the address, where it landed in the browser history and the access logs of proxy and Keycloak, and Keycloak no longer asks „Do you want to log out?“ (ECCdigital/tickets#273). The storefront ends the Keycloak session in the background, as the sign-out does, and goes straight to the SSO sign-in. Only when that fails, or the pending sign-in has expired, does the browser still pass Keycloak's logout page, without a token
+- „Benutzer wechseln“ after an SSO sign-in no longer puts the Keycloak refresh token in the address (browser history, access logs), and Keycloak no longer asks „Do you want to log out?“ (ECCdigital/tickets#273): the Keycloak session ends in the background, as on sign-out, and the SSO sign-in follows. Only if that fails or the pending sign-in has expired does the browser still pass Keycloak's logout page, without a token
 - Keycloak SSO behind a TLS-terminating reverse proxy: the storefront sent `http://…/api/auth/sso/callback` as `redirect_uri` (and an `http://` `post_logout_redirect_uri` on „change user“), because it took the origin from the request. It now takes it from `NUXT_USER_BASE_URL`, falling back to the request when that is empty, so a Keycloak client that allows only HTTPS redirect URIs accepts the login
 - Inside a tenant, opening an Offer from the Result Page failed with „Bookable not found“, and the tenant's lists came back empty: the single-tenant branch of the catalog bundle expected the backend to wrap bookables and events (`{ bookable }`, `{ bookables }`), but it returns them bare
 

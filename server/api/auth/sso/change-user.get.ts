@@ -3,6 +3,7 @@ import {
     getKeycloakEndpoints,
     getPublicOrigin,
 } from "~~/server/utils/keycloak";
+import { logger } from "~~/server/api/utils/logger.js";
 
 /**
  * „Benutzer wechseln“ on /sso/confirm: ends the pending Keycloak session in
@@ -42,7 +43,7 @@ export default defineEventHandler(async (event) => {
             });
             return sendRedirect(event, ssoLoginPath);
         } catch (err) {
-            console.error("Keycloak change-user logout error:", err);
+            logger.error({ err }, "Keycloak change-user logout failed");
         }
     }
 

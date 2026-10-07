@@ -10,6 +10,9 @@ const ORIGIN = "https://booking.example.com";
 const keycloakCalls: { url: string; body: string }[] = [];
 let keycloakLogoutFails = false;
 
+vi.mock("~~/server/api/utils/logger.js", () => ({
+  logger: { error: vi.fn() },
+}));
 vi.stubGlobal(
   "useRuntimeConfig",
   () => ({
@@ -74,7 +77,7 @@ async function switchUser(cookie: string) {
   };
 }
 
-const PENDING =
+const PENDING_SIGN_IN_COOKIES =
   "kc-pending-token=access-1; kc-pending-refresh=refresh-1; kc-pending-redirect=%2Fcheckout%2F7";
 
 beforeEach(() => {
@@ -84,7 +87,7 @@ beforeEach(() => {
 
 describe("„Benutzer wechseln“", () => {
   it("ends the Keycloak session in the background, as the sign-out does", async () => {
-    await switchUser(PENDING);
+    await switchUser(PENDING_SIGN_IN_COOKIES);
 
     expect(keycloakCalls).toHaveLength(1);
     expect(keycloakCalls[0].url).toBe(`${KEYCLOAK}/logout`);
@@ -94,7 +97,7 @@ describe("„Benutzer wechseln“", () => {
   });
 
   it("then sends the browser to the SSO sign-in, keeping the return target", async () => {
-    const { status, location } = await switchUser(PENDING);
+    const { status, location } = await switchUser(PENDING_SIGN_IN_COOKIES);
 
     expect(status).toBe(302);
     expect(location).toBe(
@@ -103,20 +106,20 @@ describe("„Benutzer wechseln“", () => {
   });
 
   it("never puts the refresh token in the address", async () => {
-    const { location } = await switchUser(PENDING);
+    const { location } = await switchUser(PENDING_SIGN_IN_COOKIES);
 
     expect(location).not.toContain("refresh_token");
     expect(location).not.toContain("refresh-1");
   });
 
   it("does not pass Keycloak's logout page, which asks „Do you want to log out?“", async () => {
-    const { location } = await switchUser(PENDING);
+    const { location } = await switchUser(PENDING_SIGN_IN_COOKIES);
 
     expect(location.startsWith(KEYCLOAK)).toBe(false);
   });
 
   it("clears the pending SSO cookies", async () => {
-    const { cookies } = await switchUser(PENDING);
+    const { cookies } = await switchUser(PENDING_SIGN_IN_COOKIES);
 
     for (const name of [
       "kc-pending-token",
@@ -129,9 +132,8 @@ describe("„Benutzer wechseln“", () => {
 
   it("falls back to Keycloak's logout page, without a token, when the background sign-out fails", async () => {
     keycloakLogoutFails = true;
-    vi.spyOn(console, "error").mockImplementation(() => {});
 
-    const { location } = await switchUser(PENDING);
+    const { location } = await switchUser(PENDING_SIGN_IN_COOKIES);
 
     const logout = new URL(location);
     expect(`${logout.origin}${logout.pathname}`).toBe(`${KEYCLOAK}/logout`);
