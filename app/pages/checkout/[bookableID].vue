@@ -24,7 +24,7 @@ import {
 import { isNotAvailableError } from "~/utils/catalogDetail.js";
 import {
   LOGIN_REQUIRED,
-  checkoutAuthOffer,
+  checkoutAuthAction,
   checkoutRequiresLogin,
   isLoginRefusal,
   isLoginRequiredPermissionError,
@@ -370,8 +370,8 @@ usePageTitle(() =>
 );
 const { error: notifyError } = useNotification();
 const isLoggedIn = computed(() => authStore.isLoggedIn);
-const authOffer = computed(() =>
-  checkoutAuthOffer({
+const authAction = computed(() =>
+  checkoutAuthAction({
     isLoggedIn: isLoggedIn.value,
     requiresLogin: requiresLoginForCheckout.value,
   }),
@@ -855,8 +855,7 @@ watch(
 );
 
 async function continueAsGuest() {
-  if (requiresLoginForCheckout.value || !isLoggedIn.value || isLoggingOut.value)
-    return;
+  if (authAction.value !== "guest" || isLoggingOut.value) return;
   isLoggingOut.value = true;
   isSwitchingToGuest.value = true;
   try {
@@ -3010,7 +3009,7 @@ function onReviewEdit(section) {
                   </p>
                 </div>
                 <UButton
-                  v-if="authOffer === 'login'"
+                  v-if="authAction === 'login'"
                   color="primary"
                   :variant="requiresLoginForCheckout ? 'solid' : 'soft'"
                   icon="i-lucide-log-in"
@@ -3019,7 +3018,7 @@ function onReviewEdit(section) {
                   {{ $t("checkout.data.loginAction") }}
                 </UButton>
                 <UButton
-                  v-else-if="authOffer === 'guest'"
+                  v-else-if="authAction === 'guest'"
                   color="primary"
                   variant="soft"
                   icon="i-lucide-log-out"

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  checkoutAuthOffer,
+  checkoutAuthAction,
   checkoutRequiresLogin,
   isLoginRefusal,
 } from "~/utils/checkoutLogin.js";
@@ -22,14 +22,14 @@ const PRE_CHECK_LOGIN_REQUIRED = {
 const room = { id: "room", requiresLogin: false };
 const loginRoom = { id: "login-room", requiresLogin: true };
 
-describe("checkoutAuthOffer", () => {
+describe("checkoutAuthAction", () => {
   it("offers a validly signed-in person no guest booking for an offer behind a login", () => {
     const requiresLogin = checkoutRequiresLogin({
       permissionCheck: PRE_CHECK_PASSED,
       bookables: [loginRoom],
     });
 
-    expect(checkoutAuthOffer({ isLoggedIn: true, requiresLogin })).toBeNull();
+    expect(checkoutAuthAction({ isLoggedIn: true, requiresLogin })).toBeNull();
   });
 
   it("keeps the guest booking for a signed-in person where no login is required", () => {
@@ -38,16 +38,16 @@ describe("checkoutAuthOffer", () => {
       bookables: [room],
     });
 
-    expect(checkoutAuthOffer({ isLoggedIn: true, requiresLogin })).toBe(
+    expect(checkoutAuthAction({ isLoggedIn: true, requiresLogin })).toBe(
       "guest",
     );
   });
 
   it("offers the sign-in to a person who is not signed in, with or without a login requirement", () => {
-    expect(checkoutAuthOffer({ isLoggedIn: false, requiresLogin: true })).toBe(
+    expect(checkoutAuthAction({ isLoggedIn: false, requiresLogin: true })).toBe(
       "login",
     );
-    expect(checkoutAuthOffer({ isLoggedIn: false, requiresLogin: false })).toBe(
+    expect(checkoutAuthAction({ isLoggedIn: false, requiresLogin: false })).toBe(
       "login",
     );
   });
@@ -116,11 +116,11 @@ describe("isLoginRefusal", () => {
     ).toBe(true);
   });
 
-  it("is any 401, whose session the backend did not accept", () => {
-    expect(isLoginRefusal(failure(401, undefined))).toBe(true);
+  it("is not a 401 without the reason: an expired session is the token renewal's (tickets#108)", () => {
+    expect(isLoginRefusal(failure(401, undefined))).toBe(false);
     expect(
       isLoginRefusal(failure(401, { success: false, message: "Token has expired" })),
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("is the reason in an answer without an error status", () => {

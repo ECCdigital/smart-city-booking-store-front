@@ -46,22 +46,22 @@ export function checkoutRequiresLogin({
  * @param {{ isLoggedIn: boolean, requiresLogin: boolean }} params
  * @returns {"login"|"guest"|null}
  */
-export function checkoutAuthOffer({ isLoggedIn, requiresLogin }) {
+export function checkoutAuthAction({ isLoggedIn, requiresLogin }) {
   if (!isLoggedIn) return "login";
   return requiresLogin ? null : "guest";
 }
 
 /**
- * Whether the backend refused a completion for want of a sign-in: its 401
- * (`checkout.login_required`, or a session it did not accept), or that
- * reason in an answer without an error status.
+ * Whether the backend refused a completion for want of a sign-in: the
+ * reason `checkout.login_required`, as its 401 carries it (backend 4.3.1)
+ * or in an answer without an error status. A 401 without it is a session
+ * the backend did not accept, which the token renewal handles (#108).
  *
  * @param {object|null} failure The `error` of a failed BFF request, or the
  *   body of an answer with `success: false`
  */
 export function isLoginRefusal(failure) {
   if (!failure || typeof failure !== "object") return false;
-  if (failure.statusCode === 401) return true;
   const body = backendErrorBodyOf(failure) ?? failure;
   return (
     body?.success === false && LOGIN_REQUIRED_REASONS.has(body?.error?.reason)
