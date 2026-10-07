@@ -23,7 +23,11 @@
       >
         <span class="inline-block">
           <UButton
-            color="error"
+            :color="
+              cancellation === CANCELLATION_AVAILABILITY.BLOCKED
+                ? 'neutral'
+                : 'error'
+            "
             variant="soft"
             icon="i-lucide-calendar-x"
             :disabled="cancellation === CANCELLATION_AVAILABILITY.BLOCKED"
