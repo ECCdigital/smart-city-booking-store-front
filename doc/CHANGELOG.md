@@ -9,7 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
-- On the phone the Kind badge („Raum“) no longer covers a result card's title or the navigation bar (ECCdigital/tickets#270). The server sent the card's picture area with two `class` attributes, of which the browser keeps the empty first one, so a card without a picture had no picture area and the badge lay on the title. And the badge's `z-10` competed with the sticky bar's, so on scrolling it slid over the bar; result cards, result strips and the offer page's picture now keep it in a stacking context of their own
+- On the phone the Kind badge („Raum“) no longer covers a result card's title or the navigation bar (ECCdigital/tickets#270): a card without a picture was server-rendered with its picture area collapsed, and on scrolling the badge slid over the sticky bar. Result cards, result strips and the detail page's picture now keep it in a stacking context of their own
 - Keycloak SSO behind a TLS-terminating reverse proxy: the storefront sent `http://…/api/auth/sso/callback` as `redirect_uri` (and an `http://` `post_logout_redirect_uri` on „change user“), because it took the origin from the request. It now takes it from `NUXT_USER_BASE_URL`, falling back to the request when that is empty, so a Keycloak client that allows only HTTPS redirect URIs accepts the login
 - Inside a tenant, opening an Offer from the Result Page failed with „Bookable not found“, and the tenant's lists came back empty: the single-tenant branch of the catalog bundle expected the backend to wrap bookables and events (`{ bookable }`, `{ bookables }`), but it returns them bare
 
