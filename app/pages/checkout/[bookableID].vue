@@ -2506,7 +2506,10 @@ async function handleFinish() {
       ? await completeGroupCheckout(payload)
       : await completeCheckout(payload);
 
-    if (isLoginRefusal(error) || isLoginRefusal(data)) {
+    // useApiClient has checked the session after a 401: a refused or failed
+    // token renewal has signed the person out by now (tickets#108).
+    const auth = { isLoggedIn: authStore.isLoggedIn };
+    if (isLoginRefusal(error, auth) || isLoginRefusal(data, auth)) {
       offerLoginAfterRefusal();
       return;
     }
