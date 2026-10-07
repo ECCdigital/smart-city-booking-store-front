@@ -7,7 +7,7 @@ import {
 
 // Back to the page itself, query included: encoded, or the login would read
 // the page's own query as its own. Only an in-app path is carried along.
-const loginFor = (to) =>
+const loginPathFor = (to) =>
   appendReturnTarget("/login", parseReturnTarget(to.fullPath));
 
 export default defineNuxtRouteMiddleware(async (to) => {
@@ -27,7 +27,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
       const authValid = await validateAuth();
 
       if (!authValid) {
-        return navigateTo(loginFor(to));
+        return navigateTo(loginPathFor(to));
       }
     }
 
@@ -37,7 +37,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   } catch (error) {
     if (error.statusCode === 401) {
-      return navigateTo(loginFor(to));
+      return navigateTo(loginPathFor(to));
     }
     console.warn("Catalog not found for auth check:", to.params.catalogSlug);
   }
