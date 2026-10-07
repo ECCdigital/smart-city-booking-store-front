@@ -253,62 +253,81 @@
             </p>
           </div>
 
+          <!--
+            The fields sit inside the option that asks for them, so choosing
+            it folds them out in place. The card is a label; clicks and keys
+            in the fields stay with the fields (interactive descendants).
+          -->
           <URadioGroup
             v-model="form.bankMode"
             :items="bankModeItems"
             variant="card"
             :disabled="submitting"
-          />
-
-          <div v-if="form.bankMode === BANK_MODE.FORM" class="flex flex-col gap-3 pt-1">
-            <UFormField
-              :label="$t('booking.cancellation.accountHolder')"
-              :hint="$t('common.optional')"
-            >
-              <UInput
-                v-model="form.accountHolder"
-                autocomplete="name"
-                :disabled="submitting"
-                class="w-full"
-              />
-            </UFormField>
-            <UFormField
-              :label="$t('booking.cancellation.iban')"
-              :hint="$t('common.optional')"
-              :error="ibanError"
-            >
-              <UInput
-                v-model="iban"
-                placeholder="DE89 3704 0044 0532 0130 00"
-                autocomplete="off"
-                spellcheck="false"
-                :disabled="submitting"
-                class="w-full"
-              />
-            </UFormField>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <UFormField
-                :label="$t('booking.cancellation.bic')"
-                :hint="$t('common.optional')"
-                :error="bicError"
+            :ui="{ description: 'w-full' }"
+          >
+            <template #description="{ item }">
+              {{ item.description }}
+              <div
+                v-if="
+                  item.value === BANK_MODE.FORM &&
+                  form.bankMode === BANK_MODE.FORM
+                "
+                class="flex flex-col gap-3 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
               >
-                <UInput
-                  v-model="bic"
-                  placeholder="COBADEFFXXX"
-                  autocomplete="off"
-                  spellcheck="false"
-                  :disabled="submitting"
-                  class="w-full"
-                />
-              </UFormField>
-              <UFormField
-                :label="$t('booking.cancellation.bankName')"
-                :hint="$t('common.optional')"
-              >
-                <UInput v-model="form.bankName" :disabled="submitting" class="w-full" />
-              </UFormField>
-            </div>
-          </div>
+                <UFormField
+                  :label="$t('booking.cancellation.accountHolder')"
+                  :hint="$t('common.optional')"
+                >
+                  <UInput
+                    v-model="form.accountHolder"
+                    autocomplete="name"
+                    :disabled="submitting"
+                    class="w-full"
+                  />
+                </UFormField>
+                <UFormField
+                  :label="$t('booking.cancellation.iban')"
+                  :hint="$t('common.optional')"
+                  :error="ibanError"
+                >
+                  <UInput
+                    v-model="iban"
+                    placeholder="DE89 3704 0044 0532 0130 00"
+                    autocomplete="off"
+                    spellcheck="false"
+                    :disabled="submitting"
+                    class="w-full"
+                  />
+                </UFormField>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <UFormField
+                    :label="$t('booking.cancellation.bic')"
+                    :hint="$t('common.optional')"
+                    :error="bicError"
+                  >
+                    <UInput
+                      v-model="bic"
+                      placeholder="COBADEFFXXX"
+                      autocomplete="off"
+                      spellcheck="false"
+                      :disabled="submitting"
+                      class="w-full"
+                    />
+                  </UFormField>
+                  <UFormField
+                    :label="$t('booking.cancellation.bankName')"
+                    :hint="$t('common.optional')"
+                  >
+                    <UInput
+                      v-model="form.bankName"
+                      :disabled="submitting"
+                      class="w-full"
+                    />
+                  </UFormField>
+                </div>
+              </div>
+            </template>
+          </URadioGroup>
         </div>
 
         <p class="flex gap-2.5 text-sm text-gray-600 dark:text-gray-300">
