@@ -53,10 +53,50 @@ export function useBookings() {
     return data;
   }
 
+  /**
+   * The refund the backend would grant if the owner cancelled now. Throws
+   * the BFF error; the dialog shows the cancellation without a preview then.
+   */
+  const getCancellationRefundPreview = async (tenantID, bookingId) => {
+    const api = useApiClient();
+    const { data, error } = await api.get(
+      `/api/bookings/${tenantID}/${bookingId}/cancellation-refund-preview`,
+    );
+    if (error) {
+      console.error("Error fetching cancellation refund preview:", error);
+      throw error;
+    }
+    return data;
+  };
+
+  /**
+   * The direct cancellation of the owner's booking (ECCdigital/tickets#222).
+   * Throws the BFF error: 400 `reason_required`, 404, 403
+   * `booking_user_cancellation_disabled` (policy), 409 (no longer live).
+   */
+  const cancelBooking = async (
+    tenantID,
+    bookingId,
+    { reason, bankDetails } = {},
+  ) => {
+    const api = useApiClient();
+    const { data, error } = await api.post(
+      `/api/bookings/${tenantID}/${bookingId}/cancel`,
+      { reason, bankDetails },
+    );
+    if (error) {
+      console.error("Error cancelling booking:", error);
+      throw error;
+    }
+    return data;
+  };
+
   return {
     fetchBookings,
     getBookingReceipt,
     getBookingInvoice,
     getStatus,
+    getCancellationRefundPreview,
+    cancelBooking,
   };
 }

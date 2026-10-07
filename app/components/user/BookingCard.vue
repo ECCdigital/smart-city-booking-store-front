@@ -33,8 +33,9 @@
               align: 'end',
             }"
             :ui="{
-              content: 'w-48 ring-0 shadow-lg glass',
+              content: 'w-60 ring-0 shadow-lg glass',
               itemLeadingIcon: 'mt-1',
+              itemDescription: 'whitespace-normal',
               item: 'before:bg-transparent data-highlighted:before:bg-transparent',
             }"
           >
@@ -45,6 +46,10 @@
               color="neutral"
             />
           </UDropdownMenu>
+          <BookingCancellationDialog
+            v-model:open="cancellationOpen"
+            :booking="booking"
+          />
         </div>
       </div>
 
@@ -95,9 +100,16 @@
 <script setup>
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
+import BookingCancellationDialog from "~/components/user/bookings/BookingCancellationDialog.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { isFreeBooking, isLiveBooking } from "~/utils/bookingStatus.js";
+import {
+  CANCELLATION_AVAILABILITY,
+  cancellationAvailabilityOf,
+  cancellationContactHintOf,
+  openCancellationRequestOf,
+} from "~/utils/bookingCancellation.js";
 
 const { t } = useI18n();
 
@@ -143,16 +155,35 @@ const isActive = computed(() => {
 });
 
 const { downloadBookingIcal } = useIcalDownload();
+
+/**
+ * The direct cancellation. The option stays on every live booking whose
+ * end has not passed; it is greyed with the tenant's contact hint where the
+ * policy forbids it.
+ */
+const cancellationOpen = ref(false);
+const cancellation = computed(() => cancellationAvailabilityOf(props.booking));
+const cancellationNote = computed(() => {
+  if (cancellation.value === CANCELLATION_AVAILABILITY.BLOCKED) {
+    return (
+      cancellationContactHintOf(props.booking) ||
+      t("booking.cancellation.blockedDefault")
+    );
+  }
+  if (cancellation.value === CANCELLATION_AVAILABILITY.HIDDEN) {
+    return (
+      cancellationContactHintOf(props.booking) ||
+      t("booking.cancellation.hiddenDefault")
+    );
+  }
+  if (openCancellationRequestOf(props.booking)) {
+    return t("booking.cancellation.openRequestShort");
+  }
+  return undefined;
+});
+
 const actionOptions = computed(() => {
   const options = [];
-
-  /*if(props.booking.lockerInfo.length > 0){
-    options.push({
-      label: "Schlüssel anzeigen",
-      icon: "i-lucide-lock",
-      onSelect: openMobileKey,
-    });
-  }*/
 
   if (isEvent.value || (props.booking.timeBegin && props.booking.timeEnd)) {
     options.push({
@@ -161,6 +192,18 @@ const actionOptions = computed(() => {
       onSelect: onDownloadIcal,
     });
   }
+
+  //if (cancellation.value !== CANCELLATION_AVAILABILITY.HIDDEN) {
+  options.push({
+    label: t("booking.cancellation.action"),
+    icon: "i-lucide-calendar-x",
+    description: cancellationNote.value,
+    disabled: cancellation.value !== CANCELLATION_AVAILABILITY.AVAILABLE,
+    onSelect: () => {
+      cancellationOpen.value = true;
+    },
+  });
+  //}
 
   return options;
 });

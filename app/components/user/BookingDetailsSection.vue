@@ -14,7 +14,9 @@
     <div class="flex mb-5">
       <div class="basis-1/2">
         <p class="font-medium">{{ $t("tenants.tenant") }}</p>
-        <p>{{ getBookingTenant(booking)?.name || $t("account.unknownTenant") }}</p>
+        <p>
+          {{ getBookingTenant(booking)?.name || $t("account.unknownTenant") }}
+        </p>
       </div>
       <div class="">
         <p class="font-medium">{{ $t("booking.statusLabel") }}</p>
@@ -26,10 +28,56 @@
       <p>{{ booking.rejectionReason }}</p>
     </div>
 
+    <!--
+      The direct cancellation: a button on a live booking whose end has not
+      passed, greyed with the tenant's contact hint where the policy forbids
+      it. A request still open by email (a `REJECT` hook) only adds a note
+      above the button; the booking can still be cancelled here directly.
+    -->
+    <div
+      v-if="cancellation !== CANCELLATION_AVAILABILITY.HIDDEN"
+      class="mb-5 flex flex-col items-start gap-3"
+    >
+      <p
+        v-if="openCancellationRequest"
+        class="flex gap-2 text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 rounded-md px-3 py-2 max-w-lg"
+      >
+        <UIcon name="i-lucide-info" class="w-4.5 h-4.5 shrink-0 mt-0.5" />
+        <span>{{ openRequestNote }}</span>
+      </p>
+      <UTooltip
+        :text="cancellationBlockedHint"
+        :disabled="cancellation !== CANCELLATION_AVAILABILITY.BLOCKED"
+      >
+        <span class="inline-block">
+          <UButton
+            color="error"
+            variant="soft"
+            icon="i-lucide-calendar-x"
+            :disabled="cancellation === CANCELLATION_AVAILABILITY.BLOCKED"
+            @click="cancellationOpen = true"
+          >
+            {{ $t("booking.cancellation.action") }}
+          </UButton>
+        </span>
+      </UTooltip>
+    </div>
+    <!--
+      Outside the block above on purpose: a cancellation turns the booking
+      non-live and the block goes, while the dialog is still showing its
+      result. Closed, the dialog renders nothing.
+    -->
+    <BookingCancellationDialog
+      v-model:open="cancellationOpen"
+      :booking="booking"
+    />
+
     <div v-if="bookingTimeSlot || eventIds.length > 0" class="mb-5 flex">
       <div class="basis-1/2">
         <div class="flex space-x-1">
-          <p v-if="bookingTimeSlot" class="font-medium">{{ $t("booking.period") }}</p>
+          <p v-if="bookingTimeSlot" class="font-medium">
+            {{ $t("booking.period") }}
+          </p>
           <p v-else-if="eventIds.length > 0" class="font-medium">
             {{ $t("booking.eventTime") }}
           </p>
@@ -160,6 +208,7 @@ import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue"
 import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
+import BookingCancellationDialog from "~/components/user/bookings/BookingCancellationDialog.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { useEventStore } from "~~/stores/event.js";
@@ -173,6 +222,12 @@ import {
   resolveBookingStatus,
 } from "~/utils/bookingStatus.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
+import {
+  CANCELLATION_AVAILABILITY,
+  cancellationAvailabilityOf,
+  cancellationContactHintOf,
+  openCancellationRequestOf,
+} from "~/utils/bookingCancellation.js";
 import { useAccessClock } from "~/composables/useAccessClock.js";
 import { readAccessPointsAnswer } from "~/utils/accessOpenFlow.js";
 import AccessPointListRow from "~/components/mobileKey/AccessPointListRow.vue";
@@ -249,6 +304,23 @@ const bookingEvent = computed(() =>
 );
 
 const isLive = computed(() => isLiveBooking(props.booking));
+
+const cancellationOpen = ref(false);
+const cancellation = computed(() => cancellationAvailabilityOf(props.booking));
+const cancellationBlockedHint = computed(
+  () =>
+    cancellationContactHintOf(props.booking) ||
+    t("booking.cancellation.blockedDefault"),
+);
+const openCancellationRequest = computed(() =>
+  openCancellationRequestOf(props.booking),
+);
+const openRequestNote = computed(() => {
+  const request = openCancellationRequest.value;
+  return t("booking.cancellation.openRequestSince", {
+    date: request?.timeCreated ? formatDate(request.timeCreated) : "–",
+  });
+});
 
 // The backend writes rejectionReason for both states; a booking the
 // customer cancelled themselves is not "rejected", so the heading follows
