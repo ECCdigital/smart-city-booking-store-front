@@ -88,6 +88,8 @@ const attachmentType = computed(() => {
       return t("booking.attachmentTypes.invoice");
     case "receipt":
       return t("booking.attachmentTypes.receipt");
+    case "cancellation":
+      return t("booking.attachmentTypes.cancellation");
     case "agreement":
       return t("booking.attachmentTypes.agreement");
     case "privacy-agreement":
@@ -128,6 +130,12 @@ async function downloadAttachment() {
       );
     } else if (props.attachment.type === "invoice") {
       blob = await useBookings().getBookingInvoice(
+        props.tenantId,
+        props.bookingId,
+        props.attachment.name,
+      );
+    } else if (props.attachment.type === "cancellation") {
+      blob = await useBookings().getBookingCancellationReceipt(
         props.tenantId,
         props.bookingId,
         props.attachment.name,

@@ -781,6 +781,7 @@
     "attachmentTypes": {
       "invoice": "Invoice",
       "receipt": "Payment receipt",
+      "cancellation": "Cancellation receipt",
       "agreement": "User agreement",
       "privacyAgreement": "Privacy policy",
       "userManual": "User manual",

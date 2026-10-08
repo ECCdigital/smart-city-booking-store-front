@@ -1128,6 +1128,7 @@
     "attachmentTypes": {
       "invoice": "Rechnung",
       "receipt": "Zahlungsbeleg",
+      "cancellation": "Stornobeleg",
       "agreement": "Nutzervereinbarung",
       "privacyAgreement": "Datenschutzerklärung",
       "userManual": "Betriebsanleitung",
