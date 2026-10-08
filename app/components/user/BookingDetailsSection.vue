@@ -28,8 +28,8 @@
       <p>{{ booking.rejectionReason }}</p>
     </div>
 
-    <div v-if="bookingTimeSlot || eventIds.length > 0" class="mb-5 flex">
-      <div class="basis-1/2">
+    <div v-if="bookingTimeSlot || eventIds.length > 0" class="mb-5 flex w-full">
+      <div class="flex flex-col w-full space-y-1">
         <div class="flex space-x-1">
           <p v-if="bookingTimeSlot" class="font-medium">
             {{ $t("booking.period") }}
