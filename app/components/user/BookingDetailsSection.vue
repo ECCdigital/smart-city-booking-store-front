@@ -342,17 +342,17 @@ const paymentMethod = computed(() => {
   return t("booking.payment.methods.notSpecified");
 });
 
+const PAYMENT_DOCUMENT_TYPES = ["invoice", "receipt", "cancellation"];
+
 const paymentDocuments = computed(() => {
-  return props.booking.attachments.filter(
-    (attachment) =>
-      attachment.type === "invoice" || attachment.type === "receipt",
+  return props.booking.attachments.filter((attachment) =>
+    PAYMENT_DOCUMENT_TYPES.includes(attachment.type),
   );
 });
 
 const otherDocuments = computed(() => {
   return props.booking.attachments.filter(
-    (attachment) =>
-      attachment.type !== "invoice" && attachment.type !== "receipt",
+    (attachment) => !PAYMENT_DOCUMENT_TYPES.includes(attachment.type),
   );
 });
 
