@@ -97,10 +97,6 @@ const props = defineProps({
   },
 });
 
-const matchCount = computed(
-  () => props.bookables.filter((b) => b.matchStatus === "match").length,
-);
-
 const emit = defineEmits(["openDetails"]);
 </script>
 
