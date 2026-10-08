@@ -408,7 +408,7 @@
               </template>
             </i18n-t>
             <template v-if="hasOpenRequest">
-              {{ " " + $t("booking.cancellation.openRequestResolved") }}
+              <p>{{ " " + $t("booking.cancellation.openRequestResolved") }}</p>
             </template>
           </span>
         </p>
@@ -580,7 +580,8 @@ const doneTextKey = ref("");
 function doneTextKeyNow() {
   if (isFree.value) return "booking.cancellation.doneText";
   if (feeDue.value) return "booking.cancellation.doneTextFeeDue";
-  if (isPaid.value && preview.data) return "booking.cancellation.doneTextRefund";
+  if (isPaid.value && preview.data)
+    return "booking.cancellation.doneTextRefund";
   return "booking.cancellation.doneTextPriced";
 }
 

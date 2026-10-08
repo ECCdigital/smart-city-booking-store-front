@@ -8,11 +8,11 @@
     -->
     <div
       v-if="cancellation !== CANCELLATION_AVAILABILITY.HIDDEN"
-      class="mb-5 flex flex-col items-start gap-3"
+      class="mb-5 flex flex-col items-end gap-3"
     >
       <p
         v-if="openCancellationRequest"
-        class="flex gap-2 text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 rounded-md px-3 py-2 max-w-lg"
+        class="flex gap-2 text-sm text-gray-700/80 dark:text-gray-200/80 bg-gray-100 dark:bg-gray-800 rounded-md px-3 py-2 max-w-lg"
       >
         <UIcon name="i-lucide-info" class="w-4.5 h-4.5 shrink-0 mt-0.5" />
         <span>{{ openRequestNote }}</span>
