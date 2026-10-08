@@ -14,7 +14,9 @@
     <div class="flex mb-5">
       <div class="basis-1/2">
         <p class="font-medium">{{ $t("tenants.tenant") }}</p>
-        <p>{{ getBookingTenant(booking)?.name || $t("account.unknownTenant") }}</p>
+        <p>
+          {{ getBookingTenant(booking)?.name || $t("account.unknownTenant") }}
+        </p>
       </div>
       <div class="">
         <p class="font-medium">{{ $t("booking.statusLabel") }}</p>
@@ -26,10 +28,12 @@
       <p>{{ booking.rejectionReason }}</p>
     </div>
 
-    <div v-if="bookingTimeSlot || eventIds.length > 0" class="mb-5 flex">
-      <div class="basis-1/2">
+    <div v-if="bookingTimeSlot || eventIds.length > 0" class="mb-5 flex w-full">
+      <div class="flex flex-col w-full space-y-1">
         <div class="flex space-x-1">
-          <p v-if="bookingTimeSlot" class="font-medium">{{ $t("booking.period") }}</p>
+          <p v-if="bookingTimeSlot" class="font-medium">
+            {{ $t("booking.period") }}
+          </p>
           <p v-else-if="eventIds.length > 0" class="font-medium">
             {{ $t("booking.eventTime") }}
           </p>
@@ -153,6 +157,10 @@
         class="bg-gray-200 dark:bg-gray-800 p-2 rounded-sm"
       />
     </div>
+
+    <div class="flex justify-end">
+      <BookingCancellationAction :booking="booking" />
+    </div>
   </div>
 </template>
 <script setup>
@@ -160,6 +168,7 @@ import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue"
 import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
+import BookingCancellationAction from "~/components/user/bookings/BookingCancellationAction.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { useEventStore } from "~~/stores/event.js";

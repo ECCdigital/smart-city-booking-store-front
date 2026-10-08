@@ -9,7 +9,8 @@
       <div
         v-for="(item, i) in items"
         :key="i"
-        class="basis-1/2 md:basis-full flex w-full"
+        class="basis-1/2 md:basis-full w-full"
+        :class="item.value ? 'flex' : 'hidden md:flex'"
       >
         <div
           v-if="!item.value"
@@ -18,16 +19,25 @@
         >
           {{ $t(item.labelKey) }}
         </div>
-        <UTooltip v-else :text="$t('common.comingSoon')" :disabled="!item.disabled">
+        <UTooltip
+          v-else
+          :text="$t('common.comingSoon')"
+          :disabled="!item.disabled"
+        >
           <NuxtLink
             class="grid sm:flex rounded p-2 w-full justify-center md:justify-start items-center text-center md:text-left"
             :class="getLinkClasses(item)"
             :to="item.disabled ? '' : tenantTo(item.value)"
           >
             <div class="flex justify-center">
-              <UIcon :name="item.icon" class="sm:mr-3 mt-1" />
+              <UIcon
+                :name="item.icon"
+                class="text-2xl sm:text-base sm:mr-3 mt-1"
+              />
             </div>
-            <div class="text-sm md:text-md mt-1 md:mt-0">{{ $t(item.labelKey) }}</div>
+            <div class="hidden sm:block text-sm md:text-md mt-1 md:mt-0">
+              {{ $t(item.labelKey) }}
+            </div>
           </NuxtLink>
         </UTooltip>
       </div>
