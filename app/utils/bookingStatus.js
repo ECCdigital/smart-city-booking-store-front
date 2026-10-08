@@ -38,7 +38,7 @@ export const BOOKING_STATUS_REASONS = {
  * The slice of a booking the status facade reads: `status` first, the
  * derived flags only where a payload carries no status, the price and the
  * refund record for the payment question.
- * @typedef {{ status?: string, isCommitted?: boolean, isPayed?: boolean, isRejected?: boolean, priceEur?: number | string | null, cancellationRefund?: { cancelledFrom?: string } }} StatusBooking
+ * @typedef {{ status?: string, isCommitted?: boolean, isPayed?: boolean, isRejected?: boolean, priceEur?: number | string | null, cancellationRefund?: { cancelledFrom?: string, origin?: string } }} StatusBooking
  */
 
 /**
@@ -203,6 +203,41 @@ export function effectiveBookingStatusI18nKey(booking) {
 }
 
 /**
+ * The state as the account names it. A request the customer withdrew
+ * themselves stays `rejected` in the backend, but the audit
+ * `cancellationRefund.origin: "user"` says who did it, and the customer reads
+ * it as cancelled. A booking rejected before that audit existed has no
+ * `cancellationRefund` and stays rejected.
+ * @param {StatusBooking} booking
+ * @returns {string} One of BOOKING_STATUS
+ */
+function resolveDisplayStatus(booking) {
+  const status = resolveBookingStatus(booking);
+  console.log(
+    "**A**",
+    status,
+    status === BOOKING_STATUS.REJECTED,
+    booking?.cancellationRefund?.origin,
+  );
+  return status === BOOKING_STATUS.REJECTED &&
+    booking?.cancellationRefund?.origin === "user"
+    ? BOOKING_STATUS.CANCELLED
+    : status;
+}
+
+/**
+ * The i18n key of the heading above `rejectionReason`, which the backend
+ * writes for both a rejection and a cancellation.
+ * @param {StatusBooking} booking
+ * @returns {string}
+ */
+export function resolveBookingReasonHeadingKey(booking) {
+  return resolveDisplayStatus(booking) === BOOKING_STATUS.REJECTED
+    ? "account.bookingDetails.rejectionReason"
+    : "account.bookingDetails.cancellationReason";
+}
+
+/**
  * How the account shows each state. `payment_due` reads as confirmed: the
  * payment chip next to it says what is still outstanding.
  */
@@ -246,7 +281,7 @@ const STATUS_PRESENTATION = {
  */
 export function resolveBookingStatusChip(booking, t) {
   const status = resolveBookingStatus(booking);
-  const presentation = STATUS_PRESENTATION[status];
+  const presentation = STATUS_PRESENTATION[resolveDisplayStatus(booking)];
 
   return {
     status,
@@ -263,6 +298,6 @@ export function resolveBookingStatusChip(booking, t) {
  * @returns {string}
  */
 export function resolveBookingStatusSearchLabel(booking, t) {
-  const status = resolveBookingStatus(booking);
+  const status = resolveDisplayStatus(booking);
   return t(STATUS_PRESENTATION[status].labelKey).toLowerCase();
 }
