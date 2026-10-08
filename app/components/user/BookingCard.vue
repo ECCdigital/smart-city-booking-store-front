@@ -78,6 +78,7 @@
       <div class="flex flex-wrap gap-2 mb-3">
         <BookingStatusChip :booking="booking" />
         <BookingPayedChip v-if="!isFree" :booking="booking" />
+        <BookingOpenCancellationRequestChip :booking="booking" short-mode />
       </div>
 
       <!-- Zusatzinformationen -->
@@ -101,6 +102,7 @@
 import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingCancellationDialog from "~/components/user/bookings/BookingCancellationDialog.vue";
+import BookingOpenCancellationRequestChip from "~/components/user/bookings/BookingOpenCancellationRequestChip.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { isFreeBooking, isLiveBooking } from "~/utils/bookingStatus.js";
