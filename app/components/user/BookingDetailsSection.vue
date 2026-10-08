@@ -20,7 +20,13 @@
       </div>
       <div class="">
         <p class="font-medium">{{ $t("booking.statusLabel") }}</p>
-        <BookingStatusChip :booking="booking" />
+        <div class="flex flex-wrap gap-2">
+          <BookingStatusChip :booking="booking" />
+          <BookingOpenCancellationRequestChip
+            :booking="booking"
+            class="max-w-[150px] md:max-w-[250px]"
+          />
+        </div>
       </div>
     </div>
     <div v-if="!isLive" class="mb-5">
@@ -169,6 +175,7 @@ import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetail
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
 import BookingCancellationAction from "~/components/user/bookings/BookingCancellationAction.vue";
+import BookingOpenCancellationRequestChip from "~/components/user/bookings/BookingOpenCancellationRequestChip.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { useEventStore } from "~~/stores/event.js";
