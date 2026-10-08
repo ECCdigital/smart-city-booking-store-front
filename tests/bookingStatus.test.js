@@ -5,6 +5,7 @@ import {
   isCommittedBooking,
   isLiveBooking,
   isSettledBooking,
+  resolveBookingReasonHeadingKey,
   resolveBookingStatus,
   resolveBookingStatusChip,
   resolveBookingStatusKey,
@@ -378,6 +379,61 @@ describe("resolveBookingStatusChip", () => {
   });
 });
 
+describe("a request the customer withdrew themselves", () => {
+  const withdrawn = {
+    status: "rejected",
+    cancellationRefund: { origin: "user" },
+  };
+  const rejectedByAdmin = {
+    status: "rejected",
+    cancellationRefund: { origin: "admin" },
+  };
+  const legacyRejected = { status: "rejected" };
+  const cancelled = { status: "cancelled" };
+
+  it.each([
+    ["rejected with origin user", withdrawn, "booking.status.cancelled"],
+    [
+      "rejected with another origin",
+      rejectedByAdmin,
+      "booking.status.rejected",
+    ],
+    ["rejected without the audit", legacyRejected, "booking.status.rejected"],
+    ["cancelled", cancelled, "booking.status.cancelled"],
+  ])("%s → chip %s", (_name, booking, expected) => {
+    expect(resolveBookingStatusChip(booking, t).label).toBe(expected);
+  });
+
+  it("keeps the booking state on the chip: only the label changes", () => {
+    expect(resolveBookingStatusChip(withdrawn, t).status).toBe("rejected");
+  });
+
+  it.each([
+    [
+      "rejected with origin user",
+      withdrawn,
+      "account.bookingDetails.cancellationReason",
+    ],
+    [
+      "rejected with another origin",
+      rejectedByAdmin,
+      "account.bookingDetails.rejectionReason",
+    ],
+    [
+      "rejected without the audit",
+      legacyRejected,
+      "account.bookingDetails.rejectionReason",
+    ],
+    ["cancelled", cancelled, "account.bookingDetails.cancellationReason"],
+  ])("%s → heading %s", (_name, booking, expected) => {
+    expect(resolveBookingReasonHeadingKey(booking)).toBe(expected);
+  });
+
+  it("is still not a live booking", () => {
+    expect(isLiveBooking(withdrawn)).toBe(false);
+  });
+});
+
 describe("resolveBookingStatusSearchLabel", () => {
   const german = (key) =>
     ({
@@ -396,5 +452,14 @@ describe("resolveBookingStatusSearchLabel", () => {
     ["cancelled", "storniert"],
   ])("%s searches as %s", (status, expected) => {
     expect(resolveBookingStatusSearchLabel({ status }, german)).toBe(expected);
+  });
+
+  it("searches a request the customer withdrew as cancelled, like its chip", () => {
+    expect(
+      resolveBookingStatusSearchLabel(
+        { status: "rejected", cancellationRefund: { origin: "user" } },
+        german,
+      ),
+    ).toBe("storniert");
   });
 });
