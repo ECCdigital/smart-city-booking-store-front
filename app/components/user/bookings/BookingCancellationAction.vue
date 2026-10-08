@@ -3,8 +3,9 @@
     <!--
       The direct cancellation: a button on a live booking whose end has not
       passed, greyed with the tenant's contact hint where the policy forbids
-      it. A request still open by email (a `REJECT` hook) only adds a note
-      above the button; the booking can still be cancelled here directly.
+      it. A request still open by email (a `REJECT` hook) is shown beside the
+      status; here it only adds a note that the booking can still be
+      cancelled directly.
     -->
     <div
       v-if="cancellation !== CANCELLATION_AVAILABILITY.HIDDEN"
@@ -15,7 +16,7 @@
         class="flex gap-2 text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 rounded-md px-3 py-2 max-w-lg"
       >
         <UIcon name="i-lucide-info" class="w-4.5 h-4.5 shrink-0 mt-0.5" />
-        <span>{{ openRequestNote }}</span>
+        <span>{{ $t("booking.cancellation.openRequestStillCancellable") }}</span>
       </p>
       <UTooltip
         :text="cancellationBlockedHint"
@@ -52,7 +53,6 @@
 
 <script setup>
 import BookingCancellationDialog from "~/components/user/bookings/BookingCancellationDialog.vue";
-import { useFormatting } from "~/composables/utils/useFormatting.js";
 import {
   CANCELLATION_AVAILABILITY,
   cancellationAvailabilityOf,
@@ -74,7 +74,6 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
-const { formatDate } = useFormatting();
 
 const cancellationOpen = ref(false);
 const cancellation = computed(() => cancellationAvailabilityOf(props.booking));
@@ -86,12 +85,6 @@ const cancellationBlockedHint = computed(
 const openCancellationRequest = computed(() =>
   openCancellationRequestOf(props.booking),
 );
-const openRequestNote = computed(() => {
-  const request = openCancellationRequest.value;
-  return t("booking.cancellation.openRequestSince", {
-    date: request?.timeCreated ? formatDate(request.timeCreated) : "–",
-  });
-});
 </script>
 
 <style scoped></style>
