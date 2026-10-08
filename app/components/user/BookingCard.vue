@@ -170,12 +170,6 @@ const cancellationNote = computed(() => {
       t("booking.cancellation.blockedDefault")
     );
   }
-  if (cancellation.value === CANCELLATION_AVAILABILITY.HIDDEN) {
-    return (
-      cancellationContactHintOf(props.booking) ||
-      t("booking.cancellation.hiddenDefault")
-    );
-  }
   if (openCancellationRequestOf(props.booking)) {
     return t("booking.cancellation.openRequestShort");
   }
@@ -193,17 +187,17 @@ const actionOptions = computed(() => {
     });
   }
 
-  //if (cancellation.value !== CANCELLATION_AVAILABILITY.HIDDEN) {
-  options.push({
-    label: t("booking.cancellation.action"),
-    icon: "i-lucide-calendar-x",
-    description: cancellationNote.value,
-    disabled: cancellation.value !== CANCELLATION_AVAILABILITY.AVAILABLE,
-    onSelect: () => {
-      cancellationOpen.value = true;
-    },
-  });
-  //}
+  if (cancellation.value !== CANCELLATION_AVAILABILITY.HIDDEN) {
+    options.push({
+      label: t("booking.cancellation.action"),
+      icon: "i-lucide-calendar-x",
+      description: cancellationNote.value,
+      disabled: cancellation.value === CANCELLATION_AVAILABILITY.BLOCKED,
+      onSelect: () => {
+        cancellationOpen.value = true;
+      },
+    });
+  }
 
   return options;
 });

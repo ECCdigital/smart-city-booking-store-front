@@ -46,6 +46,9 @@
         </span>
         <p class="text-sm text-gray-600 dark:text-gray-300 max-w-sm mt-1">
           <i18n-t :keypath="doneTextKey" scope="global">
+            <template #refund>
+              <b>{{ formatPrice(preview.data?.refundAmountEur) }}</b>
+            </template>
             <template #fee>
               <b>{{ formatPrice(preview.data?.cancellationFeeEur) }}</b>
             </template>
@@ -404,6 +407,9 @@
                 <b>{{ mail }}</b>
               </template>
             </i18n-t>
+            <template v-if="hasOpenRequest">
+              {{ " " + $t("booking.cancellation.openRequestResolved") }}
+            </template>
           </span>
         </p>
       </div>
@@ -464,6 +470,7 @@ import { useBookingStore } from "~~/stores/bookings.js";
 import {
   CANCELLATION_FAILURE,
   cancellationContactHintOf,
+  openCancellationRequestOf,
   resolveCancellationFailure,
 } from "~/utils/bookingCancellation.js";
 import { isFreeBooking, isSettledBooking } from "~/utils/bookingStatus.js";
@@ -497,9 +504,6 @@ const props = defineProps({
 });
 
 const open = defineModel("open", { type: Boolean, default: false });
-
-/** After a cancellation or a 409 the caller's booking is stale: it reloads. */
-const emit = defineEmits(["cancelled"]);
 
 const { t } = useI18n();
 const { isGreaterThanSm } = useBreakpointCheck();
@@ -568,16 +572,24 @@ const receiptTotal = computed(() =>
     ? preview.data?.refundAmountEur
     : preview.data?.cancellationFeeEur,
 );
-const doneTextKey = computed(() => {
+/**
+ * The success text, chosen when the cancellation succeeds: the reload that
+ * follows turns the booking non-live while the text is still showing.
+ */
+const doneTextKey = ref("");
+function doneTextKeyNow() {
   if (isFree.value) return "booking.cancellation.doneText";
   if (feeDue.value) return "booking.cancellation.doneTextFeeDue";
+  if (isPaid.value && preview.data) return "booking.cancellation.doneTextRefund";
   return "booking.cancellation.doneTextPriced";
-});
+}
 
 const tenantName = computed(
   () => getBookingTenant(props.booking)?.name || t("account.unknownTenant"),
 );
 const contactHint = computed(() => cancellationContactHintOf(props.booking));
+/** Read when the dialog opens: the cancellation settles the open request. */
+const hasOpenRequest = ref(false);
 const mail = computed(
   () => props.booking.mail || authStore.getUser?.email || "",
 );
@@ -707,6 +719,8 @@ async function loadPreview() {
 function reset() {
   step.value = 1;
   outcome.value = null;
+  doneTextKey.value = "";
+  hasOpenRequest.value = openCancellationRequestOf(props.booking) !== null;
   submitting.value = false;
   submitFailed.value = false;
   reasonTouched.value = false;
@@ -746,7 +760,9 @@ async function send() {
           }
         : undefined,
     });
+    doneTextKey.value = doneTextKeyNow();
     outcome.value = OUTCOME.CANCELLED;
+    reloadBookings();
   } catch (error) {
     const failure = resolveCancellationFailure(error);
     if (failure === CANCELLATION_FAILURE.REASON) {
@@ -754,6 +770,9 @@ async function send() {
       form.reason = "";
     } else if (failure) {
       outcome.value = failure;
+      if (failure === CANCELLATION_FAILURE.GONE) {
+        reloadBookings();
+      }
     } else {
       submitFailed.value = true;
     }
@@ -767,27 +786,20 @@ function close() {
 }
 
 /**
- * Closing after a cancellation or a 409 reloads the bookings, whichever way
- * the dialog closes - the button, the X, Escape or a click outside: the
- * list and the details then show the cancelled state the backend holds.
- * The caller's booking turns stale with it, so the dialog is told to close
- * first and reloads only then; a caller that unmounts it on the new state
- * no longer cuts a dialog that is still open.
+ * Right after a cancellation, or a 409 or 404, the bookings reload while
+ * the dialog still shows the outcome, so the list and the details hold the
+ * backend's state however the dialog is left. The details read the store;
+ * the list page refreshes its own async data on top.
  */
-async function reloadAfterClose() {
+async function reloadBookings() {
   await bookingStore.fetchBookings({ force: true });
   await refreshNuxtData("bookings");
-  emit("cancelled");
 }
 
 watch(open, (isOpen) => {
   if (isOpen) {
     reset();
     loadPreview();
-    return;
-  }
-  if (outcome.value === OUTCOME.CANCELLED || outcome.value === OUTCOME.GONE) {
-    reloadAfterClose();
   }
 });
 </script>

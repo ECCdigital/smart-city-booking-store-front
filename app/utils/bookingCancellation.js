@@ -22,8 +22,8 @@ export const CANCELLATION_AVAILABILITY = Object.freeze({
 
 /**
  * The failure a refused cancellation names: the missing reason (400), the
- * policy (403 with its code), a booking that is no longer live (409), or
- * nothing in particular.
+ * policy (403 with its code), a booking that is no longer live or no longer
+ * there (409, 404), or nothing in particular.
  */
 export const CANCELLATION_FAILURE = Object.freeze({
   REASON: "reason",
@@ -118,7 +118,7 @@ export function resolveCancellationFailure(error) {
   if (status === 403 && code === USER_CANCELLATION_DISABLED) {
     return CANCELLATION_FAILURE.POLICY;
   }
-  if (status === 409) {
+  if (status === 409 || status === 404) {
     return CANCELLATION_FAILURE.GONE;
   }
   return null;
