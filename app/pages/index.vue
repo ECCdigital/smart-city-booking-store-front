@@ -45,6 +45,7 @@ import MainCategoryArea from "~/components/MainCategoryArea.vue";
 import LatestEventsArea from "~/components/LatestEventsArea.vue";
 import HowBookingWorksArea from "~/components/home/HowBookingWorksArea.vue";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
+import { isTenantNotAvailable } from "~/utils/tenantHome.js";
 
 definePageMeta({
   layout: "catalog",
@@ -58,11 +59,24 @@ const route = useRoute();
 const { tenantTo } = useTenantRoute();
 const { loadBundle } = useCatalogBundle();
 const eventStore = useEventStore();
+const { tenantID } = useTenant();
 
 const catalogSlug = computed(() => route.params.catalogSlug || null);
 
-const { error } = useLazyAsyncData("catalog-bundle-home", () =>
-  loadBundle({ slug: catalogSlug.value, include: ["events"] }),
+// A tenant that is not available (missing, declined, pending approval) is
+// the neutral 404 page, with HTTP 404 on SSR; any other failure stays the
+// load error below.
+const { error } = useLazyAsyncData("catalog-bundle-home", (nuxtApp) =>
+  loadBundle({ slug: catalogSlug.value, include: ["events"] }).catch(
+    (failure) => {
+      if (isTenantNotAvailable({ tenantID: tenantID.value, error: failure })) {
+        nuxtApp.runWithContext(() =>
+          showError({ statusCode: 404, statusMessage: "Page Not Found" }),
+        );
+      }
+      throw failure;
+    },
+  ),
 );
 
 watch(
