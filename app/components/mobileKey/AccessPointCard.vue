@@ -56,7 +56,7 @@
 
         <p v-else-if="booking" class="text-sm mt-2">
           <span class="text-neutral-500"
-            >Buchung #{{ booking.id }} &middot;
+            >{{ t("mobileKey.bookingNumber", { id: booking.id }) }} &middot;
           </span>
           <span class="text-primary font-semibold">{{ timeRange }}</span>
         </p>

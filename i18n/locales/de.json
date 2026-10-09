@@ -1366,6 +1366,9 @@
     "scannedDescription": "Sie haben den Code an der Tür gescannt.",
     "whichBooking": "Welche Buchung?",
     "noKeysFound": "Keine Schlüssel gefunden",
+    "noAddress": "Keine Adresse angegeben",
+    "doorCount": "{count} Tür | {count} Türen",
+    "bookingNumber": "Buchung #{id}",
     "lockSystemInfo": "Informationen und Status des Schließsystems",
     "openAction": "Öffnen",
     "accessPoint": {
