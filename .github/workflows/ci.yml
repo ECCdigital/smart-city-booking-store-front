@@ -106,12 +106,28 @@ jobs:
         continue-on-error: true
         run: npm audit --package-lock-only --omit=dev --audit-level=high
 
+  # Gate "protected files" from portolan (ECCdigital/tickets#425): a pull
+  # request must not delete tests, set `.skip`, `.only` or `.todo`, change
+  # existing tests, accepted ADRs or this CI configuration unless its ticket
+  # (`Refs ECCdigital/tickets#<n>` in the pull request text) names the file.
+  # New tests are free. Green on push, it only checks pull requests. The ref
+  # appears twice and must match: after the `@` and in `werkzeug_ref`.
+  protected-files:
+    uses: ECCdigital/portolan/.github/workflows/geschuetzte-dateien.yml@v1
+    secrets: inherit
+    permissions:
+      contents: read
+      pull-requests: read
+    with:
+      anforderungs_repo: ECCdigital/tickets
+      werkzeug_ref: v1
+
   # The one check the branch rules require. Fails when any job it needs failed,
   # was cancelled or skipped; `typecheck` is advisory and left out for now.
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [lint, test, build, security]
+    needs: [lint, test, build, security, protected-files]
     runs-on: ubuntu-latest
     steps:
       - name: Check the results of the jobs
