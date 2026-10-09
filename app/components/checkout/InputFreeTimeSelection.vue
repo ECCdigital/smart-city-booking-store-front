@@ -14,6 +14,7 @@
         <InputTime
           v-model:date="startDate"
           v-model:time="startTime"
+          :min-date="today"
           @update:date="onStartTimeChange"
           @update:time="onStartTimeChange"
         />
@@ -27,6 +28,7 @@
         <InputTime
           v-model:date="endDate"
           v-model:time="endTime"
+          :min-date="today"
           :disabled="!startTime"
           @update:time="onManualInputChange"
           @update:date="onManualInputChange"

@@ -40,8 +40,12 @@ export function resolveCheckoutErrorKey(error) {
   return "checkout.unknown_error";
 }
 
-/** The reason of a new booking attempt the tenant supervision refuses. */
-export const OFFER_NOT_REACHABLE = "checkout.offer_not_reachable";
+/**
+ * The reason of a new booking attempt for an offer the backend no longer
+ * delivers: withdrawn, never existed or not reachable under the tenant
+ * supervision. The backend deliberately names no cause.
+ */
+export const BOOKABLE_NOT_FOUND = "checkout.bookable_not_found";
 
 function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -70,5 +74,5 @@ export function resolveCheckoutFailureKey(error) {
   if (body?.success === false && isRecord(body.error)) {
     return resolveCheckoutErrorKey(body.error);
   }
-  return error?.statusCode === 404 ? OFFER_NOT_REACHABLE : null;
+  return error?.statusCode === 404 ? BOOKABLE_NOT_FOUND : null;
 }

@@ -82,7 +82,7 @@ const currentBookable = defineModel({
   required: false,
   default: () => {},
 });
-const props = defineProps({
+defineProps({
   bookables: {
     type: Array,
     required: true,
@@ -96,10 +96,6 @@ const props = defineProps({
     default: false,
   },
 });
-
-const matchCount = computed(
-  () => props.bookables.filter((b) => b.matchStatus === "match").length,
-);
 
 const emit = defineEmits(["openDetails"]);
 </script>
