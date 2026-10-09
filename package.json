@@ -22,6 +22,7 @@
     "release:rc": "npm version prerelease --preid=rc",
     "lint:check": "eslint .",
     "test": "vitest run",
+    "test:ssr": "node tests/ssr-smoke/run.js",
     "test:watch": "vitest"
   },
   "dependencies": {
