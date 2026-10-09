@@ -1,0 +1,40 @@
+{
+  "offersEnabled": true,
+  "branding": {
+    "active": true,
+    "logoUrl": null,
+    "faviconUrl": null,
+    "theme": {
+      "colors": {
+        "primary": "",
+        "secondary": ""
+      }
+    }
+  },
+  "portalUrl": "http://localhost:3920",
+  "catalog": {
+    "name": "Smoke-Katalog",
+    "slug": "",
+    "active": false,
+    "visibility": "public",
+    "theme": {
+      "colors": {
+        "primary": "#7BA9D4",
+        "secondary": "#1C2938"
+      },
+      "active": true
+    },
+    "type": "instance",
+    "tenantId": "",
+    "tenantIds": []
+  },
+  "tenants": [
+    {
+      "id": "00000000-0000-4000-8000-0000000000aa",
+      "name": "Smoke-Mandant",
+      "contactName": "Smoke Kontakt",
+      "mail": "smoke@example.com",
+      "phone": ""
+    }
+  ]
+}

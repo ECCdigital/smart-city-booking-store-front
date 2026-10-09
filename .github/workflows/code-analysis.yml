@@ -37,3 +37,13 @@ jobs:
       - name: Run tests
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm test
+      # The unit tests never boot Nuxt, so a page that breaks only in the
+      # server render passes them (ECCdigital/tickets#395). Build, then render
+      # the smoke pages against the backend stand-in (ECCdigital/tickets#404).
+      - name: Build
+        id: build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run build
+      - name: Smoke-test the server render
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: npm run test:ssr
