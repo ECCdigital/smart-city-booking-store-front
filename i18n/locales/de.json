@@ -1384,7 +1384,13 @@
         "after": "Zugang endete um {to}",
         "full": "Zugang möglich von {from} bis {to}"
       },
-      "codeHint": "Code an der Tür eingeben"
+      "codeHint": "Code an der Tür eingeben",
+      "title": {
+        "lockerCompartment": "Fahrradbox Nr. {compartment}",
+        "lockerBooking": "Fahrradbox #{id}",
+        "locker": "Fahrradbox",
+        "unknownDoor": "Unbekannte Tür"
+      }
     },
     "stages": {
       "loading": {

@@ -1031,7 +1031,13 @@
         "after": "Access ended at {to}",
         "full": "Access possible from {from} to {to}"
       },
-      "codeHint": "Enter the code at the door"
+      "codeHint": "Enter the code at the door",
+      "title": {
+        "lockerCompartment": "Bike box no. {compartment}",
+        "lockerBooking": "Bike box #{id}",
+        "locker": "Bike box",
+        "unknownDoor": "Unknown door"
+      }
     },
     "errors": {
       "too_early": {

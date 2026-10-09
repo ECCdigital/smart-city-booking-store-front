@@ -49,9 +49,9 @@ describe("Mobile Key in English", () => {
   });
 
   it("says „Status unbekannt“ in English", () => {
-    expect(
-      translator("en")("mobileKey.errors.status_unavailable.title"),
-    ).toBe("Status unknown");
+    expect(translator("en")("mobileKey.errors.status_unavailable.title")).toBe(
+      "Status unknown",
+    );
   });
 });
 
@@ -100,5 +100,23 @@ describe("a booking named by its number", () => {
     expect(translator("en")("mobileKey.bookingNumber", { id: 4711 })).toBe(
       "Booking #4711",
     );
+  });
+});
+
+describe("the Control Button", () => {
+  it("asks for the tap in the language of the page", () => {
+    const button = source(
+      "app/components/mobileKey/AccessPointControlButton.vue",
+    );
+
+    expect(button).not.toMatch(/Tippen Sie/);
+    expect(
+      translator("en")("mobileKey.stages.can_open.title", { label: "Gate" }),
+    ).toBe("Tap to open Gate");
+    expect(
+      translator("en")("mobileKey.stages.can_close.description", {
+        label: "Gate",
+      }),
+    ).toBe("Tap to lock Gate");
   });
 });

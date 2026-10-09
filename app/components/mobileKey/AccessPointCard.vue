@@ -101,7 +101,7 @@ const props = defineProps({
 const { t } = useI18n();
 const { formatDateRange } = useFormatting();
 
-const title = computed(() => accessPointTitle(props.accessPoint));
+const title = computed(() => accessPointTitle(props.accessPoint, t));
 
 const locationLine = computed(
   () => props.booking?.leadBookable?.location?.display_address || "",

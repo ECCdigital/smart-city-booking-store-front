@@ -104,10 +104,12 @@
         {{ t("mobileKey.cooldown.busy") }}
       </p>
     </template>
-    <template v-else>
-      {{ subtitle }}
-      <span class="font-semibold"> {{ accessPointLabel }} </span>
-    </template>
+    <i18n-t v-else-if="subtitleKey" :keypath="subtitleKey" scope="global">
+      <template #label>
+        <span class="font-semibold">{{ accessPointLabel }}</span>
+      </template>
+    </i18n-t>
+    <span v-else class="font-semibold">{{ accessPointLabel }}</span>
   </div>
 </template>
 <script setup>
@@ -212,12 +214,12 @@ const icon = computed(() => {
   }
 });
 
-const subtitle = computed(() => {
+const subtitleKey = computed(() => {
   switch (props.variant) {
     case "open":
-      return `Tippen Sie zum Öffnen von`;
+      return "mobileKey.stages.can_open.title";
     case "close":
-      return `Tippen Sie zum Abschließen von`;
+      return "mobileKey.stages.can_close.description";
     default:
       return "";
   }
