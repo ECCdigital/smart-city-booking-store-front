@@ -1366,6 +1366,9 @@
     "scannedDescription": "Sie haben den Code an der Tür gescannt.",
     "whichBooking": "Welche Buchung?",
     "noKeysFound": "Keine Schlüssel gefunden",
+    "noAddress": "Keine Adresse angegeben",
+    "doorCount": "{count} Tür | {count} Türen",
+    "bookingNumber": "Buchung #{id}",
     "lockSystemInfo": "Informationen und Status des Schließsystems",
     "openAction": "Öffnen",
     "accessPoint": {
@@ -1381,7 +1384,13 @@
         "after": "Zugang endete um {to}",
         "full": "Zugang möglich von {from} bis {to}"
       },
-      "codeHint": "Code an der Tür eingeben"
+      "codeHint": "Code an der Tür eingeben",
+      "title": {
+        "lockerCompartment": "Fahrradbox Nr. {compartment}",
+        "lockerBooking": "Fahrradbox #{id}",
+        "locker": "Fahrradbox",
+        "unknownDoor": "Unbekannte Tür"
+      }
     },
     "stages": {
       "loading": {

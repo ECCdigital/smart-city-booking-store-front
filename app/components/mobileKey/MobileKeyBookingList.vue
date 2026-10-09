@@ -64,7 +64,7 @@
               class="font-semibold line-clamp-2"
               :class="booking.leadBookable?.title.length > 40 ? '' : 'text-lg'"
             >
-              {{ booking.leadBookable?.title || "Unbekanntes Buchungsobjekt" }}
+              {{ booking.leadBookable?.title || $t("booking.unknownBookable") }}
             </h2>
             <p class="text-sm text-neutral-500">
               #{{ booking.id }} &middot; {{ $t("tenants.tenant") }}:
@@ -95,7 +95,7 @@
               <p class="text-sm text-neutral-500 lg:whitespace-nowrap">
                 {{
                   booking.leadBookable.location.display_address ||
-                  "Keine Adresse angegeben"
+                  $t("mobileKey.noAddress")
                 }}
               </p>
             </div>
@@ -109,13 +109,11 @@
               />
               <p class="text-sm text-neutral-500 whitespace-nowrap">
                 {{
-                  booking.accessPoints.filter((ap) => ap.type === "door").length
-                }}
-                {{
-                  booking.accessPoints.filter((ap) => ap.type === "door")
-                    .length === 1
-                    ? "Tür"
-                    : "Türen"
+                  $t(
+                    "mobileKey.doorCount",
+                    booking.accessPoints.filter((ap) => ap.type === "door")
+                      .length,
+                  )
                 }}
               </p>
             </div>
