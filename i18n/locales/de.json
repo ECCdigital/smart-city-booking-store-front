@@ -104,6 +104,7 @@
     "confirmPassword": "Passwort bestätigen",
     "repeatPassword": "Passwort wiederholen",
     "newPassword": "Neues Passwort",
+    "currentPassword": "Bisheriges Passwort",
     "username": "Benutzername",
     "email": "E-Mail",
     "name": "Name",
@@ -555,7 +556,7 @@
     "apply": "Filter anwenden",
     "includeNonSuitable": "Nicht passende Angebote anzeigen.",
     "onlyPublicEvents": "Nur öffentliche Events anzeigen.",
-    "onlyRegistrationNeeded": "Nur anmeldepflichte Events anzeigen.",
+    "onlyRegistrationNeeded": "Nur anmeldepflichtige Events anzeigen.",
     "category": "Kategorie",
     "cities": "Orte",
     "distance": "Distanz",
@@ -573,7 +574,7 @@
     },
     "eventsSection": "Veranstaltungen",
     "customFieldsBookablesOnly": "Gilt für Buchungsobjekte.",
-    "fittingResults": "passende Ergebnisse",
+    "fittingResults": "{count} passendes Ergebnis | {count} passende Ergebnisse",
     "provider": "Anbieter"
   },
 
@@ -668,8 +669,7 @@
     "login_required": "Für diese Buchung ist eine Anmeldung erforderlich.",
     "bad_request": "Ungültige Anfrage. Bitte überprüfen Sie Ihre Eingaben.",
     "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
-    "bookable_not_found": "Das angeforderte Objekt wurde nicht gefunden.",
-    "offer_not_reachable": "Dieses Angebot ist nicht mehr verfügbar und kann nicht gebucht werden.",
+    "bookable_not_found": "Dieses Angebot ist nicht mehr verfügbar und kann nicht gebucht werden.",
     "bookable_not_bookable": "Dieses Objekt kann nicht gebucht werden.",
     "bookable_unavailable": "Dieses Objekt ist im gewählten Zeitraum nicht verfügbar.",
     "parent_unavailable": "Das übergeordnete Objekt ist im gewählten Zeitraum nicht verfügbar.",
@@ -708,6 +708,7 @@
     "block_period_mismatch": "Für dieses Objekt muss ein vollständiges Buchungszeitfenster gebucht werden.",
     "time_period_mismatch": "Für dieses Objekt muss ein vollständiger Zeitslot gebucht werden.",
     "insufficient_lead_time": "Die Buchung liegt zu kurzfristig. Zwischen Buchung und Beginn muss ausreichend Vorbereitungszeit in den Servicezeiten liegen.",
+    "time_in_past": "Der gewählte Beginn liegt in der Vergangenheit. Bitte wählen Sie einen Zeitpunkt ab jetzt.",
     "generateGroupBooking": "Keine Seriebuchung erzeugt",
     "selectTimePeriodTitle": "Kein Zeitraum ausgewählt",
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
@@ -950,10 +951,12 @@
     "start": "Beginn",
     "end": "Ende",
     "now": "Jetzt",
+    "datePlaceholder": "tt.mm.jjjj",
     "needStartDate": "Bitte wählen Sie ein Datum für den Beginn.",
     "needStartTime": "Bitte geben Sie eine Startuhrzeit an.",
     "needEndTime": "Bitte geben Sie eine Enduhrzeit an.",
     "endBeforeStart": "Die Endzeit muss nach der Startzeit liegen.",
+    "dateBeforeToday": "Das Datum darf nicht vor heute liegen.",
     "noTimes": "Keine Zeitangaben",
     "selectPeriod": "Zeitraum auswählen",
     "selectPeriodDescription": "Beginn und Ende der Buchung festlegen.",
@@ -1077,6 +1080,7 @@
       "unknown": "Unbekannter Anhangstyp"
     },
     "download": {
+      "label": "{type} herunterladen",
       "failedTitle": "Download fehlgeschlagen",
       "failedMessage": "Das Dokument konnte nicht heruntergeladen werden."
     },
@@ -1172,6 +1176,9 @@
     "changesSavedMessage": "Ihre Änderungen wurden erfolgreich gespeichert.",
     "passwordMismatch": "Die eingegebenen Passwörter stimmen nicht überein.",
     "passwordChangeFailed": "Passwortänderung fehlgeschlagen",
+    "passwordChangeFailedMessage": "Ihr Passwort konnte nicht geändert werden. Bitte versuchen Sie es erneut.",
+    "currentPasswordRequired": "Bitte geben Sie Ihr bisheriges Passwort ein.",
+    "currentPasswordWrong": "Das bisherige Passwort stimmt nicht.",
     "activities": "Meine Aktivitäten",
     "digitalKeys": "Digitale Schlüssel",
     "digitalKeysDescription": "Öffnen Sie Türen, Schließfächer oder Fahrradboxen mit Ihrem Smartphone.",
@@ -1366,6 +1373,9 @@
     "noKeysFound": "Keine Schlüssel gefunden",
     "searchPlaceholder": "Suchen",
     "noMatches": "Kein Schlüssel passt zu Ihrer Suche oder den gewählten Filtern.",
+    "noAddress": "Keine Adresse angegeben",
+    "doorCount": "{count} Tür | {count} Türen",
+    "bookingNumber": "Buchung #{id}",
     "lockSystemInfo": "Informationen und Status des Schließsystems",
     "openAction": "Öffnen",
     "accessPoint": {
@@ -1381,7 +1391,13 @@
         "after": "Zugang endete um {to}",
         "full": "Zugang möglich von {from} bis {to}"
       },
-      "codeHint": "Code an der Tür eingeben"
+      "codeHint": "Code an der Tür eingeben",
+      "title": {
+        "lockerCompartment": "Fahrradbox Nr. {compartment}",
+        "lockerBooking": "Fahrradbox #{id}",
+        "locker": "Fahrradbox",
+        "unknownDoor": "Unbekannte Tür"
+      }
     },
     "stages": {
       "loading": {

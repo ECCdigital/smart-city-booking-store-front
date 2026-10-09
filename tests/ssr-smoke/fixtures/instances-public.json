@@ -1,0 +1,77 @@
+{
+  "applications": [],
+  "contactAddress": "",
+  "contactUrl": "",
+  "copyright": "Smoke",
+  "dataProtection": {
+    "source": "url",
+    "reference": {
+      "source": "external",
+      "mediaId": null,
+      "url": ""
+    },
+    "url": ""
+  },
+  "legalNotice": {
+    "source": "url",
+    "reference": {
+      "source": "external",
+      "mediaId": null,
+      "url": ""
+    },
+    "url": ""
+  },
+  "termsAndConditions": {
+    "source": "url",
+    "reference": {
+      "source": "media",
+      "mediaId": null,
+      "url": ""
+    },
+    "url": ""
+  },
+  "allowAllUsersToCreateTenant": false,
+  "tenantInitialSupervisionLevel": "free",
+  "userNotifications": [],
+  "checkout": {
+    "useLegacyCheckout": false,
+    "checkoutUrl": "https://example.com"
+  },
+  "publicOffersEnabled": true,
+  "portalUrl": "https://example.com",
+  "branding": {
+    "active": true,
+    "theme": {
+      "colors": {
+        "primary": "",
+        "secondary": ""
+      }
+    },
+    "logo": {
+      "source": "media",
+      "mediaId": null,
+      "url": ""
+    },
+    "favicon": {
+      "source": "media",
+      "mediaId": null,
+      "url": ""
+    },
+    "background": {
+      "version": 1,
+      "type": "variant",
+      "variant": "aurora",
+      "orbs": true,
+      "noise": true,
+      "intensity": "strong"
+    },
+    "logoUrl": null,
+    "faviconUrl": null
+  },
+  "_id": "68e8daf09e87fcb33162c01b",
+  "dataProtectionUrl": "https://example.com",
+  "legalNoticeUrl": "https://example.com",
+  "__v": 2,
+  "catalogUrl": "https://example.com",
+  "enableCatalog": true
+}

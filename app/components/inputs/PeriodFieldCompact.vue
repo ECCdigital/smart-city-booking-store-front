@@ -15,7 +15,7 @@
           class="tabular-nums px-3 py-1.5 rounded-md"
           :class="missedDateValidation ? 'border-red-500 border-2 m-0' : 'm-1'"
         >
-          {{ date ? formatDate(date) : "tt.mm.jjjj" }}
+          {{ date ? formatDate(date) : $t("timePeriods.datePlaceholder") }}
         </UBadge>
       </button>
 
@@ -81,6 +81,7 @@
 <script setup lang="ts">
 import DatePicker from "~/components/inputs/DatePicker.vue";
 import TimePickerScroller from "~/components/inputs/TimePickerScroller.vue";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 
 type TimeHM = { hours: number | null; minutes: number | null } | null;
@@ -97,6 +98,7 @@ const props = defineProps({
 });
 
 const openPopover = ref<PopoverKey>(null);
+const { formatDay } = useFormatting();
 
 const missedDateValidation = computed(() => {
   return props.missingValues.includes("date");
@@ -107,11 +109,7 @@ const missedTimeValidation = computed(() => {
 
 function formatDate(dateStr: string | number | Date) {
   if (!dateStr) return "";
-  const date = new Date(dateStr);
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}.${month}.${year}`;
+  return formatDay(dateStr);
 }
 function formatTime(
   timeObj: { hours: number | null; minutes: number | null } | null,

@@ -1,0 +1,122 @@
+name: CI
+
+# One workflow with stable job names and one roll-up job, `ci-ok`. The branch
+# rules require `ci-ok` only, so jobs can be added or renamed without touching
+# the rules (ECCdigital/tickets#424).
+on:
+  # Every base, as before: also pull requests on feature branches get the CI.
+  pull_request:
+  push:
+    branches: [develop, "version/**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# 20.x dropped, not overlooked: jsdom 30, which the server-side rich-text
+# sanitiser pulls in, requires node "^22.22.2 || ^24.15.0 || >=26", and its
+# undici reads `markAsUncloneable` from node:worker_threads, which node 20 does
+# not have. Importing jsdom there throws before a single test runs. The runtime
+# image in the Dockerfile is on 22 for the same reason; the two move together.
+env:
+  NODE_VERSION: 22.x
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      # postinstall runs `nuxt prepare`, which writes .nuxt/eslint.config.mjs.
+      - run: npm ci
+      - run: npm run lint:check
+
+  # Advisory until the type errors already on the base are fixed: the job runs
+  # and shows red, but `ci-ok` does not wait for it. Once `npm run typecheck`
+  # passes, drop `continue-on-error` and add `typecheck` to `ci-ok`'s needs.
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  # The unit tests never boot Nuxt, so a page that breaks only in the server
+  # render passes them (ECCdigital/tickets#395). Build, then render the smoke
+  # pages against the backend stand-in (ECCdigital/tickets#404).
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Smoke-test the server render
+        run: npm run test:ssr
+
+  security:
+    name: security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Blocks a pull request that adds a dependency with a known vulnerability
+      # of severity high or above. It only looks at the pull request's diff, so
+      # the findings already on the base do not block.
+      - name: Review new dependencies
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+      # Advisory: the base already carries findings of severity high and
+      # critical, most fixed only by a major upgrade of nuxt or @nuxtjs/i18n.
+      # The step shows them but does not fail the job.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: npm audit (advisory)
+        continue-on-error: true
+        run: npm audit --package-lock-only --omit=dev --audit-level=high
+
+  # The one check the branch rules require. Fails when any job it needs failed,
+  # was cancelled or skipped; `typecheck` is advisory and left out for now.
+  ci-ok:
+    name: ci-ok
+    if: always()
+    needs: [lint, test, build, security]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the results of the jobs
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+        run: |
+          echo "Not all required jobs passed: ${{ join(needs.*.result, ', ') }}"
+          exit 1
+      - run: echo "All required jobs passed."

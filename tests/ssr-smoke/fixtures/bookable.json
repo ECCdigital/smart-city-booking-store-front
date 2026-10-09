@@ -1,0 +1,98 @@
+{
+  "id": "00000000-0000-4000-8000-0000000000b1",
+  "tenantId": "00000000-0000-4000-8000-0000000000aa",
+  "type": "room",
+  "title": "Smoke-Raum",
+  "description": "Raum für den Smoke-Test",
+  "images": [],
+  "imgUrl": "",
+  "flags": [],
+  "tags": [],
+  "location": {
+    "coordinates": {
+      "type": "Point",
+      "points": [null, null]
+    },
+    "display_address": "",
+    "address": {
+      "street": null,
+      "house_number": null,
+      "postcode": null,
+      "city": null,
+      "suburb": null,
+      "state": null,
+      "country": null,
+      "country_code": null
+    }
+  },
+  "isBookable": true,
+  "amount": 10,
+  "maxAmountPerBooking": null,
+  "minBookingDuration": null,
+  "maxBookingDuration": null,
+  "bookingNotes": "",
+  "isScheduleRelated": true,
+  "isTimePeriodRelated": false,
+  "timePeriods": [],
+  "isOpeningHoursRelated": false,
+  "openingHours": [],
+  "preparationLeadTimeMinutes": null,
+  "serviceHours": [],
+  "bufferTimeBeforeMinutes": null,
+  "bufferTimeAfterMinutes": null,
+  "isSpecialOpeningHoursRelated": false,
+  "specialOpeningHours": [],
+  "isLongRange": false,
+  "longRangeOptions": null,
+  "isBlockPeriodRelated": false,
+  "blockPeriods": [],
+  "priceValueAddedTax": 0,
+  "priceCategories": [
+    {
+      "priceEur": 0,
+      "interval": {
+        "start": null,
+        "end": null
+      },
+      "fixedPrice": false,
+      "holidays": [],
+      "weekdays": []
+    }
+  ],
+  "priceType": "per-item",
+  "relatedBookableIds": [],
+  "checkoutBookableIds": [],
+  "eventId": "",
+  "attachments": [],
+  "customFields": [
+    {
+      "id": "63008f80-29b7-4522-8cee-c1e0637a6b97",
+      "caption": "Wie haben Sie von uns erfahren?",
+      "placeholder": "",
+      "inputType": "text",
+      "options": [],
+      "usageOptions": {
+        "context": "checkout",
+        "requiredInCheckout": false,
+        "filterable": false,
+        "catalogFilterType": null,
+        "catalogFilterPosition": "sidebar",
+        "detailDisplayPosition": "none",
+        "showInMail": true
+      },
+      "_origin": "instance",
+      "value": null,
+      "hasValue": false
+    }
+  ],
+  "customFieldValues": [],
+  "cancellationPolicy": {
+    "userCancellable": true,
+    "contactHint": ""
+  },
+  "checkoutUrl": "https://example.com",
+  "groupBookingAllowed": true,
+  "cancellationRefundTiers": [],
+  "relatedBookables": [],
+  "requiresLogin": false
+}

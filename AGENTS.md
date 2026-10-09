@@ -37,6 +37,7 @@ npm run dev          # dev server (needs running v4.x backend)
 npm run build        # production build (Nitro node-server preset)
 npm run preview      # local production preview
 npm run lint:check   # eslint
+npm run typecheck    # nuxi typecheck (advisory, the base still has type errors)
 ```
 
 Run `npm run lint:check` before finishing a task. Fix lint issues you introduce.

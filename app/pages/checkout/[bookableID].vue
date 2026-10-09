@@ -16,12 +16,19 @@ import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useNotification } from "~/composables/useNotification.js";
 import {
-  OFFER_NOT_REACHABLE,
+  BOOKABLE_NOT_FOUND,
   backendErrorBodyOf,
   resolveCheckoutErrorKey,
   resolveCheckoutFailureKey,
 } from "~/utils/checkoutErrors.js";
 import { isNotAvailableError } from "~/utils/catalogDetail.js";
+import {
+  LOGIN_REQUIRED,
+  checkoutAuthAction,
+  checkoutRequiresLogin,
+  isLoginRefusal,
+  isLoginRequiredPermissionError,
+} from "~/utils/checkoutLogin.js";
 import {
   resolveMaxAmount,
   resolvePerBookingLimit,
@@ -233,16 +240,18 @@ const paymentProviders = computed(() => {
 });
 const permissionCheck = computed(() => data.value?.permissionCheck || null);
 
-function isLoginRequiredPermissionError(result) {
-  if (result?.success !== false || result?.error?.checkType !== "permissions") {
-    return false;
-  }
-  const reason = result?.error?.reason;
-  return reason === "checkout.login_required" || reason === "login_required";
-}
+// The backend refused the completion for want of a sign-in (tickets#123).
+const loginRefusedAtCompletion = ref(false);
 
+// An offer behind a login needs a sign-in whatever the pre-check answered:
+// for a signed-in person it passes, and the guest booking must not be
+// offered then (tickets#107).
 const requiresLoginForCheckout = computed(() =>
-  isLoginRequiredPermissionError(permissionCheck.value),
+  checkoutRequiresLogin({
+    permissionCheck: permissionCheck.value,
+    bookables: bookablesInCheckout.value,
+    refusedAtCompletion: loginRefusedAtCompletion.value,
+  }),
 );
 
 function hasCheckoutPermissionError(result) {
@@ -361,6 +370,12 @@ usePageTitle(() =>
 );
 const { error: notifyError } = useNotification();
 const isLoggedIn = computed(() => authStore.isLoggedIn);
+const authAction = computed(() =>
+  checkoutAuthAction({
+    isLoggedIn: isLoggedIn.value,
+    requiresLogin: requiresLoginForCheckout.value,
+  }),
+);
 const isLoggingOut = ref(false);
 const isSwitchingToGuest = ref(false);
 
@@ -840,8 +855,7 @@ watch(
 );
 
 async function continueAsGuest() {
-  if (requiresLoginForCheckout.value || !isLoggedIn.value || isLoggingOut.value)
-    return;
+  if (authAction.value !== "guest" || isLoggingOut.value) return;
   isLoggingOut.value = true;
   isSwitchingToGuest.value = true;
   try {
@@ -2492,14 +2506,22 @@ async function handleFinish() {
       ? await completeGroupCheckout(payload)
       : await completeCheckout(payload);
 
+    // useApiClient has checked the session after a 401: a refused or failed
+    // token renewal has signed the person out by now (tickets#108).
+    const auth = { isLoggedIn: authStore.isLoggedIn };
+    if (isLoginRefusal(error, auth) || isLoginRefusal(data, auth)) {
+      offerLoginAfterRefusal();
+      return;
+    }
+
     if (error) {
       // The offer was withdrawn or its tenant stopped being public (pending
-      // approval or declined) since the form was opened (404/409): say so
+      // approval or declined) since the form was opened (404): say so
       // instead of a generic failure.
       const failureKey = resolveCheckoutFailureKey(error);
       notifyError(
-        failureKey === OFFER_NOT_REACHABLE
-          ? t(OFFER_NOT_REACHABLE)
+        failureKey === BOOKABLE_NOT_FOUND
+          ? t(BOOKABLE_NOT_FOUND)
           : messageForCheckoutApiError(backendErrorBodyOf(error) || {}),
       );
       return;
@@ -2566,6 +2588,17 @@ async function handleFinish() {
   } finally {
     checkoutSubmitting.value = false;
   }
+}
+
+/**
+ * The backend refused the completion for want of a sign-in (tickets#123):
+ * back to the data step, which now offers the sign-in. The form survives
+ * the way through the login page in the session storage.
+ */
+function offerLoginAfterRefusal() {
+  loginRefusedAtCompletion.value = true;
+  notifyError(t(LOGIN_REQUIRED));
+  currentStep.value = stepNumberByKey("data") ?? currentStep.value;
 }
 
 function onReviewBack() {
@@ -2979,7 +3012,7 @@ function onReviewEdit(section) {
                   </p>
                 </div>
                 <UButton
-                  v-if="!isLoggedIn"
+                  v-if="authAction === 'login'"
                   color="primary"
                   :variant="requiresLoginForCheckout ? 'solid' : 'soft'"
                   icon="i-lucide-log-in"
@@ -2988,7 +3021,7 @@ function onReviewEdit(section) {
                   {{ $t("checkout.data.loginAction") }}
                 </UButton>
                 <UButton
-                  v-else-if="!requiresLoginForCheckout"
+                  v-else-if="authAction === 'guest'"
                   color="primary"
                   variant="soft"
                   icon="i-lucide-log-out"

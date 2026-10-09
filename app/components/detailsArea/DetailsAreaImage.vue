@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div class="relative isolate">
     <BookableDetailImage :item="item" :is-event="isEvent" />
 
     <div

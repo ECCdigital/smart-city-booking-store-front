@@ -1,28 +1,34 @@
-export default defineEventHandler(async (event) =>{
-    const { id, password } = await readBody(event);
-    const { apiBaseUrl: API_BASE_URL } = useRuntimeConfig();
+import { serverFetch } from "~~/server/api/utils/serverFetch.ts";
+import { proxyErrorOf } from "~~/server/utils/proxyError";
 
-    const sanitizedId = String(id).trim().toLowerCase();
-    const sanitizedPassword = String(password).trim();
+/**
+ * The password change of the signed-in account: the backend takes it only
+ * with the session and the current password, and names no other account.
+ */
+export default defineEventHandler(async (event) => {
+    const { currentPassword, password } = await readBody(event);
 
-    try {
-        const response = await $fetch(`${API_BASE_URL}/auth/resetpassword`, {
-            method: "POST",
-            body: {
-                id: sanitizedId,
-                password: sanitizedPassword,
-            },
-        });
-
-        return {
-            success: true,
-            data: response,
-        };
-    } catch (error) {
+    if (!currentPassword || !password) {
         throw createError({
-            success: false,
-            statusCode: error.response?.status || 500,
-            statusMessage: error.response?.data?.message || "Password reset failed",
+            statusCode: 400,
+            statusMessage: "Current password and password are required",
         });
     }
-})
+
+    const { data, error } = await serverFetch(event, "/auth/resetpassword", {
+        method: "POST",
+        body: {
+            currentPassword: String(currentPassword),
+            password: String(password).trim(),
+        },
+    });
+
+    if (error) {
+        throw createError(proxyErrorOf(error, "Password change failed"));
+    }
+
+    return {
+        success: true,
+        data,
+    };
+});

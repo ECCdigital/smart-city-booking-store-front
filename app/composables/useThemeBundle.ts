@@ -56,5 +56,14 @@ export function useThemeBundle(slug?: string | null) {
     return etag ? `?v=${encodeURIComponent(etag)}` : "";
   });
 
-  return { ...result, data, version };
+  // From Nuxt 4.5 on, the result carries its own enumerable then/catch/finally.
+  // Spread along, they would make `await useThemeBundle()` resolve to the bare
+  // `useFetch` result, without `version` and without the override in `data`.
+  const { then: _then, catch: _catch, finally: _finally, ...fields } = result;
+  const bundle = { ...fields, data, version };
+
+  return Object.assign(
+    result.then(() => bundle),
+    bundle,
+  );
 }
