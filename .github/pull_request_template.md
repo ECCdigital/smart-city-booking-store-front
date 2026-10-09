@@ -1,8 +1,8 @@
-## Was und warum
+## What and why
 
-<!-- Ticket: ECCdigital/tickets#… -->
+<!-- Name the ticket: `Closes ECCdigital/tickets#…` for a pull request into the default branch, `Refs ECCdigital/tickets#…` for one into a `version/…` branch. -->
 
-## Prüfung
+## Checklist
 
-- [ ] Doku und Migrationshinweis bei geändertem Verhalten oder Schema
-- [ ] offene Punkte als Unter-Ticket oder neue Anforderung erfasst
+- [ ] Docs and migration note for changed behaviour or schema (`doc/CHANGELOG.md`)
+- [ ] Open points filed as a sub-ticket or a new requirement in ECCdigital/tickets
