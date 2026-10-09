@@ -105,6 +105,7 @@
     "confirmPassword": "Confirm Password",
     "repeatPassword": "Repeat Password",
     "newPassword": "New Password",
+    "currentPassword": "Current Password",
     "username": "Username",
     "email": "Email",
     "name": "Name",
@@ -303,7 +304,7 @@
     },
     "eventsSection": "Events",
     "customFieldsBookablesOnly": "Applies to bookable items.",
-    "fittingResults": "matching results",
+    "fittingResults": "{count} matching result | {count} matching results",
     "provider": "Provider"
   },
   "checkout": {
@@ -311,7 +312,7 @@
     "additionalObjects": "Additional Objects",
     "mandatoryObjects": "Mandatory Objects",
     "login_required": "Sign-in is required for this booking.",
-    "offer_not_reachable": "This offer is no longer available and cannot be booked.",
+    "bookable_not_found": "This offer is no longer available and cannot be booked.",
     "bookable_unavailable": "This object is not available for the selected time period.",
     "unknown_error": "An error occurred during validation.",
     "group_booking_disabled": "Recurring bookings are not allowed for this object.",
@@ -328,6 +329,7 @@
     "block_period_mismatch": "A complete booking time window must be booked for this object.",
     "time_period_mismatch": "A complete time slot must be booked for this object.",
     "insufficient_lead_time": "The booking is too soon. There must be sufficient preparation time within service hours between booking and start.",
+    "time_in_past": "The chosen start lies in the past. Please choose a time from now on.",
     "selectTimePeriodTitle": "Select a time period",
     "selectTimePeriodHint": "Please select a time period first to see the price summary.",
     "maxAmountHint": "Maximum {max} available",
@@ -574,10 +576,12 @@
     "start": "Start",
     "end": "End",
     "now": "Now",
+    "datePlaceholder": "dd/mm/yyyy",
     "needStartDate": "Please pick a start date.",
     "needStartTime": "Please enter a start time.",
     "needEndTime": "Please enter an end time.",
     "endBeforeStart": "The end time must be after the start time.",
+    "dateBeforeToday": "The date cannot be before today.",
     "noTimes": "No times given",
     "selectPeriod": "Select a period",
     "selectPeriodDescription": "Set start and end of the booking.",
@@ -730,6 +734,7 @@
       "unknown": "Unknown attachment type"
     },
     "download": {
+      "label": "Download {type}",
       "failedTitle": "Download failed",
       "failedMessage": "The document could not be downloaded."
     },
@@ -824,6 +829,9 @@
     "changesSavedMessage": "Your changes have been saved.",
     "passwordMismatch": "The passwords you entered do not match.",
     "passwordChangeFailed": "Password change failed",
+    "passwordChangeFailedMessage": "Your password could not be changed. Please try again.",
+    "currentPasswordRequired": "Please enter your current password.",
+    "currentPasswordWrong": "The current password is not correct.",
     "activities": "My activity",
     "digitalKeys": "Digital keys",
     "digitalKeysDescription": "Open doors, lockers and bike boxes with your phone.",
@@ -1030,7 +1038,13 @@
         "after": "Access ended at {to}",
         "full": "Access possible from {from} to {to}"
       },
-      "codeHint": "Enter the code at the door"
+      "codeHint": "Enter the code at the door",
+      "title": {
+        "lockerCompartment": "Bike box no. {compartment}",
+        "lockerBooking": "Bike box #{id}",
+        "locker": "Bike box",
+        "unknownDoor": "Unknown door"
+      }
     },
     "errors": {
       "too_early": {
@@ -1042,6 +1056,54 @@
         "title": "Access ended",
         "description": "Your access ended on {date}. {label} can no longer be opened with it.",
         "description_undated": "Your access has ended. {label} can no longer be opened with it."
+      },
+      "stale_scan_code": {
+        "title": "Sticker out of date",
+        "description": "This QR code has been replaced and is no longer valid. Please let the administration know so the sticker can be renewed."
+      },
+      "unknown_scan_code": {
+        "title": "Unknown code",
+        "description": "This QR code does not belong to any access point of this tenant. The link may be incomplete."
+      },
+      "no_booking": {
+        "title": "No matching booking",
+        "description": "We found no booking of yours that belongs to {label}."
+      },
+      "payment_required": {
+        "title": "Booking not paid yet",
+        "description": "{label} can only be opened once the payment has been received."
+      },
+      "door_unreachable": {
+        "title": "{label} not reachable",
+        "description": "The lock is not responding right now. This may be due to the connection on site."
+      },
+      "open_unconfirmed": {
+        "title": "Opening not confirmed",
+        "description": "The command was sent, but {label} did not report back. Please check on site whether it is open."
+      },
+      "close_failed": {
+        "title": "Locking failed",
+        "description": "{label} could not be locked. Please check on site whether it is still open."
+      },
+      "status_unavailable": {
+        "title": "Status unknown",
+        "description": "The status of {label} cannot be retrieved right now."
+      },
+      "evidence_rule_unavailable": {
+        "title": "Opening not possible at the moment",
+        "description": "{label} is misconfigured. Please contact the administration – your booking remains valid."
+      },
+      "evidence_invalid": {
+        "title": "Check the sticker",
+        "description": "The scanned code does not belong to {label}. Please check the sticker and let the administration know."
+      },
+      "evidence_missing": {
+        "title": "Scan on site",
+        "description": "{label} can only be opened if you scan the QR code right in front of it."
+      },
+      "generic": {
+        "title": "Opening not possible",
+        "description": "{label} could not be opened. Please try again later."
       }
     },
     "cooldown": {
@@ -1071,11 +1133,20 @@
       "booking_hint": "please have it ready"
     },
     "actions": {
-      "open_again": "Open again"
+      "open_again": "Open again",
+      "retry": "Try again",
+      "check_status": "Check status",
+      "pay_now": "Pay now",
+      "rebook": "Book again",
+      "book_now": "Book now"
     },
     "evidence": {
       "camera": {
-        "description": "Open the QR code at {label} with your phone's camera app — the sticker brings you straight back here."
+        "description": "Open the QR code at {label} with your phone's camera app — the sticker brings you straight back here.",
+        "unsupported": "Camera not available here",
+        "denied": "Camera access denied",
+        "not_found": "No camera found",
+        "not_readable": "Camera is already in use"
       },
       "fallback_link": "Camera not working? Scan with the camera app",
       "hint": "Scan the QR code at {label}.",
@@ -1089,14 +1160,19 @@
       "wrong_tenant": {
         "description": "This QR code belongs to a different provider.",
         "title": "Different provider"
-      }
+      },
+      "step_verify": "Prove you are on site",
+      "step_open": "Open door",
+      "back_to_camera": "Back to the camera"
     },
     "stages": {
       "can_close": {
-        "title": "{label} is open"
+        "title": "{label} is open",
+        "description": "Tap to lock {label}"
       },
       "can_open": {
-        "evidence_confirmed": "✓ Proof accepted"
+        "evidence_confirmed": "✓ Proof accepted",
+        "title": "Tap to open {label}"
       },
       "closed": {
         "description": "{label} has been locked.",
@@ -1108,7 +1184,28 @@
       "opened": {
         "description": "{label} has been opened.",
         "title": "Open"
+      },
+      "opening": {
+        "title": "Opening {label} …"
+      },
+      "closing": {
+        "title": "Locking {label} …"
       }
+    },
+    "noAddress": "No address given",
+    "doorCount": "{count} door | {count} doors",
+    "bookingNumber": "Booking #{id}",
+    "blocking_reasons": {
+      "rejected": "Your booking was rejected.",
+      "not_committed": "Your booking has not been confirmed yet.",
+      "payment_required": "The payment is still pending.",
+      "authorization_revoked": "Your authorisation for this access point has been revoked.",
+      "outside_access_window": "The access lies outside the booked time window.",
+      "not_provisioned": "The access point has not been released yet.",
+      "no_remote_access": "This access point cannot be opened remotely.",
+      "evidence_missing": "Proof is missing – please scan the QR code on site.",
+      "evidence_invalid": "The proof is invalid – please check the sticker.",
+      "evidence_rule_unavailable": "The access point cannot be checked at the moment – please contact the administration."
     }
   },
   "results": {

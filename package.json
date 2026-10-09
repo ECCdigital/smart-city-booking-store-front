@@ -2,7 +2,7 @@
   "name": "smart-city-booking-store-front",
   "type": "module",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.2.1-rc.1",
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
@@ -22,7 +22,9 @@
     "release:rc": "npm version prerelease --preid=rc",
     "lint:check": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:ssr": "node tests/ssr-smoke/run.js",
+    "test:watch": "vitest",
+    "typecheck": "nuxi typecheck"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.20",
@@ -32,7 +34,7 @@
     "@nuxt/eslint": "^1.8.0",
     "@nuxt/fonts": "^0.11.4",
     "@nuxt/icon": "^2.0.0",
-    "@nuxt/kit": "^4.2.1",
+    "@nuxt/kit": "^4.5.1",
     "@nuxt/ui": "^4.2.1",
     "@nuxtjs/color-mode": "^4.0.0",
     "@nuxtjs/i18n": "^10.0.4",
@@ -45,13 +47,13 @@
     "dompurify": "~3.4.15",
     "eslint": "^9.33.0",
     "fuse.js": "^7.1.0",
-    "h3": "^1.15.4",
+    "h3": "^1.15.11",
     "haversine-distance": "^1.2.4",
     "htmlparser2": "^12.0.0",
     "jsdom": "^30.0.1",
     "jsonwebtoken": "^9.0.3",
     "nuxi": "^3.28.0",
-    "nuxt": "^4.2.1",
+    "nuxt": "^4.5.1",
     "nuxt-csurf": "^1.6.5",
     "nuxt-security": "^2.3.0",
     "pinia": "^3.0.3",
@@ -68,6 +70,8 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.3",
     "pino-pretty": "^13.1.1",
-    "vitest": "^4.1.10"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^3.3.12"
   }
 }

@@ -246,7 +246,7 @@ const { getBookableAvailability } = useBookables();
 const { t } = useI18n();
 const { contrastToSecondary } = useContrastColor();
 
-const { monthNames, weekdayNames } = useFormatting();
+const { monthNames, weekdayNames, formatDay } = useFormatting();
 
 // Both from `Intl`, in the reading language.
 const WEEKDAY_LABELS = computed(() => weekdayNames("short"));
@@ -741,12 +741,7 @@ const selectionLabel = computed(() => {
   if (!slot) return "";
 
   const date = selectedDay.value.date;
-  const dateStr = date.toLocaleDateString("de-DE", {
-    weekday: "short",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  const dateStr = formatDay(date, { weekday: "short" });
 
   return `${dateStr}, ${slot.startTime} – ${slot.endTime}`;
 });

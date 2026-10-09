@@ -36,6 +36,7 @@
           <UTooltip :text="$t('booking.downloadAppointmentTooltip')">
             <UButton
               icon="i-lucide-calendar-arrow-down"
+              :aria-label="$t('booking.downloadAppointment')"
               variant="soft"
               color="neutral"
               class="text-gray-700 dark:text-gray-300"

@@ -1,5 +1,6 @@
 <script setup>
 import { useCheckout } from "~/composables/api/useCheckout.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const COUPON_ROW_ID = "__coupon__";
 
@@ -132,6 +133,7 @@ const bookWithoutDiscount = defineModel("bookWithoutDiscount", {
 });
 
 const { t, te, locale } = useI18n();
+const { formatPrice } = useFormatting();
 const { redeemCoupon } = useCheckout();
 
 const couponDraft = ref("");
@@ -191,12 +193,7 @@ watch(
 
 function formatEur(value) {
   if (value === null || value === undefined) return "–";
-  return (
-    value.toLocaleString(locale.value === "de" ? "de-DE" : "en-GB", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + " €"
-  );
+  return formatPrice(value);
 }
 
 const redeemDiscountLabel = computed(() => {

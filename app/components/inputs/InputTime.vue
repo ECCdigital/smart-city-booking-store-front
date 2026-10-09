@@ -7,7 +7,7 @@
           version="date"
           :disabled="disabled"
           :class="
-            missingValues.includes('date') || isInvalidDate
+            missingValues.includes('date') || isInvalidDate || dateBeforeMin
               ? 'border-2 border-red-500'
               : ''
           "
@@ -16,7 +16,9 @@
             :value="dateInput"
             type="date"
             class="inputFieldClass"
+            :min="minDateInput"
             :disabled="disabled"
+            :aria-invalid="dateBeforeMin || undefined"
             @change="onDateInputChange"
           />
         </PeriodField>
@@ -43,6 +45,9 @@
         </PeriodField>
       </div>
     </div>
+    <p v-if="dateBeforeMin" class="text-red-500 text-xs" role="alert">
+      {{ $t("timePeriods.dateBeforeToday") }}
+    </p>
     <slot name="buttons" />
   </div>
 </template>
@@ -55,7 +60,12 @@ const timeModel = defineModel("time", {
   default: { hours: null, minutes: null },
 });
 
-defineProps({
+const props = defineProps({
+  /** The earliest date to take, e.g. today in the checkout; none takes any. */
+  minDate: {
+    type: Date,
+    default: null,
+  },
   disabled: {
     type: Boolean,
     default: false,
@@ -85,14 +95,23 @@ defineProps({
 const dateInput = computed(() =>
   dateModel.value ? formatLocalDateIso(dateModel.value) : "",
 );
+const minDateInput = computed(() =>
+  props.minDate ? formatLocalDateIso(props.minDate) : undefined,
+);
+// A typed date before `minDate` is not taken (ECCdigital/tickets#188); the
+// field says why until the next date.
+const dateBeforeMin = ref(false);
 function onDateInputChange(event: Event) {
   const v = event.target?.value;
   if (!v) {
+    dateBeforeMin.value = false;
     dateModel.value = null;
     return;
   }
   const parsed = new Date(v);
   if (!parsed || parsed.getFullYear() < 1000) return;
+  dateBeforeMin.value = isIsoDateBefore(v, props.minDate);
+  if (dateBeforeMin.value) return;
   dateModel.value = parsed;
 }
 

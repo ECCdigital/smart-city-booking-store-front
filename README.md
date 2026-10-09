@@ -183,6 +183,7 @@ Browser  →  Storefront (Nuxt SSR / Nitro)  →  Backend API (v4.x)
 | `npm run preview` | Local production preview |
 | `npm run generate` | Static site generation |
 | `npm run lint:check` | ESLint — report problems |
+| `npm run typecheck` | Type check (`nuxi typecheck`); advisory in the CI until the existing type errors are fixed |
 | `npm run release:patch` | Bump patch version |
 | `npm run release:minor` | Bump minor version |
 | `npm run release:major` | Bump major version |
