@@ -15,7 +15,7 @@
           {{ $t("home.mobileKey.intro") }}
         </p>
 
-        <div class="grid gap-6 sm:grid-cols-2">
+        <div class="grid gap-6 sm:grid-cols-2 md:my-10">
           <div class="space-y-2.5">
             <h3 class="text-sm font-bold text-gray-900 dark:text-white">
               {{ $t("home.mobileKey.benefitsTitle") }}
