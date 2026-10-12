@@ -33,7 +33,9 @@
               })
             "
           />
-          <p class="text-[15px] font-bold leading-snug text-gray-900 dark:text-white">
+          <p
+            class="text-[15px] font-bold leading-snug text-gray-900 dark:text-white"
+          >
             {{ $t("home.mobileKey.sample.room") }}
           </p>
           <p class="text-xs text-gray-600 dark:text-gray-400">
@@ -60,13 +62,6 @@
             {{ $t("home.mobileKey.sample.readerInRange") }}
           </p>
         </div>
-
-        <p
-          class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400"
-        >
-          <UIcon name="i-lucide-credit-card" class="shrink-0 size-3.5" />
-          {{ $t("home.mobileKey.sample.cardAlternative") }}
-        </p>
       </div>
     </div>
   </div>
