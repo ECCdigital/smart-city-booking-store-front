@@ -24,6 +24,31 @@
         "roomLine": "Seminar room 2 “Weitblick” · 3 h",
         "extraLine": "Projector (optional) · 1 pc."
       }
+    },
+    "mobileKey": {
+      "title": "Open the door with your phone",
+      "subtitle": "Direct access with digital keys",
+      "intro": "A digital key is an access right on your phone or your city card. It is valid for exactly your booking: this room, this day, this time slot.",
+      "benefitsTitle": "Your benefits",
+      "benefits": {
+        "noHandover": "No key handover and no opening hours.",
+        "expires": "Valid only during the booked period and expires on its own afterwards.",
+        "secure": "Cannot be lost or copied."
+      },
+      "stepsTitle": "How it works",
+      "steps": {
+        "book": "Book and sign in with your account.",
+        "appear": "Shortly before the start, the key appears under “{keys}”.",
+        "open": "At the door, tap “Open” or hold your city card to the reader."
+      },
+      "toKeys": "Go to your keys",
+      "sample": {
+        "validToday": "Valid today · {start}–{end}",
+        "room": "Seminar room 2 “Weitblick”",
+        "place": "Adult education centre · Schulstraße entrance",
+        "readerInRange": "Reader in range",
+        "cardAlternative": "Alternatively: hold your city card to the reader"
+      }
     }
   },
   "hero": {

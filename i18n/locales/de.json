@@ -24,6 +24,31 @@
         "roomLine": "Seminarraum 2 „Weitblick“ · 3 Std.",
         "extraLine": "Beamer (optional) · 1 Stk."
       }
+    },
+    "mobileKey": {
+      "title": "Tür auf mit dem Handy",
+      "subtitle": "Direkter Zugang dank digitaler Schlüssel",
+      "intro": "Ein digitaler Schlüssel ist eine Zutrittsberechtigung auf Ihrem Handy oder Ihrer Stadtkarte. Er gilt genau für Ihre Buchung: dieser Raum, dieser Tag, dieses Zeitfenster.",
+      "benefitsTitle": "Ihre Vorteile",
+      "benefits": {
+        "noHandover": "Keine Schlüsselübergabe und keine Öffnungszeiten.",
+        "expires": "Gilt nur im gebuchten Zeitraum und erlischt danach von selbst.",
+        "secure": "Kann nicht verloren gehen oder kopiert werden."
+      },
+      "stepsTitle": "So geht's",
+      "steps": {
+        "book": "Buchen und mit Ihrem Konto anmelden.",
+        "appear": "Kurz vor Beginn erscheint der Schlüssel unter „{keys}“.",
+        "open": "Vor der Tür „Öffnen“ tippen oder die Stadtkarte ans Lesegerät halten."
+      },
+      "toKeys": "Zu Ihren Schlüsseln",
+      "sample": {
+        "validToday": "Heute gültig · {start}–{end}",
+        "room": "Seminarraum 2 „Weitblick“",
+        "place": "Volkshochschule · Eingang Schulstraße",
+        "readerInRange": "Lesegerät in Reichweite",
+        "cardAlternative": "Alternativ: Stadtkarte ans Lesegerät halten"
+      }
     }
   },
   "hero": {

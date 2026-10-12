@@ -34,6 +34,8 @@
       <LatestEventsArea v-else-if="allEvents.length > 0" :items="allEvents" />
 
       <HowBookingWorksArea />
+
+      <MobileKeyArea />
     </div>
   </div>
 </template>
@@ -44,6 +46,7 @@ import { useEventStore } from "~~/stores/event.js";
 import MainCategoryArea from "~/components/MainCategoryArea.vue";
 import LatestEventsArea from "~/components/LatestEventsArea.vue";
 import HowBookingWorksArea from "~/components/home/HowBookingWorksArea.vue";
+import MobileKeyArea from "~/components/home/MobileKeyArea.vue";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { isTenantNotAvailable } from "~/utils/tenantHome.js";
 
