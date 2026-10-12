@@ -71,6 +71,22 @@
       </div>
     </div>
 
+    <!--
+      participation link of an online or hybrid event: the backend names it
+      in the booking once the booking is confirmed, with registration too
+      (ECCdigital/tickets#456)
+    -->
+    <div v-if="participationLink" class="mb-5">
+      <p class="font-medium">{{ $t("events.participationLink") }}</p>
+      <a
+        :href="participationLink"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-primary underline break-all"
+        >{{ participationLink }}</a
+      >
+    </div>
+
     <!-- bookable information  -->
 
     <div
@@ -166,6 +182,7 @@ import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { useEventStore } from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import { bookingEventFallback } from "~/utils/bookingEventTimes.js";
+import { bookingParticipationLinkOf } from "~/utils/eventFormat.js";
 import {
   BOOKING_STATUS,
   isFreeBooking,
@@ -247,6 +264,12 @@ watch(
 // longer public, the event left the catalog), the booking answer names it.
 const bookingEvent = computed(() =>
   bookingEventFallback(props.booking, events.value),
+);
+
+// From the booking, not the event store: with registration the public API
+// delivers the link empty.
+const participationLink = computed(() =>
+  bookingParticipationLinkOf(props.booking),
 );
 
 const isLive = computed(() => isLiveBooking(props.booking));
