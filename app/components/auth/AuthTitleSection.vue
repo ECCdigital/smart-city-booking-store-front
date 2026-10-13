@@ -3,6 +3,7 @@
     <ThemeLogo
       v-if="logo"
       :image="logo"
+      :image-dark="logoDark"
       :alt="title"
       :max-height="logoSize"
       invert-in-dark-mode
@@ -29,6 +30,9 @@ const PHONE_CAP_CLASSES = "max-sm:h-24 max-sm:max-h-24";
 
 const { data: theme } = await useThemeBundle();
 const logo = computed(() => theme.value?.logo ?? null);
+// Its variant for the dark mode; without one the logo is inverted there.
+// A Live Preview Draft carries none.
+const logoDark = computed(() => theme.value?.logoDark ?? null);
 // A Live Preview Draft carries no size; the Theme View always does.
 const logoSize = computed(() => theme.value?.authLogoSize ?? "sm");
 const title = useSiteName();

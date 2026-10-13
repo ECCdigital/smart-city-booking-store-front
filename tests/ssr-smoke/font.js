@@ -1,8 +1,10 @@
 // The instance font in the server render (ECCdigital/tickets#531). Runs after
-// the pages, on the same server: it swaps the `font` of the stand-in's Theme
-// Bundle and asks for the home page again. The store revalidates on every
-// request in the smoke test (`NUXT_CACHE_ENABLED=false`), so each swap is the
-// bundle of the next render.
+// the pages, on the same server. With all settings the fixture's bundle
+// carries a font of the media library; the check then swaps in a curated font
+// and the system font and asks for the home page again. The store revalidates
+// on every request in the smoke test (`NUXT_CACHE_ENABLED=false`), so each
+// swap is the bundle of the next render. Without the new settings the bundle
+// carries no font at all.
 //
 // With a font, the head preloads its file, the file answers as `font/woff2`
 // with a lasting cache, and the stylesheet names the very same URL with
@@ -10,8 +12,8 @@
 import { readFileSync } from "node:fs";
 
 const THEMES = "/api/catalog/themes";
-const MEDIA_ID = "00000000000000000000f0f1";
-const FONT_MEDIA_PATH = `/api/v2/instance/media/${MEDIA_ID}/file`;
+// The font of the fixture's bundle (`fixtures/catalog-themes.json`).
+const FONT_MEDIA_PATH = "/api/v2/instance/media/00000000000000000000f0f1/file";
 
 /** The uploaded font the stand-in serves from its media library. */
 export const fontRoutes = {
@@ -20,17 +22,15 @@ export const fontRoutes = {
   ),
 };
 
-const variants = [
-  {
-    name: "media library",
-    font: {
-      source: "media",
-      reference: { source: "media", mediaId: MEDIA_ID, url: FONT_MEDIA_PATH, name: "Smoke-Schrift", size: 48256 },
-    },
-  },
-  { name: "curated list", font: { source: "curated", id: "figtree" } },
-  { name: "system font", font: null },
-];
+/** The bundles to check: `font` replaces the fixture's, absent keeps it. */
+const variants = (withoutNewSettings) =>
+  withoutNewSettings
+    ? [{ name: "without new settings" }]
+    : [
+        { name: "media library" },
+        { name: "curated list", font: { source: "curated", id: "figtree" } },
+        { name: "system font", font: null },
+      ];
 
 /** The `<link>` tags of the document head that preload a font. */
 function fontPreloads(html) {
@@ -42,11 +42,11 @@ function fontPreloads(html) {
 
 const attribute = (tag, name) => tag.match(new RegExp(`\\b${name}="([^"]*)"`))?.[1];
 
-async function problemsWith({ name, font }, base) {
+async function problemsWith(name, font, base) {
   const html = await (await fetch(`${base}/`)).text();
   const preloads = fontPreloads(html);
 
-  if (font === null) {
+  if (!font) {
     return preloads.length ? [`${name}: a font preload without a font`] : [];
   }
   if (preloads.length !== 1) return [`${name}: ${preloads.length} font preloads, not 1`];
@@ -78,20 +78,23 @@ async function problemsWith({ name, font }, base) {
 }
 
 /**
- * Checks the font in each of its three states.
+ * Checks the font in each of its states.
  *
  * @param {string} base - The storefront under test.
  * @param {{ routes: Record<string, unknown> }} backend - The stand-in, whose
  *   Theme Bundle is swapped and put back.
+ * @param {{ withoutNewSettings?: boolean }} [pass] - Which pass of the smoke
+ *   test this is.
  * @returns {Promise<string[]>} What is wrong, empty when nothing is.
  */
-export async function fontProblems(base, backend) {
+export async function fontProblems(base, backend, { withoutNewSettings = false } = {}) {
   const themes = backend.routes[THEMES];
   const problems = [];
   try {
-    for (const variant of variants) {
-      backend.routes[THEMES] = { ...themes, font: variant.font };
-      const found = await problemsWith(variant, base);
+    for (const variant of variants(withoutNewSettings)) {
+      const bundle = "font" in variant ? { ...themes, font: variant.font } : themes;
+      backend.routes[THEMES] = bundle;
+      const found = await problemsWith(variant.name, bundle.font, base);
       console.log(`${found.length ? "FAIL" : "ok  "} font: ${variant.name}`);
       problems.push(...found);
     }

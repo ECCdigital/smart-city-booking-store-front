@@ -1,8 +1,9 @@
 /**
  * Renders the instance's colours as the stylesheet the storefront links in its
- * document head: primary and secondary, the text colour on each, and the
- * colours of the header bar. The contrast is computed here, on the server, so
- * text on a colour is right in the first paint, without JavaScript.
+ * document head: primary and secondary, the accent if the instance set one,
+ * the text colour on each, and the colours of the header bar. The contrast is computed here, on the server, so
+ * text on a colour is right in the first paint, without JavaScript. With an
+ * instance font it also declares the font, its fallbacks and `--font-sans`.
  *
  * The stylesheet routes used to sit behind the shared conditional cache with a
  * 300 s TTL of their own. They read the Theme Bundle directly now, so the
@@ -17,7 +18,12 @@ import type { ThemeFont } from "./themeFont";
 export interface ThemeCssColors {
   primary?: string;
   secondary?: string;
+  /** Optional: `""` or missing means the instance set no accent. */
+  accent?: string;
 }
+
+/** The colour pair every stylesheet declares, the instance's or the route's. */
+type ColorPair = Required<Pick<ThemeCssColors, "primary" | "secondary">>;
 
 /** The colours the header bar can take (`branding.header`). */
 export type ThemeCssHeader = "neutral" | "primary" | "secondary";
@@ -32,7 +38,7 @@ export interface RenderThemeCssInput {
    */
   header?: unknown;
   /** What to declare when the bundle names no usable colour pair. */
-  defaults: Required<ThemeCssColors>;
+  defaults: ColorPair;
   /** The instance font, as `readThemeFont` reads it; none for the system font. */
   font?: ThemeFont | null;
 }
@@ -83,6 +89,17 @@ function contrastOf(color: string): string {
   return luma > 180 ? BLACK : WHITE;
 }
 
+/**
+ * The accent, if the instance set one that may reach the CSS. It stands on its
+ * own: an unusable accent is simply absent and leaves the pair alone, and a
+ * usable one is declared even when the pair falls back to the defaults.
+ */
+function accentOf(colors: ThemeCssColors | null | undefined): string | null {
+  const accent = colors?.accent;
+  if (typeof accent !== "string" || accent.trim() === "") return null;
+  return SAFE_COLOR.test(accent) ? accent : null;
+}
+
 function headerOf(value: unknown): ThemeCssHeader {
   return value === "neutral" || value === "secondary" ? value : "primary";
 }
@@ -98,7 +115,11 @@ const NEUTRAL_HEADER = {
   dark: { bar: "#101828", contrast: WHITE },
 } as const;
 
-function render(colors: Required<ThemeCssColors>, header: ThemeCssHeader): string {
+function render(
+  colors: ColorPair,
+  accent: string | null,
+  header: ThemeCssHeader,
+): string {
   // The active tab stands out from the bar: in secondary with a primary
   // stripe, unless the bar itself is secondary — then the other way round.
   const [active, stripe] =
@@ -112,6 +133,14 @@ function render(colors: Required<ThemeCssColors>, header: ThemeCssHeader): strin
     `  --ui-primary-contrast: ${contrastOf(colors.primary)};`,
     `  --ui-secondary-contrast: ${contrastOf(colors.secondary)};`,
   ];
+  // No accent, no declaration: every element that wears the accent falls
+  // back on its own, through `var(--ui-accent, …)`, to what it wore before.
+  if (accent) {
+    colorDeclarations.push(
+      `  --ui-accent: ${accent};`,
+      `  --ui-accent-contrast: ${contrastOf(accent)};`,
+    );
+  }
   const activeTab = [
     `  --ui-header-active: ${active};`,
     `  --ui-header-active-contrast: ${contrastOf(active)};`,
@@ -230,7 +259,8 @@ export function renderThemeCss(input: RenderThemeCssInput): string {
   if (memoised !== undefined) return memoised;
 
   const colorsCss = render(
-    isSafeColorPair(colors) ? (colors as Required<ThemeCssColors>) : defaults,
+    isSafeColorPair(colors) ? (colors as ColorPair) : defaults,
+    accentOf(colors),
     headerOf(header),
   );
   return rendered.set(key, font ? colorsCss + renderFont(font) : colorsCss);

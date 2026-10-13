@@ -14,6 +14,8 @@
  * the kind of drift this contract exists to prevent.
  */
 
+import type { FooterLogo } from "./footerLogo";
+
 /**
  * A localised string. The locale list is the backend constant `["de", "en"]`:
  * `de` is mandatory, `en` optional. An empty `en` counts as absent, so
@@ -104,6 +106,7 @@ export const HERO_PANEL_COLOR_TOKENS = [
   "black",
   "primary",
   "secondary",
+  "accent",
 ] as const;
 
 export type HeroPanelColorToken = (typeof HERO_PANEL_COLOR_TOKENS)[number];
@@ -175,6 +178,7 @@ export const HERO_COLOR_TOKENS = [
   "default",
   "primary",
   "secondary",
+  "accent",
   "white",
 ] as const;
 
@@ -385,8 +389,15 @@ export interface ThemeView {
   heroLayout: HeroLayout | null;
   background: Background | null;
   logo: HeroMediaReference | null;
+  /**
+   * The variant of the logo the dark mode shows in its place, or `null`: then
+   * the logo is inverted in the dark mode, as before the variant.
+   */
+  logoDark: HeroMediaReference | null;
   /** The height step of the logo in the auth cards; S unless the bundle says otherwise. */
   authLogoSize: AuthLogoSize;
+  /** The logos of the footer row, in order; empty when there is no row. */
+  footerLogos: FooterLogo[];
   /** The instance font's file for the preload; `null` for the system font. */
   font: ThemeViewFont | null;
 }

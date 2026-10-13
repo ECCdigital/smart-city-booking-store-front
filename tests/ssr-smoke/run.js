@@ -4,10 +4,10 @@
 // marker, or the server logs a request error. The unit tests never boot Nuxt,
 // so a break that only shows on the server - as ECCdigital/tickets#395 did -
 // passes them. Run after `npm run build`: `npm run test:ssr`.
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import net from "node:net";
-import { startBackendStub, BOOKABLE, EVENT } from "./backend-stub.js";
+import { startBackendStub, BOOKABLE, EVENT, THEMES } from "./backend-stub.js";
 import { fontProblems } from "./font.js";
 
 const pages = [
@@ -24,6 +24,57 @@ const pages = [
 // The logo of the fixture's Theme Bundle, and the Portal Name beside it.
 const LOGO = "media%2F00000000000000000000a1a1%2Ffile";
 const PORTAL_NAME = ">Smoke-Katalog<";
+
+// The pages are rendered twice: against the fixture's Theme Bundle with every
+// setting, then — the script runs itself once more — without the settings a
+// backend before Karte ECCdigital/tickets#510 does not send.
+const WITHOUT_NEW_SETTINGS = process.env.SSR_SMOKE_PASS === "without-new-settings";
+const NEW_SETTINGS = ["logoDark", "footerLogos", "font"];
+const themes = WITHOUT_NEW_SETTINGS
+  ? Object.fromEntries(
+      Object.entries(THEMES).filter(([key]) => !NEW_SETTINGS.includes(key)),
+    )
+  : THEMES;
+console.log(
+  WITHOUT_NEW_SETTINGS ? "\nWithout new settings" : "With all settings",
+);
+
+// The logo's variant for the dark mode (ECCdigital/tickets#527).
+const LOGO_DARK = "media%2F00000000000000000000d1d1%2Ffile";
+
+/** The `<img>` tag around the first mention of `source` in `html`, or "". */
+function imgTag(html, source) {
+  const at = html.indexOf(source);
+  if (at === -1) return "";
+  return html.slice(html.lastIndexOf("<img", at), html.indexOf(">", at));
+}
+
+/**
+ * What is wrong with the logo's variant for the dark mode on an auth page
+ * (ECCdigital/tickets#527), or nothing. With a variant both images are in the
+ * HTML and the class `.dark` picks one, each with its own dimensions; without
+ * one, the logo is inverted in the dark mode and the variant is nowhere.
+ *
+ * @param {string} html - The page as the server rendered it.
+ * @returns {string | undefined} The first problem found.
+ */
+function logoDarkProblem(html) {
+  const logo = imgTag(html, LOGO);
+  if (WITHOUT_NEW_SETTINGS) {
+    if (html.includes(LOGO_DARK)) return "a variant the bundle does not carry";
+    if (!logo.includes("dark:invert")) return "logo not inverted in the dark mode";
+    return;
+  }
+  const dark = imgTag(html, LOGO_DARK);
+  if (!dark) return "no variant for the dark mode";
+  if (!logo.includes("dark:hidden")) return "logo not hidden in the dark mode";
+  if (!dark.includes("hidden dark:block")) {
+    return "variant not shown in the dark mode only";
+  }
+  if (!dark.includes('width="160"') || !dark.includes('height="80"')) {
+    return "variant without its own dimensions";
+  }
+}
 
 /**
  * What is wrong with the auth card of a page (ECCdigital/tickets#529), or
@@ -52,6 +103,44 @@ function authCardProblem(html) {
   if (!img.includes("max-h-40") || !img.includes("max-sm:max-h-24")) {
     return "logo not in L capped at M on the phone";
   }
+}
+
+// The footer logos of the fixture (ECCdigital/tickets#530): a funding logo in
+// L, linked and without a variant, then a logo in M with a variant.
+const FUNDING_LINK = "https://www.bmwsb.bund.de/";
+const FUNDING_ALT = 'alt="Smoke-Förderlogo"';
+const VARIANT = "media%2F00000000000000000000f3f3%2Ffile";
+
+/**
+ * What is wrong with the row of footer logos on a page, or nothing: it stands
+ * above the copyright, the linked logo opens in a new tab and sits on the
+ * plate in dark mode, the logo with a variant swaps to it, the sizes are the
+ * steps of the spec, and nothing is inverted.
+ *
+ * @param {string} html - The page as the server rendered it.
+ * @returns {string | undefined} The first problem found.
+ */
+function footerLogosProblem(html) {
+  const footer = html.slice(html.indexOf("<footer"), html.indexOf("</footer>"));
+  const row = footer.indexOf("data-footer-logos");
+  if (row === -1) return "no row of footer logos";
+  if (row > footer.indexOf("©")) return "row not above the copyright";
+  const link = footer.match(/<a [^>]*href="([^"]*)"[^>]*>/);
+  if (link?.[1] !== FUNDING_LINK) return "funding logo not linked";
+  if (!link[0].includes('target="_blank"') || !/rel="[^"]*\bnoopener\b/.test(link[0])) {
+    return "link not opening in a new tab with noopener";
+  }
+  if (!link[0].includes("dark:bg-white")) return "logo without variant has no plate";
+  if (!footer.includes(FUNDING_ALT)) return "funding logo without its medium's name as alt";
+  const funding = footer.slice(footer.lastIndexOf("<img", footer.indexOf(FUNDING_ALT)));
+  if (!/^<img[^>]*class="[^"]*h-\[96px\][^"]*sm:h-\[120px\]/.test(funding)) {
+    return "funding logo not in L (96 px on the phone, 120 px from sm)";
+  }
+  const variant = footer.slice(footer.lastIndexOf("<img", footer.indexOf(VARIANT)));
+  if (!/^<img[^>]*class="[^"]*hidden dark:block/.test(variant)) {
+    return "variant not shown in dark mode only";
+  }
+  if (footer.includes("invert")) return "a footer logo is inverted";
 }
 
 const serverEntry = new URL("../../.output/server/index.mjs", import.meta.url);
@@ -83,7 +172,7 @@ if (!existsSync(serverEntry)) {
   process.exit(1);
 }
 
-const backend = await startBackendStub();
+const backend = await startBackendStub({ themes });
 const port = await freePort();
 const base = `http://127.0.0.1:${port}`;
 const log = [];
@@ -112,7 +201,9 @@ try {
     for (const page of pages) {
       const res = await fetch(base + page.path, { redirect: "manual" });
       const html = await res.text();
-      const cardProblem = page.authCard ? authCardProblem(html) : undefined;
+      const cardProblem = page.authCard
+        ? (authCardProblem(html) ?? logoDarkProblem(html))
+        : undefined;
       const ok =
         res.status === 200 &&
         (!page.marker || html.includes(page.marker)) &&
@@ -128,7 +219,36 @@ try {
         );
       }
     }
-    failures.push(...(await fontProblems(base, backend)));
+
+    // The footer logos, with the fixture's settings and then without them, as
+    // a backend before ECCdigital/tickets#523 exports the bundle. The pass
+    // without new settings has none to begin with.
+    const bundle = backend.routes["/api/catalog/themes"];
+    if (!WITHOUT_NEW_SETTINGS) {
+      const withLogos = await (await fetch(base + "/")).text();
+      const logosProblem = footerLogosProblem(withLogos);
+      console.log(`${logosProblem ? "FAIL" : "ok  "} footer logos on /`);
+      if (logosProblem) failures.push(`footer logos on /: ${logosProblem}`);
+    }
+
+    const { footerLogos: _footerLogos, ...withoutLogos } = bundle;
+    backend.routes["/api/catalog/themes"] = withoutLogos;
+    try {
+      const plain = await (await fetch(base + "/")).text();
+      const leftOver = !plain.includes("<footer")
+        ? "no footer"
+        : plain.includes("data-footer-logos")
+          ? "row of footer logos without footer logos"
+          : undefined;
+      console.log(`${leftOver ? "FAIL" : "ok  "} no footer logos on / without the setting`);
+      if (leftOver) failures.push(`/ without footer logos: ${leftOver}`);
+    } finally {
+      backend.routes["/api/catalog/themes"] = bundle;
+    }
+
+    failures.push(
+      ...(await fontProblems(base, backend, { withoutNewSettings: WITHOUT_NEW_SETTINGS })),
+    );
   }
 } finally {
   server.kill();
@@ -151,5 +271,12 @@ if (failures.length) {
     `\nSSR smoke test failed:\n- ${failures.join("\n- ")}\n\nServer log:\n${log.join("")}`,
   );
   process.exit(1);
+}
+if (!WITHOUT_NEW_SETTINGS) {
+  const second = spawnSync(process.execPath, [new URL(import.meta.url).pathname], {
+    env: { ...process.env, SSR_SMOKE_PASS: "without-new-settings" },
+    stdio: "inherit",
+  });
+  if (second.status !== 0) process.exit(second.status ?? 1);
 }
 console.log("\nSSR smoke test passed.");

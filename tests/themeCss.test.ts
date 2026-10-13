@@ -321,3 +321,85 @@ describe("renderThemeCss: header", () => {
   });
 });
 
+
+/**
+ * The accent is optional (map #510): it is declared only when the instance set
+ * a valid one, so every element that wears it can fall back with
+ * `var(--ui-accent, …)` to what it showed before there was an accent.
+ */
+describe("renderThemeCss: accent", () => {
+  const COLORS = { primary: "#112233", secondary: "#445566" };
+
+  /** The declarations of one block (`:root` or `.dark`), by name. */
+  function block(css: string, selector: ":root" | ".dark"): Record<string, string> {
+    const start = css.indexOf(`${selector} {`);
+    const body = css.slice(start, css.indexOf("}", start));
+    return Object.fromEntries(
+      [...body.matchAll(/(--[\w-]+): ([^;]+);/g)].map((match) => [match[1]!, match[2]!]),
+    );
+  }
+
+  it("declares a set accent and its contrast, the same in both colour modes", () => {
+    const css = renderThemeCss({
+      etag: "accent-set",
+      colors: { ...COLORS, accent: "#7c3aed" },
+      defaults: DEFAULTS,
+    });
+
+    for (const selector of [":root", ".dark"] as const) {
+      expect(block(css, selector)["--ui-accent"]).toBe("#7c3aed");
+      expect(block(css, selector)["--ui-accent-contrast"]).toBe("#ffffff");
+    }
+  });
+
+  it("gives black text on a light accent, short or long", () => {
+    for (const [index, accent] of ["#FFE066", "#fe6"].entries()) {
+      const css = renderThemeCss({
+        etag: `accent-light-${index}`,
+        colors: { ...COLORS, accent },
+        defaults: DEFAULTS,
+      });
+
+      expect(block(css, ":root")["--ui-accent-contrast"]).toBe("#000000");
+      expect(block(css, ".dark")["--ui-accent-contrast"]).toBe("#000000");
+    }
+  });
+
+  it("declares neither variable without an accent", () => {
+    for (const [index, accent] of [undefined, "", "   "].entries()) {
+      const css = renderThemeCss({
+        etag: `accent-unset-${index}`,
+        colors: { ...COLORS, accent },
+        defaults: DEFAULTS,
+      });
+
+      expect(css).not.toContain("--ui-accent");
+    }
+  });
+
+  it("drops an accent that could end the declaration and leaves the pair alone", () => {
+    const css = renderThemeCss({
+      etag: "accent-injection",
+      colors: { ...COLORS, accent: "red; } * { display: none }" },
+      defaults: DEFAULTS,
+    });
+
+    expect(css).not.toContain("display: none");
+    expect(css).not.toContain("--ui-accent");
+    for (const selector of [":root", ".dark"] as const) {
+      expect(block(css, selector)["--ui-primary"]).toBe("#112233");
+      expect(block(css, selector)["--ui-secondary"]).toBe("#445566");
+    }
+  });
+
+  it("keeps a valid accent when the pair falls back to the defaults", () => {
+    const css = renderThemeCss({
+      etag: "accent-default-pair",
+      colors: { primary: "#112233", accent: "#7c3aed" },
+      defaults: DEFAULTS,
+    });
+
+    expect(block(css, ":root")["--ui-primary"]).toBe("#FF8B00");
+    expect(block(css, ":root")["--ui-accent"]).toBe("#7c3aed");
+  });
+});

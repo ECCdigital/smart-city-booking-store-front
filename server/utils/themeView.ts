@@ -25,6 +25,7 @@ import {
 } from "~~/shared/types/hero";
 import type { ThemeBundle } from "~~/shared/types/api";
 import { sanitizeHeroRichtext } from "./heroRichtext";
+import { parseFooterLogos } from "./footerLogos";
 import { themeFontHref } from "./themeFont";
 
 /**
@@ -48,7 +49,9 @@ export function defaultThemeView(): ThemeView {
     heroLayout: null,
     background: null,
     logo: null,
+    logoDark: null,
     authLogoSize: "sm",
+    footerLogos: [],
     font: null,
   };
 }
@@ -110,7 +113,13 @@ export function buildThemeView(
       bundle.logo === undefined || bundle.logo === null
         ? null
         : parseHeroMediaReference(bundle.logo, options),
+    // A backend before the variant sends none; that is no failure either.
+    logoDark:
+      bundle.logoDark === undefined || bundle.logoDark === null
+        ? null
+        : parseHeroMediaReference(bundle.logoDark, options, "logoDark"),
     authLogoSize: readAuthLogoSize(bundle.authLogoSize),
+    footerLogos: parseFooterLogos(bundle.footerLogos, options),
     font: readFont(bundle.font, etag),
   };
 }

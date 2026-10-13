@@ -104,6 +104,58 @@
     "width": 320,
     "height": 80
   },
+  "logoDark": {
+    "source": "media",
+    "mediaId": "00000000000000000000d1d1",
+    "url": "/api/v2/instance/media/00000000000000000000d1d1/file",
+    "width": 160,
+    "height": 80
+  },
   "authLogoSize": "lg",
+  "footerLogos": [
+    {
+      "image": {
+        "source": "media",
+        "mediaId": "00000000000000000000f1f1",
+        "url": "/api/v2/instance/media/00000000000000000000f1f1/file",
+        "width": 600,
+        "height": 300,
+        "name": "Smoke-Förderlogo"
+      },
+      "size": "lg",
+      "link": "https://www.bmwsb.bund.de/",
+      "imageDark": null
+    },
+    {
+      "image": {
+        "source": "media",
+        "mediaId": "00000000000000000000f2f2",
+        "url": "/api/v2/instance/media/00000000000000000000f2f2/file",
+        "width": 400,
+        "height": 100,
+        "name": "Smoke-Stadtwerke"
+      },
+      "size": "md",
+      "link": "",
+      "imageDark": {
+        "source": "media",
+        "mediaId": "00000000000000000000f3f3",
+        "url": "/api/v2/instance/media/00000000000000000000f3f3/file",
+        "width": 400,
+        "height": 100,
+        "name": "Smoke-Stadtwerke hell"
+      }
+    }
+  ],
+  "font": {
+    "source": "media",
+    "reference": {
+      "source": "media",
+      "mediaId": "00000000000000000000f0f1",
+      "url": "/api/v2/instance/media/00000000000000000000f0f1/file",
+      "name": "Smoke-Schrift",
+      "size": 48256
+    }
+  },
   "visibility": "public"
 }
