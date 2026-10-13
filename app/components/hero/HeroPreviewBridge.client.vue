@@ -54,8 +54,9 @@ const origin = adminOrigin(config.public.adminBaseUrl);
 
 const { t } = useI18n();
 const override = useHeroPreviewOverride();
-// The stored Theme View, for the one field a Draft does not carry: the logo.
-// Once a Draft is showing, `theme` is that Draft — which carried the logo on.
+// The stored Theme View, for the fields a Draft does not carry: the logo and
+// its variant for the dark mode, which the Blocks that follow the app logo
+// show. Once a Draft is showing, `theme` is that Draft — which carried both on.
 const { data: theme } = useThemeBundle();
 const colorMode = useColorMode();
 
@@ -241,6 +242,7 @@ async function onMessage(event) {
   const snapshot = buildHeroPreviewSnapshot(draft, {
     sanitize,
     logo: theme.value?.logo ?? null,
+    logoDark: theme.value?.logoDark ?? null,
     onIssue: reportIssue,
   });
 
