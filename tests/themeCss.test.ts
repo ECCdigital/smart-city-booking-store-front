@@ -411,6 +411,19 @@ describe("renderThemeCss: accent", () => {
     }
   });
 
+  it("declares no accent from a colour name or a functional colour, only from hex", () => {
+    for (const [index, accent] of ["rebeccapurple", "rgb(124, 58, 237)", "hsl(262, 83%, 58%)", "#7c3aed80"].entries()) {
+      const css = renderThemeCss({
+        etag: `accent-not-hex-${index}`,
+        colors: { ...COLORS, accent },
+        defaults: DEFAULTS,
+      });
+
+      expect(css).not.toContain("--ui-accent");
+      expect(block(css, ":root")["--ui-primary"]).toBe("#112233");
+    }
+  });
+
   it("drops an accent that could end the declaration and leaves the pair alone", () => {
     const css = renderThemeCss({
       etag: "accent-injection",

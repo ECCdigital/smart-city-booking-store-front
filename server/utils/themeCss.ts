@@ -66,6 +66,9 @@ function isSafeColorPair(colors: ThemeCssColors | null | undefined): boolean {
 const BLACK = "#000000";
 const WHITE = "#ffffff";
 
+/** `#rgb` or `#rrggbb`, the only forms the contrast is computed from. */
+const HEX_COLOR = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
 /**
  * The text colour on a colour: black above a luma of 180, white otherwise —
  * the rule `useContrastColor` applied on the client, so no instance changes
@@ -73,7 +76,7 @@ const WHITE = "#ffffff";
  * name, `rgb()`, `hsl()`) gives white, as it did before.
  */
 function contrastOf(color: string): string {
-  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color.trim());
+  const match = HEX_COLOR.exec(color.trim());
   if (!match) return WHITE;
 
   const digits = match[1]!;
@@ -90,14 +93,16 @@ function contrastOf(color: string): string {
 }
 
 /**
- * The accent, if the instance set one that may reach the CSS. It stands on its
- * own: an unusable accent is simply absent and leaves the pair alone, and a
- * usable one is declared even when the pair falls back to the defaults.
+ * The accent, if the instance set one: `#rgb` or `#rrggbb`, as the backend
+ * stores it (`"" | "#rrggbb"`). Unlike primary and secondary it takes no
+ * colour name and no `rgb()`, whose contrast would only ever be white. It
+ * stands on its own: an unusable accent is simply absent and leaves the pair
+ * alone, and a usable one is declared even when the pair falls back to the
+ * defaults.
  */
 function accentOf(colors: ThemeCssColors | null | undefined): string | null {
   const accent = colors?.accent;
-  if (typeof accent !== "string" || accent.trim() === "") return null;
-  return SAFE_COLOR.test(accent) ? accent : null;
+  return typeof accent === "string" && HEX_COLOR.test(accent) ? accent : null;
 }
 
 function headerOf(value: unknown): ThemeCssHeader {
