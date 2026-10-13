@@ -40,6 +40,8 @@ export interface ThemeBundle {
   heroLayout?: unknown;
   background?: unknown;
   logo?: unknown;
+  /** The height step of the logo in the auth cards, read by `buildThemeView`. */
+  authLogoSize?: unknown;
 }
 
 export interface CatalogData {

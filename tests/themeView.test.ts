@@ -119,6 +119,29 @@ describe("buildThemeView", () => {
 
     expect(view.name).toBe("");
   });
+
+  it.each(["sm", "md", "lg"])(
+    "carries the size of the logo on the auth pages, %s",
+    (size) => {
+      const view = buildThemeView(bundleWith({ authLogoSize: size }), "e", withIssues());
+
+      expect(view.authLogoSize).toBe(size);
+    },
+  );
+
+  it.each([undefined, null, "xl", "", 3])(
+    "reads the size of the logo on the auth pages as S when it is %s",
+    (size) => {
+      const { issues, onIssue } = withIssues();
+
+      const view = buildThemeView(bundleWith({ authLogoSize: size }), "e", {
+        onIssue,
+      });
+
+      expect(view.authLogoSize).toBe("sm");
+      expect(issues).toEqual([]);
+    },
+  );
 });
 
 describe("defaultThemeView", () => {
@@ -129,6 +152,7 @@ describe("defaultThemeView", () => {
       heroLayout: null,
       background: null,
       logo: null,
+      authLogoSize: "sm",
     });
   });
 });

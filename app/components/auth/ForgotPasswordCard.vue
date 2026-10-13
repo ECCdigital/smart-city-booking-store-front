@@ -1,7 +1,8 @@
 <template>
   <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
     <template #header>
-      <h2 class="text-2xl font-semibold text-center">
+      <AuthTitleSection />
+      <h2 class="text-lg font-semibold text-center text-gray-500 dark:text-gray-400">
         {{ $t("forgotPassword.title") }}
       </h2>
 
