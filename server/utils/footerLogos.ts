@@ -11,12 +11,8 @@ import {
   type HeroParseIssue,
   type HeroParseOptions,
 } from "~~/shared/utils/heroLayout";
-import {
-  FOOTER_LOGO_SIZES,
-  type FooterLogo,
-  type FooterLogoImage,
-  type FooterLogoSize,
-} from "~~/shared/types/footerLogo";
+import type { FooterLogo, FooterLogoImage } from "~~/shared/types/footerLogo";
+import { readLogoSize } from "./logoSize";
 
 const PATH = "footerLogos";
 
@@ -40,13 +36,6 @@ function readImage(
 
   const name = (value as { name?: unknown }).name;
   return { ...reference, name: typeof name === "string" ? name : "" };
-}
-
-/** An off-list size reads as M, the backend's default. */
-function readSize(value: unknown): FooterLogoSize {
-  return (FOOTER_LOGO_SIZES as readonly unknown[]).includes(value)
-    ? (value as FooterLogoSize)
-    : "md";
 }
 
 /** Only an absolute `http(s)` URL becomes a link; anything else none. */
@@ -98,7 +87,8 @@ export function parseFooterLogos(
 
     logos.push({
       image,
-      size: readSize(logo.size),
+      // An off-list size reads as M, the backend's default.
+      size: readLogoSize(logo.size, "md"),
       link: readLink(logo.link, `${path}.link`, report),
       imageDark:
         logo.imageDark === undefined || logo.imageDark === null

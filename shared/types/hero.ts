@@ -446,10 +446,16 @@ export interface ThemeViewFont {
   href: string;
 }
 
-/** The steps the logo in the auth cards can take: 56, 96 or 160 px high. */
-export const AUTH_LOGO_SIZES = ["sm", "md", "lg"] as const;
+/**
+ * The S/M/L steps of a logo the instance sizes: in the auth cards 56, 96 or
+ * 160 px high, in the footer 48, 80 or 120 px.
+ */
+export const LOGO_SIZES = ["sm", "md", "lg"] as const;
 
-export type AuthLogoSize = (typeof AUTH_LOGO_SIZES)[number];
+export type LogoSize = (typeof LOGO_SIZES)[number];
+
+/** The step of the logo in the auth cards. */
+export type AuthLogoSize = LogoSize;
 
 /**
  * The Live Preview protocol between the admin's Hero Editor and the storefront
