@@ -104,6 +104,9 @@ function headerOf(value: unknown): ThemeCssHeader {
   return value === "neutral" || value === "secondary" ? value : "primary";
 }
 
+/** gray-900: the app's near-black text and the footer's dark ground. */
+const GRAY_900 = "#101828";
+
 /**
  * The neutral header is fixed per colour mode and computes nothing: white with
  * the app's near-black text (gray-900) in light, and in dark the footer's
@@ -111,8 +114,24 @@ function headerOf(value: unknown): ThemeCssHeader {
  * in `NavigationBar.vue`.
  */
 const NEUTRAL_HEADER = {
-  light: { bar: WHITE, contrast: "#101828" },
-  dark: { bar: "#101828", contrast: WHITE },
+  light: { bar: WHITE, contrast: GRAY_900 },
+  dark: { bar: GRAY_900, contrast: WHITE },
+} as const;
+
+/**
+ * The solid button on the header bar ("Register"). On a coloured bar it stays
+ * as it always was, white in light and black in dark. On the neutral bar that
+ * would vanish into the bar, so it takes the bar's text colour as its ground.
+ */
+const HEADER_BUTTON = {
+  coloured: {
+    light: { button: WHITE, contrast: BLACK },
+    dark: { button: BLACK, contrast: WHITE },
+  },
+  neutral: {
+    light: { button: GRAY_900, contrast: WHITE },
+    dark: { button: WHITE, contrast: GRAY_900 },
+  },
 } as const;
 
 function render(
@@ -148,12 +167,26 @@ function render(
   ];
 
   const headerIn = (mode: keyof typeof NEUTRAL_HEADER): string[] => {
+    const { button, contrast: buttonContrast } =
+      HEADER_BUTTON[header === "neutral" ? "neutral" : "coloured"][mode];
+    const buttonDeclarations = [
+      `  --ui-header-button: ${button};`,
+      `  --ui-header-button-contrast: ${buttonContrast};`,
+    ];
     if (header === "neutral") {
       const { bar, contrast } = NEUTRAL_HEADER[mode];
-      return [`  --ui-header: ${bar};`, `  --ui-header-contrast: ${contrast};`];
+      return [
+        `  --ui-header: ${bar};`,
+        `  --ui-header-contrast: ${contrast};`,
+        ...buttonDeclarations,
+      ];
     }
     const bar = header === "secondary" ? colors.secondary : colors.primary;
-    return [`  --ui-header: ${bar};`, `  --ui-header-contrast: ${contrastOf(bar)};`];
+    return [
+      `  --ui-header: ${bar};`,
+      `  --ui-header-contrast: ${contrastOf(bar)};`,
+      ...buttonDeclarations,
+    ];
   };
 
   const block = (mode: keyof typeof NEUTRAL_HEADER): string =>

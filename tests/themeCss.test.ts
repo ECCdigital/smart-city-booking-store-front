@@ -305,6 +305,40 @@ describe("renderThemeCss: header", () => {
     }
   });
 
+  it("keeps the solid button white on black in light and black on white in dark on a coloured header, as before", () => {
+    for (const header of [undefined, "primary", "secondary"]) {
+      const css = renderThemeCss({
+        etag: `header-button-${header}`,
+        colors: COLORS,
+        header,
+        defaults: DEFAULTS,
+      });
+
+      expect(block(css, ":root")["--ui-header-button"]).toBe("#ffffff");
+      expect(block(css, ":root")["--ui-header-button-contrast"]).toBe("#000000");
+      expect(block(css, ".dark")["--ui-header-button"]).toBe("#000000");
+      expect(block(css, ".dark")["--ui-header-button-contrast"]).toBe("#ffffff");
+    }
+  });
+
+  it("turns the solid button around on a neutral header, so it stands out from the bar", () => {
+    const css = renderThemeCss({
+      etag: "header-button-neutral",
+      colors: COLORS,
+      header: "neutral",
+      defaults: DEFAULTS,
+    });
+    const light = block(css, ":root");
+    const dark = block(css, ".dark");
+
+    expect(light["--ui-header-button"]).toBe("#101828");
+    expect(light["--ui-header-button-contrast"]).toBe("#ffffff");
+    expect(dark["--ui-header-button"]).toBe("#ffffff");
+    expect(dark["--ui-header-button-contrast"]).toBe("#101828");
+    expect(light["--ui-header-button"]).not.toBe(light["--ui-header"]);
+    expect(dark["--ui-header-button"]).not.toBe(dark["--ui-header"]);
+  });
+
   it("puts the active tab in primary with a secondary stripe on a secondary header", () => {
     const css = renderThemeCss({
       etag: "header-active-secondary",
