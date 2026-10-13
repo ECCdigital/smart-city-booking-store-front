@@ -4,7 +4,7 @@
     :label="$t('bookableDetail.bookNow')"
     icon="i-lucide-shopping-cart"
     class="justify-center px-5"
-    :style="{ color: contrastToPrimary, cursor: 'pointer' }"
+    style="color: var(--ui-primary-contrast); cursor: pointer"
     @click="goToCheckout()"
   />
   <EventBookingButton v-if="isEvent" :event="item" is-direct-connection />
@@ -24,7 +24,7 @@ const props = defineProps({
   },
 });
 
-const { contrastToPrimary, goToCheckout } = useBookableDetailContent(
+const { goToCheckout } = useBookableDetailContent(
   () => props.item,
   props.isEvent,
 );

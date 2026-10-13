@@ -7,6 +7,10 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ## [Unreleased]
 
+### Added
+
+- The header bar follows the instance's `header` from the Theme Bundle: neutral, primary or secondary, primary by default as before (ECCdigital/tickets#525). Neutral is white with near-black text in light mode and the footer's ground with white text in dark mode. On a secondary bar the active tab stands in primary with a secondary stripe. Requires the backend of ECCdigital/tickets#520 for the setting; without it the bar stays primary
+
 ### Security
 
 - Account settings, „Passwort ändern“ asks for the current password (ECCdigital/tickets#264): `POST /api/auth/change-password` takes `{ currentPassword, password }`, hands both on to `POST /auth/resetpassword` with the session and no longer names the account; a wrong current password shows „Das bisherige Passwort stimmt nicht.“, and a failed change no longer reports success; a `401` (the session could not be renewed) signs the person out. Requires backend 4.3.1, which accepts the change only signed in and with the current password; deploy them together
@@ -14,6 +18,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- Text on primary, secondary and the header bar no longer flickers from white to black on light colours (ECCdigital/tickets#525): the theme stylesheet now declares `--ui-primary-contrast`, `--ui-secondary-contrast` and `--ui-header-contrast`, computed on the server with the old rule (luma above 180 gives black), so the colour is right in the first paint, also without JavaScript. `useContrastColor` is gone. A short `#rgb` colour now gets its contrast computed too; before it always gave white
 - Every page rendered on the server answers again instead of a 500 (ECCdigital/tickets#395): from Nuxt 4.5 on (ECCdigital/tickets#284) `useFetch` returns its own enumerable `then`, which `useThemeBundle()` spread along, so `await useThemeBundle()` resolved to the bare fetch result. `app.vue` and the catalog page lost the `version` of the theme assets and threw, and the Hero, the page background and the auth pages read the stored Theme View instead of the Live Preview's Draft
 - `npm run lint:check` passes again, so the CI's ESLint step does too (ECCdigital/tickets#233): `ResultsMapList` kept an unused `matchCount`. No behaviour change
 - An access token renewed while a page renders on the server now reaches the browser, and the rest of the render sends it too (ECCdigital/tickets#108). Before, the page showed the person as logged in while the browser kept the expired token and an already revoked refresh token. When the backend answers `401` to the token a BFF route sent (backend 4.3.1, ECCdigital/tickets#109), the route renews the token and asks exactly once more. If the refresh token is refused or missing, the cookies are cleared, the person is logged out and the checkout offers the login; if the renewal cannot be reached, the session stays for a later try. Calls sent side by side share one renewal, so the rotated refresh token does not end the session. With backend 4.3.0 nothing changes

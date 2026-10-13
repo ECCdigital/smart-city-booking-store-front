@@ -62,7 +62,7 @@
         block
         :loading="loading"
         class="mt-2"
-        :style="{ color: contrastToPrimary }"
+        style="color: var(--ui-primary-contrast)"
       >
         {{ $t("common.login") }}
       </UButton>
@@ -125,7 +125,6 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useAuth } from "~/composables/auth/useAuth.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { appendReturnTarget } from "~~/shared/utils/returnTarget";
 
 const props = defineProps({
@@ -143,7 +142,6 @@ const userData = defineModel("userData", {
 
 const emit = defineEmits(["submit", "sso-login"]);
 
-const { contrastToPrimary } = useContrastColor();
 
 const show = ref(false);
 
