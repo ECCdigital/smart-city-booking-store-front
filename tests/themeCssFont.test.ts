@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -97,6 +98,49 @@ describe("renderThemeCss with a font of the curated list", () => {
     expect(css).toContain(
       `:root {\n  --font-sans: "Theme Font", "Theme Font Fallback A", "Theme Font Fallback R", ${TODAYS_STACK};\n}`,
     );
+  });
+});
+
+describe("renderThemeCss with IBM Plex Sans", () => {
+  it("declares IBM's own latin1 files with the full weight axis", async () => {
+    const faces = fontFaces(await cssWith({ source: "curated", id: "ibm-plex-sans" }, "f-plex"));
+
+    expect(faces.filter((face) => face["font-family"] === '"Theme Font"')).toEqual([
+      expect.objectContaining({
+        src: 'url("/fonts/ibm-plex-sans/ibm-plex-sans-0.2.0-latin1-normal.woff2") format("woff2")',
+        "font-weight": "100 700",
+        "font-style": "normal",
+      }),
+      expect.objectContaining({
+        src: 'url("/fonts/ibm-plex-sans/ibm-plex-sans-0.2.0-latin1-italic.woff2") format("woff2")',
+        "font-weight": "100 700",
+        "font-style": "italic",
+      }),
+    ]);
+  });
+
+  it("measures the fallbacks at the default instance, which is Regular", async () => {
+    const faces = fontFaces(await cssWith({ source: "curated", id: "ibm-plex-sans" }, "f-plex"));
+
+    // Plex at 400 (ascent 1025, descent 275, average width 451 of 1000),
+    // the same in IBM's static Regular and at the variable font's default.
+    expect(faces.filter((face) => face.src?.startsWith("local("))).toEqual([
+      expect.objectContaining({ src: 'local("Arial")', "size-adjust": "101.17%", "ascent-override": "101.32%", "descent-override": "27.18%", "line-gap-override": "0%" }),
+      expect.objectContaining({ src: 'local("Roboto")', "size-adjust": "101.39%", "ascent-override": "101.1%", "descent-override": "27.12%", "line-gap-override": "0%" }),
+    ]);
+  });
+
+  it("ships IBM's files byte for byte, with IBM's licence beside them", () => {
+    const sha256 = (path: string) =>
+      createHash("sha256").update(readFileSync(new URL(`../public/fonts/ibm-plex-sans/${path}`, import.meta.url))).digest("hex");
+
+    // `fonts/split/woff2/IBM Plex Sans Var-{Roman,Italic}-Latin1.woff2` and
+    // `LICENSE.txt` of `@ibm/plex-sans-variable` 0.2.0. Its licence reserves
+    // the name "Plex": any change to a file would make it a Modified Version
+    // that may no longer carry the name.
+    expect(sha256("ibm-plex-sans-0.2.0-latin1-normal.woff2")).toBe("a18d94ea83c93f0a465d0976d8bc8ecbb031225dbaf76fd201d4e724a972034f");
+    expect(sha256("ibm-plex-sans-0.2.0-latin1-italic.woff2")).toBe("4dbb53a002b701005c7eb5d0fc049a3abd7c31821714ab5fdc33c189ceadeb75");
+    expect(sha256("OFL.txt")).toBe("7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da");
   });
 });
 
