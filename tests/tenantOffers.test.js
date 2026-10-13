@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  providerAccent,
-  providerInitials,
-  providerTiles,
-} from "~/utils/providerOffers.js";
+  tenantAccent,
+  tenantInitials,
+  tenantTiles,
+} from "~/utils/tenantOffers.js";
 
 /**
  * „Angebot nach Anbietern“ on the instance home (ECCdigital/tickets#478):
@@ -19,15 +19,15 @@ const tenant = (id, bookableCount, eventCount, extra = {}) => ({
   ...extra,
 });
 
-describe("providerTiles", () => {
+describe("tenantTiles", () => {
   it("leaves out a tenant without a bookable and without an event", () => {
-    const tiles = providerTiles([tenant("Leer", 0, 0), tenant("Verein", 1, 0)]);
+    const tiles = tenantTiles([tenant("Leer", 0, 0), tenant("Verein", 1, 0)]);
 
     expect(tiles.map((tile) => tile.id)).toEqual(["Verein"]);
   });
 
   it("puts the most bookables and events together first", () => {
-    const tiles = providerTiles([
+    const tiles = tenantTiles([
       tenant("A", 1, 1),
       tenant("B", 0, 5),
       tenant("C", 3, 0),
@@ -37,7 +37,7 @@ describe("providerTiles", () => {
   });
 
   it("orders a tie by name", () => {
-    const tiles = providerTiles([
+    const tiles = tenantTiles([
       tenant("Zweirad", 2, 0),
       tenant("Ärztehaus", 1, 1),
       tenant("Bürgerhaus", 0, 2),
@@ -51,7 +51,7 @@ describe("providerTiles", () => {
   });
 
   it("carries name, short description and counts, the description trimmed or null", () => {
-    const [withText, without] = providerTiles([
+    const [withText, without] = tenantTiles([
       tenant("Verein", 2, 1, { description: "  Sport im Quartier. " }),
       tenant("Halle", 1, 0, { description: "   " }),
     ]);
@@ -68,40 +68,40 @@ describe("providerTiles", () => {
   });
 
   it("counts missing numbers as none, so a bundle of an older backend shows no area", () => {
-    expect(providerTiles([{ id: "alt", name: "Alt" }])).toEqual([]);
+    expect(tenantTiles([{ id: "alt", name: "Alt" }])).toEqual([]);
   });
 
   it("answers an empty list for no tenants", () => {
-    expect(providerTiles(undefined)).toEqual([]);
-    expect(providerTiles([])).toEqual([]);
+    expect(tenantTiles(undefined)).toEqual([]);
+    expect(tenantTiles([])).toEqual([]);
   });
 });
 
-describe("providerInitials", () => {
+describe("tenantInitials", () => {
   it("takes the first letters of the first two words", () => {
-    expect(providerInitials("Sport & Bäder")).toBe("SB");
-    expect(providerInitials("Jugendzentrum Ost")).toBe("JO");
-    expect(providerInitials("Stadt Wildeshausen e.V.")).toBe("SW");
+    expect(tenantInitials("Sport & Bäder")).toBe("SB");
+    expect(tenantInitials("Jugendzentrum Ost")).toBe("JO");
+    expect(tenantInitials("Stadt Wildeshausen e.V.")).toBe("SW");
   });
 
   it("takes the first two letters of a single word", () => {
-    expect(providerInitials("Kulturamt")).toBe("KU");
+    expect(tenantInitials("Kulturamt")).toBe("KU");
   });
 
   it("answers a question mark for a name without letters", () => {
-    expect(providerInitials("")).toBe("?");
-    expect(providerInitials(undefined)).toBe("?");
+    expect(tenantInitials("")).toBe("?");
+    expect(tenantInitials(undefined)).toBe("?");
   });
 });
 
-describe("providerAccent", () => {
+describe("tenantAccent", () => {
   it("gives a tenant the same accent on every load", () => {
-    expect(providerAccent("diz", 6)).toBe(providerAccent("diz", 6));
+    expect(tenantAccent("diz", 6)).toBe(tenantAccent("diz", 6));
   });
 
   it("stays within the palette", () => {
     for (const id of ["a", "diz", "0f44248a-bf4e-4292", "Stadt Testingen"]) {
-      const accent = providerAccent(id, 6);
+      const accent = tenantAccent(id, 6);
       expect(accent).toBeGreaterThanOrEqual(0);
       expect(accent).toBeLessThan(6);
     }

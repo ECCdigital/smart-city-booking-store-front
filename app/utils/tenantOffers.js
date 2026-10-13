@@ -8,7 +8,7 @@
  * @param {Array<{ id: string, name: string, description?: string, bookableCount?: number, eventCount?: number }> | undefined} tenants
  * @returns {Array<{ id: string, name: string, description: string | null, bookableCount: number, eventCount: number, initials: string }>}
  */
-export function providerTiles(tenants) {
+export function tenantTiles(tenants) {
   return (tenants ?? [])
     .map((tenant) => ({
       id: tenant.id,
@@ -16,7 +16,7 @@ export function providerTiles(tenants) {
       description: tenant.description?.trim() || null,
       bookableCount: tenant.bookableCount ?? 0,
       eventCount: tenant.eventCount ?? 0,
-      initials: providerInitials(tenant.name),
+      initials: tenantInitials(tenant.name),
     }))
     .filter((tile) => tile.bookableCount + tile.eventCount > 0)
     .sort(
@@ -34,7 +34,7 @@ export function providerTiles(tenants) {
  * @param {string | undefined} name
  * @returns {string}
  */
-export function providerInitials(name) {
+export function tenantInitials(name) {
   const words = (name ?? "")
     .split(/\s+/)
     .filter((word) => /^\p{L}/u.test(word));
@@ -52,7 +52,7 @@ export function providerInitials(name) {
  * @param {number} size
  * @returns {number}
  */
-export function providerAccent(id, size) {
+export function tenantAccent(id, size) {
   let hash = 0;
   for (const char of String(id)) {
     hash = (hash * 31 + char.codePointAt(0)) >>> 0;

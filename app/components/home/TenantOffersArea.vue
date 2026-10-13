@@ -22,7 +22,7 @@
           <div>
             <div class="flex items-center gap-4">
               <span
-                :class="ACCENTS[providerAccent(tile.id, ACCENTS.length)]"
+                :class="ACCENTS[tenantAccent(tile.id, ACCENTS.length)]"
                 class="shrink-0 w-14 h-14 rounded-xl text-white text-lg font-bold flex items-center justify-center"
                 aria-hidden="true"
               >
@@ -79,7 +79,7 @@
 </template>
 
 <script setup>
-import { providerAccent, providerTiles } from "~/utils/providerOffers.js";
+import { tenantAccent, tenantTiles } from "~/utils/tenantOffers.js";
 
 // Written out whole so Tailwind finds the classes.
 const ACCENTS = [
@@ -98,5 +98,5 @@ const props = defineProps({
   },
 });
 
-const tiles = computed(() => providerTiles(props.tenants));
+const tiles = computed(() => tenantTiles(props.tenants));
 </script>
