@@ -1,6 +1,8 @@
 /**
  * Renders the instance's colours as the stylesheet the storefront links in its
- * document head.
+ * document head: primary and secondary, the text colour on each, and the
+ * colours of the header bar. The contrast is computed here, on the server, so
+ * text on a colour is right in the first paint, without JavaScript.
  *
  * The stylesheet routes used to sit behind the shared conditional cache with a
  * 300 s TTL of their own. They read the Theme Bundle directly now, so the
@@ -101,11 +103,13 @@ function render(colors: Required<ThemeCssColors>, header: ThemeCssHeader): strin
       ? [colors.primary, colors.secondary]
       : [colors.secondary, colors.primary];
 
-  const shared = [
+  const colorDeclarations = [
     `  --ui-primary: ${colors.primary};`,
     `  --ui-secondary: ${colors.secondary};`,
     `  --ui-primary-contrast: ${contrastOf(colors.primary)};`,
     `  --ui-secondary-contrast: ${contrastOf(colors.secondary)};`,
+  ];
+  const activeTab = [
     `  --ui-header-active: ${active};`,
     `  --ui-header-active-contrast: ${contrastOf(active)};`,
     `  --ui-header-active-stripe: ${stripe};`,
@@ -120,9 +124,9 @@ function render(colors: Required<ThemeCssColors>, header: ThemeCssHeader): strin
     return [`  --ui-header: ${bar};`, `  --ui-header-contrast: ${contrastOf(bar)};`];
   };
 
-  const light = [...shared, ...headerIn("light")].join("\n");
-  const dark = [...shared, ...headerIn("dark")].join("\n");
-  return `:root {\n${light}\n}\n.dark {\n${dark}\n}\n`;
+  const block = (mode: keyof typeof NEUTRAL_HEADER): string =>
+    [...colorDeclarations, ...headerIn(mode), ...activeTab].join("\n");
+  return `:root {\n${block("light")}\n}\n.dark {\n${block("dark")}\n}\n`;
 }
 
 /**
