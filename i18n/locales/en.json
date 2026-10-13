@@ -1,6 +1,11 @@
 {
   "welcome": "Welcome!",
   "home": {
+    "providers": {
+      "title": "Offers by provider",
+      "bookables": "no bookables | {count} bookable | {count} bookables",
+      "events": "no events | {count} event | {count} events"
+    },
     "howItWorks": {
       "title": "How booking works",
       "steps": {
