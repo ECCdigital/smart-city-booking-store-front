@@ -36,9 +36,33 @@ export interface ThemeLogoImage {
 }
 
 /** Shown in the light mode only, when a variant takes over in the dark. */
-const LIGHT_ONLY = "dark:hidden";
+const LIGHT_ONLY = ["dark:hidden"];
 /** The variant: shown in the dark mode only. */
 const DARK_ONLY = ["hidden", "dark:block"];
+
+/** One image of a logo and the classes that show it in its colour mode only. */
+export interface ThemeImageInMode<T extends ThemeImage = ThemeImage> {
+  image: T;
+  /** Empty for a logo without a variant: it shows in both modes. */
+  modeClasses: string[];
+}
+
+/**
+ * A logo by colour mode: the logo alone, or the logo for the light mode and
+ * its variant for the dark one. Only a variant with an address counts. The
+ * class `.dark` on `<html>` picks one image, see {@link themeLogoImages}; the
+ * footer logos follow the same rule.
+ */
+export function imagesByColourMode<T extends ThemeImage>(
+  image: T,
+  imageDark: T | null | undefined,
+): ThemeImageInMode<T>[] {
+  if (!imageDark?.url) return [{ image, modeClasses: [] }];
+  return [
+    { image, modeClasses: LIGHT_ONLY },
+    { image: imageDark, modeClasses: DARK_ONLY },
+  ];
+}
 
 /**
  * The images `ThemeLogo` renders: none without an address, one for a logo
@@ -59,36 +83,29 @@ const DARK_ONLY = ["hidden", "dark:block"];
  */
 export function themeLogoImages(options: ThemeLogoOptions): ThemeLogoImage[] {
   const { imageSource } = useMediaImage();
-  const dark = options.imageDark?.url ? options.imageDark : null;
+  const inModes = imagesByColourMode(options.image, options.imageDark);
+  // Only a logo without a variant may be inverted.
+  const invertInDarkMode = inModes.length === 1 && options.invertInDarkMode;
 
-  function attributes(
-    image: ThemeImage,
-    invertInDarkMode: boolean,
-    extraClasses: string[],
-  ): ThemeLogoImage | null {
-    const source = imageSource(image, "logo");
-    if (!source) return null;
+  const [logo, variant] = inModes.map(
+    ({ image, modeClasses }): ThemeLogoImage | null => {
+      const source = imageSource(image, "logo");
+      if (!source) return null;
 
-    const imageOptions = { image, maxHeight: options.maxHeight, invertInDarkMode };
-    const style = imageStyle(imageOptions);
-    return {
-      ...source,
-      ...(image.width ? { width: image.width } : {}),
-      ...(image.height ? { height: image.height } : {}),
-      ...(style ? { style } : {}),
-      ...(options.priority ? { fetchpriority: "high" as const } : {}),
-      class: [...imageClasses(imageOptions), ...extraClasses],
-    };
-  }
+      const imageOptions = { image, maxHeight: options.maxHeight, invertInDarkMode };
+      const style = imageStyle(imageOptions);
+      return {
+        ...source,
+        ...(image.width ? { width: image.width } : {}),
+        ...(image.height ? { height: image.height } : {}),
+        ...(style ? { style } : {}),
+        ...(options.priority ? { fetchpriority: "high" as const } : {}),
+        class: [...imageClasses(imageOptions), ...modeClasses],
+      };
+    },
+  );
 
-  if (!dark) {
-    const logo = attributes(options.image, options.invertInDarkMode, []);
-    return logo ? [logo] : [];
-  }
-
-  const logo = attributes(options.image, false, [LIGHT_ONLY]);
   if (!logo) return [];
-  const variant = attributes(dark, false, DARK_ONLY);
   return variant ? [logo, variant] : [logo];
 }
 
