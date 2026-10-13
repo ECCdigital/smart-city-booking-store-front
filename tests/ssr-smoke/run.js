@@ -142,6 +142,51 @@ function footerLogosProblem(html) {
   if (footer.includes("invert")) return "a footer logo is inverted";
 }
 
+// The Hero's logo Block follows the app logo (ECCdigital/tickets#528). A backend
+// before ECCdigital/tickets#522 exports it as a copy of the logo's medium,
+// inverted in the dark mode, which is what the pass without new settings
+// gets in its place.
+const HERO_LOGO_BLOCK = 'data-block="default-logo"';
+if (WITHOUT_NEW_SETTINGS) {
+  themes.heroLayout = {
+    ...THEMES.heroLayout,
+    blocks: THEMES.heroLayout.blocks.map((block) =>
+      block.image?.source === "app-logo"
+        ? { ...block, image: THEMES.logo, invertInDarkMode: true }
+        : block,
+    ),
+  };
+}
+
+/**
+ * What is wrong with the logo Block of the Hero on a page, or nothing: it
+ * shows the app logo and, in the dark mode, its variant, each image in the
+ * HTML with the class `.dark` picking one and neither inverted. Without the
+ * variant it shows the logo alone, inverted in the dark mode.
+ *
+ * @param {string} html - The page as the server rendered it.
+ * @returns {string | undefined} The first problem found.
+ */
+function heroLogoProblem(html) {
+  const at = html.indexOf(HERO_LOGO_BLOCK);
+  if (at === -1) return "no logo Block in the Hero";
+  const block = html.slice(at, html.indexOf("</div>", at));
+  const logo = imgTag(block, LOGO);
+  if (!logo) return "logo Block without the app logo";
+  if (WITHOUT_NEW_SETTINGS) {
+    if (block.includes(LOGO_DARK)) return "a variant the bundle does not carry";
+    if (!logo.includes("dark:invert")) return "logo not inverted in the dark mode";
+    return;
+  }
+  const dark = imgTag(block, LOGO_DARK);
+  if (!dark) return "no variant for the dark mode";
+  if (!logo.includes("dark:hidden")) return "logo not hidden in the dark mode";
+  if (!dark.includes("hidden dark:block")) {
+    return "variant not shown in the dark mode only";
+  }
+  if (block.includes("dark:invert")) return "inverted despite the variant";
+}
+
 const serverEntry = new URL("../../.output/server/index.mjs", import.meta.url);
 
 function freePort() {
@@ -243,6 +288,24 @@ try {
       if (leftOver) failures.push(`/ without footer logos: ${leftOver}`);
     } finally {
       backend.routes["/api/catalog/themes"] = bundle;
+    }
+
+    // The Hero's logo Block (ECCdigital/tickets#528): from the bundle's layout,
+    // then from the storefront's Fallback Hero Layout when the layout fails
+    // the guard, which derives it the same way.
+    const heroPages = [
+      ["/", bundle],
+      ["/ with the Fallback Hero Layout", { ...bundle, heroLayout: { version: 1 } }],
+    ];
+    for (const [name, heroBundle] of heroPages) {
+      backend.routes["/api/catalog/themes"] = heroBundle;
+      try {
+        const problem = heroLogoProblem(await (await fetch(base + "/")).text());
+        console.log(`${problem ? "FAIL" : "ok  "} Hero logo on ${name}`);
+        if (problem) failures.push(`Hero logo on ${name}: ${problem}`);
+      } finally {
+        backend.routes["/api/catalog/themes"] = bundle;
+      }
     }
   }
 } finally {

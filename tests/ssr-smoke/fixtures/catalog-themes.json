@@ -31,12 +31,21 @@
         "layer": "back",
         "homeOnly": false,
         "hideOnMobile": false,
-        "image": null,
+        "image": {
+          "source": "app-logo",
+          "url": "/api/v2/instance/media/00000000000000000000a1a1/file",
+          "width": 320,
+          "height": 80,
+          "dark": {
+            "url": "/api/v2/instance/media/00000000000000000000d1d1/file",
+            "width": 160,
+            "height": 80
+          }
+        },
         "alt": {
           "de": "Markplatz"
         },
-        "maxHeight": "sm",
-        "invertInDarkMode": true
+        "maxHeight": "sm"
       },
       {
         "id": "default-title",

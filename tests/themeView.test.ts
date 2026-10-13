@@ -378,6 +378,67 @@ describe("the variant of the logo for the dark mode", () => {
   });
 });
 
+// An image Block that follows the app logo (ECCdigital/tickets#528): the
+// backend puts the app logo and its variant in, and the storefront carries
+// both to the client. A stored copy of the logo's medium stays as it is.
+describe("an image Block of the bundle that follows the app logo", () => {
+  const LOGO_URL = "/api/v2/instance/media/66f1c2000000000000000009/file";
+  const DARK_URL = "/api/v2/instance/media/66f1c200000000000000000d/file";
+
+  function layoutWith(block: object) {
+    return {
+      version: 1,
+      blocks: [
+        { id: "logo", type: "image", zone: "middle-right", alt: { de: "Logo" }, ...block },
+      ],
+    };
+  }
+
+  it("reaches the client with the app logo and its variant", () => {
+    const { issues, onIssue } = withIssues();
+    const heroLayout = layoutWith({
+      image: {
+        source: "app-logo",
+        url: LOGO_URL,
+        width: 320,
+        height: 80,
+        dark: { url: DARK_URL, width: 200, height: 100 },
+      },
+    });
+
+    const view = buildThemeView(bundleWith({ heroLayout }), "abc123", { onIssue });
+
+    expect(issues).toEqual([]);
+    expect(view.heroLayout?.blocks[0]).toMatchObject({
+      image: {
+        source: "app-logo",
+        url: LOGO_URL,
+        width: 320,
+        height: 80,
+        dark: { url: DARK_URL, width: 200, height: 100 },
+      },
+    });
+  });
+
+  it("keeps a stored copy of the app logo's medium, not swapped for the source", () => {
+    const heroLayout = layoutWith({
+      image: {
+        source: "media",
+        mediaId: "66f1c2000000000000000009",
+        url: LOGO_URL,
+      },
+      invertInDarkMode: true,
+    });
+
+    const view = buildThemeView(bundleWith({ heroLayout }), "abc123", withIssues());
+
+    expect(view.heroLayout?.blocks[0]).toMatchObject({
+      image: { source: "media", mediaId: "66f1c2000000000000000009" },
+      invertInDarkMode: true,
+    });
+  });
+});
+
 describe("defaultThemeView", () => {
   it("is a complete Theme View that asks the renderer for its fallbacks", () => {
     expect(defaultThemeView()).toEqual({

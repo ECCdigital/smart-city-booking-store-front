@@ -38,6 +38,10 @@ function textBlock(id: string) {
   return { id, type: "text", zone: "top-left", text: { de: "Eins" } };
 }
 
+function imageBlock(id: string) {
+  return { id, type: "image", zone: "middle-right", alt: { de: "Logo" } };
+}
+
 /**
  * A fixture as the backend exported it before the amendment: `panel` back to
  * one of the two words it used to be, and the four fields the amendment added
@@ -62,6 +66,114 @@ function asLegacyExport(layout: object) {
 describe("parseHeroLayout", () => {
   it("accepts the Default Hero Layout unchanged", () => {
     expect(parseHeroLayout(defaultHeroLayout)).toEqual(defaultHeroLayout);
+  });
+
+  describe("an image Block that follows the app logo", () => {
+    const LOGO_URL = "/api/v2/instance/media/66f1c2000000000000000001/file";
+    const DARK_URL = "/api/v2/instance/media/66f1c2000000000000000002/file";
+
+    function appLogoLayout(image: unknown, extra: object = {}) {
+      return {
+        version: 1,
+        blocks: [{ ...imageBlock("logo"), image, ...extra }],
+      };
+    }
+
+    it("keeps the app logo and its variant the backend put in", () => {
+      const layout = parseHeroLayout(
+        appLogoLayout({
+          source: "app-logo",
+          url: LOGO_URL,
+          width: 320,
+          height: 80,
+          dark: { url: DARK_URL, width: 160, height: 80 },
+        }),
+      );
+
+      expect(layout?.blocks[0]).toMatchObject({
+        type: "image",
+        image: {
+          source: "app-logo",
+          url: LOGO_URL,
+          width: 320,
+          height: 80,
+          dark: { url: DARK_URL, width: 160, height: 80 },
+        },
+      });
+    });
+
+    it("has no switch for the dark mode, whatever the export says", () => {
+      // The app logo brings its own rule — its variant, or inverted without
+      // one — so a Block that follows it has no `invertInDarkMode` to carry.
+      const layout = parseHeroLayout(
+        appLogoLayout({ source: "app-logo", url: LOGO_URL }, { invertInDarkMode: false }),
+      );
+
+      expect(layout?.blocks[0]).not.toHaveProperty("invertInDarkMode");
+    });
+
+    it("carries no address and no variant without an app logo", () => {
+      // Without an app logo, or with the theme switched off, the backend
+      // exports every derived key as `null`; the Block then shows nothing.
+      const layout = parseHeroLayout(
+        appLogoLayout({
+          source: "app-logo",
+          url: null,
+          width: null,
+          height: null,
+          dark: null,
+        }),
+      );
+
+      expect((layout?.blocks[0] as HeroImageBlock).image).toEqual({
+        source: "app-logo",
+      });
+    });
+
+    it("rejects a variant that is not an object", () => {
+      const { issues, onIssue } = withIssues();
+
+      expect(
+        parseHeroLayout(
+          appLogoLayout({ source: "app-logo", url: LOGO_URL, dark: DARK_URL }),
+          { onIssue },
+        ),
+      ).toBeNull();
+      expect(issues).toEqual([
+        { path: "heroLayout.blocks[0].image.dark", code: "invalid_format" },
+      ]);
+    });
+
+    it("is no source for the Background", () => {
+      const { issues, onIssue } = withIssues();
+
+      expect(
+        parseBackground(
+          { ...backgroundImage, image: { source: "app-logo", url: LOGO_URL } },
+          { onIssue },
+        ),
+      ).toBeNull();
+      expect(issues).toEqual([
+        { path: "background.image.source", code: "invalid_custom" },
+      ]);
+    });
+  });
+
+  it("keeps an image Block with a copy of the app logo's medium as it is", () => {
+    // A layout stored before the source existed holds the logo's media id.
+    // Nothing swaps it for the source silently; the editor offers the switch.
+    const copy = {
+      ...imageBlock("copy"),
+      image: { source: "media", mediaId: "66f1c2000000000000000001" },
+      invertInDarkMode: true,
+    };
+
+    const layout = parseHeroLayout({ version: 1, blocks: [copy] });
+
+    expect(layout?.blocks[0]).toMatchObject({
+      image: { source: "media", mediaId: "66f1c2000000000000000001" },
+      invertInDarkMode: true,
+    });
   });
 
   it("accepts the acceptance fixture unchanged, every added field with it", () => {

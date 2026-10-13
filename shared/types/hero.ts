@@ -276,13 +276,52 @@ export interface HeroRichtextBlock extends HeroBlockBase {
   shadow: boolean;
 }
 
-export interface HeroImageBlock extends HeroBlockBase {
+/** An image as the export resolves it: its address and, when measured, its dimensions. */
+export interface HeroImageAddress {
+  url: string;
+  width?: number;
+  height?: number;
+}
+
+/**
+ * An image Block's reference to the app logo instead of a medium of its own,
+ * so the Block follows a new app logo. It is stored as `{ source: "app-logo" }`
+ * alone, without a `mediaId`. The export puts in `url`, `width` and `height`
+ * of the app logo and, under `dark`, those of its variant for the dark mode;
+ * without an app logo, or with the theme switched off, it puts in none, and
+ * the Block shows no image. Only image Blocks take it, never the Background.
+ */
+export interface HeroAppLogoReference {
+  source: "app-logo";
+  url?: string;
+  width?: number;
+  height?: number;
+  /** The variant for the dark mode; absent without one. */
+  dark?: HeroImageAddress;
+}
+
+/** The fields every image Block carries, whatever its image follows. */
+interface HeroImageBlockBase extends HeroBlockBase {
   type: "image";
-  image: HeroMediaReference;
   alt: LocalizedString;
   maxHeight: HeroImageMaxHeight;
+}
+
+/** An image Block showing a medium of the library, inverted in dark mode when asked. */
+export interface HeroMediaImageBlock extends HeroImageBlockBase {
+  image: HeroMediaReference;
   invertInDarkMode: boolean;
 }
+
+/**
+ * An image Block following the app logo. It has no switch for the dark mode:
+ * the app logo's rule applies — its variant, or inverted without one.
+ */
+export interface HeroAppLogoImageBlock extends HeroImageBlockBase {
+  image: HeroAppLogoReference;
+}
+
+export type HeroImageBlock = HeroMediaImageBlock | HeroAppLogoImageBlock;
 
 export type HeroBlock = HeroTextBlock | HeroRichtextBlock | HeroImageBlock;
 

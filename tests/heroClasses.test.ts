@@ -48,6 +48,7 @@ import {
   type HeroBlockAlignment,
   type HeroImageBlock,
   type HeroLayout,
+  type HeroMediaImageBlock,
   type HeroPanel,
   type HeroPanelColor,
   type HeroPanelRadius,
@@ -742,10 +743,16 @@ describe("a rich-text Block", () => {
 });
 
 describe("an image", () => {
-  const logo = (defaultHeroLayout as HeroLayout).blocks.find(
-    (block) => block.id === "default-logo",
-  ) as HeroImageBlock;
-  const measured: HeroImageBlock = {
+  // The Default Hero Layout's logo Block as it was before it followed the app
+  // logo: a copy of the logo's medium, inverted in dark mode.
+  const logo: HeroMediaImageBlock = {
+    ...((defaultHeroLayout as HeroLayout).blocks.find(
+      (block) => block.id === "default-logo",
+    ) as HeroImageBlock),
+    image: { source: "media", mediaId: "66f1c2000000000000000001" },
+    invertInDarkMode: true,
+  };
+  const measured: HeroMediaImageBlock = {
     ...logo,
     image: { ...logo.image, width: 320, height: 80 },
   };
@@ -773,7 +780,7 @@ describe("an image", () => {
   });
 
   it("inverts in dark mode only when asked to", () => {
-    const plain: HeroImageBlock = {
+    const plain: HeroMediaImageBlock = {
       ...measured,
       maxHeight: "xl",
       invertInDarkMode: false,
