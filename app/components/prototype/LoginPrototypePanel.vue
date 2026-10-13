@@ -42,12 +42,23 @@
             <input type="radio" name="proto-logo" :checked="proto.logo.value === key" @change="proto.set({ logo: key })">
             {{ label }}
           </label>
+          <div v-if="proto.variant.value === 'B'" class="space-y-1">
+            <div class="text-neutral-400">Heller Grund in der Karte</div>
+            <label class="flex items-center gap-2">
+              <input type="radio" name="proto-plate" :checked="proto.plate.value === 'kopf'" @change="proto.set({ plate: undefined })">
+              Kopf über die ganze Breite
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="radio" name="proto-plate" :checked="proto.plate.value === 'logo'" @change="proto.set({ plate: 'logo' })">
+              Platte nur um das Logo
+            </label>
+          </div>
           <label v-if="proto.variant.value === 'A'" class="flex items-center gap-2">
             <input type="checkbox" :checked="proto.panelLight.value" @change="proto.set({ panel: $event.target.checked ? 'hell' : undefined })">
             Panel auch im Dunkelmodus hell (ohne Invertierung)
           </label>
           <label class="flex items-center gap-2">
-            <input type="checkbox" :checked="proto.invert.value" :disabled="proto.panelLight.value && proto.variant.value === 'A'" @change="proto.set({ invert: $event.target.checked ? undefined : '0' })">
+            <input type="checkbox" :checked="proto.invert.value" :disabled="(proto.panelLight.value && proto.variant.value === 'A') || proto.variant.value === 'B'" @change="proto.set({ invert: $event.target.checked ? undefined : '0' })">
             Im Dunkelmodus invertieren (heute immer an)
           </label>
         </fieldset>
@@ -136,6 +147,7 @@ const titleColors = computed(() => {
   const v = proto.variant.value;
   if (v === "0") return [primary.value, primary.value];
   if (v === "C") return proto.brightness.value === "dunkel" ? ["#ffffff", "#ffffff"] : ["#111827", "#ffffff"];
+  if (v === "B" && proto.plate.value === "kopf") return proto.titlePrimary.value ? [primary.value, primary.value] : ["#111827", "#111827"];
   if (v === "A" && proto.panelLight.value) return proto.titlePrimary.value ? [primary.value, primary.value] : ["#111827", "#111827"];
   return proto.titlePrimary.value ? [primary.value, primary.value] : ["#111827", "#ffffff"];
 });
@@ -143,6 +155,9 @@ const titleColors = computed(() => {
 const rows = computed(() => {
   const [tl, td] = titleColors.value;
   const v = proto.variant.value;
+  if (v === "B" && proto.plate.value === "kopf") {
+    return [{ label: "auf Kopf (weiß)", light: contrast(tl, "#ffffff"), dark: contrast(tl, "#ffffff") }];
+  }
   if (v === "A" && proto.panelLight.value) {
     return [{ label: "auf Panel (weiß)", light: contrast(tl, "#ffffff"), dark: contrast(tl, "#ffffff") }];
   }
@@ -174,6 +189,7 @@ const state = computed(() =>
       logo: proto.logo.value,
       size: proto.variant.value === "0" ? "sm" : proto.size.value,
       invert: proto.invert.value,
+      plate: proto.variant.value === "B" ? proto.plate.value : undefined,
       panel: proto.variant.value === "A" ? (proto.panelLight.value ? "hell" : "glass") : undefined,
       name: proto.longName.value ? "lang" : "Instanz",
       titleColor: titleColors.value,

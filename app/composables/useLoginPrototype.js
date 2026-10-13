@@ -20,7 +20,7 @@ export const LOGIN_PROTO_NAMES = {
 export const LOGIN_PROTO_DESCRIPTIONS = {
   0: "Der Stand von 1.2.x zum Vergleich: Logo in S und Portalname in Primär frei auf dem Hintergrund, mit Vignette, ohne Kontrastlogik. Die Größe gilt hier nicht.",
   A: "Logo und Portalname stehen wie heute links bzw. über der Karte, aber in einem eigenen Glas-Panel (.glass wie die Login-Karte). Der Hintergrund bleibt sichtbar, das Panel trägt die Lesbarkeit.",
-  B: "Logo und Portalname wandern in die Login-Karte, über „Anmelden“. Die linke Hälfte zeigt nur den Hintergrund, die Karte steht mittig. Eine Fläche für alles.",
+  B: "Logo und Portalname wandern in die Login-Karte, über „Anmelden“. Die Karte steht mittig. Der Grund hinter dem Logo bleibt auch im Dunkelmodus hell, als Kopf der Karte oder als Platte nur um das Logo. Das Logo wird nie invertiert.",
   C: "Wie heute frei auf dem Hintergrund. Die Schriftfarbe ergibt sich aus der Helligkeit des Hintergrunds (hell → dunkel, dunkel → weiß), dazu ein Schein in der Gegenfarbe um Schrift und Logo. Bei einem Bild kennt der Server die Helligkeit nur über die Overlay-Einstellung.",
   D: "Ein schmales neutrales Band oben über die ganze Breite, wie ein Header: Logo links, Portalname daneben. Darunter die Karte mittig auf dem Hintergrund.",
 };
@@ -49,7 +49,7 @@ export const LOGIN_PROTO_SIZES = {
   xl: "XL · 256 px",
 };
 
-export const LOGIN_PROTO_KEYS = ["variant", "bg", "logo", "size", "name", "invert", "titleColor", "overlay", "panel"];
+export const LOGIN_PROTO_KEYS = ["variant", "bg", "logo", "size", "name", "invert", "titleColor", "overlay", "panel", "plate"];
 
 const LONG_NAME =
   "Buchungsportal der Hansestadt Musterstadt – Räume, Sportstätten und Veranstaltungen";
@@ -82,8 +82,13 @@ export function useLoginPrototype() {
   const longName = computed(() => route.query.name === "lang");
   // Variante A: Panel auch im Dunkelmodus hell, dann ohne Invertierung.
   const panelLight = computed(() => isDev && route.query.panel === "hell");
+  // Variante B: heller Grund in der Karte, als Kopf über die ganze Breite
+  // oder als Platte nur um das Logo. Dann ohne Invertierung.
+  const plate = computed(() => (isDev && route.query.plate === "logo" ? "logo" : "kopf"));
   const invert = computed(() =>
-    panelLight.value && variant.value === "A" ? false : route.query.invert !== "0",
+    (panelLight.value && variant.value === "A") || variant.value === "B"
+      ? false
+      : route.query.invert !== "0",
   );
   const titlePrimary = computed(() => route.query.titleColor === "primary");
   // Overlay im Dunkelmodus über einem Bild, in Prozent, wie in der Einstellung.
@@ -109,6 +114,7 @@ export function useLoginPrototype() {
     longNameText: LONG_NAME,
     invert,
     panelLight,
+    plate,
     titlePrimary,
     overlay,
     brightness,

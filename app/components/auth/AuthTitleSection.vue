@@ -4,10 +4,21 @@
     <template v-if="variant !== '0'">
       <div
         v-if="isLargeVersion || placement !== 'page'"
-        :class="placement === 'page' ? 'hidden lg:flex items-center justify-center' : 'flex'"
+        :class="placement === 'page' ? 'hidden lg:flex items-center justify-center' : placement === 'card' ? 'grid' : 'flex'"
       >
         <div :class="boxClasses">
+          <div
+            v-if="placement === 'card' && proto.plate.value === 'logo'"
+            class="bg-white rounded-lg px-4 py-3 shadow-sm"
+          >
+            <PrototypeLoginLogo
+              :instance-logo="logo"
+              :alt="title"
+              :max-height="largeSize"
+            />
+          </div>
           <PrototypeLoginLogo
+            v-else
             :instance-logo="logo"
             :alt="title"
             :max-height="largeSize"
@@ -107,7 +118,11 @@ const neutralText = "text-gray-900 dark:text-white";
 const boxClasses = computed(() => {
   switch (props.placement) {
     case "card":
-      return "grid gap-3 justify-items-center text-center pb-2";
+      // Heller Grund auch im Dunkelmodus: Kopf über die ganze Kartenbreite
+      // (hebt das Padding des Card-Headers auf) oder Platte um das Logo.
+      return proto.plate.value === "kopf"
+        ? "grid gap-3 justify-items-center text-center -mx-4 -mt-4 sm:-mx-6 px-4 sm:px-6 pt-5 pb-4 bg-white rounded-t-xl border-b border-gray-200"
+        : "grid gap-3 justify-items-center text-center pb-2";
     case "band":
       return "flex items-center gap-4 min-w-0";
   }
@@ -127,6 +142,9 @@ const titleClasses = computed(() => {
   const base = props.placement === "band" ? "font-semibold text-lg leading-tight" : "font-bold text-xl";
   if (variant.value === "C" && props.placement === "page") {
     return [base, proto.brightness.value === "dunkel" ? "text-white" : "text-gray-900 dark:text-white"];
+  }
+  if (props.placement === "card" && proto.plate.value === "kopf") {
+    return [base, proto.titlePrimary.value ? "text-primary" : "text-gray-900"];
   }
   if (variant.value === "A" && proto.panelLight.value) {
     return [base, proto.titlePrimary.value ? "text-primary" : "text-gray-900"];
