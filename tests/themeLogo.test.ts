@@ -8,9 +8,11 @@ import { JSDOM } from "jsdom";
 import { describe, expect, it } from "vitest";
 
 import {
+  imageBlockLogo,
   themeLogoImages,
   type ThemeLogoOptions,
 } from "~/utils/themeLogo";
+import type { HeroImageBlock } from "~~/shared/types/hero";
 
 // The logo and its variant for the dark mode (ECCdigital/tickets#527): with a
 // variant both images are in the server-rendered HTML and the class `.dark`
@@ -169,4 +171,85 @@ describe("the logo without a variant", () => {
 
     expect(images).toHaveLength(0);
   });
+});
+
+// An image Block of the Hero renders through the same logo (ECCdigital/tickets#528).
+// One that follows the app logo takes the app logo's rule: its variant in the
+// dark mode, or inverted without one. It has no switch of its own.
+describe("an image Block", () => {
+  const BLOCK = {
+    id: "logo",
+    type: "image",
+    zone: "middle-right",
+    alt: { de: "Marktplatz" },
+    maxHeight: "sm",
+  } as const;
+
+  function block(fields: object) {
+    return { ...BLOCK, ...fields } as unknown as HeroImageBlock;
+  }
+
+  const APP_LOGO = {
+    source: "app-logo" as const,
+    url: LOGO.url,
+    width: LOGO.width,
+    height: LOGO.height,
+  };
+
+  it("following the app logo shows its variant in the dark mode", async () => {
+    const options = imageBlockLogo(
+      block({
+        image: {
+          ...APP_LOGO,
+          dark: { url: DARK.url, width: DARK.width, height: DARK.height },
+        },
+      }),
+    );
+    const { images } = await render({ ...options, maxHeight: "sm" });
+
+    expect(images).toHaveLength(2);
+    const [light, dark] = images;
+    expect(light.getAttribute("src")).toContain(encodeURIComponent(LOGO.url));
+    expect(classesOf(light)).toContain("dark:hidden");
+    expect(dark.getAttribute("src")).toContain(encodeURIComponent(DARK.url));
+    expect(classesOf(dark)).toEqual(expect.arrayContaining(["hidden", "dark:block"]));
+    expect([dark.getAttribute("width"), dark.getAttribute("height")]).toEqual(["200", "100"]);
+    for (const img of images) expect(classesOf(img)).not.toContain("dark:invert");
+  });
+
+  it("following the app logo without a variant is the app logo, inverted in the dark mode", async () => {
+    const { images } = await render({
+      ...imageBlockLogo(block({ image: APP_LOGO })),
+      maxHeight: "sm",
+    });
+
+    expect(images).toHaveLength(1);
+    expect(images[0].getAttribute("src")).toContain(encodeURIComponent(LOGO.url));
+    expect(classesOf(images[0])).toEqual(
+      expect.arrayContaining(["dark:invert", "dark:hue-rotate-180"]),
+    );
+  });
+
+  it("following the app logo shows nothing when there is none", async () => {
+    const { images } = await render({
+      ...imageBlockLogo(block({ image: { source: "app-logo" } })),
+      maxHeight: "sm",
+    });
+
+    expect(images).toHaveLength(0);
+  });
+
+  it.each([true, false])(
+    "with a medium of its own inverts as its switch says (%s), even a copy of the app logo",
+    async (invertInDarkMode) => {
+      const { images } = await render({
+        ...imageBlockLogo(block({ image: LOGO, invertInDarkMode })),
+        maxHeight: "sm",
+      });
+
+      expect(images).toHaveLength(1);
+      expect(images[0].getAttribute("src")).toContain(encodeURIComponent(LOGO.url));
+      expect(classesOf(images[0]).includes("dark:invert")).toBe(invertInDarkMode);
+    },
+  );
 });

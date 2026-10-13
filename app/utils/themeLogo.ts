@@ -1,16 +1,20 @@
 import { imageClasses, imageStyle } from "~/components/hero/heroClasses";
 import { useMediaImage } from "~/composables/utils/useMediaImage";
 import type {
+  HeroImageAddress,
+  HeroImageBlock,
   HeroImageMaxHeight,
-  HeroMediaReference,
 } from "~~/shared/types/hero";
+
+/** An image from the Theme View: its address, and its dimensions when measured. */
+type ThemeImage = Partial<HeroImageAddress>;
 
 /** What `ThemeLogo` is given. */
 export interface ThemeLogoOptions {
-  /** A media reference from the Theme View, with its dimensions when measured. */
-  image: HeroMediaReference;
+  /** An image from the Theme View, with its dimensions when measured. */
+  image: ThemeImage;
   /** The variant the dark mode shows in place of `image`, if there is one. */
-  imageDark?: HeroMediaReference | null;
+  imageDark?: ThemeImage | null;
   /** The height step of the contract's image scale. */
   maxHeight: HeroImageMaxHeight;
   /** Whether a logo without a variant is inverted in the dark mode. */
@@ -58,7 +62,7 @@ export function themeLogoImages(options: ThemeLogoOptions): ThemeLogoImage[] {
   const dark = options.imageDark?.url ? options.imageDark : null;
 
   function attributes(
-    image: HeroMediaReference,
+    image: ThemeImage,
     invertInDarkMode: boolean,
     extraClasses: string[],
   ): ThemeLogoImage | null {
@@ -86,4 +90,28 @@ export function themeLogoImages(options: ThemeLogoOptions): ThemeLogoImage[] {
   if (!logo) return [];
   const variant = attributes(dark, false, DARK_ONLY);
   return variant ? [logo, variant] : [logo];
+}
+
+/**
+ * What an image Block of the Hero hands `ThemeLogo`. A Block that follows the
+ * app logo takes the app logo's rule, as the auth pages do: its variant in
+ * the dark mode, or the logo inverted without one. A Block with a medium of
+ * its own inverts as its switch says — also one holding a copy of the app
+ * logo's medium, which is shown as stored, not swapped for the app logo.
+ */
+export function imageBlockLogo(
+  block: HeroImageBlock,
+): Pick<ThemeLogoOptions, "image" | "imageDark" | "invertInDarkMode"> {
+  if (block.image.source === "app-logo") {
+    return {
+      image: block.image,
+      imageDark: block.image.dark ?? null,
+      invertInDarkMode: true,
+    };
+  }
+  return {
+    image: block.image,
+    imageDark: null,
+    invertInDarkMode: "invertInDarkMode" in block && block.invertInDarkMode,
+  };
 }

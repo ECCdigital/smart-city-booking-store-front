@@ -26,6 +26,7 @@ import type {
   HeroBlockWidth,
   HeroColorToken,
   HeroHeight,
+  HeroImageAddress,
   HeroImageBlock,
   HeroImageMaxHeight,
   HeroPanel,
@@ -545,11 +546,12 @@ export function blockColorStyle(
   return isHeroColorToken(block.color) ? undefined : { color: block.color };
 }
 
-/** What an image is rendered from: its reference, its height step and the dark-mode toggle. */
-export type HeroImageOptions = Pick<
-  HeroImageBlock,
-  "image" | "maxHeight" | "invertInDarkMode"
->;
+/** What an image is rendered from: its dimensions, its height step and the dark-mode toggle. */
+export interface HeroImageOptions {
+  image: Pick<HeroImageAddress, "width" | "height">;
+  maxHeight: HeroImageMaxHeight;
+  invertInDarkMode: boolean;
+}
 
 /** A dark logo on a dark page: inverted, with the hue turned back. */
 const INVERT_CLASSES = "dark:invert dark:hue-rotate-180";
