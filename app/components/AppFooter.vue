@@ -24,12 +24,61 @@ const adminBaseUrl = useRuntimeConfig().public.adminBaseUrl;
 const offerSpacesUrl = computed(() =>
   offerSpacesEntryUrl(adminBaseUrl, instanceStore.instance),
 );
+
+// PROTOTYPE #514: Logos im Footer, Varianten per ?variant=. Nur im Dev-Modus.
+const proto = useFooterLogosPrototype();
+const v = proto.variant;
 </script>
 
 <template>
   <!-- Surface stays full-bleed, content sits on the container edges -->
   <footer class="bg-white dark:bg-gray-900">
+    <!-- PROTOTYPE #514 D: helles Band über dem Footer, auch im Dunkelmodus -->
+    <div v-if="v === 'D'" class="border-t border-gray-200 bg-white dark:border-gray-800">
+      <div class="container py-6">
+        <PrototypeFooterLogos
+          always-light
+          class="flex flex-wrap items-center justify-center gap-x-10 gap-y-5"
+        />
+      </div>
+    </div>
+
+    <!-- PROTOTYPE #514 A: eigene Zeile über Copyright und Links -->
+    <div v-if="v === 'A'" class="container border-b border-gray-200 pt-6 pb-5 dark:border-gray-800">
+      <PrototypeFooterLogos class="flex flex-wrap items-center gap-x-8 gap-y-4" />
+    </div>
+
+    <!-- PROTOTYPE #514 B: zweispaltig, rechts ein Raster gleicher Boxen -->
     <div
+      v-if="v === 'B'"
+      class="container grid gap-6 py-6 text-sm sm:grid-cols-[1fr_auto] sm:items-start"
+    >
+      <div class="flex flex-col gap-3">
+        <span class="text-gray-600 dark:text-gray-400">{{ copyright }}</span>
+        <nav v-if="documents.length || offerSpacesUrl" class="flex flex-wrap gap-x-6 gap-y-2">
+          <a
+            v-for="doc in documents"
+            :key="doc.key"
+            :href="doc.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-gray-700 hover:underline dark:text-gray-300"
+          >
+            {{ $t(`footer.${doc.key}`) }}
+          </a>
+          <a v-if="offerSpacesUrl" :href="offerSpacesUrl" class="text-gray-700 hover:underline dark:text-gray-300">
+            {{ $t("footer.offerSpaces") }}
+          </a>
+        </nav>
+        <ClientOnly>
+          <TenantSwitcher variant="footer" />
+        </ClientOnly>
+      </div>
+      <PrototypeFooterLogos class="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:justify-items-end" />
+    </div>
+
+    <div
+      v-else
       class="container flex flex-col gap-4 py-5 text-sm sm:flex-row sm:items-center sm:justify-between"
     >
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-8">
@@ -67,6 +116,8 @@ const offerSpacesUrl = computed(() =>
         <div v-if="$slots.logos" class="flex items-center gap-4">
           <slot name="logos" />
         </div>
+        <!-- PROTOTYPE #514 C: klein in der bestehenden Zeile -->
+        <PrototypeFooterLogos v-if="v === 'C'" class="flex flex-wrap items-center gap-x-5 gap-y-3" />
 
         <!-- The one place the tenant is always chosen; the bar only names the
              one already in use. It closes the row on the right. -->

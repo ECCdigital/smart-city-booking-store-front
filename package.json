@@ -9,6 +9,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "prototype:footer": "nuxt dev --port 3014",
     "dev:tunnel": "nuxt dev --tunnel --qr",
     "generate": "nuxt generate",
     "preview": "nuxt preview",

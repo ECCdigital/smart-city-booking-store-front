@@ -4,6 +4,8 @@
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <!-- PROTOTYPE #514: Logos im Footer, nur im Dev-Modus -->
+    <PrototypeFooterLogosPrototypePanel />
   </UApp>
 </template>
 
