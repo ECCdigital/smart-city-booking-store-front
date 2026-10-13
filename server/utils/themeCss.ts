@@ -12,6 +12,7 @@
  */
 
 import { createEtagMemo } from "./etagMemo";
+import type { ThemeFont } from "./themeFont";
 
 export interface ThemeCssColors {
   primary?: string;
@@ -32,6 +33,8 @@ export interface RenderThemeCssInput {
   header?: unknown;
   /** What to declare when the bundle names no usable colour pair. */
   defaults: Required<ThemeCssColors>;
+  /** The instance font, as `readThemeFont` reads it; none for the system font. */
+  font?: ThemeFont | null;
 }
 
 /** Rendered stylesheets, keyed by etag and by the route's own defaults. */
@@ -129,24 +132,106 @@ function render(colors: Required<ThemeCssColors>, header: ThemeCssHeader): strin
   return `:root {\n${block("light")}\n}\n.dark {\n${block("dark")}\n}\n`;
 }
 
+/** The family every instance font is declared under, whatever its name. */
+const FONT_FAMILY = '"Theme Font"';
+
+/** Tailwind's `--font-sans`, the stack the storefront has always set in. */
+const TODAYS_SANS_STACK =
+  'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
+
+/**
+ * What a font URL may consist of. The storefront builds every one of them, so
+ * this is a second line behind that, in the spirit of `SAFE_COLOR`: no quote,
+ * backslash, parenthesis or semicolon ever reaches `url("…")`.
+ */
+const SAFE_FONT_URL = /^\/[A-Za-z0-9._~%/?=&-]{1,512}$/;
+/** The name of a system font in `local("…")` and of a fallback family. */
+const SAFE_FONT_NAME = /^[A-Za-z0-9 ]{1,64}$/;
+
+const isWeight = (value: unknown): boolean =>
+  Number.isInteger(value) && (value as number) >= 1 && (value as number) <= 1000;
+const isPercent = (value: unknown): boolean =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1000;
+
+function isSafeFont(font: ThemeFont): boolean {
+  return (
+    font.faces.length > 0 &&
+    font.faces.every(
+      (face) =>
+        SAFE_FONT_URL.test(face.src) &&
+        (face.style === "normal" || face.style === "italic") &&
+        (face.weight === null || face.weight.every(isWeight)),
+    ) &&
+    font.fallbacks.every(
+      (face) =>
+        SAFE_FONT_NAME.test(face.family) &&
+        SAFE_FONT_NAME.test(face.local) &&
+        [face.sizeAdjust, face.ascentOverride, face.descentOverride, face.lineGapOverride].every(isPercent),
+    )
+  );
+}
+
+/**
+ * The font's faces, its fallbacks and `--font-sans`. `font-display: optional`
+ * never swaps a late font in, so nothing on the page moves; the preload in
+ * the document head is what lets the font make the first paint at all. A
+ * weight range comes from the file's `wght` axis, so 300 to 800 are real
+ * weights and the browser synthesises no bold.
+ */
+function renderFont(font: ThemeFont): string {
+  const faces = font.faces.map((face) =>
+    [
+      "@font-face {",
+      `  font-family: ${FONT_FAMILY};`,
+      `  src: url("${face.src}") format("woff2");`,
+      `  font-weight: ${face.weight ? face.weight.join(" ") : "400"};`,
+      `  font-style: ${face.style};`,
+      "  font-display: optional;",
+      "}",
+    ].join("\n"),
+  );
+  const fallbacks = font.fallbacks.map((face) =>
+    [
+      "@font-face {",
+      `  font-family: "${face.family}";`,
+      `  src: local("${face.local}");`,
+      `  size-adjust: ${face.sizeAdjust}%;`,
+      `  ascent-override: ${face.ascentOverride}%;`,
+      `  descent-override: ${face.descentOverride}%;`,
+      `  line-gap-override: ${face.lineGapOverride}%;`,
+      "}",
+    ].join("\n"),
+  );
+  // Unlayered, so it wins over Tailwind's `--font-sans` in `@layer theme`.
+  const stack = [
+    FONT_FAMILY,
+    ...font.fallbacks.map((face) => `"${face.family}"`),
+    TODAYS_SANS_STACK,
+  ].join(", ");
+
+  return `${[...faces, ...fallbacks].join("\n")}\n:root {\n  --font-sans: ${stack};\n}\n`;
+}
+
 /**
  * The stylesheet for one Theme Bundle.
  *
- * @param input - The bundle's etag and colours, plus the route's own defaults.
- * @returns The CSS text, rendered once per etag and set of defaults.
+ * @param input - The bundle's etag, colours, header and font, plus the
+ *   route's own defaults.
+ * @returns The CSS text, rendered once per etag, set of defaults and font. A
+ *   font is part of the key because an uploaded one can fail to load once and
+ *   arrive on the next request under the same etag.
  */
 export function renderThemeCss(input: RenderThemeCssInput): string {
   const { etag, colors, header, defaults } = input;
-  const key = `${etag}::${defaults.primary}::${defaults.secondary}`;
+  const font = input.font && isSafeFont(input.font) ? input.font : null;
+  const key = `${etag}::${defaults.primary}::${defaults.secondary}::${font?.href ?? ""}`;
 
   const memoised = rendered.get(key);
   if (memoised !== undefined) return memoised;
 
-  return rendered.set(
-    key,
-    render(
-      isSafeColorPair(colors) ? (colors as Required<ThemeCssColors>) : defaults,
-      headerOf(header),
-    ),
+  const colorsCss = render(
+    isSafeColorPair(colors) ? (colors as Required<ThemeCssColors>) : defaults,
+    headerOf(header),
   );
+  return rendered.set(key, font ? colorsCss + renderFont(font) : colorsCss);
 }
