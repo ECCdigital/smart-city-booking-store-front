@@ -104,6 +104,13 @@
     "width": 320,
     "height": 80
   },
+  "logoDark": {
+    "source": "media",
+    "mediaId": "00000000000000000000d1d1",
+    "url": "/api/v2/instance/media/00000000000000000000d1d1/file",
+    "width": 160,
+    "height": 80
+  },
   "authLogoSize": "lg",
   "footerLogos": [
     {

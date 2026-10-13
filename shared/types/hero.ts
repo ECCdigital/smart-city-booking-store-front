@@ -389,6 +389,11 @@ export interface ThemeView {
   heroLayout: HeroLayout | null;
   background: Background | null;
   logo: HeroMediaReference | null;
+  /**
+   * The variant of the logo the dark mode shows in its place, or `null`: then
+   * the logo is inverted in the dark mode, as before the variant.
+   */
+  logoDark: HeroMediaReference | null;
   /** The height step of the logo in the auth cards; S unless the bundle says otherwise. */
   authLogoSize: AuthLogoSize;
   /** The logos of the footer row, in order; empty when there is no row. */
