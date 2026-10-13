@@ -77,12 +77,6 @@ const footerLogos = computed(() => theme.value?.footerLogos ?? []);
       </div>
 
       <div class="flex items-center gap-4 sm:gap-6">
-        <!-- Logos a caller adds to this row; the instance's footer logos have
-             their own row above. -->
-        <div v-if="$slots.logos" class="flex items-center gap-4">
-          <slot name="logos" />
-        </div>
-
         <!-- The one place the tenant is always chosen; the bar only names the
              one already in use. It closes the row on the right. -->
         <ClientOnly>

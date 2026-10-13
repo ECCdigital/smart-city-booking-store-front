@@ -14,7 +14,7 @@
       <UButton
         v-if="isGreaterThanSm"
         :label="t('common.register')"
-        class="hidden sm:block px-4 text-black dark:text-white bg-white dark:bg-black"
+        class="hidden sm:block px-4 bg-(--ui-header-button) text-(--ui-header-button-contrast)"
         :to="registerTo"
       />
     </template>

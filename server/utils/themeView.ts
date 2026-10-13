@@ -18,14 +18,11 @@ import {
   type HeroParseOptions,
 } from "~~/shared/utils/heroLayout";
 import { sanitizeHeroLayoutRichtext } from "~~/shared/utils/heroRichtextAllowlist";
-import {
-  AUTH_LOGO_SIZES,
-  type AuthLogoSize,
-  type ThemeView,
-} from "~~/shared/types/hero";
+import type { ThemeView } from "~~/shared/types/hero";
 import type { ThemeBundle } from "~~/shared/types/api";
 import { sanitizeHeroRichtext } from "./heroRichtext";
 import { parseFooterLogos } from "./footerLogos";
+import { readLogoSize } from "./logoSize";
 import { themeFontHref } from "./themeFont";
 
 /**
@@ -54,17 +51,6 @@ export function defaultThemeView(): ThemeView {
     footerLogos: [],
     font: null,
   };
-}
-
-/**
- * The size of the logo in the auth cards. A backend before the setting, or a
- * value off the list, reads as S, the size the logo always had; nothing is
- * reported, because a default filled in is no failure.
- */
-function readAuthLogoSize(value: unknown): AuthLogoSize {
-  return (AUTH_LOGO_SIZES as readonly unknown[]).includes(value)
-    ? (value as AuthLogoSize)
-    : "sm";
 }
 
 /**
@@ -118,7 +104,8 @@ export function buildThemeView(
       bundle.logoDark === undefined || bundle.logoDark === null
         ? null
         : parseHeroMediaReference(bundle.logoDark, options, "logoDark"),
-    authLogoSize: readAuthLogoSize(bundle.authLogoSize),
+    // A backend before the setting reads as S, the size the logo always had.
+    authLogoSize: readLogoSize(bundle.authLogoSize, "sm"),
     footerLogos: parseFooterLogos(bundle.footerLogos, options),
     font: readFont(bundle.font, etag),
   };

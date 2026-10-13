@@ -11,29 +11,21 @@ import {
   type HeroParseIssue,
   type HeroParseOptions,
 } from "~~/shared/utils/heroLayout";
-import {
-  FOOTER_LOGO_SIZES,
-  type FooterLogo,
-  type FooterLogoImage,
-  type FooterLogoSize,
-} from "~~/shared/types/footerLogo";
+import type { FooterLogo, FooterLogoImage } from "~~/shared/types/footerLogo";
+import { readLogoSize } from "./logoSize";
 
 const PATH = "footerLogos";
 
 /**
  * One image of a footer logo, with the medium's title as its alternative
- * text. The reference guard names its path `logo`; the issue is renamed to
- * the image's place in the list.
+ * text. An issue names the image's place in the list.
  */
 function readImage(
   value: unknown,
   path: string,
   report: (issue: HeroParseIssue) => void,
 ): FooterLogoImage | null {
-  const reference = parseHeroMediaReference(value, {
-    onIssue: (issue) =>
-      report({ ...issue, path: issue.path.replace(/^logo/, path) }),
-  });
+  const reference = parseHeroMediaReference(value, { onIssue: report }, path);
   if (!reference) return null;
   // The guard lets an unaddressed reference through, the export always has
   // one; without it there is nothing to show.
@@ -44,13 +36,6 @@ function readImage(
 
   const name = (value as { name?: unknown }).name;
   return { ...reference, name: typeof name === "string" ? name : "" };
-}
-
-/** An off-list size reads as M, the backend's default. */
-function readSize(value: unknown): FooterLogoSize {
-  return (FOOTER_LOGO_SIZES as readonly unknown[]).includes(value)
-    ? (value as FooterLogoSize)
-    : "md";
 }
 
 /** Only an absolute `http(s)` URL becomes a link; anything else none. */
@@ -102,7 +87,8 @@ export function parseFooterLogos(
 
     logos.push({
       image,
-      size: readSize(logo.size),
+      // An off-list size reads as M, the backend's default.
+      size: readLogoSize(logo.size, "md"),
       link: readLink(logo.link, `${path}.link`, report),
       imageDark:
         logo.imageDark === undefined || logo.imageDark === null

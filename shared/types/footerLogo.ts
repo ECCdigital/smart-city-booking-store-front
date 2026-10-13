@@ -1,9 +1,7 @@
-import type { HeroMediaReference } from "./hero";
+import type { HeroMediaReference, LogoSize } from "./hero";
 
-/** The height steps of a footer logo: 48, 80 or 120 px, × 0.8 on a phone. */
-export const FOOTER_LOGO_SIZES = ["sm", "md", "lg"] as const;
-
-export type FooterLogoSize = (typeof FOOTER_LOGO_SIZES)[number];
+/** The height step of a footer logo: 48, 80 or 120 px, × 0.8 on a phone. */
+export type FooterLogoSize = LogoSize;
 
 /**
  * An image of a footer logo: a media reference with the title of the medium,

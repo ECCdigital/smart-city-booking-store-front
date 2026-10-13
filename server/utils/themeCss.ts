@@ -66,6 +66,9 @@ function isSafeColorPair(colors: ThemeCssColors | null | undefined): boolean {
 const BLACK = "#000000";
 const WHITE = "#ffffff";
 
+/** `#rgb` or `#rrggbb`, the only forms the contrast is computed from. */
+const HEX_COLOR = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
 /**
  * The text colour on a colour: black above a luma of 180, white otherwise —
  * the rule `useContrastColor` applied on the client, so no instance changes
@@ -73,7 +76,7 @@ const WHITE = "#ffffff";
  * name, `rgb()`, `hsl()`) gives white, as it did before.
  */
 function contrastOf(color: string): string {
-  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color.trim());
+  const match = HEX_COLOR.exec(color.trim());
   if (!match) return WHITE;
 
   const digits = match[1]!;
@@ -90,19 +93,24 @@ function contrastOf(color: string): string {
 }
 
 /**
- * The accent, if the instance set one that may reach the CSS. It stands on its
- * own: an unusable accent is simply absent and leaves the pair alone, and a
- * usable one is declared even when the pair falls back to the defaults.
+ * The accent, if the instance set one: `#rgb` or `#rrggbb`, as the backend
+ * stores it (`"" | "#rrggbb"`). Unlike primary and secondary it takes no
+ * colour name and no `rgb()`, whose contrast would only ever be white. It
+ * stands on its own: an unusable accent is simply absent and leaves the pair
+ * alone, and a usable one is declared even when the pair falls back to the
+ * defaults.
  */
 function accentOf(colors: ThemeCssColors | null | undefined): string | null {
   const accent = colors?.accent;
-  if (typeof accent !== "string" || accent.trim() === "") return null;
-  return SAFE_COLOR.test(accent) ? accent : null;
+  return typeof accent === "string" && HEX_COLOR.test(accent) ? accent : null;
 }
 
 function headerOf(value: unknown): ThemeCssHeader {
   return value === "neutral" || value === "secondary" ? value : "primary";
 }
+
+/** gray-900: the app's near-black text and the footer's dark ground. */
+const GRAY_900 = "#101828";
 
 /**
  * The neutral header is fixed per colour mode and computes nothing: white with
@@ -111,8 +119,24 @@ function headerOf(value: unknown): ThemeCssHeader {
  * in `NavigationBar.vue`.
  */
 const NEUTRAL_HEADER = {
-  light: { bar: WHITE, contrast: "#101828" },
-  dark: { bar: "#101828", contrast: WHITE },
+  light: { bar: WHITE, contrast: GRAY_900 },
+  dark: { bar: GRAY_900, contrast: WHITE },
+} as const;
+
+/**
+ * The solid button on the header bar ("Register"). On a coloured bar it stays
+ * as it always was, white in light and black in dark. On the neutral bar that
+ * would vanish into the bar, so it takes the bar's text colour as its ground.
+ */
+const HEADER_BUTTON = {
+  coloured: {
+    light: { button: WHITE, contrast: BLACK },
+    dark: { button: BLACK, contrast: WHITE },
+  },
+  neutral: {
+    light: { button: GRAY_900, contrast: WHITE },
+    dark: { button: WHITE, contrast: GRAY_900 },
+  },
 } as const;
 
 function render(
@@ -148,12 +172,26 @@ function render(
   ];
 
   const headerIn = (mode: keyof typeof NEUTRAL_HEADER): string[] => {
+    const { button, contrast: buttonContrast } =
+      HEADER_BUTTON[header === "neutral" ? "neutral" : "coloured"][mode];
+    const buttonDeclarations = [
+      `  --ui-header-button: ${button};`,
+      `  --ui-header-button-contrast: ${buttonContrast};`,
+    ];
     if (header === "neutral") {
       const { bar, contrast } = NEUTRAL_HEADER[mode];
-      return [`  --ui-header: ${bar};`, `  --ui-header-contrast: ${contrast};`];
+      return [
+        `  --ui-header: ${bar};`,
+        `  --ui-header-contrast: ${contrast};`,
+        ...buttonDeclarations,
+      ];
     }
     const bar = header === "secondary" ? colors.secondary : colors.primary;
-    return [`  --ui-header: ${bar};`, `  --ui-header-contrast: ${contrastOf(bar)};`];
+    return [
+      `  --ui-header: ${bar};`,
+      `  --ui-header-contrast: ${contrastOf(bar)};`,
+      ...buttonDeclarations,
+    ];
   };
 
   const block = (mode: keyof typeof NEUTRAL_HEADER): string =>
