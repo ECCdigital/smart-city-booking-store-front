@@ -35,7 +35,7 @@
 
       <!-- The instance home only: under /t/:tenantID the store holds that
            tenant's catalog, not the providers. -->
-      <ProviderOffersArea
+      <TenantOffersArea
         v-if="!error && !isTenantContext"
         :tenants="tenantStore.getTenants"
       />
@@ -54,7 +54,7 @@ import MainCategoryArea from "~/components/MainCategoryArea.vue";
 import LatestEventsArea from "~/components/LatestEventsArea.vue";
 import HowBookingWorksArea from "~/components/home/HowBookingWorksArea.vue";
 import MobileKeyArea from "~/components/home/MobileKeyArea.vue";
-import ProviderOffersArea from "~/components/home/ProviderOffersArea.vue";
+import TenantOffersArea from "~/components/home/TenantOffersArea.vue";
 import { useTenantStore } from "~~/stores/tenant.js";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { isTenantNotAvailable } from "~/utils/tenantHome.js";
