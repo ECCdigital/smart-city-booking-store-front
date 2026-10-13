@@ -171,6 +171,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 ### Removed
 
 - `locker_not_ready` from the mobile key's blocking reasons (sentence, badge and screen table): backend 4.3 never raises it, a compartment without a grant reads `not_provisioned`
+- The Cooldown button prototype: the page `/prototype/cooldown-button` and its three variants with the variant switcher under `app/components/prototype/`. The Cooldown itself on the Control Button stays. No behaviour change for bookers
 
 ## [1.1.7] — 2026-08-25
 
