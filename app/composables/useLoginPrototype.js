@@ -20,7 +20,7 @@ export const LOGIN_PROTO_NAMES = {
 export const LOGIN_PROTO_DESCRIPTIONS = {
   0: "Der Stand von 1.2.x zum Vergleich: Logo in S und Portalname in Primär frei auf dem Hintergrund, mit Vignette, ohne Kontrastlogik. Die Größe gilt hier nicht.",
   A: "Logo und Portalname stehen wie heute links bzw. über der Karte, aber in einem eigenen Glas-Panel (.glass wie die Login-Karte). Der Hintergrund bleibt sichtbar, das Panel trägt die Lesbarkeit.",
-  B: "Logo und Portalname wandern in die Login-Karte, über „Anmelden“. Die Karte steht mittig. Der Grund hinter dem Logo bleibt auch im Dunkelmodus hell, als Kopf der Karte oder als Platte nur um das Logo. Das Logo wird nie invertiert.",
+  B: "Logo und Portalname wandern in die Login-Karte, über „Anmelden“. Die Karte steht mittig. Das Logo steht ohne eigenen Grund auf der Karte. Zum Vergleich: heller Kopf oder helle Platte, dann ohne Invertierung.",
   C: "Wie heute frei auf dem Hintergrund. Die Schriftfarbe ergibt sich aus der Helligkeit des Hintergrunds (hell → dunkel, dunkel → weiß), dazu ein Schein in der Gegenfarbe um Schrift und Logo. Bei einem Bild kennt der Server die Helligkeit nur über die Overlay-Einstellung.",
   D: "Ein schmales neutrales Band oben über die ganze Breite, wie ein Header: Logo links, Portalname daneben. Darunter die Karte mittig auf dem Hintergrund.",
 };
@@ -82,11 +82,14 @@ export function useLoginPrototype() {
   const longName = computed(() => route.query.name === "lang");
   // Variante A: Panel auch im Dunkelmodus hell, dann ohne Invertierung.
   const panelLight = computed(() => isDev && route.query.panel === "hell");
-  // Variante B: heller Grund in der Karte, als Kopf über die ganze Breite
-  // oder als Platte nur um das Logo. Dann ohne Invertierung.
-  const plate = computed(() => (isDev && route.query.plate === "logo" ? "logo" : "kopf"));
+  // Variante B: ohne eigenen Grund (Standard), oder heller Grund als Kopf
+  // über die ganze Breite bzw. als Platte um das Logo, dann ohne Invertierung.
+  const plate = computed(() =>
+    isDev && ["logo", "kopf"].includes(route.query.plate) ? route.query.plate : "keins",
+  );
   const invert = computed(() =>
-    (panelLight.value && variant.value === "A") || variant.value === "B"
+    (panelLight.value && variant.value === "A") ||
+    (variant.value === "B" && plate.value !== "keins")
       ? false
       : route.query.invert !== "0",
   );

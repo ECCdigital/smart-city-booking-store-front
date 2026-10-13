@@ -43,9 +43,13 @@
             {{ label }}
           </label>
           <div v-if="proto.variant.value === 'B'" class="space-y-1">
-            <div class="text-neutral-400">Heller Grund in der Karte</div>
+            <div class="text-neutral-400">Grund hinter dem Logo</div>
             <label class="flex items-center gap-2">
-              <input type="radio" name="proto-plate" :checked="proto.plate.value === 'kopf'" @change="proto.set({ plate: undefined })">
+              <input type="radio" name="proto-plate" :checked="proto.plate.value === 'keins'" @change="proto.set({ plate: undefined })">
+              Kein eigener Grund
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="radio" name="proto-plate" :checked="proto.plate.value === 'kopf'" @change="proto.set({ plate: 'kopf' })">
               Kopf über die ganze Breite
             </label>
             <label class="flex items-center gap-2">
@@ -58,7 +62,7 @@
             Panel auch im Dunkelmodus hell (ohne Invertierung)
           </label>
           <label class="flex items-center gap-2">
-            <input type="checkbox" :checked="proto.invert.value" :disabled="(proto.panelLight.value && proto.variant.value === 'A') || proto.variant.value === 'B'" @change="proto.set({ invert: $event.target.checked ? undefined : '0' })">
+            <input type="checkbox" :checked="proto.invert.value" :disabled="(proto.panelLight.value && proto.variant.value === 'A') || (proto.variant.value === 'B' && proto.plate.value !== 'keins')" @change="proto.set({ invert: $event.target.checked ? undefined : '0' })">
             Im Dunkelmodus invertieren (heute immer an)
           </label>
         </fieldset>
