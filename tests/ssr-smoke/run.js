@@ -8,6 +8,7 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import net from "node:net";
 import { startBackendStub, BOOKABLE, EVENT } from "./backend-stub.js";
+import { fontProblems } from "./font.js";
 
 const pages = [
   { path: "/", marker: "Smoke-Katalog" },
@@ -127,6 +128,7 @@ try {
         );
       }
     }
+    failures.push(...(await fontProblems(base, backend)));
   }
 } finally {
   server.kill();

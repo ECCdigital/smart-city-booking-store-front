@@ -153,6 +153,7 @@ describe("defaultThemeView", () => {
       background: null,
       logo: null,
       authLogoSize: "sm",
+      font: null,
     });
   });
 });

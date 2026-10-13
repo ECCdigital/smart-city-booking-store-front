@@ -47,6 +47,12 @@ export interface ThemeBundle {
   logo?: unknown;
   /** The height step of the logo in the auth cards, read by `buildThemeView`. */
   authLogoSize?: unknown;
+  /**
+   * The instance font: `{ source: "curated", id }`, `{ source: "media",
+   * reference: { url, name, size, … } }`, or `null` for the system font.
+   * Read by `server/utils/themeFont.ts`.
+   */
+  font?: unknown;
 }
 
 export interface CatalogData {

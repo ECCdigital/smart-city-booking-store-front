@@ -60,6 +60,12 @@ export default defineNuxtConfig({
     },
   },
   routeRules: {
+    // The fonts of the curated list (ECCdigital/tickets#531) carry their
+    // version in the file name, so they are cached for good. Nitro serves the
+    // rest of `public/` without a Cache-Control of its own.
+    "/fonts/**": {
+      headers: { "cache-control": "public, max-age=31536000, immutable" },
+    },
     // Colour mode is now in the SSR HTML (cookie + html class). A shared ISR
     // cache would serve one visitor's mode to the next for 300s.
     "/catalog/**": { ssr: true },

@@ -387,6 +387,13 @@ export interface ThemeView {
   logo: HeroMediaReference | null;
   /** The height step of the logo in the auth cards; S unless the bundle says otherwise. */
   authLogoSize: AuthLogoSize;
+  /** The instance font's file for the preload; `null` for the system font. */
+  font: ThemeViewFont | null;
+}
+
+/** The instance font as the client sees it: only the URL on the storefront. */
+export interface ThemeViewFont {
+  href: string;
 }
 
 /** The steps the logo in the auth cards can take: 56, 96 or 160 px high. */

@@ -4,6 +4,7 @@
 // the smoke test instead of silently rendering an error page.
 import http from "node:http";
 import { readFileSync } from "node:fs";
+import { fontRoutes } from "./font.js";
 
 const fixture = (name) =>
   JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url)));
@@ -26,12 +27,14 @@ const routes = {
   [`/api/${TENANT}/bookables/public/${BOOKABLE}`]: bookable,
   [`/json/${TENANT}/events/${EVENT}`]: event,
   [`/api/${TENANT}/events/${EVENT}`]: event,
+  ...fontRoutes,
 };
 
 /**
  * Starts the stand-in on a free port.
  *
- * @returns {Promise<{ url: string, unknown: Set<string>, close: () => void }>}
+ * @returns {Promise<{ url: string, unknown: Set<string>, routes: object, close: () => void }>}
+ *   `routes` is the table it answers from, for a check that swaps a fixture.
  */
 export function startBackendStub() {
   const unknown = new Set();
@@ -44,6 +47,11 @@ export function startBackendStub() {
       res.end(JSON.stringify({ success: false, message: "Not found" }));
       return;
     }
+    if (Buffer.isBuffer(body)) {
+      res.writeHead(200, { "content-type": "font/woff2" });
+      res.end(body);
+      return;
+    }
     res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
     res.end(JSON.stringify(body));
   });
@@ -53,6 +61,7 @@ export function startBackendStub() {
       resolve({
         url: `http://127.0.0.1:${port}`,
         unknown,
+        routes,
         close: () => server.close(),
       });
     });
