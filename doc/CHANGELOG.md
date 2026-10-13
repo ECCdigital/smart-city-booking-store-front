@@ -10,6 +10,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 ### Added
 
 - The header bar follows the instance's `header` from the Theme Bundle: neutral, primary or secondary, primary by default as before (ECCdigital/tickets#525). Neutral is white with near-black text in light mode and the footer's ground with white text in dark mode. On a secondary bar the active tab stands in primary with a secondary stripe. Requires the backend of ECCdigital/tickets#520 for the setting; without it the bar stays primary
+- An accent colour for badges and decoration (ECCdigital/tickets#526): with `theme.colors.accent` set, the theme stylesheet declares `--ui-accent` and `--ui-accent-contrast`, and the Kind badges, the „Pauschal“ badge (filled, contrast text), the stripes of result cards and strips, the category circle and hover ring, the accent polygons and one glow of the generated backgrounds wear it, the same in light and dark. The Hero takes `accent` as text and Panel colour. Without an accent every element keeps its look from before: primary, the secondary outline for „Pauschal“, the palette's colours for the background. Requires the backend of ECCdigital/tickets#520
 
 ### Security
 

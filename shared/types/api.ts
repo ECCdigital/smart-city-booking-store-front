@@ -3,6 +3,8 @@ export type PortalMode = "offers" | "personal";
 export interface ThemeColors {
   primary?: string;
   secondary?: string;
+  /** `""` when the instance set no accent. */
+  accent?: string;
 }
 
 export interface Theme {

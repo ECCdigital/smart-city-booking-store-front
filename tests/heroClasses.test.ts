@@ -289,6 +289,8 @@ describe("the Hero class tables", () => {
       default: "text-black dark:text-white",
       primary: "text-primary",
       secondary: "text-secondary",
+      // The stylesheet declares no accent unless the instance set one.
+      accent: "text-[color:var(--ui-accent,var(--ui-primary))]",
       white: "text-white",
     });
   });
@@ -444,6 +446,7 @@ describe("a Block's box", () => {
       ["black", "#000000"],
       ["primary", "var(--ui-primary)"],
       ["secondary", "var(--ui-secondary)"],
+      ["accent", "var(--ui-accent, var(--ui-primary))"],
       ["#b91c1c", "#b91c1c"],
     ];
 
@@ -682,7 +685,7 @@ describe("a rich-text Block", () => {
     }
   });
 
-  it("paints the four colour tokens of the vocabulary, `default` black on a Panel", () => {
+  it("paints the five colour tokens of the vocabulary, `default` black on a Panel", () => {
     for (const token of HERO_COLOR_TOKENS) {
       const mark = `hero-color-${token}`;
       expect(HERO_RICHTEXT_CLASSES.color).toContain(mark);
