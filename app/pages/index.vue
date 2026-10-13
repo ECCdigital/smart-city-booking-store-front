@@ -33,8 +33,6 @@
       />
       <LatestEventsArea v-else-if="allEvents.length > 0" :items="allEvents" />
 
-      <!-- The instance home only: under /t/:tenantID the store holds that
-           tenant's catalog, not the providers. -->
       <TenantOffersArea
         v-if="!error && !isTenantContext"
         :tenants="tenantStore.getTenants"

@@ -5,7 +5,6 @@
       <div class="flex-1" />
       <UButton
         variant="ghost"
-        color="neutral"
         :label="$t('home.providers.all')"
         trailing-icon="i-lucide-chevron-right"
         to="/search"
@@ -18,45 +17,52 @@
              only shows on the instance home. -->
         <NuxtLink
           :to="`/t/${tile.id}`"
-          class="group flex flex-col h-full gap-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 transition duration-200 ease-out hover:shadow-lg hover:ring-2 hover:ring-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+          class="group flex flex-col justify-between h-full gap-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 transition duration-200 ease-out hover:shadow-lg hover:ring-2 hover:ring-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
         >
-          <div class="flex items-center gap-4">
-            <span
-              :class="ACCENTS[providerAccent(tile.id, ACCENTS.length)]"
-              class="shrink-0 w-14 h-14 rounded-xl text-white text-lg font-bold flex items-center justify-center"
-              aria-hidden="true"
-            >
-              {{ tile.initials }}
-            </span>
-            <div class="min-w-0">
-              <p
-                class="text-xl font-bold text-gray-900 dark:text-white break-words"
+          <div>
+            <div class="flex items-center gap-4">
+              <span
+                :class="ACCENTS[providerAccent(tile.id, ACCENTS.length)]"
+                class="shrink-0 w-14 h-14 rounded-xl text-white text-lg font-bold flex items-center justify-center"
+                aria-hidden="true"
               >
-                {{ tile.name }}
-              </p>
-              <!-- A count breaks as a whole, never between number and word. -->
-              <p class="text-gray-600 dark:text-gray-400">
-                <span class="whitespace-nowrap">{{
-                  $t("home.providers.bookables", tile.bookableCount)
-                }}</span>
-                ·
-                <span class="whitespace-nowrap">{{
-                  $t("home.providers.events", tile.eventCount)
-                }}</span>
-              </p>
+                {{ tile.initials }}
+              </span>
+              <div class="min-w-0">
+                <p
+                  class="text-xl font-bold text-gray-900 dark:text-white break-words"
+                >
+                  {{ tile.name }}
+                </p>
+                <!-- A count breaks as a whole, never between number and word. -->
+                <p class="text-gray-600 dark:text-gray-400">
+                  <span
+                    v-if="tile.bookableCount > 0"
+                    class="whitespace-nowrap"
+                    >{{
+                      $t("home.providers.bookables", tile.bookableCount)
+                    }}</span
+                  >
+                  <span v-if="tile.bookableCount > 0 && tile.eventCount > 0">
+                    ·
+                  </span>
+                  <span v-if="tile.eventCount > 0" class="whitespace-nowrap">{{
+                    $t("home.providers.events", tile.eventCount)
+                  }}</span>
+                </p>
+              </div>
             </div>
+
+            <!-- Plain text the tenant wrote: interpolated, never `v-html`. -->
+            <p
+              v-if="tile.description"
+              class="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-line mt-2 text-sm"
+            >
+              {{ tile.description }}
+            </p>
           </div>
 
-          <!-- Plain text the tenant wrote: interpolated, never `v-html`. -->
-          <p
-            v-if="tile.description"
-            class="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-line"
-          >
-            {{ tile.description }}
-          </p>
-
-          <div class="flex-1" />
-          <span
+          <div
             class="self-end inline-flex items-center gap-1 font-semibold text-primary"
           >
             {{ $t("home.providers.showOffers") }}
@@ -65,7 +71,7 @@
               class="transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
               aria-hidden="true"
             />
-          </span>
+          </div>
         </NuxtLink>
       </li>
     </ul>
