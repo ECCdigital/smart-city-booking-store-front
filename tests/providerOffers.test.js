@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { providerTiles } from "~/utils/providerOffers.js";
+import {
+  providerAccent,
+  providerInitials,
+  providerTiles,
+} from "~/utils/providerOffers.js";
 
 /**
  * „Angebot nach Anbietern“ on the instance home (ECCdigital/tickets#478):
@@ -52,12 +56,13 @@ describe("providerTiles", () => {
       tenant("Halle", 1, 0, { description: "   " }),
     ]);
 
-    expect(withText).toEqual({
+    expect(withText).toMatchObject({
       id: "Verein",
       name: "Verein",
       description: "Sport im Quartier.",
       bookableCount: 2,
       eventCount: 1,
+      initials: "VE",
     });
     expect(without.description).toBeNull();
   });
@@ -69,5 +74,36 @@ describe("providerTiles", () => {
   it("answers an empty list for no tenants", () => {
     expect(providerTiles(undefined)).toEqual([]);
     expect(providerTiles([])).toEqual([]);
+  });
+});
+
+describe("providerInitials", () => {
+  it("takes the first letters of the first two words", () => {
+    expect(providerInitials("Sport & Bäder")).toBe("SB");
+    expect(providerInitials("Jugendzentrum Ost")).toBe("JO");
+    expect(providerInitials("Stadt Wildeshausen e.V.")).toBe("SW");
+  });
+
+  it("takes the first two letters of a single word", () => {
+    expect(providerInitials("Kulturamt")).toBe("KU");
+  });
+
+  it("answers a question mark for a name without letters", () => {
+    expect(providerInitials("")).toBe("?");
+    expect(providerInitials(undefined)).toBe("?");
+  });
+});
+
+describe("providerAccent", () => {
+  it("gives a tenant the same accent on every load", () => {
+    expect(providerAccent("diz", 6)).toBe(providerAccent("diz", 6));
+  });
+
+  it("stays within the palette", () => {
+    for (const id of ["a", "diz", "0f44248a-bf4e-4292", "Stadt Testingen"]) {
+      const accent = providerAccent(id, 6);
+      expect(accent).toBeGreaterThanOrEqual(0);
+      expect(accent).toBeLessThan(6);
+    }
   });
 });

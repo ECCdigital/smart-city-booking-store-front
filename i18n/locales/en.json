@@ -4,7 +4,9 @@
     "providers": {
       "title": "Offers by provider",
       "bookables": "no bookables | {count} bookable | {count} bookables",
-      "events": "no events | {count} event | {count} events"
+      "events": "no events | {count} event | {count} events",
+      "all": "All providers",
+      "showOffers": "View offers"
     },
     "howItWorks": {
       "title": "How booking works",

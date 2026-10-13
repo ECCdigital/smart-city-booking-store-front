@@ -4,7 +4,9 @@
     "providers": {
       "title": "Angebot nach Anbietern",
       "bookables": "keine Buchungsobjekte | {count} Buchungsobjekt | {count} Buchungsobjekte",
-      "events": "keine Events | {count} Event | {count} Events"
+      "events": "keine Veranstaltungen | {count} Veranstaltung | {count} Veranstaltungen",
+      "all": "Alle Anbieter",
+      "showOffers": "Angebote ansehen"
     },
     "howItWorks": {
       "title": "So funktioniert das Buchen",
