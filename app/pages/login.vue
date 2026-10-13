@@ -15,6 +15,7 @@ definePageMeta({
 const t = useI18n().t;
 usePageTitle(() => t("meta.pages.login"));
 const route = useRoute();
+const proto = useLoginPrototype();
 
 const form = ref({ id: "", password: "" });
 const loading = ref(false);
@@ -62,23 +63,53 @@ const handleSsoLogin = () => {
 
 <template>
   <PageBackground>
-    <AuthTitleSection
-      is-large-version
-      class="hidden lg:flex w-3/5 items-center justify-center"
-    />
+    <!-- PROTOTYPE #513: B und D stellen die Karte mittig, 0, A und C wie heute -->
+    <template v-if="proto.variant.value === 'B' || proto.variant.value === 'D'">
+      <div class="flex flex-col w-full min-h-screen">
+        <div
+          v-if="proto.variant.value === 'D'"
+          class="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur border-b border-gray-200 dark:border-gray-800 shadow-sm px-6 py-3"
+        >
+          <AuthTitleSection placement="band" />
+        </div>
+        <div class="flex flex-1 items-center justify-center p-6">
+          <LoginCard
+            v-model:user-data="form"
+            class="shadow-2xl/50"
+            :loading="loading"
+            :sso-enabled="ssoEnabled"
+            :sso-error="ssoError"
+            :return-target="returnTarget ?? undefined"
+            @submit="handleLogin"
+            @sso-login="handleSsoLogin"
+          >
+            <template v-if="proto.variant.value === 'B'" #title>
+              <AuthTitleSection placement="card" />
+            </template>
+          </LoginCard>
+        </div>
+      </div>
+    </template>
 
-    <div class="flex flex-col w-full lg:w-2/5 items-center justify-center p-6">
-      <AuthTitleSection class="lg:hidden" />
-      <LoginCard
-        v-model:user-data="form"
-        class="shadow-2xl/50"
-        :loading="loading"
-        :sso-enabled="ssoEnabled"
-        :sso-error="ssoError"
-        :return-target="returnTarget ?? undefined"
-        @submit="handleLogin"
-        @sso-login="handleSsoLogin"
+    <template v-else>
+      <AuthTitleSection
+        is-large-version
+        class="hidden lg:flex w-3/5 items-center justify-center"
       />
-    </div>
+
+      <div class="flex flex-col w-full lg:w-2/5 items-center justify-center p-6">
+        <AuthTitleSection class="lg:hidden" />
+        <LoginCard
+          v-model:user-data="form"
+          class="shadow-2xl/50"
+          :loading="loading"
+          :sso-enabled="ssoEnabled"
+          :sso-error="ssoError"
+          :return-target="returnTarget ?? undefined"
+          @submit="handleLogin"
+          @sso-login="handleSsoLogin"
+        />
+      </div>
+    </template>
   </PageBackground>
 </template>

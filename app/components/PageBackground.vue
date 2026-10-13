@@ -12,12 +12,15 @@ defineProps({
 });
 
 const { data: theme } = await useThemeBundle();
+const proto = useLoginPrototype();
 </script>
 
 <template>
   <div class="page-wrapper relative min-h-screen">
     <div class="fixed inset-0 -z-10">
-      <BackgroundLayers :background="theme?.background" />
+      <!-- PROTOTYPE #513: Testhintergründe für den Login -->
+      <PrototypeLoginBackground v-if="proto.bg.value !== 'instanz'" />
+      <BackgroundLayers v-else :background="theme?.background" />
       <div v-if="vignette" class="absolute inset-0 pointer-events-none vignette" />
     </div>
 

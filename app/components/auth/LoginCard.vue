@@ -1,7 +1,12 @@
 <template>
   <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
     <template #header>
-      <h1 class="text-2xl font-semibold text-center">
+      <!-- PROTOTYPE #513, Variante B: Logo und Portalname in der Karte -->
+      <slot name="title" />
+      <h1
+        class="font-semibold text-center"
+        :class="$slots.title ? 'text-lg text-gray-500 dark:text-gray-400 mt-2' : 'text-2xl'"
+      >
         {{ $t("login.title") }}
       </h1>
     </template>

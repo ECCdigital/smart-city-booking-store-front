@@ -4,6 +4,8 @@
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <!-- PROTOTYPE #513: Login lesbar, nur im Dev-Modus -->
+    <PrototypeLoginPrototypePanel />
   </UApp>
 </template>
 
