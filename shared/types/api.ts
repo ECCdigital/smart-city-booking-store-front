@@ -45,6 +45,8 @@ export interface ThemeBundle {
   heroLayout?: unknown;
   background?: unknown;
   logo?: unknown;
+  /** The variant of the logo for the dark mode, read like `logo`. */
+  logoDark?: unknown;
   /** The height step of the logo in the auth cards, read by `buildThemeView`. */
   authLogoSize?: unknown;
 }

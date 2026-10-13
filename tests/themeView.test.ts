@@ -144,6 +144,53 @@ describe("buildThemeView", () => {
   );
 });
 
+describe("the variant of the logo for the dark mode", () => {
+  const dark = {
+    source: "media",
+    mediaId: "66f1c200000000000000000d",
+    url: "/api/v2/instance/media/66f1c200000000000000000d/file",
+    width: 200,
+    height: 100,
+  };
+
+  it("travels beside the logo, with its own dimensions", () => {
+    const { issues, onIssue } = withIssues();
+
+    const view = buildThemeView(bundleWith({ logoDark: dark }), "e", { onIssue });
+
+    expect(view.logoDark).toEqual(dark);
+    expect(view.logo?.mediaId).toBe("66f1c2000000000000000009");
+    expect(issues).toEqual([]);
+  });
+
+  it.each([undefined, null])(
+    "is null without a report when the bundle carries %s",
+    (logoDark) => {
+      const { issues, onIssue } = withIssues();
+
+      const view = buildThemeView(bundleWith({ logoDark }), "e", { onIssue });
+
+      expect(view.logoDark).toBeNull();
+      expect(issues).toEqual([]);
+    },
+  );
+
+  it("is null on its own when it fails the guard, and costs the logo nothing", () => {
+    const { issues, onIssue } = withIssues();
+
+    const view = buildThemeView(
+      bundleWith({ logoDark: { source: "url", url: "https://evil.example/x.png" } }),
+      "e",
+      { onIssue },
+    );
+
+    expect(view.logoDark).toBeNull();
+    expect(view.logo?.mediaId).toBe("66f1c2000000000000000009");
+    expect(issues).toHaveLength(1);
+    expect(issues[0].path).toMatch(/^logoDark/);
+  });
+});
+
 describe("defaultThemeView", () => {
   it("is a complete Theme View that asks the renderer for its fallbacks", () => {
     expect(defaultThemeView()).toEqual({
@@ -152,6 +199,7 @@ describe("defaultThemeView", () => {
       heroLayout: null,
       background: null,
       logo: null,
+      logoDark: null,
       authLogoSize: "sm",
     });
   });
