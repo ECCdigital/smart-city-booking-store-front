@@ -22,18 +22,14 @@ const PATH = "footerLogos";
 
 /**
  * One image of a footer logo, with the medium's title as its alternative
- * text. The reference guard names its path `logo`; the issue is renamed to
- * the image's place in the list.
+ * text. An issue names the image's place in the list.
  */
 function readImage(
   value: unknown,
   path: string,
   report: (issue: HeroParseIssue) => void,
 ): FooterLogoImage | null {
-  const reference = parseHeroMediaReference(value, {
-    onIssue: (issue) =>
-      report({ ...issue, path: issue.path.replace(/^logo/, path) }),
-  });
+  const reference = parseHeroMediaReference(value, { onIssue: report }, path);
   if (!reference) return null;
   // The guard lets an unaddressed reference through, the export always has
   // one; without it there is nothing to show.
