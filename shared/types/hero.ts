@@ -437,6 +437,13 @@ export interface ThemeView {
   authLogoSize: AuthLogoSize;
   /** The logos of the footer row, in order; empty when there is no row. */
   footerLogos: FooterLogo[];
+  /** The instance font's file for the preload; `null` for the system font. */
+  font: ThemeViewFont | null;
+}
+
+/** The instance font as the client sees it: only the URL on the storefront. */
+export interface ThemeViewFont {
+  href: string;
 }
 
 /** The steps the logo in the auth cards can take: 56, 96 or 160 px high. */

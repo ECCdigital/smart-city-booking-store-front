@@ -156,5 +156,15 @@
       }
     }
   ],
+  "font": {
+    "source": "media",
+    "reference": {
+      "source": "media",
+      "mediaId": "00000000000000000000f0f1",
+      "url": "/api/v2/instance/media/00000000000000000000f0f1/file",
+      "name": "Smoke-Schrift",
+      "size": 48256
+    }
+  },
   "visibility": "public"
 }

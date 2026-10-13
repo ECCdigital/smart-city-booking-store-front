@@ -450,6 +450,7 @@ describe("defaultThemeView", () => {
       logoDark: null,
       authLogoSize: "sm",
       footerLogos: [],
+      font: null,
     });
   });
 });

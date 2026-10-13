@@ -8,6 +8,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import net from "node:net";
 import { startBackendStub, BOOKABLE, EVENT, THEMES } from "./backend-stub.js";
+import { fontProblems } from "./font.js";
 
 const pages = [
   { path: "/", marker: "Smoke-Katalog" },
@@ -28,7 +29,7 @@ const PORTAL_NAME = ">Smoke-Katalog<";
 // setting, then — the script runs itself once more — without the settings a
 // backend before Karte ECCdigital/tickets#510 does not send.
 const WITHOUT_NEW_SETTINGS = process.env.SSR_SMOKE_PASS === "without-new-settings";
-const NEW_SETTINGS = ["logoDark", "footerLogos"];
+const NEW_SETTINGS = ["logoDark", "footerLogos", "font"];
 const themes = WITHOUT_NEW_SETTINGS
   ? Object.fromEntries(
       Object.entries(THEMES).filter(([key]) => !NEW_SETTINGS.includes(key)),
@@ -307,6 +308,10 @@ try {
         backend.routes["/api/catalog/themes"] = bundle;
       }
     }
+
+    failures.push(
+      ...(await fontProblems(base, backend, { withoutNewSettings: WITHOUT_NEW_SETTINGS })),
+    );
   }
 } finally {
   server.kill();
