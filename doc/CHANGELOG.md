@@ -10,6 +10,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 ### Added
 
 - The header bar follows the instance's `header` from the Theme Bundle: neutral, primary or secondary, primary by default as before (ECCdigital/tickets#525). Neutral is white with near-black text in light mode and the footer's ground with white text in dark mode. On a secondary bar the active tab stands in primary with a secondary stripe. Requires the backend of ECCdigital/tickets#520 for the setting; without it the bar stays primary
+- The auth pages show the app logo's variant for the dark mode from the Theme Bundle's `logoDark` (ECCdigital/tickets#527). Both images are in the server-rendered HTML and the class `.dark` picks one, so the right logo stands in the first paint, also in the mode „System“, and on every toggle without a reload; each reserves its own box. Without a variant the logo is inverted in the dark mode as before. Requires the backend of ECCdigital/tickets#521 for the variant
 
 ### Security
 

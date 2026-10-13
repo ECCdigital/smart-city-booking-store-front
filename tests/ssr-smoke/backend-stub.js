@@ -15,10 +15,13 @@ export const EVENT = "00000000-0000-4000-8000-0000000000e1";
 const bookable = fixture("bookable.json");
 const event = fixture("event.json");
 
+/** The Theme Bundle of the fixture, with every setting the storefront reads. */
+export const THEMES = fixture("catalog-themes.json");
+
 const routes = {
   "/api/catalog/mode": fixture("catalog-mode.json"),
   "/api/instances/public": fixture("instances-public.json"),
-  "/api/catalog/themes": fixture("catalog-themes.json"),
+  "/api/catalog/themes": THEMES,
   "/api/catalog/bundle": fixture("catalog-bundle.json"),
   [`/json/${TENANT}/bookables/`]: [bookable],
   [`/json/${TENANT}/events/`]: [event],
@@ -31,13 +34,16 @@ const routes = {
 /**
  * Starts the stand-in on a free port.
  *
+ * @param {{ themes?: object }} [options] - A Theme Bundle to answer with in
+ *   place of the fixture's.
  * @returns {Promise<{ url: string, unknown: Set<string>, close: () => void }>}
  */
-export function startBackendStub() {
+export function startBackendStub({ themes = THEMES } = {}) {
   const unknown = new Set();
+  const answers = { ...routes, "/api/catalog/themes": themes };
   const server = http.createServer((req, res) => {
     const path = req.url.split("?")[0];
-    const body = req.method === "GET" ? routes[path] : undefined;
+    const body = req.method === "GET" ? answers[path] : undefined;
     if (body === undefined) {
       unknown.add(`${req.method} ${path}`);
       res.writeHead(404, { "content-type": "application/json" });
