@@ -10,6 +10,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 ### Added
 
 - The header bar follows the instance's `header` from the Theme Bundle: neutral, primary or secondary, primary by default as before (ECCdigital/tickets#525). Neutral is white with near-black text in light mode and the footer's ground with white text in dark mode. On a secondary bar the active tab stands in primary with a secondary stripe. Requires the backend of ECCdigital/tickets#520 for the setting; without it the bar stays primary
+- The instance's footer logos, such as funding logos, stand in a row of their own above copyright and links (ECCdigital/tickets#530): 48, 80 or 120 px high (× 0.8 on the phone), at most 3.5 times as wide, never inverted. In dark mode a logo shows its variant, or stands on a white plate without one. A linked logo opens in a new tab; the alternative text is the medium's title. Requires the backend of ECCdigital/tickets#523; without footer logos the footer is unchanged
 
 ### Security
 

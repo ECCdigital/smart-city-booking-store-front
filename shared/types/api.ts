@@ -47,6 +47,8 @@ export interface ThemeBundle {
   logo?: unknown;
   /** The height step of the logo in the auth cards, read by `buildThemeView`. */
   authLogoSize?: unknown;
+  /** The logos of the footer row, read by `parseFooterLogos`. */
+  footerLogos?: unknown;
 }
 
 export interface CatalogData {

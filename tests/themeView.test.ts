@@ -144,6 +144,193 @@ describe("buildThemeView", () => {
   );
 });
 
+describe("buildThemeView, footer logos", () => {
+  function footerImage(id: string, name: string) {
+    return {
+      source: "media",
+      mediaId: id,
+      url: `/api/v2/instance/media/${id}/file`,
+      width: 600,
+      height: 200,
+      name,
+    };
+  }
+
+  it("carries the footer logos in their order, each with its image, size, link and variant", () => {
+    const { issues, onIssue } = withIssues();
+
+    const view = buildThemeView(
+      bundleWith({
+        footerLogos: [
+          {
+            image: footerImage("66f1c20000000000000000f1", "Gefördert vom BMWSB"),
+            size: "lg",
+            link: "https://www.bmwsb.bund.de/",
+            imageDark: null,
+          },
+          {
+            image: footerImage("66f1c20000000000000000f2", "Stadtwerke"),
+            size: "sm",
+            link: "",
+            imageDark: footerImage("66f1c20000000000000000f3", "Stadtwerke hell"),
+          },
+        ],
+      }),
+      "e",
+      { onIssue },
+    );
+
+    expect(view.footerLogos).toEqual([
+      {
+        image: {
+          source: "media",
+          mediaId: "66f1c20000000000000000f1",
+          url: "/api/v2/instance/media/66f1c20000000000000000f1/file",
+          width: 600,
+          height: 200,
+          name: "Gefördert vom BMWSB",
+        },
+        size: "lg",
+        link: "https://www.bmwsb.bund.de/",
+        imageDark: null,
+      },
+      {
+        image: {
+          source: "media",
+          mediaId: "66f1c20000000000000000f2",
+          url: "/api/v2/instance/media/66f1c20000000000000000f2/file",
+          width: 600,
+          height: 200,
+          name: "Stadtwerke",
+        },
+        size: "sm",
+        link: "",
+        imageDark: {
+          source: "media",
+          mediaId: "66f1c20000000000000000f3",
+          url: "/api/v2/instance/media/66f1c20000000000000000f3/file",
+          width: 600,
+          height: 200,
+          name: "Stadtwerke hell",
+        },
+      },
+    ]);
+    expect(issues).toEqual([]);
+  });
+
+  it.each([undefined, null, []])(
+    "has no footer logos, and reports nothing, when the bundle carries %s",
+    (footerLogos) => {
+      const { issues, onIssue } = withIssues();
+
+      const view = buildThemeView(bundleWith({ footerLogos }), "e", { onIssue });
+
+      expect(view.footerLogos).toEqual([]);
+      expect(issues).toEqual([]);
+    },
+  );
+
+  it.each([
+    "javascript:alert(1)",
+    "data:text/html,<script>alert(1)</script>",
+    "//evil.example/",
+    "/relative",
+    42,
+  ])("never turns %s into a link, and keeps the logo", (link) => {
+    const { issues, onIssue } = withIssues();
+
+    const view = buildThemeView(
+      bundleWith({
+        footerLogos: [
+          { image: footerImage("66f1c20000000000000000f1", "Logo"), size: "md", link, imageDark: null },
+        ],
+      }),
+      "e",
+      { onIssue },
+    );
+
+    expect(view.footerLogos).toHaveLength(1);
+    expect(view.footerLogos[0]!.link).toBe("");
+    expect(issues).toEqual([{ path: "footerLogos[0].link", code: "invalid_format" }]);
+  });
+
+  it("drops a logo whose image fails on its own and keeps the others", () => {
+    const { issues, onIssue } = withIssues();
+
+    const view = buildThemeView(
+      bundleWith({
+        footerLogos: [
+          { image: { source: "external", url: "https://evil.example/x.png" }, size: "md", link: "" },
+          { image: footerImage("66f1c20000000000000000f2", "Stadtwerke"), size: "md", link: "" },
+        ],
+      }),
+      "e",
+      { onIssue },
+    );
+
+    expect(view.footerLogos.map((logo) => logo.image.name)).toEqual(["Stadtwerke"]);
+    expect(issues).toEqual([{ path: "footerLogos[0].image.source", code: "invalid_custom" }]);
+  });
+
+  it("drops a logo, or its variant, that carries no address to show", () => {
+    const { issues, onIssue } = withIssues();
+    const { url: _url, ...unaddressed } = footerImage("66f1c20000000000000000f9", "Ohne URL");
+
+    const view = buildThemeView(
+      bundleWith({
+        footerLogos: [
+          { image: unaddressed, size: "md", link: "" },
+          { image: footerImage("66f1c20000000000000000f2", "Stadtwerke"), size: "md", link: "", imageDark: unaddressed },
+        ],
+      }),
+      "e",
+      { onIssue },
+    );
+
+    expect(view.footerLogos).toHaveLength(1);
+    expect(view.footerLogos[0]!.image.name).toBe("Stadtwerke");
+    expect(view.footerLogos[0]!.imageDark).toBeNull();
+    expect(issues).toEqual([
+      { path: "footerLogos[0].image.url", code: "required" },
+      { path: "footerLogos[1].imageDark.url", code: "required" },
+    ]);
+  });
+
+  it("shows the plate rather than a broken variant", () => {
+    const { issues, onIssue } = withIssues();
+
+    const view = buildThemeView(
+      bundleWith({
+        footerLogos: [
+          {
+            image: footerImage("66f1c20000000000000000f1", "Logo"),
+            size: "md",
+            link: "",
+            imageDark: { source: "media", mediaId: "" },
+          },
+        ],
+      }),
+      "e",
+      { onIssue },
+    );
+
+    expect(view.footerLogos[0]!.imageDark).toBeNull();
+    expect(issues).toEqual([{ path: "footerLogos[0].imageDark.mediaId", code: "required" }]);
+  });
+
+  it.each([undefined, "xl", 3])("reads the size %s as M", (size) => {
+    const view = buildThemeView(
+      bundleWith({
+        footerLogos: [{ image: footerImage("66f1c20000000000000000f1", "Logo"), size, link: "" }],
+      }),
+      "e",
+      withIssues(),
+    );
+
+    expect(view.footerLogos[0]!.size).toBe("md");
+  });
+});
+
 describe("defaultThemeView", () => {
   it("is a complete Theme View that asks the renderer for its fallbacks", () => {
     expect(defaultThemeView()).toEqual({
@@ -153,6 +340,7 @@ describe("defaultThemeView", () => {
       background: null,
       logo: null,
       authLogoSize: "sm",
+      footerLogos: [],
     });
   });
 });

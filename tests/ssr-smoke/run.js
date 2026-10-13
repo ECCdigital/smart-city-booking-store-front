@@ -53,6 +53,44 @@ function authCardProblem(html) {
   }
 }
 
+// The footer logos of the fixture (ECCdigital/tickets#530): a funding logo in
+// L, linked and without a variant, then a logo in M with a variant.
+const FUNDING_LINK = "https://www.bmwsb.bund.de/";
+const FUNDING_ALT = 'alt="Smoke-Förderlogo"';
+const VARIANT = "media%2F00000000000000000000f3f3%2Ffile";
+
+/**
+ * What is wrong with the row of footer logos on a page, or nothing: it stands
+ * above the copyright, the linked logo opens in a new tab and sits on the
+ * plate in dark mode, the logo with a variant swaps to it, the sizes are the
+ * steps of the spec, and nothing is inverted.
+ *
+ * @param {string} html - The page as the server rendered it.
+ * @returns {string | undefined} The first problem found.
+ */
+function footerLogosProblem(html) {
+  const footer = html.slice(html.indexOf("<footer"), html.indexOf("</footer>"));
+  const row = footer.indexOf("data-footer-logos");
+  if (row === -1) return "no row of footer logos";
+  if (row > footer.indexOf("©")) return "row not above the copyright";
+  const link = footer.match(/<a [^>]*href="([^"]*)"[^>]*>/);
+  if (link?.[1] !== FUNDING_LINK) return "funding logo not linked";
+  if (!link[0].includes('target="_blank"') || !/rel="[^"]*\bnoopener\b/.test(link[0])) {
+    return "link not opening in a new tab with noopener";
+  }
+  if (!link[0].includes("dark:bg-white")) return "logo without variant has no plate";
+  if (!footer.includes(FUNDING_ALT)) return "funding logo without its medium's name as alt";
+  const funding = footer.slice(footer.lastIndexOf("<img", footer.indexOf(FUNDING_ALT)));
+  if (!/^<img[^>]*class="[^"]*h-\[96px\][^"]*sm:h-\[120px\]/.test(funding)) {
+    return "funding logo not in L (96 px on the phone, 120 px from sm)";
+  }
+  const variant = footer.slice(footer.lastIndexOf("<img", footer.indexOf(VARIANT)));
+  if (!/^<img[^>]*class="[^"]*hidden dark:block/.test(variant)) {
+    return "variant not shown in dark mode only";
+  }
+  if (footer.includes("invert")) return "a footer logo is inverted";
+}
+
 const serverEntry = new URL("../../.output/server/index.mjs", import.meta.url);
 
 function freePort() {
@@ -126,6 +164,29 @@ try {
             (cardProblem ? `, auth card: ${cardProblem}` : ""),
         );
       }
+    }
+
+    // The footer logos, with the fixture's settings and then without them, as
+    // a backend before ECCdigital/tickets#523 exports the bundle.
+    const themes = backend.routes["/api/catalog/themes"];
+    const withLogos = await (await fetch(base + "/")).text();
+    const logosProblem = footerLogosProblem(withLogos);
+    console.log(`${logosProblem ? "FAIL" : "ok  "} footer logos on /`);
+    if (logosProblem) failures.push(`footer logos on /: ${logosProblem}`);
+
+    const { footerLogos: _footerLogos, ...withoutLogos } = themes;
+    backend.routes["/api/catalog/themes"] = withoutLogos;
+    try {
+      const plain = await (await fetch(base + "/")).text();
+      const leftOver = !plain.includes("<footer")
+        ? "no footer"
+        : plain.includes("data-footer-logos")
+          ? "row of footer logos without footer logos"
+          : undefined;
+      console.log(`${leftOver ? "FAIL" : "ok  "} no footer logos on / without the setting`);
+      if (leftOver) failures.push(`/ without footer logos: ${leftOver}`);
+    } finally {
+      backend.routes["/api/catalog/themes"] = themes;
     }
   }
 } finally {
