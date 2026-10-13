@@ -98,7 +98,7 @@
             <UButton
               :label="$t('events.bookAtProvider')"
               class="justify-center px-5"
-              :style="{ color: contrastToPrimary }"
+              style="color: var(--ui-primary-contrast)"
               @click="goToExternalCheckout()"
             />
           </div>
@@ -153,7 +153,6 @@ import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import EventTicketStrip from "~/components/events/EventTicketStrip.vue";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 import AddressInformationArea from "~/components/AddressInformationArea.vue";
@@ -223,7 +222,6 @@ onMounted(async () => {
   }
 });
 
-const { contrastToPrimary } = useContrastColor();
 
 async function setSearchTimePeriod(tp) {
   timePeriod.value = tp;

@@ -27,7 +27,7 @@
         color="primary"
         block
         :loading="loading"
-        :style="{ color: contrastToPrimary }"
+        style="color: var(--ui-primary-contrast)"
         class="mt-2"
       >
         {{ $t("forgotPassword.submit") }}
@@ -46,7 +46,6 @@
 </template>
 
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 defineProps({
   loading: {
@@ -62,7 +61,6 @@ const userData = defineModel("userData", {
 
 const emit = defineEmits(["submit"]);
 
-const { contrastToPrimary } = useContrastColor();
 
 function submitForm() {
   emit("submit");

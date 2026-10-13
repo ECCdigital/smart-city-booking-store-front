@@ -11,7 +11,7 @@
       :icon="category.icon"
       :aria-label="category.label"
       :ui="neutral ? NEUTRAL_UI : undefined"
-      :style="neutral ? undefined : { color: contrastToPrimary }"
+      :style="neutral ? undefined : { color: 'var(--ui-primary-contrast)' }"
     />
   </UTooltip>
   <UBadge
@@ -23,17 +23,15 @@
     :label="category.label"
     :icon="category.icon"
     :ui="neutral ? NEUTRAL_UI : undefined"
-    :style="neutral ? undefined : { color: contrastToPrimary }"
+    :style="neutral ? undefined : { color: 'var(--ui-primary-contrast)' }"
   />
 </template>
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 defineOptions({ inheritAttrs: false });
 
 const { t } = useI18n();
 
-const { contrastToPrimary } = useContrastColor();
 
 const props = defineProps({
   type: {

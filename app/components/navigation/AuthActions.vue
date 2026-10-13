@@ -8,7 +8,7 @@
         :icon="isGreaterThanSm ? '' : 'i-lucide-log-in'"
         variant="ghost"
         class="block px-1 sm:px-2"
-        :style="{ color: contrastToPrimary }"
+        style="color: var(--ui-header-contrast)"
         :to="loginTo"
       />
       <UButton
@@ -29,12 +29,10 @@
 import UserDropdown from "~/components/UserDropdown.vue";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck";
 import { useAuthStore } from "~~/stores/auth.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import BookingsDropdown from "~/components/BookingsDropdown.vue";
 
 const { t } = useI18n();
 
-const { contrastToPrimary } = useContrastColor();
 const { isGreaterThanSm } = useBreakpointCheck();
 const authStore = useAuthStore();
 const route = useRoute();

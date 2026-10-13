@@ -15,7 +15,7 @@
     <template #header>
       <div class="w-full flex justify-center mt-5">
         <div class="bg-primary rounded-full p-3 pb-1 shadow-lg avatar-hover">
-          <UIcon :name="category.icon" :style="{color: contrastToPrimary}" class="avatar-hover" size="24"/>
+          <UIcon :name="category.icon" style="color: var(--ui-primary-contrast)" class="avatar-hover" size="24"/>
         </div>
       </div>
     </template>
@@ -26,7 +26,6 @@
   </UCard>
 </template>
 <script setup>
-import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 
 const props = defineProps({
   category: {
@@ -37,7 +36,6 @@ const props = defineProps({
 
 const {tenantTo} = useTenantRoute();
 
-const { contrastToPrimary } = useContrastColor();
 
 
 const router = useRouter()

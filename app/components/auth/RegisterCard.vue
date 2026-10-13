@@ -91,7 +91,7 @@
         color="primary"
         block
         :loading="loading"
-        :style="{ color: contrastToPrimary }"
+        style="color: var(--ui-primary-contrast)"
         class="mt-2"
       >
         {{ $t("common.register") }}
@@ -113,7 +113,6 @@
 import PasswordInput from "~/components/auth/PasswordInput.vue";
 import PasswordProgress from "~/components/auth/PasswordProgress.vue";
 import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 const { t } = useI18n();
 const notification = useNotification();
@@ -137,7 +136,6 @@ const userData = defineModel("userData", {
 
 const emit = defineEmits(["submit"]);
 
-const { contrastToPrimary } = useContrastColor();
 
 const {
   documents: legalDocuments,
