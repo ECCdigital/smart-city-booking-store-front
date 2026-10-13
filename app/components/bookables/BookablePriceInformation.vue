@@ -40,7 +40,7 @@
           </div>
           <div v-else-if="priceCategory.fixedPrice" class="flex justify-end">
             <UTooltip :text="fixedPriceHint">
-              <UBadge class="ml-2" color="secondary" variant="outline">
+              <UBadge data-accent="badge-outline" class="ml-2" color="secondary" variant="outline">
                 {{ $t("price.flatRate") }}
               </UBadge>
             </UTooltip>

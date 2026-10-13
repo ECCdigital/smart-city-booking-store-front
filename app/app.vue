@@ -4,6 +4,8 @@
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <!-- PROTOTYPE #512: Akzentfarbe, nur im Dev-Modus -->
+    <PrototypeAccentPrototypePanel />
   </UApp>
 </template>
 

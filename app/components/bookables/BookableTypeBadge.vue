@@ -5,6 +5,7 @@
   <UTooltip v-if="iconOnly" :text="category.label">
     <UBadge
       v-bind="$attrs"
+    data-accent="badge"
       class="z-10 px-2"
       :color="neutral ? 'neutral' : color"
       size="md"
@@ -17,6 +18,7 @@
   <UBadge
     v-else
     v-bind="$attrs"
+    data-accent="badge"
     class="z-10"
     :color="neutral ? 'neutral' : color"
     size="md"

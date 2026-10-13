@@ -55,6 +55,7 @@
         </ClientOnly>
       </div>
       <USeparator
+        data-accent="stripe"
         orientation="vertical"
         color="primary"
         type="solid"

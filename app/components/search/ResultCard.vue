@@ -43,7 +43,7 @@
           </div>
         </ClientOnly>
       </div>
-      <USeparator color="primary" type="solid" size="xl" class="w-full" />
+      <USeparator data-accent="stripe" color="primary" type="solid" size="xl" class="w-full" />
     </div>
     <ResultCardBookableContent
       v-if="!isEvent"

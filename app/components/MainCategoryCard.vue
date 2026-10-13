@@ -8,13 +8,14 @@
     the scale is dropped for visitors who ask for less motion, the ring stays.
   -->
   <UCard
+      data-accent="card"
       class="mainCategoryCard relative h-full cursor-pointer bg-white dark:bg-gray-700 text-black dark:text-gray-200 shadow-lg transition duration-200 ease-out hover:z-10 hover:scale-105 hover:shadow-xl hover:ring-2 hover:ring-primary motion-reduce:transition-none motion-reduce:hover:scale-100"
       variant="solid"
       @click="goToCategory"
   >
     <template #header>
       <div class="w-full flex justify-center mt-5">
-        <div class="bg-primary rounded-full p-3 pb-1 shadow-lg avatar-hover">
+        <div data-accent="icon" class="bg-primary rounded-full p-3 pb-1 shadow-lg avatar-hover">
           <UIcon :name="category.icon" :style="{color: contrastToPrimary}" class="avatar-hover" size="24"/>
         </div>
       </div>
