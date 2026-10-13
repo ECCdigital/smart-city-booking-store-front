@@ -34,6 +34,11 @@ export interface ThemeBundle {
   visibility?: "public" | "private" | "unlisted";
   logoUrl?: string;
   faviconUrl?: string;
+  /**
+   * The colour of the header bar. The backend sends `"primary"` when the
+   * branding is switched off; the stylesheet reads anything else as primary.
+   */
+  header?: "neutral" | "primary" | "secondary";
   /** The Catalog's name — the Portal Name for the instance catalog. */
   name?: string;
   /** Validated by `parseHeroLayout`; shapes are in `shared/types/hero.ts`. */

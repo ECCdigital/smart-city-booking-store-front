@@ -16,10 +16,18 @@ export interface ThemeCssColors {
   secondary?: string;
 }
 
+/** The colours the header bar can take (`branding.header`). */
+export type ThemeCssHeader = "neutral" | "primary" | "secondary";
+
 export interface RenderThemeCssInput {
   /** The Theme Bundle's etag — the identity of the rendered content. */
   etag: string;
   colors: ThemeCssColors | null | undefined;
+  /**
+   * The bundle's `header`. Anything but one of the three values — missing,
+   * or unknown — reads as `"primary"`, the look from before the setting.
+   */
+  header?: unknown;
   /** What to declare when the bundle names no usable colour pair. */
   defaults: Required<ThemeCssColors>;
 }
@@ -44,9 +52,77 @@ function isSafeColorPair(colors: ThemeCssColors | null | undefined): boolean {
   return SAFE_COLOR.test(colors.primary) && SAFE_COLOR.test(colors.secondary);
 }
 
-function render(colors: Required<ThemeCssColors>): string {
-  const declarations = `  --ui-primary: ${colors.primary};\n  --ui-secondary: ${colors.secondary};`;
-  return `:root {\n${declarations}\n}\n.dark {\n${declarations}\n}\n`;
+const BLACK = "#000000";
+const WHITE = "#ffffff";
+
+/**
+ * The text colour on a colour: black above a luma of 180, white otherwise —
+ * the rule `useContrastColor` applied on the client, so no instance changes
+ * its look. Only `#rgb` and `#rrggbb` are computed; any other value (a colour
+ * name, `rgb()`, `hsl()`) gives white, as it did before.
+ */
+function contrastOf(color: string): string {
+  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color.trim());
+  if (!match) return WHITE;
+
+  const digits = match[1]!;
+  const hex =
+    digits.length === 3
+      ? [...digits].map((digit) => digit + digit).join("")
+      : digits;
+  const rgb = Number.parseInt(hex, 16);
+  const r = (rgb >> 16) & 0xff;
+  const g = (rgb >> 8) & 0xff;
+  const b = rgb & 0xff;
+  const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luma > 180 ? BLACK : WHITE;
+}
+
+function headerOf(value: unknown): ThemeCssHeader {
+  return value === "neutral" || value === "secondary" ? value : "primary";
+}
+
+/**
+ * The neutral header is fixed per colour mode and computes nothing: white with
+ * the app's near-black text (gray-900) in light, and in dark the footer's
+ * ground (`bg-gray-900`) with white text. Opaque on purpose, see the iOS note
+ * in `NavigationBar.vue`.
+ */
+const NEUTRAL_HEADER = {
+  light: { bar: WHITE, contrast: "#101828" },
+  dark: { bar: "#101828", contrast: WHITE },
+} as const;
+
+function render(colors: Required<ThemeCssColors>, header: ThemeCssHeader): string {
+  // The active tab stands out from the bar: in secondary with a primary
+  // stripe, unless the bar itself is secondary — then the other way round.
+  const [active, stripe] =
+    header === "secondary"
+      ? [colors.primary, colors.secondary]
+      : [colors.secondary, colors.primary];
+
+  const shared = [
+    `  --ui-primary: ${colors.primary};`,
+    `  --ui-secondary: ${colors.secondary};`,
+    `  --ui-primary-contrast: ${contrastOf(colors.primary)};`,
+    `  --ui-secondary-contrast: ${contrastOf(colors.secondary)};`,
+    `  --ui-header-active: ${active};`,
+    `  --ui-header-active-contrast: ${contrastOf(active)};`,
+    `  --ui-header-active-stripe: ${stripe};`,
+  ];
+
+  const headerIn = (mode: keyof typeof NEUTRAL_HEADER): string[] => {
+    if (header === "neutral") {
+      const { bar, contrast } = NEUTRAL_HEADER[mode];
+      return [`  --ui-header: ${bar};`, `  --ui-header-contrast: ${contrast};`];
+    }
+    const bar = header === "secondary" ? colors.secondary : colors.primary;
+    return [`  --ui-header: ${bar};`, `  --ui-header-contrast: ${contrastOf(bar)};`];
+  };
+
+  const light = [...shared, ...headerIn("light")].join("\n");
+  const dark = [...shared, ...headerIn("dark")].join("\n");
+  return `:root {\n${light}\n}\n.dark {\n${dark}\n}\n`;
 }
 
 /**
@@ -56,7 +132,7 @@ function render(colors: Required<ThemeCssColors>): string {
  * @returns The CSS text, rendered once per etag and set of defaults.
  */
 export function renderThemeCss(input: RenderThemeCssInput): string {
-  const { etag, colors, defaults } = input;
+  const { etag, colors, header, defaults } = input;
   const key = `${etag}::${defaults.primary}::${defaults.secondary}`;
 
   const memoised = rendered.get(key);
@@ -64,6 +140,9 @@ export function renderThemeCss(input: RenderThemeCssInput): string {
 
   return rendered.set(
     key,
-    render(isSafeColorPair(colors) ? (colors as Required<ThemeCssColors>) : defaults),
+    render(
+      isSafeColorPair(colors) ? (colors as Required<ThemeCssColors>) : defaults,
+      headerOf(header),
+    ),
   );
 }

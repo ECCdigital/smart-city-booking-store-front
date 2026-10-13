@@ -21,6 +21,7 @@ export default defineEventHandler(async (event) => {
   return renderThemeCss({
     etag: entry?.etag ?? "default",
     colors: entry?.bundle?.theme?.colors,
+    header: entry?.bundle?.header,
     defaults: defaultTheme,
   });
 });
