@@ -173,6 +173,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 - `locker_not_ready` from the mobile key's blocking reasons (sentence, badge and screen table): backend 4.3 never raises it, a compartment without a grant reads `not_provisioned`
 - The Cooldown button prototype: the page `/prototype/cooldown-button` and its three variants with the variant switcher under `app/components/prototype/`. The Cooldown itself on the Control Button stays. No behaviour change for bookers
 - Six components nothing rendered any more: `AlreadyVerifiedCardLinkCard`, `checkout/InputTimePeriod` (empty), `inputs/InputDate`, `inputs/TimePickerDialog`, `search/DetailsAreaEventContent` (events render through `DetailsAreaContent`) and `user/settings/SettingsNavigation`, with the keys only they used: `events.ticketOptionsAndAvailability`, `account.settingsAppearance`, `account.settingsPersonalData`. No behaviour change
+- Composables and helpers nothing called any more: `useMemberships`, `useMobileKey`, `useSsoConfig`, `useFeatures`, `useCalendarDateField`; `descriptionOf`, `tagsOf`, `flagsOf` and `offerKey` (with its test) from `search/offer.ts`; `readCalendarDateFromDateFieldRoot`, `readTimeFromTimeFieldRoot`, `calendarDateToJsDate` and `jsDateToCalendarDate` from `localDate.js`; `attemptsSignature` from `recurrence.js`; `invalidateKeycloakCache` on the server. The BFF routes only `useMemberships` and `useMobileKey` called (`/api/memberships/my`, `/api/bookings/…/mobile-key/…`) stay for now. No behaviour change
 
 ## [1.1.7] — 2026-08-25
 
