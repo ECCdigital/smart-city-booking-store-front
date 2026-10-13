@@ -3,9 +3,11 @@ import type { ThemeView } from "~~/shared/types/hero";
 /**
  * What the Live Preview shows in place of the stored Theme View: a Draft has
  * a Portal Name, a Hero Layout and a Background but no etag — it was never
- * saved — so the etag is the one field it cannot carry.
+ * saved — so the etag is a field it cannot carry. Nor does it carry the size
+ * of the logo in the auth cards: the Hero Editor does not edit it, and the
+ * preview shows no auth page.
  */
-export type HeroPreviewView = Omit<ThemeView, "etag">;
+export type HeroPreviewView = Omit<ThemeView, "etag" | "authLogoSize">;
 
 /**
  * The Draft the Live Preview is showing in place of the stored Theme View, or

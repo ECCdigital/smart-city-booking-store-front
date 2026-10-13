@@ -3,7 +3,6 @@ import { ref } from "vue";
 import RegisterCard from "~/components/auth/RegisterCard.vue";
 import { useAuth } from "~/composables/auth/useAuth.js";
 import RegisterSuccessCard from "~/components/auth/RegisterSuccessCard.vue";
-import AuthTitleSection from "~/components/auth/AuthTitleSection.vue";
 import { useReturnTarget } from "~/composables/auth/useReturnTarget";
 import { useRateLimitNotice } from "~/composables/auth/useRateLimitNotice";
 import { signupOutcome } from "~/utils/authEntryFlow";
@@ -74,14 +73,7 @@ const handleResend = async () => {
 
 <template>
   <PageBackground>
-    <AuthTitleSection
-      is-large-version
-      class="hidden lg:flex w-3/5 items-center justify-center"
-    />
-
-    <div class="flex flex-col w-full lg:w-2/5 items-center justify-center p-6">
-      <AuthTitleSection class="lg:hidden" />
-
+    <div class="flex w-full items-center justify-center p-6">
       <RegisterSuccessCard
         v-if="success"
         class="shadow-2xl/50"

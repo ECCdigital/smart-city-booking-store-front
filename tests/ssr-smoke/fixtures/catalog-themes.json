@@ -99,10 +99,11 @@
   },
   "logo": {
     "source": "media",
-    "mediaId": null,
-    "url": "",
-    "width": null,
-    "height": null
+    "mediaId": "00000000000000000000a1a1",
+    "url": "/api/v2/instance/media/00000000000000000000a1a1/file",
+    "width": 320,
+    "height": 80
   },
+  "authLogoSize": "lg",
   "visibility": "public"
 }

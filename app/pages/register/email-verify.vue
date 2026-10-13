@@ -5,7 +5,6 @@ import FailedEmailVerificationCard from "~/components/auth/email-verification/Fa
 import { useAuth } from "~/composables/auth/useAuth.js";
 import AlreadyVerifiedEmailCard from "~/components/auth/email-verification/AlreadyVerifiedEmailCard.vue";
 import EmailVerificationActionCard from "~/components/auth/email-verification/EmailVerificationActionCard.vue";
-import AuthTitleSection from "~/components/auth/AuthTitleSection.vue";
 import { useReturnTarget } from "~/composables/auth/useReturnTarget";
 import { useRateLimitNotice } from "~/composables/auth/useRateLimitNotice";
 import { verifiedReturnTarget } from "~/utils/authEntryFlow";
@@ -82,17 +81,7 @@ onMounted(() => {
 
 <template>
   <PageBackground>
-    <div class="hidden lg:flex w-3/5 items-center justify-center text-white">
-      <AuthTitleSection class="" />
-
-      <div class="max-w-md text-center">
-        <h1 class="text-4xl font-bold mb-4" />
-      </div>
-    </div>
-
-    <div class="flex flex-col w-full lg:w-2/5 items-center justify-center p-6">
-      <AuthTitleSection class="lg:hidden" />
-
+    <div class="flex w-full items-center justify-center p-6">
       <EmailVerificationActionCard
         v-if="verificationStatus === 'actionRequired'"
         :email="id"

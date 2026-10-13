@@ -18,7 +18,11 @@ import {
   type HeroParseOptions,
 } from "~~/shared/utils/heroLayout";
 import { sanitizeHeroLayoutRichtext } from "~~/shared/utils/heroRichtextAllowlist";
-import type { ThemeView } from "~~/shared/types/hero";
+import {
+  AUTH_LOGO_SIZES,
+  type AuthLogoSize,
+  type ThemeView,
+} from "~~/shared/types/hero";
 import type { ThemeBundle } from "~~/shared/types/api";
 import { sanitizeHeroRichtext } from "./heroRichtext";
 
@@ -43,7 +47,19 @@ export function defaultThemeView(): ThemeView {
     heroLayout: null,
     background: null,
     logo: null,
+    authLogoSize: "sm",
   };
+}
+
+/**
+ * The size of the logo in the auth cards. A backend before the setting, or a
+ * value off the list, reads as S, the size the logo always had; nothing is
+ * reported, because a default filled in is no failure.
+ */
+function readAuthLogoSize(value: unknown): AuthLogoSize {
+  return (AUTH_LOGO_SIZES as readonly unknown[]).includes(value)
+    ? (value as AuthLogoSize)
+    : "sm";
 }
 
 /**
@@ -82,5 +98,6 @@ export function buildThemeView(
       bundle.logo === undefined || bundle.logo === null
         ? null
         : parseHeroMediaReference(bundle.logo, options),
+    authLogoSize: readAuthLogoSize(bundle.authLogoSize),
   };
 }

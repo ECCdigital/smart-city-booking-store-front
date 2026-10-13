@@ -385,7 +385,14 @@ export interface ThemeView {
   heroLayout: HeroLayout | null;
   background: Background | null;
   logo: HeroMediaReference | null;
+  /** The height step of the logo in the auth cards; S unless the bundle says otherwise. */
+  authLogoSize: AuthLogoSize;
 }
+
+/** The steps the logo in the auth cards can take: 56, 96 or 160 px high. */
+export const AUTH_LOGO_SIZES = ["sm", "md", "lg"] as const;
+
+export type AuthLogoSize = (typeof AUTH_LOGO_SIZES)[number];
 
 /**
  * The Live Preview protocol between the admin's Hero Editor and the storefront

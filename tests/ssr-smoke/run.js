@@ -12,11 +12,46 @@ import { startBackendStub, BOOKABLE, EVENT } from "./backend-stub.js";
 const pages = [
   { path: "/", marker: "Smoke-Katalog" },
   { path: "/search", marker: "Smoke-Raum" },
-  { path: "/login" },
-  { path: "/register" },
+  { path: "/login", authCard: true },
+  { path: "/register", authCard: true },
+  { path: "/password/forgot", authCard: true },
+  { path: "/register/email-verify", authCard: true },
   { path: `/bookables/${BOOKABLE}`, marker: "Smoke-Raum" },
   { path: `/events/${EVENT}`, marker: "Smoke-Veranstaltung" },
 ];
+
+// The logo of the fixture's Theme Bundle, and the Portal Name beside it.
+const LOGO = "media%2F00000000000000000000a1a1%2Ffile";
+const PORTAL_NAME = ">Smoke-Katalog<";
+
+/**
+ * What is wrong with the auth card of a page (ECCdigital/tickets#529), or
+ * nothing: the logo and the Portal Name stand at the top of the card, above
+ * its heading, and nowhere on the page outside it. The fixture asks for the
+ * logo in L, which the phone caps at M.
+ *
+ * @param {string} html - The page as the server rendered it.
+ * @returns {string | undefined} The first problem found.
+ */
+function authCardProblem(html) {
+  const start = html.indexOf('data-slot="header"');
+  if (start === -1) return "no card header";
+  if (html.slice(html.indexOf("<body"), start).includes(LOGO)) {
+    return "logo outside the card";
+  }
+  const header = html.slice(start, html.indexOf('data-slot="body"', start));
+  const logo = header.indexOf(LOGO);
+  const name = header.indexOf(PORTAL_NAME);
+  if (logo === -1) return "no logo in the card header";
+  if (name === -1) return "no Portal Name in the card header";
+  if (!(logo < name && name < header.search(/<h[12]/))) {
+    return "logo and Portal Name not above the heading";
+  }
+  const img = header.slice(header.lastIndexOf("<img", logo), header.indexOf(">", logo));
+  if (!img.includes("max-h-40") || !img.includes("max-sm:max-h-24")) {
+    return "logo not in L capped at M on the phone";
+  }
+}
 
 const serverEntry = new URL("../../.output/server/index.mjs", import.meta.url);
 
@@ -76,15 +111,19 @@ try {
     for (const page of pages) {
       const res = await fetch(base + page.path, { redirect: "manual" });
       const html = await res.text();
+      const cardProblem = page.authCard ? authCardProblem(html) : undefined;
       const ok =
-        res.status === 200 && (!page.marker || html.includes(page.marker));
+        res.status === 200 &&
+        (!page.marker || html.includes(page.marker)) &&
+        !cardProblem;
       console.log(`${ok ? "ok  " : "FAIL"} ${res.status} ${page.path}`);
       if (!ok) {
         failures.push(
           `${page.path}: ${res.status}` +
             (page.marker && !html.includes(page.marker)
               ? `, "${page.marker}" missing`
-              : ""),
+              : "") +
+            (cardProblem ? `, auth card: ${cardProblem}` : ""),
         );
       }
     }
