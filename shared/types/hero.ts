@@ -14,6 +14,8 @@
  * the kind of drift this contract exists to prevent.
  */
 
+import type { FooterLogo } from "./footerLogo";
+
 /**
  * A localised string. The locale list is the backend constant `["de", "en"]`:
  * `de` is mandatory, `en` optional. An empty `en` counts as absent, so
@@ -389,6 +391,8 @@ export interface ThemeView {
   logo: HeroMediaReference | null;
   /** The height step of the logo in the auth cards; S unless the bundle says otherwise. */
   authLogoSize: AuthLogoSize;
+  /** The logos of the footer row, in order; empty when there is no row. */
+  footerLogos: FooterLogo[];
 }
 
 /** The steps the logo in the auth cards can take: 56, 96 or 160 px high. */

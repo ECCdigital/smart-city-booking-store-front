@@ -25,6 +25,7 @@ import {
 } from "~~/shared/types/hero";
 import type { ThemeBundle } from "~~/shared/types/api";
 import { sanitizeHeroRichtext } from "./heroRichtext";
+import { parseFooterLogos } from "./footerLogos";
 
 /**
  * The etag of the Theme View served when no bundle could ever be read. It is a
@@ -48,6 +49,7 @@ export function defaultThemeView(): ThemeView {
     background: null,
     logo: null,
     authLogoSize: "sm",
+    footerLogos: [],
   };
 }
 
@@ -99,5 +101,6 @@ export function buildThemeView(
         ? null
         : parseHeroMediaReference(bundle.logo, options),
     authLogoSize: readAuthLogoSize(bundle.authLogoSize),
+    footerLogos: parseFooterLogos(bundle.footerLogos, options),
   };
 }

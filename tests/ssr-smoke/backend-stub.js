@@ -31,7 +31,10 @@ const routes = {
 /**
  * Starts the stand-in on a free port.
  *
- * @returns {Promise<{ url: string, unknown: Set<string>, close: () => void }>}
+ * `routes` is the live table: a check may swap a fixture for a request and put
+ * it back, since the smoke server revalidates the Theme Bundle on every read.
+ *
+ * @returns {Promise<{ url: string, unknown: Set<string>, routes: Record<string, unknown>, close: () => void }>}
  */
 export function startBackendStub() {
   const unknown = new Set();
@@ -53,6 +56,7 @@ export function startBackendStub() {
       resolve({
         url: `http://127.0.0.1:${port}`,
         unknown,
+        routes,
         close: () => server.close(),
       });
     });
