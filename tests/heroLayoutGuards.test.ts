@@ -107,6 +107,24 @@ describe("parseHeroLayout", () => {
     expect(layout?.blocks[1]).toMatchObject({ color: "#ff8800" });
   });
 
+  it("keeps the accent token as a text colour and as a Panel colour", () => {
+    const layout = parseHeroLayout({
+      version: 1,
+      blocks: [
+        {
+          ...textBlock("a"),
+          color: "accent",
+          panel: { ...HERO_PANEL_GLASS, color: "accent" },
+        },
+      ],
+    });
+
+    expect(layout?.blocks[0]).toMatchObject({
+      color: "accent",
+      panel: { color: "accent" },
+    });
+  });
+
   it("drops an empty English translation, so consumers can read `en ?? de`", () => {
     const layout = parseHeroLayout(crowdedHeroLayout);
     const image = layout?.blocks[2] as HeroImageBlock;

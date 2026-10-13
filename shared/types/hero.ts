@@ -104,6 +104,7 @@ export const HERO_PANEL_COLOR_TOKENS = [
   "black",
   "primary",
   "secondary",
+  "accent",
 ] as const;
 
 export type HeroPanelColorToken = (typeof HERO_PANEL_COLOR_TOKENS)[number];
@@ -175,6 +176,7 @@ export const HERO_COLOR_TOKENS = [
   "default",
   "primary",
   "secondary",
+  "accent",
   "white",
 ] as const;
 

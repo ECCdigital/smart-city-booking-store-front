@@ -233,11 +233,14 @@ export const HERO_IMAGE_HEIGHT_CLASSES: Record<HeroImageMaxHeight, string> = {
 /**
  * The named colours. `primary` and `secondary` are the theme's colours from
  * the stylesheet route; a hex colour is the one text value that goes inline.
+ * `accent` falls back to primary: the stylesheet declares `--ui-accent` only
+ * when the instance set one.
  */
 export const HERO_COLOR_CLASSES: Record<HeroColorToken, string> = {
   default: "text-black dark:text-white",
   primary: "text-primary",
   secondary: "text-secondary",
+  accent: "text-[color:var(--ui-accent,var(--ui-primary))]",
   white: "text-white",
 };
 
@@ -291,6 +294,8 @@ const HERO_PANEL_COLOR_VALUES: Record<HeroPanelColorToken, string> = {
   black: "#000000",
   primary: "var(--ui-primary)",
   secondary: "var(--ui-secondary)",
+  // Declared only when the instance set an accent; primary otherwise.
+  accent: "var(--ui-accent, var(--ui-primary))",
 };
 
 /**
