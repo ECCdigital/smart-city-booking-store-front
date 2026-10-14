@@ -695,6 +695,7 @@
   "booking": {
     "emptyTitle": "No bookings yet",
     "emptyDescription": "You have not made any bookings yet.",
+    "noMatches": "No booking matches your search or the chosen filters.",
     "typeRoom": "Room booking",
     "typeResource": "Equipment booking",
     "typeTicket": "Ticket booking",

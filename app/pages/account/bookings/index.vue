@@ -42,6 +42,13 @@
       v-else-if="filteredBookings?.length"
       :bookings="filteredBookings"
     />
+    <div
+      v-else-if="bookings.length"
+      class="flex flex-col items-center justify-center py-16 text-center"
+    >
+      <UIcon name="i-lucide-filter-x" class="text-6xl text-gray-400 mb-4" />
+      <p class="text-gray-500">{{ $t("booking.noMatches") }}</p>
+    </div>
     <BookingEmptyState v-else />
   </div>
 </template>

@@ -1041,6 +1041,7 @@
   "booking": {
     "emptyTitle": "Keine Buchungen vorhanden",
     "emptyDescription": "Sie haben noch keine Buchungen vorgenommen.",
+    "noMatches": "Keine Buchung passt zu Ihrer Suche oder den gewählten Filtern.",
     "typeRoom": "Raumbuchung",
     "typeResource": "Ressourcen-Buchung",
     "typeTicket": "Ticketbuchung",
