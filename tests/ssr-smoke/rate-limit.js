@@ -5,7 +5,10 @@
 //
 // What a page loads besides itself and the API does not count against that
 // budget: the build's own files, the messages, and the theme's stylesheet,
-// font and favicon. Images and icons have a budget of their own.
+// font and favicon, a catalog's stylesheet too. Images and icons have a budget
+// of their own.
+
+import { BOOKABLE, CATALOG, EVENT, TENANT } from "./backend-stub.js";
 
 const LIMIT = 500;
 const PROXY_LIMIT = 2000;
@@ -13,6 +16,20 @@ const PROXY_LIMIT = 2000;
 // Cold page views from one address within the interval: ten people opening
 // four pages each.
 const VIEWS = 40;
+
+// What the browser asks the API for once a page has hydrated, as Chromium
+// recorded it against the backend stand-in. It counts against the pages'
+// budget like the page itself and the server's requests while rendering it.
+const AFTER_HYDRATION = {
+  "/login": ["/api/auth/card-methods"],
+  "/register/email-verify": ["/api/catalog/bundle?include=events"],
+  [`/bookables/${BOOKABLE}`]: [
+    "/api/auth/me",
+    `/api/bookables/${TENANT}/availability/${BOOKABLE}/?start=2026-10-11T22:00:00.000Z&end=2026-10-18T22:00:00.000Z&amount=1`,
+  ],
+  [`/events/${EVENT}`]: ["/api/auth/me"],
+  [`/catalog/${CATALOG}`]: [`/api/catalog/${CATALOG}`],
+};
 
 /** A request from `address`, answered with its status and body. */
 async function request(base, path, address, headers = {}) {
@@ -38,8 +55,10 @@ async function passedBefore429(base, path, address, requests) {
 function staticFiles(html) {
   const chunk = html.match(/"(\/_nuxt\/[^"]+\.js)"/)?.[1];
   const version = html.match(/\/api\/theme\/css\?v=([^"&]+)/)?.[1];
+  const catalogCss = html.match(/"(\/api\/theme\/catalog\/[^"]+)"/)?.[1];
   return [
     chunk,
+    catalogCss,
     "/fonts/inter/inter-5.3.0-latin-wght-normal.woff2",
     "/favicon.ico",
     "/wasm/zxing_reader.wasm",
@@ -77,6 +96,12 @@ export async function rateLimitProblems(base, pages, backend) {
   const home = await (await fetch(base + "/")).text();
   const image = images(home)[0];
   if (!image) report("images", "no image on /");
+  const catalog = await (await fetch(`${base}/catalog/${CATALOG}`)).text();
+  if (
+    !staticFiles(catalog).some((path) => path.startsWith("/api/theme/catalog/"))
+  ) {
+    report("catalog stylesheet", `no stylesheet on /catalog/${CATALOG}`);
+  }
 
   // More visitors than the limit allows, each from an address of its own,
   // open a page. Each render asks the backend who is signed in: the server's
@@ -97,7 +122,9 @@ export async function rateLimitProblems(base, pages, backend) {
 
   // Each file more often than the limit allows, from an address of its own,
   // then the page from that address: it still answers.
-  const uncounted = [...staticFiles(home), ICONS, image].filter(Boolean);
+  const uncounted = [
+    ...new Set([...staticFiles(home), ...staticFiles(catalog), ICONS, image]),
+  ].filter(Boolean);
   for (const [i, path] of uncounted.entries()) {
     const address = `203.0.113.${i + 1}`;
     const passed = await passedBefore429(base, path, address, LIMIT + 1);
@@ -112,7 +139,7 @@ export async function rateLimitProblems(base, pages, backend) {
 
   // Several people behind one address, as in an office or a school, open the
   // storefront with an empty cache: each page, then what the browser fetches
-  // for it.
+  // for it, then what it asks the API for after hydration.
   {
     const address = "203.0.113.100";
     const refused = async () => {
@@ -120,7 +147,12 @@ export async function rateLimitProblems(base, pages, backend) {
         const page = pages[view % pages.length];
         const { status, html } = await request(base, page, address);
         if (status === 429) return page;
-        for (const path of [...staticFiles(html), ICONS, ...images(html)]) {
+        for (const path of [
+          ...staticFiles(html),
+          ICONS,
+          ...images(html),
+          ...(AFTER_HYDRATION[page] ?? []),
+        ]) {
           if ((await request(base, path, address)).status === 429) {
             return `${path} of ${page}`;
           }
@@ -168,7 +200,12 @@ export async function rateLimitProblems(base, pages, backend) {
   // The server's own requests go unlimited because they carry no address.
   // A request with an empty `X-Forwarded-For` is counted by its connection.
   {
-    const passed = await passedBefore429(base, "/api/catalog/mode", "", LIMIT + 2);
+    const passed = await passedBefore429(
+      base,
+      "/api/catalog/mode",
+      "",
+      LIMIT + 2,
+    );
     report(
       "an empty X-Forwarded-For stays limited",
       passed === null && `no 429 after ${LIMIT + 2} requests`,

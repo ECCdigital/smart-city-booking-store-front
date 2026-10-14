@@ -13,6 +13,9 @@ export const TENANT = "00000000-0000-4000-8000-0000000000aa";
 export const BOOKABLE = "00000000-0000-4000-8000-0000000000b1";
 export const EVENT = "00000000-0000-4000-8000-0000000000e1";
 
+/** A catalog of its own, with a stylesheet of its own (ECCdigital/tickets#555). */
+export const CATALOG = "smoke";
+
 const bookable = fixture("bookable.json");
 const event = fixture("event.json");
 
@@ -24,6 +27,12 @@ const routes = {
   "/api/instances/public": fixture("instances-public.json"),
   "/api/catalog/themes": THEMES,
   "/api/catalog/bundle": fixture("catalog-bundle.json"),
+  [`/api/catalog/${CATALOG}`]: {
+    ...fixture("catalog-bundle.json").catalog,
+    slug: CATALOG,
+    active: true,
+    type: "catalog",
+  },
   [`/json/${TENANT}/bookables/`]: [bookable],
   [`/json/${TENANT}/events/`]: [event],
   [`/json/${TENANT}/bookables/${BOOKABLE}`]: bookable,
@@ -47,7 +56,11 @@ const routes = {
 export function startBackendStub({ themes = THEMES } = {}) {
   const unknown = new Set();
   const hits = new Map();
-  const answers = { ...routes, "/api/catalog/themes": themes };
+  const answers = {
+    ...routes,
+    "/api/catalog/themes": themes,
+    [`/api/catalog/themes/${CATALOG}`]: themes,
+  };
   const server = http.createServer((req, res) => {
     const path = req.url.split("?")[0];
     hits.set(path, (hits.get(path) ?? 0) + 1);

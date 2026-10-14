@@ -12,9 +12,9 @@ const heroPreviewRouteRule = {
 
 // What a page loads besides itself and the API does not count against the
 // rate limit (ECCdigital/tickets#555). The build's own files and `public/`
-// never reach the limiter, Nitro serves them before it. The messages and the
-// instance's stylesheet, font and favicon change only with a deploy or a new
-// Theme Bundle and are exempt here.
+// never reach the limiter, Nitro serves them before it. The messages, the
+// instance's stylesheet, font and favicon and each catalog's stylesheet change
+// only with a deploy or a new Theme Bundle and are exempt here.
 const unlimitedRouteRule = { security: { rateLimiter: false } };
 const UNLIMITED_ROUTES = [
   // Nuxt renders an error page through this route, with the headers of the
@@ -25,6 +25,9 @@ const UNLIMITED_ROUTES = [
   "/api/theme/css",
   "/api/theme/font",
   "/api/theme/favicon",
+  // A route rule cannot match `<slug>.css` inside a segment, so the catalog
+  // stylesheets have a segment of their own.
+  "/api/theme/catalog/**",
 ];
 
 // Images and icons do not count against it either. Both routes also fetch
@@ -161,9 +164,11 @@ export default defineNuxtConfig({
     rateLimiter: {
       tokensPerInterval: 500,
       interval: 300000,
-      // The server's own requests while it renders a page, such as the
-      // session check, carry no address, and every visitor's would share one
-      // budget. The page they render has counted already
+      // The server's own requests without `X-Forwarded-For`, such as the
+      // session check while it renders a page, carry no address, and every
+      // visitor's would share one budget. They go free; the page they render
+      // has counted already. Its requests that forward the visitor's
+      // `X-Forwarded-For` still count against the visitor
       // (ECCdigital/tickets#555).
       whiteList: [""],
       headers: false,
