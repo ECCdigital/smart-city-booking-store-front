@@ -33,90 +33,97 @@
         />
       </div>
 
-      <p
-        v-if="!pending && shownDocuments.length === 0"
-        class="py-10 text-center text-gray-500"
-      >
-        {{ t("account.invoices.noMatches") }}
-      </p>
-
-      <UTable
-        v-else
-        v-model:sorting="sorting"
-        v-model:pagination="pagination"
-        :data="shownDocuments"
-        :columns="columns"
-        :loading="pending"
-        :pagination-options="{
-          getPaginationRowModel: getPaginationRowModel(),
-        }"
-        :ui="{
-          base: 'min-w-full table-fixed',
-          th: 'overflow-hidden',
-          td: 'overflow-hidden',
-        }"
-        class="w-full"
-      >
-        <template
-          v-for="col in sortableColumns"
-          :key="col.id"
-          #[`${col.id}-header`]="{ column }"
+      <!-- The table gives no hold on its rows, so it cross-fades as a whole
+           in the shared list transition when the search changes what it
+           shows. -->
+      <Transition name="card-list" mode="out-in">
+        <p
+          v-if="!pending && shownDocuments.length === 0"
+          key="no-matches"
+          class="py-10 text-center text-gray-500"
         >
-          <UButton
-            color="neutral"
-            variant="ghost"
-            :label="col.label"
-            :icon="sortIcon(column)"
-            class="-mx-2.5"
-            @click="column.toggleSorting(column.getIsSorted() === 'asc')"
-          />
-        </template>
+          {{ t("account.invoices.noMatches") }}
+        </p>
 
-        <template #timeCreated-cell="{ row }">
-          {{ formatDate(row.original.timeCreated) }}
-        </template>
-        <template #title-cell="{ row }">
-          <UTooltip
-            :disabled="!row.original.title"
-            :ui="wrapTooltipUi"
+        <UTable
+          v-else
+          :key="shownKey"
+          v-model:sorting="sorting"
+          v-model:pagination="pagination"
+          :data="shownDocuments"
+          :columns="columns"
+          :loading="pending"
+          :pagination-options="{
+            getPaginationRowModel: getPaginationRowModel(),
+          }"
+          :ui="{
+            base: 'min-w-full table-fixed',
+            th: 'overflow-hidden',
+            td: 'overflow-hidden',
+          }"
+          class="w-full"
+        >
+          <template
+            v-for="col in sortableColumns"
+            :key="col.id"
+            #[`${col.id}-header`]="{ column }"
           >
-            <span class="block w-full truncate">
-              {{ row.original.title }}
-            </span>
-            <template #content>
-              <span class="min-w-0 w-full whitespace-normal break-words">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              :label="col.label"
+              :icon="sortIcon(column)"
+              class="-mx-2.5"
+              @click="column.toggleSorting(column.getIsSorted() === 'asc')"
+            />
+          </template>
+
+          <template #timeCreated-cell="{ row }">
+            {{ formatDate(row.original.timeCreated) }}
+          </template>
+          <template #title-cell="{ row }">
+            <UTooltip
+              :disabled="!row.original.title"
+              :ui="wrapTooltipUi"
+            >
+              <span class="block w-full truncate">
                 {{ row.original.title }}
               </span>
-            </template>
-          </UTooltip>
-        </template>
-        <template #bookingId-cell="{ row }">
-          <NuxtLink
-            :to="tenantTo(`/account/bookings/${row.original.bookingId}`)"
-            class="block truncate text-primary hover:underline"
-          >
-            #{{ row.original.bookingId }}
-          </NuxtLink>
-        </template>
-        <template #bookableNames-cell="{ row }">
-          <UTooltip
-            :disabled="!row.original.bookableNames"
-            :ui="wrapTooltipUi"
-          >
-            <span class="block w-full truncate">
-              {{ row.original.bookableNames }}
-            </span>
-            <template #content>
-              <span class="min-w-0 w-full whitespace-normal break-words">
-                {{ row.original.bookableNames }}
+              <template #content>
+                <span class="min-w-0 w-full whitespace-normal break-words">
+                  {{ row.original.title }}
+                </span>
+              </template>
+            </UTooltip>
+          </template>
+          <template #bookingId-cell="{ row }">
+            <NuxtLink
+              :to="tenantTo(`/account/bookings/${row.original.bookingId}`)"
+              class="block truncate text-primary hover:underline"
+            >
+              #{{ row.original.bookingId }}
+            </NuxtLink>
+          </template>
+          <template #bookableNames-cell="{ row }">
+            <UTooltip
+              :disabled="!row.original.bookableLabel"
+              :ui="wrapTooltipUi"
+            >
+              <span class="block w-full truncate">
+                {{ row.original.bookableLabel }}
               </span>
-            </template>
-          </UTooltip>
-        </template>
-        <template #paidLabel-cell="{ row }">
-          <BookingPayedChip :booking="row.original.booking" />
-        </template>
-      </UTable>
+              <template #content>
+                <span class="min-w-0 w-full whitespace-normal break-words">
+                  {{ row.original.bookableLabel }}
+                </span>
+              </template>
+            </UTooltip>
+          </template>
+          <template #paidLabel-cell="{ row }">
+            <BookingPayedChip :booking="row.original.booking" />
+          </template>
+        </UTable>
+      </Transition>
 
       <div
         v-if="shownDocuments.length > pagination.pageSize"
@@ -146,7 +153,10 @@ import { useBookingStore } from "~~/stores/bookings.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import { resolveBookingPaymentChip } from "~/utils/bookingPaymentStatus.js";
-import { includesText } from "~/utils/textSearch.js";
+import {
+  paymentDocumentsOf,
+  searchPaymentDocuments,
+} from "~/utils/paymentDocumentList.js";
 
 definePageMeta({
   layout: "panel",
@@ -235,37 +245,26 @@ const columns = computed(() =>
   })),
 );
 
-const paymentDocuments = computed(() => {
-  return bookingStore.getBookings.flatMap((booking) => {
-    const bookableNames = (booking.bookableItems || [])
-      .map((item) => item._bookableUsed?.title)
-      .filter(Boolean)
-      .join(", ");
-
-    return (booking.attachments || [])
-      .filter(
-        (attachment) =>
-          attachment.type === "invoice" || attachment.type === "receipt",
-      )
-      .map((attachment) => ({
-        timeCreated: Number(attachment.timeCreated) || 0,
-        title: attachment.title || attachment.name || "",
-        type: attachment.type,
-        typeLabel: documentTypeLabel(attachment.type),
-        bookingId: booking.id,
-        bookableNames: bookableNames || t("account.invoices.unknownBookable"),
-        paidLabel: resolveBookingPaymentChip(booking, t).label,
-        booking,
-      }));
-  });
-});
+const paymentDocuments = computed(() =>
+  paymentDocumentsOf(bookingStore.getBookings).map((document) => ({
+    ...document,
+    typeLabel: documentTypeLabel(document.type),
+    bookableLabel:
+      document.bookableNames || t("account.invoices.unknownBookable"),
+    paidLabel: resolveBookingPaymentChip(document.booking, t).label,
+  })),
+);
 
 const searchQuery = ref("");
 
 const shownDocuments = computed(() =>
-  paymentDocuments.value.filter((document) =>
-    includesText(document.bookableNames, searchQuery.value),
-  ),
+  searchPaymentDocuments(paymentDocuments.value, searchQuery.value),
+);
+
+// Changes when the table shows other documents: after a search, or when the
+// bookings come in or change.
+const shownKey = computed(() =>
+  shownDocuments.value.map((document) => document.key).join("|"),
 );
 
 // A new search gives a different list: the reader expects its first page.
