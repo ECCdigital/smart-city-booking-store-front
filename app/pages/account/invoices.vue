@@ -98,9 +98,18 @@
                 :disabled="!row.original.title"
                 :ui="wrapTooltipUi"
               >
-                <span class="block w-full truncate">
+                <button
+                  type="button"
+                  class="block w-full truncate text-left text-primary hover:underline cursor-pointer"
+                  :aria-label="
+                    t('account.invoices.actions.open', {
+                      title: row.original.title,
+                    })
+                  "
+                  @click="openDocument(row.original.attachment, row.original)"
+                >
                   {{ row.original.title }}
-                </span>
+                </button>
                 <template #content>
                   <span class="min-w-0 w-full whitespace-normal break-words">
                     {{ row.original.title }}
@@ -133,6 +142,45 @@
             </template>
             <template #paidLabel-cell="{ row }">
               <BookingPayedChip :booking="row.original.booking" />
+            </template>
+            <template #actions-header>
+              <span class="sr-only">
+                {{ t("account.invoices.columns.actions") }}
+              </span>
+            </template>
+            <template #actions-cell="{ row }">
+              <div class="flex justify-end gap-1">
+                <UTooltip :text="t('account.invoices.actions.downloadTooltip')">
+                  <UButton
+                    icon="i-lucide-download"
+                    color="neutral"
+                    variant="ghost"
+                    :aria-label="
+                      t('account.invoices.actions.download', {
+                        title: row.original.title,
+                      })
+                    "
+                    @click="
+                      downloadDocument(row.original.attachment, row.original)
+                    "
+                  />
+                </UTooltip>
+                <UTooltip :text="t('account.invoices.actions.printTooltip')">
+                  <UButton
+                    icon="i-lucide-printer"
+                    color="neutral"
+                    variant="ghost"
+                    :aria-label="
+                      t('account.invoices.actions.print', {
+                        title: row.original.title,
+                      })
+                    "
+                    @click="
+                      printDocument(row.original.attachment, row.original)
+                    "
+                  />
+                </UTooltip>
+              </div>
             </template>
           </UTable>
         </div>
@@ -171,6 +219,7 @@ import {
   paymentDocumentsOf,
   searchPaymentDocuments,
 } from "~/utils/paymentDocumentList.js";
+import { usePaymentDocument } from "~/composables/usePaymentDocument.js";
 
 definePageMeta({
   layout: "panel",
@@ -184,6 +233,7 @@ usePageTitle(() => t("meta.pages.accountInvoices"));
 const bookingStore = useBookingStore();
 const { formatDate } = useFormatting();
 const { tenantTo } = useTenantRoute();
+const { openDocument, downloadDocument, printDocument } = usePaymentDocument();
 
 const { pending } = await useAsyncData("account-invoices", () =>
   bookingStore.fetchBookings(),
@@ -214,7 +264,7 @@ const sortableColumns = computed(() => [
   {
     id: "timeCreated",
     label: t("account.invoices.columns.createdAt"),
-    width: "16%",
+    width: "14%",
   },
   {
     id: "title",
@@ -224,27 +274,29 @@ const sortableColumns = computed(() => [
   {
     id: "typeLabel",
     label: t("account.invoices.columns.type"),
-    width: "14%",
+    width: "12%",
   },
   {
     id: "bookingId",
     label: t("account.invoices.columns.bookingId"),
-    width: "16%",
+    width: "14%",
   },
   {
     id: "bookableNames",
     label: t("account.invoices.columns.bookables"),
-    width: "20%",
+    width: "18%",
   },
   {
     id: "paidLabel",
     label: t("account.invoices.columns.paid"),
-    width: "14%",
+    width: "12%",
   },
 ]);
 
-const columns = computed(() =>
-  sortableColumns.value.map((column) => ({
+const ACTIONS_WIDTH = "10%";
+
+const columns = computed(() => [
+  ...sortableColumns.value.map((column) => ({
     accessorKey: column.id,
     meta: {
       class: {
@@ -257,7 +309,16 @@ const columns = computed(() =>
       },
     },
   })),
-);
+  {
+    id: "actions",
+    meta: {
+      style: {
+        th: { width: ACTIONS_WIDTH },
+        td: { width: ACTIONS_WIDTH },
+      },
+    },
+  },
+]);
 
 const paymentDocuments = computed(() =>
   paymentDocumentsOf(bookingStore.getBookings).map((document) => ({

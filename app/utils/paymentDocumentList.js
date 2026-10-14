@@ -11,7 +11,8 @@ const PAYMENT_TYPES = ["invoice", "receipt"];
 /**
  * The invoices and receipts of the bookings, each named by its title (or file
  * name) and by the titles of its booking's bookables, joined; empty when the
- * booking names none. `key` tells one document from the others.
+ * booking names none. `key` tells one document from the others; `tenantId`
+ * and `attachment` say where to fetch the document from.
  */
 export function paymentDocumentsOf(bookings) {
   return (bookings ?? []).flatMap((booking) => {
@@ -31,6 +32,8 @@ export function paymentDocumentsOf(bookings) {
           title,
           type: attachment.type,
           bookingId: booking.id,
+          tenantId: booking.tenantId,
+          attachment,
           bookableNames,
           booking,
         };

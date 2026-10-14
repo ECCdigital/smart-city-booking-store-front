@@ -1118,9 +1118,11 @@
       "unknown": "Unbekannter Anhangstyp"
     },
     "download": {
-      "label": "{type} herunterladen",
-      "failedTitle": "Download fehlgeschlagen",
-      "failedMessage": "Das Dokument konnte nicht heruntergeladen werden."
+      "label": "{type} herunterladen"
+    },
+    "document": {
+      "unavailableTitle": "Dokument nicht abrufbar",
+      "unavailableMessage": "Das Dokument konnte nicht geladen werden. Bitte versuchen Sie es später erneut."
     },
     "errors": {
       "notFoundTitle": "Seite nicht gefunden",
@@ -1247,7 +1249,15 @@
         "type": "Dokumenttyp",
         "bookingId": "Buchungs-ID",
         "bookables": "Buchungsobjekte",
-        "paid": "Bezahlt"
+        "paid": "Bezahlt",
+        "actions": "Aktionen"
+      },
+      "actions": {
+        "open": "{title} in neuem Tab öffnen",
+        "download": "{title} herunterladen",
+        "downloadTooltip": "Herunterladen",
+        "print": "{title} drucken",
+        "printTooltip": "Drucken"
       },
       "types": {
         "invoice": "Rechnung",
