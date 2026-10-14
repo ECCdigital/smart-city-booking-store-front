@@ -804,7 +804,8 @@
     "listFilter": {
       "filterBy": "Filter by:",
       "tenant": "Provider:",
-      "kind": "Type:"
+      "kind": "Type:",
+      "clearAll": "Clear all filters"
     },
     "contactData": "Contact details",
     "security": "Security",

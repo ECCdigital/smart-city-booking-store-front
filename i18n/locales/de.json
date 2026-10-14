@@ -1151,7 +1151,8 @@
     "listFilter": {
       "filterBy": "Filtern nach:",
       "tenant": "Anbieter:",
-      "kind": "Typ:"
+      "kind": "Typ:",
+      "clearAll": "Alle Filter entfernen"
     },
     "contactData": "Kontaktdaten",
     "security": "Sicherheit",

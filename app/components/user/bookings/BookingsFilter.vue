@@ -279,7 +279,28 @@ const statusFilterItems = () => [
       },
     },
   ],
+  [
+    {
+      label: t("account.listFilter.clearAll"),
+      icon: "i-lucide-filter-x",
+      disabled: !hasFiltersApplied.value,
+      onSelect() {
+        clearStatusFilters();
+      },
+    },
+  ],
 ];
+
+// Clears what this dropdown holds; the period select beside it stays.
+function clearStatusFilters() {
+  showActiveBookings.value = false;
+  showStatusConfirmed.value = false;
+  showStatusRejected.value = false;
+  showStatusPending.value = false;
+  showPaymentsConfirmed.value = false;
+  showPaymentsUnconfirmed.value = false;
+  onSetFilter();
+}
 
 function getSortIconByValue(value) {
   const item = sortItems().find((item) => item.value === value);
