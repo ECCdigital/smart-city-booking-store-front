@@ -23,9 +23,11 @@ const routes = {
   [`/json/${TENANT}/bookables/`]: [bookable],
   [`/json/${TENANT}/events/`]: [event],
   [`/json/${TENANT}/bookables/${BOOKABLE}`]: bookable,
-  [`/api/${TENANT}/bookables/public/${BOOKABLE}`]: bookable,
+  // The direct-link routes carry the wish to be listed, without which the
+  // detail page shows nothing (ECCdigital/tickets#225).
+  [`/api/${TENANT}/bookables/public/${BOOKABLE}`]: { ...bookable, isPublic: true },
   [`/json/${TENANT}/events/${EVENT}`]: event,
-  [`/api/${TENANT}/events/${EVENT}`]: event,
+  [`/api/${TENANT}/events/${EVENT}`]: { ...event, isPublic: true },
 };
 
 /**

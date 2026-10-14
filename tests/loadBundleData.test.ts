@@ -27,6 +27,11 @@ describe("loadBundleData for a single-tenant catalog", () => {
     responses.clear();
     responses.set(`/json/${tenantId}/bookables/${bookable.id}`, bookable);
     responses.set(`/json/${tenantId}/events/${event.id}`, event);
+    responses.set(`/api/${tenantId}/bookables/public/${bookable.id}?populate=true`, {
+      ...bookable,
+      isPublic: true,
+    });
+    responses.set(`/api/${tenantId}/events/${event.id}`, { ...event, isPublic: true });
     responses.set(`/json/${tenantId}/bookables/`, [bookable]);
     responses.set(`/json/${tenantId}/events/`, [event]);
   });
@@ -51,5 +56,24 @@ describe("loadBundleData for a single-tenant catalog", () => {
     await expect(
       loadBundleData(h3Event, { ...single, bookableId: "missing" }),
     ).rejects.toMatchObject({ statusCode: 404, statusMessage: "Bookable not found" });
+  });
+
+  it("rejects an unlisted bookable with 404, as one that is not available", async () => {
+    responses.set(`/api/${tenantId}/bookables/public/${bookable.id}?populate=true`, {
+      ...bookable,
+      isPublic: false,
+    });
+
+    await expect(
+      loadBundleData(h3Event, { ...single, bookableId: bookable.id }),
+    ).rejects.toMatchObject({ statusCode: 404, statusMessage: "Bookable not found" });
+  });
+
+  it("rejects an unlisted event with 404, as one that is not available", async () => {
+    responses.set(`/api/${tenantId}/events/${event.id}`, { ...event, isPublic: false });
+
+    await expect(
+      loadBundleData(h3Event, { ...single, eventId: event.id }),
+    ).rejects.toMatchObject({ statusCode: 404, statusMessage: "Event not found" });
   });
 });
