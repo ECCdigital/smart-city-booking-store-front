@@ -485,7 +485,14 @@
     "eventDate": "Datum der Veranstaltung",
     "eventDescription": "Beschreibung der Veranstaltung",
     "noEvents": "Keine Veranstaltungen gefunden",
-    "noEvent": "Keine Veranstaltung gefunden"
+    "noEvent": "Keine Veranstaltung gefunden",
+    "participationLink": "Teilnahme-Link",
+    "format": {
+      "label": "Format",
+      "presence": "Präsenz",
+      "hybrid": "Hybrid",
+      "online": "Online"
+    }
   },
   "bookableDetail": {
     "notFound": "Nicht gefunden",

@@ -87,6 +87,7 @@ function detailsSectionState() {
     events: [],
     bookingEvent: null,
     bookingEventTimeSlot: null,
+    participationLink: null,
     bookingPrice: "0,00 €",
     paymentMethod: "–",
     isFree: true,

@@ -231,7 +231,14 @@
     "soldOut": "This ticket type is sold out.",
     "selectTicketOption": "Select a ticket option",
     "noEvent": "No event found",
-    "noEvents": "No events found"
+    "noEvents": "No events found",
+    "participationLink": "Participation link",
+    "format": {
+      "label": "Format",
+      "presence": "In person",
+      "hybrid": "Hybrid",
+      "online": "Online"
+    }
   },
   "errors": {
     "offerNotAvailable": "This offer cannot be reached right now.",
