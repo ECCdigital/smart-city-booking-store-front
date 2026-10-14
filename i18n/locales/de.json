@@ -363,7 +363,7 @@
   },
 
   "errors": {
-    "offerNotAvailable": "Dieses Angebot ist nicht (mehr) verfügbar.",
+    "offerNotAvailable": "Dieses Angebot ist derzeit nicht erreichbar.",
     "loadFailed": {
       "title": "Inhalte konnten nicht geladen werden",
       "message": "Bitte versuchen Sie es später erneut."

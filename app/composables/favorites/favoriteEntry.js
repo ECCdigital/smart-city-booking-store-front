@@ -2,8 +2,9 @@
  * The framework-free part of the favorites page: how one hydrated entry of
  * the favorites list (`GET /api/favorites/offers`) is read. An entry carries
  * the reference, the snapshot (`title`, `tenantName`) taken when the Offer
- * was marked, one of three states, and, when available, the Offer in its
- * public projection.
+ * was marked, its state, and, when available or unlisted, the Offer in its
+ * public projection. Only an available entry leads to its detail view; an
+ * unlisted one is reached by its checkout alone and reads as not available.
  */
 
 import { favoriteKey } from "./favoriteReference.js";
@@ -12,6 +13,7 @@ import { includesText } from "../../utils/textSearch.js";
 
 export const FAVORITE_STATUS = Object.freeze({
   AVAILABLE: "available",
+  UNLISTED: "unlisted",
   UNAVAILABLE: "unavailable",
   DELETED: "deleted",
 });
