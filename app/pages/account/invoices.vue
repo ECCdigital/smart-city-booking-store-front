@@ -37,13 +37,17 @@
            in the shared list transition when the search changes what it
            shows. -->
       <Transition name="card-list" mode="out-in">
-        <p
+        <div
           v-if="!pending && shownDocuments.length === 0"
           key="no-matches"
-          class="py-10 text-center text-gray-500"
+          class="flex flex-col items-center justify-center py-16 text-center"
         >
-          {{ t("account.invoices.noMatches") }}
-        </p>
+          <UIcon
+            name="i-lucide-filter-x"
+            class="text-6xl text-gray-400 mb-4"
+          />
+          <p class="text-gray-500">{{ t("account.invoices.noMatches") }}</p>
+        </div>
 
         <UTable
           v-else
