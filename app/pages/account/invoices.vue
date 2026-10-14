@@ -279,17 +279,17 @@ const sortableColumns = computed(() => [
   {
     id: "bookingId",
     label: t("account.invoices.columns.bookingId"),
-    width: "14%",
+    width: "12%",
   },
   {
     id: "bookableNames",
     label: t("account.invoices.columns.bookables"),
-    width: "18%",
+    width: "16%",
   },
   {
     id: "paidLabel",
     label: t("account.invoices.columns.paid"),
-    width: "12%",
+    width: "16%",
   },
 ]);
 
