@@ -23,6 +23,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- The links in auth mails no longer carry a doubled slash when `NUXT_USER_BASE_URL` or `NUXT_PUBLIC_USER_BASE_URL` ends in `/` (ECCdigital/tickets#554): „Passwort vergessen“, the email verification of signup and its resend, and the card link. Before, the reset link opened the start page and lost token and address
 - Text on primary, secondary and the header bar no longer flickers from white to black on light colours (ECCdigital/tickets#525): the theme stylesheet declares the contrast colours, computed on the server, and `useContrastColor` is gone. A short `#rgb` colour now gets its contrast computed too
 - Every page rendered on the server answers again instead of a 500 (ECCdigital/tickets#395): from Nuxt 4.5 on (ECCdigital/tickets#284) `useFetch` returns its own enumerable `then`, which `useThemeBundle()` spread along, so `await useThemeBundle()` resolved to the bare fetch result. `app.vue` and the catalog page lost the `version` of the theme assets and threw, and the Hero, the page background and the auth pages read the stored Theme View instead of the Live Preview's Draft
 - `npm run lint:check` passes again, so the CI's ESLint step does too (ECCdigital/tickets#233): `ResultsMapList` kept an unused `matchCount`. No behaviour change
