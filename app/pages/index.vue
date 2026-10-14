@@ -33,6 +33,11 @@
       />
       <LatestEventsArea v-else-if="allEvents.length > 0" :items="allEvents" />
 
+      <TenantOffersArea
+        v-if="!error && !isTenantContext"
+        :tenants="tenantStore.getTenants"
+      />
+
       <HowBookingWorksArea />
 
       <MobileKeyArea />
@@ -47,6 +52,8 @@ import MainCategoryArea from "~/components/MainCategoryArea.vue";
 import LatestEventsArea from "~/components/LatestEventsArea.vue";
 import HowBookingWorksArea from "~/components/home/HowBookingWorksArea.vue";
 import MobileKeyArea from "~/components/home/MobileKeyArea.vue";
+import TenantOffersArea from "~/components/home/TenantOffersArea.vue";
+import { useTenantStore } from "~~/stores/tenant.js";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { isTenantNotAvailable } from "~/utils/tenantHome.js";
 
@@ -62,7 +69,8 @@ const route = useRoute();
 const { tenantTo } = useTenantRoute();
 const { loadBundle } = useCatalogBundle();
 const eventStore = useEventStore();
-const { tenantID } = useTenant();
+const { tenantID, isTenantContext } = useTenant();
+const tenantStore = useTenantStore();
 
 const catalogSlug = computed(() => route.params.catalogSlug || null);
 
