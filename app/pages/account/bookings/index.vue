@@ -37,7 +37,9 @@
       />
     </div>
 
-    <BookingsSkeleton v-if="pending" :skeleton-count="9" />
+    <!-- Only the first load: a refresh keeps the cards, and with them a
+         cancellation dialog that is still showing its outcome. -->
+    <BookingsSkeleton v-if="pending && !enrichedBookings" :skeleton-count="9" />
     <BookingSection
       v-else-if="filteredBookings?.length"
       :bookings="filteredBookings"

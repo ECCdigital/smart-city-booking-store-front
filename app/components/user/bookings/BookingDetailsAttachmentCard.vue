@@ -89,6 +89,8 @@ const attachmentType = computed(() => {
       return t("booking.attachmentTypes.invoice");
     case "receipt":
       return t("booking.attachmentTypes.receipt");
+    case "cancellation":
+      return t("booking.attachmentTypes.cancellation");
     case "agreement":
       return t("booking.attachmentTypes.agreement");
     case "privacy-agreement":

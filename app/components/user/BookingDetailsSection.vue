@@ -14,11 +14,19 @@
     <div class="flex mb-5">
       <div class="basis-1/2">
         <p class="font-medium">{{ $t("tenants.tenant") }}</p>
-        <p>{{ getBookingTenant(booking)?.name || $t("account.unknownTenant") }}</p>
+        <p>
+          {{ getBookingTenant(booking)?.name || $t("account.unknownTenant") }}
+        </p>
       </div>
       <div class="">
         <p class="font-medium">{{ $t("booking.statusLabel") }}</p>
-        <BookingStatusChip :booking="booking" />
+        <div class="flex flex-wrap gap-2">
+          <BookingStatusChip :booking="booking" />
+          <BookingOpenCancellationRequestChip
+            :booking="booking"
+            class="max-w-[150px] md:max-w-[250px]"
+          />
+        </div>
       </div>
     </div>
     <div v-if="!isLive" class="mb-5">
@@ -26,10 +34,12 @@
       <p>{{ booking.rejectionReason }}</p>
     </div>
 
-    <div v-if="bookingTimeSlot || eventIds.length > 0" class="mb-5 flex">
-      <div class="basis-1/2">
+    <div v-if="bookingTimeSlot || eventIds.length > 0" class="mb-5 flex w-full">
+      <div class="flex flex-col w-full space-y-1">
         <div class="flex space-x-1">
-          <p v-if="bookingTimeSlot" class="font-medium">{{ $t("booking.period") }}</p>
+          <p v-if="bookingTimeSlot" class="font-medium">
+            {{ $t("booking.period") }}
+          </p>
           <p v-else-if="eventIds.length > 0" class="font-medium">
             {{ $t("booking.eventTime") }}
           </p>
@@ -170,6 +180,10 @@
         class="bg-gray-200 dark:bg-gray-800 p-2 rounded-sm"
       />
     </div>
+
+    <div class="flex justify-end">
+      <BookingCancellationAction :booking="booking" />
+    </div>
   </div>
 </template>
 <script setup>
@@ -177,6 +191,8 @@ import BookingStatusChip from "~/components/user/bookings/BookingStatusChip.vue"
 import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetailsBookableCard.vue";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
+import BookingCancellationAction from "~/components/user/bookings/BookingCancellationAction.vue";
+import BookingOpenCancellationRequestChip from "~/components/user/bookings/BookingOpenCancellationRequestChip.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { useEventStore } from "~~/stores/event.js";
@@ -184,11 +200,10 @@ import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import { bookingEventFallback } from "~/utils/bookingEventTimes.js";
 import { bookingParticipationLinkOf } from "~/utils/eventFormat.js";
 import {
-  BOOKING_STATUS,
   isFreeBooking,
   isLiveBooking,
   isSettledBooking,
-  resolveBookingStatus,
+  resolveBookingReasonHeadingKey,
 } from "~/utils/bookingStatus.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { useAccessClock } from "~/composables/useAccessClock.js";
@@ -274,13 +289,8 @@ const participationLink = computed(() =>
 
 const isLive = computed(() => isLiveBooking(props.booking));
 
-// The backend writes rejectionReason for both states; a booking the
-// customer cancelled themselves is not "rejected", so the heading follows
-// the state.
 const reasonHeading = computed(() =>
-  resolveBookingStatus(props.booking) === BOOKING_STATUS.REJECTED
-    ? t("account.bookingDetails.rejectionReason")
-    : t("account.bookingDetails.cancellationReason"),
+  t(resolveBookingReasonHeadingKey(props.booking)),
 );
 
 function formatTimeSlot(timeBegin, timeEnd) {
@@ -357,17 +367,17 @@ const paymentMethod = computed(() => {
   return t("booking.payment.methods.notSpecified");
 });
 
+const PAYMENT_DOCUMENT_TYPES = ["invoice", "receipt", "cancellation"];
+
 const paymentDocuments = computed(() => {
-  return props.booking.attachments.filter(
-    (attachment) =>
-      attachment.type === "invoice" || attachment.type === "receipt",
+  return props.booking.attachments.filter((attachment) =>
+    PAYMENT_DOCUMENT_TYPES.includes(attachment.type),
   );
 });
 
 const otherDocuments = computed(() => {
   return props.booking.attachments.filter(
-    (attachment) =>
-      attachment.type !== "invoice" && attachment.type !== "receipt",
+    (attachment) => !PAYMENT_DOCUMENT_TYPES.includes(attachment.type),
   );
 });
 

@@ -1,6 +1,6 @@
 /**
- * Invoices and receipts of a booking, opened, downloaded and printed in the
- * browser (ECCdigital/tickets#458).
+ * Invoices, receipts and cancellation receipts of a booking, opened,
+ * downloaded and printed in the browser (ECCdigital/tickets#458).
  *
  * The backend sends a document as `Content-Disposition: attachment` and the
  * BFF does not hand that header on, so a link to the BFF route cannot show
@@ -19,6 +19,37 @@ const BLOB_URL_LIFETIME_MS = 60_000;
 export function paymentDocumentFileName(attachment) {
   const name = attachment.title || attachment.name || "document";
   return /\.pdf$/i.test(name) ? name : `${name}.pdf`;
+}
+
+/**
+ * Fetches the bytes of a booking's payment document by its type: invoice,
+ * receipt or cancellation receipt (ECCdigital/tickets#291). Throws for a
+ * document without its booking or of another type.
+ * @param {{
+ *   getBookingInvoice: Function,
+ *   getBookingReceipt: Function,
+ *   getBookingCancellationReceipt: Function,
+ * }} api The booking routes of the BFF, as `useBookings` has them.
+ * @param {{ type: string, name: string, tenantId: string, bookingId: string }} paymentDocument
+ * @returns {Promise<Blob>}
+ */
+export async function fetchBookingPaymentDocument(
+  api,
+  { tenantId, bookingId, type, name },
+) {
+  if (!tenantId || !bookingId) {
+    throw new Error("The document's booking is unknown");
+  }
+  switch (type) {
+    case "invoice":
+      return api.getBookingInvoice(tenantId, bookingId, name);
+    case "receipt":
+      return api.getBookingReceipt(tenantId, bookingId, name);
+    case "cancellation":
+      return api.getBookingCancellationReceipt(tenantId, bookingId, name);
+    default:
+      throw new Error(`No payment document: ${type}`);
+  }
 }
 
 /**

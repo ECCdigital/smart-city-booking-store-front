@@ -1,15 +1,18 @@
 import { useBookings } from "~/composables/api/useBookings.js";
-import { createPaymentDocumentActions } from "~/utils/paymentDocument.js";
+import {
+  createPaymentDocumentActions,
+  fetchBookingPaymentDocument,
+} from "~/utils/paymentDocument.js";
 
 /**
- * Open, download and print an invoice or receipt of a booking through the
- * BFF. A document that cannot be fetched shows an error. Call the actions
- * from a click only: they need the browser window.
+ * Open, download and print an invoice, receipt or cancellation receipt of a
+ * booking through the BFF. A document that cannot be fetched shows an error.
+ * Call the actions from a click only: they need the browser window.
  */
 export function usePaymentDocument() {
   const { t } = useI18n();
   const notification = useNotification();
-  const { getBookingInvoice, getBookingReceipt } = useBookings();
+  const bookings = useBookings();
 
   let actions = null;
 
@@ -17,18 +20,8 @@ export function usePaymentDocument() {
   function getActions() {
     actions ??= createPaymentDocumentActions({
       win: window,
-      fetchDocument: ({ tenantId, bookingId, ...attachment }) => {
-        if (!tenantId || !bookingId) {
-          throw new Error("The document's booking is unknown");
-        }
-        if (attachment.type === "invoice") {
-          return getBookingInvoice(tenantId, bookingId, attachment.name);
-        }
-        if (attachment.type === "receipt") {
-          return getBookingReceipt(tenantId, bookingId, attachment.name);
-        }
-        throw new Error(`No payment document: ${attachment.type}`);
-      },
+      fetchDocument: (paymentDocument) =>
+        fetchBookingPaymentDocument(bookings, paymentDocument),
       onError: () =>
         notification.error(
           t("booking.document.unavailableMessage"),

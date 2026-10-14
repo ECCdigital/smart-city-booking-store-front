@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   createPaymentDocumentActions,
+  fetchBookingPaymentDocument,
   paymentDocumentFileName,
 } from "~/utils/paymentDocument.js";
 
@@ -51,6 +52,73 @@ describe("paymentDocumentFileName", () => {
     expect(paymentDocumentFileName({ ...invoice, title: "" })).toBe(
       "R-2026-0001.pdf",
     );
+  });
+});
+
+describe("fetchBookingPaymentDocument", () => {
+  const owner = { tenantId: "t1", bookingId: "b1" };
+
+  function bookingRoutes() {
+    return {
+      getBookingInvoice: vi.fn(async () => "invoice-bytes"),
+      getBookingReceipt: vi.fn(async () => "receipt-bytes"),
+      getBookingCancellationReceipt: vi.fn(async () => "cancellation-bytes"),
+    };
+  }
+
+  it.each([
+    ["invoice", "getBookingInvoice", "invoice-bytes"],
+    ["receipt", "getBookingReceipt", "receipt-bytes"],
+    // The cancellation receipt of the booking details (ECCdigital/tickets#291).
+    ["cancellation", "getBookingCancellationReceipt", "cancellation-bytes"],
+  ])("fetches a %s through %s", async (type, route, bytes) => {
+    const api = bookingRoutes();
+
+    await expect(
+      fetchBookingPaymentDocument(api, { ...owner, type, name: "D-1.pdf" }),
+    ).resolves.toBe(bytes);
+
+    expect(api[route]).toHaveBeenCalledWith("t1", "b1", "D-1.pdf");
+  });
+
+  it("refuses an attachment that is no payment document", async () => {
+    const api = bookingRoutes();
+
+    await expect(
+      fetchBookingPaymentDocument(api, { ...owner, type: "agreement" }),
+    ).rejects.toThrow("No payment document: agreement");
+  });
+
+  it("refuses a document without its booking", async () => {
+    await expect(
+      fetchBookingPaymentDocument(bookingRoutes(), {
+        type: "cancellation",
+        name: "S-1.pdf",
+      }),
+    ).rejects.toThrow("The document's booking is unknown");
+  });
+
+  it("lets the actions download a cancellation receipt", async () => {
+    const { window: win } = browserWindow();
+    const api = bookingRoutes();
+    const onError = vi.fn();
+    const { download } = createPaymentDocumentActions({
+      win,
+      fetchDocument: (paymentDocument) =>
+        fetchBookingPaymentDocument(api, paymentDocument),
+      onError,
+    });
+
+    await download({
+      ...owner,
+      type: "cancellation",
+      name: "S-2026-0001.pdf",
+      title: "Stornobeleg S-2026-0001",
+    });
+
+    expect(onError).not.toHaveBeenCalled();
+    const link = win.HTMLAnchorElement.prototype.click.mock.contexts[0];
+    expect(link.getAttribute("download")).toBe("Stornobeleg S-2026-0001.pdf");
   });
 });
 
