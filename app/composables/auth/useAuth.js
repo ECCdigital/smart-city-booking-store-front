@@ -25,10 +25,10 @@ export const useAuth = () => {
     });
     return response;
   };
-  const changePassword = async (id, password) => {
+  const changePassword = async (currentPassword, password) => {
     return await $fetch("/api/auth/change-password", {
       method: "POST",
-      body: { id, password },
+      body: { currentPassword, password },
     });
   };
 

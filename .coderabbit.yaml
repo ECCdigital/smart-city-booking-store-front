@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Keeps the organisation's settings and only adds the base branches: without
+# them CodeRabbit skips every pull request on `version/<major>.<minor>.x`
+# (ECCdigital/tickets#424). The review stays advisory.
+inheritance: true
+reviews:
+  auto_review:
+    base_branches:
+      - "^develop$"
+      - "^version/.+$"

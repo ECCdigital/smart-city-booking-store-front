@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import de from "~~/i18n/locales/de.json";
+import en from "~~/i18n/locales/en.json";
 import {
   backendErrorBodyOf,
   resolveCheckoutErrorKey,
@@ -20,10 +22,10 @@ describe("backendErrorBodyOf", () => {
   it("finds the backend's error body inside the BFF's error envelope", () => {
     const body = {
       success: false,
-      error: { reason: "checkout.offer_not_reachable" },
+      error: { reason: "checkout.bookable_not_found" },
     };
 
-    expect(backendErrorBodyOf(failure(409, body))).toEqual(body);
+    expect(backendErrorBodyOf(failure(404, body))).toEqual(body);
   });
 
   it("is null when the backend sent no body", () => {
@@ -36,12 +38,12 @@ describe("resolveCheckoutFailureKey", () => {
   it("names the refusal of an offer that is withdrawn or whose tenant is not public", () => {
     expect(
       resolveCheckoutFailureKey(
-        failure(409, {
+        failure(404, {
           success: false,
-          error: { reason: "checkout.offer_not_reachable" },
+          error: { reason: "checkout.bookable_not_found" },
         }),
       ),
-    ).toBe("checkout.offer_not_reachable");
+    ).toBe("checkout.bookable_not_found");
   });
 
   it("treats a 404 of the backend as an offer that is no longer available", () => {
@@ -53,7 +55,7 @@ describe("resolveCheckoutFailureKey", () => {
           statusCode: 404,
         }),
       ),
-    ).toBe("checkout.offer_not_reachable");
+    ).toBe("checkout.bookable_not_found");
   });
 
   it("keeps another structured reason of the backend", () => {
@@ -98,5 +100,25 @@ describe("resolveCheckoutErrorKey", () => {
         params: { capacity: 2, occupied: 3 },
       }),
     ).toBe("checkout.unknown");
+  });
+});
+
+describe("the wording of an offer that is no longer available", () => {
+  const wording = {
+    de: "Dieses Angebot ist nicht mehr verfügbar und kann nicht gebucht werden.",
+    en: "This offer is no longer available and cannot be booked.",
+  };
+
+  const locales = [
+    ["de", de],
+    ["en", en],
+  ];
+
+  it.each(locales)("%s names checkout.bookable_not_found as no longer available", (locale, messages) => {
+    expect(messages.checkout.bookable_not_found).toBe(wording[locale]);
+  });
+
+  it.each(locales)("%s carries no key for the removed checkout.offer_not_reachable", (_locale, messages) => {
+    expect(messages.checkout).not.toHaveProperty("offer_not_reachable");
   });
 });

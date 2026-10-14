@@ -157,6 +157,18 @@ const filterItems = () => [
         ],
       ]
     : []),
+  [
+    {
+      label: t("account.listFilter.clearAll"),
+      icon: "i-lucide-filter-x",
+      disabled: !hasFiltersApplied.value,
+      onSelect() {
+        selectedTenantIds.value = [];
+        selectedKinds.value = [];
+        onSetFilter();
+      },
+    },
+  ],
 ];
 
 function toggled(list, value, on) {

@@ -183,6 +183,7 @@
 <script setup>
 import { useBookables } from "~/composables/api/useBookables.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   tenantId: { type: String, default: null },
@@ -204,6 +205,7 @@ const navButtonClass = computed(() =>
 );
 
 const { t, locale } = useI18n();
+const { formatDay, formatPrice } = useFormatting();
 const { getBlockPeriods } = useBookables();
 
 function buildMonthLabels(monthStyle) {
@@ -229,12 +231,7 @@ function toDateParam(date) {
 
 function formatEur(value) {
   if (value === null || value === undefined) return "–";
-  return (
-    value.toLocaleString(locale.value === "en" ? "en-GB" : "de-DE", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + " €"
-  );
+  return formatPrice(value);
 }
 
 function formatTime(date) {
@@ -271,7 +268,7 @@ function formatBlockRangeFull(timeBegin, timeEnd) {
   const weekday = (d) => t(`bookingTimeWindowSelection.weekdays.${d.getDay()}`);
   const start = new Date(timeBegin);
   const end = new Date(timeEnd);
-  const datePart = (d) => `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.`;
+  const datePart = (d) => formatDay(d, { year: undefined });
 
   return `${weekday(start)}, ${datePart(start)} ${formatTime(start)} – ${weekday(end)}, ${datePart(end)} ${formatTime(end)}`;
 }

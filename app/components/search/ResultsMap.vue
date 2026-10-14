@@ -103,7 +103,7 @@
               v-if="suitableCount !== null"
               class="hidden sm:inline text-sm font-bold text-black dark:text-white rounded-lg py-2 px-3 shadow-md glass"
             >
-              {{ suitableCount }} {{ $t("filter.fittingResults") }}
+              {{ $t("filter.fittingResults", suitableCount) }}
             </span>
             <UButton
               :label="$t('results.list')"

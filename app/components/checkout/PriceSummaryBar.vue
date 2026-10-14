@@ -1,5 +1,6 @@
 <script setup>
 import { reachedPerBookingLimit } from "~/utils/amountLimits";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const props = defineProps({
   summary: {
@@ -48,34 +49,21 @@ const props = defineProps({
 const emit = defineEmits(["update:amount"]);
 
 const { t } = useI18n();
+const formatting = useFormatting();
 
 function formatEur(value) {
   if (value === null || value === undefined) return "–";
-  return (
-    value.toLocaleString("de-DE", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + " €"
-  );
+  return formatting.formatPrice(value);
 }
 
 function formatDate(dateStr) {
   if (!dateStr) return "";
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  return formatting.formatDay(dateStr);
 }
 
 function formatTime(dateStr) {
   if (!dateStr) return "";
-  const d = new Date(dateStr);
-  return d.toLocaleTimeString("de-DE", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatting.formatTime(dateStr);
 }
 
 const formattedTimePeriod = computed(() => {

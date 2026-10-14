@@ -32,6 +32,18 @@ export default defineNuxtConfig({
       // Vite blockt sonst fremde Host-Header mit "Blocked request".
       allowedHosts: [".trycloudflare.com"],
     },
+    // nuxt-security's `removeLoggers` drops `console` and `debugger` through
+    // esbuild, which Vite 8 (Nuxt 4.5) no longer uses. The Oxc minifier does
+    // it for the client bundle instead.
+    $client: {
+      build: {
+        rolldownOptions: {
+          output: {
+            minify: { compress: { dropConsole: true, dropDebugger: true } },
+          },
+        },
+      },
+    },
   },
 
   runtimeConfig: {

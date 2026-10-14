@@ -1,14 +1,18 @@
 /**
  * Resolution of one bookable or event for a direct link, independent of the
- * catalog list. The storefront applies no rule of its own: it asks the
- * backend for the offer in every tenant that can hold it and takes what the
- * backend delivers; a 404 there is "not available".
+ * catalog list. The storefront asks the backend for the offer in every
+ * tenant that can hold it; a 404 there is "not available".
  *
  * Two backend routes answer per tenant. The catalog interface (`/json/…`)
- * delivers what is listed, in the shape the detail page reads. The
+ * delivers what the public reaches, in the shape the detail page reads. The
  * direct-link route (`/api/:tenant/bookables/public/:id`,
- * `/api/:tenant/events/:id`) also delivers an offer without a publication
- * wish; its answer is the stored offer and is brought into that shape here.
+ * `/api/:tenant/events/:id`) delivers the same offers as stored, with their
+ * wish to be listed (`isPublic`); its answer is brought into that shape
+ * where the catalog interface refuses the tenant.
+ *
+ * One rule is the storefront's own: the detail page shows an offer only
+ * when it asks to be listed. An `unlisted` offer (`isPublic` false) is
+ * reached by the direct link to its checkout alone (ECCdigital/tickets#225).
  */
 
 export type DetailKind = "bookable" | "event";
@@ -42,7 +46,7 @@ type CandidateParams = {
 /**
  * The tenants a direct link is asked in. The tenant of a single-tenant
  * catalog is asked alone. Otherwise every given tenant is asked, plus the tenant the link names — a hint only
- * ever adds a candidate, the backend still decides.
+ * ever adds a candidate, the backend still answers for it.
  */
 export function detailCandidateTenants({
   catalogTenantId = null,
@@ -159,20 +163,25 @@ async function resolveInTenant(
 ): Promise<TenantAnswer> {
   const route = routes[kind];
 
-  const listed = await fetch(route.listed(tenantId, id));
-  if (!listed.error && isRecord(listed.data) && listed.data.id) {
-    return { hit: { tenantId, item: listed.data }, failure: null };
+  const [listed, direct] = await Promise.all([
+    fetch(route.listed(tenantId, id)),
+    fetch(route.directLink(tenantId, id)),
+  ]);
+
+  // Only the direct-link route tells whether the offer asks to be listed;
+  // without its answer the offer is not shown.
+  if (direct.error || !isRecord(direct.data) || !direct.data.id) {
+    return { hit: null, failure: failureOf(direct) ?? failureOf(listed) };
+  }
+  if (direct.data.isPublic !== true) {
+    return { hit: null, failure: null };
   }
 
-  const direct = await fetch(route.directLink(tenantId, id));
-  if (!direct.error && isRecord(direct.data) && direct.data.id) {
-    return {
-      hit: { tenantId, item: route.fromDirectLink(direct.data) },
-      failure: null,
-    };
-  }
-
-  return { hit: null, failure: failureOf(direct) ?? failureOf(listed) };
+  const item =
+    !listed.error && isRecord(listed.data) && listed.data.id
+      ? listed.data
+      : route.fromDirectLink(direct.data);
+  return { hit: { tenantId, item }, failure: null };
 }
 
 /**

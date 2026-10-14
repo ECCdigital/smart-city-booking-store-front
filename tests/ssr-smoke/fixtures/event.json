@@ -1,0 +1,51 @@
+{
+  "id": "00000000-0000-4000-8000-0000000000e1",
+  "tenantId": "00000000-0000-4000-8000-0000000000aa",
+  "attendees": "",
+  "location": {
+    "coordinates": {
+      "type": "Point",
+      "points": [10.1228, 54.3233]
+    },
+    "display_address": "Rathausplatz 1, 24103 Kiel",
+    "address": {
+      "street": "Rathausplatz",
+      "house_number": "1",
+      "postcode": "24103",
+      "city": "Kiel",
+      "suburb": null,
+      "state": null,
+      "country": "Deutschland",
+      "country_code": "de"
+    }
+  },
+  "eventLocation": {
+    "phoneNumber": "",
+    "emailAddress": "",
+    "select": null,
+    "room": null,
+    "url": "",
+    "name": "Rathaus"
+  },
+  "eventOrganizer": {
+    "contactPersonImage": "",
+    "speakers": []
+  },
+  "format": 0,
+  "images": [],
+  "information": {
+    "teaserImage": "",
+    "tags": [],
+    "flags": [],
+    "name": "Smoke-Veranstaltung",
+    "teaserText": "",
+    "description": "",
+    "startDate": "2026-11-08",
+    "endDate": "2026-11-08",
+    "startTime": "10:00",
+    "endTime": "12:00"
+  },
+  "schedules": [],
+  "externalBookingUrl": "",
+  "tickets": []
+}

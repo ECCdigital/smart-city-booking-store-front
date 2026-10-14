@@ -119,6 +119,13 @@
           />
         </div>
 
+        <div v-if="enableEditingPassword" class="my-3">
+          <PasswordInput
+            v-model="currentPassword"
+            :label="$t('common.currentPassword')"
+            input-style-classes="w-full md:w-[35%]"
+          />
+        </div>
         <div
           v-if="enableEditingPassword"
           class="md:flex space-y-2 md:space-y-0 my-3"
@@ -225,6 +232,7 @@ onBeforeRouteLeave(() => {
   return false;
 });
 
+const currentPassword = ref("");
 const newPassword = ref("");
 const repeatedPassword = ref("");
 
@@ -252,7 +260,14 @@ function resetUserChanges() {
   formVersion.value += 1;
 }
 
-function changePassword() {
+async function changePassword() {
+  if (!currentPassword.value) {
+    notification.error(
+      t("account.currentPasswordRequired"),
+      t("account.passwordChangeFailed"),
+    );
+    return;
+  }
   if (newPassword.value !== repeatedPassword.value) {
     notification.error(
       t("account.passwordMismatch"),
@@ -260,12 +275,25 @@ function changePassword() {
     );
     return;
   }
-  authStore.changePassword(currentUser.value.id, newPassword.value);
+  const result = await authStore.changePassword(
+    currentPassword.value,
+    newPassword.value,
+  );
+  if (!result.success) {
+    notification.error(
+      result.statusCode === 403
+        ? t("account.currentPasswordWrong")
+        : t("account.passwordChangeFailedMessage"),
+      t("account.passwordChangeFailed"),
+    );
+    return;
+  }
   notification.success(
     t("account.passwordChangedMessage"),
     t("account.passwordChanged"),
   );
   enableEditingPassword.value = false;
+  currentPassword.value = "";
   newPassword.value = "";
   repeatedPassword.value = "";
 }

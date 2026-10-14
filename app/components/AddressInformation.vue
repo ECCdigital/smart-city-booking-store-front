@@ -34,8 +34,10 @@
 </template>
 <script setup>
 import { useRoute } from "#imports";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const { t } = useI18n();
+const { formatNumber } = useFormatting();
 
 const props = defineProps({
   item: {
@@ -69,10 +71,13 @@ const location = computed(() => {
 
 const distance = computed(() => {
   if (props.item.distanceMeter == null) return null;
-  return (props.item.distanceMeter / 1000)
-    .toFixed(2)
-    .replace(".", ",")
-    .replace(/,00$/, "");
+  // Two decimals, none for whole kilometres.
+  const km = Math.round(props.item.distanceMeter / 10) / 100;
+  const digits = Number.isInteger(km) ? 0 : 2;
+  return formatNumber(km, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
 });
 
 const copyAddressToClipboard = async () => {

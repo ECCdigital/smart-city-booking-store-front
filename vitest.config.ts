@@ -11,6 +11,12 @@ export default defineConfig({
       "~": fileURLToPath(new URL("./app", import.meta.url)),
     },
   },
+  // Nuxt replaces `import.meta.server` at build time. Here it reads a global,
+  // so a test can run app code the way it runs during server rendering by
+  // setting `globalThis.__nuxtServer`. Unset, it stays falsy as before.
+  define: {
+    "import.meta.server": "globalThis.__nuxtServer",
+  },
   test: {
     include: ["tests/**/*.test.{js,ts}"],
     environment: "node",

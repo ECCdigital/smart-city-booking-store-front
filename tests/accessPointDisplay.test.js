@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { createI18n } from "vue-i18n";
+
+import de from "~~/i18n/locales/de.json";
+import en from "~~/i18n/locales/en.json";
 
 import {
   ACCESS_POINT_LOCK_STATES,
@@ -13,26 +17,38 @@ const DAY = 24 * HOUR;
 // Local time on purpose: "same day" is the day the person sees.
 const NOW = new Date(2026, 8, 17, 9, 0).getTime();
 
+function translator(locale) {
+  return createI18n({ legacy: false, locale, messages: { de, en } }).global.t;
+}
+
+const t = translator("de");
+
 describe("accessPointTitle", () => {
   it("names a bike box by the number written on it", () => {
     // `compartment` is what the person looks for at the site; the provider's
     // booking id is not on the box.
     expect(
-      accessPointTitle({
-        type: "locker",
-        compartment: "12",
-        externalBookingId: 4711,
-      }),
+      accessPointTitle(
+        {
+          type: "locker",
+          compartment: "12",
+          externalBookingId: 4711,
+        },
+        t,
+      ),
     ).toBe("Fahrradbox Nr. 12");
   });
 
   it("falls back to the booking behind a box the provider did not number", () => {
     expect(
-      accessPointTitle({
-        type: "locker",
-        compartment: null,
-        externalBookingId: 4711,
-      }),
+      accessPointTitle(
+        {
+          type: "locker",
+          compartment: null,
+          externalBookingId: 4711,
+        },
+        t,
+      ),
     ).toBe("Fahrradbox #4711");
   });
 
@@ -40,35 +56,54 @@ describe("accessPointTitle", () => {
     // Before the grant - an unpaid booking - the provider knows neither a
     // number nor a booking id; `#null` is not a name.
     expect(
-      accessPointTitle({
-        type: "locker",
-        compartment: null,
-        externalBookingId: null,
-      }),
+      accessPointTitle(
+        {
+          type: "locker",
+          compartment: null,
+          externalBookingId: null,
+        },
+        t,
+      ),
     ).toBe("Fahrradbox");
   });
 
   it("lets type decide, not provider", () => {
     // The same provider that runs the lockers also runs doors; #13, #15.
     expect(
-      accessPointTitle({
-        type: "door",
-        provider: "ifbs",
-        label: "Nebeneingang",
-        externalBookingId: 4711,
-      }),
+      accessPointTitle(
+        {
+          type: "door",
+          provider: "ifbs",
+          label: "Nebeneingang",
+          externalBookingId: 4711,
+        },
+        t,
+      ),
     ).toBe("Nebeneingang");
   });
 
   it("names a door from a provider nobody enumerated", () => {
     // The old label rendered nothing at all outside its two known providers.
-    expect(accessPointTitle({ type: "door", provider: "whoever" })).toBe(
+    expect(accessPointTitle({ type: "door", provider: "whoever" }, t)).toBe(
       "Unbekannte Tür",
     );
   });
 
   it("survives an access point that is not there yet", () => {
-    expect(accessPointTitle(null)).toBe("Unbekannte Tür");
+    expect(accessPointTitle(null, t)).toBe("Unbekannte Tür");
+  });
+
+  it("names boxes and doors in the language of the page", () => {
+    const english = translator("en");
+
+    expect(
+      accessPointTitle({ type: "locker", compartment: "12" }, english),
+    ).toBe("Bike box no. 12");
+    expect(
+      accessPointTitle({ type: "locker", externalBookingId: 4711 }, english),
+    ).toBe("Bike box #4711");
+    expect(accessPointTitle({ type: "locker" }, english)).toBe("Bike box");
+    expect(accessPointTitle(null, english)).toBe("Unknown door");
   });
 });
 

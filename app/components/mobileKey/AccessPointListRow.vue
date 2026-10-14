@@ -15,7 +15,7 @@
 
       <div class="lg:flex lg:gap-2 lg:items-center basis-6/7">
         <div class="text-md font-semibold line-clamp-2">
-          {{ accessPointTitle(accessPoint) }}
+          {{ accessPointTitle(accessPoint, t) }}
         </div>
         <div class="text-sm text-neutral-500">
           <!-- the Access Window first, the code hint under it -->

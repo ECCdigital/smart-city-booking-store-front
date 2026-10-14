@@ -1,0 +1,15 @@
+{
+  "mode": "offers",
+  "portalUrl": "http://localhost:3920",
+  "branding": {
+    "active": true,
+    "logoUrl": null,
+    "faviconUrl": null,
+    "theme": {
+      "colors": {
+        "primary": "",
+        "secondary": ""
+      }
+    }
+  }
+}

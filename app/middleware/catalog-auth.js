@@ -1,5 +1,14 @@
 import { useAuth } from "~/composables/auth/useAuth.js";
 import { useCatalog } from "~/composables/api/useCatalog.js";
+import {
+  appendReturnTarget,
+  parseReturnTarget,
+} from "~~/shared/utils/returnTarget";
+
+// Back to the page itself, query included: encoded, or the login would read
+// the page's own query as its own. Only an in-app path is carried along.
+const loginPathFor = (to) =>
+  appendReturnTarget("/login", parseReturnTarget(to.fullPath));
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (!to.params?.catalogSlug) return;
@@ -18,7 +27,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
       const authValid = await validateAuth();
 
       if (!authValid) {
-        return navigateTo(`/login?redirect=${to.fullPath}`);
+        return navigateTo(loginPathFor(to));
       }
     }
 
@@ -28,7 +37,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   } catch (error) {
     if (error.statusCode === 401) {
-      return navigateTo(`/login?redirect=${to.fullPath}`);
+      return navigateTo(loginPathFor(to));
     }
     console.warn("Catalog not found for auth check:", to.params.catalogSlug);
   }

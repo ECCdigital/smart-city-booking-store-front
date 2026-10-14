@@ -43,6 +43,9 @@ const { t, locale } = useI18n();
 
 const intlLocale = computed(() => (locale.value === "de" ? "de-DE" : "en-GB"));
 
+// A series takes no typed date before today (ECCdigital/tickets#188).
+const today = new Date();
+
 const startDate = ref(null);
 const startTime = ref({ hours: null, minutes: null });
 const endDate = ref(null);
@@ -467,6 +470,7 @@ function getWeekDayCardClass(wd) {
         <InputTime
           v-model:date="startDate"
           v-model:time="startTime"
+          :min-date="today"
           @update:date="onStartChange"
           @update:time="onStartChange"
         />
@@ -480,6 +484,7 @@ function getWeekDayCardClass(wd) {
         <InputTime
           v-model:date="endDate"
           v-model:time="endTime"
+          :min-date="today"
           :disabled="!hasStartTime"
         />
       </div>
@@ -631,7 +636,7 @@ function getWeekDayCardClass(wd) {
       >
         {{ $t("groupBooking.fields.until") }}
       </label>
-      <InputTime v-model:date="untilDate" disable-time />
+      <InputTime v-model:date="untilDate" :min-date="today" disable-time />
     </div>
 
     <!-- Generate trigger -->

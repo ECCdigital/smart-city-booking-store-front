@@ -23,7 +23,8 @@ import {
  * A pure module rather than a component, for the same reason
  * `accessErrorScreens.js` is one: an SFC cannot be imported in a Node test.
  * That is also why the lock states carry an i18n *key* rather than a word:
- * the module has no `t()`, the renderer does.
+ * the module has no `t()`, the renderer does - or hands its own in, as for
+ * the title.
  */
 
 /**
@@ -34,21 +35,28 @@ import {
  * a `#null`. Which kind it is comes from `type` (#13, #15) - the provider does
  * not decide how a thing is called. A door from a provider nobody enumerated
  * still gets a name, rather than the empty row the old label left behind.
+ *
+ * @param {Object|null|undefined} accessPoint
+ * @param {(key: string, params?: Object) => string} t vue-i18n's translator
  */
-export function accessPointTitle(accessPoint) {
+export function accessPointTitle(accessPoint, t) {
   if (accessPoint?.type === "locker") {
     if (accessPoint.compartment) {
-      return `Fahrradbox Nr. ${accessPoint.compartment}`;
+      return t("mobileKey.accessPoint.title.lockerCompartment", {
+        compartment: accessPoint.compartment,
+      });
     }
 
     if (accessPoint.externalBookingId) {
-      return `Fahrradbox #${accessPoint.externalBookingId}`;
+      return t("mobileKey.accessPoint.title.lockerBooking", {
+        id: accessPoint.externalBookingId,
+      });
     }
 
-    return "Fahrradbox";
+    return t("mobileKey.accessPoint.title.locker");
   }
 
-  return accessPoint?.label || "Unbekannte Tür";
+  return accessPoint?.label || t("mobileKey.accessPoint.title.unknownDoor");
 }
 
 /**

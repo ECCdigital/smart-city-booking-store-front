@@ -137,7 +137,7 @@ const bookingPrice = computed(() => {
   return formatPrice(props.booking.priceEur);
 });
 
-const { formatDate, formatPrice } = useFormatting();
+const { formatDate, formatDay, formatTime, formatPrice } = useFormatting();
 
 const currentTime = ref(new Date().getTime());
 const isActive = computed(() => {
@@ -211,17 +211,6 @@ const bookingTitle = computed(() => {
   return props.booking.objectName;
 });
 
-const sameDayBookingDateFormatter = new Intl.DateTimeFormat("de-DE", {
-  day: "2-digit",
-  month: "2-digit",
-  year: "2-digit",
-});
-
-const sameDayBookingTimeFormatter = new Intl.DateTimeFormat("de-DE", {
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
 function isSameCalendarDay(startDate, endDate) {
   return (
     startDate.getFullYear() === endDate.getFullYear() &&
@@ -251,11 +240,11 @@ const bookingTimeSlot = computed(() => {
 
     if (isSameCalendarDay(startDate, endDate)) {
       return (
-        sameDayBookingDateFormatter.format(startDate) +
+        formatDay(startDate, { year: "2-digit" }) +
         ", " +
-        sameDayBookingTimeFormatter.format(startDate) +
+        formatTime(startDate) +
         " - " +
-        sameDayBookingTimeFormatter.format(endDate)
+        formatTime(endDate)
       );
     }
 

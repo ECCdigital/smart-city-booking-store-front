@@ -49,7 +49,10 @@
             {{ bookingTimeRange(candidate) }}
           </div>
           <div class="text-sm text-neutral-500">
-            {{ candidate.leadBookable?.title || `Buchung #${candidate.id}` }}
+            {{
+              candidate.leadBookable?.title ||
+              t("mobileKey.bookingNumber", { id: candidate.id })
+            }}
           </div>
         </div>
       </UButton>
@@ -292,7 +295,7 @@ const scanEvidence = computed(() => [
 
 const bookingTimeRange = (candidate) =>
   formatDateRange(candidate?.timeBegin, candidate?.timeEnd) ||
-  `Buchung #${candidate?.id}`;
+  t("mobileKey.bookingNumber", { id: candidate?.id });
 
 /**
  * The door by name - the wording never says "the door", it says which one.

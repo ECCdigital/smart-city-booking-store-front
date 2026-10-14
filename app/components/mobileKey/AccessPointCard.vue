@@ -56,7 +56,7 @@
 
         <p v-else-if="booking" class="text-sm mt-2">
           <span class="text-neutral-500"
-            >Buchung #{{ booking.id }} &middot;
+            >{{ t("mobileKey.bookingNumber", { id: booking.id }) }} &middot;
           </span>
           <span class="text-primary font-semibold">{{ timeRange }}</span>
         </p>
@@ -101,7 +101,7 @@ const props = defineProps({
 const { t } = useI18n();
 const { formatDateRange } = useFormatting();
 
-const title = computed(() => accessPointTitle(props.accessPoint));
+const title = computed(() => accessPointTitle(props.accessPoint, t));
 
 const locationLine = computed(
   () => props.booking?.leadBookable?.location?.display_address || "",

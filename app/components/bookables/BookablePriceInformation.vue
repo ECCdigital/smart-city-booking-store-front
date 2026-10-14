@@ -13,7 +13,7 @@
         <div class="basis-1/5" />
         <div class="basis-2/5 content-center">
           <span class="font-bold">
-            {{ getGrossPrice(priceCategory.priceEur) }} €
+            {{ getGrossPrice(priceCategory.priceEur) }}
           </span>
         </div>
       </template>
@@ -58,7 +58,7 @@
           "
         >
           <span class="font-bold">
-            {{ getGrossPrice(priceCategory.priceEur) }} €
+            {{ getGrossPrice(priceCategory.priceEur) }}
           </span>
           <span v-if="!priceCategory.fixedPrice"> / {{ getUnit() }} </span>
         </div>
@@ -80,7 +80,7 @@ import { useFormatting } from "~/composables/utils/useFormatting.js";
 const { t } = useI18n();
 
 
-const { weekdayNames } = useFormatting();
+const { weekdayNames, formatPrice } = useFormatting();
 
 const props = defineProps({
   item: {
@@ -159,9 +159,9 @@ function hasPriceConditions(priceCategory) {
 function getGrossPrice(price) {
   if (props.item.priceValueAddedTax) {
     const gross = price + (price * props.item.priceValueAddedTax) / 100;
-    return gross.toFixed(2).toString().replace(/\./g, ",");
+    return formatPrice(gross);
   }
-  return price.toFixed(2).toString().replace(/\./g, ",");
+  return formatPrice(price);
 }
 
 function getUnit() {
