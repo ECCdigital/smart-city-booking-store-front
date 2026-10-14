@@ -33,9 +33,10 @@
         />
       </div>
 
-      <!-- The table gives no hold on its rows, so it cross-fades as a whole
-           in the shared list transition when the search changes what it
-           shows. -->
+      <!-- The table gives no hold on its rows, so it fades out and in as a
+           whole in the shared list transition when the search changes what
+           it shows. UTable renders more than one root node, which a
+           Transition cannot fade, so a plain div carries the key. -->
       <Transition name="card-list" mode="out-in">
         <div
           v-if="!pending && shownDocuments.length === 0"
@@ -49,84 +50,84 @@
           <p class="text-gray-500">{{ t("account.invoices.noMatches") }}</p>
         </div>
 
-        <UTable
-          v-else
-          :key="shownKey"
-          v-model:sorting="sorting"
-          v-model:pagination="pagination"
-          :data="shownDocuments"
-          :columns="columns"
-          :loading="pending"
-          :pagination-options="{
-            getPaginationRowModel: getPaginationRowModel(),
-          }"
-          :ui="{
-            base: 'min-w-full table-fixed',
-            th: 'overflow-hidden',
-            td: 'overflow-hidden',
-          }"
-          class="w-full"
-        >
-          <template
-            v-for="col in sortableColumns"
-            :key="col.id"
-            #[`${col.id}-header`]="{ column }"
+        <div v-else :key="shownKey">
+          <UTable
+            v-model:sorting="sorting"
+            v-model:pagination="pagination"
+            :data="shownDocuments"
+            :columns="columns"
+            :loading="pending"
+            :pagination-options="{
+              getPaginationRowModel: getPaginationRowModel(),
+            }"
+            :ui="{
+              base: 'min-w-full table-fixed',
+              th: 'overflow-hidden',
+              td: 'overflow-hidden',
+            }"
+            class="w-full"
           >
-            <UButton
-              color="neutral"
-              variant="ghost"
-              :label="col.label"
-              :icon="sortIcon(column)"
-              class="-mx-2.5"
-              @click="column.toggleSorting(column.getIsSorted() === 'asc')"
-            />
-          </template>
-
-          <template #timeCreated-cell="{ row }">
-            {{ formatDate(row.original.timeCreated) }}
-          </template>
-          <template #title-cell="{ row }">
-            <UTooltip
-              :disabled="!row.original.title"
-              :ui="wrapTooltipUi"
+            <template
+              v-for="col in sortableColumns"
+              :key="col.id"
+              #[`${col.id}-header`]="{ column }"
             >
-              <span class="block w-full truncate">
-                {{ row.original.title }}
-              </span>
-              <template #content>
-                <span class="min-w-0 w-full whitespace-normal break-words">
+              <UButton
+                color="neutral"
+                variant="ghost"
+                :label="col.label"
+                :icon="sortIcon(column)"
+                class="-mx-2.5"
+                @click="column.toggleSorting(column.getIsSorted() === 'asc')"
+              />
+            </template>
+
+            <template #timeCreated-cell="{ row }">
+              {{ formatDate(row.original.timeCreated) }}
+            </template>
+            <template #title-cell="{ row }">
+              <UTooltip
+                :disabled="!row.original.title"
+                :ui="wrapTooltipUi"
+              >
+                <span class="block w-full truncate">
                   {{ row.original.title }}
                 </span>
-              </template>
-            </UTooltip>
-          </template>
-          <template #bookingId-cell="{ row }">
-            <NuxtLink
-              :to="tenantTo(`/account/bookings/${row.original.bookingId}`)"
-              class="block truncate text-primary hover:underline"
-            >
-              #{{ row.original.bookingId }}
-            </NuxtLink>
-          </template>
-          <template #bookableNames-cell="{ row }">
-            <UTooltip
-              :disabled="!row.original.bookableLabel"
-              :ui="wrapTooltipUi"
-            >
-              <span class="block w-full truncate">
-                {{ row.original.bookableLabel }}
-              </span>
-              <template #content>
-                <span class="min-w-0 w-full whitespace-normal break-words">
+                <template #content>
+                  <span class="min-w-0 w-full whitespace-normal break-words">
+                    {{ row.original.title }}
+                  </span>
+                </template>
+              </UTooltip>
+            </template>
+            <template #bookingId-cell="{ row }">
+              <NuxtLink
+                :to="tenantTo(`/account/bookings/${row.original.bookingId}`)"
+                class="block truncate text-primary hover:underline"
+              >
+                #{{ row.original.bookingId }}
+              </NuxtLink>
+            </template>
+            <template #bookableNames-cell="{ row }">
+              <UTooltip
+                :disabled="!row.original.bookableLabel"
+                :ui="wrapTooltipUi"
+              >
+                <span class="block w-full truncate">
                   {{ row.original.bookableLabel }}
                 </span>
-              </template>
-            </UTooltip>
-          </template>
-          <template #paidLabel-cell="{ row }">
-            <BookingPayedChip :booking="row.original.booking" />
-          </template>
-        </UTable>
+                <template #content>
+                  <span class="min-w-0 w-full whitespace-normal break-words">
+                    {{ row.original.bookableLabel }}
+                  </span>
+                </template>
+              </UTooltip>
+            </template>
+            <template #paidLabel-cell="{ row }">
+              <BookingPayedChip :booking="row.original.booking" />
+            </template>
+          </UTable>
+        </div>
       </Transition>
 
       <div
