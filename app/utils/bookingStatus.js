@@ -213,12 +213,6 @@ export function effectiveBookingStatusI18nKey(booking) {
  */
 function resolveDisplayStatus(booking) {
   const status = resolveBookingStatus(booking);
-  console.log(
-    "**A**",
-    status,
-    status === BOOKING_STATUS.REJECTED,
-    booking?.cancellationRefund?.origin,
-  );
   return status === BOOKING_STATUS.REJECTED &&
     booking?.cancellationRefund?.origin === "user"
     ? BOOKING_STATUS.CANCELLED
