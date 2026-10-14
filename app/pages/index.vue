@@ -65,18 +65,24 @@ const catalogSlug = computed(() => route.params.catalogSlug || null);
 
 // A tenant that is not available (missing, declined, pending approval) is
 // the neutral 404 page, with HTTP 404 on SSR; any other failure stays the
-// load error below.
-const { error } = useLazyAsyncData("catalog-bundle-home", (nuxtApp) =>
-  loadBundle({ slug: catalogSlug.value, include: ["events"] }).catch(
-    (failure) => {
-      if (isTenantNotAvailable({ tenantID: tenantID.value, error: failure })) {
-        nuxtApp.runWithContext(() =>
-          showError({ statusCode: 404, statusMessage: "Page Not Found" }),
-        );
-      }
-      throw failure;
-    },
-  ),
+// load error below. The key follows the tenant and catalog, so choosing a
+// tenant on the start page loads its offers.
+const { error } = useLazyAsyncData(
+  () =>
+    `catalog-bundle-home:${catalogSlug.value ?? "root"}:${tenantID.value ?? "all"}`,
+  (nuxtApp) =>
+    loadBundle({ slug: catalogSlug.value, include: ["events"] }).catch(
+      (failure) => {
+        if (
+          isTenantNotAvailable({ tenantID: tenantID.value, error: failure })
+        ) {
+          nuxtApp.runWithContext(() =>
+            showError({ statusCode: 404, statusMessage: "Page Not Found" }),
+          );
+        }
+        throw failure;
+      },
+    ),
 );
 
 watch(

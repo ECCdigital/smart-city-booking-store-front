@@ -15,6 +15,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- Choosing or clearing a tenant on the start page now loads that tenant's upcoming events, as `/search` already did (ECCdigital/tickets#540): the page loaded its bundle under one fixed key, so it kept the events of the page it came from. The key now names catalog and tenant
 - The result cards' picture area had no height on a server-rendered page and the page hydrated with mismatches: the header carried an empty static `class=""` beside its dynamic class, which the server wrote as two `class` attributes, and the browser kept the empty one. The empty attribute is gone
 - Every page rendered on the server answers again instead of a 500 (ECCdigital/tickets#395): from Nuxt 4.5 on (ECCdigital/tickets#284) `useFetch` returns its own enumerable `then`, which `useThemeBundle()` spread along, so `await useThemeBundle()` resolved to the bare fetch result. `app.vue` and the catalog page lost the `version` of the theme assets and threw, and the Hero, the page background and the auth pages read the stored Theme View instead of the Live Preview's Draft
 - `npm run lint:check` passes again, so the CI's ESLint step does too (ECCdigital/tickets#233): `ResultsMapList` kept an unused `matchCount`. No behaviour change

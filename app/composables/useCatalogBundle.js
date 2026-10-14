@@ -169,7 +169,8 @@ export function useCatalogBundle() {
     clearNuxtData(
       (key) =>
         typeof key === "string" &&
-        (key.startsWith("catalog-bundle:") || key === "catalog-bundle-home"),
+        (key.startsWith("catalog-bundle:") ||
+          key.startsWith("catalog-bundle-home:")),
     );
   }
 
