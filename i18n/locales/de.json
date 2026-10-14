@@ -462,7 +462,6 @@
     "showAllEvents": "Alle Events ansehen",
     "upcoming": "Anstehende Veranstaltungen",
     "ticketOptions": "Ticketoptionen",
-    "ticketOptionsAndAvailability": "Ticketoptionen & Verfügbarkeit",
     "selectDatesHint": "Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen.",
     "bookAtProvider": "Beim Anbieter buchen",
     "notPublicTitle": "Kein öffentliches Event.",
@@ -1173,8 +1172,6 @@
       "fr": "Französisch",
       "es": "Spanisch"
     },
-    "settingsPersonalData": "Persönliche Daten",
-    "settingsAppearance": "Darstellung",
     "appearanceTitle": "Optische Darstellung",
     "appearanceColorScheme": "Farbgestaltung",
     "appearanceLanguage": "Sprache",

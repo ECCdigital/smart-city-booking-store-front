@@ -216,7 +216,6 @@
     "showAllEvents": "View all events",
     "upcoming": "Upcoming events",
     "ticketOptions": "Ticket options",
-    "ticketOptionsAndAvailability": "Ticket options and availability",
     "selectDatesHint": "Pick dates to see availability and prices.",
     "bookAtProvider": "Book with the provider",
     "notPublicTitle": "Not a public event.",
@@ -826,8 +825,6 @@
       "fr": "French",
       "es": "Spanish"
     },
-    "settingsPersonalData": "Personal details",
-    "settingsAppearance": "Appearance",
     "appearanceTitle": "Appearance",
     "appearanceColorScheme": "Colour scheme",
     "appearanceLanguage": "Language",

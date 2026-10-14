@@ -251,15 +251,6 @@ export function generateBookingAttempts(rule) {
   return sortOccurrencesByStart(occurrences);
 }
 
-/**
- * Convert a generated attempt list into a stable signature for caching the
- * validation result.
- */
-export function attemptsSignature(attempts) {
-  if (!Array.isArray(attempts) || attempts.length === 0) return "";
-  return attempts.map((a) => `${a.start}-${a.end}`).join("|");
-}
-
 /** Weekday labels in ISO order (Mon..Sun) mapped to JS `getDay()` values. */
 export const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
