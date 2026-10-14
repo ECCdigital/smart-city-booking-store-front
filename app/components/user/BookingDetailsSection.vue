@@ -193,11 +193,10 @@ import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
 import { bookingEventFallback } from "~/utils/bookingEventTimes.js";
 import { bookingParticipationLinkOf } from "~/utils/eventFormat.js";
 import {
-  BOOKING_STATUS,
   isFreeBooking,
   isLiveBooking,
   isSettledBooking,
-  resolveBookingStatus,
+  resolveBookingReasonHeadingKey,
 } from "~/utils/bookingStatus.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { useAccessClock } from "~/composables/useAccessClock.js";
@@ -283,13 +282,8 @@ const participationLink = computed(() =>
 
 const isLive = computed(() => isLiveBooking(props.booking));
 
-// The backend writes rejectionReason for both states; a booking the
-// customer cancelled themselves is not "rejected", so the heading follows
-// the state.
 const reasonHeading = computed(() =>
-  resolveBookingStatus(props.booking) === BOOKING_STATUS.REJECTED
-    ? t("account.bookingDetails.rejectionReason")
-    : t("account.bookingDetails.cancellationReason"),
+  t(resolveBookingReasonHeadingKey(props.booking)),
 );
 
 function formatTimeSlot(timeBegin, timeEnd) {
