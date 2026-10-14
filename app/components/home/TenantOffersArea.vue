@@ -16,7 +16,7 @@
         <!-- The tenant's own home, not the current tenant's path: the area
              only shows on the instance home. -->
         <NuxtLink
-          :to="`/t/${tile.id}`"
+          :to="`/t/${tile.id}/search`"
           class="group flex flex-col justify-between h-full gap-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 transition duration-200 ease-out hover:shadow-lg hover:ring-2 hover:ring-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
         >
           <div>
