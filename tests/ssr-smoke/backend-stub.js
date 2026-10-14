@@ -38,16 +38,19 @@ const routes = {
  *
  * `routes` is the live table: a check may swap a fixture for a request and put
  * it back, since the smoke server revalidates the Theme Bundle on every read.
+ * `hits` counts the requests per path, answered or not.
  *
  * @param {{ themes?: object }} [options] - A Theme Bundle to answer with in
  *   place of the fixture's.
- * @returns {Promise<{ url: string, unknown: Set<string>, routes: Record<string, unknown>, close: () => void }>}
+ * @returns {Promise<{ url: string, unknown: Set<string>, hits: Map<string, number>, routes: Record<string, unknown>, close: () => void }>}
  */
 export function startBackendStub({ themes = THEMES } = {}) {
   const unknown = new Set();
+  const hits = new Map();
   const answers = { ...routes, "/api/catalog/themes": themes };
   const server = http.createServer((req, res) => {
     const path = req.url.split("?")[0];
+    hits.set(path, (hits.get(path) ?? 0) + 1);
     const body = req.method === "GET" ? answers[path] : undefined;
     if (body === undefined) {
       unknown.add(`${req.method} ${path}`);
@@ -69,6 +72,7 @@ export function startBackendStub({ themes = THEMES } = {}) {
       resolve({
         url: `http://127.0.0.1:${port}`,
         unknown,
+        hits,
         routes: answers,
         close: () => server.close(),
       });

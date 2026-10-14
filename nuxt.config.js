@@ -10,10 +10,11 @@ const heroPreviewRouteRule = {
   security: { headers: { xFrameOptions: false } },
 };
 
-// Files that never change between deploys do not count against the rate
-// limit (ECCdigital/tickets#555): the messages, the icons, and the theme's
-// stylesheet, font and favicon. The build's own files and `public/` never
-// reach the limiter, Nitro serves them before it.
+// What a page loads besides itself and the API does not count against the
+// rate limit (ECCdigital/tickets#555). The build's own files and `public/`
+// never reach the limiter, Nitro serves them before it. The messages and the
+// instance's stylesheet, font and favicon change only with a deploy or a new
+// Theme Bundle and are exempt here.
 const unlimitedRouteRule = { security: { rateLimiter: false } };
 const UNLIMITED_ROUTES = [
   // Nuxt renders an error page through this route, with the headers of the
@@ -21,17 +22,17 @@ const UNLIMITED_ROUTES = [
   // page instead of `app/error.vue`.
   "/__nuxt_error",
   "/_i18n/**",
-  "/api/_nuxt_icon/**",
   "/api/theme/css",
   "/api/theme/font",
   "/api/theme/favicon",
 ];
 
-// Images do not count against it either. The image proxy also fetches from
-// foreign hosts, so it keeps a budget of its own, four times as large.
-const imageRouteRule = {
+// Images and icons do not count against it either. Both routes also fetch
+// from foreign hosts, so each keeps a budget of its own, four times as large.
+const proxyRouteRule = {
   security: { rateLimiter: { tokensPerInterval: 2000 } },
 };
+const PROXY_ROUTES = ["/api/img", "/api/_nuxt_icon/**"];
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -98,7 +99,9 @@ export default defineNuxtConfig({
     ...Object.fromEntries(
       UNLIMITED_ROUTES.map((route) => [route, unlimitedRouteRule]),
     ),
-    "/api/img": imageRouteRule,
+    ...Object.fromEntries(
+      PROXY_ROUTES.map((route) => [route, proxyRouteRule]),
+    ),
   },
 
   modules: [
@@ -158,6 +161,11 @@ export default defineNuxtConfig({
     rateLimiter: {
       tokensPerInterval: 500,
       interval: 300000,
+      // The server's own requests while it renders a page, such as the
+      // session check, carry no address, and every visitor's would share one
+      // budget. The page they render has counted already
+      // (ECCdigital/tickets#555).
+      whiteList: [""],
       headers: false,
       driver: {
         name: "lruCache",

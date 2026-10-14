@@ -3,24 +3,38 @@
 // which it reads from `X-Forwarded-For`, so each check sends one of its own
 // and starts with a full budget: 500 requests in 5 minutes.
 //
-// Files that never change between deploys do not count against the limit:
-// the build's own files, the messages, icons, theme stylesheet, font and
-// favicon.
+// What a page loads besides itself and the API does not count against that
+// budget: the build's own files, the messages, and the theme's stylesheet,
+// font and favicon. Images and icons have a budget of their own.
 
 const LIMIT = 500;
-const IMAGE_LIMIT = 2000;
+const PROXY_LIMIT = 2000;
 
-/** A request from `address`, answered with its status. */
-async function status(base, path, address) {
+// Cold page views from one address within the interval: ten people opening
+// four pages each.
+const VIEWS = 40;
+
+/** A request from `address`, answered with its status and body. */
+async function request(base, path, address, headers = {}) {
   const res = await fetch(base + path, {
-    headers: { "x-forwarded-for": address, accept: "text/html" },
+    headers: { "x-forwarded-for": address, accept: "text/html", ...headers },
     redirect: "manual",
   });
-  await res.arrayBuffer();
-  return res.status;
+  return { status: res.status, html: await res.text() };
 }
 
-/** The files of a page that never change between deploys. */
+/**
+ * Asks for `path` from `address` up to `requests` times and answers how many
+ * got through before the first 429, or null when none was refused.
+ */
+async function passedBefore429(base, path, address, requests) {
+  for (let n = 0; n < requests; n++) {
+    if ((await request(base, path, address)).status === 429) return n;
+  }
+  return null;
+}
+
+/** The files of a page that do not change until the next deploy or bundle. */
 function staticFiles(html) {
   const chunk = html.match(/"(\/_nuxt\/[^"]+\.js)"/)?.[1];
   const version = html.match(/\/api\/theme\/css\?v=([^"&]+)/)?.[1];
@@ -30,12 +44,13 @@ function staticFiles(html) {
     "/favicon.ico",
     "/wasm/zxing_reader.wasm",
     "/_i18n/smoke/de/messages.json",
-    "/api/_nuxt_icon/lucide.json?icons=search",
     `/api/theme/css?v=${version}`,
     `/api/theme/font?v=${version}`,
     `/api/theme/favicon?v=${version}`,
   ].filter(Boolean);
 }
+
+const ICONS = "/api/_nuxt_icon/lucide.json?icons=search";
 
 /** The images of a page, all through the image proxy. */
 function images(html) {
@@ -44,18 +59,15 @@ function images(html) {
   );
 }
 
-// Cold page views from one address within the interval: ten people opening
-// four pages each.
-const VIEWS = 40;
-
 /**
  * What is wrong with the rate limit, one line per problem.
  *
  * @param {string} base - The storefront's address.
  * @param {string[]} pages - The pages to view.
+ * @param {{ hits: Map<string, number> }} backend - The backend stand-in.
  * @returns {Promise<string[]>}
  */
-export async function rateLimitProblems(base, pages) {
+export async function rateLimitProblems(base, pages, backend) {
   const problems = [];
   const report = (name, problem) => {
     console.log(`${problem ? "FAIL" : "ok  "} rate limit: ${name}`);
@@ -63,109 +75,103 @@ export async function rateLimitProblems(base, pages) {
   };
 
   const home = await (await fetch(base + "/")).text();
+  const image = images(home)[0];
+  if (!image) report("images", "no image on /");
 
-  // Each file more often than the limit allows, from an address of its own,
-  // then the page from that address: it still answers.
-  for (const [i, path] of staticFiles(home).entries()) {
-    const address = `203.0.113.${i + 1}`;
-    let limited = false;
-    for (let n = 0; n <= LIMIT && !limited; n++) {
-      limited = (await status(base, path, address)) === 429;
+  // More visitors than the limit allows, each from an address of its own,
+  // open a page. Each render asks the backend who is signed in: the server's
+  // own requests during a render share no budget across visitors.
+  {
+    const visitors = LIMIT + 11;
+    const before = backend.hits.get("/auth/me") ?? 0;
+    for (let i = 0; i < visitors; i++) {
+      const address = `198.51.${Math.floor(i / 250)}.${i % 250}`;
+      await request(base, "/", address, { cookie: "access-token=smoke" });
     }
-    const page = await status(base, "/", address);
+    const asked = (backend.hits.get("/auth/me") ?? 0) - before;
     report(
-      `${path} does not count`,
-      limited
-        ? "answered 429"
-        : page !== 200
-          ? `the page answered ${page} afterwards`
-          : undefined,
+      `${visitors} visitors share no budget`,
+      asked < visitors && `the backend was asked ${asked} times`,
     );
   }
 
-  // More images than the limit allows, then the page from the same address:
-  // images have a budget of their own.
-  {
-    const address = "203.0.113.50";
-    const image = images(home)[0];
-    let limited = false;
-    for (let n = 0; n <= LIMIT && !limited; n++) {
-      limited = (await status(base, image, address)) === 429;
-    }
-    const page = await status(base, "/", address);
+  // Each file more often than the limit allows, from an address of its own,
+  // then the page from that address: it still answers.
+  const uncounted = [...staticFiles(home), ICONS, image].filter(Boolean);
+  for (const [i, path] of uncounted.entries()) {
+    const address = `203.0.113.${i + 1}`;
+    const passed = await passedBefore429(base, path, address, LIMIT + 1);
+    const page = await request(base, "/", address);
     report(
-      "images do not count against the limit of the pages",
-      limited
-        ? "an image answered 429"
-        : page !== 200
-          ? `the page answered ${page} afterwards`
-          : undefined,
+      `${path.split("?")[0]} does not count against the pages`,
+      passed !== null
+        ? `429 after ${passed} requests`
+        : page.status !== 200 && `the page answered ${page.status} afterwards`,
     );
   }
 
   // Several people behind one address, as in an office or a school, open the
   // storefront with an empty cache: each page, then what the browser fetches
-  // for it. Images have a budget of their own.
+  // for it.
   {
     const address = "203.0.113.100";
-    let limited;
-    for (let view = 0; view < VIEWS && !limited; view++) {
-      const page = pages[view % pages.length];
-      const res = await fetch(base + page, {
-        headers: { "x-forwarded-for": address, accept: "text/html" },
-      });
-      const html = await res.text();
-      if (res.status === 429) {
-        limited = page;
-        break;
-      }
-      for (const path of [...staticFiles(html), ...images(html)]) {
-        if ((await status(base, path, address)) === 429) {
-          limited = `${path} of ${page}`;
-          break;
+    const refused = async () => {
+      for (let view = 0; view < VIEWS; view++) {
+        const page = pages[view % pages.length];
+        const { status, html } = await request(base, page, address);
+        if (status === 429) return page;
+        for (const path of [...staticFiles(html), ICONS, ...images(html)]) {
+          if ((await request(base, path, address)).status === 429) {
+            return `${path} of ${page}`;
+          }
         }
       }
-    }
+    };
+    const limited = await refused();
     report(
       `${VIEWS} cold page views from one address`,
       limited && `${limited} answered 429`,
     );
   }
 
-  // The API and the image proxy stay limited, each with its own budget.
+  // The API, the images and the icons stay limited, each with its own budget.
   for (const [path, budget, address] of [
     ["/api/catalog/mode", LIMIT, "203.0.113.200"],
-    [images(home)[0], IMAGE_LIMIT, "203.0.113.201"],
+    [image, PROXY_LIMIT, "203.0.113.201"],
+    [ICONS, PROXY_LIMIT, "203.0.113.202"],
   ]) {
-    const answered = [];
-    for (let n = 0; n <= budget + 1; n++) {
-      answered.push(await status(base, path, address));
-    }
-    const first = answered.indexOf(429);
+    if (!path) continue;
+    const passed = await passedBefore429(base, path, address, budget + 2);
     report(
       `${path.split("?")[0]} stays limited to ${budget}`,
-      first === -1
-        ? `no 429 after ${answered.length} requests`
-        : first < budget
-          ? `429 after ${first} requests`
-          : undefined,
+      passed === null
+        ? `no 429 after ${budget + 2} requests`
+        : passed < budget && `429 after ${passed} requests`,
     );
   }
 
   // A page from an address that has used up its budget says so, in the
   // storefront's own error page.
   {
-    const res = await fetch(base + "/", {
-      headers: { "x-forwarded-for": "203.0.113.200", accept: "text/html" },
-    });
-    const html = await res.text();
+    const address = "203.0.113.210";
+    await passedBefore429(base, "/api/catalog/mode", address, LIMIT + 2);
+    const { status, html } = await request(base, "/", address);
     report(
       "a limited page shows a hint",
-      res.status !== 429
-        ? `answered ${res.status}`
-        : !html.includes(">Zu viele Anfragen<")
-          ? `no hint: ${html.includes("Too Many Requests") ? "Nuxt's fallback page" : "other page"}`
-          : undefined,
+      status !== 429
+        ? `answered ${status}`
+        : !html.includes(">Zu viele Anfragen<") &&
+            `no hint: ${html.includes("Too Many Requests") ? "Nuxt's fallback page" : "other page"}`,
+    );
+  }
+
+  // The server's own requests go unlimited because they carry no address.
+  // A request with an empty `X-Forwarded-For` is counted by its connection.
+  {
+    const passed = await passedBefore429(base, "/api/catalog/mode", "", LIMIT + 2);
+    report(
+      "an empty X-Forwarded-For stays limited",
+      passed === null && `no 429 after ${LIMIT + 2} requests`,
     );
   }
 

@@ -317,7 +317,11 @@ try {
     // The rate limit does not depend on the bundle's settings: once is enough.
     if (!WITHOUT_NEW_SETTINGS) {
       failures.push(
-        ...(await rateLimitProblems(base, pages.map((page) => page.path))),
+        ...(await rateLimitProblems(
+          base,
+          pages.map((page) => page.path),
+          backend,
+        )),
       );
     }
   }
