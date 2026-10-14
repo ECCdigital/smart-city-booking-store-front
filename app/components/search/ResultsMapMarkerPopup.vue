@@ -8,38 +8,65 @@
     class="justify-center bg-transparent hidden md:flex"
     @remove="emit('closeGroup')"
   >
-    <UCarousel
-      :items="group.bookables"
-      fade
-      dots
-      arrows
-      :loop="true"
-      :prev="{ variant: 'soft', color: 'primary' }"
-      :next="{ variant: 'soft', color: 'primary' }"
-      indicators
-      :ui="{
-        controls:
-          'absolute inset-y-0 left-0 right-0 flex items-center justify-between pointer-events-none',
-        prev: 'pointer-events-auto translate-x-12',
-        next: 'pointer-events-auto -translate-x-12',
-        dots: 'absolute left-1/2 -translate-x-1/2 bottom-2',
-        dot: 'w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-600',
-      }"
-      class="w-[300px] mx-auto pb-5 hidden md:flex"
-    >
-      <template #default="{ item }">
-        <div class="flex justify-center w-full">
-          <ResultCard
-            :item="item.item"
-            :is-not-bookable="!item.isBookable"
-            :calculated-price="item.calculatedPrice"
-            map-detail-mode
-            class="w-full shadow-none"
-            @click="emit('openDetails', item, true)"
-          />
+    <div class="w-[300px] mx-auto hidden md:block">
+      <div class="flex items-center justify-end gap-2 pb-2 pl-1">
+        <div class="flex shrink-0 items-center gap-2">
+          <span
+            class="text-sm font-semibold tabular-nums"
+            aria-live="polite"
+            :aria-label="
+              $t('results.offerPosition', {
+                n: activeIndex + 1,
+                total: group.bookables.length,
+              })
+            "
+          >
+            {{ activeIndex + 1 }} / {{ group.bookables.length }}
+          </span>
+          <UButtonGroup size="sm">
+            <UButton
+              icon="i-lucide-chevron-left"
+              color="neutral"
+              variant="outline"
+              :aria-label="$t('results.previousOffer')"
+              @click="carouselRef?.emblaApi?.scrollPrev()"
+            />
+            <UButton
+              icon="i-lucide-chevron-right"
+              color="neutral"
+              variant="outline"
+              :aria-label="$t('results.nextOffer')"
+              @click="carouselRef?.emblaApi?.scrollNext()"
+            />
+          </UButtonGroup>
         </div>
-      </template>
-    </UCarousel>
+      </div>
+
+      <!-- auto-height: the viewport follows the active card instead of the
+           tallest one, so a card with a one-line address leaves no gap. -->
+      <UCarousel
+        ref="carouselRef"
+        :items="group.bookables"
+        fade
+        auto-height
+        :loop="true"
+        class="w-full h-auto pb-0"
+        @select="onSelect"
+      >
+        <template #default="{ item }">
+          <div class="flex justify-center w-full mb-0">
+            <ResultCard
+              :item="item.item"
+              :is-not-bookable="!item.isBookable"
+              :calculated-price="item.calculatedPrice"
+              map-detail-mode
+              class="w-full shadow-none"
+              @click="emit('openDetails', item, true)"
+            />
+          </div>
+        </template>
+      </UCarousel>
+    </div>
   </LPopup>
 </template>
 <script setup>
@@ -53,6 +80,14 @@ defineProps({
 });
 
 const emit = defineEmits(["openDetails", "closeGroup"]);
+
+const carouselRef = ref(null);
+
+const activeIndex = ref(0);
+
+function onSelect(index) {
+  activeIndex.value = index;
+}
 </script>
 
 <style>

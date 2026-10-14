@@ -33,7 +33,14 @@
       />
       <LatestEventsArea v-else-if="allEvents.length > 0" :items="allEvents" />
 
+      <TenantOffersArea
+        v-if="!error && !isTenantContext"
+        :tenants="tenantStore.getTenants"
+      />
+
       <HowBookingWorksArea />
+
+      <MobileKeyArea />
     </div>
   </div>
 </template>
@@ -44,6 +51,9 @@ import { useEventStore } from "~~/stores/event.js";
 import MainCategoryArea from "~/components/MainCategoryArea.vue";
 import LatestEventsArea from "~/components/LatestEventsArea.vue";
 import HowBookingWorksArea from "~/components/home/HowBookingWorksArea.vue";
+import MobileKeyArea from "~/components/home/MobileKeyArea.vue";
+import TenantOffersArea from "~/components/home/TenantOffersArea.vue";
+import { useTenantStore } from "~~/stores/tenant.js";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { isTenantNotAvailable } from "~/utils/tenantHome.js";
 
@@ -59,24 +69,31 @@ const route = useRoute();
 const { tenantTo } = useTenantRoute();
 const { loadBundle } = useCatalogBundle();
 const eventStore = useEventStore();
-const { tenantID } = useTenant();
+const { tenantID, isTenantContext } = useTenant();
+const tenantStore = useTenantStore();
 
 const catalogSlug = computed(() => route.params.catalogSlug || null);
 
 // A tenant that is not available (missing, declined, pending approval) is
 // the neutral 404 page, with HTTP 404 on SSR; any other failure stays the
-// load error below.
-const { error } = useLazyAsyncData("catalog-bundle-home", (nuxtApp) =>
-  loadBundle({ slug: catalogSlug.value, include: ["events"] }).catch(
-    (failure) => {
-      if (isTenantNotAvailable({ tenantID: tenantID.value, error: failure })) {
-        nuxtApp.runWithContext(() =>
-          showError({ statusCode: 404, statusMessage: "Page Not Found" }),
-        );
-      }
-      throw failure;
-    },
-  ),
+// load error below. The key follows the tenant and catalog, so choosing a
+// tenant on the start page loads its offers.
+const { error } = useLazyAsyncData(
+  () =>
+    `catalog-bundle-home:${catalogSlug.value ?? "root"}:${tenantID.value ?? "all"}`,
+  (nuxtApp) =>
+    loadBundle({ slug: catalogSlug.value, include: ["events"] }).catch(
+      (failure) => {
+        if (
+          isTenantNotAvailable({ tenantID: tenantID.value, error: failure })
+        ) {
+          nuxtApp.runWithContext(() =>
+            showError({ statusCode: 404, statusMessage: "Page Not Found" }),
+          );
+        }
+        throw failure;
+      },
+    ),
 );
 
 watch(

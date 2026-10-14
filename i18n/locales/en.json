@@ -1,6 +1,13 @@
 {
   "welcome": "Welcome!",
   "home": {
+    "providers": {
+      "title": "Offers by provider",
+      "bookables": "no bookables | {count} bookable | {count} bookables",
+      "events": "no events | {count} event | {count} events",
+      "all": "All providers",
+      "showOffers": "View offers"
+    },
     "howItWorks": {
       "title": "How booking works",
       "steps": {
@@ -23,6 +30,30 @@
         "period": "{date}, {start} – {end}",
         "roomLine": "Seminar room 2 “Weitblick” · 3 h",
         "extraLine": "Projector (optional) · 1 pc."
+      }
+    },
+    "mobileKey": {
+      "title": "Open doors with the smartphone",
+      "subtitle": "Direct access with digital keys",
+      "intro": "A digital key is an access right on your smartphone. Use it to open doors, lockers, or bike boxes. This key is valid only for your booking: exactly on this day and exactly during this period for the booked object.",
+      "benefitsTitle": "Your benefits",
+      "benefits": {
+        "noHandover": "No key handover and no opening hours.",
+        "expires": "Valid only during the booked period and expires on its own afterwards.",
+        "secure": "Cannot be lost or copied."
+      },
+      "stepsTitle": "How it works",
+      "steps": {
+        "book": "Book and sign in with your account.",
+        "appear": "Shortly before the start, the key appears under “{keys}”.",
+        "open": "At the door, scan the QR code and tap “Open”."
+      },
+      "toKeys": "Go to my keys",
+      "sample": {
+        "validToday": "Valid today · {start}–{end}",
+        "room": "Seminar room 2 “Weitblick”",
+        "place": "Adult education centre · Schulstraße entrance",
+        "readerInRange": "Reader in range"
       }
     }
   },
@@ -216,7 +247,6 @@
     "showAllEvents": "View all events",
     "upcoming": "Upcoming events",
     "ticketOptions": "Ticket options",
-    "ticketOptionsAndAvailability": "Ticket options and availability",
     "selectDatesHint": "Pick dates to see availability and prices.",
     "bookAtProvider": "Book with the provider",
     "notPublicTitle": "Not a public event.",
@@ -804,9 +834,11 @@
       "unknown": "Unknown attachment type"
     },
     "download": {
-      "label": "Download {type}",
-      "failedTitle": "Download failed",
-      "failedMessage": "The document could not be downloaded."
+      "label": "Download {type}"
+    },
+    "document": {
+      "unavailableTitle": "Document unavailable",
+      "unavailableMessage": "The document could not be loaded. Please try again later."
     },
     "errors": {
       "notFoundTitle": "Page not found",
@@ -888,8 +920,6 @@
       "fr": "French",
       "es": "Spanish"
     },
-    "settingsPersonalData": "Personal details",
-    "settingsAppearance": "Appearance",
     "appearanceTitle": "Appearance",
     "appearanceColorScheme": "Colour scheme",
     "appearanceLanguage": "Language",
@@ -905,10 +935,10 @@
     "currentPasswordWrong": "The current password is not correct.",
     "activities": "My activity",
     "digitalKeys": "Digital keys",
-    "digitalKeysDescription": "Open doors, lockers and bike boxes with your phone.",
+    "digitalKeysDescription": "Open doors, lockers and bike boxes with the phone.",
     "quickBookDescription": "Find and book the offers you saved, in moments.",
     "invoicesShortDescription": "Every invoice and receipt in one place.",
-    "invoicesDescription": "Here you will find your invoices and payment receipts.",
+    "invoicesDescription": "Every invoice, payment receipt and cancellation receipt in one place. Access to related bookings via booking-id.",
     "favoritesTitle": "Favourites",
     "appearanceDescription": "Manage how the app looks. You can switch between a light and a dark theme, and change the language of the interface.",
     "bookedItems": "Booked items",
@@ -922,7 +952,7 @@
     },
     "unknownTenant": "Unknown",
     "invoices": {
-      "title": "Your invoices and receipts",
+      "title": "My invoices and receipts",
       "emptyTitle": "No invoices available",
       "emptyDescription": "There are currently no invoices for your account. Once invoices have been created, they will appear here.",
       "unknownBookable": "Unknown bookable",
@@ -934,7 +964,15 @@
         "type": "Document type",
         "bookingId": "Booking ID",
         "bookables": "Bookables",
-        "paid": "Paid"
+        "paid": "Paid",
+        "actions": "Actions"
+      },
+      "actions": {
+        "open": "Open {title} in a new tab",
+        "download": "Download {title}",
+        "downloadLabel": "Download",
+        "print": "Print {title}",
+        "printLabel": "Print"
       },
       "types": {
         "invoice": "Invoice",
@@ -1086,8 +1124,8 @@
     "helpTitle": "A key missing, or trouble at the door?",
     "helpDescription": "Only doors you currently hold a booking with access rights for are shown. If a key is missing or a door will not open, our support team can help.",
     "helpShowContact": "Show help and contact",
-    "yourKeys": "Your keys",
-    "yourKeysDescription": "Open and lock doors during your booking.",
+    "yourKeys": "My digital keys",
+    "yourKeysDescription": "Digital keys for doors, lockers and bike boxes. Easy access via smartphone during the booking. Only doors you currently hold a booking with access rights for are shown.",
     "openDoor": "Open the door",
     "scannedDescription": "You scanned the code at the door.",
     "whichBooking": "Which booking?",
@@ -1294,6 +1332,10 @@
     "mapView": "Map view",
     "atThisLocation": "Results at this location:",
     "clickToOpen": "Click to open the selection",
+    "clickToSeeAll": "Click to see all",
+    "offerPosition": "Offer {n} of {total}",
+    "previousOffer": "Previous offer",
+    "nextOffer": "Next offer",
     "pagination": {
       "itemsPerPage": "Per page",
       "all": "All",
@@ -1638,8 +1680,8 @@
     "failed": "The favourite could not be saved. Please try again.",
     "removeFailed": "The favourite could not be removed. Please try again.",
     "page": {
-      "title": "Favourites",
-      "description": "Here you will find all the offers you have saved as favourites.",
+      "title": "My Favourites",
+      "description": "All offers marked as favorites at a glance. Offers marked with a heart can be found, managed, and booked here.",
       "count": "No favourites | One favourite | {count} favourites",
       "unavailable": "Not available",
       "unavailableHint": "This offer cannot be reached right now. It stays saved until you remove it.",

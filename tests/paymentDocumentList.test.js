@@ -56,6 +56,13 @@ describe("the payment documents of the invoice list", () => {
     expect(bare.bookableNames).toBe("");
   });
 
+  it("carries what fetching the document needs: its attachment and tenant", () => {
+    const withTenant = booking({ tenantId: "rp43" });
+    const [invoice] = paymentDocumentsOf([withTenant]);
+    expect(invoice.tenantId).toBe("rp43");
+    expect(invoice.attachment).toBe(withTenant.attachments[0]);
+  });
+
   it("keeps nothing for a booking without attachments or no bookings", () => {
     expect(paymentDocumentsOf([booking({ attachments: undefined })])).toEqual(
       [],

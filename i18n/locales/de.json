@@ -1,6 +1,13 @@
 {
   "welcome": "Willkommen",
   "home": {
+    "providers": {
+      "title": "Angebot nach Anbietern",
+      "bookables": "keine Buchungsobjekte | {count} Buchungsobjekt | {count} Buchungsobjekte",
+      "events": "keine Veranstaltungen | {count} Veranstaltung | {count} Veranstaltungen",
+      "all": "Alle Anbieter",
+      "showOffers": "Angebote ansehen"
+    },
     "howItWorks": {
       "title": "So funktioniert das Buchen",
       "steps": {
@@ -23,6 +30,30 @@
         "period": "{date}, {start} – {end} Uhr",
         "roomLine": "Seminarraum 2 „Weitblick“ · 3 Std.",
         "extraLine": "Beamer (optional) · 1 Stk."
+      }
+    },
+    "mobileKey": {
+      "title": "Türen öffnen mit dem Smartphone",
+      "subtitle": "Direkter Zugang dank digitaler Schlüssel",
+      "intro": "Ein digitaler Schlüssel ist eine Zutrittsberechtigung auf Ihrem Smartphone. Nutzen Sie ihn zum Öffnen von Türen, Schließfächern oder Fahrradboxen. Dieser Schlüssel gilt ausschließlich für Ihre Buchung: Genau an diesem Tag und genau in diesem Zeitraum für das gebuchte Objekt.",
+      "benefitsTitle": "Ihre Vorteile",
+      "benefits": {
+        "noHandover": "Keine Schlüsselübergabe und keine Öffnungszeiten.",
+        "expires": "Gilt nur im gebuchten Zeitraum und erlischt danach von selbst.",
+        "secure": "Kann nicht verloren gehen oder kopiert werden."
+      },
+      "stepsTitle": "So geht's",
+      "steps": {
+        "book": "Buchen und mit Ihrem Konto anmelden.",
+        "appear": "Kurz vor Beginn erscheint der Schlüssel unter „{keys}“.",
+        "open": "Vor der Tür QR-Code scannen und „Öffnen“ tippen."
+      },
+      "toKeys": "Zu meinen Schlüsseln",
+      "sample": {
+        "validToday": "Heute gültig · {start}–{end}",
+        "room": "Seminarraum 2 „Weitblick“",
+        "place": "Volkshochschule · Eingang Schulstraße",
+        "readerInRange": "Lesegerät in Reichweite"
       }
     }
   },
@@ -462,7 +493,6 @@
     "showAllEvents": "Alle Events ansehen",
     "upcoming": "Anstehende Veranstaltungen",
     "ticketOptions": "Ticketoptionen",
-    "ticketOptionsAndAvailability": "Ticketoptionen & Verfügbarkeit",
     "selectDatesHint": "Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen.",
     "bookAtProvider": "Beim Anbieter buchen",
     "notPublicTitle": "Kein öffentliches Event.",
@@ -1150,9 +1180,11 @@
       "unknown": "Unbekannter Anhangstyp"
     },
     "download": {
-      "label": "{type} herunterladen",
-      "failedTitle": "Download fehlgeschlagen",
-      "failedMessage": "Das Dokument konnte nicht heruntergeladen werden."
+      "label": "{type} herunterladen"
+    },
+    "document": {
+      "unavailableTitle": "Dokument nicht abrufbar",
+      "unavailableMessage": "Das Dokument konnte nicht geladen werden. Bitte versuchen Sie es später erneut."
     },
     "errors": {
       "notFoundTitle": "Seite nicht gefunden",
@@ -1235,8 +1267,6 @@
       "fr": "Französisch",
       "es": "Spanisch"
     },
-    "settingsPersonalData": "Persönliche Daten",
-    "settingsAppearance": "Darstellung",
     "appearanceTitle": "Optische Darstellung",
     "appearanceColorScheme": "Farbgestaltung",
     "appearanceLanguage": "Sprache",
@@ -1252,10 +1282,10 @@
     "currentPasswordWrong": "Das bisherige Passwort stimmt nicht.",
     "activities": "Meine Aktivitäten",
     "digitalKeys": "Digitale Schlüssel",
-    "digitalKeysDescription": "Öffnen Sie Türen, Schließfächer oder Fahrradboxen mit Ihrem Smartphone.",
+    "digitalKeysDescription": "Türen, Schließfächer oder Fahrradboxen direkt mit dem Smartphone öffnen.",
     "quickBookDescription": "Gemerkte Angebote schnell wiederfinden und buchen.",
     "invoicesShortDescription": "Alle Rechnungen und Belege an einem Ort.",
-    "invoicesDescription": "Hier finden Sie Ihre Rechnungen und Zahlungsbelege.",
+    "invoicesDescription": "Alle Rechnungen, Zahlungsbelege und Stornobelege an einem Ort. Direkter Zugriff auf die Buchung über die Buchungs-ID.",
     "favoritesTitle": "Favoriten",
     "appearanceDescription": "Verwalten Sie die Darstellung der Anwendung. Sie können beispielsweise zwischen einem hellen und einem dunklen Design wechseln. Optional können Sie auch die Sprache der Benutzeroberfläche anpassen.",
     "bookedItems": "Gebuchte Objekte",
@@ -1269,7 +1299,7 @@
     },
     "unknownTenant": "Unbekannt",
     "invoices": {
-      "title": "Ihre Rechnungen und Zahlungsbelege",
+      "title": "Meine Rechnungen und Zahlungsbelege",
       "emptyTitle": "Keine Rechnungen vorhanden",
       "emptyDescription": "Aktuell sind für Ihr Konto keine Rechnungen verfügbar. Sobald Rechnungen erstellt wurden, werden diese hier angezeigt.",
       "unknownBookable": "Unbekanntes Buchungsobjekt",
@@ -1281,7 +1311,15 @@
         "type": "Dokumenttyp",
         "bookingId": "Buchungs-ID",
         "bookables": "Buchungsobjekte",
-        "paid": "Bezahlt"
+        "paid": "Bezahlt",
+        "actions": "Aktionen"
+      },
+      "actions": {
+        "open": "{title} in neuem Tab öffnen",
+        "download": "{title} herunterladen",
+        "downloadLabel": "Herunterladen",
+        "print": "{title} drucken",
+        "printLabel": "Drucken"
       },
       "types": {
         "invoice": "Rechnung",
@@ -1436,8 +1474,8 @@
     "helpTitle": "Schlüssel nicht sichtbar oder Tür-Problem?",
     "helpDescription": "Es werden nur Türen angezeigt, für die Sie aktuell eine Buchung mit Schließberechtigung haben. Fehlt ein Schlüssel oder lässt sich eine Tür nicht öffnen, hilft Ihnen unser Support weiter.",
     "helpShowContact": "Hilfe & Kontakt anzeigen",
-    "yourKeys": "Ihre Schlüssel",
-    "yourKeysDescription": "Öffnen und schließen Sie Türen im Zeitraum Ihrer Buchung.",
+    "yourKeys": "Meine digitalen Schlüssel",
+    "yourKeysDescription": "Digitale Schlüssel für Türen, Schließfächer und Fahrradboxen. Einfaches Öffnen und Schließen im Zeitraum der Buchung per Smartphone. Nur für Buchungen mit gültiger Schließberechtigung.",
     "openDoor": "Tür öffnen",
     "scannedDescription": "Sie haben den Code an der Tür gescannt.",
     "whichBooking": "Welche Buchung?",
@@ -1644,6 +1682,10 @@
     "mapView": "Kartenansicht",
     "atThisLocation": "Ergebnisse an diesem Standort:",
     "clickToOpen": "Klick um Auswahl zu öffnen",
+    "clickToSeeAll": "Klick um Alle anzusehen",
+    "offerPosition": "Angebot {n} von {total}",
+    "previousOffer": "Vorheriges Angebot",
+    "nextOffer": "Nächstes Angebot",
     "pagination": {
       "itemsPerPage": "Pro Seite",
       "all": "Alle",
@@ -1707,8 +1749,8 @@
     "failed": "Der Favorit konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     "removeFailed": "Der Favorit konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
     "page": {
-      "title": "Ihre Favoriten",
-      "description": "Hier finden Sie alle Angebote, die Sie als Favorit gemerkt haben.",
+      "title": "Meine Favoriten",
+      "description": "Alle als Favoriten markierte Angebote auf einen Blick. Mit einem Herz markierte Angebote können hier wiedergefunden, verwaltet und gebucht werden.",
       "count": "Keine Favoriten | Ein Favorit | {count} Favoriten",
       "unavailable": "Nicht verfügbar",
       "unavailableHint": "Dieses Angebot ist derzeit nicht erreichbar. Es bleibt gemerkt, bis Sie es entfernen.",
