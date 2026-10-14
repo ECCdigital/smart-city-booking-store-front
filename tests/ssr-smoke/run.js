@@ -7,8 +7,15 @@
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import net from "node:net";
-import { startBackendStub, BOOKABLE, EVENT, THEMES } from "./backend-stub.js";
+import {
+  startBackendStub,
+  BOOKABLE,
+  CATALOG,
+  EVENT,
+  THEMES,
+} from "./backend-stub.js";
 import { fontProblems } from "./font.js";
+import { rateLimitProblems } from "./rate-limit.js";
 
 const pages = [
   { path: "/", marker: "Smoke-Katalog" },
@@ -19,6 +26,7 @@ const pages = [
   { path: "/register/email-verify", authCard: true },
   { path: `/bookables/${BOOKABLE}`, marker: "Smoke-Raum" },
   { path: `/events/${EVENT}`, marker: "Smoke-Veranstaltung" },
+  { path: `/catalog/${CATALOG}`, marker: "Smoke-Katalog" },
 ];
 
 // The logo of the fixture's Theme Bundle, and the Portal Name beside it.
@@ -312,6 +320,17 @@ try {
     failures.push(
       ...(await fontProblems(base, backend, { withoutNewSettings: WITHOUT_NEW_SETTINGS })),
     );
+
+    // The rate limit does not depend on the bundle's settings: once is enough.
+    if (!WITHOUT_NEW_SETTINGS) {
+      failures.push(
+        ...(await rateLimitProblems(
+          base,
+          pages.map((page) => page.path),
+          backend,
+        )),
+      );
+    }
   }
 } finally {
   server.kill();

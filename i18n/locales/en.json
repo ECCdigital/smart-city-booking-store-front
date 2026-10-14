@@ -78,6 +78,7 @@
       "notFound": "Page not found",
       "forbidden": "Access denied",
       "serverError": "Server error",
+      "tooManyRequests": "Too many requests",
       "error": "Error",
       "close": "Close"
     }
@@ -250,6 +251,10 @@
       "serverError": {
         "title": "Server error",
         "message": "An internal error occurred. Please try again later."
+      },
+      "tooManyRequests": {
+        "title": "Too many requests",
+        "message": "Your network sent a great many requests in a short time. Please try again in a few minutes."
       },
       "generic": {
         "title": "An error occurred",

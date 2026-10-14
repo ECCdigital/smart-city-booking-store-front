@@ -78,6 +78,7 @@
       "notFound": "Seite nicht gefunden",
       "forbidden": "Zugriff verweigert",
       "serverError": "Serverfehler",
+      "tooManyRequests": "Zu viele Anfragen",
       "error": "Fehler",
       "close": "Schließen"
     }
@@ -379,6 +380,10 @@
       "serverError": {
         "title": "Serverfehler",
         "message": "Ein interner Fehler ist aufgetreten. Bitte versuchen Sie es später erneut."
+      },
+      "tooManyRequests": {
+        "title": "Zu viele Anfragen",
+        "message": "Von Ihrem Netzwerk kamen in kurzer Zeit sehr viele Anfragen. Bitte versuchen Sie es in einigen Minuten erneut."
       },
       "generic": {
         "title": "Ein Fehler ist aufgetreten",
