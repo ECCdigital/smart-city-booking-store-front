@@ -772,9 +772,11 @@
       "unknown": "Unknown attachment type"
     },
     "download": {
-      "label": "Download {type}",
-      "failedTitle": "Download failed",
-      "failedMessage": "The document could not be downloaded."
+      "label": "Download {type}"
+    },
+    "document": {
+      "unavailableTitle": "Document unavailable",
+      "unavailableMessage": "The document could not be loaded. Please try again later."
     },
     "errors": {
       "notFoundTitle": "Page not found",
@@ -900,7 +902,15 @@
         "type": "Document type",
         "bookingId": "Booking ID",
         "bookables": "Bookables",
-        "paid": "Paid"
+        "paid": "Paid",
+        "actions": "Actions"
+      },
+      "actions": {
+        "open": "Open {title} in a new tab",
+        "download": "Download {title}",
+        "downloadLabel": "Download",
+        "print": "Print {title}",
+        "printLabel": "Print"
       },
       "types": {
         "invoice": "Invoice",
