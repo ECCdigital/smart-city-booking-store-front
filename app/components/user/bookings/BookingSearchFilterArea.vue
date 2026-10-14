@@ -55,15 +55,6 @@ const searchOptions = {
 };
 const fuseInstance = computed(() => new Fuse(props.bookings, searchOptions));
 
-watch(searchQuery, (newQuery) => {
-  if (!newQuery) {
-    emit("update:bookings", props.bookings);
-  } else {
-    const results = fuseInstance.value.search(newQuery).map((r) => r.item);
-    emit("update:bookings", results);
-  }
-});
-
 // The providers of the bookings, named like the booking details and the key
 // list do: from the booking's tenant snapshot.
 const { getBookingTenant } = useTenant();
@@ -76,24 +67,25 @@ const tenants = computed(() =>
 
 //filter and sorting
 const filters = ref([]);
-watch(filters, (newFilter) => {
-  if (!newFilter) {
-    emit("update:bookings", props.bookings);
-  } else {
-    let filtered = props.bookings;
 
-    filtered = filterForBookingPeriod(filtered);
+// Search and filters narrow together: the filters and the sorting apply to
+// what the search finds, so changing one keeps the other.
+watch([searchQuery, filters], ([query, filter]) => {
+  let shown = query
+    ? fuseInstance.value.search(query).map((r) => r.item)
+    : props.bookings;
 
-    filtered = filterForPaymentStatus(filtered);
+  shown = filterForBookingPeriod(shown);
 
-    filtered = filterForStatus(filtered);
+  shown = filterForPaymentStatus(shown);
 
-    filtered = filterAccessBookingsByTenant(filtered, newFilter.tenantIds);
+  shown = filterForStatus(shown);
 
-    filtered = sortBookings(filtered);
+  shown = filterAccessBookingsByTenant(shown, filter?.tenantIds);
 
-    emit("update:bookings", filtered);
-  }
+  shown = sortBookings(shown);
+
+  emit("update:bookings", shown);
 });
 
 function setFilter(filter) {
