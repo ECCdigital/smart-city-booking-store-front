@@ -234,7 +234,7 @@
     "noEvents": "No events found"
   },
   "errors": {
-    "offerNotAvailable": "This offer is not (or no longer) available.",
+    "offerNotAvailable": "This offer cannot be reached right now.",
     "loadFailed": {
       "title": "The content could not be loaded",
       "message": "Please try again later."
