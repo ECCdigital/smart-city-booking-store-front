@@ -21,6 +21,9 @@ import { sanitizeHeroLayoutRichtext } from "~~/shared/utils/heroRichtextAllowlis
 import type { ThemeView } from "~~/shared/types/hero";
 import type { ThemeBundle } from "~~/shared/types/api";
 import { sanitizeHeroRichtext } from "./heroRichtext";
+import { parseFooterLogos } from "./footerLogos";
+import { readLogoSize } from "./logoSize";
+import { themeFontHref } from "./themeFont";
 
 /**
  * The etag of the Theme View served when no bundle could ever be read. It is a
@@ -43,7 +46,21 @@ export function defaultThemeView(): ThemeView {
     heroLayout: null,
     background: null,
     logo: null,
+    logoDark: null,
+    authLogoSize: "sm",
+    footerLogos: [],
+    font: null,
   };
+}
+
+/**
+ * The instance font for the preload: only the URL on the storefront, never
+ * the backend's. Like the size of the auth logo, a font that is not there
+ * reads as the system font without a report.
+ */
+function readFont(font: unknown, etag: string): ThemeView["font"] {
+  const href = themeFontHref(font, etag);
+  return href ? { href } : null;
 }
 
 /**
@@ -82,5 +99,14 @@ export function buildThemeView(
       bundle.logo === undefined || bundle.logo === null
         ? null
         : parseHeroMediaReference(bundle.logo, options),
+    // A backend before the variant sends none; that is no failure either.
+    logoDark:
+      bundle.logoDark === undefined || bundle.logoDark === null
+        ? null
+        : parseHeroMediaReference(bundle.logoDark, options, "logoDark"),
+    // A backend before the setting reads as S, the size the logo always had.
+    authLogoSize: readLogoSize(bundle.authLogoSize, "sm"),
+    footerLogos: parseFooterLogos(bundle.footerLogos, options),
+    font: readFont(bundle.font, etag),
   };
 }

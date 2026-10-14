@@ -48,7 +48,7 @@
         <UButton
           :label="$t('common.search')"
           class="w-full basis-1/5 justify-center"
-          :style="{ color: contrastToPrimary }"
+          style="color: var(--ui-primary-contrast)"
           @click="onSearch"
         />
       </div>
@@ -100,7 +100,7 @@
     <UButton
       :label="$t('common.search')"
       class="w-full justify-center"
-      :style="{ color: contrastToPrimary }"
+      style="color: var(--ui-primary-contrast)"
       @click="onSearch"
     />
   </UCard>
@@ -108,7 +108,6 @@
 <script setup>
 import InputText from "~/components/inputs/InputText.vue";
 import InputDateTimePeriod from "~/components/inputs/InputDateTimePeriod.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import AddressLookup from "~/components/inputs/AddressLookup.vue";
 
 const isInitialized = defineModel("isInitailized", {
@@ -180,7 +179,6 @@ const hasSearchCiteria = computed(
 );
 const emit = defineEmits(["search", "reset"]);
 
-const { contrastToPrimary } = useContrastColor();
 
 const hasInitionalLocationObject = ref(false);
 watch(_location, (newVal) => {

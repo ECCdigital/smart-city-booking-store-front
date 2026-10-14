@@ -48,6 +48,7 @@ import {
   type HeroBlockAlignment,
   type HeroImageBlock,
   type HeroLayout,
+  type HeroMediaImageBlock,
   type HeroPanel,
   type HeroPanelColor,
   type HeroPanelRadius,
@@ -289,6 +290,8 @@ describe("the Hero class tables", () => {
       default: "text-black dark:text-white",
       primary: "text-primary",
       secondary: "text-secondary",
+      // The stylesheet declares no accent unless the instance set one.
+      accent: "text-[color:var(--ui-accent,var(--ui-primary))]",
       white: "text-white",
     });
   });
@@ -444,6 +447,7 @@ describe("a Block's box", () => {
       ["black", "#000000"],
       ["primary", "var(--ui-primary)"],
       ["secondary", "var(--ui-secondary)"],
+      ["accent", "var(--ui-accent, var(--ui-primary))"],
       ["#b91c1c", "#b91c1c"],
     ];
 
@@ -682,7 +686,7 @@ describe("a rich-text Block", () => {
     }
   });
 
-  it("paints the four colour tokens of the vocabulary, `default` black on a Panel", () => {
+  it("paints the five colour tokens of the vocabulary, `default` black on a Panel", () => {
     for (const token of HERO_COLOR_TOKENS) {
       const mark = `hero-color-${token}`;
       expect(HERO_RICHTEXT_CLASSES.color).toContain(mark);
@@ -739,10 +743,16 @@ describe("a rich-text Block", () => {
 });
 
 describe("an image", () => {
-  const logo = (defaultHeroLayout as HeroLayout).blocks.find(
-    (block) => block.id === "default-logo",
-  ) as HeroImageBlock;
-  const measured: HeroImageBlock = {
+  // The Default Hero Layout's logo Block as it was before it followed the app
+  // logo: a copy of the logo's medium, inverted in dark mode.
+  const logo: HeroMediaImageBlock = {
+    ...((defaultHeroLayout as HeroLayout).blocks.find(
+      (block) => block.id === "default-logo",
+    ) as HeroImageBlock),
+    image: { source: "media", mediaId: "66f1c2000000000000000001" },
+    invertInDarkMode: true,
+  };
+  const measured: HeroMediaImageBlock = {
     ...logo,
     image: { ...logo.image, width: 320, height: 80 },
   };
@@ -770,7 +780,7 @@ describe("an image", () => {
   });
 
   it("inverts in dark mode only when asked to", () => {
-    const plain: HeroImageBlock = {
+    const plain: HeroMediaImageBlock = {
       ...measured,
       maxHeight: "xl",
       invertInDarkMode: false,

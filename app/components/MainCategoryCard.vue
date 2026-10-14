@@ -8,14 +8,14 @@
     the scale is dropped for visitors who ask for less motion, the ring stays.
   -->
   <UCard
-      class="mainCategoryCard relative h-full cursor-pointer bg-white dark:bg-gray-700 text-black dark:text-gray-200 shadow-lg transition duration-200 ease-out hover:z-10 hover:scale-105 hover:shadow-xl hover:ring-2 hover:ring-primary motion-reduce:transition-none motion-reduce:hover:scale-100"
+      class="mainCategoryCard relative h-full cursor-pointer bg-white dark:bg-gray-700 text-black dark:text-gray-200 shadow-lg transition duration-200 ease-out hover:z-10 hover:scale-105 hover:shadow-xl hover:ring-2 hover:ring-[color:var(--ui-accent,var(--ui-primary))] motion-reduce:transition-none motion-reduce:hover:scale-100"
       variant="solid"
       @click="goToCategory"
   >
     <template #header>
       <div class="w-full flex justify-center mt-5">
-        <div class="bg-primary rounded-full p-3 pb-1 shadow-lg avatar-hover">
-          <UIcon :name="category.icon" :style="{color: contrastToPrimary}" class="avatar-hover" size="24"/>
+        <div class="bg-[color:var(--ui-accent,var(--ui-primary))] rounded-full p-3 pb-1 shadow-lg avatar-hover">
+          <UIcon :name="category.icon" style="color: var(--ui-accent-contrast, var(--ui-primary-contrast))" class="avatar-hover" size="24"/>
         </div>
       </div>
     </template>
@@ -26,7 +26,6 @@
   </UCard>
 </template>
 <script setup>
-import {useContrastColor} from "~/composables/utils/useContrastColor.js";
 
 const props = defineProps({
   category: {
@@ -37,7 +36,6 @@ const props = defineProps({
 
 const {tenantTo} = useTenantRoute();
 
-const { contrastToPrimary } = useContrastColor();
 
 
 const router = useRouter()

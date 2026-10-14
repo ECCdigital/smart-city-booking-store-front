@@ -1,56 +1,39 @@
 <template>
-  <div>
-    <div
-      v-if="isLargeVersion"
-      class="hidden lg:flex items-center justify-center"
-    >
-      <div class="max-w-md text-center">
-        <div class="mb-10 grid space-y-2 content-center justify-items-center">
-          <ThemeLogo
-            v-if="logo"
-            :image="logo"
-            :alt="title"
-            max-height="sm"
-            invert-in-dark-mode
-          />
-          <p class="text-primary font-bold text-xl">
-            {{ title }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div v-else class="flex flex-col items-center">
-      <ThemeLogo
-        v-if="logo"
-        :image="logo"
-        :alt="title"
-        max-height="sm"
-        invert-in-dark-mode
-        class="mb-6"
-      />
-      <p class="text-primary font-bold text-xl text-center mb-6">
-        {{ title }}
-      </p>
-    </div>
+  <div class="grid gap-3 justify-items-center text-center pb-2">
+    <ThemeLogo
+      v-if="logo"
+      :image="logo"
+      :image-dark="logoDark"
+      :alt="title"
+      :max-height="logoSize"
+      invert-in-dark-mode
+      :class="logoSize === 'lg' ? PHONE_CAP_CLASSES : undefined"
+    />
+    <p class="font-bold text-xl text-gray-900 dark:text-white">
+      {{ title }}
+    </p>
   </div>
 </template>
 <script setup>
 /**
- * The title above the auth forms: the logo and the Portal Name, both from
- * the Theme View the page already holds — nothing is fetched here. Without
- * a logo the Portal Name stands alone.
+ * The title at the top of the auth cards: the logo and the Portal Name, both
+ * from the Theme View the page already holds — nothing is fetched here.
+ * Inside the card they read on any Background, which is why they have no
+ * ground of their own and the name is neutral rather than primary. Without a
+ * logo the Portal Name stands alone.
+ *
+ * The logo takes the size the instance chose, S unless set. On a phone it is
+ * at most M: the cap is added on top of the L step, so it holds for a
+ * measured logo (capped height) and an unmeasured one (fixed height) alike.
  */
-defineProps({
-  isLargeVersion: {
-    type: Boolean,
-    default: false,
-  },
-});
+const PHONE_CAP_CLASSES = "max-sm:h-24 max-sm:max-h-24";
 
 const { data: theme } = await useThemeBundle();
 const logo = computed(() => theme.value?.logo ?? null);
+// Its variant for the dark mode; without one the logo is inverted there.
+// A Live Preview Draft carries none.
+const logoDark = computed(() => theme.value?.logoDark ?? null);
+// A Live Preview Draft carries no size; the Theme View always does.
+const logoSize = computed(() => theme.value?.authLogoSize ?? "sm");
 const title = useSiteName();
 </script>
-
-<style scoped></style>

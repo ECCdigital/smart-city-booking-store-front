@@ -36,6 +36,7 @@ const layout = computed(
       title: t("meta.siteNameFallback"),
       subtitle: t("hero.fallbackSubtitle"),
       logo: theme.value?.logo ?? null,
+      logoDark: theme.value?.logoDark ?? null,
     }),
 );
 
