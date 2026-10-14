@@ -3,6 +3,7 @@ import { ref } from "vue";
 import ForgotPasswordCard from "~/components/auth/ForgotPasswordCard.vue";
 import ForgotPasswordSuccessCard from "~/components/auth/ForgotPasswordSuccessCard.vue";
 import { useAuth } from "~/composables/auth/useAuth";
+import { storefrontUrl } from "~~/shared/utils/storefrontUrl";
 
 const form = ref({
   email: "",
@@ -20,7 +21,10 @@ const localePath = useLocalePath();
 const handleForgotPassword = async () => {
   loading.value = true;
   try {
-    const resetUrl = `${config.public.userBaseUrl}${localePath("/password/reset")}`;
+    const resetUrl = storefrontUrl(
+      config.public.userBaseUrl,
+      localePath("/password/reset"),
+    );
     await forgotPassword(form.value.email, resetUrl);
     success.value = true;
   } catch {
