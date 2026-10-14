@@ -10,6 +10,29 @@ const heroPreviewRouteRule = {
   security: { headers: { xFrameOptions: false } },
 };
 
+// Files that never change between deploys do not count against the rate
+// limit (ECCdigital/tickets#555): the messages, the icons, and the theme's
+// stylesheet, font and favicon. The build's own files and `public/` never
+// reach the limiter, Nitro serves them before it.
+const unlimitedRouteRule = { security: { rateLimiter: false } };
+const UNLIMITED_ROUTES = [
+  // Nuxt renders an error page through this route, with the headers of the
+  // request that failed. Limited, a 429 would end in Nuxt's bare fallback
+  // page instead of `app/error.vue`.
+  "/__nuxt_error",
+  "/_i18n/**",
+  "/api/_nuxt_icon/**",
+  "/api/theme/css",
+  "/api/theme/font",
+  "/api/theme/favicon",
+];
+
+// Images do not count against it either. The image proxy also fetches from
+// foreign hosts, so it keeps a budget of its own, four times as large.
+const imageRouteRule = {
+  security: { rateLimiter: { tokensPerInterval: 2000 } },
+};
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
@@ -72,6 +95,10 @@ export default defineNuxtConfig({
     ...Object.fromEntries(
       HERO_PREVIEW_ROUTES.map((route) => [route, heroPreviewRouteRule]),
     ),
+    ...Object.fromEntries(
+      UNLIMITED_ROUTES.map((route) => [route, unlimitedRouteRule]),
+    ),
+    "/api/img": imageRouteRule,
   },
 
   modules: [

@@ -9,6 +9,7 @@ import { existsSync } from "node:fs";
 import net from "node:net";
 import { startBackendStub, BOOKABLE, EVENT, THEMES } from "./backend-stub.js";
 import { fontProblems } from "./font.js";
+import { rateLimitProblems } from "./rate-limit.js";
 
 const pages = [
   { path: "/", marker: "Smoke-Katalog" },
@@ -312,6 +313,13 @@ try {
     failures.push(
       ...(await fontProblems(base, backend, { withoutNewSettings: WITHOUT_NEW_SETTINGS })),
     );
+
+    // The rate limit does not depend on the bundle's settings: once is enough.
+    if (!WITHOUT_NEW_SETTINGS) {
+      failures.push(
+        ...(await rateLimitProblems(base, pages.map((page) => page.path))),
+      );
+    }
   }
 } finally {
   server.kill();
