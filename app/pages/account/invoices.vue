@@ -30,7 +30,15 @@
           :placeholder="$t('account.invoices.searchPlaceholder')"
           :aria-label="$t('account.invoices.searchPlaceholder')"
           class="w-full md:w-[40%]"
-        />
+          :ui="{ trailing: 'pe-0' }"
+        >
+          <template #trailing>
+            <ClearButton
+              :show-clear-button="!!searchQuery"
+              @clear="searchQuery = ''"
+            />
+          </template>
+        </UInput>
       </div>
 
       <!-- The table gives no hold on its rows, so it fades out and in as a
@@ -153,6 +161,7 @@
   </div>
 </template>
 <script setup>
+import ClearButton from "~/components/inputs/ClearButton.vue";
 import { getPaginationRowModel } from "@tanstack/vue-table";
 import { useBookingStore } from "~~/stores/bookings.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";

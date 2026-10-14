@@ -7,11 +7,20 @@
       variant="outline"
       :placeholder="$t('common.searchPlaceholder')"
       class="w-full"
-    />
+      :ui="{ trailing: 'pe-0' }"
+    >
+      <template #trailing>
+        <ClearButton
+          :show-clear-button="!!searchQuery"
+          @clear="searchQuery = ''"
+        />
+      </template>
+    </UInput>
     <BookingsFilter :tenants="tenants" @set-filter="setFilter" />
   </div>
 </template>
 <script setup>
+import ClearButton from "~/components/inputs/ClearButton.vue";
 import BookingsFilter from "~/components/user/bookings/BookingsFilter.vue";
 import Fuse from "fuse.js";
 import {
