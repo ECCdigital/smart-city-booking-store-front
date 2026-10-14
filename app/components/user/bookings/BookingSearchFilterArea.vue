@@ -8,7 +8,7 @@
       :placeholder="$t('common.searchPlaceholder')"
       class="w-full"
     />
-    <BookingsFilter @set-filter="setFilter" />
+    <BookingsFilter :tenants="tenants" @set-filter="setFilter" />
   </div>
 </template>
 <script setup>
@@ -24,6 +24,10 @@ import {
   isLiveBooking,
   resolveBookingStatus,
 } from "~/utils/bookingStatus.js";
+import {
+  filterAccessBookingsByTenant,
+  tenantsOfAccessBookings,
+} from "~/utils/accessBookingList.js";
 
 const props = defineProps({
   bookings: {
@@ -60,6 +64,16 @@ watch(searchQuery, (newQuery) => {
   }
 });
 
+// The providers of the bookings, named like the booking details and the key
+// list do: from the booking's tenant snapshot.
+const { getBookingTenant } = useTenant();
+const tenants = computed(() =>
+  tenantsOfAccessBookings(
+    props.bookings,
+    (booking) => getBookingTenant(booking)?.name,
+  ),
+);
+
 //filter and sorting
 const filters = ref([]);
 watch(filters, (newFilter) => {
@@ -73,6 +87,8 @@ watch(filters, (newFilter) => {
     filtered = filterForPaymentStatus(filtered);
 
     filtered = filterForStatus(filtered);
+
+    filtered = filterAccessBookingsByTenant(filtered, newFilter.tenantIds);
 
     filtered = sortBookings(filtered);
 

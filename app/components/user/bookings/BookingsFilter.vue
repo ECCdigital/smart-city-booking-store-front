@@ -19,7 +19,7 @@
       itemLeadingIcon: 'mt-1',
       itemTrailingIcon: 'mt-1 mr-1 text-primary',
       item: 'hover:bg-primary/10',
-      content: 'w-48',
+      content: 'w-56',
     }"
   >
     <UChip :show="hasFiltersApplied" inset class="mt-2 md:mt-0">
@@ -54,6 +54,12 @@
 <script setup>
 const { t } = useI18n();
 
+const props = defineProps({
+  tenants: {
+    type: Array,
+    default: () => [],
+  },
+});
 const emit = defineEmits(["setFilter"]);
 
 const bookingPeriodFilter = ref("all");
@@ -75,8 +81,10 @@ const showStatusRejected = ref(false);
 const showStatusPending = ref(false);
 const showPaymentsConfirmed = ref(false);
 const showPaymentsUnconfirmed = ref(false);
+const selectedTenantIds = ref([]);
 const hasFiltersApplied = computed(() => {
   return (
+    selectedTenantIds.value.length > 0 ||
     showActiveBookings.value ||
     showStatusConfirmed.value ||
     showStatusRejected.value ||
@@ -182,6 +190,38 @@ const statusFilterItems = () => [
       class: "cursor-default font-bold opacity-50 hover:bg-transparent mb-1",
       disabled: true,
     },
+  ],
+
+  [
+    {
+      label: t("account.listFilter.tenant"),
+      class: "cursor-default opacity-50 hover:bg-transparent",
+      disabled: true,
+    },
+    ...props.tenants.map((tenant, index) => {
+      const checked = selectedTenantIds.value.includes(tenant.id);
+      return {
+        label: tenant.name,
+        icon: "i-lucide-building-2",
+        type: "checkbox",
+        checked,
+        class: [
+          checked ? "bg-primary/20" : "",
+          index === props.tenants.length - 1 ? "mb-1" : "",
+        ]
+          .filter(Boolean)
+          .join(" "),
+        onUpdateChecked(on) {
+          selectedTenantIds.value = on
+            ? [...new Set([...selectedTenantIds.value, tenant.id])]
+            : selectedTenantIds.value.filter((id) => id !== tenant.id);
+          onSetFilter();
+        },
+        onSelect(e) {
+          e.preventDefault();
+        },
+      };
+    }),
   ],
 
   /*{
@@ -293,6 +333,7 @@ const statusFilterItems = () => [
 
 // Clears what this dropdown holds; the period select beside it stays.
 function clearStatusFilters() {
+  selectedTenantIds.value = [];
   showActiveBookings.value = false;
   showStatusConfirmed.value = false;
   showStatusRejected.value = false;
@@ -317,6 +358,7 @@ function onSetFilter() {
     statusPending: showStatusPending.value,
     paymentsConfirmed: showPaymentsConfirmed.value,
     paymentsUnconfirmed: showPaymentsUnconfirmed.value,
+    tenantIds: selectedTenantIds.value,
   });
 }
 </script>
