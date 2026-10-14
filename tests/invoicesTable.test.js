@@ -83,6 +83,7 @@ function mountPage(locale) {
     paymentDocuments: [row],
     shownDocuments: [row],
     shownKey: "QDGJ-EESJ/R-2026-0001",
+    pagedDocuments: [],
     searchQuery: "",
     sorting: [],
     pagination: { pageIndex: 0, pageSize: 25 },
@@ -154,5 +155,67 @@ describe("a row of the invoices table", () => {
     expect(print.getAttribute("aria-label")).toBe(name);
     print.click();
     expect(state.printDocument).toHaveBeenCalledWith(attachment, row);
+  });
+});
+
+describe("a card of the invoices list on narrow screens", () => {
+  const CARD = "components/user/invoices/PaymentDocumentCard.vue";
+
+  function mountCard(locale) {
+    const i18n = createI18n({ legacy: false, locale, messages: { de, en } });
+    const emit = vi.fn();
+    const app = Vue.createApp({
+      render: renderFunctionOf(CARD),
+      setup: () => ({
+        paymentDocument: row,
+        t: i18n.global.t,
+        formatDate: () => "01.10.2026",
+        bookingTo: "/account/bookings/QDGJ-EESJ",
+        emit,
+      }),
+    });
+    app.use(i18n);
+    app.component("UButton", {
+      inheritAttrs: false,
+      props: ["label"],
+      setup: (props, { attrs }) => () => Vue.h("button", attrs, props.label),
+    });
+    const root = document.createElement("div");
+    app.mount(root);
+    const [title, download, print] = root.querySelectorAll("button");
+    return { root, emit, title, download, print };
+  }
+
+  it("shows what a row of the table shows", () => {
+    const { root } = mountCard("de");
+
+    const text = root.textContent;
+    expect(text).toContain("Rechnung");
+    expect(text).toContain("01.10.2026");
+    expect(text).toContain("R-2026-0001");
+    expect(text).toContain("Saal");
+    expect(text).toContain("#QDGJ-EESJ");
+  });
+
+  it.each([
+    ["de", "R-2026-0001 in neuem Tab öffnen", "Herunterladen", "Drucken"],
+    ["en", "Open R-2026-0001 in a new tab", "Download", "Print"],
+  ])("names its actions (%s)", (locale, open, download, print) => {
+    const card = mountCard(locale);
+
+    expect(card.title.getAttribute("aria-label")).toBe(open);
+    expect(card.download.textContent).toBe(download);
+    expect(card.print.textContent).toBe(print);
+  });
+
+  it.each([
+    ["title", "open"],
+    ["download", "download"],
+    ["print", "print"],
+  ])("asks the page to %s the document", (button, event) => {
+    const card = mountCard("de");
+
+    card[button].click();
+    expect(card.emit).toHaveBeenCalledWith(event);
   });
 });

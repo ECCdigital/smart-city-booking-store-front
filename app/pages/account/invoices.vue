@@ -59,6 +59,18 @@
         </div>
 
         <div v-else :key="shownKey">
+          <!-- Narrow screens get cards; the table needs the width. -->
+          <div class="md:hidden">
+            <PaymentDocumentCard
+              v-for="row in pagedDocuments"
+              :key="row.key"
+              :payment-document="row"
+              @open="openDocument(row.attachment, row)"
+              @download="downloadDocument(row.attachment, row)"
+              @print="printDocument(row.attachment, row)"
+            />
+          </div>
+
           <UTable
             v-model:sorting="sorting"
             v-model:pagination="pagination"
@@ -73,7 +85,7 @@
               th: 'overflow-hidden',
               td: 'overflow-hidden',
             }"
-            class="w-full"
+            class="hidden md:block w-full"
           >
             <template
               v-for="col in sortableColumns"
@@ -150,7 +162,7 @@
             </template>
             <template #actions-cell="{ row }">
               <div class="flex justify-end gap-1">
-                <UTooltip :text="t('account.invoices.actions.downloadTooltip')">
+                <UTooltip :text="t('account.invoices.actions.downloadLabel')">
                   <UButton
                     icon="i-lucide-download"
                     color="neutral"
@@ -165,7 +177,7 @@
                     "
                   />
                 </UTooltip>
-                <UTooltip :text="t('account.invoices.actions.printTooltip')">
+                <UTooltip :text="t('account.invoices.actions.printLabel')">
                   <UButton
                     icon="i-lucide-printer"
                     color="neutral"
@@ -214,6 +226,7 @@ import { getPaginationRowModel } from "@tanstack/vue-table";
 import { useBookingStore } from "~~/stores/bookings.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
+import PaymentDocumentCard from "~/components/user/invoices/PaymentDocumentCard.vue";
 import { resolveBookingPaymentChip } from "~/utils/bookingPaymentStatus.js";
 import {
   paymentDocumentsOf,
@@ -341,6 +354,24 @@ const shownDocuments = computed(() =>
 const shownKey = computed(() =>
   shownDocuments.value.map((document) => document.key).join("|"),
 );
+
+// The cards show the page the table would: same order, same slice.
+const pagedDocuments = computed(() => {
+  const [order] = sorting.value;
+  const sorted = order
+    ? [...shownDocuments.value].sort((a, b) => {
+        const left = a[order.id];
+        const right = b[order.id];
+        const compared =
+          typeof left === "number" && typeof right === "number"
+            ? left - right
+            : String(left ?? "").localeCompare(String(right ?? ""));
+        return order.desc ? -compared : compared;
+      })
+    : shownDocuments.value;
+  const { pageIndex, pageSize } = pagination.value;
+  return sorted.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+});
 
 // A new search gives a different list: the reader expects its first page.
 watch(searchQuery, () => {

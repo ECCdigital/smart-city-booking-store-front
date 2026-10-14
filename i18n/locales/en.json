@@ -908,9 +908,9 @@
       "actions": {
         "open": "Open {title} in a new tab",
         "download": "Download {title}",
-        "downloadTooltip": "Download",
+        "downloadLabel": "Download",
         "print": "Print {title}",
-        "printTooltip": "Print"
+        "printLabel": "Print"
       },
       "types": {
         "invoice": "Invoice",

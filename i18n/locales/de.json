@@ -1255,9 +1255,9 @@
       "actions": {
         "open": "{title} in neuem Tab öffnen",
         "download": "{title} herunterladen",
-        "downloadTooltip": "Herunterladen",
+        "downloadLabel": "Herunterladen",
         "print": "{title} drucken",
-        "printTooltip": "Drucken"
+        "printLabel": "Drucken"
       },
       "types": {
         "invoice": "Rechnung",
