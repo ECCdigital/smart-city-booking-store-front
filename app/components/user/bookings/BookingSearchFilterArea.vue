@@ -7,11 +7,20 @@
       variant="outline"
       :placeholder="$t('common.searchPlaceholder')"
       class="w-full"
-    />
-    <BookingsFilter @set-filter="setFilter" />
+      :ui="{ trailing: 'pe-0' }"
+    >
+      <template #trailing>
+        <ClearButton
+          :show-clear-button="!!searchQuery"
+          @clear="searchQuery = ''"
+        />
+      </template>
+    </UInput>
+    <BookingsFilter :tenants="tenants" @set-filter="setFilter" />
   </div>
 </template>
 <script setup>
+import ClearButton from "~/components/inputs/ClearButton.vue";
 import BookingsFilter from "~/components/user/bookings/BookingsFilter.vue";
 import Fuse from "fuse.js";
 import {
@@ -24,6 +33,10 @@ import {
   isLiveBooking,
   resolveBookingStatus,
 } from "~/utils/bookingStatus.js";
+import {
+  filterAccessBookingsByTenant,
+  tenantsOfAccessBookings,
+} from "~/utils/accessBookingList.js";
 
 const props = defineProps({
   bookings: {
@@ -51,33 +64,37 @@ const searchOptions = {
 };
 const fuseInstance = computed(() => new Fuse(props.bookings, searchOptions));
 
-watch(searchQuery, (newQuery) => {
-  if (!newQuery) {
-    emit("update:bookings", props.bookings);
-  } else {
-    const results = fuseInstance.value.search(newQuery).map((r) => r.item);
-    emit("update:bookings", results);
-  }
-});
+// The providers of the bookings, named like the booking details and the key
+// list do: from the booking's tenant snapshot.
+const { getBookingTenant } = useTenant();
+const tenants = computed(() =>
+  tenantsOfAccessBookings(
+    props.bookings,
+    (booking) => getBookingTenant(booking)?.name,
+  ),
+);
 
 //filter and sorting
 const filters = ref([]);
-watch(filters, (newFilter) => {
-  if (!newFilter) {
-    emit("update:bookings", props.bookings);
-  } else {
-    let filtered = props.bookings;
 
-    filtered = filterForBookingPeriod(filtered);
+// Search and filters narrow together: the filters and the sorting apply to
+// what the search finds, so changing one keeps the other.
+watch([searchQuery, filters], ([query, filter]) => {
+  let shown = query
+    ? fuseInstance.value.search(query).map((r) => r.item)
+    : props.bookings;
 
-    filtered = filterForPaymentStatus(filtered);
+  shown = filterForBookingPeriod(shown);
 
-    filtered = filterForStatus(filtered);
+  shown = filterForPaymentStatus(shown);
 
-    filtered = sortBookings(filtered);
+  shown = filterForStatus(shown);
 
-    emit("update:bookings", filtered);
-  }
+  shown = filterAccessBookingsByTenant(shown, filter?.tenantIds);
+
+  shown = sortBookings(shown);
+
+  emit("update:bookings", shown);
 });
 
 function setFilter(filter) {

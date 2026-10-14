@@ -95,7 +95,7 @@
     "showAll": "Show all",
     "showLess": "Show less",
     "clearEntry": "Clear entry",
-    "searchPlaceholder": "Search...",
+    "searchPlaceholder": "Search",
     "imageLoadFailed": "Image could not be loaded",
     "unsavedChanges": "You have unsaved changes.",
     "distanceUnknown": "Distance unavailable.",
@@ -695,6 +695,7 @@
   "booking": {
     "emptyTitle": "No bookings yet",
     "emptyDescription": "You have not made any bookings yet.",
+    "noMatches": "No booking matches your search or the chosen filters.",
     "typeRoom": "Room booking",
     "typeResource": "Equipment booking",
     "typeTicket": "Ticket booking",
@@ -803,7 +804,8 @@
     "listFilter": {
       "filterBy": "Filter by:",
       "tenant": "Provider:",
-      "kind": "Type:"
+      "kind": "Type:",
+      "clearAll": "Clear all filters"
     },
     "contactData": "Contact details",
     "security": "Security",
@@ -856,7 +858,7 @@
       "emptyDescription": "There are currently no invoices for your account. Once invoices have been created, they will appear here.",
       "unknownBookable": "Unknown bookable",
       "searchPlaceholder": "Search by bookable",
-      "noMatches": "No invoice matches your search.",
+      "noMatches": "No documents match your search.",
       "columns": {
         "createdAt": "Created",
         "title": "Title",

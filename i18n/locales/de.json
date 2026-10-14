@@ -94,7 +94,7 @@
     "showAll": "Alle anzeigen",
     "showLess": "Weniger anzeigen",
     "clearEntry": "Eintrag löschen",
-    "searchPlaceholder": "Suchen...",
+    "searchPlaceholder": "Suchen",
     "imageLoadFailed": "Bild konnte nicht geladen werden",
     "unsavedChanges": "Sie haben nicht gespeicherte Änderungen.",
     "distanceUnknown": "Distanz nicht ermittelbar.",
@@ -1041,6 +1041,7 @@
   "booking": {
     "emptyTitle": "Keine Buchungen vorhanden",
     "emptyDescription": "Sie haben noch keine Buchungen vorgenommen.",
+    "noMatches": "Keine Buchung passt zu Ihrer Suche oder den gewählten Filtern.",
     "typeRoom": "Raumbuchung",
     "typeResource": "Ressourcen-Buchung",
     "typeTicket": "Ticketbuchung",
@@ -1150,7 +1151,8 @@
     "listFilter": {
       "filterBy": "Filtern nach:",
       "tenant": "Anbieter:",
-      "kind": "Typ:"
+      "kind": "Typ:",
+      "clearAll": "Alle Filter entfernen"
     },
     "contactData": "Kontaktdaten",
     "security": "Sicherheit",
@@ -1203,7 +1205,7 @@
       "emptyDescription": "Aktuell sind für Ihr Konto keine Rechnungen verfügbar. Sobald Rechnungen erstellt wurden, werden diese hier angezeigt.",
       "unknownBookable": "Unbekanntes Buchungsobjekt",
       "searchPlaceholder": "Nach Buchungsobjekt suchen",
-      "noMatches": "Keine Rechnung passt zu Ihrer Suche.",
+      "noMatches": "Keine Dokumente passen zu Ihrer Suche.",
       "columns": {
         "createdAt": "Erstelldatum",
         "title": "Titel",
