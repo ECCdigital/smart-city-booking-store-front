@@ -1582,6 +1582,10 @@
     "mapView": "Kartenansicht",
     "atThisLocation": "Ergebnisse an diesem Standort:",
     "clickToOpen": "Klick um Auswahl zu öffnen",
+    "clickToSeeAll": "Klick um Alle anzusehen",
+    "offerPosition": "Angebot {n} von {total}",
+    "previousOffer": "Vorheriges Angebot",
+    "nextOffer": "Nächstes Angebot",
     "pagination": {
       "itemsPerPage": "Pro Seite",
       "all": "Alle",

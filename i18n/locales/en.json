@@ -1232,6 +1232,10 @@
     "mapView": "Map view",
     "atThisLocation": "Results at this location:",
     "clickToOpen": "Click to open the selection",
+    "clickToSeeAll": "Click to see all",
+    "offerPosition": "Offer {n} of {total}",
+    "previousOffer": "Previous offer",
+    "nextOffer": "Next offer",
     "pagination": {
       "itemsPerPage": "Per page",
       "all": "All",
