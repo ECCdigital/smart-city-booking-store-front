@@ -30,11 +30,7 @@
 <script setup>
 import AccessPointStatusScreen from "~/components/mobileKey/AccessPointStatusScreen.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
-import {
-  buildErrorScreen,
-  errorScreenMoment,
-} from "~/utils/accessErrorScreens.js";
-import { ACCESS_ERRORS } from "~/utils/accessOpenFlow.js";
+import { buildErrorScreen } from "~/utils/accessErrorScreens.js";
 
 const props = defineProps({
   /** An `ACCESS_ERRORS` value from `~/utils/accessOpenFlow.js`. */
@@ -94,25 +90,7 @@ const props = defineProps({
 const emit = defineEmits(["retry"]);
 
 const { t } = useI18n();
-const { formatDate, formatTime } = useFormatting();
-
-/**
- * When access begins or ended, as the window screens say it, or from when to
- * try again - or nothing.
- */
-const moment = computed(() =>
-  errorScreenMoment(props.kind, {
-    booking: props.booking,
-    accessPointId: props.accessPointId,
-    retryAfter: props.retryAfter,
-  }),
-);
-
-/** The time to try again is minutes away: the clock time says it. */
-const formatMoment = (value) =>
-  props.kind === ACCESS_ERRORS.OPEN_TEMPORARY
-    ? formatTime(value)
-    : formatDate(value);
+const format = useFormatting();
 
 const screen = computed(() =>
   buildErrorScreen(props.kind, {
@@ -121,7 +99,9 @@ const screen = computed(() =>
     booking: props.booking,
     tenantId: props.tenantId,
     blockingReason: props.blockingReason,
-    date: moment.value !== null ? formatMoment(moment.value) : null,
+    accessPointId: props.accessPointId,
+    retryAfter: props.retryAfter,
+    format,
   }),
 );
 </script>
