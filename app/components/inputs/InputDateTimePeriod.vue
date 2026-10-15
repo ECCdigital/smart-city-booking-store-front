@@ -321,7 +321,9 @@ const durationPresets = [60, 120, 240];
 
 const now = computed(() => new Date());
 
-function isCompleteTime(t: TimeHM) {
+function isCompleteTime(
+  t: TimeHM,
+): t is { hours: number; minutes: number } {
   return t != null && t.hours != null && t.minutes != null;
 }
 
@@ -373,6 +375,7 @@ const invalidDateSlot = computed(() => {
   const start = dateRange.value[0];
   const end = dateRange.value[1];
 
+  if (!start || !end) return false;
   return end < start;
 });
 const invalidTimeslot = computed(() => {
@@ -469,20 +472,16 @@ function buildTimestampsFromState(): TimePeriod {
   const [d0, d1] = dateRange.value;
   const baseEndDate = d1 ?? d0 ?? null;
 
+  const startTime = timeRange.value.start;
   const startTs =
-    d0 &&
-    timeRange.value.start &&
-    timeRange.value.start.hours !== null &&
-    timeRange.value.start.minutes !== null
-      ? dateToTimestampWithTime(d0, timeRange.value.start)
+    d0 && isCompleteTime(startTime)
+      ? dateToTimestampWithTime(d0, startTime)
       : null;
 
+  const endTime = timeRange.value.end;
   const endTs =
-    baseEndDate &&
-    timeRange.value.end &&
-    timeRange.value.end.hours !== null &&
-    timeRange.value.end.minutes !== null
-      ? dateToTimestampWithTime(baseEndDate, timeRange.value.end)
+    baseEndDate && isCompleteTime(endTime)
+      ? dateToTimestampWithTime(baseEndDate, endTime)
       : null;
 
   return { start: startTs, end: endTs };
@@ -540,6 +539,7 @@ function formatDateTimeRange(
 
   if (!dates || dates.length !== 2) return "";
   const [start, end] = dates;
+  if (!start || !end) return "";
   const d1 = new Date(start);
   const d2 = new Date(end);
   const sameDay =

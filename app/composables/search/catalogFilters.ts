@@ -278,8 +278,7 @@ export function matchesCustomField(
   if (filterType === "slider") {
     let n;
     if (filterDef && filterDef.inputType === "select") {
-      const temp =
-        filterDef.options?.findIndex((o) => o.value === itemValue) + 1;
+      const temp = (filterDef.options?.findIndex((o) => o.value === itemValue) ?? -1) + 1;
       n = temp;
     } else {
       n = Number(itemValue);
@@ -292,7 +291,7 @@ export function matchesCustomField(
   if (filterType === "range") {
     let n;
     if (filterDef && filterDef.inputType === "select") {
-      n = filterDef.options?.findIndex((o) => o.value === itemValue) + 1;
+      n = (filterDef.options?.findIndex((o) => o.value === itemValue) ?? -1) + 1;
     } else {
       n = Number(itemValue);
     }

@@ -6,7 +6,7 @@ const ACCEPTANCE_KEYS = ["dataProtection", "termsAndConditions"];
 export function useLegalAcceptance() {
   const documents = useLegalDocuments(ACCEPTANCE_KEYS);
 
-  const accepted = reactive({});
+  const accepted = reactive(/** @type {Record<string, boolean>} */ ({}));
 
   watch(
     documents,

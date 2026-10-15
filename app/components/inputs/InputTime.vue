@@ -54,10 +54,11 @@
 <script setup lang="ts">
 import PeriodField from "~/components/inputs/PeriodField.vue";
 
-const dateModel = defineModel("date", { type: Date, default: null });
-const timeModel = defineModel("time", {
-  type: Object,
-  default: { hours: null, minutes: null },
+type TimeValue = { hours: number | null; minutes: number | null } | null;
+
+const dateModel = defineModel<Date | null>("date", { default: null });
+const timeModel = defineModel<TimeValue>("time", {
+  default: () => ({ hours: null, minutes: null }),
 });
 
 const props = defineProps({
@@ -102,7 +103,7 @@ const minDateInput = computed(() =>
 // field says why until the next date.
 const dateBeforeMin = ref(false);
 function onDateInputChange(event: Event) {
-  const v = event.target?.value;
+  const v = (event.currentTarget as HTMLInputElement).value;
   if (!v) {
     dateBeforeMin.value = false;
     dateModel.value = null;
@@ -128,7 +129,7 @@ const timeInput = computed(() => {
   return `${hh}:${mm}`;
 });
 function onTimeInputChange(event: Event) {
-  const v = event.target.value; // "HH:mm" oder ""
+  const v = (event.currentTarget as HTMLInputElement).value;
   if (!v) {
     timeModel.value = null;
     return;

@@ -136,13 +136,15 @@ const {
 } = useCalendarDateField(model, { getFieldRoot });
 
 const minCalendarDate = computed(() => {
-  if (props.minDate) return jsDateToCalendarDate(props.minDate);
+  if (props.minDate) return jsDateToCalendarDate(props.minDate) ?? undefined;
   if (props.disablePast) return today(getLocalTimeZone());
   return undefined;
 });
 
 const maxCalendarDate = computed(() =>
-  props.maxDate ? jsDateToCalendarDate(props.maxDate) : undefined
+  props.maxDate
+    ? (jsDateToCalendarDate(props.maxDate) ?? undefined)
+    : undefined,
 );
 
 function openDatePicker() {

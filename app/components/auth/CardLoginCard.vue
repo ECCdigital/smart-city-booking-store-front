@@ -52,6 +52,10 @@ const errorMessage = ref("");
 const loading = ref(false);
 const showSecret = ref(false);
 
+function toggleSecret() {
+  showSecret.value = !showSecret.value;
+}
+
 const credentials = reactive({
   publicId: "",
   secret: "",
@@ -283,7 +287,7 @@ const back = async () => {
                 showSecret ? 'Hide secret' : 'Show secret'
               "
                 :aria-pressed="showSecret"
-                @click="showSecret = !showSecret"
+                @click="toggleSecret"
             />
           </template>
         </UInput>
