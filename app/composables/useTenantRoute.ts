@@ -78,7 +78,9 @@ export const useTenantRoute = () => {
     ) {
       clone.name = `tenant-${clone.name}`;
       clone.params = {
-        ...clone.params,
+        ...(typeof clone.params === "object" && clone.params
+          ? clone.params
+          : {}),
         tenantID: tenantID.value,
       };
     }
@@ -89,7 +91,7 @@ export const useTenantRoute = () => {
   }
 
   function normalizePath(p: string) {
-    const withoutQuery = p.split("?")[0].split("#")[0];
+    const withoutQuery = (p.split("?")[0] ?? "").split("#")[0] ?? "";
     return withoutQuery.length > 1
       ? withoutQuery.replace(/\/+$/, "")
       : withoutQuery;

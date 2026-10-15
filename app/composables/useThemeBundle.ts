@@ -40,7 +40,7 @@ export function useHeroPreviewOverride() {
 export function useThemeBundle(slug?: string | null) {
   const key = slug ? `theme-bundle:${slug}` : "theme-bundle";
 
-  const result = useFetch("/api/theme/bundle", {
+  const result = useFetch<ThemeView>("/api/theme/bundle", {
     key,
     query: slug ? { slug } : undefined,
     // Serving the payload back is what keeps a route change from refetching.

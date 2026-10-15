@@ -130,11 +130,11 @@ export function useCatalogBundle() {
     }
   }
 
-  function isDetailLoadedForCurrentAuth({
-    slug = null,
-    bookableID = null,
-    eventID = null,
-  } = {}) {
+  /**
+   * @param {{ slug?: string | null, bookableID?: string | null, eventID?: string | null }} [params]
+   */
+  function isDetailLoadedForCurrentAuth(params = {}) {
+    const { slug = null, bookableID = null, eventID = null } = params;
     const contextKey = buildContextKey(slug, tenantID.value, getAuthScope());
     const detailId = bookableID ?? eventID;
     if (!detailId) return false;
@@ -178,13 +178,14 @@ export function useCatalogBundle() {
    *
    * @param {{ slug?: string | null, bookableID?: string | null, eventID?: string | null, tenantHint?: string | null, force?: boolean }} [params]
    */
-  async function loadDetail({
-    slug = null,
-    bookableID = null,
-    eventID = null,
-    tenantHint = null,
-    force = false,
-  } = {}) {
+  async function loadDetail(params = {}) {
+    const {
+      slug = null,
+      bookableID = null,
+      eventID = null,
+      tenantHint = null,
+      force = false,
+    } = params;
     if (!bookableID && !eventID) {
       throw new Error("loadDetail requires bookableID or eventID");
     }
@@ -272,13 +273,17 @@ export function useCatalogBundle() {
     return item;
   }
 
-  async function loadBundle({
-    slug = null,
-    bookableID = null,
-    eventID = null,
-    include = [],
-    force = false,
-  } = {}) {
+  /**
+   * @param {{ slug?: string | null, bookableID?: string | null, eventID?: string | null, include?: string | string[] | null, force?: boolean }} [params]
+   */
+  async function loadBundle(params = {}) {
+    const {
+      slug = null,
+      bookableID = null,
+      eventID = null,
+      include = [],
+      force = false,
+    } = params;
     const includeList = Array.isArray(include) ? include : [include];
     const hasOnlyDetailRequest =
       (bookableID || eventID) && includeList.filter(Boolean).length === 0;

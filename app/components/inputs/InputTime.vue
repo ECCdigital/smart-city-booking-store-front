@@ -136,8 +136,9 @@ function onTimeInputChange(event: Event) {
   }
   // nur vollständige HH:mm (verhindert 15:1 → 15:01)
   if (!/^\d{2}:\d{2}$/.test(v)) return;
-  const [h, m] = v.split(":").map(Number);
-  timeModel.value = { hours: h, minutes: m };
+  const [hours, minutes] = v.split(":").map(Number);
+  if (hours === undefined || minutes === undefined) return;
+  timeModel.value = { hours, minutes };
 }
 </script>
 

@@ -45,7 +45,7 @@
             <InputTime
               v-model:date="startDate"
               v-model:time="startTime"
-              :min-date="minDate"
+              :min-date="minDate ?? undefined"
               :missing-values="missingValues.start"
               :is-invalid-date="invalidDateSlot"
               :is-invalid-time="invalidTimeslot"
@@ -77,7 +77,7 @@
             <InputTime
               v-model:date="endDate"
               v-model:time="endTime"
-              :min-date="minDate"
+              :min-date="minDate ?? undefined"
               :missing-values="missingValues.end"
               :is-invalid-date="invalidDateSlot"
               :is-invalid-time="invalidTimeslot"

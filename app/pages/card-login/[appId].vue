@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useAuth } from "~/composables/auth/useAuth";
 import { useReturnTarget } from "~/composables/auth/useReturnTarget";
 import { useAuthStore } from "~~/stores/auth.js";
-import CardLoginCard from "~/components/auth/CardLoginCard";
+import CardLoginCard from "~/components/auth/CardLoginCard.vue";
 import type { CardMethod } from "~~/shared/types/api";
 
 definePageMeta({ layout: "default" });

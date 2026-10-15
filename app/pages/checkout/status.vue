@@ -33,7 +33,7 @@ const authStore = useAuthStore();
 const isLoggedIn = computed(() => authStore.isLoggedIn);
 const { t, te, locale } = useI18n();
 usePageTitle(() => t("meta.pages.checkoutStatus"));
-const checkoutNavTab = useState("checkoutNavTab", () => "");
+const checkoutNavTab = useState("checkoutNavTab", () => null);
 
 const bookableId = computed(() => String(route.query.bookableId || "").trim());
 const bookingId = computed(() => String(route.query.bookingId || "").trim());
@@ -311,7 +311,7 @@ onUnmounted(() => {
   stopAutoPollClock();
 
   if (checkoutNavTab.value?.url === route.fullPath) {
-    checkoutNavTab.value = "";
+    checkoutNavTab.value = null;
   }
 });
 

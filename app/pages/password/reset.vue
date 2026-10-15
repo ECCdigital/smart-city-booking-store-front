@@ -47,7 +47,7 @@ const handleResetPassword = async () => {
     );
     await navigateTo("/login");
   } catch (err) {
-    if (err?.statusCode === 400) {
+    if ((err as { statusCode?: number })?.statusCode === 400) {
       notification.error(
         t("notifications.resetPasswordInvalidToken.message"),
         t("notifications.resetPasswordInvalidToken.title"),

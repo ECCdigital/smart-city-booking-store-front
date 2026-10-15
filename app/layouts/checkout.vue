@@ -1,5 +1,10 @@
 <script setup lang="ts">
-const checkoutNavTab = useState("checkoutNavTab", () => "");
+import type { CheckoutNavigationTab } from "~/types/checkout";
+
+const checkoutNavTab = useState<CheckoutNavigationTab | null>(
+  "checkoutNavTab",
+  () => null,
+);
 
 const mounted = ref(false);
 onMounted(() => {

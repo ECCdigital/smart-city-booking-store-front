@@ -483,7 +483,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
       const searchString = (
         addressParts.length > 1
           ? addressParts.slice(0, -1).join(",")
-          : addressParts[0]
+          : (addressParts[0] ?? "")
       ).trim();
 
       searchForLocationString(searchString, itemsWithoutCoordinates).forEach(
@@ -725,9 +725,11 @@ export function useBookableSearch<TItem extends SearchableItem>(
         }
       }),
     );
-    return result.map((r, index) =>
-      r.status === "fulfilled" ? r.value : events[index],
-    );
+    return result
+      .map((r, index) =>
+        r.status === "fulfilled" ? r.value : events[index],
+      )
+      .filter((event): event is SearchResultItem => event !== undefined);
   }
 
   const hasUrlCriteria = computed(
@@ -737,7 +739,10 @@ export function useBookableSearch<TItem extends SearchableItem>(
   function getSourceItemIds(items: unknown[] | null | undefined) {
     if (!Array.isArray(items)) return "";
     return items
-      .map((item: { id?: string }) => item?.id ?? "")
+      .map((item) => {
+        if (!item || typeof item !== "object" || !("id" in item)) return "";
+        return typeof item.id === "string" ? item.id : "";
+      })
       .filter(Boolean)
       .sort()
       .join(",");

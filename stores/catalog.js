@@ -1,7 +1,10 @@
 import { useCatalog } from "~/composables/api/useCatalog.js";
 
+/** @typedef {import("../shared/types/api").CatalogData} CatalogData */
+
 export const useCatalogStore = defineStore("catalog", {
   state: () => ({
+    /** @type {CatalogData | null} */
     catalog: null,
     loadedFor: null,
     loading: false,

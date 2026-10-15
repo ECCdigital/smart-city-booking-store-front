@@ -21,6 +21,16 @@ export interface PortalModeResponse {
   portalUrl?: string;
 }
 
+/** Public instance settings used by the storefront. */
+export interface InstanceResponse {
+  applications?: Array<{ id: string; active: boolean }>;
+  publicOffersEnabled?: boolean;
+  portalUrl?: string | null;
+  copyright?: string;
+  allowAllUsersToCreateTenant?: boolean;
+  [key: string]: unknown;
+}
+
 /**
  * The backend's Theme Bundle export. Everything that decides the look of the
  * site travels here and nowhere else (storefront ADR 0001), which is why the

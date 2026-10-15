@@ -78,7 +78,7 @@ export function useCatalogAuthReload() {
     );
 
     const loadedScopes = [bookableStore.loadedFor, eventStore.loadedFor].filter(
-      Boolean,
+      (loadedFor): loadedFor is string => typeof loadedFor === "string",
     );
 
     if (loadedScopes.length === 0) {

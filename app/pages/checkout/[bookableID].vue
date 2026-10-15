@@ -314,7 +314,7 @@ const typeLabels = computed(() => ({
   event: t("booking.typeEvent"),
 }));
 
-const checkoutNavTab = useState("checkoutNavTab", () => {});
+const checkoutNavTab = useState("checkoutNavTab", () => null);
 
 watch(
   [leadBookable, () => locale.value],
@@ -338,7 +338,7 @@ watch(
 );
 
 onUnmounted(() => {
-  checkoutNavTab.value = "";
+  checkoutNavTab.value = null;
 });
 const additionalBookables = computed(
   () => data.value?.additionalBookables || [],

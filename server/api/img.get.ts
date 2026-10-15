@@ -45,7 +45,7 @@ function isPrivateIp(ip: string) {
   const [a, b] = parts;
   return (
     a === 10 ||
-    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 172 && b !== undefined && b >= 16 && b <= 31) ||
     (a === 192 && b === 168) ||
     ip === "127.0.0.1" ||
     ip === "::1"

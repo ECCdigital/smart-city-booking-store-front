@@ -4,6 +4,7 @@ export const useEventStore = defineStore("event", {
   state: () => ({
     initialized: false,
     events: [],
+    /** @type {string | null} */
     loadedFor: null,
     loadedDetailsFor: {},
     // A failed list load, so an empty list is not mistaken for a success.

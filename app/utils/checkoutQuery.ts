@@ -7,7 +7,7 @@ export const CHECKOUT_ONLY_QUERY_KEYS = [
 ] as const;
 
 function normalizePath(path: string): string {
-  const withoutQuery = path.split("?")[0].split("#")[0];
+  const withoutQuery = (path.split("?")[0] ?? "").split("#")[0] ?? "";
   const withoutTenantPrefix = withoutQuery.replace(/^\/t\/[^/]+/, "");
   return withoutTenantPrefix.length > 0 ? withoutTenantPrefix : withoutQuery;
 }

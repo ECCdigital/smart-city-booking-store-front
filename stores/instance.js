@@ -1,8 +1,11 @@
 import { useInstance } from "~/composables/api/useInstance.js";
 
+/** @typedef {import("../shared/types/api").InstanceResponse} InstanceResponse */
+
 export const useInstanceStore = defineStore("instance", {
   state: () => ({
     initialized: false,
+    /** @type {InstanceResponse | null} */
     instance: null,
   }),
   getters: {

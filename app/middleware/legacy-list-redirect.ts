@@ -1,3 +1,5 @@
+import type { LocationQueryRaw } from "vue-router";
+
 /**
  * The former list pages, `/bookables` and `/events`, live on as redirects to
  * the Result Page. The query travels along, so a saved search keeps working,
@@ -13,7 +15,7 @@ export default defineNuxtRouteMiddleware((to) => {
   const tenantID = to.params.tenantID as string | undefined;
   const path = tenantID ? `/t/${tenantID}/search` : "/search";
 
-  const query: Record<string, unknown> = { ...to.query };
+  const query: LocationQueryRaw = { ...to.query };
   if (/\/events\/?$/.test(to.path)) {
     const cats = String(query.cat ?? "")
       .split(",")

@@ -24,7 +24,6 @@ export default defineEventHandler(async (event) => {
         const error = err as UpstreamError;
         console.error("Error verifying card:", error);
         throw createError({
-            success: false,
             statusCode: error.response?.status || 500,
             statusMessage: error.response?.data?.message || "Card link verification failed",
         });

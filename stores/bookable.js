@@ -4,6 +4,7 @@ export const useBookableStore = defineStore("bookable", {
   state: () => ({
     initialized: false,
     bookables: [],
+    /** @type {string | null} */
     loadedFor: null,
     loadedDetailsFor: {},
     // A failed list load, so an empty list is not mistaken for a success.
