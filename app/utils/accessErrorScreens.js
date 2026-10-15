@@ -203,18 +203,38 @@ export function formatBlockingReasonMessage(
 }
 
 /**
- * The moment a window screen names: for `too_early` when access begins, for
+ * The failures whose wording names a moment where one is known, and takes its
+ * undated key where none is.
+ */
+const DATED_KINDS = Object.freeze([
+  ACCESS_ERRORS.TOO_EARLY,
+  ACCESS_ERRORS.TOO_LATE,
+  ACCESS_ERRORS.OPEN_TEMPORARY,
+]);
+
+/**
+ * The moment a screen names: for `too_early` when access begins, for
  * `too_late` when it ended - the door's own Access Window first, the booking
  * envelope where the door is not known, the booking's raw times as the last
  * resort (a booking without eligibility, as the wider scan-page query returns
- * it). `null` for every other failure, and where nothing names a time - the
- * screen then takes its undated wording.
+ * it). For `open_temporary` the time from which the backend says another
+ * attempt can work (`retryAfter`). `null` for every other failure, and where
+ * nothing names a time - the screen then takes its undated wording.
  *
  * @param {string} kind An {@link ACCESS_ERRORS} value
- * @param {{ booking?: Object|null, accessPointId?: string|number|null }} context
+ * @param {{ booking?: Object|null, accessPointId?: string|number|null,
+ *   retryAfter?: number|null }} context `retryAfter` in epoch ms, from
+ *   `readOpenOutcome`
  * @returns {number|null} epoch ms
  */
-export function errorScreenMoment(kind, { booking = null, accessPointId = null }) {
+export function errorScreenMoment(
+  kind,
+  { booking = null, accessPointId = null, retryAfter = null },
+) {
+  if (kind === ACCESS_ERRORS.OPEN_TEMPORARY) {
+    return Number.isFinite(retryAfter) ? retryAfter : null;
+  }
+
   if (kind !== ACCESS_ERRORS.TOO_EARLY && kind !== ACCESS_ERRORS.TOO_LATE) {
     return null;
   }
@@ -248,8 +268,8 @@ export function errorScreenMoment(kind, { booking = null, accessPointId = null }
  * @param {Object|null} [context.booking] The booking the failure is about
  * @param {string|null} [context.tenantId] Tenant the destinations stay inside
  * @param {string|null} [context.blockingReason] What the server named, if anything
- * @param {string|null} [context.date] The moment the window screens name
- *   (see {@link errorScreenMoment}), already formatted
+ * @param {string|null} [context.date] The moment the screen names (see
+ *   {@link errorScreenMoment}), already formatted
  * @returns {{ icon: string, color: string, title: string, description: string,
  *   exit: { label: string, to: string|null, retry: string|null }|null }}
  */
@@ -281,10 +301,7 @@ export function buildErrorScreen(
  * carries sentences, not logic.
  */
 function describeFailure(kind, { t, label, blockingReason, date, wording }) {
-  if (
-    (kind === ACCESS_ERRORS.TOO_EARLY || kind === ACCESS_ERRORS.TOO_LATE) &&
-    !date
-  ) {
+  if (DATED_KINDS.includes(kind) && !date) {
     return t(`${wording}.description_undated`, { label });
   }
 

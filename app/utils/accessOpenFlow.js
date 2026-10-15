@@ -561,9 +561,14 @@ export function buildOpenRequest({ evidence = [] } = {}) {
  * {@link OPEN_FAILURE_SCREENS}. Where both came, the reason speaks first; an
  * `openFailure` this module does not know stays generic.
  *
+ * `retryAfter` comes along only on `open_temporary` and only where the
+ * backend named a readable time (an ISO time, e.g. the end of Salto's block
+ * after `otp_blocked`); without one the field is missing, as in the answer.
+ *
  * @param {{ success?: boolean, data?: Object }|null|undefined} response
  * @param {{ booking?: Object|null, now?: number }} [context]
- * @returns {{ opened: boolean, pendingProcessId: string|null, error: string|null, blockingReason: string|null }}
+ * @returns {{ opened: boolean, pendingProcessId: string|null, error: string|null,
+ *   blockingReason: string|null, retryAfter?: number }} `retryAfter` in epoch ms
  */
 export function readOpenOutcome(response, { booking = null, now } = {}) {
   if (response?.success === true) {
@@ -582,14 +587,21 @@ export function readOpenOutcome(response, { booking = null, now } = {}) {
     ? OPEN_FAILURE_SCREENS[failureClass]
     : null;
 
+  const error =
+    !blockingReason && openFailure
+      ? openFailure
+      : reasonError(blockingReason, booking, now ?? Date.now());
+  const retryAfter =
+    error === ACCESS_ERRORS.OPEN_TEMPORARY
+      ? Date.parse(response?.data?.retryAfter ?? "")
+      : NaN;
+
   return {
     opened: false,
     pendingProcessId: null,
-    error:
-      !blockingReason && openFailure
-        ? openFailure
-        : reasonError(blockingReason, booking, now ?? Date.now()),
+    error,
     blockingReason,
+    ...(Number.isFinite(retryAfter) && { retryAfter }),
   };
 }
 

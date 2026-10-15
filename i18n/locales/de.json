@@ -1573,7 +1573,8 @@
       },
       "open_temporary": {
         "title": "Gerade nicht möglich",
-        "description": "{label} lässt sich im Moment nicht öffnen. Versuchen Sie es in ein paar Minuten noch einmal."
+        "description": "{label} lässt sich im Moment nicht öffnen. Versuchen Sie es ab {date} Uhr noch einmal.",
+        "description_undated": "{label} lässt sich im Moment nicht öffnen. Versuchen Sie es in ein paar Minuten noch einmal."
       },
       "open_unconfirmed": {
         "title": "Öffnen nicht bestätigt",

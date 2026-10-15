@@ -394,6 +394,45 @@ describe("readOpenOutcome", () => {
     });
   });
 
+  it("carries the time to retry the backend names for a temporary open failure", () => {
+    expect(
+      readOpenOutcome({
+        success: false,
+        data: { openFailure: "temporary", retryAfter: "2026-08-12T18:55:00.000Z" },
+      }),
+    ).toEqual({
+      opened: false,
+      pendingProcessId: null,
+      error: ACCESS_ERRORS.OPEN_TEMPORARY,
+      blockingReason: null,
+      retryAfter: NOW + 25 * 60 * 1000,
+    });
+  });
+
+  it("names no time to retry where the backend names none or an unreadable one", () => {
+    expect(
+      readOpenOutcome({ success: false, data: { openFailure: "temporary" } }),
+    ).not.toHaveProperty("retryAfter");
+    expect(
+      readOpenOutcome({
+        success: false,
+        data: { openFailure: "temporary", retryAfter: "bald" },
+      }),
+    ).not.toHaveProperty("retryAfter");
+  });
+
+  it("names a time to retry only on the screen that passes", () => {
+    expect(
+      readOpenOutcome({
+        success: false,
+        data: {
+          openFailure: "configuration",
+          retryAfter: "2026-08-12T18:55:00.000Z",
+        },
+      }),
+    ).not.toHaveProperty("retryAfter");
+  });
+
   it("reads an open failure of the setup as the misconfigured door, which stays", () => {
     expect(
       readOpenOutcome({ success: false, data: { openFailure: "configuration" } }),
