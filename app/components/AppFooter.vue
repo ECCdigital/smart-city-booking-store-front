@@ -24,11 +24,26 @@ const adminBaseUrl = useRuntimeConfig().public.adminBaseUrl;
 const offerSpacesUrl = computed(() =>
   offerSpacesEntryUrl(adminBaseUrl, instanceStore.instance),
 );
+
+// The instance's footer logos (Theme View). The Live Preview's Draft carries
+// none, so its footer shows no row.
+const { data: theme } = await useThemeBundle();
+const footerLogos = computed(() => theme.value?.footerLogos ?? []);
 </script>
 
 <template>
   <!-- Surface stays full-bleed, content sits on the container edges -->
   <footer class="bg-white dark:bg-gray-900">
+    <!-- Footer logos, funding logos among them: a row of their own above
+         copyright and links, only when the instance has any. -->
+    <div
+      v-if="footerLogos.length"
+      data-footer-logos
+      class="container border-b border-gray-200 pt-6 pb-5 dark:border-gray-800"
+    >
+      <FooterLogos :logos="footerLogos" />
+    </div>
+
     <div
       class="container flex flex-col gap-4 py-5 text-sm sm:flex-row sm:items-center sm:justify-between"
     >
@@ -62,12 +77,6 @@ const offerSpacesUrl = computed(() =>
       </div>
 
       <div class="flex items-center gap-4 sm:gap-6">
-        <!-- Partner logos are out of scope for now (no instance field, no admin
-             form). The slot keeps them a matter of data rather than a rebuild. -->
-        <div v-if="$slots.logos" class="flex items-center gap-4">
-          <slot name="logos" />
-        </div>
-
         <!-- The one place the tenant is always chosen; the bar only names the
              one already in use. It closes the row on the right. -->
         <ClientOnly>

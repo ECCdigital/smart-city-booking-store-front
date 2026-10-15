@@ -14,6 +14,7 @@ import {
 import type { HeroParseIssue } from "~~/shared/utils/heroLayout";
 import {
   HERO_BLOCK_OFFSET_NONE,
+  type HeroImageBlock,
   type HeroRichtextBlock,
   type HeroZone,
 } from "~~/shared/types/hero";
@@ -115,6 +116,13 @@ describe("buildHeroPreviewSnapshot", () => {
     colorMode: "light",
   };
   const logo = { source: "media" as const, mediaId: "logo-1", url: "/l.png" };
+  const logoDark = {
+    source: "media" as const,
+    mediaId: "logo-2",
+    url: "/d.png",
+    width: 160,
+    height: 80,
+  };
 
   /** A stand-in for DOMPurify that leaves a mark, so its use is visible. */
   const sanitize = (html: string) => `<p>clean:${html.length}</p>`;
@@ -134,7 +142,10 @@ describe("buildHeroPreviewSnapshot", () => {
 
   function build(envelope: HeroPreviewDraftEnvelope) {
     const { issues, onIssue } = withIssues();
-    return { issues, snapshot: buildHeroPreviewSnapshot(envelope, { sanitize, logo, onIssue }) };
+    return {
+      issues,
+      snapshot: buildHeroPreviewSnapshot(envelope, { sanitize, logo, logoDark, onIssue }),
+    };
   }
 
   it("builds the view the Hero renders from a valid Draft", () => {
@@ -148,9 +159,77 @@ describe("buildHeroPreviewSnapshot", () => {
     );
     expect(snapshot!.view.background).toEqual(backgroundImage);
     expect(snapshot!.view.logo).toEqual(logo);
+    expect(snapshot!.view.logoDark).toEqual(logoDark);
     expect(snapshot!.view).not.toHaveProperty("etag");
     expect(snapshot!.colorMode).toBe("light");
     expect(snapshot!.selectedBlockId).toBeNull();
+  });
+
+  // A Draft carries no logo: the Hero Editor does not edit it. A Block that
+  // follows the app logo shows the stored one with its variant
+  // (ECCdigital/tickets#528).
+  describe("an image Block that follows the app logo", () => {
+    function imageOf(snapshot: ReturnType<typeof build>["snapshot"], id: string) {
+      return (
+        snapshot!.view.heroLayout!.blocks.find((block) => block.id === id) as HeroImageBlock
+      ).image;
+    }
+
+    it("shows the stored app logo with its variant", () => {
+      const { snapshot } = build({ ...draft, heroLayout: defaultHeroLayout });
+
+      expect(imageOf(snapshot, "default-logo")).toEqual({
+        source: "app-logo",
+        url: "/l.png",
+        dark: { url: "/d.png", width: 160, height: 80 },
+      });
+    });
+
+    it("shows the stored app logo, whatever the Draft put in", () => {
+      const layout = structuredClone(defaultHeroLayout);
+      layout.blocks[0]!.image = {
+        source: "app-logo",
+        url: "/old.png",
+        dark: { url: "/old-dark.png" },
+      } as never;
+
+      const { snapshot } = build({ ...draft, heroLayout: layout });
+
+      expect(imageOf(snapshot, "default-logo")).toEqual({
+        source: "app-logo",
+        url: "/l.png",
+        dark: { url: "/d.png", width: 160, height: 80 },
+      });
+    });
+
+    it("shows nothing without a stored app logo", () => {
+      const { issues, onIssue } = withIssues();
+
+      const snapshot = buildHeroPreviewSnapshot(
+        { ...draft, heroLayout: defaultHeroLayout },
+        { sanitize, logo: null, logoDark, onIssue },
+      );
+
+      expect(issues).toEqual([]);
+      expect(imageOf(snapshot, "default-logo")).toEqual({ source: "app-logo" });
+    });
+
+    it("leaves a Block with a copy of the app logo's medium as the Draft has it", () => {
+      const layout = structuredClone(defaultHeroLayout);
+      layout.blocks[0] = {
+        ...layout.blocks[0]!,
+        image: { source: "media", mediaId: "logo-1", url: "/copy.png" },
+        invertInDarkMode: true,
+      } as never;
+
+      const { snapshot } = build({ ...draft, heroLayout: layout });
+      const block = snapshot!.view.heroLayout!.blocks[0] as HeroImageBlock;
+
+      expect(block).toMatchObject({
+        image: { source: "media", mediaId: "logo-1", url: "/copy.png" },
+        invertInDarkMode: true,
+      });
+    });
   });
 
   it("carries the selected Block when the Draft names one", () => {
@@ -217,6 +296,7 @@ describe("buildHeroPreviewSnapshot", () => {
     const snapshot = buildHeroPreviewSnapshot(draft, {
       sanitize: () => "x".repeat(10_001),
       logo,
+      logoDark,
       onIssue,
     });
 

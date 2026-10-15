@@ -32,8 +32,7 @@
           <AuthActions />
 
           <div
-            class="h-6 w-px opacity-30"
-            :style="{ backgroundColor: contrastToPrimary }"
+            class="h-6 w-px bg-(--ui-header-contrast) opacity-30"
           />
 
           <div class="flex items-center">
@@ -59,7 +58,6 @@ import NavigationLink from "./NavigationLink.vue";
 import AuthActions from "~/components/navigation/AuthActions.vue";
 import ColorModeToggle from "~/components/navigation/ColorModeToggle.vue";
 import LanguageToggle from "~/components/navigation/LanguageToggle.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 defineProps({
   tabs: {
@@ -67,8 +65,6 @@ defineProps({
     default: () => [],
   },
 });
-
-const { contrastToPrimary } = useContrastColor();
 
 // Below `sm` (the width the app treats as "phone") the bar stays pinned to the
 // top edge while the page scrolls under it; from `sm` up it flows as before.
@@ -84,8 +80,10 @@ const { contrastToPrimary } = useContrastColor();
 // sticky/fixed element at the top edge that is at least 90% wide, taller than
 // 10px, opaque and free of `backdrop-filter` — so adding `.glass`, a blur or an
 // alpha-bearing background colour here would silently turn that colouring off.
+// `--ui-header` comes from the theme stylesheet: an instance colour as before,
+// or the opaque neutral.
 const barClass = computed(() => [
-  "bg-[var(--color-primary)]",
+  "bg-(--ui-header)",
   "sticky top-0 z-10 sm:static",
 ]);
 </script>

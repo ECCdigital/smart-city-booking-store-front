@@ -11,7 +11,7 @@
         :variant="view === option.value ? 'solid' : 'soft'"
         class="first:rounded-l-lg last:rounded-r-lg px-3"
         :style="
-          view === option.value ? { color: contrastToSecondary } : undefined
+          view === option.value ? { color: 'var(--ui-secondary-contrast)' } : undefined
         "
         @click="selectView(option.value)"
       />
@@ -20,10 +20,8 @@
 </template>
 
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 const { t } = useI18n();
 
-const { contrastToSecondary } = useContrastColor();
 
 const view = defineModel({
   type: String,
