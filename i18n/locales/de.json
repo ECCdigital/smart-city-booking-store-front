@@ -1110,6 +1110,7 @@
     "eventTime": "Veranstaltungszeit",
     "priceLabel": "Preis:",
     "downloadAppointment": "Termin herunterladen",
+    "actionsFor": "Aktionen zur Buchung #{id}",
     "downloadAppointmentTooltip": "Als Termin herunterladen",
     "cancellation": {
       "action": "Buchung stornieren",
@@ -1209,6 +1210,8 @@
       "all": "Alle",
       "filterBy": "Filtern nach:",
       "sortBy": "Sortieren nach:",
+      "filterButton": "Buchungen filtern",
+      "sortButton": "Buchungen sortieren",
       "activeBookings": "Aktive Buchungen",
       "status": "Status:",
       "confirmed": "Bestätigt",
