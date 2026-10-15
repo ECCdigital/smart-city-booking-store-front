@@ -40,6 +40,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Changed
 
+- The navigation bar in the checkout shows „Buchung“ for every kind of bookable instead of „Raumbuchung“, „Ticketbuchung“ and the like
 - A request the customer withdrew themselves (`status: "rejected"` with `cancellationRefund.origin: "user"`) shows „storniert" on the booking card, in the booking details and in the search, and its reason under „Stornierungsgrund"; one rejected by the administration or the system, or before that audit existed, stays „abgelehnt" with „Ablehnungsgrund" (ECCdigital/tickets#290)
 - The favorite heart no longer shows a loading spinner while it saves (ECCdigital/tickets#189). Marking plays a short burst instead: the heart dips, swells and settles, and twelve short rays in its colour shoot out of it (0.7 seconds, played to its end also when the save is done sooner). A refused mark stops it at once and shows the same notice as before. Removing a favorite shows no animation. With „Bewegung reduzieren“ (`prefers-reduced-motion`) the heart only fades a little while it marks
 - „Meine Buchungen" no longer says „Sie haben noch keine Buchungen vorgenommen." when the search or the filters find nothing; it says „Keine Buchung passt zu Ihrer Suche oder den gewählten Filtern.", as the favorites do (ECCdigital/tickets#226). Key `booking.noMatches`. „Ihre Rechnungen und Zahlungsbelege" shows its „Keine Rechnung passt zu Ihrer Suche." the same way, with the filter icon
