@@ -3,9 +3,8 @@ import { useRoute, useRouter } from "#imports";
 import type {
   CatalogQueryState,
   CustomFieldValue,
-  SortMode,
-  ViewMode,
 } from "~/types/catalogParams";
+import { parseSortMode, parseViewMode } from "~/utils/catalogQueryModes";
 
 function parseNumberOrNull(v: unknown): number | null {
   if (v === undefined || v === null || v === "") return null;
@@ -14,24 +13,6 @@ function parseNumberOrNull(v: unknown): number | null {
 }
 
 const CF_PREFIX = "cf_";
-const SORT_MODES: SortMode[] = [
-  "alphabeticAscending",
-  "alphabeticDescending",
-  "priceAscending",
-  "priceDescending",
-  "distanceAscending",
-  "distanceDescending",
-];
-
-function parseSortMode(value: unknown): SortMode {
-  return typeof value === "string" && SORT_MODES.includes(value as SortMode)
-    ? (value as SortMode)
-    : "alphabeticAscending";
-}
-
-function parseViewMode(value: unknown): ViewMode {
-  return value === "map" ? "map" : "list";
-}
 
 function parseCustomFieldValue(raw: string): CustomFieldValue {
   if (raw === "true") return true;
