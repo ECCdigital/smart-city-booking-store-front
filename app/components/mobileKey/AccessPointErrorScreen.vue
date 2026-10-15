@@ -34,6 +34,7 @@ import {
   buildErrorScreen,
   errorScreenMoment,
 } from "~/utils/accessErrorScreens.js";
+import { ACCESS_ERRORS } from "~/utils/accessOpenFlow.js";
 
 const props = defineProps({
   /** An `ACCESS_ERRORS` value from `~/utils/accessOpenFlow.js`. */
@@ -74,6 +75,15 @@ const props = defineProps({
     type: [String, Number],
     default: null,
   },
+  /**
+   * From when another attempt can work, in epoch ms, where the backend named
+   * it (`readOpenOutcome`): `open_temporary` then says the time instead of
+   * "in a few minutes".
+   */
+  retryAfter: {
+    type: Number,
+    default: null,
+  },
 });
 
 /**
@@ -84,15 +94,25 @@ const props = defineProps({
 const emit = defineEmits(["retry"]);
 
 const { t } = useI18n();
-const { formatDate } = useFormatting();
+const { formatDate, formatTime } = useFormatting();
 
-/** When access begins or ended, as the window screens say it - or nothing. */
+/**
+ * When access begins or ended, as the window screens say it, or from when to
+ * try again - or nothing.
+ */
 const moment = computed(() =>
   errorScreenMoment(props.kind, {
     booking: props.booking,
     accessPointId: props.accessPointId,
+    retryAfter: props.retryAfter,
   }),
 );
+
+/** The time to try again is minutes away: the clock time says it. */
+const formatMoment = (value) =>
+  props.kind === ACCESS_ERRORS.OPEN_TEMPORARY
+    ? formatTime(value)
+    : formatDate(value);
 
 const screen = computed(() =>
   buildErrorScreen(props.kind, {
@@ -101,7 +121,7 @@ const screen = computed(() =>
     booking: props.booking,
     tenantId: props.tenantId,
     blockingReason: props.blockingReason,
-    date: moment.value !== null ? formatDate(moment.value) : null,
+    date: moment.value !== null ? formatMoment(moment.value) : null,
   }),
 );
 </script>

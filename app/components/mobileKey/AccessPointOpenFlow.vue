@@ -137,6 +137,7 @@
         :tenant-id="tenantId"
         :blocking-reason="view.blockingReason"
         :access-point-id="accessPoint.id"
+        :retry-after="result?.retryAfter ?? null"
         @retry="retryFailure"
       />
     </div>

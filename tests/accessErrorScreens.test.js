@@ -200,6 +200,30 @@ describe("open_temporary, wenn Öffnen gerade nicht geht", () => {
   it("öffnet den Kontakt zum Support", () => {
     expect(ACCESS_ERROR_SCREENS[ACCESS_ERRORS.OPEN_TEMPORARY].help).toBe(true);
   });
+
+  it("nennt die Uhrzeit, ab der es wieder geht, statt „in ein paar Minuten“", () => {
+    const screen = buildErrorScreen(ACCESS_ERRORS.OPEN_TEMPORARY, {
+      t,
+      label: "Labortür XS4 One S",
+      date: "10:25",
+    });
+
+    expect(screen.description).toBe(
+      "Labortür XS4 One S lässt sich im Moment nicht öffnen. Versuchen Sie es ab 10:25 Uhr noch einmal.",
+    );
+  });
+
+  it("nimmt als Zeitpunkt die Zeit, die das Backend nennt, und sonst keinen", () => {
+    const retryAfter = Date.UTC(2026, 9, 15, 10, 25);
+
+    expect(
+      errorScreenMoment(ACCESS_ERRORS.OPEN_TEMPORARY, { retryAfter }),
+    ).toBe(retryAfter);
+    expect(errorScreenMoment(ACCESS_ERRORS.OPEN_TEMPORARY, {})).toBeNull();
+    expect(
+      errorScreenMoment(ACCESS_ERRORS.DOOR_UNREACHABLE, { retryAfter }),
+    ).toBeNull();
+  });
 });
 
 describe("buildErrorScreen", () => {
