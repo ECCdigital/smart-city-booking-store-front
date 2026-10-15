@@ -8,6 +8,7 @@ import {
   textBlockClasses,
 } from "./heroClasses";
 import { localizedText } from "~/utils/heroBlocks";
+import { imageBlockLogo } from "~/utils/themeLogo";
 
 /**
  * One Block of the Hero Layout: its box — spacing, width, the surface of its
@@ -57,9 +58,13 @@ const richtext = computed(() =>
   props.block.type === "richtext" ? props.block : null,
 );
 // A reference without an address has nothing to show; no empty box for it.
+// That is also a Block following the app logo while there is none.
 const image = computed(() =>
   props.block.type === "image" && props.block.image.url ? props.block : null,
 );
+// The image, its variant for the dark mode and whether it inverts: a Block
+// that follows the app logo takes the app logo's rule, see `imageBlockLogo`.
+const logo = computed(() => image.value && imageBlockLogo(image.value));
 
 // An inline style reaches the element through `v-bind` of an object rather
 // than a bound `:style`, because the server renderer writes an empty
@@ -101,10 +106,11 @@ const panelStyle = computed(() => styleAttribute(blockPanelStyle(props.block)));
     <!-- eslint-enable vue/no-v-html -->
     <ThemeLogo
       v-else-if="image"
-      :image="image.image"
+      :image="logo.image"
+      :image-dark="logo.imageDark"
       :alt="localizedText(image.alt, locale)"
       :max-height="image.maxHeight"
-      :invert-in-dark-mode="image.invertInDarkMode"
+      :invert-in-dark-mode="logo.invertInDarkMode"
       :priority="priority"
       :class="imageBlockClasses(image)"
     />

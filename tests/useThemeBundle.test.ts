@@ -15,7 +15,11 @@ function nuxtFetchResult(payload: unknown) {
   return promise as typeof promise & typeof fields;
 }
 
-const stored = { etag: "abc 1", portalName: "Gespeichert" };
+const stored = {
+  etag: "abc 1",
+  portalName: "Gespeichert",
+  font: { href: "/fonts/inter/inter-5.3.0-latin-wght-normal.woff2" },
+};
 const states = new Map<string, ReturnType<typeof ref>>();
 
 vi.stubGlobal("computed", computed);
@@ -40,6 +44,12 @@ describe("useThemeBundle, awaited as during server rendering", () => {
     useHeroPreviewOverride().value = { portalName: "Entwurf" } as never;
     const { data } = await useThemeBundle();
     expect(data.value).toEqual({ portalName: "Entwurf" });
+  });
+
+  it("keeps the font of the stored bundle under a Draft", async () => {
+    useHeroPreviewOverride().value = { portalName: "Entwurf" } as never;
+    const { fontHref } = await useThemeBundle();
+    expect(fontHref.value).toBe("/fonts/inter/inter-5.3.0-latin-wght-normal.woff2");
   });
 
   it("serves the stored bundle in data without a Draft", async () => {

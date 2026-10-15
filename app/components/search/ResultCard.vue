@@ -49,7 +49,13 @@
           </div>
         </ClientOnly>
       </div>
-      <USeparator color="primary" type="solid" size="xl" class="w-full" />
+      <USeparator
+        color="primary"
+        type="solid"
+        size="xl"
+        class="w-full"
+        :ui="{ border: 'border-[color:var(--ui-accent,var(--ui-primary))]' }"
+      />
     </div>
     <ResultCardBookableContent
       v-if="!isEvent"

@@ -31,7 +31,8 @@ useHead({
     {
       rel: "stylesheet",
       href: computed(
-        () => `/api/theme/${catalogSlug.value}.css${themeVersion.value}`,
+        () =>
+          `/api/theme/catalog/${catalogSlug.value}.css${themeVersion.value}`,
       ),
     },
   ],

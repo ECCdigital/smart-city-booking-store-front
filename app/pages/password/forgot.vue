@@ -3,7 +3,7 @@ import { ref } from "vue";
 import ForgotPasswordCard from "~/components/auth/ForgotPasswordCard.vue";
 import ForgotPasswordSuccessCard from "~/components/auth/ForgotPasswordSuccessCard.vue";
 import { useAuth } from "~/composables/auth/useAuth";
-import AuthTitleSection from "~/components/auth/AuthTitleSection.vue";
+import { storefrontUrl } from "~~/shared/utils/storefrontUrl";
 
 const form = ref({
   email: "",
@@ -21,7 +21,10 @@ const localePath = useLocalePath();
 const handleForgotPassword = async () => {
   loading.value = true;
   try {
-    const resetUrl = `${config.public.userBaseUrl}${localePath("/password/reset")}`;
+    const resetUrl = storefrontUrl(
+      config.public.userBaseUrl,
+      localePath("/password/reset"),
+    );
     await forgotPassword(form.value.email, resetUrl);
     success.value = true;
   } catch {
@@ -37,14 +40,7 @@ const handleForgotPassword = async () => {
 
 <template>
   <PageBackground>
-    <AuthTitleSection
-      is-large-version
-      class="hidden lg:flex w-3/5 items-center justify-center"
-    />
-
-    <div class="flex flex-col w-full lg:w-2/5 items-center justify-center p-6">
-      <AuthTitleSection class="lg:hidden" />
-
+    <div class="flex w-full items-center justify-center p-6">
       <ForgotPasswordSuccessCard v-if="success" class="shadow-2xl/50" />
       <ForgotPasswordCard
         v-else

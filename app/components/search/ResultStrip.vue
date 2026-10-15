@@ -69,6 +69,7 @@
         color="primary"
         type="solid"
         size="xl"
+        :ui="{ border: 'border-[color:var(--ui-accent,var(--ui-primary))]' }"
       />
     </div>
     <ResultStripBookableContent

@@ -57,7 +57,7 @@
         :label="$t('common.search')"
         size="sm"
         class="pointer-events-none"
-        :style="{ color: contrastToPrimary }"
+        style="color: var(--ui-primary-contrast)"
         tabindex="-1"
       />
     </div>
@@ -187,7 +187,7 @@
           trailing-icon="i-lucide-arrow-right"
           size="sm"
           class="pointer-events-none"
-          :style="{ color: contrastToPrimary }"
+          style="color: var(--ui-primary-contrast)"
           tabindex="-1"
         />
       </div>
@@ -222,11 +222,9 @@
 </template>
 
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 const { t } = useI18n();
-const { contrastToPrimary } = useContrastColor();
 const { formatTime, localeTag } = useFormatting();
 
 // The sample booking: the next Friday from tomorrow on, 09:00–12:00.
@@ -276,7 +274,7 @@ const days = computed(() => {
 // A field painted in the primary colour takes the text colour that reads on
 // it, whatever the instance's primary is — the same rule as every button.
 function onPrimaryStyle({ state }) {
-  return state === "selected" ? { color: contrastToPrimary.value } : undefined;
+  return state === "selected" ? { color: "var(--ui-primary-contrast)" } : undefined;
 }
 
 function dayClass(day) {

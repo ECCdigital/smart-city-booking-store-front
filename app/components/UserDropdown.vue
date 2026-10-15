@@ -1,6 +1,5 @@
 <script setup>
 import { useAuthStore } from "~~/stores/auth.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { adminEntry } from "~/utils/authEntryFlow";
 
 const { tenantTo } = useTenantRoute();
@@ -11,14 +10,8 @@ const config = useRuntimeConfig();
 const authStore = useAuthStore();
 const notification = useNotification();
 
-const { contrastToPrimary } = useContrastColor();
-const nameColor = computed(() => {
-  if (contrastToPrimary.value === "#ffffff") {
-    return "text-white hidden md:inline";
-  } else {
-    return "text-black hidden md:inline";
-  }
-});
+// The name sits on the header bar, so it takes the bar's text colour.
+const nameColor = "text-[color:var(--ui-header-contrast)] hidden md:inline";
 
 const user = computed(() => authStore.getUser);
 

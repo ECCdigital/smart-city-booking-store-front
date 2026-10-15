@@ -2,7 +2,7 @@
   <div
     ref="wrapperRef"
     class="@container space-y-5"
-    :style="{ '--selection-text-color': contrastToSecondary }"
+    style="--selection-text-color: var(--ui-secondary-contrast)"
   >
     <div class="grid grid-cols-1 @lg:flex @lg:flex-wrap gap-4">
       <div class="md:flex items-center space-x-1">
@@ -185,7 +185,6 @@ import enLocale from "@fullcalendar/core/locales/en-gb";
 import { useMediaQuery } from "@vueuse/core";
 import { useBookables } from "~/composables/api/useBookables.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
 import InputTime from "~/components/inputs/InputTime.vue";
 import {
@@ -332,7 +331,6 @@ function onJumpDate(date) {
 /* ── language ────────────────────────────────────────────── */
 const { t, locale } = useI18n();
 const { localeTag } = useFormatting();
-const { contrastToSecondary } = useContrastColor();
 
 const CALENDAR_LOCALES = { de: deLocale, en: enLocale };
 const calendarLocale = computed(

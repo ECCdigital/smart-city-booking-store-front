@@ -113,7 +113,7 @@
               :class="
                 showList ? 'bg-primary/80' : 'glass text-black dark:text-white'
               "
-              :style="showList ? { color: contrastToPrimary } : undefined"
+              :style="showList ? { color: 'var(--ui-primary-contrast)' } : undefined"
               @click="showList = !showList"
             />
             <slot name="filter" />
@@ -171,9 +171,7 @@ import ResultsMapMarkerPopup from "~/components/search/ResultsMapMarkerPopup.vue
 import ResultsMapMarkerTooltip from "~/components/search/ResultsMapMarkerTooltip.vue";
 import ResultsMapMobilePopup from "~/components/search/ResultsMapMobilePopup.vue";
 import ResultsMapList from "~/components/search/ResultsMapList.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
-const { contrastToPrimary } = useContrastColor();
 
 const props = defineProps({
   bookables: {

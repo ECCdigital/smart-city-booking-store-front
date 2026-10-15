@@ -37,6 +37,10 @@ import {
   BOOKING_STATUS,
   resolveBookingStatus,
 } from "~/utils/bookingStatus.js";
+import {
+  toDiscountPercent,
+  useBookingDiscountWaiver,
+} from "~/composables/checkout/useBookingDiscountWaiver";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 
@@ -390,12 +394,11 @@ function resetAuthSensitiveCheckoutState() {
   checkoutID.value = null;
   summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
   validationErrors.value = {};
-  bookingDiscountEligibility.value = {};
+  resetBookingDiscountWaiver();
   groupBookingAttemptStatuses.value = {};
   selectedPaymentProviderId.value = null;
   appliedCouponCode.value = null;
   appliedCouponDetails.value = null;
-  bookWithoutDiscountPreference.value = null;
 }
 
 function prunePersistedCheckoutStateForGuest() {
@@ -648,8 +651,15 @@ const restoredCustomFieldValues = ref({});
 const selectedPaymentProviderId = ref(null);
 const appliedCouponCode = ref(null);
 const appliedCouponDetails = ref(null);
-const bookWithoutDiscountPreference = ref(null);
-const bookingDiscountEligibility = ref({});
+const {
+  eligibility: bookingDiscountEligibility,
+  preference: bookWithoutDiscountPreference,
+  hasOption: hasBookingDiscountOption,
+  maxPercent: maxBookingDiscountPercent,
+  isWithoutDiscount: isBookingWithoutDiscount,
+  selected: selectedBookWithoutDiscount,
+  reset: resetBookingDiscountWaiver,
+} = useBookingDiscountWaiver();
 
 const hasResolvedFreeCheckout = computed(() => {
   const total = Number(summary.value?.total ?? 0);
@@ -1092,40 +1102,6 @@ const couponForValidation = computed(() => {
   return s || null;
 });
 
-function toDiscountPercent(value) {
-  const percent = Number(value);
-  if (!Number.isFinite(percent)) return 0;
-  return Math.min(100, Math.max(0, Math.round(percent)));
-}
-
-const hasBookingDiscountOption = computed(() =>
-  Object.values(bookingDiscountEligibility.value).some(
-    (value) => toDiscountPercent(value) > 0,
-  ),
-);
-
-const maxBookingDiscountPercent = computed(() => {
-  const values = Object.values(bookingDiscountEligibility.value).map(
-    toDiscountPercent,
-  );
-  return values.length > 0 ? Math.max(...values) : 0;
-});
-
-const isBookingWithoutDiscount = computed(() => {
-  if (!hasBookingDiscountOption.value) return false;
-  if (typeof bookWithoutDiscountPreference.value === "boolean") {
-    return bookWithoutDiscountPreference.value;
-  }
-  return false;
-});
-
-const selectedBookWithoutDiscount = computed({
-  get: () => isBookingWithoutDiscount.value,
-  set: (value) => {
-    bookWithoutDiscountPreference.value = value === true;
-  },
-});
-
 const COUPON_SUMMARY_ROW_ID = "__coupon__";
 
 function isFixedAmountCoupon(details) {
@@ -1507,12 +1483,12 @@ async function validateGroupBookingAttempts() {
   const myToken = ++validationToken;
   isValidating.value = true;
   validationErrors.value = {};
-  bookingDiscountEligibility.value = {};
 
   if (attempts.length === 0) {
     summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
     checkoutID.value = null;
     groupBookingAttemptStatuses.value = {};
+    bookingDiscountEligibility.value = {};
     if (myToken === validationToken) isValidating.value = false;
     return;
   }
@@ -1574,6 +1550,7 @@ async function validateGroupBookingAttempts() {
         [bookableID]: { reason, error: batchResult.error, isLead: true },
       };
       groupBookingAttemptStatuses.value = {};
+      bookingDiscountEligibility.value = {};
       summary.value = {
         items: [],
         taxAmount: 0,
@@ -1605,6 +1582,7 @@ async function validateGroupBookingAttempts() {
         [bookableID]: { reason, params, isLead: true },
       };
       groupBookingAttemptStatuses.value = {};
+      bookingDiscountEligibility.value = {};
       summary.value = {
         items: [],
         taxAmount: 0,

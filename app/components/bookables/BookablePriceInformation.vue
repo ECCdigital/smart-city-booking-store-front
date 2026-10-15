@@ -40,7 +40,12 @@
           </div>
           <div v-else-if="priceCategory.fixedPrice" class="flex justify-end">
             <UTooltip :text="fixedPriceHint">
-              <UBadge class="ml-2" color="secondary" variant="outline">
+              <UBadge
+                class="ml-2"
+                color="secondary"
+                variant="outline"
+                :ui="FLAT_RATE_UI"
+              >
                 {{ $t("price.flatRate") }}
               </UBadge>
             </UTooltip>
@@ -76,6 +81,13 @@
 
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+
+// With an accent the badge is filled with it and its text in the contrast
+// colour. Without one every part falls back to the secondary outline it
+// always had: no fill, secondary text, a secondary ring at 50 %.
+const FLAT_RATE_UI = {
+  base: "bg-[color:var(--ui-accent,transparent)] text-[color:var(--ui-accent-contrast,var(--ui-secondary))] ring-[color:var(--ui-accent,color-mix(in_oklab,var(--ui-secondary)_50%,transparent))]",
+};
 
 const { t } = useI18n();
 
