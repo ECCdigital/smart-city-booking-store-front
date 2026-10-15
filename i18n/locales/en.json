@@ -1191,6 +1191,12 @@
         "title": "{label} not reachable",
         "description": "The lock is not responding right now. This may be due to the connection on site."
       },
+      "open_temporary": {
+        "title": "Not possible right now",
+        "description": "{label} cannot be opened at the moment. Please try again from {time}.",
+        "description_undated": "{label} cannot be opened at the moment. Please try again in a few minutes.",
+        "summary": "Not possible right now · from {time}"
+      },
       "open_unconfirmed": {
         "title": "Opening not confirmed",
         "description": "The command was sent, but {label} did not report back. Please check on site whether it is open."
