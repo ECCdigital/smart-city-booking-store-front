@@ -1193,8 +1193,9 @@
       },
       "open_temporary": {
         "title": "Not possible right now",
-        "description": "{label} cannot be opened at the moment. Please try again from {date}.",
-        "description_undated": "{label} cannot be opened at the moment. Please try again in a few minutes."
+        "description": "{label} cannot be opened at the moment. Please try again from {time}.",
+        "description_undated": "{label} cannot be opened at the moment. Please try again in a few minutes.",
+        "summary": "Not possible right now · from {time}"
       },
       "open_unconfirmed": {
         "title": "Opening not confirmed",
