@@ -107,13 +107,17 @@ describe("der Ausweg eines Falls", () => {
 });
 
 describe("der Ausweg, der unter dem Bildschirm steht", () => {
-  it("liegt bei genau zwei Zeilen im Aktionsknopf", () => {
+  it("liegt bei genau drei Zeilen im Aktionsknopf", () => {
     const handedToButton = ROWS.filter(
       ([, row]) => row.retry === "action",
     ).map(([kind]) => kind);
 
     expect(handedToButton.sort()).toEqual(
-      [ACCESS_ERRORS.DOOR_UNREACHABLE, ACCESS_ERRORS.CLOSE_FAILED].sort(),
+      [
+        ACCESS_ERRORS.DOOR_UNREACHABLE,
+        ACCESS_ERRORS.OPEN_TEMPORARY,
+        ACCESS_ERRORS.CLOSE_FAILED,
+      ].sort(),
     );
   });
 
@@ -128,7 +132,11 @@ describe("der Ausweg, der unter dem Bildschirm steht", () => {
     expect(row.to).toBeUndefined();
   });
 
-  it.each([ACCESS_ERRORS.DOOR_UNREACHABLE, ACCESS_ERRORS.CLOSE_FAILED])(
+  it.each([
+    ACCESS_ERRORS.DOOR_UNREACHABLE,
+    ACCESS_ERRORS.OPEN_TEMPORARY,
+    ACCESS_ERRORS.CLOSE_FAILED,
+  ])(
     "lässt %s ohne eigenen Knopf stehen",
     (kind) => {
       const screen = buildErrorScreen(kind, { t, label: LABEL });
@@ -140,9 +148,13 @@ describe("der Ausweg, der unter dem Bildschirm steht", () => {
 });
 
 describe("failureMayPass", () => {
-  it("nennt genau die zwei Zeilen, deren Bildschirm vergehen darf", () => {
+  it("nennt genau die drei Zeilen, deren Bildschirm vergehen darf", () => {
     expect(KINDS.filter(failureMayPass).sort()).toEqual(
-      [ACCESS_ERRORS.DOOR_UNREACHABLE, ACCESS_ERRORS.CLOSE_FAILED].sort(),
+      [
+        ACCESS_ERRORS.DOOR_UNREACHABLE,
+        ACCESS_ERRORS.OPEN_TEMPORARY,
+        ACCESS_ERRORS.CLOSE_FAILED,
+      ].sort(),
     );
   });
 
@@ -170,6 +182,24 @@ describe("failureMayPass", () => {
       expect(buildErrorScreen(kind, { t, label: LABEL }).exit).toBeNull();
     },
   );
+});
+
+describe("open_temporary, wenn Öffnen gerade nicht geht", () => {
+  it("sagt, dass es gleich wieder gehen kann, mit dem Namen der Tür", () => {
+    const screen = buildErrorScreen(ACCESS_ERRORS.OPEN_TEMPORARY, {
+      t,
+      label: "Labortür XS4 One S",
+    });
+
+    expect(screen.title).toBe("Gerade nicht möglich");
+    expect(screen.description).toBe(
+      "Labortür XS4 One S lässt sich im Moment nicht öffnen. Versuchen Sie es in ein paar Minuten noch einmal.",
+    );
+  });
+
+  it("öffnet den Kontakt zum Support", () => {
+    expect(ACCESS_ERROR_SCREENS[ACCESS_ERRORS.OPEN_TEMPORARY].help).toBe(true);
+  });
 });
 
 describe("buildErrorScreen", () => {
