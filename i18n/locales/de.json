@@ -1571,6 +1571,10 @@
         "title": "{label} nicht erreichbar",
         "description": "Das Schloss antwortet gerade nicht. Das kann an der Verbindung vor Ort liegen."
       },
+      "open_temporary": {
+        "title": "Gerade nicht möglich",
+        "description": "{label} lässt sich im Moment nicht öffnen. Versuchen Sie es in ein paar Minuten noch einmal."
+      },
       "open_unconfirmed": {
         "title": "Öffnen nicht bestätigt",
         "description": "Der Befehl wurde übermittelt, {label} hat sich aber nicht zurückgemeldet. Bitte prüfen Sie vor Ort, ob offen ist."

@@ -1,5 +1,5 @@
 /**
- * How the fourteen failures of {@link ACCESS_ERRORS} look, and where each one
+ * How the fifteen failures of {@link ACCESS_ERRORS} look, and where each one
  * lets the person in front of the door out again.
  *
  * The wording is not here - it lives in `i18n/locales/de.json` under
@@ -39,7 +39,7 @@ const bookableDetailPath = (tenantId, bookableId) =>
  * `retry: "action"` is the one that shows no button here. Saying it means the
  * command provably did not go through, so giving it again is harmless - which
  * is exactly what the control button under the screen does. That is also why
- * the two rows holding it are the two whose screen may pass and hand the
+ * the three rows holding it are the three whose screen may pass and hand the
  * button back; `retry: "status"` marks the opposite case, where what is
  * missing is knowledge and the way out is a *different* command.
  */
@@ -85,6 +85,17 @@ export const ACCESS_ERROR_SCREENS = Object.freeze({
     color: "error",
     // No button of its own: the command never reached the door, so repeating
     // it is harmless - and the control button under this screen is that repeat.
+    retry: "action",
+    help: true,
+  },
+  [ACCESS_ERRORS.OPEN_TEMPORARY]: {
+    icon: "i-lucide-timer",
+    color: "warning",
+    // The backend's `openFailure: "temporary"`: the door refused this attempt
+    // (a rejected one-time password, a lock offline) and may take the next
+    // one. Not `door_unreachable` - "the connection on site" is wrong for a
+    // rejected password. The way out is trying again a little later, which is
+    // the control button that comes back once this screen has passed.
     retry: "action",
     help: true,
   },
