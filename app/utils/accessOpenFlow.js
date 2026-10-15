@@ -56,7 +56,7 @@ const REASON_SCREENS = Object.freeze({
 });
 
 /**
- * The two failure classes the backend names for an open that passed every
+ * The failure classes the backend names for an open that passed every
  * check and still did not go through (`AccessOpenError`, backend 4.4). It
  * names the class only, never the provider's detail.
  *
@@ -582,14 +582,14 @@ export function readOpenOutcome(response, { booking = null, now } = {}) {
   }
 
   const blockingReason = response?.data?.blockingReasons?.[0] ?? null;
-  const failureClass = response?.data?.openFailure;
-  const openFailure = Object.hasOwn(OPEN_FAILURE_SCREENS, failureClass ?? "")
-    ? OPEN_FAILURE_SCREENS[failureClass]
+  const openFailure = response?.data?.openFailure;
+  const openFailureScreen = Object.hasOwn(OPEN_FAILURE_SCREENS, openFailure ?? "")
+    ? OPEN_FAILURE_SCREENS[openFailure]
     : null;
 
   const error =
-    !blockingReason && openFailure
-      ? openFailure
+    !blockingReason && openFailureScreen
+      ? openFailureScreen
       : reasonError(blockingReason, booking, now ?? Date.now());
   const retryAfter =
     error === ACCESS_ERRORS.OPEN_TEMPORARY

@@ -1,5 +1,5 @@
 /**
- * How the fifteen failures of {@link ACCESS_ERRORS} look, and where each one
+ * How the failures of {@link ACCESS_ERRORS} look, and where each one
  * lets the person in front of the door out again.
  *
  * The wording is not here - it lives in `i18n/locales/de.json` under
@@ -39,9 +39,9 @@ const bookableDetailPath = (tenantId, bookableId) =>
  * `retry: "action"` is the one that shows no button here. Saying it means the
  * command provably did not go through, so giving it again is harmless - which
  * is exactly what the control button under the screen does. That is also why
- * the three rows holding it are the three whose screen may pass and hand the
- * button back; `retry: "status"` marks the opposite case, where what is
- * missing is knowledge and the way out is a *different* command.
+ * the rows holding it are the ones whose screen may pass and hand the button
+ * back; `retry: "status"` marks the opposite case, where what is missing is
+ * knowledge and the way out is a *different* command.
  */
 export const ACCESS_ERROR_SCREENS = Object.freeze({
   [ACCESS_ERRORS.STALE_SCAN_CODE]: {
@@ -258,7 +258,7 @@ export function errorScreenMoment(
  * A way out without a destination - `payment_required` on a booking with no
  * id, `too_late` with no lead bookable - drops its button; the context exit
  * the caller renders carries the screen alone. So does a way out that is not
- * on this screen at all: the two `retry: "action"` rows name no `action`, and
+ * on this screen at all: the `retry: "action"` rows name no `action`, and
  * `exit` stays null for them.
  *
  * @param {string} kind An {@link ACCESS_ERRORS} value; anything else is generic

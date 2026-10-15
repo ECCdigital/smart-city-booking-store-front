@@ -389,7 +389,7 @@ describe("readOpenOutcome", () => {
     ).toEqual({
       opened: false,
       pendingProcessId: null,
-      error: "open_temporary",
+      error: ACCESS_ERRORS.OPEN_TEMPORARY,
       blockingReason: null,
     });
   });

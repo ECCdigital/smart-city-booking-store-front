@@ -107,7 +107,7 @@ describe("der Ausweg eines Falls", () => {
 });
 
 describe("der Ausweg, der unter dem Bildschirm steht", () => {
-  it("liegt bei genau drei Zeilen im Aktionsknopf", () => {
+  it("hands the repeat to the control button for exactly these rows", () => {
     const handedToButton = ROWS.filter(
       ([, row]) => row.retry === "action",
     ).map(([kind]) => kind);
@@ -137,7 +137,7 @@ describe("der Ausweg, der unter dem Bildschirm steht", () => {
     ACCESS_ERRORS.OPEN_TEMPORARY,
     ACCESS_ERRORS.CLOSE_FAILED,
   ])(
-    "lässt %s ohne eigenen Knopf stehen",
+    "shows %s without a button of its own",
     (kind) => {
       const screen = buildErrorScreen(kind, { t, label: LABEL });
 
@@ -148,7 +148,7 @@ describe("der Ausweg, der unter dem Bildschirm steht", () => {
 });
 
 describe("failureMayPass", () => {
-  it("nennt genau die drei Zeilen, deren Bildschirm vergehen darf", () => {
+  it("names exactly the rows whose screen may pass", () => {
     expect(KINDS.filter(failureMayPass).sort()).toEqual(
       [
         ACCESS_ERRORS.DOOR_UNREACHABLE,
@@ -184,8 +184,8 @@ describe("failureMayPass", () => {
   );
 });
 
-describe("open_temporary, wenn Öffnen gerade nicht geht", () => {
-  it("sagt, dass es gleich wieder gehen kann, mit dem Namen der Tür", () => {
+describe("open_temporary, when opening is not possible right now", () => {
+  it("says it can work again shortly, naming the door", () => {
     const screen = buildErrorScreen(ACCESS_ERRORS.OPEN_TEMPORARY, {
       t,
       label: "Labortür XS4 One S",
@@ -197,11 +197,11 @@ describe("open_temporary, wenn Öffnen gerade nicht geht", () => {
     );
   });
 
-  it("öffnet den Kontakt zum Support", () => {
+  it("opens the support contact", () => {
     expect(ACCESS_ERROR_SCREENS[ACCESS_ERRORS.OPEN_TEMPORARY].help).toBe(true);
   });
 
-  it("nennt die Uhrzeit, ab der es wieder geht, statt „in ein paar Minuten“", () => {
+  it("names the time from which it can work again instead of a few minutes", () => {
     const screen = buildErrorScreen(ACCESS_ERRORS.OPEN_TEMPORARY, {
       t,
       label: "Labortür XS4 One S",
@@ -213,7 +213,7 @@ describe("open_temporary, wenn Öffnen gerade nicht geht", () => {
     );
   });
 
-  it("nimmt als Zeitpunkt die Zeit, die das Backend nennt, und sonst keinen", () => {
+  it("takes the time the backend names as its moment, and none otherwise", () => {
     const retryAfter = Date.UTC(2026, 9, 15, 10, 25);
 
     expect(
