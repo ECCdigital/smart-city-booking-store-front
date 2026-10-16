@@ -47,7 +47,11 @@ const stubs = {
         ),
       ),
   },
-  UTooltip: { setup: (_, { slots }) => () => slots.default?.() },
+  UTooltip: {
+    props: ["text"],
+    setup: (props, { slots }) => () =>
+      Vue.h("span", { "data-tooltip": props.text }, slots.default?.()),
+  },
   UButton: {
     inheritAttrs: false,
     setup: (_, { attrs }) => () => Vue.h("button", attrs),
@@ -172,6 +176,19 @@ describe("the quick filter above the invoices list", () => {
     expect(quickFilter.map((button) => button.getAttribute("label"))).toEqual(
       labels,
     );
+  });
+
+  it.each([
+    ["de", ["Filtern nach Rechnungen", "Filtern nach Zahlungsbelege", "Filtern nach Stornobelege"]],
+    ["en", ["Filter by Invoices", "Filter by Receipts", "Filter by Cancellation receipts"]],
+  ])("names each button's filter in a tooltip (%s)", (locale, tooltips) => {
+    const { quickFilter } = mountPage(locale);
+
+    expect(
+      quickFilter.map((button) =>
+        button.closest("[data-tooltip]").getAttribute("data-tooltip"),
+      ),
+    ).toEqual(tooltips);
   });
 
   it("marks the chosen type as pressed and toggles a type on click", () => {

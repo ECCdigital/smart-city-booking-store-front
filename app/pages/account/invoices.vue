@@ -31,16 +31,24 @@
           :aria-label="t('account.invoices.quickFilter.label')"
           class="flex flex-wrap gap-2"
         >
-          <UButton
+          <UTooltip
             v-for="type in PAYMENT_TYPES"
             :key="type"
-            :color="typeFilter === type ? 'primary' : 'neutral'"
-            :variant="typeFilter === type ? 'solid' : 'soft'"
-            :label="t(`account.invoices.quickFilter.${type}`)"
-            :aria-pressed="typeFilter === type"
-            size="md"
-            @click="toggleTypeFilter(type)"
-          />
+            :text="
+              t('account.invoices.quickFilter.tooltip', {
+                type: t(`account.invoices.quickFilter.${type}`),
+              })
+            "
+          >
+            <UButton
+              :color="typeFilter === type ? 'primary' : 'neutral'"
+              :variant="typeFilter === type ? 'solid' : 'soft'"
+              :label="t(`account.invoices.quickFilter.${type}`)"
+              :aria-pressed="typeFilter === type"
+              size="md"
+              @click="toggleTypeFilter(type)"
+            />
+          </UTooltip>
         </div>
         <UInput
           v-model="searchQuery"

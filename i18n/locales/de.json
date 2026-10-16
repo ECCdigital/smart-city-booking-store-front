@@ -1312,6 +1312,7 @@
       "noMatches": "Keine Dokumente passen zu Ihrer Suche oder dem gewählten Filter.",
       "quickFilter": {
         "label": "Nach Dokumententyp filtern",
+        "tooltip": "Filtern nach {type}",
         "invoice": "Rechnungen",
         "receipt": "Zahlungsbelege",
         "cancellation": "Stornobelege"
