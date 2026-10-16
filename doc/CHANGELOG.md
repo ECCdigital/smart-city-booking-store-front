@@ -7,6 +7,10 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ## [Unreleased]
 
+### Fixed
+
+- On the phone the map of the Result Page no longer covers the navigation bar (ECCdigital/tickets#310): its `z-10` competed with the sticky bar's, and the later element won. The map, the mobile key's loading spinner and its scan square now keep their `z-10` in a stacking context of their own, as the Kind badge does since ECCdigital/tickets#270
+
 ### Security
 
 - `overrides` in `package.json` lifts `@simple-git/argv-parser` 1.1.1 → 2.0.1 (critical, GHSA-v5rq-49vh-5v5c, ECCdigital/tickets#424). It comes in through `nuxt` → `@nuxt/devtools` → `simple-git` 3.36.0 and runs only with `nuxt dev`. `simple-git` 4.0.2, which takes the fixed version itself, does not work with `@nuxt/devtools` 3.4.2: it has no default export any more, and `nuxt prepare` fails. `simple-git` 3.36.0 calls only `vulnerabilityCheck(args, env)`, which 2.0.1 still offers unchanged. `simple-git` 3.36.0 keeps its own findings (GHSA-x6jw-m9v5-85vh and others) until `@nuxt/devtools` takes `simple-git` 4. Drop the override once it does

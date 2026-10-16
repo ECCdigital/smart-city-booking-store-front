@@ -6,7 +6,7 @@
       only a different content (§ 5.3).
     -->
     <div
-      class="relative aspect-square w-full max-w-[45vh] mx-auto overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-neutral-900"
+      class="relative isolate aspect-square w-full max-w-[45vh] mx-auto overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-neutral-900"
     >
       <div
         v-if="fallbackCard"
