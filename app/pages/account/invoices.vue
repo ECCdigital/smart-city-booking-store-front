@@ -19,9 +19,29 @@
     </div>
 
     <div v-else class="w-full">
-      <!-- The search reads the bookables a document belongs to, so a typed
-           name finds every invoice and receipt of that room or device. -->
-      <div class="flex justify-end mb-4">
+      <!-- The quick filter narrows to one document type; a second click on
+           the chosen type shows all again. The search reads the bookables a
+           document belongs to, so a typed name finds every document of that
+           room or device. Both narrow together. -->
+      <div
+        class="flex flex-col-reverse gap-3 md:flex-row md:items-center md:justify-between mb-4"
+      >
+        <div
+          role="group"
+          :aria-label="t('account.invoices.quickFilter.label')"
+          class="flex flex-wrap gap-2"
+        >
+          <UButton
+            v-for="type in PAYMENT_TYPES"
+            :key="type"
+            :color="typeFilter === type ? 'primary' : 'neutral'"
+            :variant="typeFilter === type ? 'solid' : 'soft'"
+            :label="t(`account.invoices.quickFilter.${type}`)"
+            :aria-pressed="typeFilter === type"
+            size="md"
+            @click="toggleTypeFilter(type)"
+          />
+        </div>
         <UInput
           v-model="searchQuery"
           icon="i-lucide-search"
@@ -229,6 +249,7 @@ import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import PaymentDocumentCard from "~/components/user/invoices/PaymentDocumentCard.vue";
 import { resolveBookingPaymentChip } from "~/utils/bookingPaymentStatus.js";
 import {
+  PAYMENT_TYPES,
   paymentDocumentsOf,
   searchPaymentDocuments,
 } from "~/utils/paymentDocumentList.js";
@@ -344,9 +365,18 @@ const paymentDocuments = computed(() =>
 );
 
 const searchQuery = ref("");
+const typeFilter = ref(null);
+
+function toggleTypeFilter(type) {
+  typeFilter.value = typeFilter.value === type ? null : type;
+}
 
 const shownDocuments = computed(() =>
-  searchPaymentDocuments(paymentDocuments.value, searchQuery.value),
+  searchPaymentDocuments(
+    paymentDocuments.value,
+    searchQuery.value,
+    typeFilter.value,
+  ),
 );
 
 // Changes when the table shows other documents: after a search, or when the
@@ -373,8 +403,9 @@ const pagedDocuments = computed(() => {
   return sorted.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
 });
 
-// A new search gives a different list: the reader expects its first page.
-watch(searchQuery, () => {
+// A new search or filter gives a different list: the reader expects its first
+// page.
+watch([searchQuery, typeFilter], () => {
   pagination.value = { ...pagination.value, pageIndex: 0 };
 });
 

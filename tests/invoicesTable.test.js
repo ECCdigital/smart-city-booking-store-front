@@ -85,6 +85,9 @@ function mountPage(locale) {
     shownKey: "QDGJ-EESJ/R-2026-0001",
     pagedDocuments: [],
     searchQuery: "",
+    PAYMENT_TYPES: ["invoice", "receipt", "cancellation"],
+    typeFilter: "receipt",
+    toggleTypeFilter: vi.fn(),
     sorting: [],
     pagination: { pageIndex: 0, pageSize: 25 },
     currentPage: 1,
@@ -119,7 +122,8 @@ function mountPage(locale) {
   app.mount(root);
   expect(missing).toEqual([]);
   const [title, download, print] = root.querySelectorAll("td button");
-  return { state, title, download, print };
+  const quickFilter = [...root.querySelectorAll('[role="group"] button')];
+  return { state, title, download, print, quickFilter };
 }
 
 describe("a row of the invoices table", () => {
@@ -158,6 +162,29 @@ describe("a row of the invoices table", () => {
   });
 });
 
+describe("the quick filter above the invoices list", () => {
+  it.each([
+    ["de", ["Rechnungen", "Zahlungsbelege", "Stornobelege"]],
+    ["en", ["Invoices", "Receipts", "Cancellation receipts"]],
+  ])("offers one button per document type (%s)", (locale, labels) => {
+    const { quickFilter } = mountPage(locale);
+
+    expect(quickFilter.map((button) => button.getAttribute("label"))).toEqual(
+      labels,
+    );
+  });
+
+  it("marks the chosen type as pressed and toggles a type on click", () => {
+    const { state, quickFilter } = mountPage("de");
+
+    expect(
+      quickFilter.map((button) => button.getAttribute("aria-pressed")),
+    ).toEqual(["false", "true", "false"]);
+    quickFilter[2].click();
+    expect(state.toggleTypeFilter).toHaveBeenCalledWith("cancellation");
+  });
+});
+
 describe("a card of the invoices list on narrow screens", () => {
   const CARD = "components/user/invoices/PaymentDocumentCard.vue";
 
@@ -178,7 +205,10 @@ describe("a card of the invoices list on narrow screens", () => {
     app.component("UButton", {
       inheritAttrs: false,
       props: ["label"],
-      setup: (props, { attrs }) => () => Vue.h("button", attrs, props.label),
+      setup:
+        (props, { attrs }) =>
+        () =>
+          Vue.h("button", attrs, props.label),
     });
     const root = document.createElement("div");
     app.mount(root);
