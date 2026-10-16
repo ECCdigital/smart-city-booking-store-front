@@ -385,6 +385,9 @@ function documentTypeLabel(type) {
   if (type === "receipt") {
     return t("account.invoices.types.receipt");
   }
+  if (type === "cancellation") {
+    return t("account.invoices.types.cancellation");
+  }
   return t("account.invoices.types.unknown");
 }
 

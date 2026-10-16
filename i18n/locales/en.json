@@ -95,7 +95,7 @@
       "accountBookingDetail": "Booking details",
       "accountKeys": "Keys",
       "accountKeyDetail": "Key details",
-      "accountInvoices": "Invoices",
+      "accountInvoices": "Documents",
       "accountFavorites": "Favorites",
       "accountSettings": "Settings",
       "accountAppearance": "Appearance",
@@ -227,7 +227,7 @@
     "accountBookings": "My bookings",
     "activities": "Activities",
     "digitalKeys": "Keys",
-    "invoices": "Invoices",
+    "invoices": "Documents",
     "account": "Account",
     "resources": "Resources",
     "user": "User",
@@ -957,7 +957,7 @@
     },
     "unknownTenant": "Unknown",
     "invoices": {
-      "title": "My invoices and receipts",
+      "title": "My documents",
       "emptyTitle": "No invoices available",
       "emptyDescription": "There are currently no invoices for your account. Once invoices have been created, they will appear here.",
       "unknownBookable": "Unknown bookable",
@@ -982,6 +982,7 @@
       "types": {
         "invoice": "Invoice",
         "receipt": "Receipt",
+        "cancellation": "Cancellation receipt",
         "unknown": "Unknown"
       }
     }
