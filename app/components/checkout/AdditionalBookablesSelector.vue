@@ -19,6 +19,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue"]);
 
+const { t } = useI18n();
 const { formatPrice } = useFormatting();
 
 const { imageSource } = useMediaImage();
@@ -73,7 +74,7 @@ function getMinPrice(bookable) {
 
 function formatPriceLabel(value) {
   if (value === null || value === undefined || value === 0)
-    return $t("common.freeOfCharge");
+    return t("common.freeOfCharge");
   return "+ " + formatPrice(value);
 }
 
