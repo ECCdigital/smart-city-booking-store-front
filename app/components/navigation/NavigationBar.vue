@@ -4,7 +4,12 @@
       <div class="flex min-w-0 items-center">
         <UTooltip :text="$t('navigation.backToHome')">
           <NavigationLink
-            :tab="{ value: '/', icon: 'i-lucide-home', label: '' }"
+            :tab="{
+              value: '/',
+              icon: 'i-lucide-home',
+              label: '',
+              ariaLabel: $t('navigation.backToHome'),
+            }"
           />
         </UTooltip>
         <UTooltip :text="$t('navigation.toOffers')">
@@ -13,6 +18,7 @@
               value: '/search',
               icon: 'i-lucide-shopping-bag',
               label: '',
+              ariaLabel: $t('navigation.toOffers'),
             }"
           />
         </UTooltip>

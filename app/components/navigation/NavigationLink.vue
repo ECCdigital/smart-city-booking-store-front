@@ -1,5 +1,9 @@
 <template>
-  <NuxtLink :to="tenantTo(tab.value)" :class="linkClass">
+  <NuxtLink
+    :to="tenantTo(tab.value)"
+    :class="linkClass"
+    :aria-label="tab.ariaLabel"
+  >
     <div :class="stripeClass" />
     <Icon
       v-if="tab.icon"

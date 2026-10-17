@@ -764,6 +764,7 @@
     "eventTime": "Event time",
     "priceLabel": "Price:",
     "downloadAppointment": "Download appointment",
+    "actionsFor": "Actions for booking #{id}",
     "downloadAppointmentTooltip": "Download as an appointment",
     "cancellation": {
       "action": "Cancel booking",
@@ -863,6 +864,8 @@
       "all": "All",
       "filterBy": "Filter by:",
       "sortBy": "Sort by:",
+      "filterButton": "Filter bookings",
+      "sortButton": "Sort bookings",
       "activeBookings": "Active bookings",
       "status": "Status:",
       "confirmed": "Confirmed",
