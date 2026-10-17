@@ -1280,6 +1280,8 @@
     "appearanceLight": "Hell",
     "changesSaved": "Änderungen gespeichert",
     "changesSavedMessage": "Ihre Änderungen wurden erfolgreich gespeichert.",
+    "changesSaveFailed": "Speichern fehlgeschlagen",
+    "changesSaveFailedMessage": "Ihre Änderungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     "passwordMismatch": "Die eingegebenen Passwörter stimmen nicht überein.",
     "passwordChangeFailed": "Passwortänderung fehlgeschlagen",
     "passwordChangeFailedMessage": "Ihr Passwort konnte nicht geändert werden. Bitte versuchen Sie es erneut.",

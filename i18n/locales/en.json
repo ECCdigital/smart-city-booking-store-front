@@ -933,6 +933,8 @@
     "appearanceLight": "Light",
     "changesSaved": "Changes saved",
     "changesSavedMessage": "Your changes have been saved.",
+    "changesSaveFailed": "Saving failed",
+    "changesSaveFailedMessage": "Your changes could not be saved. Please try again.",
     "passwordMismatch": "The passwords you entered do not match.",
     "passwordChangeFailed": "Password change failed",
     "passwordChangeFailedMessage": "Your password could not be changed. Please try again.",
