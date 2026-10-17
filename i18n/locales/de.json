@@ -95,7 +95,7 @@
       "accountBookingDetail": "Buchungsdetails",
       "accountKeys": "Schlüssel",
       "accountKeyDetail": "Schlüsseldetails",
-      "accountInvoices": "Rechnungen",
+      "accountInvoices": "Belege",
       "accountFavorites": "Favoriten",
       "accountSettings": "Einstellungen",
       "accountAppearance": "Darstellung",
@@ -204,7 +204,7 @@
     "keys": "Digitale Schlüssel",
     "activities": "Aktivitäten",
     "digitalKeys": "Digitale Schlüssel",
-    "invoices": "Rechnungen",
+    "invoices": "Belege",
     "account": "Benutzerkonto",
     "backToHome": "Zurück zur Startseite",
     "toOffers": "Zu den Angeboten",
@@ -1304,12 +1304,19 @@
     },
     "unknownTenant": "Unbekannt",
     "invoices": {
-      "title": "Meine Rechnungen und Zahlungsbelege",
+      "title": "Meine Belege",
       "emptyTitle": "Keine Rechnungen vorhanden",
       "emptyDescription": "Aktuell sind für Ihr Konto keine Rechnungen verfügbar. Sobald Rechnungen erstellt wurden, werden diese hier angezeigt.",
       "unknownBookable": "Unbekanntes Buchungsobjekt",
       "searchPlaceholder": "Nach Buchungsobjekt suchen",
-      "noMatches": "Keine Dokumente passen zu Ihrer Suche.",
+      "noMatches": "Keine Dokumente passen zu Ihrer Suche oder dem gewählten Filter.",
+      "quickFilter": {
+        "label": "Nach Dokumententyp filtern",
+        "tooltip": "Filtern nach {type}",
+        "invoice": "Rechnungen",
+        "receipt": "Zahlungsbelege",
+        "cancellation": "Stornobelege"
+      },
       "columns": {
         "createdAt": "Erstelldatum",
         "title": "Titel",
@@ -1329,6 +1336,7 @@
       "types": {
         "invoice": "Rechnung",
         "receipt": "Zahlungsbeleg",
+        "cancellation": "Stornobeleg",
         "unknown": "Unbekannt"
       }
     }
