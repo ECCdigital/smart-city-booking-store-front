@@ -4,6 +4,10 @@ import { copyrightLine } from "~/utils/copyrightLine.js";
 import { offerSpacesEntryUrl } from "~/utils/authEntryFlow";
 import { useInstanceStore } from "~~/stores/instance.js";
 
+defineProps({
+  tenantSwitcher: { type: Boolean, default: true },
+});
+
 const documents = useLegalDocuments();
 const instanceStore = useInstanceStore();
 
@@ -76,7 +80,7 @@ const footerLogos = computed(() => theme.value?.footerLogos ?? []);
         </nav>
       </div>
 
-      <div class="flex items-center gap-4 sm:gap-6">
+      <div v-if="tenantSwitcher" class="flex items-center gap-4 sm:gap-6">
         <!-- The one place the tenant is always chosen; the bar only names the
              one already in use. It closes the row on the right. -->
         <ClientOnly>
