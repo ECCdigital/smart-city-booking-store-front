@@ -774,6 +774,7 @@
       "loginAction": "Jetzt einloggen",
       "loggedInTitle": "Sie sind eingeloggt",
       "loggedInDescription": "Sie können sich ausloggen und diese Buchung stattdessen als Gast abschließen.",
+      "loggedInRequiredDescription": "Diese Buchung erfordert eine Anmeldung und wird mit Ihrem angemeldeten Konto ({name}) abgeschlossen.",
       "logoutGuestAction": "Ausloggen und als Gast fortfahren",
       "customFieldsSectionTitle": "Zusätzliche Angaben",
       "customFieldSelectPlaceholder": "Bitte auswählen",

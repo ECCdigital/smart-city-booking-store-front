@@ -3,10 +3,7 @@ import { useUsers } from "~/composables/api/useUsers.js";
 import { useBookingStore } from "~~/stores/bookings.js";
 import { useFavoritesStore } from "~~/stores/favorites.js";
 import { useAuth } from "~/composables/auth/useAuth.js";
-import {
-  broadcastSessionEnded,
-  isAccountPath,
-} from "~/utils/sharedAuthSync";
+import { broadcastSessionEnded, isAccountPath } from "~/utils/sharedAuthSync";
 import { relayAuthCookies } from "~/utils/ssrAuthCookies";
 
 /**
@@ -26,6 +23,11 @@ export const useAuthStore = defineStore("auth", {
   getters: {
     isLoggedIn: (state) => state.tokenValid && !!state.user,
     getUser: (state) => state.user,
+    displayName: (state) => {
+      const fullname = state.user?.firstName + " " + state.user?.lastName;
+      const suffix = fullname.length > 20 ? "..." : "";
+      return fullname.slice(0, 20) + suffix;
+    },
   },
   actions: {
     /**
