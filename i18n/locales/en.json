@@ -382,6 +382,8 @@
     "quantityFixed": "Quantity for {item}: {amount}",
     "data": {
       "contactSectionTitle": "Contact details",
+      "businessBookingLabel": "Business booking",
+      "businessBookingHint": "For a company, an association or an authority. Unticked, the booking counts as private.",
       "addressLookupLabel": "Find address",
       "addressLookupPlaceholder": "Enter an address (e.g. Main Street 1, Berlin)",
       "addressLookupHint": "Select a result to auto-fill street, postal code, and city.",
@@ -462,6 +464,9 @@
       }
     },
     "review": {
+      "bookingKindLabel": "Booking type",
+      "bookingKindPrivate": "Private",
+      "bookingKindBusiness": "Business",
       "periodTitle": "Time period",
       "periodMissing": "No time period selected.",
       "priceTitle": "Price summary",

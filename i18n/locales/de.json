@@ -756,6 +756,8 @@
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
     "data": {
       "contactSectionTitle": "Kontaktdaten",
+      "businessBookingLabel": "Geschäftliche Buchung",
+      "businessBookingHint": "Für ein Unternehmen, einen Verein oder eine Behörde. Ohne Haken gilt die Buchung als privat.",
       "addressLookupLabel": "Adresse suchen",
       "addressLookupPlaceholder": "Adresse eingeben (z. B. Musterstraße 1, Berlin)",
       "addressLookupHint": "Wählen Sie einen Treffer aus, um Straße, PLZ und Stadt automatisch zu übernehmen.",
@@ -836,6 +838,9 @@
       }
     },
     "review": {
+      "bookingKindLabel": "Buchungsart",
+      "bookingKindPrivate": "Privat",
+      "bookingKindBusiness": "Geschäftlich",
       "periodTitle": "Zeitraum",
       "periodMissing": "Kein Zeitraum ausgewählt.",
       "priceTitle": "Preisübersicht",

@@ -1,6 +1,7 @@
 <script setup>
 import { useCheckout } from "~/composables/api/useCheckout.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+import { isBusinessContact } from "~/utils/businessBooking.js";
 
 const COUPON_ROW_ID = "__coupon__";
 
@@ -347,6 +348,14 @@ const contactReviewRows = computed(() => {
       rows.push({ key, label: contactLabel(key), value: String(v).trim() });
     }
   }
+
+  rows.push({
+    key: "bookingKind",
+    label: t("checkout.review.bookingKindLabel"),
+    value: isBusinessContact(c)
+      ? t("checkout.review.bookingKindBusiness")
+      : t("checkout.review.bookingKindPrivate"),
+  });
 
   return rows;
 });
