@@ -329,6 +329,7 @@ function statusDetailParts(statusKey) {
 function statusPresentation(statusKey) {
   switch (statusKey) {
     case "status.rejected":
+    case "status.withdrawn":
       return {
         icon: "i-lucide-x-circle",
         badge: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",

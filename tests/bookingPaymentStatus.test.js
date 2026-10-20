@@ -91,6 +91,55 @@ describe("resolvePaymentDisplayStatus", () => {
   });
 });
 
+describe("a withdrawn booking", () => {
+  it.each(["requested", "payment_due"])(
+    "withdrawn from %s owes nothing: the payment lapses",
+    (cancelledFrom) => {
+      const booking = {
+        status: "withdrawn",
+        priceEur: 10,
+        cancellationRefund: { cancelledFrom },
+      };
+      expect(resolvePaymentDisplayStatus(booking)).toBe("lapsed");
+      expect(isUnpaidBooking(booking)).toBe(false);
+      expect(isPaidBooking(booking)).toBe(false);
+    },
+  );
+
+  it("withdrawn from confirmed stays paid: the refund is a matter of its own", () => {
+    expect(
+      resolvePaymentDisplayStatus({
+        status: "withdrawn",
+        priceEur: 10,
+        cancellationRefund: { cancelledFrom: "confirmed" },
+      }),
+    ).toBe("paid");
+  });
+
+  it("withdrawn and free stays free", () => {
+    expect(
+      resolvePaymentDisplayStatus({ status: "withdrawn", priceEur: 0 }),
+    ).toBe("free");
+  });
+
+  it("shows the lapsed payment as Entfällt, not as unpaid", () => {
+    expect(
+      resolveBookingPaymentChip(
+        {
+          status: "withdrawn",
+          priceEur: 10,
+          cancellationRefund: { cancelledFrom: "payment_due" },
+        },
+        t,
+      ),
+    ).toMatchObject({
+      status: "lapsed",
+      label: "booking.payment.lapsed",
+      icon: "i-lucide-ban",
+    });
+  });
+});
+
 describe("isPaidBooking / isUnpaidBooking", () => {
   it("agree with the display status", () => {
     const paid = { status: "confirmed", priceEur: 10 };

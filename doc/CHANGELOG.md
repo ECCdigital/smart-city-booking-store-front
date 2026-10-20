@@ -9,6 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Added
 
+- Chip „Widerrufen“ ([ECCdigital/tickets#611](https://github.com/ECCdigital/tickets/issues/611)): a booking whose withdrawal the provider accepted (status `withdrawn`) shows it in the booking list and details, with a hint on the refund, and on the status page; where nothing was paid, its payment chip reads „Entfällt“ instead of „Nicht bezahlt“ and it no longer counts as unpaid in the filter; it counts under the filter „Storniert / Abgelehnt“ and no longer offers „Buchung widerrufen“ or „Buchung stornieren“. Needs the backend with ECCdigital/tickets#611
 - „Buchung widerrufen“ in the booking details ([ECCdigital/tickets#256](https://github.com/ECCdigital/tickets/issues/256)): left of „Buchung stornieren“, for a live booking of a private customer (no company) within 14 days of the booking. It opens a prepared mail to the tenant, who checks the withdrawal; nothing on the booking changes. Shown where the backend answers `withdrawalUrl` with the booking, so it needs the backend with ECCdigital/tickets#256
 
 ### Fixed

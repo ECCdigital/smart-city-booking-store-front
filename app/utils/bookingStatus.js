@@ -9,6 +9,7 @@ export const BOOKING_STATUS = Object.freeze({
   CONFIRMED: "confirmed",
   REJECTED: "rejected",
   CANCELLED: "cancelled",
+  WITHDRAWN: "withdrawn",
 });
 
 const BOOKING_STATUSES = Object.values(BOOKING_STATUS);
@@ -22,6 +23,7 @@ const BOOKING_STATUS_I18N = {
   PAYMENT_EXPECTED: "status.payment_expected",
   PAID_COMPLETED: "status.paid_completed",
   REJECTED: "status.rejected",
+  WITHDRAWN: "status.withdrawn",
   CONFIRMED_WITHOUT_PAYMENT: "status.confirmed_without_payment",
 };
 
@@ -114,7 +116,7 @@ export function resolveBookingStatus(booking) {
 }
 
 /**
- * A living booking: neither rejected nor cancelled.
+ * A living booking: neither rejected, cancelled nor withdrawn.
  * @param {StatusBooking} booking
  * @returns {boolean}
  */
@@ -142,10 +144,10 @@ export function isCommittedBooking(booking) {
 }
 
 /**
- * Nothing left to pay: the booking is free, paid, or was cancelled out of the
- * paid state. Only a cancelled booking needs more than `status` to tell -
- * `cancellationRefund.cancelledFrom`, or the paid flag where a payload has
- * no refund record.
+ * Nothing left to pay: the booking is free, paid, or was cancelled or
+ * withdrawn out of the paid state. Only those need more than `status` to
+ * tell - `cancellationRefund.cancelledFrom`, or the paid flag where a
+ * payload has no refund record.
  * @param {StatusBooking} booking
  * @returns {boolean}
  */
@@ -156,7 +158,8 @@ export function isSettledBooking(booking) {
   switch (resolveBookingStatus(booking)) {
     case BOOKING_STATUS.CONFIRMED:
       return true;
-    case BOOKING_STATUS.CANCELLED: {
+    case BOOKING_STATUS.CANCELLED:
+    case BOOKING_STATUS.WITHDRAWN: {
       const cancelledFrom = booking?.cancellationRefund?.cancelledFrom;
       return cancelledFrom
         ? cancelledFrom === BOOKING_STATUS.CONFIRMED
@@ -179,6 +182,8 @@ export function resolveBookingStatusKey(booking) {
     case BOOKING_STATUS.REJECTED:
     case BOOKING_STATUS.CANCELLED:
       return BOOKING_STATUS_I18N.REJECTED;
+    case BOOKING_STATUS.WITHDRAWN:
+      return BOOKING_STATUS_I18N.WITHDRAWN;
     case BOOKING_STATUS.REQUESTED:
       return BOOKING_STATUS_I18N.AWAITING_APPROVAL;
     case BOOKING_STATUS.PAYMENT_DUE:
@@ -265,6 +270,13 @@ const STATUS_PRESENTATION = {
     color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
     icon: "i-lucide-x",
     tooltipKey: null,
+  },
+  // The tenant accepted the customer's withdrawal.
+  [BOOKING_STATUS.WITHDRAWN]: {
+    labelKey: "booking.status.withdrawn",
+    color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+    icon: "i-lucide-undo-2",
+    tooltipKey: "booking.status.withdrawnTooltip",
   },
 };
 

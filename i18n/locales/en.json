@@ -553,6 +553,7 @@
       "paymentStateLabel": "Payment status",
       "paymentPaid": "Paid",
       "paymentPending": "Unpaid",
+      "paymentLapsed": "Not due",
       "paymentFree": "Free of charge",
       "amountLabel": "Amount",
       "bookingStatusError": "This booking could not be loaded.",
@@ -592,6 +593,10 @@
         "rejected": {
           "title": "Request not accepted",
           "body": "Unfortunately your booking request could not be accepted. If you have questions, please contact the provider."
+        },
+        "withdrawn": {
+          "title": "Booking withdrawn",
+          "body": "The provider has accepted your withdrawal. It costs you nothing; any amount already paid will be refunded in full."
         },
         "confirmed_without_payment": {
           "title": "Completed (free of charge)",
@@ -732,6 +737,7 @@
     "payment_expected": "Payment required to complete the booking",
     "paid_completed": "Paid and completed",
     "rejected": "Rejected or cancelled",
+    "withdrawn": "Withdrawn",
     "confirmed_without_payment": "Completed (free of charge)"
   },
   "booking": {
@@ -899,7 +905,8 @@
       },
       "free": "Free of charge",
       "paid": "Paid",
-      "unpaid": "Unpaid"
+      "unpaid": "Unpaid",
+      "lapsed": "Not due"
     },
     "status": {
       "requested": "Pending",
@@ -907,7 +914,9 @@
       "payment_due": "Confirmed",
       "confirmed": "Confirmed",
       "rejected": "Rejected",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "withdrawn": "Withdrawn",
+      "withdrawnTooltip": "The provider has accepted your withdrawal. Any amount already paid will be refunded in full."
     }
   },
   "account": {
