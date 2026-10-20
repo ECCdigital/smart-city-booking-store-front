@@ -1111,6 +1111,10 @@
     "priceLabel": "Preis:",
     "downloadAppointment": "Termin herunterladen",
     "downloadAppointmentTooltip": "Als Termin herunterladen",
+    "withdrawal": {
+      "action": "Buchung widerrufen",
+      "hint": "Öffnet eine vorbereitete E-Mail an den Anbieter. Der Anbieter prüft Ihren Widerruf und meldet sich bei Ihnen."
+    },
     "cancellation": {
       "action": "Buchung stornieren",
       "title": "Buchung stornieren",
