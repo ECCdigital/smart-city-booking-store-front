@@ -928,6 +928,7 @@
       "paymentPaid": "Bezahlt",
       "paymentPending": "Nicht bezahlt",
       "paymentFree": "Kostenfrei",
+      "paymentWaived": "Entfällt",
       "amountLabel": "Betrag",
       "bookingStatusError": "Diese Buchung konnte nicht geladen werden.",
       "summaryTotalLabel": "Buchungen",
@@ -1241,7 +1242,8 @@
       },
       "free": "Kostenfrei",
       "paid": "Bezahlt",
-      "unpaid": "Nicht bezahlt"
+      "unpaid": "Nicht bezahlt",
+      "waived": "Entfällt"
     },
     "status": {
       "requested": "Ausstehend",
