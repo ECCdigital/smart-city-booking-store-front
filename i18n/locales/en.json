@@ -846,6 +846,7 @@
       "invoice": "Invoice",
       "receipt": "Payment receipt",
       "cancellation": "Cancellation receipt",
+      "withdrawal": "Withdrawal receipt",
       "agreement": "User agreement",
       "privacyAgreement": "Privacy policy",
       "userManual": "User manual",
@@ -1000,6 +1001,7 @@
       "types": {
         "invoice": "Invoice",
         "receipt": "Receipt",
+        "withdrawal": "Withdrawal receipt",
         "unknown": "Unknown"
       }
     }

@@ -63,6 +63,26 @@ export function useBookings() {
     return data;
   };
 
+  const getBookingWithdrawalReceipt = async (
+    tenantID,
+    bookingId,
+    receiptName,
+  ) => {
+    const api = useApiClient();
+
+    const { data, error } = await api.get(
+      `/api/bookings/${tenantID}/${bookingId}/withdrawal-receipt/${receiptName}`,
+      {},
+    );
+
+    if (error) {
+      console.error("Error fetching booking withdrawal receipt:", error);
+      throw error;
+    }
+
+    return data;
+  };
+
   const getStatus = async (tenantID, bookingId) => {
     const api = useApiClient();
     const { data, error } = await api.get(`/api/bookings/${tenantID}/${bookingId}/status`);
@@ -116,6 +136,7 @@ export function useBookings() {
     getBookingReceipt,
     getBookingInvoice,
     getBookingCancellationReceipt,
+    getBookingWithdrawalReceipt,
     getStatus,
     getCancellationRefundPreview,
     cancelBooking,

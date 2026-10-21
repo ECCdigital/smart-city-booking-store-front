@@ -6,7 +6,7 @@
 
 import { includesText } from "./textSearch.js";
 
-const PAYMENT_TYPES = ["invoice", "receipt"];
+const PAYMENT_TYPES = ["invoice", "receipt", "withdrawal"];
 
 /**
  * The invoices and receipts of the bookings, each named by its title (or file

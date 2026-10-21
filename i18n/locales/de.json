@@ -1192,6 +1192,7 @@
       "invoice": "Rechnung",
       "receipt": "Zahlungsbeleg",
       "cancellation": "Stornobeleg",
+      "withdrawal": "Widerrufbeleg",
       "agreement": "Nutzervereinbarung",
       "privacyAgreement": "Datenschutzerklärung",
       "userManual": "Betriebsanleitung",
@@ -1347,6 +1348,7 @@
       "types": {
         "invoice": "Rechnung",
         "receipt": "Zahlungsbeleg",
+        "withdrawal": "Widerrufbeleg",
         "unknown": "Unbekannt"
       }
     }

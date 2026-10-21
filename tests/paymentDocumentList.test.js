@@ -30,6 +30,24 @@ const bookings = [
   booking({ id: "NOBOOKABLE-1", bookableItems: [] }),
 ];
 
+describe("the withdrawal receipt in the invoice list", () => {
+  it("is listed beside invoices and receipts; a cancellation is not", () => {
+    const withdrawn = booking({
+      id: "WD-1",
+      attachments: [
+        { type: "invoice", title: "Rechnung 1", timeCreated: 1 },
+        { type: "cancellation", title: "Stornorechnung", timeCreated: 2 },
+        { type: "withdrawal", title: "Widerrufbeleg", timeCreated: 3 },
+      ],
+    });
+
+    expect(paymentDocumentsOf([withdrawn]).map((d) => d.type)).toEqual([
+      "invoice",
+      "withdrawal",
+    ]);
+  });
+});
+
 describe("the payment documents of the invoice list", () => {
   it("takes the invoices and receipts of every booking, nothing else", () => {
     expect(

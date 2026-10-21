@@ -369,7 +369,12 @@ const paymentMethod = computed(() => {
   return t("booking.payment.methods.notSpecified");
 });
 
-const PAYMENT_DOCUMENT_TYPES = ["invoice", "receipt", "cancellation"];
+const PAYMENT_DOCUMENT_TYPES = [
+  "invoice",
+  "receipt",
+  "cancellation",
+  "withdrawal",
+];
 
 const paymentDocuments = computed(() => {
   return props.booking.attachments.filter((attachment) =>
