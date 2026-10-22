@@ -7,6 +7,10 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ## [Unreleased]
 
+### Added
+
+- The checkout says when an address is on the blacklist ([ECCdigital/tickets#627](https://github.com/ECCdigital/tickets/issues/627)): „Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an …“ with the instance's mail address, or „den Betreiber dieses Angebots“ without one (`checkout.address_blacklisted`). Needs the backend with the same ticket
+
 ### Fixed
 
 - On the phone the map of the Result Page no longer covers the navigation bar (ECCdigital/tickets#310): its `z-10` competed with the sticky bar's, and the later element won. The map, the mobile key's loading spinner and its scan square now keep their `z-10` in a stacking context of their own, as the Kind badge does since ECCdigital/tickets#270

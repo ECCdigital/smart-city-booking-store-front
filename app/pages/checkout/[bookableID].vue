@@ -18,6 +18,8 @@ import { useNotification } from "~/composables/useNotification.js";
 import {
   BOOKABLE_NOT_FOUND,
   backendErrorBodyOf,
+  ADDRESS_BLACKLISTED,
+  addressBlacklistedMessage,
   resolveCheckoutErrorKey,
   resolveCheckoutFailureKey,
 } from "~/utils/checkoutErrors.js";
@@ -2399,7 +2401,9 @@ function messageForStructuredCheckoutError(apiError) {
       ? apiError.params
       : {};
   let core = null;
-  if (typeof reason === "string" && reason) {
+  if (reason === ADDRESS_BLACKLISTED) {
+    core = addressBlacklistedMessage(params, t);
+  } else if (typeof reason === "string" && reason) {
     if (te(reason)) {
       core = t(reason, params);
     } else {

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { createI18n } from "vue-i18n";
 
 import de from "~~/i18n/locales/de.json";
 import en from "~~/i18n/locales/en.json";
 import {
+  addressBlacklistedMessage,
   backendErrorBodyOf,
   resolveCheckoutErrorKey,
   resolveCheckoutFailureKey,
@@ -120,5 +122,39 @@ describe("the wording of an offer that is no longer available", () => {
 
   it.each(locales)("%s carries no key for the removed checkout.offer_not_reachable", (_locale, messages) => {
     expect(messages.checkout).not.toHaveProperty("offer_not_reachable");
+  });
+});
+
+describe("the refusal of an address on the blacklist", () => {
+  const translator = (locale) =>
+    createI18n({ legacy: false, locale, messages: { de, en } }).global.t;
+
+  it("names the instance's mail address to write to", () => {
+    expect(
+      addressBlacklistedMessage({ mailAddress: "betrieb@example.test" }, translator("de")),
+    ).toBe(
+      "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an betrieb@example.test.",
+    );
+  });
+
+  it("names the operator of the offer where the instance has no mail address", () => {
+    const expected =
+      "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an den Betreiber dieses Angebots.";
+
+    expect(addressBlacklistedMessage({ mailAddress: "" }, translator("de"))).toBe(expected);
+    expect(addressBlacklistedMessage({ mailAddress: "  " }, translator("de"))).toBe(expected);
+    expect(addressBlacklistedMessage({}, translator("de"))).toBe(expected);
+    expect(addressBlacklistedMessage(undefined, translator("de"))).toBe(expected);
+  });
+
+  it("speaks English too", () => {
+    expect(
+      addressBlacklistedMessage({ mailAddress: "betrieb@example.test" }, translator("en")),
+    ).toBe(
+      "No booking is possible with this address. If you have questions, please write to betrieb@example.test.",
+    );
+    expect(addressBlacklistedMessage({}, translator("en"))).toBe(
+      "No booking is possible with this address. If you have questions, please write to the operator of this offer.",
+    );
   });
 });

@@ -47,6 +47,30 @@ export function resolveCheckoutErrorKey(error) {
  */
 export const BOOKABLE_NOT_FOUND = "checkout.bookable_not_found";
 
+/**
+ * The reason of a checkout that refused an address on the blacklist
+ * (ECCdigital/tickets#627). The backend's answer carries the instance's
+ * `mailAddress` in `params`, empty where the instance has none.
+ */
+export const ADDRESS_BLACKLISTED = "checkout.address_blacklisted";
+
+/**
+ * The refusal of an address on the blacklist: whom to write to with
+ * questions, the instance's mail address or, without one, the operator of
+ * the offer.
+ *
+ * @param {{ mailAddress?: string }|undefined} params The `params` of the refusal
+ * @param {Function} t The translate function of vue-i18n
+ * @returns {string}
+ */
+export function addressBlacklistedMessage(params, t) {
+  const mailAddress =
+    typeof params?.mailAddress === "string" ? params.mailAddress.trim() : "";
+  return t(ADDRESS_BLACKLISTED, {
+    contact: mailAddress || t("checkout.address_blacklisted_operator"),
+  });
+}
+
 function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
