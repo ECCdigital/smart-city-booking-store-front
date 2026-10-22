@@ -49,11 +49,12 @@ const stubs = {
   },
 };
 
-function mountAlert(locale, mailAddress) {
+function mountAlert(locale, mailAddress, registration = false) {
   const i18n = createI18n({ legacy: false, locale, messages: { de, en } });
   const state = {
     t: i18n.global.t,
     mailAddress,
+    registration,
     copyMailAddress: vi.fn(),
   };
   const app = Vue.createApp({
@@ -121,6 +122,39 @@ describe("the refusal of an address on the blacklist", () => {
     expect(title(root)).toBe("Booking not possible");
     expect(text(root)).toBe(
       `No booking is possible with this address. If you have questions, please write to ${OPERATOR}.`,
+    );
+  });
+});
+
+// The registration refuses an address on the blacklist with a title and a
+// notice of its own (ECCdigital/tickets#628).
+describe("the refusal of a registration", () => {
+  it("says that no registration is possible", () => {
+    const { root } = mountAlert("de", OPERATOR, true);
+
+    expect(title(root)).toBe("Registrierung nicht möglich");
+    expect(text(root)).toBe(
+      `Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wende dich per Mail an ${OPERATOR}.`,
+    );
+    expect(root.querySelector("a").getAttribute("href")).toBe(
+      `mailto:${OPERATOR}`,
+    );
+  });
+
+  it("names the operator without a mail address", () => {
+    const { root } = mountAlert("de", "", true);
+
+    expect(text(root)).toBe(
+      "Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wende dich per Mail an den Betreiber dieses Angebots.",
+    );
+  });
+
+  it("speaks English too", () => {
+    const { root } = mountAlert("en", OPERATOR, true);
+
+    expect(title(root)).toBe("Registration not possible");
+    expect(text(root)).toBe(
+      `No registration is possible with this email address. If you have questions, please write to ${OPERATOR}.`,
     );
   });
 });

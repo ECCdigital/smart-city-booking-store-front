@@ -3,10 +3,24 @@
     color="error"
     variant="soft"
     icon="i-lucide-circle-x"
-    :title="t('checkout.address_blacklisted_title')"
+    :title="
+      t(
+        registration
+          ? 'checkout.address_blacklisted_registration_title'
+          : 'checkout.address_blacklisted_title',
+      )
+    "
   >
     <template #description>
-      <i18n-t keypath="checkout.address_blacklisted" scope="global" tag="p">
+      <i18n-t
+        :keypath="
+          registration
+            ? 'checkout.address_blacklisted_registration'
+            : 'checkout.address_blacklisted'
+        "
+        scope="global"
+        tag="p"
+      >
         <template #contact>
           <span v-if="mailAddress">
             <!-- Wraps as a whole first, breaks only when longer than a line. -->
@@ -38,13 +52,16 @@
  * The refusal of an address on the blacklist (ECCdigital/tickets#627): it
  * stays where the booking is sent, and the instance's mail address in it
  * opens a mail or is copied. Without one it names the operator of the
- * offer.
+ * offer. The registration (ECCdigital/tickets#628) shows it with a title
+ * and a notice of its own.
  */
 import { useNotification } from "~/composables/useNotification.js";
 
 const props = defineProps({
   /** The instance's mail address from the refusal, trimmed; empty without one. */
   mailAddress: { type: String, default: "" },
+  /** The refusal of a registration instead of a booking. */
+  registration: { type: Boolean, default: false },
 });
 
 const { t } = useI18n();

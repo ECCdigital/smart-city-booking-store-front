@@ -100,6 +100,21 @@ export function backendErrorBodyOf(error) {
 }
 
 /**
+ * The refusal of an address on the blacklist from the BFF's error, as the
+ * registration answers it (ECCdigital/tickets#628) - the checkout's reason
+ * with the instance's mail address: that address, trimmed, empty where the
+ * instance has none; null for any other failure.
+ *
+ * @param {unknown} error The rejected `$fetch` of a BFF route
+ * @returns {string|null}
+ */
+export function addressBlacklistedRefusalOf(error) {
+  const body = backendErrorBodyOf(error);
+  if (body?.error !== ADDRESS_BLACKLISTED) return null;
+  return addressBlacklistedContact(body.params);
+}
+
+/**
  * The i18n key for a checkout request the backend refused with an error
  * status, null when the failure names no cause (an infrastructure error).
  * A 404 is an offer or tenant the backend no longer delivers; no distinction

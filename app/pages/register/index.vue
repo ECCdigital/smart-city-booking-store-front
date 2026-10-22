@@ -27,12 +27,16 @@ const { target: returnTarget, withTarget } = useReturnTarget();
 const { notifyWait, notifyRateLimited } = useRateLimitNotice();
 
 const success = ref(false);
+// The instance's mail address of a refusal on the blacklist
+// (ECCdigital/tickets#628), empty without one; null without a refusal.
+const blacklistedMailAddress = ref(null);
 const resending = ref(false);
 
 // The confirmation is account-neutral: the backend answers the same for a new
 // and an already registered address, and so does this page.
 const handleRegister = async () => {
   loading.value = true;
+  blacklistedMailAddress.value = null;
   let failure = null;
   try {
     await register({ ...form.value, nextUrl: returnTarget.value });
@@ -42,7 +46,9 @@ const handleRegister = async () => {
 
   const outcome = signupOutcome(failure);
   success.value = outcome.kind === "confirmation";
-  if (outcome.kind === "rateLimited") {
+  if (outcome.kind === "blacklisted") {
+    blacklistedMailAddress.value = outcome.mailAddress;
+  } else if (outcome.kind === "rateLimited") {
     notifyWait(outcome.seconds);
   } else if (outcome.kind === "failed") {
     notification.error(
@@ -86,6 +92,7 @@ const handleResend = async () => {
         v-model:user-data="form"
         :loading="loading"
         :login-to="withTarget('/login')"
+        :blacklisted-mail-address="blacklistedMailAddress"
         class="shadow-2xl/50"
         @submit="handleRegister"
       />

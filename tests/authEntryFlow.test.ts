@@ -14,6 +14,29 @@ describe("signupOutcome", () => {
     expect(signupOutcome(null, NOW)).toEqual({ kind: "confirmation" });
   });
 
+  it("refuses an address on the blacklist with the instance's mail address", () => {
+    // The one answer that tells (ECCdigital/tickets#628), unlike any other 409.
+    const refusal = (mailAddress: string) => ({
+      statusCode: 409,
+      data: {
+        statusCode: 409,
+        data: {
+          error: "checkout.address_blacklisted",
+          params: { mailAddress },
+        },
+      },
+    });
+
+    expect(signupOutcome(refusal(" betrieb@example.test "), NOW)).toEqual({
+      kind: "blacklisted",
+      mailAddress: "betrieb@example.test",
+    });
+    expect(signupOutcome(refusal(""), NOW)).toEqual({
+      kind: "blacklisted",
+      mailAddress: "",
+    });
+  });
+
   it("confirms just the same when a backend still answers 409", () => {
     // Telling "already registered" apart would disclose the account.
     expect(signupOutcome({ statusCode: 409 }, NOW)).toEqual({

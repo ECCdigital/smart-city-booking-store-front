@@ -2,6 +2,8 @@
 import {useAuthStore} from "~~/stores/auth.js";
 import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
 import { useReturnTarget } from "~/composables/auth/useReturnTarget";
+import { addressBlacklistedRefusalOf } from "~/utils/checkoutErrors.js";
+import CheckoutAddressBlacklistedAlert from "~/components/checkout/CheckoutAddressBlacklistedAlert.vue";
 
 definePageMeta({ layout: "default" });
 
@@ -12,6 +14,9 @@ const loading = ref(false);
 const authStore = useAuthStore();
 const pendingRedirect = useCookie("kc-pending-redirect");
 const { follow: followReturnTarget } = useReturnTarget();
+// The instance's mail address of a refusal on the blacklist
+// (ECCdigital/tickets#628), empty without one; null without a refusal.
+const blacklistedMailAddress = ref(null);
 
 const {
   documents: legalDocuments,
@@ -46,6 +51,8 @@ const handleRegister = async () => {
       await followReturnTarget(redirect);
     }
   } catch (err) {
+    blacklistedMailAddress.value = addressBlacklistedRefusalOf(err);
+    if (blacklistedMailAddress.value !== null) return;
     notification.error(t("notifications.registerError.message"));
     console.error("SSO register failed:", err);
   } finally {
@@ -78,8 +85,14 @@ const handleRegister = async () => {
           </p>
         </div>
 
+        <CheckoutAddressBlacklistedAlert
+          v-if="blacklistedMailAddress !== null"
+          :mail-address="blacklistedMailAddress"
+          registration
+        />
+
         <div
-          v-if="legalDocuments.length"
+          v-else-if="legalDocuments.length"
           class="flex flex-col gap-2 pb-2"
         >
           <UCheckbox
@@ -110,6 +123,7 @@ const handleRegister = async () => {
               {{ t("common.back") }}
             </UButton>
             <UButton
+                v-if="blacklistedMailAddress === null"
                 color="primary"
                 :loading="loading"
                 @click="handleRegister"

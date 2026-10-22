@@ -6,6 +6,7 @@ import en from "~~/i18n/locales/en.json";
 import {
   addressBlacklistedContact,
   addressBlacklistedMessage,
+  addressBlacklistedRefusalOf,
   backendErrorBodyOf,
   resolveCheckoutErrorKey,
   resolveCheckoutFailureKey,
@@ -166,5 +167,39 @@ describe("the refusal of an address on the blacklist", () => {
     expect(addressBlacklistedMessage({}, translator("en"))).toBe(
       "No booking is possible with this address. If you have questions, please write to the operator of this offer.",
     );
+  });
+});
+
+// The registration answers an address on the blacklist with the checkout's
+// refusal (ECCdigital/tickets#628); the BFF hands its body on.
+describe("addressBlacklistedRefusalOf", () => {
+  const refusal = (mailAddress) =>
+    failure(409, {
+      error: "checkout.address_blacklisted",
+      params: { mailAddress },
+    });
+
+  it("is the instance's mail address of the refusal, trimmed", () => {
+    expect(addressBlacklistedRefusalOf(refusal(" betrieb@example.test "))).toBe(
+      "betrieb@example.test",
+    );
+  });
+
+  it("is empty where the instance has no mail address", () => {
+    expect(addressBlacklistedRefusalOf(refusal(""))).toBe("");
+    expect(
+      addressBlacklistedRefusalOf(
+        failure(409, { error: "checkout.address_blacklisted" }),
+      ),
+    ).toBe("");
+  });
+
+  it("is null for any other failure", () => {
+    expect(addressBlacklistedRefusalOf(failure(409, {}))).toBeNull();
+    expect(
+      addressBlacklistedRefusalOf(failure(400, { reason: "secret_mismatch" })),
+    ).toBeNull();
+    expect(addressBlacklistedRefusalOf(failure(502, undefined))).toBeNull();
+    expect(addressBlacklistedRefusalOf(null)).toBeNull();
   });
 });

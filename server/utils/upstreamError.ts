@@ -16,6 +16,9 @@
 interface UpstreamErrorBody {
   message?: string;
   reason?: string;
+  /** A reason in the checkout's form, e.g. `checkout.address_blacklisted`. */
+  error?: string;
+  params?: Record<string, unknown>;
 }
 
 export interface UpstreamError {

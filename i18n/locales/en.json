@@ -378,6 +378,8 @@
     "address_blacklisted_copy": "Copy mail address",
     "address_blacklisted_copied": "Mail address copied",
     "address_blacklisted_copy_failed": "The mail address could not be copied. Please select and copy it by hand.",
+    "address_blacklisted_registration": "No registration is possible with this email address. If you have questions, please write to {contact}.",
+    "address_blacklisted_registration_title": "Registration not possible",
     "selectTimePeriodTitle": "Select a time period",
     "selectTimePeriodHint": "Please select a time period first to see the price summary.",
     "maxAmountHint": "Maximum {max} available",

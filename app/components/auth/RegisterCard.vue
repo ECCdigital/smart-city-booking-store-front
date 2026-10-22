@@ -8,6 +8,12 @@
     </template>
 
     <UForm :state="userData" class="flex flex-col gap-2" @submit="submitForm">
+      <CheckoutAddressBlacklistedAlert
+        v-if="blacklistedMailAddress !== null"
+        :mail-address="blacklistedMailAddress"
+        registration
+        class="mb-2"
+      />
       <div class="flex justify-between">
         <UFormField :label="$t('common.firstName')" required>
           <UInput
@@ -113,6 +119,7 @@
 import PasswordInput from "~/components/auth/PasswordInput.vue";
 import PasswordProgress from "~/components/auth/PasswordProgress.vue";
 import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
+import CheckoutAddressBlacklistedAlert from "~/components/checkout/CheckoutAddressBlacklistedAlert.vue";
 
 const { t } = useI18n();
 const notification = useNotification();
@@ -126,6 +133,12 @@ defineProps({
   loginTo: {
     type: String,
     default: "/login",
+  },
+  // The instance's mail address of a refusal on the blacklist
+  // (ECCdigital/tickets#628), empty without one; null without a refusal.
+  blacklistedMailAddress: {
+    type: String,
+    default: null,
   },
 });
 

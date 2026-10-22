@@ -757,6 +757,8 @@
     "address_blacklisted_copy": "Mailadresse kopieren",
     "address_blacklisted_copied": "Mailadresse kopiert",
     "address_blacklisted_copy_failed": "Die Mailadresse ließ sich nicht kopieren. Bitte markieren und kopieren Sie sie von Hand.",
+    "address_blacklisted_registration": "Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wende dich per Mail an {contact}.",
+    "address_blacklisted_registration_title": "Registrierung nicht möglich",
     "generateGroupBooking": "Keine Seriebuchung erzeugt",
     "selectTimePeriodTitle": "Kein Zeitraum ausgewählt",
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
