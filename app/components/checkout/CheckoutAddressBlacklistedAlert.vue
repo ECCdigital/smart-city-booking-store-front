@@ -8,14 +8,14 @@
     <template #description>
       <i18n-t keypath="checkout.address_blacklisted" scope="global" tag="p">
         <template #contact>
-          <span v-if="mailAddress" class="inline-flex items-center gap-1">
+          <span v-if="mailAddress">
+            <!-- Wraps as a whole first, breaks only when longer than a line. -->
             <a
               :href="`mailto:${mailAddress}`"
-              class="font-bold underline select-all break-all"
-            >
-              {{ mailAddress }}
-            </a>
-            <UButton
+              class="font-bold underline select-all [overflow-wrap:anywhere]"
+              >{{ mailAddress }}</a
+            ><UButton
+              class="ms-1 align-middle"
               icon="i-lucide-copy"
               size="xs"
               color="neutral"
