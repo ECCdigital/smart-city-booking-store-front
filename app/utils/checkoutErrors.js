@@ -64,11 +64,24 @@ export const ADDRESS_BLACKLISTED = "checkout.address_blacklisted";
  * @returns {string}
  */
 export function addressBlacklistedMessage(params, t) {
-  const mailAddress =
-    typeof params?.mailAddress === "string" ? params.mailAddress.trim() : "";
   return t(ADDRESS_BLACKLISTED, {
-    contact: mailAddress || t("checkout.address_blacklisted_operator"),
+    contact:
+      addressBlacklistedContact(params) ||
+      t("checkout.address_blacklisted_operator"),
   });
+}
+
+/**
+ * The instance's mail address of the refusal of an address on the
+ * blacklist, trimmed; empty where the instance has none.
+ *
+ * @param {{ mailAddress?: string }|undefined} params The `params` of the refusal
+ * @returns {string}
+ */
+export function addressBlacklistedContact(params) {
+  return typeof params?.mailAddress === "string"
+    ? params.mailAddress.trim()
+    : "";
 }
 
 function isRecord(value) {

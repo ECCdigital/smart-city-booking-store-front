@@ -4,6 +4,7 @@ import { createI18n } from "vue-i18n";
 import de from "~~/i18n/locales/de.json";
 import en from "~~/i18n/locales/en.json";
 import {
+  addressBlacklistedContact,
   addressBlacklistedMessage,
   backendErrorBodyOf,
   resolveCheckoutErrorKey,
@@ -145,6 +146,15 @@ describe("the refusal of an address on the blacklist", () => {
     expect(addressBlacklistedMessage({ mailAddress: "  " }, translator("de"))).toBe(expected);
     expect(addressBlacklistedMessage({}, translator("de"))).toBe(expected);
     expect(addressBlacklistedMessage(undefined, translator("de"))).toBe(expected);
+  });
+
+  it("reads the mail address to link and copy, trimmed, empty without one", () => {
+    expect(addressBlacklistedContact({ mailAddress: " betrieb@example.test " })).toBe(
+      "betrieb@example.test",
+    );
+    expect(addressBlacklistedContact({ mailAddress: "" })).toBe("");
+    expect(addressBlacklistedContact({ mailAddress: 42 })).toBe("");
+    expect(addressBlacklistedContact(undefined)).toBe("");
   });
 
   it("speaks English too", () => {

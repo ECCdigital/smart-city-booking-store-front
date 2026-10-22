@@ -9,7 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Added
 
-- The checkout says when an address is on the blacklist ([ECCdigital/tickets#627](https://github.com/ECCdigital/tickets/issues/627)): „Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an …“ with the instance's mail address, or „den Betreiber dieses Angebots“ without one (`checkout.address_blacklisted`). Needs the backend with the same ticket
+- The checkout says when an address is on the blacklist ([ECCdigital/tickets#627](https://github.com/ECCdigital/tickets/issues/627)): „Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an …“ as a notice on the review step instead of a toast: the instance's mail address is a `mailto:` link with a button to copy it, without one it names „den Betreiber dieses Angebots“ (`checkout.address_blacklisted`). The notice goes when the address changes or the booking is sent again. Needs the backend with the same ticket
 
 ### Fixed
 
