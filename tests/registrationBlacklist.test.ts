@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { addressBlacklistedRefusalOf } from "~/utils/checkoutErrors.js";
 
-// The registration refuses an address on the blacklist (ECCdigital/tickets#628):
+// The registration refuses an address on the blacklist:
 // the backend answers 409 with the checkout's reason and the instance's mail
 // address. Each registration route - password, SSO, card - hands that body on
 // to the page. The routes run on real h3; Nitro's auto-imports are stubbed with

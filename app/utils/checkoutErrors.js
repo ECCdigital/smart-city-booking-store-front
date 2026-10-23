@@ -48,8 +48,8 @@ export function resolveCheckoutErrorKey(error) {
 export const BOOKABLE_NOT_FOUND = "checkout.bookable_not_found";
 
 /**
- * The reason of a checkout that refused an address on the blacklist
- * (ECCdigital/tickets#627). The backend's answer carries the instance's
+ * The reason of a checkout that refused an address on the blacklist.
+ * The backend's answer carries the instance's
  * `mailAddress` in `params`, empty where the instance has none.
  */
 export const ADDRESS_BLACKLISTED = "checkout.address_blacklisted";
@@ -101,7 +101,7 @@ export function backendErrorBodyOf(error) {
 
 /**
  * The refusal of an address on the blacklist from the BFF's error, as the
- * registration answers it (ECCdigital/tickets#628) - the checkout's reason
+ * registration answers it - the checkout's reason
  * with the instance's mail address: that address, trimmed, empty where the
  * instance has none; null for any other failure.
  *

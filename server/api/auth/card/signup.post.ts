@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
             statusMessage:
                 error.data?.message || "Card registration failed",
             // The backend's body: the `reason` the card login names, or the
-            // refusal of an address on the blacklist (ECCdigital/tickets#628).
+            // refusal of an address on the blacklist.
             data: error.data,
         });
     }

@@ -647,7 +647,7 @@ const contactForm = reactive({
   city: "",
 });
 
-// The refusal of an address on the blacklist (ECCdigital/tickets#627): the
+// The refusal of an address on the blacklist: the
 // instance's mail address to write to, empty without one, null while there
 // is none. It stays on the review step instead of a toast, so the address
 // can be clicked or copied, until the address changes or the booking is

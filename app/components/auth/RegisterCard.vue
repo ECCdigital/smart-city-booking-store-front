@@ -134,8 +134,8 @@ defineProps({
     type: String,
     default: "/login",
   },
-  // The instance's mail address of a refusal on the blacklist
-  // (ECCdigital/tickets#628), empty without one; null without a refusal.
+  // The instance's mail address of a refusal on the blacklist,
+  // empty without one; null without a refusal.
   blacklistedMailAddress: {
     type: String,
     default: null,

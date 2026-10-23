@@ -15,7 +15,7 @@ describe("signupOutcome", () => {
   });
 
   it("refuses an address on the blacklist with the instance's mail address", () => {
-    // The one answer that tells (ECCdigital/tickets#628), unlike any other 409.
+    // The one answer that tells, unlike any other 409.
     const refusal = (mailAddress: string) => ({
       statusCode: 409,
       data: {

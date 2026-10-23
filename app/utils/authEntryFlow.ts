@@ -24,7 +24,7 @@ export type SignupOutcome =
  * Account-neutral: the backend answers `201` whether or not the address has
  * an account. A `409` of an older backend lands on the same confirmation, so
  * the page never tells a registered address from a new one. The one
- * exception is an address on the blacklist (ECCdigital/tickets#628), refused
+ * exception is an address on the blacklist, refused
  * on purpose with the instance's mail address to write to.
  *
  * @param error - The rejected `$fetch`, or `null`/`undefined` on success.

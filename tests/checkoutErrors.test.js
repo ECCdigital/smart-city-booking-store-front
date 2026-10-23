@@ -171,7 +171,7 @@ describe("the refusal of an address on the blacklist", () => {
 });
 
 // The registration answers an address on the blacklist with the checkout's
-// refusal (ECCdigital/tickets#628); the BFF hands its body on.
+// refusal; the BFF hands its body on.
 describe("addressBlacklistedRefusalOf", () => {
   const refusal = (mailAddress) =>
     failure(409, {

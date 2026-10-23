@@ -14,8 +14,8 @@ const loading = ref(false);
 const authStore = useAuthStore();
 const pendingRedirect = useCookie("kc-pending-redirect");
 const { follow: followReturnTarget } = useReturnTarget();
-// The instance's mail address of a refusal on the blacklist
-// (ECCdigital/tickets#628), empty without one; null without a refusal.
+// The instance's mail address of a refusal on the blacklist,
+// empty without one; null without a refusal.
 const blacklistedMailAddress = ref(null);
 
 const {

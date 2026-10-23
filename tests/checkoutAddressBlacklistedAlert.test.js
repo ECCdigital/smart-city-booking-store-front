@@ -11,8 +11,8 @@ import de from "~~/i18n/locales/de.json";
 import en from "~~/i18n/locales/en.json";
 
 // The refusal of an address on the blacklist stays on the review step, and
-// the instance's mail address in it can be written to or copied
-// (ECCdigital/tickets#627). A toast would be gone before either.
+// the instance's mail address in it can be written to or copied.
+// A toast would be gone before either.
 //
 // Nuxt is not booted (see vitest.config.ts): the component's template is
 // compiled and mounted with the state its script would provide.
@@ -127,7 +127,7 @@ describe("the refusal of an address on the blacklist", () => {
 });
 
 // The registration refuses an address on the blacklist with a title and a
-// notice of its own (ECCdigital/tickets#628).
+// notice of its own.
 describe("the refusal of a registration", () => {
   it("says that no registration is possible", () => {
     const { root } = mountAlert("de", OPERATOR, true);

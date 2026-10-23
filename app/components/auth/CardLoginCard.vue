@@ -52,7 +52,7 @@ type State =
 const step = ref<Step>("credentials");
 const state = ref<State>("");
 const errorMessage = ref("");
-/** The instance's mail address of a refusal on the blacklist (ECCdigital/tickets#628), empty without one. */
+/** The instance's mail address of a refusal on the blacklist, empty without one. */
 const blacklistedMailAddress = ref("");
 const loading = ref(false);
 const showSecret = ref(false);

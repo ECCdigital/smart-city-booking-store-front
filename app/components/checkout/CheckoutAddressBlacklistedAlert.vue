@@ -49,10 +49,10 @@
 
 <script setup>
 /**
- * The refusal of an address on the blacklist (ECCdigital/tickets#627): it
+ * The refusal of an address on the blacklist: it
  * stays where the booking is sent, and the instance's mail address in it
  * opens a mail or is copied. Without one it names the operator of the
- * offer. The registration (ECCdigital/tickets#628) shows it with a title
+ * offer. The registration shows it with a title
  * and a notice of its own.
  */
 import { useNotification } from "~/composables/useNotification.js";

@@ -81,7 +81,7 @@ export default defineEventHandler(async (event) => {
             statusCode: error.response?.status || 500,
             statusMessage: error.response?.statusText || "SSO registration failed",
             // The backend's body, e.g. the refusal of an address on the
-            // blacklist with the instance's mail address (ECCdigital/tickets#628).
+            // blacklist with the instance's mail address.
             data: error.data,
         });
     }
