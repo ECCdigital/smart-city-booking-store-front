@@ -9,6 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- The booking details show an attachment as accepted when the checkout required a tick for it (ECCdigital/tickets#641): the checkout does not finish without the tick at a shown, required attachment (`show` and `required` in the booking's `_bookableUsed`), but never sent it, so the backend stored no `accepted` and every attachment showed as not accepted. „Akzeptiert“ shows only at such attachments now, always ticked, and no longer at those that never asked for a tick; the stored `accepted` is not read. Rule in `app/utils/bookingAttachmentAccepted.js`
 - On the phone the map of the Result Page no longer covers the navigation bar (ECCdigital/tickets#310): its `z-10` competed with the sticky bar's, and the later element won. The map, the mobile key's loading spinner and its scan square now keep their `z-10` in a stacking context of their own, as the Kind badge does since ECCdigital/tickets#270
 
 ### Security

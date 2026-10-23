@@ -19,17 +19,14 @@
           }}</span>
         </template>
       </i18n-t>
-      <div v-if="!isPaymentDocument" class="mt-1 flex items-center">
+      <div
+        v-if="!isPaymentDocument && attachment.requiresAcceptance"
+        class="mt-1 flex items-center"
+      >
         {{ $t("booking.accepted") }}
         <UIcon
-          v-if="attachment.accepted"
           name="i-lucide-square-check-big"
           class="ml-1 text-green-600 dark:text-green-500"
-        />
-        <UIcon
-          v-else
-          name="i-lucide-square"
-          class="ml-1 text-red-600 dark:text-red-500"
         />
       </div>
       <div v-if="isPaymentDocument" class="mt-2 text-sm flex items-center">

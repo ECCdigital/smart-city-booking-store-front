@@ -197,6 +197,7 @@ import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { useEventStore } from "~~/stores/event.js";
 import EventTimeInformation from "~/components/events/EventTimeInformation.vue";
+import { requiresAcceptance } from "~/utils/bookingAttachmentAccepted.js";
 import { bookingEventFallback } from "~/utils/bookingEventTimes.js";
 import { bookingParticipationLinkOf } from "~/utils/eventFormat.js";
 import {
@@ -376,9 +377,12 @@ const paymentDocuments = computed(() => {
 });
 
 const otherDocuments = computed(() => {
-  return props.booking.attachments.filter(
-    (attachment) => !PAYMENT_DOCUMENT_TYPES.includes(attachment.type),
-  );
+  return props.booking.attachments
+    .filter((attachment) => !PAYMENT_DOCUMENT_TYPES.includes(attachment.type))
+    .map((attachment) => ({
+      ...attachment,
+      requiresAcceptance: requiresAcceptance(attachment, props.booking),
+    }));
 });
 
 const bookableTitles = computed(() => {
