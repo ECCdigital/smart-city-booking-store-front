@@ -6,7 +6,7 @@
  * the server paints the right one — a wrapper that carries `dark` itself
  * forces it.
  *
- * The auth pages also get a slim navigation bar and the app's footer, so a
+ * The auth pages also get a slim navigation bar and the minimal footer, so a
  * visitor who is not signed in can still reach the start page and the legal
  * documents. The error page goes without them.
  */
@@ -32,7 +32,7 @@ const { data: theme } = await useThemeBundle();
       <div class="flex flex-1">
         <slot />
       </div>
-      <AppFooter v-if="navigation" :tenant-switcher="false" />
+      <AppFooter v-if="navigation" minimal />
     </div>
   </div>
 </template>

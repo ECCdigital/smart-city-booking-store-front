@@ -5,7 +5,8 @@ import { offerSpacesEntryUrl } from "~/utils/authEntryFlow";
 import { useInstanceStore } from "~~/stores/instance.js";
 
 defineProps({
-  tenantSwitcher: { type: Boolean, default: true },
+  /** The auth pages' footer: copyright and links only, no logos and no tenant choice. */
+  minimal: { type: Boolean, default: false },
 });
 
 const documents = useLegalDocuments();
@@ -41,7 +42,7 @@ const footerLogos = computed(() => theme.value?.footerLogos ?? []);
     <!-- Footer logos, funding logos among them: a row of their own above
          copyright and links, only when the instance has any. -->
     <div
-      v-if="footerLogos.length"
+      v-if="!minimal && footerLogos.length"
       data-footer-logos
       class="container border-b border-gray-200 pt-6 pb-5 dark:border-gray-800"
     >
@@ -80,7 +81,7 @@ const footerLogos = computed(() => theme.value?.footerLogos ?? []);
         </nav>
       </div>
 
-      <div v-if="tenantSwitcher" class="flex items-center gap-4 sm:gap-6">
+      <div v-if="!minimal" class="flex items-center gap-4 sm:gap-6">
         <!-- The one place the tenant is always chosen; the bar only names the
              one already in use. It closes the row on the right. -->
         <ClientOnly>
