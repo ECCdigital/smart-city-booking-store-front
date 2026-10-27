@@ -5,7 +5,7 @@ import { offerSpacesEntryUrl } from "~/utils/authEntryFlow";
 import { useInstanceStore } from "~~/stores/instance.js";
 
 defineProps({
-  /** The auth pages' footer: copyright and links only, no logos and no tenant choice. */
+  /** The auth pages' footer: copyright and legal links only, no logos, no "Offer spaces" and no tenant choice. */
   minimal: { type: Boolean, default: false },
 });
 
@@ -58,7 +58,7 @@ const footerLogos = computed(() => theme.value?.footerLogos ?? []);
         </span>
 
         <nav
-          v-if="documents.length || offerSpacesUrl"
+          v-if="documents.length || (!minimal && offerSpacesUrl)"
           class="flex flex-wrap gap-x-6 gap-y-2"
         >
           <a
@@ -72,7 +72,7 @@ const footerLogos = computed(() => theme.value?.footerLogos ?? []);
             {{ $t(`footer.${doc.key}`) }}
           </a>
           <a
-            v-if="offerSpacesUrl"
+            v-if="!minimal && offerSpacesUrl"
             :href="offerSpacesUrl"
             class="text-gray-700 hover:underline dark:text-gray-300"
           >
