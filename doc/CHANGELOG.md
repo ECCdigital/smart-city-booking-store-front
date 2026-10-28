@@ -9,6 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- „Passwort vergessen“ names a hit rate limit (ECCdigital/tickets#302): a `429` of `/api/auth/forgot-password` shows „Zu viele Anfragen“ (`errors.page.tooManyRequests`) instead of the general error; the form stays
 - On the phone the map of the Result Page no longer covers the navigation bar (ECCdigital/tickets#310): its `z-10` competed with the sticky bar's, and the later element won. The map, the mobile key's loading spinner and its scan square now keep their `z-10` in a stacking context of their own, as the Kind badge does since ECCdigital/tickets#270
 
 ### Security
