@@ -7,6 +7,10 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ## [Unreleased]
 
+### Changed
+
+- Notice after the registration ([ECCdigital/tickets#600](https://github.com/ECCdigital/tickets/issues/600)): „Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.“, the same for every address. The signup sends the backend `forgotPasswordUrl`, the storefront's page „Passwort vergessen“ (`/password/forgot` under `NUXT_USER_BASE_URL`); an address with a verified account gets a mail with a button to it from the backend with ECCdigital/tickets#600
+
 ### Fixed
 
 - On the phone the map of the Result Page no longer covers the navigation bar (ECCdigital/tickets#310): its `z-10` competed with the sticky bar's, and the later element won. The map, the mobile key's loading spinner and its scan square now keep their `z-10` in a stacking context of their own, as the Kind badge does since ECCdigital/tickets#270

@@ -301,7 +301,7 @@
     },
     "success": {
       "heading": "Bitte prüfe dein Postfach",
-      "description": "Wenn die angegebene E-Mail-Adresse verwendet werden kann, erhältst du in Kürze eine E-Mail mit einem Bestätigungslink. Bitte bestätige darüber deine E-Mail-Adresse, um dein Konto zu aktivieren.",
+      "description": "Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.",
       "resent": "Wenn die E-Mail-Adresse zu einem noch nicht bestätigten Konto gehört, haben wir den Bestätigungslink erneut gesendet.",
       "spamHint": "Wenn du die E-Mail nicht findest, überprüfe bitte auch deinen Spam- oder Werbeordner.",
       "toHome": "Zur Startseite",
