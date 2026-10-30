@@ -1349,6 +1349,7 @@
   "results": {
     "noLocation": "No location given",
     "noOffers": "No offers found.",
+    "noMatches": "No bookable items or events match the current search criteria.",
     "noneInArea": "No results in this area.",
     "fullscreen": "Full screen",
     "exitFullscreen": "Exit full screen",

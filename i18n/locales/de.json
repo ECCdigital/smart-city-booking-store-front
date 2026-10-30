@@ -1699,6 +1699,7 @@
   "results": {
     "noLocation": "Ohne Ortsangabe",
     "noOffers": "Keine Angebote gefunden.",
+    "noMatches": "Keine Buchungsobjekte oder Events passen zu den aktuellen Suchkriterien.",
     "noneInArea": "Keine Ergebnisse in diesem Bereich.",
     "fullscreen": "Vollbild",
     "exitFullscreen": "Vollbild beenden",
