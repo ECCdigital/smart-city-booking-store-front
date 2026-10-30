@@ -4,6 +4,7 @@ import ForgotPasswordCard from "~/components/auth/ForgotPasswordCard.vue";
 import ForgotPasswordSuccessCard from "~/components/auth/ForgotPasswordSuccessCard.vue";
 import { useAuth } from "~/composables/auth/useAuth";
 import { storefrontUrl } from "~~/shared/utils/storefrontUrl";
+import { rateLimitWait } from "~~/shared/utils/retryAfter";
 
 const form = ref({
   email: "",
@@ -27,11 +28,11 @@ const handleForgotPassword = async () => {
     );
     await forgotPassword(form.value.email, resetUrl);
     success.value = true;
-  } catch {
-    notification.error(
-      t("notifications.forgotPasswordError.message"),
-      t("notifications.forgotPasswordError.title"),
-    );
+  } catch (error) {
+    const key = rateLimitWait(error)
+      ? "errors.page.tooManyRequests"
+      : "notifications.forgotPasswordError";
+    notification.error(t(`${key}.message`), t(`${key}.title`));
   } finally {
     loading.value = false;
   }
