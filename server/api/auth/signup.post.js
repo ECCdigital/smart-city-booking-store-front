@@ -40,7 +40,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-
   try {
     const response = await $fetch(`${API_BASE_URL}/auth/signup`, {
       method: "POST",
@@ -52,6 +51,9 @@ export default defineEventHandler(async (event) => {
         lastName: sanitizedLastname,
         company: sanitizedCompany,
         verifyUrl: storefrontUrl(USER_BASE_URL, "/register/email-verify"),
+        // Linked by the hint an address with an account gets instead of the
+        // verification.
+        forgotPasswordUrl: storefrontUrl(USER_BASE_URL, "/password/forgot"),
         ...(returnTarget ? { nextUrl: returnTarget } : {}),
         ...(legalAcceptance ? { legalAcceptance } : {}),
       },

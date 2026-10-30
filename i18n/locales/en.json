@@ -1440,7 +1440,7 @@
     },
     "success": {
       "heading": "Please check your inbox",
-      "description": "If the address you entered can be used, you will shortly receive an e-mail with a confirmation link. Please use it to confirm your e-mail address and activate your account.",
+      "description": "You will shortly receive an e-mail to complete your registration.",
       "resent": "If the address belongs to an account that is not confirmed yet, we have sent the confirmation link again.",
       "spamHint": "If you cannot find the email, check your spam or promotions folder.",
       "toHome": "To the home page",

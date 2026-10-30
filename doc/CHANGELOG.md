@@ -7,6 +7,9 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ## [Unreleased]
 
+### Changed
+
+- Notice after the registration ([ECCdigital/tickets#600](https://github.com/ECCdigital/tickets/issues/600)): „Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.“, the same for every address. The signup sends the backend `forgotPasswordUrl`, the storefront's page „Passwort vergessen“ (`/password/forgot` under `NUXT_USER_BASE_URL`); an address with a verified account gets a mail with a button to it from the backend with ECCdigital/tickets#600
 ### Added
 
 - The registration says when an address is on the blacklist ([ECCdigital/tickets#628](https://github.com/ECCdigital/tickets/issues/628)): by password, SSO and card it shows „Registrierung nicht möglich“ with „Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wende dich per Mail an …“ and the instance's mail address, or „den Betreiber dieses Angebots“ without one, instead of the neutral confirmation. The BFF routes hand the backend's refusal on. Needs the backend with the same ticket
