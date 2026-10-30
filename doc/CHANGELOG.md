@@ -9,6 +9,8 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Added
 
+- The registration says when an address is on the blacklist ([ECCdigital/tickets#628](https://github.com/ECCdigital/tickets/issues/628)): by password, SSO and card it shows „Registrierung nicht möglich“ with „Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wende dich per Mail an …“ and the instance's mail address, or „den Betreiber dieses Angebots“ without one, instead of the neutral confirmation. The BFF routes hand the backend's refusal on. Needs the backend with the same ticket
+- The checkout says when an address is on the blacklist ([ECCdigital/tickets#627](https://github.com/ECCdigital/tickets/issues/627)): „Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an …“ as a notice on the review step instead of a toast: the instance's mail address is a `mailto:` link with a button to copy it, without one it names „den Betreiber dieses Angebots“ (`checkout.address_blacklisted`). The notice goes when the address changes or the booking is sent again. Needs the backend with the same ticket
 - „Buchung widerrufen“ in the booking details ([ECCdigital/tickets#256](https://github.com/ECCdigital/tickets/issues/256)): left of „Buchung stornieren“, for a live booking of a private customer (no company) within 14 days of the booking. It opens a prepared mail to the tenant, who checks the withdrawal; nothing on the booking changes. Shown where the backend answers `withdrawalUrl` with the booking, so it needs the backend with ECCdigital/tickets#256
 
 ### Fixed
