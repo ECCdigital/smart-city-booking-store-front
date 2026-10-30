@@ -827,7 +827,7 @@
       "failedTitle": "The booking could not be cancelled.",
       "failedText": "Please try again. If the problem persists, contact the provider."
     },
-    "comment": "Your comment",
+    "comment": "Comment",
     "attachmentTypes": {
       "invoice": "Invoice",
       "receipt": "Payment receipt",

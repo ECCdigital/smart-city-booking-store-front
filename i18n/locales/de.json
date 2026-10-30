@@ -1173,7 +1173,7 @@
       "failedTitle": "Die Buchung konnte nicht storniert werden.",
       "failedText": "Bitte versuchen Sie es erneut. Besteht das Problem weiter, wenden Sie sich an den Anbieter."
     },
-    "comment": "Ihr Kommentar",
+    "comment": "Kommentar",
     "attachmentTypes": {
       "invoice": "Rechnung",
       "receipt": "Zahlungsbeleg",
