@@ -6,10 +6,11 @@
 
 import { includesText } from "./textSearch.js";
 
-const PAYMENT_TYPES = ["invoice", "receipt"];
+/** The document types the list shows, in the order of its quick filter. */
+export const PAYMENT_TYPES = ["invoice", "receipt", "cancellation"];
 
 /**
- * The invoices and receipts of the bookings, each named by its title (or file
+ * The invoices, receipts and cancellation receipts of the bookings, each named by its title (or file
  * name) and by the titles of its booking's bookables, joined; empty when the
  * booking names none. `key` tells one document from the others; `tenantId`
  * and `attachment` say where to fetch the document from.
@@ -43,10 +44,12 @@ export function paymentDocumentsOf(bookings) {
 
 /**
  * The documents whose bookables hold the searched text, case and accents
- * aside. An empty query keeps everything.
+ * aside, and of the chosen type. An empty query and no type keep everything.
  */
-export function searchPaymentDocuments(documents, query) {
-  return (documents ?? []).filter((document) =>
-    includesText(document.bookableNames, query),
+export function searchPaymentDocuments(documents, query, type = null) {
+  return (documents ?? []).filter(
+    (document) =>
+      (!type || document.type === type) &&
+      includesText(document.bookableNames, query),
   );
 }

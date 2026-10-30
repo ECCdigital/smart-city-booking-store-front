@@ -1,5 +1,9 @@
 <template>
-  <NuxtLink :to="tenantTo(tab.value)" :class="linkClass">
+  <NuxtLink
+    :to="tenantTo(tab.value)"
+    :class="linkClass"
+    :aria-label="tab.ariaLabel"
+  >
     <div :class="stripeClass" />
     <Icon
       v-if="tab.icon"
@@ -8,14 +12,12 @@
     />
     <span
       v-if="isActive"
-      class="hidden sm:block"
-      :class="labelClass"
+      :class="[labelOnPhone ? 'ml-2 sm:ml-0' : 'hidden sm:block', labelClass]"
       >{{ tab.label }}</span
     >
     <span
       v-if="!isActive"
-      class="hidden sm:inline"
-      :class="labelClass"
+      :class="[labelOnPhone ? 'ml-2 sm:ml-0' : 'hidden sm:inline', labelClass]"
       >{{ tab.label }}</span
     >
   </NuxtLink>
@@ -25,6 +27,11 @@ const props = defineProps({
   tab: {
     type: Object,
     required: true,
+  },
+  /** Keeps the label beside the icon below `sm`, where it is hidden otherwise. */
+  labelOnPhone: {
+    type: Boolean,
+    default: false,
   },
 });
 

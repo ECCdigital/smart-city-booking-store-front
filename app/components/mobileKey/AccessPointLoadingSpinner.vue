@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="relative flex items-center justify-center mb-12">
+    <div class="relative isolate flex items-center justify-center mb-12">
       <div
         class="absolute w-24 h-24 rounded-full bg-primary/30 animate-[ping-soft_2.5s_cubic-bezier(0,0,0.2,1)_infinite]"
       />
