@@ -15,6 +15,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- The booking details show an attachment as accepted when the checkout required a tick for it (ECCdigital/tickets#641): the checkout does not finish without the tick at a shown, required attachment (`show` and `required` in the booking's `_bookableUsed`), but never sent it, so the backend stored no `accepted` and every attachment showed as not accepted. „Akzeptiert“ shows only at such attachments now, always ticked, and no longer at those that never asked for a tick; the stored `accepted` is not read. Rule in `app/utils/bookingAttachmentAccepted.js`
 - A booking cancelled before it was paid and without a cancellation fee (100 % refund) no longer shows „Nicht bezahlt" in the booking list, but „Entfällt"
 
 - With sign-in required, the checkout's „Sie sind eingeloggt“ box no longer offers to finish the booking as a guest; it says the booking is completed with the signed-in account, named as in the navigation bar (ECCdigital/tickets#398). Key `checkout.data.loggedInRequiredDescription`
