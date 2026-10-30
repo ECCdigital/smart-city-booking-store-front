@@ -1,5 +1,6 @@
 <script setup>
 import { useAuthStore } from "~~/stores/auth.js";
+import { useInstanceStore } from "~~/stores/instance.js";
 import { adminEntry } from "~/utils/authEntryFlow";
 
 const { tenantTo } = useTenantRoute();
@@ -8,6 +9,7 @@ const { t } = useI18n();
 
 const config = useRuntimeConfig();
 const authStore = useAuthStore();
+const instanceStore = useInstanceStore();
 const notification = useNotification();
 
 // The name sits on the header bar, so it takes the bar's text colour.
@@ -52,11 +54,15 @@ const items = computed(() => {
         icon: "i-lucide-book-marked",
         onSelect: () => goTo("/account/bookings"),
       },
-      {
-        label: t("navigation.digitalKeys"),
-        icon: "i-lucide-key-round",
-        onSelect: () => goTo("/mobile-key"),
-      },
+      ...(instanceStore.usesDigitalKeys
+        ? [
+            {
+              label: t("navigation.digitalKeys"),
+              icon: "i-lucide-key-round",
+              onSelect: () => goTo("/mobile-key"),
+            },
+          ]
+        : []),
       {
         label: t("navigation.favorites"),
         icon: "i-lucide-book-heart",

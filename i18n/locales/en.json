@@ -372,6 +372,14 @@
     "time_period_mismatch": "A complete time slot must be booked for this object.",
     "insufficient_lead_time": "The booking is too soon. There must be sufficient preparation time within service hours between booking and start.",
     "time_in_past": "The chosen start lies in the past. Please choose a time from now on.",
+    "address_blacklisted": "No booking is possible with this address. If you have questions, please write to {contact}.",
+    "address_blacklisted_operator": "the operator of this offer",
+    "address_blacklisted_title": "Booking not possible",
+    "address_blacklisted_copy": "Copy mail address",
+    "address_blacklisted_copied": "Mail address copied",
+    "address_blacklisted_copy_failed": "The mail address could not be copied. Please select and copy it by hand.",
+    "address_blacklisted_registration": "No registration is possible with this email address. If you have questions, please write to {contact}.",
+    "address_blacklisted_registration_title": "Registration not possible",
     "selectTimePeriodTitle": "Select a time period",
     "selectTimePeriodHint": "Please select a time period first to see the price summary.",
     "maxAmountHint": "Maximum {max} available",
@@ -555,6 +563,7 @@
       "paymentPaid": "Paid",
       "paymentPending": "Unpaid",
       "paymentFree": "Free of charge",
+      "paymentWaived": "Waived",
       "amountLabel": "Amount",
       "bookingStatusError": "This booking could not be loaded.",
       "summaryTotalLabel": "Bookings",
@@ -900,7 +909,8 @@
       },
       "free": "Free of charge",
       "paid": "Paid",
-      "unpaid": "Unpaid"
+      "unpaid": "Unpaid",
+      "waived": "Waived"
     },
     "status": {
       "requested": "Pending",
@@ -1346,6 +1356,7 @@
   "results": {
     "noLocation": "No location given",
     "noOffers": "No offers found.",
+    "noMatches": "No bookable items or events match the current search criteria.",
     "noneInArea": "No results in this area.",
     "fullscreen": "Full screen",
     "exitFullscreen": "Exit full screen",

@@ -13,11 +13,15 @@ import CheckoutContactStep from "~/components/checkout/CheckoutContactStep.vue";
 import CheckoutCustomFields from "~/components/checkout/CheckoutCustomFields.vue";
 import CheckoutPaymentStep from "~/components/checkout/CheckoutPaymentStep.vue";
 import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
+import CheckoutAddressBlacklistedAlert from "~/components/checkout/CheckoutAddressBlacklistedAlert.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useNotification } from "~/composables/useNotification.js";
 import {
   BOOKABLE_NOT_FOUND,
   backendErrorBodyOf,
+  ADDRESS_BLACKLISTED,
+  addressBlacklistedContact,
+  addressBlacklistedMessage,
   resolveCheckoutErrorKey,
   resolveCheckoutFailureKey,
 } from "~/utils/checkoutErrors.js";
@@ -634,6 +638,30 @@ const contactForm = reactive({
   zipCode: "",
   city: "",
 });
+
+// The refusal of an address on the blacklist: the
+// instance's mail address to write to, empty without one, null while there
+// is none. It stays on the review step instead of a toast, so the address
+// can be clicked or copied, until the address changes or the booking is
+// sent again.
+const blacklistRefusal = ref(null);
+const blacklistRefusalAlert = ref(null);
+
+watch(
+  () => contactForm.email,
+  () => {
+    blacklistRefusal.value = null;
+  },
+);
+
+async function showBlacklistRefusal(apiError) {
+  blacklistRefusal.value = addressBlacklistedContact(apiError.params);
+  await nextTick();
+  blacklistRefusalAlert.value?.$el?.scrollIntoView?.({
+    behavior: "smooth",
+    block: "center",
+  });
+}
 
 const customerComment = ref("");
 const attachmentAccepted = ref({});
@@ -2391,7 +2419,9 @@ function messageForStructuredCheckoutError(apiError) {
       ? apiError.params
       : {};
   let core = null;
-  if (typeof reason === "string" && reason) {
+  if (reason === ADDRESS_BLACKLISTED) {
+    core = addressBlacklistedMessage(params, t);
+  } else if (typeof reason === "string" && reason) {
     if (te(reason)) {
       core = t(reason, params);
     } else {
@@ -2467,6 +2497,7 @@ async function handleFinish() {
   if (!canGoNext.value || checkoutSubmitting.value) return;
 
   checkoutSubmitting.value = true;
+  blacklistRefusal.value = null;
   try {
     const payload = isGroupBookingActive.value
       ? buildGroupCheckoutPayload()
@@ -2498,6 +2529,10 @@ async function handleFinish() {
     }
 
     if (data?.success === false && data?.error) {
+      if (resolveCheckoutErrorKey(data.error) === ADDRESS_BLACKLISTED) {
+        await showBlacklistRefusal(data.error);
+        return;
+      }
       notifyError(messageForStructuredCheckoutErrorNotify(data.error));
       return;
     }
@@ -3059,6 +3094,12 @@ function onReviewEdit(section) {
           </template>
 
           <template #step-confirm>
+            <CheckoutAddressBlacklistedAlert
+              v-if="blacklistRefusal !== null"
+              ref="blacklistRefusalAlert"
+              class="mb-6"
+              :mail-address="blacklistRefusal"
+            />
             <CheckoutReviewStep
               v-model:applied-coupon="appliedCouponCode"
               v-model:applied-coupon-details="appliedCouponDetails"

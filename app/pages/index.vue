@@ -40,7 +40,7 @@
 
       <HowBookingWorksArea />
 
-      <MobileKeyArea />
+      <MobileKeyArea v-if="instanceStore.usesDigitalKeys" />
     </div>
   </div>
 </template>
@@ -54,6 +54,7 @@ import HowBookingWorksArea from "~/components/home/HowBookingWorksArea.vue";
 import MobileKeyArea from "~/components/home/MobileKeyArea.vue";
 import TenantOffersArea from "~/components/home/TenantOffersArea.vue";
 import { useTenantStore } from "~~/stores/tenant.js";
+import { useInstanceStore } from "~~/stores/instance.js";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
 import { isTenantNotAvailable } from "~/utils/tenantHome.js";
 
@@ -71,6 +72,7 @@ const { loadBundle } = useCatalogBundle();
 const eventStore = useEventStore();
 const { tenantID, isTenantContext } = useTenant();
 const tenantStore = useTenantStore();
+const instanceStore = useInstanceStore();
 
 const catalogSlug = computed(() => route.params.catalogSlug || null);
 
