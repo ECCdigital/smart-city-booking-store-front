@@ -555,6 +555,7 @@
       "paymentPaid": "Paid",
       "paymentPending": "Unpaid",
       "paymentFree": "Free of charge",
+      "paymentWaived": "Waived",
       "amountLabel": "Amount",
       "bookingStatusError": "This booking could not be loaded.",
       "summaryTotalLabel": "Bookings",
@@ -903,7 +904,8 @@
       },
       "free": "Free of charge",
       "paid": "Paid",
-      "unpaid": "Unpaid"
+      "unpaid": "Unpaid",
+      "waived": "Waived"
     },
     "status": {
       "requested": "Pending",

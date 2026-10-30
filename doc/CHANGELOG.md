@@ -13,6 +13,8 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- A booking cancelled before it was paid and without a cancellation fee (100 % refund) no longer shows „Nicht bezahlt" in the booking list, but „Entfällt"
+
 - With sign-in required, the checkout's „Sie sind eingeloggt“ box no longer offers to finish the booking as a guest; it says the booking is completed with the signed-in account, named as in the navigation bar (ECCdigital/tickets#398). Key `checkout.data.loggedInRequiredDescription`
 - On the phone the map of the Result Page no longer covers the navigation bar (ECCdigital/tickets#310): its `z-10` competed with the sticky bar's, and the later element won. The map, the mobile key's loading spinner and its scan square now keep their `z-10` in a stacking context of their own, as the Kind badge does since ECCdigital/tickets#270
 
