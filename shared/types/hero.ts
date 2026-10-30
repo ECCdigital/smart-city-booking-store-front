@@ -14,6 +14,8 @@
  * the kind of drift this contract exists to prevent.
  */
 
+import type { FooterLogo } from "./footerLogo";
+
 /**
  * A localised string. The locale list is the backend constant `["de", "en"]`:
  * `de` is mandatory, `en` optional. An empty `en` counts as absent, so
@@ -104,6 +106,7 @@ export const HERO_PANEL_COLOR_TOKENS = [
   "black",
   "primary",
   "secondary",
+  "accent",
 ] as const;
 
 export type HeroPanelColorToken = (typeof HERO_PANEL_COLOR_TOKENS)[number];
@@ -175,6 +178,7 @@ export const HERO_COLOR_TOKENS = [
   "default",
   "primary",
   "secondary",
+  "accent",
   "white",
 ] as const;
 
@@ -272,13 +276,52 @@ export interface HeroRichtextBlock extends HeroBlockBase {
   shadow: boolean;
 }
 
-export interface HeroImageBlock extends HeroBlockBase {
+/** An image as the export resolves it: its address and, when measured, its dimensions. */
+export interface HeroImageAddress {
+  url: string;
+  width?: number;
+  height?: number;
+}
+
+/**
+ * An image Block's reference to the app logo instead of a medium of its own,
+ * so the Block follows a new app logo. It is stored as `{ source: "app-logo" }`
+ * alone, without a `mediaId`. The export puts in `url`, `width` and `height`
+ * of the app logo and, under `dark`, those of its variant for the dark mode;
+ * without an app logo, or with the theme switched off, it puts in none, and
+ * the Block shows no image. Only image Blocks take it, never the Background.
+ */
+export interface HeroAppLogoReference {
+  source: "app-logo";
+  url?: string;
+  width?: number;
+  height?: number;
+  /** The variant for the dark mode; absent without one. */
+  dark?: HeroImageAddress;
+}
+
+/** The fields every image Block carries, whatever its image follows. */
+interface HeroImageBlockBase extends HeroBlockBase {
   type: "image";
-  image: HeroMediaReference;
   alt: LocalizedString;
   maxHeight: HeroImageMaxHeight;
+}
+
+/** An image Block showing a medium of the library, inverted in dark mode when asked. */
+export interface HeroMediaImageBlock extends HeroImageBlockBase {
+  image: HeroMediaReference;
   invertInDarkMode: boolean;
 }
+
+/**
+ * An image Block following the app logo. It has no switch for the dark mode:
+ * the app logo's rule applies — its variant, or inverted without one.
+ */
+export interface HeroAppLogoImageBlock extends HeroImageBlockBase {
+  image: HeroAppLogoReference;
+}
+
+export type HeroImageBlock = HeroMediaImageBlock | HeroAppLogoImageBlock;
 
 export type HeroBlock = HeroTextBlock | HeroRichtextBlock | HeroImageBlock;
 
@@ -385,7 +428,34 @@ export interface ThemeView {
   heroLayout: HeroLayout | null;
   background: Background | null;
   logo: HeroMediaReference | null;
+  /**
+   * The variant of the logo the dark mode shows in its place, or `null`: then
+   * the logo is inverted in the dark mode, as before the variant.
+   */
+  logoDark: HeroMediaReference | null;
+  /** The height step of the logo in the auth cards; S unless the bundle says otherwise. */
+  authLogoSize: AuthLogoSize;
+  /** The logos of the footer row, in order; empty when there is no row. */
+  footerLogos: FooterLogo[];
+  /** The instance font's file for the preload; `null` for the system font. */
+  font: ThemeViewFont | null;
 }
+
+/** The instance font as the client sees it: only the URL on the storefront. */
+export interface ThemeViewFont {
+  href: string;
+}
+
+/**
+ * The S/M/L steps of a logo the instance sizes: in the auth cards 56, 96 or
+ * 160 px high, in the footer 48, 80 or 120 px.
+ */
+export const LOGO_SIZES = ["sm", "md", "lg"] as const;
+
+export type LogoSize = (typeof LOGO_SIZES)[number];
+
+/** The step of the logo in the auth cards. */
+export type AuthLogoSize = LogoSize;
 
 /**
  * The Live Preview protocol between the admin's Hero Editor and the storefront

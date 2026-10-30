@@ -95,7 +95,7 @@
       "accountBookingDetail": "Booking details",
       "accountKeys": "Keys",
       "accountKeyDetail": "Key details",
-      "accountInvoices": "Invoices",
+      "accountInvoices": "Documents",
       "accountFavorites": "Favorites",
       "accountSettings": "Settings",
       "accountAppearance": "Appearance",
@@ -109,6 +109,7 @@
       "notFound": "Page not found",
       "forbidden": "Access denied",
       "serverError": "Server error",
+      "tooManyRequests": "Too many requests",
       "error": "Error",
       "close": "Close"
     }
@@ -226,7 +227,7 @@
     "accountBookings": "My bookings",
     "activities": "Activities",
     "digitalKeys": "Keys",
-    "invoices": "Invoices",
+    "invoices": "Documents",
     "account": "Account",
     "resources": "Resources",
     "user": "User",
@@ -288,6 +289,10 @@
       "serverError": {
         "title": "Server error",
         "message": "An internal error occurred. Please try again later."
+      },
+      "tooManyRequests": {
+        "title": "Too many requests",
+        "message": "Your network sent a great many requests in a short time. Please try again in a few minutes."
       },
       "generic": {
         "title": "An error occurred",
@@ -395,6 +400,7 @@
       "loginAction": "Sign in now",
       "loggedInTitle": "You are signed in",
       "loggedInDescription": "You can sign out and continue this booking as a guest instead.",
+      "loggedInRequiredDescription": "This booking requires sign-in and will be completed with your signed-in account ({name}).",
       "logoutGuestAction": "Sign out and continue as guest",
       "customFieldsSectionTitle": "Additional details",
       "customFieldSelectPlaceholder": "Please select",
@@ -756,7 +762,12 @@
     "eventTime": "Event time",
     "priceLabel": "Price:",
     "downloadAppointment": "Download appointment",
+    "actionsFor": "Actions for booking #{id}",
     "downloadAppointmentTooltip": "Download as an appointment",
+    "withdrawal": {
+      "action": "Withdraw from booking",
+      "hint": "Opens a prepared email to the provider. The provider checks your withdrawal and gets back to you."
+    },
     "cancellation": {
       "action": "Cancel booking",
       "title": "Cancel booking",
@@ -818,7 +829,7 @@
       "failedTitle": "The booking could not be cancelled.",
       "failedText": "Please try again. If the problem persists, contact the provider."
     },
-    "comment": "Your comment",
+    "comment": "Comment",
     "attachmentTypes": {
       "invoice": "Invoice",
       "receipt": "Payment receipt",
@@ -855,6 +866,8 @@
       "all": "All",
       "filterBy": "Filter by:",
       "sortBy": "Sort by:",
+      "filterButton": "Filter bookings",
+      "sortButton": "Sort bookings",
       "activeBookings": "Active bookings",
       "status": "Status:",
       "confirmed": "Confirmed",
@@ -925,6 +938,8 @@
     "appearanceLight": "Light",
     "changesSaved": "Changes saved",
     "changesSavedMessage": "Your changes have been saved.",
+    "changesSaveFailed": "Saving failed",
+    "changesSaveFailedMessage": "Your changes could not be saved. Please try again.",
     "passwordMismatch": "The passwords you entered do not match.",
     "passwordChangeFailed": "Password change failed",
     "passwordChangeFailedMessage": "Your password could not be changed. Please try again.",
@@ -949,12 +964,19 @@
     },
     "unknownTenant": "Unknown",
     "invoices": {
-      "title": "My invoices and receipts",
+      "title": "My documents",
       "emptyTitle": "No invoices available",
       "emptyDescription": "There are currently no invoices for your account. Once invoices have been created, they will appear here.",
       "unknownBookable": "Unknown bookable",
       "searchPlaceholder": "Search by bookable",
-      "noMatches": "No documents match your search.",
+      "noMatches": "No documents match your search or the chosen filter.",
+      "quickFilter": {
+        "label": "Filter by document type",
+        "tooltip": "Filter by {type}",
+        "invoice": "Invoices",
+        "receipt": "Receipts",
+        "cancellation": "Cancellation receipts"
+      },
       "columns": {
         "createdAt": "Created",
         "title": "Title",
@@ -974,6 +996,7 @@
       "types": {
         "invoice": "Invoice",
         "receipt": "Receipt",
+        "cancellation": "Cancellation receipt",
         "unknown": "Unknown"
       }
     }
@@ -1182,6 +1205,12 @@
       "door_unreachable": {
         "title": "{label} not reachable",
         "description": "The lock is not responding right now. This may be due to the connection on site."
+      },
+      "open_temporary": {
+        "title": "Not possible right now",
+        "description": "{label} cannot be opened at the moment. Please try again from {time}.",
+        "description_undated": "{label} cannot be opened at the moment. Please try again in a few minutes.",
+        "summary": "Not possible right now · from {time}"
       },
       "open_unconfirmed": {
         "title": "Opening not confirmed",

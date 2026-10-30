@@ -23,7 +23,7 @@
           v-if="isBookableAndMatch"
           :label="$t('bookableDetail.book')"
           class="justify-center px-2 md:px-5"
-          :style="{ color: contrastToPrimary }"
+          style="color: var(--ui-primary-contrast)"
           @click="goToCheckout()"
         />
         <UButton
@@ -59,7 +59,6 @@ const props = defineProps({
 const {
   isBookableAndMatch,
   showAvailabilityResult,
-  contrastToPrimary,
   goToCheckout,
 } = useBookableDetailContent(() => props.item);
 </script>

@@ -4,7 +4,7 @@
       variant="ghost"
       color="neutral"
       class="flex h-12 items-center px-2 sm:px-3 font-bold hover:bg-current/15! active:bg-current/20!"
-      :style="{ color: contrastToPrimary }"
+      style="color: var(--ui-header-contrast)"
       :aria-label="actionLabel"
       @click="toggle"
     >
@@ -14,9 +14,6 @@
 </template>
 
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
-
-const { contrastToPrimary } = useContrastColor();
 const { t, locale, locales, setLocale } = useI18n();
 
 const targetLocale = computed(() => (locale.value === "en" ? "de" : "en"));

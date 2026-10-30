@@ -162,7 +162,7 @@ body {
 
 /*
  * The class vocabulary of rendered rich text, painted: the steps of the text
- * scale, the four named colours and a paragraph's own alignment. Those are
+ * scale, the five named colours and a paragraph's own alignment. Those are
  * everything a run of words may still carry after the class pass
  * (`shared/utils/heroRichtextAllowlist.ts`), and none of them can be a
  * utility class the way a Block's own fields are — the markup is a string
@@ -249,10 +249,10 @@ body {
 }
 
 /*
- * The four named colours, resolved the way a Block resolves its own: the
+ * The five named colours, resolved the way a Block resolves its own: the
  * theme's `--ui-primary` / `--ui-secondary` from the stylesheet route behind
- * `text-primary` and `text-secondary`, and `default` following the colour
- * mode. There is no `hero-color-black`; a run that names nothing inherits the
+ * `text-primary` and `text-secondary`, `--ui-accent` with primary as its
+ * fallback, and `default` following the colour mode. There is no `hero-color-black`; a run that names nothing inherits the
  * Block's colour, which is the whole of "follows the Block".
  *
  * A `data-color` run needs no rule at all: the class pass writes the
@@ -269,6 +269,10 @@ body {
 
 .hero-richtext span.hero-color-secondary {
     @apply text-secondary;
+}
+
+.hero-richtext span.hero-color-accent {
+    @apply text-[color:var(--ui-accent,var(--ui-primary))];
 }
 
 .hero-richtext span.hero-color-white {

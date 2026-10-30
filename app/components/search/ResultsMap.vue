@@ -5,8 +5,13 @@
     container ("Map container not found"), and a search with no placeable
     result then never got a map to centre on the address.
   -->
+  <!--
+    `isolate` keeps the map's `z-10` (and Leaflet's panes) in a stacking
+    context of their own; otherwise the map, coming later in the page, slid
+    over the sticky navigation bar's `z-10` on the phone.
+  -->
   <div
-    class="results-map"
+    class="results-map isolate"
     :class="
       isFullscreen
         ? 'fixed inset-0 z-[1000] bg-neutral-50 dark:bg-gray-950'
@@ -113,7 +118,7 @@
               :class="
                 showList ? 'bg-primary/80' : 'glass text-black dark:text-white'
               "
-              :style="showList ? { color: contrastToPrimary } : undefined"
+              :style="showList ? { color: 'var(--ui-primary-contrast)' } : undefined"
               @click="showList = !showList"
             />
             <slot name="filter" />
@@ -171,9 +176,7 @@ import ResultsMapMarkerPopup from "~/components/search/ResultsMapMarkerPopup.vue
 import ResultsMapMarkerTooltip from "~/components/search/ResultsMapMarkerTooltip.vue";
 import ResultsMapMobilePopup from "~/components/search/ResultsMapMobilePopup.vue";
 import ResultsMapList from "~/components/search/ResultsMapList.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
-const { contrastToPrimary } = useContrastColor();
 
 const props = defineProps({
   bookables: {

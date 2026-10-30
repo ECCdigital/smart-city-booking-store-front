@@ -9,7 +9,7 @@
       :aria-label="$t('common.actions')"
       size="xl"
       class="justify-center px-3"
-      :style="{ color: contrastToPrimary, cursor: 'pointer' }"
+      style="color: var(--ui-primary-contrast); cursor: pointer"
     />
   </UDropdownMenu>
 </template>
@@ -31,11 +31,7 @@ const props = defineProps({
   },
 });
 
-const {
-  contrastToPrimary,
-
-  goToRelatedItems,
-} = useBookableDetailContent(() => props.item, props.isEvent);
+const { goToRelatedItems } = useBookableDetailContent(() => props.item, props.isEvent);
 const { downloadEventIcal } = useIcalDownload();
 
 const notification = useNotification();

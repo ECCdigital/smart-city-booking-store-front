@@ -46,10 +46,14 @@ import {
   type Background,
   type BackgroundFocalPoint,
   type BackgroundOverlay,
+  type HeroAppLogoReference,
   type HeroBlock,
+  type HeroBlockBase,
   type HeroBlockOffset,
   type HeroColor,
   type HeroColorToken,
+  type HeroImageAddress,
+  type HeroImageBlock,
   type HeroLayout,
   type HeroMediaReference,
   type HeroPanel,
@@ -268,16 +272,56 @@ function readMediaReference(
   const mediaId = readString(source.mediaId, `${path}.mediaId`);
   if (mediaId.trim() === "") fail(`${path}.mediaId`, "required");
 
-  const reference: HeroMediaReference = { source: "media", mediaId };
+  return { source: "media", mediaId, ...readImageAddress(source, path) };
+}
+
+/**
+ * The keys the export derives for an image: its address, kept when present,
+ * and its dimensions, kept when they are whole and positive. `null`
+ * dimensions mean the medium has not been measured yet, which the renderer
+ * handles by reserving height only.
+ */
+function readImageAddress(
+  source: Record<string, unknown>,
+  path: string,
+): Partial<HeroImageAddress> {
+  const address: Partial<HeroImageAddress> = {};
 
   if (isPresent(source.url)) {
-    reference.url = readString(source.url, `${path}.url`);
+    address.url = readString(source.url, `${path}.url`);
   }
   for (const key of ["width", "height"] as const) {
     const dimension = source[key];
     if (typeof dimension !== "number" || !Number.isInteger(dimension)) continue;
     if (dimension <= 0) continue;
-    reference[key] = dimension;
+    address[key] = dimension;
+  }
+
+  return address;
+}
+
+/**
+ * An image Block's reference to the app logo. The backend has put in the
+ * app logo's address and dimensions and, under `dark`, its variant's; every
+ * one of them is `null` without an app logo, and an absent key here is the
+ * same answer. A variant without an address has nothing to show and counts
+ * as none. A `mediaId` that came along is ignored like any unknown key.
+ */
+function readAppLogoReference(
+  source: Record<string, unknown>,
+  path: string,
+): HeroAppLogoReference {
+  const reference: HeroAppLogoReference = {
+    source: "app-logo",
+    ...readImageAddress(source, path),
+  };
+
+  if (isPresent(source.dark)) {
+    const dark = readImageAddress(
+      readObject(source.dark, `${path}.dark`),
+      `${path}.dark`,
+    );
+    if (dark.url) reference.dark = { ...dark, url: dark.url };
   }
 
   return reference;
@@ -470,28 +514,47 @@ function readBlock(value: unknown, path: string): HeroBlock {
         shadow: readBoolean(source.shadow, `${path}.shadow`, false),
       };
     case "image":
-      return {
-        ...common,
-        type,
-        image: readMediaReference(source.image, `${path}.image`),
-        alt: readLocalizedString(
-          source.alt,
-          `${path}.alt`,
-          HERO_TEXT_MAX_LENGTH,
-        ),
-        maxHeight: readEnum(
-          source.maxHeight,
-          `${path}.maxHeight`,
-          HERO_IMAGE_MAX_HEIGHTS,
-          "md",
-        ),
-        invertInDarkMode: readBoolean(
-          source.invertInDarkMode,
-          `${path}.invertInDarkMode`,
-          false,
-        ),
-      };
+      return readImageBlock(source, path, common);
   }
+}
+
+/**
+ * The image-specific half of an image Block. One that follows the app logo
+ * takes the app logo's rule for the dark mode, so it has no switch of its
+ * own: an `invertInDarkMode` the export carries anyway is ignored like any
+ * unknown key rather than failing the layout.
+ */
+function readImageBlock(
+  source: Record<string, unknown>,
+  path: string,
+  common: HeroBlockBase,
+): HeroImageBlock {
+  const fields = {
+    ...common,
+    type: "image" as const,
+    alt: readLocalizedString(source.alt, `${path}.alt`, HERO_TEXT_MAX_LENGTH),
+    maxHeight: readEnum(
+      source.maxHeight,
+      `${path}.maxHeight`,
+      HERO_IMAGE_MAX_HEIGHTS,
+      "md",
+    ),
+  };
+
+  const image = readObject(source.image, `${path}.image`);
+  if (image.source === "app-logo") {
+    return { ...fields, image: readAppLogoReference(image, `${path}.image`) };
+  }
+
+  return {
+    ...fields,
+    image: readMediaReference(image, `${path}.image`),
+    invertInDarkMode: readBoolean(
+      source.invertInDarkMode,
+      `${path}.invertInDarkMode`,
+      false,
+    ),
+  };
 }
 
 function readHeroLayout(value: unknown, path: string): HeroLayout {
@@ -648,20 +711,23 @@ export function parseHeroLayout(
 }
 
 /**
- * Reads the enriched media reference the Theme Bundle exports for the logo.
+ * Reads an enriched media reference the Theme Bundle exports on its own: the
+ * logo and its variant for the dark mode.
  *
- * The Blocks carry their own references through {@link parseHeroLayout}; this
- * is the one reference that stands on its own in the Theme View.
+ * The Blocks carry their own references through {@link parseHeroLayout};
+ * these are the references that stand on their own in the Theme View.
  *
- * @param input - Untrusted JSON: the `logo` of a Theme Bundle export.
+ * @param input - Untrusted JSON: the `logo` or `logoDark` of a Theme Bundle export.
  * @param options - Where to report the first failing field.
+ * @param path - The field of the bundle the reference was read from.
  * @returns The reference, or `null`.
  */
 export function parseHeroMediaReference(
   input: unknown,
   options: HeroParseOptions = {},
+  path = "logo",
 ): HeroMediaReference | null {
-  return guard((path) => readMediaReference(input, path), "logo", options);
+  return guard((at) => readMediaReference(input, at), path, options);
 }
 
 /**

@@ -7,7 +7,7 @@ const defaultTheme = {
   secondary: "#10b981",
 };
 
-/** The stylesheet of one catalog slug. See `css.get.js` for the caching. */
+/** The stylesheet of one catalog slug. See `../css.get.js` for the caching. */
 export default defineEventHandler(async (event) => {
   // The slug sits in the file name of the path, not in a whole segment, so it
   // is read from the URL rather than from a router param. The versioned link
@@ -23,6 +23,7 @@ export default defineEventHandler(async (event) => {
   return renderThemeCss({
     etag: entry?.etag ?? "default",
     colors: entry?.bundle?.theme?.colors,
+    header: entry?.bundle?.header,
     defaults: defaultTheme,
   });
 });

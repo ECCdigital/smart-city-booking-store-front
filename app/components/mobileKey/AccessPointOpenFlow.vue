@@ -137,6 +137,7 @@
         :tenant-id="tenantId"
         :blocking-reason="view.blockingReason"
         :access-point-id="accessPoint.id"
+        :retry-after="result?.retryAfter ?? null"
         @retry="retryFailure"
       />
     </div>
@@ -152,7 +153,7 @@
       class="flex items-center justify-center gap-2 text-sm text-neutral-500"
     >
       <UIcon :name="passedFailure.icon" class="shrink-0" />
-      <span>{{ passedFailure.title }}</span>
+      <span>{{ passedFailure.summary }}</span>
     </p>
 
     <!--
@@ -194,10 +195,11 @@ import AccessPointStepper from "~/components/mobileKey/AccessPointStepper.vue";
 import SupportContactLine from "~/components/mobileKey/SupportContactLine.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { useAccessNow } from "~/composables/useAccessClock.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 import {
   ACCESS_ERROR_SCREENS,
-  buildErrorScreen,
   failureMayPass,
+  passedFailureScreen,
 } from "~/utils/accessErrorScreens.js";
 import {
   ACCESS_ERRORS,
@@ -254,6 +256,7 @@ const emit = defineEmits(["status"]);
 
 const { open, close, getStatus, pollOpenStatus } = useAccessPoints();
 const { t } = useI18n();
+const format = useFormatting();
 
 /** `undefined` while nobody has read one, `null` when there was none to read. */
 const status = ref(undefined);
@@ -365,10 +368,10 @@ let passRun = 0;
 let mounted = true;
 
 /**
- * The failure whose screen has already passed, still named under the button
- * that repeats it - until the next action begins.
+ * The failed result whose screen has already passed, still named under the
+ * button that repeats it - until the next action begins.
  */
-const passedFailureKind = ref(null);
+const passedResult = ref(null);
 
 /**
  * The proof the scanner collected in *this* session - the one thing about
@@ -413,7 +416,9 @@ const view = computed(() =>
  * that speaks about one.
  */
 const failureInTheRoom = computed(() =>
-  view.value.stage === "error" ? view.value.error : passedFailureKind.value,
+  view.value.stage === "error"
+    ? view.value.error
+    : (passedResult.value?.error ?? null),
 );
 
 /**
@@ -426,14 +431,16 @@ const supportContactExpanded = computed(
     Boolean(ACCESS_ERROR_SCREENS[failureInTheRoom.value]?.help),
 );
 
-/** The passed failure by name and sign, in the table's own words. */
+/**
+ * The passed failure by name and sign, in the table's own words - with the
+ * time to try again where the result named one.
+ */
 const passedFailure = computed(() =>
-  passedFailureKind.value
-    ? buildErrorScreen(passedFailureKind.value, {
-        t,
-        label: accessPointLabel.value,
-      })
-    : null,
+  passedFailureScreen(passedResult.value, {
+    t,
+    label: accessPointLabel.value,
+    format,
+  }),
 );
 
 /**
@@ -748,7 +755,7 @@ function beginAction(kind) {
   stopBusyRead();
   action.value = kind;
   result.value = null;
-  passedFailureKind.value = null;
+  passedResult.value = null;
   busyNotice.value = false;
 }
 
@@ -777,7 +784,7 @@ async function letResultPass() {
     return;
   }
 
-  passedFailureKind.value = failure;
+  passedResult.value = failure ? result.value : null;
   result.value = null;
 }
 
