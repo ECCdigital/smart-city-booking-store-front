@@ -315,22 +315,14 @@ const requiresManualApproval = computed(() => {
   return v === false || v === "false" || v === 0 || v === "0";
 });
 
-const typeLabels = computed(() => ({
-  room: t("booking.typeRoom"),
-  resource: t("booking.typeResource"),
-  ticket: t("booking.typeTicket"),
-  event: t("booking.typeEvent"),
-}));
-
 const checkoutNavTab = useState("checkoutNavTab", () => {});
 
 watch(
   [leadBookable, () => locale.value],
-  ([b]) => {
-    const type = b?.type;
+  () => {
     const bookableID = route.params.bookableID;
     const tenantID = route.query.tenantId;
-    const label = typeLabels.value[type] || type || "";
+    const label = t("booking.booking");
 
     if (!bookableID || !tenantID) {
       checkoutNavTab.value = { label, url: "" };

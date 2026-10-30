@@ -37,6 +37,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Changed
 
+- The navigation bar in the checkout shows „Buchung“ for every kind of bookable instead of „Raumbuchung“, „Ticketbuchung“ and the like
 - „Digitale Schlüssel“ in the side menu, the user menu and on „Meine Buchungen“, and the start page's „Türen öffnen mit dem Smartphone“, show only when the public instance reports `usesDigitalKeys: true` (ECCdigital/tickets#460). Needs the backend field from ECCdigital/tickets#459; without it they stay hidden. `/mobile-key` itself stays reachable by its address
 - `/search` no longer stays empty when no Offer matches the search: it says „Keine Buchungsobjekte oder Events passen zu den aktuellen Suchkriterien.“ with a magnifier icon. The list, grid and map left out the non-matching Offers unless „Nicht passende Angebote anzeigen“ was on, so the old „Keine Angebote gefunden.“ never showed. Key `results.noMatches`
 - The detail page of a bookable or event that is not available leads „Zur Startseite“ instead of „Zurück“ to `/search`. It goes to a plain `/`, without the current query or the tenant path
