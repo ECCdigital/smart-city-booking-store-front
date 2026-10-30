@@ -1,5 +1,6 @@
 import { adminOrigin } from "~~/shared/utils/adminOrigin";
 import { parseReturnTarget } from "~~/shared/utils/returnTarget";
+import { storefrontUrl } from "~~/shared/utils/storefrontUrl";
 import { clientIpHeaders, throwIfRateLimited } from "~~/server/utils/rateLimit";
 
 /**
@@ -35,7 +36,7 @@ export default defineEventHandler(async (event) => {
       headers: clientIpHeaders(event),
       body: {
         id: sanitizedEmail,
-        verifyUrl: `${USER_BASE_URL}/register/email-verify`,
+        verifyUrl: storefrontUrl(USER_BASE_URL, "/register/email-verify"),
         ...(returnTarget ? { nextUrl: returnTarget } : {}),
       },
     });

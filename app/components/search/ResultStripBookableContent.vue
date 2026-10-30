@@ -96,7 +96,7 @@
               class="justify-center px-10"
               :disabled="isNotBookable"
               :style="{
-                color: contrastToPrimary,
+                color: 'var(--ui-primary-contrast)',
                 cursor: isNotBookable ? '' : 'pointer',
               }"
               @click="goToCheckout"
@@ -113,7 +113,7 @@
             :label="$t('bookableDetail.viewDetails')"
             variant="solid"
             class="justify-center px-10 text-color-dark dark:text-color-light"
-            :style="{ cursor: 'pointer', color: contrastToPrimary }"
+            style="cursor: pointer; color: var(--ui-primary-contrast)"
             @click="openDetails"
           />
         </div>
@@ -126,7 +126,6 @@ import AddressInformation from "~/components/AddressInformation.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 
 const props = defineProps({
@@ -187,7 +186,6 @@ const hasFlags = computed(() => (props.bookable?.flags?.length ?? 0) > 0);
 
 const { getTenantName } = useTenant();
 
-const { contrastToPrimary } = useContrastColor();
 
 function openDetails() {
   emit("openDetails", props.bookable.id, props.bookable.type);

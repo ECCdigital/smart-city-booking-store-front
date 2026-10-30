@@ -5,7 +5,7 @@
       variant="ghost"
       color="neutral"
       class="flex h-12 items-center px-2 sm:px-3 hover:bg-current/15! active:bg-current/20!"
-      :style="{ color: contrastToPrimary }"
+      style="color: var(--ui-header-contrast)"
       :aria-label="t('colorMode.toggle')"
       :aria-pressed="isDark"
       @click="toggle"
@@ -14,9 +14,6 @@
 </template>
 
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
-
-const { contrastToPrimary } = useContrastColor();
 const { t } = useI18n();
 
 // The only holder of the colour mode is colorMode.preference -- no local ref, no

@@ -3,6 +3,8 @@ export type PortalMode = "offers" | "personal";
 export interface ThemeColors {
   primary?: string;
   secondary?: string;
+  /** `""` when the instance set no accent. */
+  accent?: string;
 }
 
 export interface Theme {
@@ -34,12 +36,29 @@ export interface ThemeBundle {
   visibility?: "public" | "private" | "unlisted";
   logoUrl?: string;
   faviconUrl?: string;
+  /**
+   * The colour of the header bar. The backend sends `"primary"` when the
+   * branding is switched off; the stylesheet reads anything else as primary.
+   */
+  header?: "neutral" | "primary" | "secondary";
   /** The Catalog's name — the Portal Name for the instance catalog. */
   name?: string;
   /** Validated by `parseHeroLayout`; shapes are in `shared/types/hero.ts`. */
   heroLayout?: unknown;
   background?: unknown;
   logo?: unknown;
+  /** The variant of the logo for the dark mode, read like `logo`. */
+  logoDark?: unknown;
+  /** The height step of the logo in the auth cards, read by `buildThemeView`. */
+  authLogoSize?: unknown;
+  /** The logos of the footer row, read by `parseFooterLogos`. */
+  footerLogos?: unknown;
+  /**
+   * The instance font: `{ source: "curated", id }`, `{ source: "media",
+   * reference: { url, name, size, … } }`, or `null` for the system font.
+   * Read by `server/utils/themeFont.ts`.
+   */
+  font?: unknown;
 }
 
 export interface CatalogData {

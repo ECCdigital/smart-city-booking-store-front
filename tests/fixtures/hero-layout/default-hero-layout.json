@@ -17,10 +17,9 @@
       "layer": "back",
       "homeOnly": false,
       "hideOnMobile": false,
-      "image": { "source": "media", "mediaId": "66f1c2000000000000000001" },
+      "image": { "source": "app-logo" },
       "alt": { "de": "Marktplatz" },
-      "maxHeight": "sm",
-      "invertInDarkMode": true
+      "maxHeight": "sm"
     },
     {
       "id": "default-title",

@@ -14,6 +14,7 @@ const { t } = useI18n();
 const errorConfig: Record<number, { key: string; icon: string }> = {
   404: { key: "errors.page.notAvailable", icon: "i-lucide-search" },
   403: { key: "errors.page.forbidden", icon: "i-lucide-lock" },
+  429: { key: "errors.page.tooManyRequests", icon: "i-lucide-hourglass" },
   500: { key: "errors.page.serverError", icon: "i-lucide-cog" },
   502: { key: "errors.page.serverError", icon: "i-lucide-cog" },
   503: { key: "errors.page.serverError", icon: "i-lucide-cog" },
@@ -29,6 +30,7 @@ const pageTitle = computed(() => {
   const code = props.error?.statusCode;
   if (code === 404) return t("meta.pages.notFound");
   if (code === 403) return t("meta.pages.forbidden");
+  if (code === 429) return t("meta.pages.tooManyRequests");
   if (code === 500) return t("meta.pages.serverError");
   return t("meta.pages.error");
 });
@@ -38,7 +40,7 @@ usePageTitle(pageTitle);
 
 <template>
   <!-- `dark` on the wrapper forces the dark palette whatever the visitor's colour mode -->
-  <PageBackground class="error-page dark">
+  <PageBackground class="error-page dark" :navigation="false">
     <div class="error-card">
       <UIcon
         size="48"

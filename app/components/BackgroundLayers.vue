@@ -324,8 +324,9 @@ useHead({
   fill: rgb(var(--bg-base));
 }
 
+/* The instance's accent when it set one, the palette's indigo otherwise. */
 .poly-accent {
-  fill: rgb(var(--bg-accent));
+  fill: var(--ui-accent, rgb(var(--bg-accent)));
 }
 
 .poly-line {
@@ -406,7 +407,8 @@ useHead({
   height: 450px;
   bottom: 10%;
   left: 25%;
-  background: var(--bg-tertiary-from);
+  /* The instance's accent when it set one, the palette's violet otherwise. */
+  background: var(--ui-accent, var(--bg-tertiary-from));
   animation-delay: -18s;
 }
 

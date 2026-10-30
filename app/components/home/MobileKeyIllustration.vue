@@ -48,7 +48,7 @@
         >
           <div
             class="w-21 h-21 rounded-full bg-primary flex items-center justify-center"
-            :style="{ color: contrastToPrimary }"
+            style="color: var(--ui-primary-contrast)"
           >
             <UIcon name="i-lucide-lock-open" size="36" />
           </div>
@@ -68,10 +68,8 @@
 </template>
 
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 
-const { contrastToPrimary } = useContrastColor();
 const { formatTime } = useFormatting();
 
 // The sample key is valid today, 09:00–12:00.

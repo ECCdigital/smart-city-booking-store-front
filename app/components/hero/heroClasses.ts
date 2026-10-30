@@ -26,6 +26,7 @@ import type {
   HeroBlockWidth,
   HeroColorToken,
   HeroHeight,
+  HeroImageAddress,
   HeroImageBlock,
   HeroImageMaxHeight,
   HeroPanel,
@@ -233,11 +234,14 @@ export const HERO_IMAGE_HEIGHT_CLASSES: Record<HeroImageMaxHeight, string> = {
 /**
  * The named colours. `primary` and `secondary` are the theme's colours from
  * the stylesheet route; a hex colour is the one text value that goes inline.
+ * `accent` falls back to primary: the stylesheet declares `--ui-accent` only
+ * when the instance set one.
  */
 export const HERO_COLOR_CLASSES: Record<HeroColorToken, string> = {
   default: "text-black dark:text-white",
   primary: "text-primary",
   secondary: "text-secondary",
+  accent: "text-[color:var(--ui-accent,var(--ui-primary))]",
   white: "text-white",
 };
 
@@ -291,6 +295,8 @@ const HERO_PANEL_COLOR_VALUES: Record<HeroPanelColorToken, string> = {
   black: "#000000",
   primary: "var(--ui-primary)",
   secondary: "var(--ui-secondary)",
+  // Declared only when the instance set an accent; primary otherwise.
+  accent: "var(--ui-accent, var(--ui-primary))",
 };
 
 /**
@@ -540,11 +546,12 @@ export function blockColorStyle(
   return isHeroColorToken(block.color) ? undefined : { color: block.color };
 }
 
-/** What an image is rendered from: its reference, its height step and the dark-mode toggle. */
-export type HeroImageOptions = Pick<
-  HeroImageBlock,
-  "image" | "maxHeight" | "invertInDarkMode"
->;
+/** What an image is rendered from: its dimensions, its height step and the dark-mode toggle. */
+export interface HeroImageOptions {
+  image: Pick<HeroImageAddress, "width" | "height">;
+  maxHeight: HeroImageMaxHeight;
+  invertInDarkMode: boolean;
+}
 
 /** A dark logo on a dark page: inverted, with the hue turned back. */
 const INVERT_CLASSES = "dark:invert dark:hue-rotate-180";
