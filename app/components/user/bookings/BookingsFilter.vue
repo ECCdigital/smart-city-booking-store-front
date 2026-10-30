@@ -25,6 +25,7 @@
     <UChip :show="hasFiltersApplied" inset class="mt-2 md:mt-0">
       <UButton
         icon="i-lucide-list-filter"
+        :aria-label="$t('booking.filter.filterButton')"
         size="md"
         variant="outline"
         color="neutral"
@@ -44,6 +45,7 @@
       :icon="
         sortOption ? getSortIconByValue(sortOption) : 'i-lucide-arrow-down-up'
       "
+      :aria-label="$t('booking.filter.sortButton')"
       size="md"
       variant="outline"
       color="neutral"

@@ -4,6 +4,11 @@ import { copyrightLine } from "~/utils/copyrightLine.js";
 import { offerSpacesEntryUrl } from "~/utils/authEntryFlow";
 import { useInstanceStore } from "~~/stores/instance.js";
 
+defineProps({
+  /** The auth pages' footer: copyright and legal links only, no logos, no "Offer spaces" and no tenant choice. */
+  minimal: { type: Boolean, default: false },
+});
+
 const documents = useLegalDocuments();
 const instanceStore = useInstanceStore();
 
@@ -37,7 +42,7 @@ const footerLogos = computed(() => theme.value?.footerLogos ?? []);
     <!-- Footer logos, funding logos among them: a row of their own above
          copyright and links, only when the instance has any. -->
     <div
-      v-if="footerLogos.length"
+      v-if="!minimal && footerLogos.length"
       data-footer-logos
       class="container border-b border-gray-200 pt-6 pb-5 dark:border-gray-800"
     >
@@ -53,7 +58,7 @@ const footerLogos = computed(() => theme.value?.footerLogos ?? []);
         </span>
 
         <nav
-          v-if="documents.length || offerSpacesUrl"
+          v-if="documents.length || (!minimal && offerSpacesUrl)"
           class="flex flex-wrap gap-x-6 gap-y-2"
         >
           <a
@@ -67,7 +72,7 @@ const footerLogos = computed(() => theme.value?.footerLogos ?? []);
             {{ $t(`footer.${doc.key}`) }}
           </a>
           <a
-            v-if="offerSpacesUrl"
+            v-if="!minimal && offerSpacesUrl"
             :href="offerSpacesUrl"
             class="text-gray-700 hover:underline dark:text-gray-300"
           >
@@ -76,7 +81,7 @@ const footerLogos = computed(() => theme.value?.footerLogos ?? []);
         </nav>
       </div>
 
-      <div class="flex items-center gap-4 sm:gap-6">
+      <div v-if="!minimal" class="flex items-center gap-4 sm:gap-6">
         <!-- The one place the tenant is always chosen; the bar only names the
              one already in use. It closes the row on the right. -->
         <ClientOnly>

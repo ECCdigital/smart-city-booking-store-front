@@ -95,7 +95,7 @@
       "accountBookingDetail": "Buchungsdetails",
       "accountKeys": "Schlüssel",
       "accountKeyDetail": "Schlüsseldetails",
-      "accountInvoices": "Rechnungen",
+      "accountInvoices": "Belege",
       "accountFavorites": "Favoriten",
       "accountSettings": "Einstellungen",
       "accountAppearance": "Darstellung",
@@ -204,7 +204,7 @@
     "keys": "Digitale Schlüssel",
     "activities": "Aktivitäten",
     "digitalKeys": "Digitale Schlüssel",
-    "invoices": "Rechnungen",
+    "invoices": "Belege",
     "account": "Benutzerkonto",
     "backToHome": "Zurück zur Startseite",
     "toOffers": "Zu den Angeboten",
@@ -751,6 +751,14 @@
     "time_period_mismatch": "Für dieses Objekt muss ein vollständiger Zeitslot gebucht werden.",
     "insufficient_lead_time": "Die Buchung liegt zu kurzfristig. Zwischen Buchung und Beginn muss ausreichend Vorbereitungszeit in den Servicezeiten liegen.",
     "time_in_past": "Der gewählte Beginn liegt in der Vergangenheit. Bitte wählen Sie einen Zeitpunkt ab jetzt.",
+    "address_blacklisted": "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an {contact}.",
+    "address_blacklisted_operator": "den Betreiber dieses Angebots",
+    "address_blacklisted_title": "Buchung nicht möglich",
+    "address_blacklisted_copy": "Mailadresse kopieren",
+    "address_blacklisted_copied": "Mailadresse kopiert",
+    "address_blacklisted_copy_failed": "Die Mailadresse ließ sich nicht kopieren. Bitte markieren und kopieren Sie sie von Hand.",
+    "address_blacklisted_registration": "Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wende dich per Mail an {contact}.",
+    "address_blacklisted_registration_title": "Registrierung nicht möglich",
     "generateGroupBooking": "Keine Seriebuchung erzeugt",
     "selectTimePeriodTitle": "Kein Zeitraum ausgewählt",
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
@@ -774,6 +782,7 @@
       "loginAction": "Jetzt einloggen",
       "loggedInTitle": "Sie sind eingeloggt",
       "loggedInDescription": "Sie können sich ausloggen und diese Buchung stattdessen als Gast abschließen.",
+      "loggedInRequiredDescription": "Diese Buchung erfordert eine Anmeldung und wird mit Ihrem angemeldeten Konto ({name}) abgeschlossen.",
       "logoutGuestAction": "Ausloggen und als Gast fortfahren",
       "customFieldsSectionTitle": "Zusätzliche Angaben",
       "customFieldSelectPlaceholder": "Bitte auswählen",
@@ -928,6 +937,7 @@
       "paymentPaid": "Bezahlt",
       "paymentPending": "Nicht bezahlt",
       "paymentFree": "Kostenfrei",
+      "paymentWaived": "Entfällt",
       "amountLabel": "Betrag",
       "bookingStatusError": "Diese Buchung konnte nicht geladen werden.",
       "summaryTotalLabel": "Buchungen",
@@ -1110,7 +1120,12 @@
     "eventTime": "Veranstaltungszeit",
     "priceLabel": "Preis:",
     "downloadAppointment": "Termin herunterladen",
+    "actionsFor": "Aktionen zur Buchung #{id}",
     "downloadAppointmentTooltip": "Als Termin herunterladen",
+    "withdrawal": {
+      "action": "Buchung widerrufen",
+      "hint": "Öffnet eine vorbereitete E-Mail an den Anbieter. Der Anbieter prüft Ihren Widerruf und meldet sich bei Ihnen."
+    },
     "cancellation": {
       "action": "Buchung stornieren",
       "title": "Buchung stornieren",
@@ -1172,7 +1187,7 @@
       "failedTitle": "Die Buchung konnte nicht storniert werden.",
       "failedText": "Bitte versuchen Sie es erneut. Besteht das Problem weiter, wenden Sie sich an den Anbieter."
     },
-    "comment": "Ihr Kommentar",
+    "comment": "Kommentar",
     "attachmentTypes": {
       "invoice": "Rechnung",
       "receipt": "Zahlungsbeleg",
@@ -1209,6 +1224,8 @@
       "all": "Alle",
       "filterBy": "Filtern nach:",
       "sortBy": "Sortieren nach:",
+      "filterButton": "Buchungen filtern",
+      "sortButton": "Buchungen sortieren",
       "activeBookings": "Aktive Buchungen",
       "status": "Status:",
       "confirmed": "Bestätigt",
@@ -1241,7 +1258,8 @@
       },
       "free": "Kostenfrei",
       "paid": "Bezahlt",
-      "unpaid": "Nicht bezahlt"
+      "unpaid": "Nicht bezahlt",
+      "waived": "Entfällt"
     },
     "status": {
       "requested": "Ausstehend",
@@ -1280,6 +1298,8 @@
     "appearanceLight": "Hell",
     "changesSaved": "Änderungen gespeichert",
     "changesSavedMessage": "Ihre Änderungen wurden erfolgreich gespeichert.",
+    "changesSaveFailed": "Speichern fehlgeschlagen",
+    "changesSaveFailedMessage": "Ihre Änderungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     "passwordMismatch": "Die eingegebenen Passwörter stimmen nicht überein.",
     "passwordChangeFailed": "Passwortänderung fehlgeschlagen",
     "passwordChangeFailedMessage": "Ihr Passwort konnte nicht geändert werden. Bitte versuchen Sie es erneut.",
@@ -1304,12 +1324,19 @@
     },
     "unknownTenant": "Unbekannt",
     "invoices": {
-      "title": "Meine Rechnungen und Zahlungsbelege",
+      "title": "Meine Belege",
       "emptyTitle": "Keine Rechnungen vorhanden",
       "emptyDescription": "Aktuell sind für Ihr Konto keine Rechnungen verfügbar. Sobald Rechnungen erstellt wurden, werden diese hier angezeigt.",
       "unknownBookable": "Unbekanntes Buchungsobjekt",
       "searchPlaceholder": "Nach Buchungsobjekt suchen",
-      "noMatches": "Keine Dokumente passen zu Ihrer Suche.",
+      "noMatches": "Keine Dokumente passen zu Ihrer Suche oder dem gewählten Filter.",
+      "quickFilter": {
+        "label": "Nach Dokumententyp filtern",
+        "tooltip": "Filtern nach {type}",
+        "invoice": "Rechnungen",
+        "receipt": "Zahlungsbelege",
+        "cancellation": "Stornobelege"
+      },
       "columns": {
         "createdAt": "Erstelldatum",
         "title": "Titel",
@@ -1329,6 +1356,7 @@
       "types": {
         "invoice": "Rechnung",
         "receipt": "Zahlungsbeleg",
+        "cancellation": "Stornobeleg",
         "unknown": "Unbekannt"
       }
     }
@@ -1681,6 +1709,7 @@
   "results": {
     "noLocation": "Ohne Ortsangabe",
     "noOffers": "Keine Angebote gefunden.",
+    "noMatches": "Keine Buchungsobjekte oder Events passen zu den aktuellen Suchkriterien.",
     "noneInArea": "Keine Ergebnisse in diesem Bereich.",
     "fullscreen": "Vollbild",
     "exitFullscreen": "Vollbild beenden",
