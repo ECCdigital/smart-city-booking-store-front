@@ -21,6 +21,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 - Choosing or clearing a tenant on the start page now loads that tenant's upcoming events, as `/search` already did (ECCdigital/tickets#540): the page loaded its bundle under one fixed key, so it kept the events of the page it came from. The key now names catalog and tenant
 - The result cards' picture area had no height on a server-rendered page and the page hydrated with mismatches: the header carried an empty static `class=""` beside its dynamic class, which the server wrote as two `class` attributes, and the browser kept the empty one. The empty attribute is gone
 - The map tooltip for a place with many Offers no longer grows past the map: its list is capped in height and fades out at the bottom, and the hint under it then reads „Klick um Alle anzusehen“ (`results.clickToSeeAll`) instead of „Klick um Auswahl zu öffnen“
+- Icon-only buttons have an accessible name in German and English (ECCdigital/tickets#399): home and search in the header bar, and filter, sort and the per-booking menu in the account's booking list
 
 ### Changed
 
