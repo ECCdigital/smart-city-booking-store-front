@@ -767,6 +767,10 @@
     "downloadAppointment": "Download appointment",
     "actionsFor": "Actions for booking #{id}",
     "downloadAppointmentTooltip": "Download as an appointment",
+    "withdrawal": {
+      "action": "Withdraw from booking",
+      "hint": "Opens a prepared email to the provider. The provider checks your withdrawal and gets back to you."
+    },
     "cancellation": {
       "action": "Cancel booking",
       "title": "Cancel booking",
