@@ -67,6 +67,9 @@ export default defineEventHandler(async (event) => {
       success: false,
       statusCode: error.response?.status || 500,
       statusMessage: error.response?.data?.message || "Signup failed",
+      // The backend's body, e.g. the refusal of an address on the blacklist
+      // with the instance's mail address.
+      data: error.data,
     });
   }
 });

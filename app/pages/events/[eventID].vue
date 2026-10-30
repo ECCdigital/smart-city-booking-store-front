@@ -13,7 +13,6 @@ definePageMeta({
 });
 
 const route = useRoute();
-const { tenantTo } = useTenantRoute();
 const eventStore = useEventStore();
 const authStore = useAuthStore();
 
@@ -61,8 +60,8 @@ usePageTitle(() =>
       />
       <p class="text-gray-500">{{ $t("errors.offerNotAvailable") }}</p>
       <UButton
-        :label="$t('common.back')"
-        :to="tenantTo({ path: '/search', query: { cat: 'event' } })"
+        :label="$t('errors.page.home')"
+        to="/"
         class="mt-4"
       />
     </div>
