@@ -108,15 +108,25 @@
             />
             <p class="text-gray-500">{{ $t("results.noOffers") }}</p>
           </div>
+          <div
+            v-else-if="!hasVisibleOffers"
+            class="flex flex-col items-center justify-center py-16 text-center"
+          >
+            <UIcon
+              name="i-lucide-search-x"
+              class="text-6xl text-gray-400 mb-4"
+            />
+            <p class="text-gray-500">{{ $t("results.noMatches") }}</p>
+          </div>
           <ResultsList
-            v-if="currentView === 'list' && sortedOffers.length > 0"
+            v-if="currentView === 'list' && hasVisibleOffers"
             :bookables="sortedOffers"
             include-non-bookable
             :include-non-suitable="query.inclNoSuitable"
             class="hidden md:block"
           />
           <ResultsGrid
-            v-if="currentView === 'list' && sortedOffers.length > 0"
+            v-if="currentView === 'list' && hasVisibleOffers"
             :bookables="sortedOffers"
             include-non-bookable
             :include-non-suitable="query.inclNoSuitable"
@@ -124,7 +134,7 @@
           />
 
           <ResultsMap
-            v-if="currentView === 'map' && sortedOffers.length > 0"
+            v-if="currentView === 'map' && hasVisibleOffers"
             :bookables="sortedOffers"
             :include-non-suitable="query.inclNoSuitable"
             :suitable-count="suitableCount"
@@ -189,5 +199,13 @@ const {
 } = useBookableSearch({ sourceItems });
 
 const currentView = ref(query.viewMode);
+
+// The list, grid and map show the Offers that miss the criteria only on
+// request, so a search without a match would otherwise leave them empty.
+const hasVisibleOffers = computed(
+  () =>
+    suitableCount.value > 0 ||
+    (query.inclNoSuitable && sortedOffers.value.length > 0),
+);
 </script>
 <style scoped></style>

@@ -3012,12 +3012,23 @@ function onReviewEdit(section) {
                           : $t("checkout.data.guestTitle")
                     }}
                   </p>
-                  <p class="text-sm text-gray-600 dark:text-gray-300">
+                  <i18n-t
+                    v-if="requiresLoginForCheckout && isLoggedIn"
+                    keypath="checkout.data.loggedInRequiredDescription"
+                    tag="p"
+                    scope="global"
+                    class="text-sm text-gray-600 dark:text-gray-300"
+                  >
+                    <template #name>
+                      <span class="italic font-semibold">{{
+                        authStore.displayName
+                      }}</span>
+                    </template>
+                  </i18n-t>
+                  <p v-else class="text-sm text-gray-600 dark:text-gray-300">
                     {{
                       requiresLoginForCheckout
-                        ? isLoggedIn
-                          ? $t("checkout.data.loggedInDescription")
-                          : $t("checkout.data.loginRequiredDescription")
+                        ? $t("checkout.data.loginRequiredDescription")
                         : isLoggedIn
                           ? $t("checkout.data.loggedInDescription")
                           : $t("checkout.data.guestDescription")
