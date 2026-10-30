@@ -181,7 +181,8 @@
       />
     </div>
 
-    <div class="flex justify-end">
+    <div class="flex flex-wrap items-end justify-end gap-3">
+      <BookingWithdrawalAction :booking="booking" />
       <BookingCancellationAction :booking="booking" />
     </div>
   </div>
@@ -192,6 +193,7 @@ import BookingDetailsBookableCard from "~/components/user/bookings/BookingDetail
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import BookingDetailsAttachmentCard from "~/components/user/bookings/BookingDetailsAttachmentCard.vue";
 import BookingCancellationAction from "~/components/user/bookings/BookingCancellationAction.vue";
+import BookingWithdrawalAction from "~/components/user/bookings/BookingWithdrawalAction.vue";
 import BookingOpenCancellationRequestChip from "~/components/user/bookings/BookingOpenCancellationRequestChip.vue";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
