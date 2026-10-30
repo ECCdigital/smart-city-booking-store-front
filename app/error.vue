@@ -40,7 +40,7 @@ usePageTitle(pageTitle);
 
 <template>
   <!-- `dark` on the wrapper forces the dark palette whatever the visitor's colour mode -->
-  <PageBackground class="error-page dark">
+  <PageBackground class="error-page dark" :navigation="false">
     <div class="error-card">
       <UIcon
         size="48"
