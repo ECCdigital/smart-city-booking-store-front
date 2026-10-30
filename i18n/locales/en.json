@@ -400,6 +400,7 @@
       "loginAction": "Sign in now",
       "loggedInTitle": "You are signed in",
       "loggedInDescription": "You can sign out and continue this booking as a guest instead.",
+      "loggedInRequiredDescription": "This booking requires sign-in and will be completed with your signed-in account ({name}).",
       "logoutGuestAction": "Sign out and continue as guest",
       "customFieldsSectionTitle": "Additional details",
       "customFieldSelectPlaceholder": "Please select",
