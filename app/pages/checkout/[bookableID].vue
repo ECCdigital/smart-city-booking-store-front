@@ -14,11 +14,15 @@ import { isBusinessContact } from "~/utils/businessBooking.js";
 import CheckoutCustomFields from "~/components/checkout/CheckoutCustomFields.vue";
 import CheckoutPaymentStep from "~/components/checkout/CheckoutPaymentStep.vue";
 import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
+import CheckoutAddressBlacklistedAlert from "~/components/checkout/CheckoutAddressBlacklistedAlert.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useNotification } from "~/composables/useNotification.js";
 import {
   BOOKABLE_NOT_FOUND,
   backendErrorBodyOf,
+  ADDRESS_BLACKLISTED,
+  addressBlacklistedContact,
+  addressBlacklistedMessage,
   resolveCheckoutErrorKey,
   resolveCheckoutFailureKey,
 } from "~/utils/checkoutErrors.js";
@@ -312,22 +316,14 @@ const requiresManualApproval = computed(() => {
   return v === false || v === "false" || v === 0 || v === "0";
 });
 
-const typeLabels = computed(() => ({
-  room: t("booking.typeRoom"),
-  resource: t("booking.typeResource"),
-  ticket: t("booking.typeTicket"),
-  event: t("booking.typeEvent"),
-}));
-
 const checkoutNavTab = useState("checkoutNavTab", () => {});
 
 watch(
   [leadBookable, () => locale.value],
-  ([b]) => {
-    const type = b?.type;
+  () => {
     const bookableID = route.params.bookableID;
     const tenantID = route.query.tenantId;
-    const label = typeLabels.value[type] || type || "";
+    const label = t("booking.booking");
 
     if (!bookableID || !tenantID) {
       checkoutNavTab.value = { label, url: "" };
@@ -646,6 +642,30 @@ const contactForm = reactive({
   // checkbox, then their choice (isBusinessContact).
   isBusiness: null,
 });
+
+// The refusal of an address on the blacklist: the
+// instance's mail address to write to, empty without one, null while there
+// is none. It stays on the review step instead of a toast, so the address
+// can be clicked or copied, until the address changes or the booking is
+// sent again.
+const blacklistRefusal = ref(null);
+const blacklistRefusalAlert = ref(null);
+
+watch(
+  () => contactForm.email,
+  () => {
+    blacklistRefusal.value = null;
+  },
+);
+
+async function showBlacklistRefusal(apiError) {
+  blacklistRefusal.value = addressBlacklistedContact(apiError.params);
+  await nextTick();
+  blacklistRefusalAlert.value?.$el?.scrollIntoView?.({
+    behavior: "smooth",
+    block: "center",
+  });
+}
 
 const customerComment = ref("");
 const attachmentAccepted = ref({});
@@ -2408,7 +2428,9 @@ function messageForStructuredCheckoutError(apiError) {
       ? apiError.params
       : {};
   let core = null;
-  if (typeof reason === "string" && reason) {
+  if (reason === ADDRESS_BLACKLISTED) {
+    core = addressBlacklistedMessage(params, t);
+  } else if (typeof reason === "string" && reason) {
     if (te(reason)) {
       core = t(reason, params);
     } else {
@@ -2484,6 +2506,7 @@ async function handleFinish() {
   if (!canGoNext.value || checkoutSubmitting.value) return;
 
   checkoutSubmitting.value = true;
+  blacklistRefusal.value = null;
   try {
     const payload = isGroupBookingActive.value
       ? buildGroupCheckoutPayload()
@@ -2515,6 +2538,10 @@ async function handleFinish() {
     }
 
     if (data?.success === false && data?.error) {
+      if (resolveCheckoutErrorKey(data.error) === ADDRESS_BLACKLISTED) {
+        await showBlacklistRefusal(data.error);
+        return;
+      }
       notifyError(messageForStructuredCheckoutErrorNotify(data.error));
       return;
     }
@@ -2986,12 +3013,23 @@ function onReviewEdit(section) {
                           : $t("checkout.data.guestTitle")
                     }}
                   </p>
-                  <p class="text-sm text-gray-600 dark:text-gray-300">
+                  <i18n-t
+                    v-if="requiresLoginForCheckout && isLoggedIn"
+                    keypath="checkout.data.loggedInRequiredDescription"
+                    tag="p"
+                    scope="global"
+                    class="text-sm text-gray-600 dark:text-gray-300"
+                  >
+                    <template #name>
+                      <span class="italic font-semibold">{{
+                        authStore.displayName
+                      }}</span>
+                    </template>
+                  </i18n-t>
+                  <p v-else class="text-sm text-gray-600 dark:text-gray-300">
                     {{
                       requiresLoginForCheckout
-                        ? isLoggedIn
-                          ? $t("checkout.data.loggedInDescription")
-                          : $t("checkout.data.loginRequiredDescription")
+                        ? $t("checkout.data.loginRequiredDescription")
                         : isLoggedIn
                           ? $t("checkout.data.loggedInDescription")
                           : $t("checkout.data.guestDescription")
@@ -3065,6 +3103,12 @@ function onReviewEdit(section) {
           </template>
 
           <template #step-confirm>
+            <CheckoutAddressBlacklistedAlert
+              v-if="blacklistRefusal !== null"
+              ref="blacklistRefusalAlert"
+              class="mb-6"
+              :mail-address="blacklistRefusal"
+            />
             <CheckoutReviewStep
               v-model:applied-coupon="appliedCouponCode"
               v-model:applied-coupon-details="appliedCouponDetails"

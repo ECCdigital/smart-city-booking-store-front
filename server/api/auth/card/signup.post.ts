@@ -53,9 +53,9 @@ export default defineEventHandler(async (event) => {
             statusCode: error.status || 500,
             statusMessage:
                 error.data?.message || "Card registration failed",
-            data: {
-                reason: error.data?.reason,
-            },
+            // The backend's body: the `reason` the card login names, or the
+            // refusal of an address on the blacklist.
+            data: error.data,
         });
     }
 });

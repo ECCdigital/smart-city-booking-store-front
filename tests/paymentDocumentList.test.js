@@ -25,13 +25,14 @@ const bookings = [
     attachments: [
       { type: "receipt", name: "beleg.pdf", timeCreated: 1700000500000 },
       { type: "contract", title: "Vertrag" },
+      { type: "cancellation", name: "storno.pdf", timeCreated: 1700000900000 },
     ],
   }),
   booking({ id: "NOBOOKABLE-1", bookableItems: [] }),
 ];
 
 describe("the withdrawal receipt in the invoice list", () => {
-  it("is listed beside invoices and receipts; a cancellation is not", () => {
+  it("is listed beside invoices, receipts and cancellation receipts", () => {
     const withdrawn = booking({
       id: "WD-1",
       attachments: [
@@ -43,24 +44,26 @@ describe("the withdrawal receipt in the invoice list", () => {
 
     expect(paymentDocumentsOf([withdrawn]).map((d) => d.type)).toEqual([
       "invoice",
+      "cancellation",
       "withdrawal",
     ]);
   });
 });
 
 describe("the payment documents of the invoice list", () => {
-  it("takes the invoices and receipts of every booking, nothing else", () => {
+  it("takes the invoices, receipts and cancellation receipts of every booking, nothing else", () => {
     expect(
       paymentDocumentsOf(bookings).map((d) => [d.bookingId, d.type]),
     ).toEqual([
       ["ABCD-1234", "invoice"],
       ["WXYZ-9876", "receipt"],
+      ["WXYZ-9876", "cancellation"],
       ["NOBOOKABLE-1", "invoice"],
     ]);
   });
 
   it("names a document by its title or file and its booking's bookables", () => {
-    const [invoice, receipt, bare] = paymentDocumentsOf(bookings);
+    const [invoice, receipt, , bare] = paymentDocumentsOf(bookings);
     expect(invoice).toMatchObject({
       key: "ABCD-1234/1700000000000/Rechnung 1",
       title: "Rechnung 1",
@@ -99,8 +102,10 @@ describe("the search of the invoice list", () => {
     ]);
     expect(ids(searchPaymentDocuments(documents, "nahmasch"))).toEqual([
       "WXYZ-9876",
+      "WXYZ-9876",
     ]);
     expect(ids(searchPaymentDocuments(documents, "laser"))).toEqual([
+      "WXYZ-9876",
       "WXYZ-9876",
     ]);
   });
@@ -110,8 +115,19 @@ describe("the search of the invoice list", () => {
     expect(searchPaymentDocuments(documents, "abcd")).toEqual([]);
   });
 
+  it("narrows to the chosen type, together with the search", () => {
+    expect(
+      searchPaymentDocuments(documents, "", "cancellation").map((d) => d.type),
+    ).toEqual(["cancellation"]);
+    expect(ids(searchPaymentDocuments(documents, "", "invoice"))).toEqual([
+      "ABCD-1234",
+      "NOBOOKABLE-1",
+    ]);
+    expect(searchPaymentDocuments(documents, "saal", "receipt")).toEqual([]);
+  });
+
   it("keeps everything for an empty query, a document without bookable included", () => {
-    expect(searchPaymentDocuments(documents, "")).toHaveLength(3);
-    expect(searchPaymentDocuments(documents, undefined)).toHaveLength(3);
+    expect(searchPaymentDocuments(documents, "")).toHaveLength(4);
+    expect(searchPaymentDocuments(documents, undefined)).toHaveLength(4);
   });
 });

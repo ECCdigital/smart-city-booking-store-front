@@ -15,13 +15,29 @@ export const PAYMENT_DISPLAY_STATUS = {
   FREE: "free",
   PAID: "paid",
   UNPAID: "unpaid",
+  WAIVED: "waived",
   LAPSED: "lapsed",
 };
 
 /**
- * Whether the booking is free, paid, or still owes something - read off
- * `booking.status` through `isSettledBooking`; the price is checked first so
- * a free booking reads as free in every state. A withdrawn booking owes
+ * Cancelled before it was paid, and the cancellation left no fee: nothing
+ * was paid and nothing is owed. A cancellation without a refund record stays
+ * unpaid - it cannot tell.
+ * @param {PaymentStatusBooking} booking
+ * @returns {boolean}
+ */
+function isWaivedBooking(booking) {
+  if (resolveBookingStatus(booking) !== BOOKING_STATUS.CANCELLED) {
+    return false;
+  }
+  const fee = booking?.cancellationRefund?.cancellationFeeEur;
+  return fee !== null && fee !== undefined && Number(fee) === 0;
+}
+
+/**
+ * Whether the booking is free, paid, waived, or still owes something - read
+ * off `booking.status` through `isSettledBooking`; the price is checked first
+ * so a free booking reads as free in every state. A withdrawn booking owes
  * nothing: what was not paid lapses.
  * @param {PaymentStatusBooking} booking
  * @returns {typeof PAYMENT_DISPLAY_STATUS[keyof typeof PAYMENT_DISPLAY_STATUS]}
@@ -32,6 +48,9 @@ export function resolvePaymentDisplayStatus(booking) {
   }
   if (isSettledBooking(booking)) {
     return PAYMENT_DISPLAY_STATUS.PAID;
+  }
+  if (isWaivedBooking(booking)) {
+    return PAYMENT_DISPLAY_STATUS.WAIVED;
   }
   if (resolveBookingStatus(booking) === BOOKING_STATUS.WITHDRAWN) {
     return PAYMENT_DISPLAY_STATUS.LAPSED;
@@ -74,6 +93,12 @@ const PAYMENT_PRESENTATION = {
       "w-[120px] bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
     icon: "i-lucide-hourglass",
   },
+  [PAYMENT_DISPLAY_STATUS.WAIVED]: {
+    labelKey: "booking.payment.waived",
+    classes:
+      "w-[85px] bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+    icon: "i-lucide-circle-slash",
+  },
   [PAYMENT_DISPLAY_STATUS.LAPSED]: {
     labelKey: "booking.payment.lapsed",
     classes:
@@ -89,6 +114,8 @@ const CHECKOUT_PAYMENT_STATE_CLASS = {
     "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200",
   [PAYMENT_DISPLAY_STATUS.UNPAID]:
     "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200",
+  [PAYMENT_DISPLAY_STATUS.WAIVED]:
+    "bg-gray-100 text-gray-700 dark:bg-gray-800/40 dark:text-gray-300",
   [PAYMENT_DISPLAY_STATUS.LAPSED]:
     "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
 };
@@ -97,6 +124,7 @@ const CHECKOUT_PAYMENT_LABEL_KEY = {
   [PAYMENT_DISPLAY_STATUS.FREE]: "checkout.status.paymentFree",
   [PAYMENT_DISPLAY_STATUS.PAID]: "checkout.status.paymentPaid",
   [PAYMENT_DISPLAY_STATUS.UNPAID]: "checkout.status.paymentPending",
+  [PAYMENT_DISPLAY_STATUS.WAIVED]: "checkout.status.paymentWaived",
   [PAYMENT_DISPLAY_STATUS.LAPSED]: "checkout.status.paymentLapsed",
 };
 
