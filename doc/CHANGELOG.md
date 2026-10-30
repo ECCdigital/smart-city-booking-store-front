@@ -28,6 +28,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- The checkout's additional objects take „kostenlos“ / “Free of charge” from `t()` of `useI18n()` instead of `$t()` in `<script setup>` (ECCdigital/tickets#308). The fixed „Unbekanntes Buchungsobjekt“ in the Mobile Key list already went to i18n with ECCdigital/tickets#324
 - Account settings no longer report „Änderungen gespeichert“ when saving the profile fails (ECCdigital/tickets#299): the auth store's `updateUser` swallowed the error and cleared the user. It now answers whether the save went through and keeps the user; the page shows „Speichern fehlgeschlagen“ and keeps the unsaved changes. A session that ends during the save goes to the login despite them
 - Choosing or clearing a tenant on the start page now loads that tenant's upcoming events, as `/search` already did (ECCdigital/tickets#540): the page loaded its bundle under one fixed key, so it kept the events of the page it came from. The key now names catalog and tenant
 - The result cards' picture area had no height on a server-rendered page and the page hydrated with mismatches: the header carried an empty static `class=""` beside its dynamic class, which the server wrote as two `class` attributes, and the browser kept the empty one. The empty attribute is gone
