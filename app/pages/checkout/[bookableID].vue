@@ -10,6 +10,7 @@ import InputMonthSelection from "../../components/checkout/InputMonthSelection.v
 import InputBlockPeriodSelection from "~/components/checkout/InputBlockPeriodSelection.vue";
 import PriceSummaryBar from "~/components/checkout/PriceSummaryBar.vue";
 import CheckoutContactStep from "~/components/checkout/CheckoutContactStep.vue";
+import { isBusinessContact } from "~/utils/businessBooking.js";
 import CheckoutCustomFields from "~/components/checkout/CheckoutCustomFields.vue";
 import CheckoutPaymentStep from "~/components/checkout/CheckoutPaymentStep.vue";
 import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
@@ -637,6 +638,9 @@ const contactForm = reactive({
   address: "",
   zipCode: "",
   city: "",
+  // Private or business booking: `null` until the booker sets the
+  // checkbox, then their choice (isBusinessContact).
+  isBusiness: null,
 });
 
 // The refusal of an address on the blacklist: the
@@ -2017,6 +2021,9 @@ function restoreCheckoutState() {
             contactForm[key] = parsed.contactForm[key] || "";
           }
         }
+        if (typeof parsed.contactForm.isBusiness === "boolean") {
+          contactForm.isBusiness = parsed.contactForm.isBusiness;
+        }
       }
       if (typeof parsed.customerComment === "string") {
         customerComment.value = parsed.customerComment;
@@ -2296,6 +2303,7 @@ function buildCheckoutPayload() {
 
   if (contactForm.phone?.trim()) payload.phone = contactForm.phone.trim();
   if (contactForm.company?.trim()) payload.company = contactForm.company.trim();
+  payload.isBusiness = isBusinessContact(contactForm);
   if (contactForm.address?.trim()) payload.street = contactForm.address.trim();
   if (contactForm.zipCode?.trim()) payload.zipCode = contactForm.zipCode.trim();
   if (contactForm.city?.trim()) payload.location = contactForm.city.trim();
@@ -2353,6 +2361,7 @@ function buildGroupCheckoutPayload() {
 
   if (contactForm.phone?.trim()) payload.phone = contactForm.phone.trim();
   if (contactForm.company?.trim()) payload.company = contactForm.company.trim();
+  payload.isBusiness = isBusinessContact(contactForm);
   if (contactForm.address?.trim()) payload.street = contactForm.address.trim();
   if (contactForm.zipCode?.trim()) payload.zipCode = contactForm.zipCode.trim();
   if (contactForm.city?.trim()) payload.location = contactForm.city.trim();

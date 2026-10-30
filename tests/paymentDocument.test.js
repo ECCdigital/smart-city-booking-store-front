@@ -63,6 +63,7 @@ describe("fetchBookingPaymentDocument", () => {
       getBookingInvoice: vi.fn(async () => "invoice-bytes"),
       getBookingReceipt: vi.fn(async () => "receipt-bytes"),
       getBookingCancellationReceipt: vi.fn(async () => "cancellation-bytes"),
+      getBookingWithdrawalReceipt: vi.fn(async () => "withdrawal-bytes"),
     };
   }
 
@@ -71,6 +72,8 @@ describe("fetchBookingPaymentDocument", () => {
     ["receipt", "getBookingReceipt", "receipt-bytes"],
     // The cancellation receipt of the booking details (ECCdigital/tickets#291).
     ["cancellation", "getBookingCancellationReceipt", "cancellation-bytes"],
+    // The withdrawal receipt of an accepted withdrawal („Widerrufbeleg“).
+    ["withdrawal", "getBookingWithdrawalReceipt", "withdrawal-bytes"],
   ])("fetches a %s through %s", async (type, route, bytes) => {
     const api = bookingRoutes();
 

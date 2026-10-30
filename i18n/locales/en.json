@@ -390,6 +390,8 @@
     "quantityFixed": "Quantity for {item}: {amount}",
     "data": {
       "contactSectionTitle": "Contact details",
+      "businessBookingLabel": "Business booking",
+      "businessBookingHint": "For a company, an association or an authority. Unticked, the booking counts as private.",
       "addressLookupLabel": "Find address",
       "addressLookupPlaceholder": "Enter an address (e.g. Main Street 1, Berlin)",
       "addressLookupHint": "Select a result to auto-fill street, postal code, and city.",
@@ -471,6 +473,9 @@
       }
     },
     "review": {
+      "bookingKindLabel": "Booking type",
+      "bookingKindPrivate": "Private",
+      "bookingKindBusiness": "Business",
       "periodTitle": "Time period",
       "periodMissing": "No time period selected.",
       "priceTitle": "Price summary",
@@ -562,6 +567,7 @@
       "paymentStateLabel": "Payment status",
       "paymentPaid": "Paid",
       "paymentPending": "Unpaid",
+      "paymentLapsed": "Not due",
       "paymentFree": "Free of charge",
       "paymentWaived": "Waived",
       "amountLabel": "Amount",
@@ -602,6 +608,10 @@
         "rejected": {
           "title": "Request not accepted",
           "body": "Unfortunately your booking request could not be accepted. If you have questions, please contact the provider."
+        },
+        "withdrawn": {
+          "title": "Booking withdrawn",
+          "body": "The provider has accepted your withdrawal. It costs you nothing; any amount already paid will be refunded in full."
         },
         "confirmed_without_payment": {
           "title": "Completed (free of charge)",
@@ -742,6 +752,7 @@
     "payment_expected": "Payment required to complete the booking",
     "paid_completed": "Paid and completed",
     "rejected": "Rejected or cancelled",
+    "withdrawn": "Withdrawn",
     "confirmed_without_payment": "Completed (free of charge)"
   },
   "booking": {
@@ -843,6 +854,7 @@
       "invoice": "Invoice",
       "receipt": "Payment receipt",
       "cancellation": "Cancellation receipt",
+      "withdrawal": "Withdrawal receipt",
       "agreement": "User agreement",
       "privacyAgreement": "Privacy policy",
       "userManual": "User manual",
@@ -910,7 +922,8 @@
       "free": "Free of charge",
       "paid": "Paid",
       "unpaid": "Unpaid",
-      "waived": "Waived"
+      "waived": "Waived",
+      "lapsed": "Not due"
     },
     "status": {
       "requested": "Pending",
@@ -918,7 +931,9 @@
       "payment_due": "Confirmed",
       "confirmed": "Confirmed",
       "rejected": "Rejected",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "withdrawn": "Withdrawn",
+      "withdrawnTooltip": "The provider has accepted your withdrawal. Any amount already paid will be refunded in full."
     }
   },
   "account": {
@@ -1007,6 +1022,7 @@
         "invoice": "Invoice",
         "receipt": "Receipt",
         "cancellation": "Cancellation receipt",
+        "withdrawal": "Withdrawal receipt",
         "unknown": "Unknown"
       }
     }

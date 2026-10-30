@@ -186,7 +186,7 @@ function filterForStatus(bookings) {
   }
 
   return bookings.filter((b) => {
-    // One checkbox covers rejected and cancelled: neither booking lives on.
+    // One checkbox covers rejected, cancelled and withdrawn: none lives on.
     if (filters.value.statusRejected && !isLiveBooking(b)) {
       return true;
     }

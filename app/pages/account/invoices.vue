@@ -427,6 +427,9 @@ function documentTypeLabel(type) {
   if (type === "cancellation") {
     return t("account.invoices.types.cancellation");
   }
+  if (type === "withdrawal") {
+    return t("account.invoices.types.withdrawal");
+  }
   return t("account.invoices.types.unknown");
 }
 

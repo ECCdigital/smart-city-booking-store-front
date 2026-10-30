@@ -7,11 +7,16 @@
 import { includesText } from "./textSearch.js";
 
 /** The document types the list shows, in the order of its quick filter. */
-export const PAYMENT_TYPES = ["invoice", "receipt", "cancellation"];
+export const PAYMENT_TYPES = [
+  "invoice",
+  "receipt",
+  "cancellation",
+  "withdrawal",
+];
 
 /**
- * The invoices, receipts and cancellation receipts of the bookings, each named by its title (or file
- * name) and by the titles of its booking's bookables, joined; empty when the
+ * The invoices, receipts, cancellation and withdrawal receipts of the
+ * bookings, each named by its title (or file name) and by the titles of its booking's bookables, joined; empty when the
  * booking names none. `key` tells one document from the others; `tenantId`
  * and `attachment` say where to fetch the document from.
  */

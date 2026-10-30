@@ -24,6 +24,7 @@ describe("withdrawalUrlOf", () => {
   it("answers null for a booking that is no longer live", () => {
     expect(withdrawalUrlOf(bookingOf({ status: "cancelled" }))).toBeNull();
     expect(withdrawalUrlOf(bookingOf({ status: "rejected" }))).toBeNull();
+    expect(withdrawalUrlOf(bookingOf({ status: "withdrawn" }))).toBeNull();
   });
 
   it("opens nothing but a mail", () => {
