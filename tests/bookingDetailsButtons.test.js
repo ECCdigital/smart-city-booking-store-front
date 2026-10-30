@@ -12,7 +12,8 @@ import de from "~~/i18n/locales/de.json";
 import en from "~~/i18n/locales/en.json";
 
 // The icon-only buttons of the booking details carry a tooltip, which a
-// screen reader does not read as the button's name (ECCdigital/tickets#271).
+// screen reader does not read as the button's name (ECCdigital/tickets#271,
+// ECCdigital/tickets#309).
 // Each one needs an `aria-label` in the language of the page.
 //
 // Nuxt is not booted (see vitest.config.ts): only a component's template is
@@ -98,7 +99,7 @@ function detailsSectionState() {
   };
 }
 
-function bookableCardState() {
+function bookableCardState({ eventId = null } = {}) {
   return {
     bookable: {
       bookableId: "room-1",
@@ -106,9 +107,10 @@ function bookableCardState() {
       _bookableUsed: { title: "Saal", location: {} },
     },
     bookableTitle: "Saal",
-    eventId: null,
+    eventId,
     bookingPrice: "0,00 €",
     goToBookable: () => {},
+    goToEvent: () => {},
   };
 }
 
@@ -150,6 +152,19 @@ describe("buttons in the booking details have an accessible name", () => {
       "components/user/bookings/BookingDetailsBookableCard.vue",
       locale,
       bookableCardState(),
+    );
+
+    expect(button.getAttribute("aria-label")).toBe(name);
+  });
+
+  it.each([
+    ["de", "Zum Event gehen"],
+    ["en", "Go to the event"],
+  ])("names the button that opens the booked event (%s)", async (locale, name) => {
+    const [, button] = await buttonsOf(
+      "components/user/bookings/BookingDetailsBookableCard.vue",
+      locale,
+      bookableCardState({ eventId: "event-1" }),
     );
 
     expect(button.getAttribute("aria-label")).toBe(name);

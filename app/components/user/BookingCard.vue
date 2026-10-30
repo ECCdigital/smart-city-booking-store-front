@@ -41,6 +41,7 @@
           >
             <UButton
               icon="i-lucide-ellipsis-vertical"
+              :aria-label="$t('booking.actionsFor', { id: booking.id })"
               class="rounded-3xl"
               variant="soft"
               color="neutral"
