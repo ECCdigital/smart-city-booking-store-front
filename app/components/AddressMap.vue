@@ -55,7 +55,7 @@ const addressCoordinates = computed(() => {
 });
 </script>
 
-<style scoped>
+<style>
 .leaflet-div-icon {
   background: transparent;
   border: transparent;

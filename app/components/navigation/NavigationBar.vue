@@ -1,10 +1,27 @@
 <template>
   <div :class="barClass">
     <div class="container flex justify-between">
-      <div class="flex min-w-0 items-center">
+      <!-- The auth pages show only the way to the start page, named, since
+           the visitor has not got into the portal yet. -->
+      <div v-if="variant === 'auth'" class="flex min-w-0 items-center">
+        <NavigationLink
+          :tab="{
+            value: '/',
+            icon: 'i-lucide-home',
+            label: $t('navigation.home'),
+          }"
+          label-on-phone
+        />
+      </div>
+      <div v-else class="flex min-w-0 items-center">
         <UTooltip :text="$t('navigation.backToHome')">
           <NavigationLink
-            :tab="{ value: '/', icon: 'i-lucide-home', label: '' }"
+            :tab="{
+              value: '/',
+              icon: 'i-lucide-home',
+              label: '',
+              ariaLabel: $t('navigation.backToHome'),
+            }"
           />
         </UTooltip>
         <UTooltip :text="$t('navigation.toOffers')">
@@ -13,6 +30,7 @@
               value: '/search',
               icon: 'i-lucide-shopping-bag',
               label: '',
+              ariaLabel: $t('navigation.toOffers'),
             }"
           />
         </UTooltip>
@@ -28,12 +46,14 @@
 
       <ClientOnly>
         <div class="flex shrink-0 items-center gap-1 sm:gap-3">
-          <slot name="actions" />
-          <AuthActions />
+          <template v-if="variant !== 'auth'">
+            <slot name="actions" />
+            <AuthActions />
 
-          <div
-            class="h-6 w-px bg-(--ui-header-contrast) opacity-30"
-          />
+            <div
+              class="h-6 w-px bg-(--ui-header-contrast) opacity-30"
+            />
+          </template>
 
           <div class="flex items-center">
             <LanguageToggle />
@@ -64,24 +84,16 @@ defineProps({
     type: Array,
     default: () => [],
   },
+  // "auth": the slim bar of the sign-in pages, with the start page, language
+  // and colour mode only.
+  variant: {
+    type: String,
+    default: "default",
+  },
 });
 
-// Below `sm` (the width the app treats as "phone") the bar stays pinned to the
-// top edge while the page scrolls under it; from `sm` up it flows as before.
-//
-// `z-10` matches the app's existing sticky elements (checkout stepper, price bar)
-// and keeps the bar above page content, whose stacking stays at `z-0`/auto. It
-// cannot swallow Nuxt UI overlays: `UApp` renders as `<div class="isolate">`, and
-// modals, tooltips and toasts are teleported next to that element rather than
-// into it, so any z-index in the app is confined below them.
-//
-// iOS 26 also samples this bar to paint the area behind the status bar, which is
-// why the app no longer looks grey up there. WebKit only does that for a
-// sticky/fixed element at the top edge that is at least 90% wide, taller than
-// 10px, opaque and free of `backdrop-filter` — so adding `.glass`, a blur or an
-// alpha-bearing background colour here would silently turn that colouring off.
-// `--ui-header` comes from the theme stylesheet: an instance colour as before,
-// or the opaque neutral.
+// Sticky on phones, static on larger screens. Keep opaque and free of
+// `backdrop-filter`: iOS 26 samples this bar for the status-bar background.
 const barClass = computed(() => [
   "bg-(--ui-header)",
   "sticky top-0 z-10 sm:static",

@@ -6,6 +6,7 @@
       class="w-full my-2 mb-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6"
     >
       <QuickAccessCard
+        v-if="instanceStore.usesDigitalKeys"
         icon="i-lucide-key-round"
         :title="$t('account.digitalKeys')"
         :description="$t('account.digitalKeysDescription')"
@@ -64,6 +65,7 @@ import { useEvents } from "~/composables/api/useEvents.js";
 import { enrichBookingsWithEventDateTimes } from "~/utils/bookingEventTimes.js";
 import { computed } from "vue";
 import QuickAccessCard from "~/components/user/bookings/QuickAccessCard.vue";
+import { useInstanceStore } from "~~/stores/instance.js";
 
 definePageMeta({
   layout: "panel",
@@ -75,6 +77,7 @@ const { t } = useI18n();
 usePageTitle(() => t("meta.pages.accountBookings"));
 
 const bookingsStore = useBookingStore();
+const instanceStore = useInstanceStore();
 const { fetchEventById } = useEvents();
 
 const { data: enrichedBookings, pending } = useAsyncData(
