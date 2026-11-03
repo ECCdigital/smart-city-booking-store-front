@@ -9,7 +9,7 @@
     </div>
 
     <!-- Help Information -->
-    <GeneralHelpSection :bookings="bookings" />
+    <GeneralHelpSection v-if="bookings.length" :bookings="bookings" />
 
     <!-- View Switch, search and filter only once there are keys to show. -->
     <div v-if="bookings.length" class="flex my-5 justify-between">
