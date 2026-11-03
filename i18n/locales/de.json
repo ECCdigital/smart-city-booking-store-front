@@ -116,6 +116,7 @@
   },
   "common": {
     "actions": "Aktionen",
+    "browseOffers": "Angebote entdecken",
     "clearInput": "Eingabe löschen",
     "phoneNumber": "Telefonnummer",
     "comingSoon": "Demnächst verfügbar",
@@ -1337,8 +1338,8 @@
     "unknownTenant": "Unbekannt",
     "invoices": {
       "title": "Meine Belege",
-      "emptyTitle": "Keine Rechnungen vorhanden",
-      "emptyDescription": "Aktuell sind für Ihr Konto keine Rechnungen verfügbar. Sobald Rechnungen erstellt wurden, werden diese hier angezeigt.",
+      "emptyTitle": "Keine Belege vorhanden",
+      "emptyDescription": "Aktuell sind für Ihr Konto keine Belege verfügbar. Sobald Belege erstellt wurden, werden diese hier angezeigt.",
       "unknownBookable": "Unbekanntes Buchungsobjekt",
       "searchPlaceholder": "Nach Buchungsobjekt suchen",
       "noMatches": "Keine Dokumente passen zu Ihrer Suche oder dem gewählten Filter.",
@@ -1347,7 +1348,8 @@
         "tooltip": "Filtern nach {type}",
         "invoice": "Rechnungen",
         "receipt": "Zahlungsbelege",
-        "cancellation": "Stornobelege"
+        "cancellation": "Stornobelege",
+        "withdrawal": "Widerrufbelege"
       },
       "columns": {
         "createdAt": "Erstelldatum",
@@ -1525,7 +1527,8 @@
     "openDoor": "Tür öffnen",
     "scannedDescription": "Sie haben den Code an der Tür gescannt.",
     "whichBooking": "Welche Buchung?",
-    "noKeysFound": "Keine Schlüssel gefunden",
+    "emptyTitle": "Keine Schlüssel vorhanden",
+    "emptyDescription": "Sobald Sie ein Angebot mit digitalem Zugang gebucht haben, finden Sie den Schlüssel hier.",
     "searchPlaceholder": "Suchen",
     "noMatches": "Kein Schlüssel passt zu Ihrer Suche oder den gewählten Filtern.",
     "noAddress": "Keine Adresse angegeben",
@@ -1813,7 +1816,6 @@
       "undo": "Rückgängig",
       "emptyTitle": "Noch keine Favoriten",
       "emptyDescription": "Markieren Sie Angebote im Katalog oder in der Detailansicht mit dem Herz, um sie hier wiederzufinden.",
-      "browseOffers": "Angebote entdecken",
       "searchPlaceholder": "Nach Titel suchen",
       "noMatches": "Kein Favorit passt zu Ihrer Suche oder den gewählten Filtern.",
       "loadFailed": "Ihre Favoriten konnten nicht geladen werden."

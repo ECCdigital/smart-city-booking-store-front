@@ -21,7 +21,7 @@
       />
 
       <QuickAccessCard
-        icon="i-lucide-wallet-cards"
+        icon="i-lucide-file-text"
         :title="$t('navigation.invoices')"
         :description="$t('account.invoicesShortDescription')"
         to="/account/invoices"
@@ -32,7 +32,9 @@
       <h2 class="mt-5 text-xl font-bold">
         {{ $t("meta.pages.accountBookings") }}
       </h2>
+      <!-- Search and filter only once there is something to narrow. -->
       <BookingSearchFilterArea
+        v-if="bookings.length"
         :bookings="bookings"
         @update:bookings="setFilteredBookings"
       />
@@ -45,21 +47,30 @@
       v-else-if="filteredBookings?.length"
       :bookings="filteredBookings"
     />
-    <div
+    <ListEmptyState
       v-else-if="bookings.length"
-      class="flex flex-col items-center justify-center py-16 text-center"
+      icon="i-lucide-filter-x"
+      :description="$t('booking.noMatches')"
+    />
+    <ListEmptyState
+      v-else
+      icon="i-lucide-calendar-x"
+      :title="$t('booking.emptyTitle')"
+      :description="$t('booking.emptyDescription')"
     >
-      <UIcon name="i-lucide-filter-x" class="text-6xl text-gray-400 mb-4" />
-      <p class="text-gray-500">{{ $t("booking.noMatches") }}</p>
-    </div>
-    <BookingEmptyState v-else />
+      <UButton
+        :label="$t('common.browseOffers')"
+        icon="i-lucide-search"
+        :to="tenantTo('/search')"
+      />
+    </ListEmptyState>
   </div>
 </template>
 <script setup>
 import BookingSection from "~/components/user/BookingSection.vue";
 import { useBookingStore } from "~~/stores/bookings.js";
 import BookingsSkeleton from "~/components/user/bookings/BookingsSkeleton.vue";
-import BookingEmptyState from "~/components/user/bookings/BookingEmptyState.vue";
+import ListEmptyState from "~/components/user/ListEmptyState.vue";
 import BookingSearchFilterArea from "~/components/user/bookings/BookingSearchFilterArea.vue";
 import { useEvents } from "~/composables/api/useEvents.js";
 import { enrichBookingsWithEventDateTimes } from "~/utils/bookingEventTimes.js";
@@ -76,6 +87,7 @@ definePageMeta({
 const { t } = useI18n();
 usePageTitle(() => t("meta.pages.accountBookings"));
 
+const { tenantTo } = useTenantRoute();
 const bookingsStore = useBookingStore();
 const instanceStore = useInstanceStore();
 const { fetchEventById } = useEvents();
