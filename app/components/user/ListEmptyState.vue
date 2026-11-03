@@ -1,6 +1,4 @@
 <template>
-  <!-- The empty state of the account lists (Buchungen, Schlüssel, Favoriten,
-       Belege), so they look alike with no entries and with no matches. -->
   <div class="flex flex-col items-center justify-center py-16 text-center">
     <UIcon :name="icon" class="text-6xl text-gray-400 mb-4" />
     <h2
@@ -17,6 +15,10 @@
 </template>
 
 <script setup>
+// The empty state of the account lists (Buchungen, Schlüssel, Favoriten,
+// Belege), so they look alike with no entries and with no matches. The
+// template keeps a single root element: Belege fades it in a Transition,
+// which cannot animate a root with a comment beside it.
 defineProps({
   icon: { type: String, required: true },
   title: { type: String, default: "" },
