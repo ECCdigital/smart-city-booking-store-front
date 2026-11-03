@@ -474,6 +474,7 @@ import {
   resolveCancellationFailure,
 } from "~/utils/bookingCancellation.js";
 import { isFreeBooking, isSettledBooking } from "~/utils/bookingStatus.js";
+import { tierDeadline } from "~/utils/cancellationRefundTiers.js";
 import {
   formatIban,
   isValidBic,
@@ -617,17 +618,32 @@ const feePercent = computed(() => {
   return Number.isFinite(refundPercent) ? 100 - refundPercent : null;
 });
 
+/**
+ * The tier the refund applied, such as „36 Stunden“ or „2 Tage“; `null`
+ * without a scale, where no tier applies.
+ */
+function appliedTierOf(hours) {
+  if (!Number.isFinite(hours)) return null;
+  if (hours === 0) return t("booking.cancellation.tierAtStart");
+  const { amount, unit } = tierDeadline(hours);
+  return unit === "days"
+    ? t("booking.cancellation.tierDays", { n: amount }, amount)
+    : t("booking.cancellation.tierHours", { n: amount }, amount);
+}
+
 const tierHint = computed(() => {
   const data = preview.data;
   if (!data) return "";
-  const days = Math.max(0, Number(data.daysBeforeStart) || 0);
-  return t("booking.cancellation.tierHint", {
-    when: t("booking.cancellation.daysBeforeStart", { n: days }, days),
-    tierDays: data.appliedTierDays ?? days,
-    tenant: tenantName.value,
-    percent: data.appliedRefundPercentage ?? 0,
-    feePercent: feePercent.value ?? 100,
-  });
+  const tier = appliedTierOf(data.appliedTierHours);
+  return t(
+    tier ? "booking.cancellation.tierHint" : "booking.cancellation.refundHint",
+    {
+      tier,
+      tenant: tenantName.value,
+      percent: data.appliedRefundPercentage ?? 0,
+      feePercent: feePercent.value ?? 100,
+    },
+  );
 });
 
 const bankModeItems = computed(() => [
