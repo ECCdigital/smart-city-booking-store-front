@@ -116,6 +116,7 @@
   },
   "common": {
     "actions": "Actions",
+    "browseOffers": "Browse offers",
     "clearInput": "Clear input",
     "phoneNumber": "Phone number",
     "comingSoon": "Coming soon",
@@ -1175,7 +1176,8 @@
     "openDoor": "Open the door",
     "scannedDescription": "You scanned the code at the door.",
     "whichBooking": "Which booking?",
-    "noKeysFound": "No keys found",
+    "emptyTitle": "No keys yet",
+    "emptyDescription": "Once you have booked an offer with digital access, you will find its key here.",
     "searchPlaceholder": "Search",
     "noMatches": "No key matches your search or the chosen filters.",
     "lockSystemInfo": "Information and status of the locking system",
@@ -1744,7 +1746,6 @@
       "undo": "Undo",
       "emptyTitle": "No favourites yet",
       "emptyDescription": "Tap the heart on an offer in the catalogue or on its detail page to find it here again.",
-      "browseOffers": "Browse offers",
       "searchPlaceholder": "Search by title",
       "noMatches": "No favourite matches your search or the chosen filters.",
       "loadFailed": "Your favourites could not be loaded."

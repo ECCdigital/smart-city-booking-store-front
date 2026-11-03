@@ -5,18 +5,12 @@
       :description="$t('account.invoicesDescription')"
     />
 
-    <div
+    <ListEmptyState
       v-if="!pending && paymentDocuments.length === 0"
-      class="flex flex-col items-center justify-center py-24 text-center"
-    >
-      <UIcon name="i-lucide-file-text" class="text-6xl text-gray-400 mb-4" />
-      <h2 class="text-xl font-semibold mb-2">
-        {{ t("account.invoices.emptyTitle") }}
-      </h2>
-      <p class="text-gray-500 max-w-md">
-        {{ t("account.invoices.emptyDescription") }}
-      </p>
-    </div>
+      icon="i-lucide-file-text"
+      :title="t('account.invoices.emptyTitle')"
+      :description="t('account.invoices.emptyDescription')"
+    />
 
     <div v-else class="w-full">
       <!-- The quick filter narrows to one document type; a second click on
@@ -74,17 +68,12 @@
            it shows. UTable renders more than one root node, which a
            Transition cannot fade, so a plain div carries the key. -->
       <Transition name="card-list" mode="out-in">
-        <div
+        <ListEmptyState
           v-if="!pending && shownDocuments.length === 0"
           key="no-matches"
-          class="flex flex-col items-center justify-center py-16 text-center"
-        >
-          <UIcon
-            name="i-lucide-filter-x"
-            class="text-6xl text-gray-400 mb-4"
-          />
-          <p class="text-gray-500">{{ t("account.invoices.noMatches") }}</p>
-        </div>
+          icon="i-lucide-filter-x"
+          :description="t('account.invoices.noMatches')"
+        />
 
         <div v-else :key="shownKey">
           <!-- Narrow screens get cards; the table needs the width. -->
@@ -255,6 +244,7 @@ import { useBookingStore } from "~~/stores/bookings.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
 import PaymentDocumentCard from "~/components/user/invoices/PaymentDocumentCard.vue";
+import ListEmptyState from "~/components/user/ListEmptyState.vue";
 import { resolveBookingPaymentChip } from "~/utils/bookingPaymentStatus.js";
 import {
   PAYMENT_TYPES,

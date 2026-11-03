@@ -116,6 +116,7 @@
   },
   "common": {
     "actions": "Aktionen",
+    "browseOffers": "Angebote entdecken",
     "clearInput": "Eingabe löschen",
     "phoneNumber": "Telefonnummer",
     "comingSoon": "Demnächst verfügbar",
@@ -1525,7 +1526,8 @@
     "openDoor": "Tür öffnen",
     "scannedDescription": "Sie haben den Code an der Tür gescannt.",
     "whichBooking": "Welche Buchung?",
-    "noKeysFound": "Keine Schlüssel gefunden",
+    "emptyTitle": "Keine Schlüssel vorhanden",
+    "emptyDescription": "Sobald Sie ein Angebot mit digitalem Zugang gebucht haben, finden Sie den Schlüssel hier.",
     "searchPlaceholder": "Suchen",
     "noMatches": "Kein Schlüssel passt zu Ihrer Suche oder den gewählten Filtern.",
     "noAddress": "Keine Adresse angegeben",
@@ -1813,7 +1815,6 @@
       "undo": "Rückgängig",
       "emptyTitle": "Noch keine Favoriten",
       "emptyDescription": "Markieren Sie Angebote im Katalog oder in der Detailansicht mit dem Herz, um sie hier wiederzufinden.",
-      "browseOffers": "Angebote entdecken",
       "searchPlaceholder": "Nach Titel suchen",
       "noMatches": "Kein Favorit passt zu Ihrer Suche oder den gewählten Filtern.",
       "loadFailed": "Ihre Favoriten konnten nicht geladen werden."
