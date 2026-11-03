@@ -13,6 +13,7 @@
           color="primary"
           variant="ghost"
           class="rounded-full py-2 px-3"
+          :aria-label="$t('filter.reset')"
           @click="removeFilter"
         />
       </UTooltip>
@@ -22,6 +23,7 @@
           variant="ghost"
           icon="i-lucide-x"
           class="rounded-xl"
+          :aria-label="$t('meta.pages.close')"
           @click="() => emit('close')"
         />
       </UTooltip>
