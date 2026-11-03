@@ -70,7 +70,7 @@ const items = computed(() => {
       },
       {
         label: t("navigation.invoices"),
-        icon: "i-lucide-wallet-cards",
+        icon: "i-lucide-file-text",
         onSelect: () => goTo("/account/invoices"),
       },
     ],

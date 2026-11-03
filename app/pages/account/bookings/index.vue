@@ -21,7 +21,7 @@
       />
 
       <QuickAccessCard
-        icon="i-lucide-wallet-cards"
+        icon="i-lucide-file-text"
         :title="$t('navigation.invoices')"
         :description="$t('account.invoicesShortDescription')"
         to="/account/invoices"

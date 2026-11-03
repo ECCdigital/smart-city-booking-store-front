@@ -9,7 +9,7 @@
       v-if="!pending && paymentDocuments.length === 0"
       class="flex flex-col items-center justify-center py-24 text-center"
     >
-      <div class="text-4xl mb-4">🧾</div>
+      <UIcon name="i-lucide-file-text" class="text-6xl text-gray-400 mb-4" />
       <h2 class="text-xl font-semibold mb-2">
         {{ t("account.invoices.emptyTitle") }}
       </h2>
