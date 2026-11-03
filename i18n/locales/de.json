@@ -1337,8 +1337,8 @@
     "unknownTenant": "Unbekannt",
     "invoices": {
       "title": "Meine Belege",
-      "emptyTitle": "Keine Rechnungen vorhanden",
-      "emptyDescription": "Aktuell sind für Ihr Konto keine Rechnungen verfügbar. Sobald Rechnungen erstellt wurden, werden diese hier angezeigt.",
+      "emptyTitle": "Keine Belege vorhanden",
+      "emptyDescription": "Aktuell sind für Ihr Konto keine Belege verfügbar. Sobald Belege erstellt wurden, werden diese hier angezeigt.",
       "unknownBookable": "Unbekanntes Buchungsobjekt",
       "searchPlaceholder": "Nach Buchungsobjekt suchen",
       "noMatches": "Keine Dokumente passen zu Ihrer Suche oder dem gewählten Filter.",
