@@ -19,9 +19,37 @@
     </div>
 
     <div v-else class="w-full">
-      <!-- The search reads the bookables a document belongs to, so a typed
-           name finds every invoice and receipt of that room or device. -->
-      <div class="flex justify-end mb-4">
+      <!-- The quick filter narrows to one document type; a second click on
+           the chosen type shows all again. The search reads the bookables a
+           document belongs to, so a typed name finds every document of that
+           room or device. Both narrow together. -->
+      <div
+        class="flex flex-col-reverse gap-3 md:flex-row md:items-center md:justify-between mb-4"
+      >
+        <div
+          role="group"
+          :aria-label="t('account.invoices.quickFilter.label')"
+          class="flex flex-wrap gap-2"
+        >
+          <UTooltip
+            v-for="type in PAYMENT_TYPES"
+            :key="type"
+            :text="
+              t('account.invoices.quickFilter.tooltip', {
+                type: t(`account.invoices.quickFilter.${type}`),
+              })
+            "
+          >
+            <UButton
+              :color="typeFilter === type ? 'primary' : 'neutral'"
+              :variant="typeFilter === type ? 'solid' : 'soft'"
+              :label="t(`account.invoices.quickFilter.${type}`)"
+              :aria-pressed="typeFilter === type"
+              size="md"
+              @click="toggleTypeFilter(type)"
+            />
+          </UTooltip>
+        </div>
         <UInput
           v-model="searchQuery"
           icon="i-lucide-search"
@@ -30,93 +58,173 @@
           :placeholder="$t('account.invoices.searchPlaceholder')"
           :aria-label="$t('account.invoices.searchPlaceholder')"
           class="w-full md:w-[40%]"
-        />
+          :ui="{ trailing: 'pe-0' }"
+        >
+          <template #trailing>
+            <ClearButton
+              :show-clear-button="!!searchQuery"
+              @clear="searchQuery = ''"
+            />
+          </template>
+        </UInput>
       </div>
 
-      <p
-        v-if="!pending && shownDocuments.length === 0"
-        class="py-10 text-center text-gray-500"
-      >
-        {{ t("account.invoices.noMatches") }}
-      </p>
-
-      <UTable
-        v-else
-        v-model:sorting="sorting"
-        v-model:pagination="pagination"
-        :data="shownDocuments"
-        :columns="columns"
-        :loading="pending"
-        :pagination-options="{
-          getPaginationRowModel: getPaginationRowModel(),
-        }"
-        :ui="{
-          base: 'min-w-full table-fixed',
-          th: 'overflow-hidden',
-          td: 'overflow-hidden',
-        }"
-        class="w-full"
-      >
-        <template
-          v-for="col in sortableColumns"
-          :key="col.id"
-          #[`${col.id}-header`]="{ column }"
+      <!-- The table gives no hold on its rows, so it fades out and in as a
+           whole in the shared list transition when the search changes what
+           it shows. UTable renders more than one root node, which a
+           Transition cannot fade, so a plain div carries the key. -->
+      <Transition name="card-list" mode="out-in">
+        <div
+          v-if="!pending && shownDocuments.length === 0"
+          key="no-matches"
+          class="flex flex-col items-center justify-center py-16 text-center"
         >
-          <UButton
-            color="neutral"
-            variant="ghost"
-            :label="col.label"
-            :icon="sortIcon(column)"
-            class="-mx-2.5"
-            @click="column.toggleSorting(column.getIsSorted() === 'asc')"
+          <UIcon
+            name="i-lucide-filter-x"
+            class="text-6xl text-gray-400 mb-4"
           />
-        </template>
+          <p class="text-gray-500">{{ t("account.invoices.noMatches") }}</p>
+        </div>
 
-        <template #timeCreated-cell="{ row }">
-          {{ formatDate(row.original.timeCreated) }}
-        </template>
-        <template #title-cell="{ row }">
-          <UTooltip
-            :disabled="!row.original.title"
-            :ui="wrapTooltipUi"
+        <div v-else :key="shownKey">
+          <!-- Narrow screens get cards; the table needs the width. -->
+          <div class="md:hidden">
+            <PaymentDocumentCard
+              v-for="row in pagedDocuments"
+              :key="row.key"
+              :payment-document="row"
+              @open="openDocument(row.attachment, row)"
+              @download="downloadDocument(row.attachment, row)"
+              @print="printDocument(row.attachment, row)"
+            />
+          </div>
+
+          <UTable
+            v-model:sorting="sorting"
+            v-model:pagination="pagination"
+            :data="shownDocuments"
+            :columns="columns"
+            :loading="pending"
+            :pagination-options="{
+              getPaginationRowModel: getPaginationRowModel(),
+            }"
+            :ui="{
+              base: 'min-w-full table-fixed',
+              th: 'overflow-hidden',
+              td: 'overflow-hidden',
+            }"
+            class="hidden md:block w-full"
           >
-            <span class="block w-full truncate">
-              {{ row.original.title }}
-            </span>
-            <template #content>
-              <span class="min-w-0 w-full whitespace-normal break-words">
-                {{ row.original.title }}
+            <template
+              v-for="col in sortableColumns"
+              :key="col.id"
+              #[`${col.id}-header`]="{ column }"
+            >
+              <UButton
+                color="neutral"
+                variant="ghost"
+                :label="col.label"
+                :icon="sortIcon(column)"
+                class="-mx-2.5"
+                @click="column.toggleSorting(column.getIsSorted() === 'asc')"
+              />
+            </template>
+
+            <template #timeCreated-cell="{ row }">
+              {{ formatDate(row.original.timeCreated) }}
+            </template>
+            <template #title-cell="{ row }">
+              <UTooltip
+                :disabled="!row.original.title"
+                :ui="wrapTooltipUi"
+              >
+                <button
+                  type="button"
+                  class="block w-full truncate text-left text-primary hover:underline cursor-pointer"
+                  :aria-label="
+                    t('account.invoices.actions.open', {
+                      title: row.original.title,
+                    })
+                  "
+                  @click="openDocument(row.original.attachment, row.original)"
+                >
+                  {{ row.original.title }}
+                </button>
+                <template #content>
+                  <span class="min-w-0 w-full whitespace-normal break-words">
+                    {{ row.original.title }}
+                  </span>
+                </template>
+              </UTooltip>
+            </template>
+            <template #bookingId-cell="{ row }">
+              <NuxtLink
+                :to="tenantTo(`/account/bookings/${row.original.bookingId}`)"
+                class="block truncate text-primary hover:underline"
+              >
+                #{{ row.original.bookingId }}
+              </NuxtLink>
+            </template>
+            <template #bookableNames-cell="{ row }">
+              <UTooltip
+                :disabled="!row.original.bookableLabel"
+                :ui="wrapTooltipUi"
+              >
+                <span class="block w-full truncate">
+                  {{ row.original.bookableLabel }}
+                </span>
+                <template #content>
+                  <span class="min-w-0 w-full whitespace-normal break-words">
+                    {{ row.original.bookableLabel }}
+                  </span>
+                </template>
+              </UTooltip>
+            </template>
+            <template #paidLabel-cell="{ row }">
+              <BookingPayedChip :booking="row.original.booking" />
+            </template>
+            <template #actions-header>
+              <span class="sr-only">
+                {{ t("account.invoices.columns.actions") }}
               </span>
             </template>
-          </UTooltip>
-        </template>
-        <template #bookingId-cell="{ row }">
-          <NuxtLink
-            :to="tenantTo(`/account/bookings/${row.original.bookingId}`)"
-            class="block truncate text-primary hover:underline"
-          >
-            #{{ row.original.bookingId }}
-          </NuxtLink>
-        </template>
-        <template #bookableNames-cell="{ row }">
-          <UTooltip
-            :disabled="!row.original.bookableNames"
-            :ui="wrapTooltipUi"
-          >
-            <span class="block w-full truncate">
-              {{ row.original.bookableNames }}
-            </span>
-            <template #content>
-              <span class="min-w-0 w-full whitespace-normal break-words">
-                {{ row.original.bookableNames }}
-              </span>
+            <template #actions-cell="{ row }">
+              <div class="flex justify-end gap-1">
+                <UTooltip :text="t('account.invoices.actions.downloadLabel')">
+                  <UButton
+                    icon="i-lucide-download"
+                    color="neutral"
+                    variant="ghost"
+                    :aria-label="
+                      t('account.invoices.actions.download', {
+                        title: row.original.title,
+                      })
+                    "
+                    @click="
+                      downloadDocument(row.original.attachment, row.original)
+                    "
+                  />
+                </UTooltip>
+                <UTooltip :text="t('account.invoices.actions.printLabel')">
+                  <UButton
+                    icon="i-lucide-printer"
+                    color="neutral"
+                    variant="ghost"
+                    :aria-label="
+                      t('account.invoices.actions.print', {
+                        title: row.original.title,
+                      })
+                    "
+                    @click="
+                      printDocument(row.original.attachment, row.original)
+                    "
+                  />
+                </UTooltip>
+              </div>
             </template>
-          </UTooltip>
-        </template>
-        <template #paidLabel-cell="{ row }">
-          <BookingPayedChip :booking="row.original.booking" />
-        </template>
-      </UTable>
+          </UTable>
+        </div>
+      </Transition>
 
       <div
         v-if="shownDocuments.length > pagination.pageSize"
@@ -141,12 +249,19 @@
   </div>
 </template>
 <script setup>
+import ClearButton from "~/components/inputs/ClearButton.vue";
 import { getPaginationRowModel } from "@tanstack/vue-table";
 import { useBookingStore } from "~~/stores/bookings.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import BookingPayedChip from "~/components/user/bookings/BookingPayedChip.vue";
+import PaymentDocumentCard from "~/components/user/invoices/PaymentDocumentCard.vue";
 import { resolveBookingPaymentChip } from "~/utils/bookingPaymentStatus.js";
-import { includesText } from "~/utils/textSearch.js";
+import {
+  PAYMENT_TYPES,
+  paymentDocumentsOf,
+  searchPaymentDocuments,
+} from "~/utils/paymentDocumentList.js";
+import { usePaymentDocument } from "~/composables/usePaymentDocument.js";
 
 definePageMeta({
   layout: "panel",
@@ -160,6 +275,7 @@ usePageTitle(() => t("meta.pages.accountInvoices"));
 const bookingStore = useBookingStore();
 const { formatDate } = useFormatting();
 const { tenantTo } = useTenantRoute();
+const { openDocument, downloadDocument, printDocument } = usePaymentDocument();
 
 const { pending } = await useAsyncData("account-invoices", () =>
   bookingStore.fetchBookings(),
@@ -190,7 +306,7 @@ const sortableColumns = computed(() => [
   {
     id: "timeCreated",
     label: t("account.invoices.columns.createdAt"),
-    width: "16%",
+    width: "14%",
   },
   {
     id: "title",
@@ -200,27 +316,29 @@ const sortableColumns = computed(() => [
   {
     id: "typeLabel",
     label: t("account.invoices.columns.type"),
-    width: "14%",
+    width: "12%",
   },
   {
     id: "bookingId",
     label: t("account.invoices.columns.bookingId"),
-    width: "16%",
+    width: "12%",
   },
   {
     id: "bookableNames",
     label: t("account.invoices.columns.bookables"),
-    width: "20%",
+    width: "16%",
   },
   {
     id: "paidLabel",
     label: t("account.invoices.columns.paid"),
-    width: "14%",
+    width: "16%",
   },
 ]);
 
-const columns = computed(() =>
-  sortableColumns.value.map((column) => ({
+const ACTIONS_WIDTH = "10%";
+
+const columns = computed(() => [
+  ...sortableColumns.value.map((column) => ({
     accessorKey: column.id,
     meta: {
       class: {
@@ -233,43 +351,69 @@ const columns = computed(() =>
       },
     },
   })),
+  {
+    id: "actions",
+    meta: {
+      style: {
+        th: { width: ACTIONS_WIDTH },
+        td: { width: ACTIONS_WIDTH },
+      },
+    },
+  },
+]);
+
+const paymentDocuments = computed(() =>
+  paymentDocumentsOf(bookingStore.getBookings).map((document) => ({
+    ...document,
+    typeLabel: documentTypeLabel(document.type),
+    bookableLabel:
+      document.bookableNames || t("account.invoices.unknownBookable"),
+    paidLabel: resolveBookingPaymentChip(document.booking, t).label,
+  })),
 );
 
-const paymentDocuments = computed(() => {
-  return bookingStore.getBookings.flatMap((booking) => {
-    const bookableNames = (booking.bookableItems || [])
-      .map((item) => item._bookableUsed?.title)
-      .filter(Boolean)
-      .join(", ");
-
-    return (booking.attachments || [])
-      .filter(
-        (attachment) =>
-          attachment.type === "invoice" || attachment.type === "receipt",
-      )
-      .map((attachment) => ({
-        timeCreated: Number(attachment.timeCreated) || 0,
-        title: attachment.title || attachment.name || "",
-        type: attachment.type,
-        typeLabel: documentTypeLabel(attachment.type),
-        bookingId: booking.id,
-        bookableNames: bookableNames || t("account.invoices.unknownBookable"),
-        paidLabel: resolveBookingPaymentChip(booking, t).label,
-        booking,
-      }));
-  });
-});
-
 const searchQuery = ref("");
+const typeFilter = ref(null);
+
+function toggleTypeFilter(type) {
+  typeFilter.value = typeFilter.value === type ? null : type;
+}
 
 const shownDocuments = computed(() =>
-  paymentDocuments.value.filter((document) =>
-    includesText(document.bookableNames, searchQuery.value),
+  searchPaymentDocuments(
+    paymentDocuments.value,
+    searchQuery.value,
+    typeFilter.value,
   ),
 );
 
-// A new search gives a different list: the reader expects its first page.
-watch(searchQuery, () => {
+// Changes when the table shows other documents: after a search, or when the
+// bookings come in or change.
+const shownKey = computed(() =>
+  shownDocuments.value.map((document) => document.key).join("|"),
+);
+
+// The cards show the page the table would: same order, same slice.
+const pagedDocuments = computed(() => {
+  const [order] = sorting.value;
+  const sorted = order
+    ? [...shownDocuments.value].sort((a, b) => {
+        const left = a[order.id];
+        const right = b[order.id];
+        const compared =
+          typeof left === "number" && typeof right === "number"
+            ? left - right
+            : String(left ?? "").localeCompare(String(right ?? ""));
+        return order.desc ? -compared : compared;
+      })
+    : shownDocuments.value;
+  const { pageIndex, pageSize } = pagination.value;
+  return sorted.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+});
+
+// A new search or filter gives a different list: the reader expects its first
+// page.
+watch([searchQuery, typeFilter], () => {
   pagination.value = { ...pagination.value, pageIndex: 0 };
 });
 
@@ -279,6 +423,12 @@ function documentTypeLabel(type) {
   }
   if (type === "receipt") {
     return t("account.invoices.types.receipt");
+  }
+  if (type === "cancellation") {
+    return t("account.invoices.types.cancellation");
+  }
+  if (type === "withdrawal") {
+    return t("account.invoices.types.withdrawal");
   }
   return t("account.invoices.types.unknown");
 }

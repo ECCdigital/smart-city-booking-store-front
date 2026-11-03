@@ -16,9 +16,10 @@ const emit = defineEmits(["startVerification"]);
     class="w-full max-w-md rounded-xl bg-white/30 dark:bg-gray-900/30 backdrop-blur-lg"
   >
     <template #header>
+      <AuthTitleSection />
       <div class="flex flex-col justify-center items-center">
         <UIcon size="32" name="i-lucide-mail-check" class="text-primary" />
-        <h2 class="text-2xl font-semibold mb-2">
+        <h2 class="text-lg font-semibold mb-2">
           {{ $t("emailVerification.action.heading") }}
         </h2>
       </div>

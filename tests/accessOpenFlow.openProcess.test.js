@@ -15,6 +15,7 @@ import {
   readScannedCode,
   readStatus,
 } from "~/utils/accessOpenFlow.js";
+import { failureMayPass } from "~/utils/accessErrorScreens.js";
 
 const NOW = Date.UTC(2026, 7, 12, 18, 30);
 const HOUR = 60 * 60 * 1000;
@@ -379,6 +380,85 @@ describe("readOpenOutcome", () => {
       opened: false,
       error: ACCESS_ERRORS.GENERIC,
       blockingReason: null,
+    });
+  });
+
+  it("reads a temporary open failure as a screen that may pass", () => {
+    expect(
+      readOpenOutcome({ success: false, data: { openFailure: "temporary" } }),
+    ).toEqual({
+      opened: false,
+      pendingProcessId: null,
+      error: ACCESS_ERRORS.OPEN_TEMPORARY,
+      blockingReason: null,
+    });
+  });
+
+  it("carries the time to retry the backend names for a temporary open failure", () => {
+    expect(
+      readOpenOutcome({
+        success: false,
+        data: { openFailure: "temporary", retryAfter: "2026-08-12T18:55:00.000Z" },
+      }),
+    ).toEqual({
+      opened: false,
+      pendingProcessId: null,
+      error: ACCESS_ERRORS.OPEN_TEMPORARY,
+      blockingReason: null,
+      retryAfter: NOW + 25 * 60 * 1000,
+    });
+  });
+
+  it("names no time to retry where the backend names none or an unreadable one", () => {
+    expect(
+      readOpenOutcome({ success: false, data: { openFailure: "temporary" } }),
+    ).not.toHaveProperty("retryAfter");
+    expect(
+      readOpenOutcome({
+        success: false,
+        data: { openFailure: "temporary", retryAfter: "bald" },
+      }),
+    ).not.toHaveProperty("retryAfter");
+  });
+
+  it("names a time to retry only on the screen that passes", () => {
+    expect(
+      readOpenOutcome({
+        success: false,
+        data: {
+          openFailure: "configuration",
+          retryAfter: "2026-08-12T18:55:00.000Z",
+        },
+      }),
+    ).not.toHaveProperty("retryAfter");
+  });
+
+  it("reads an open failure of the setup as the misconfigured door, which stays", () => {
+    expect(
+      readOpenOutcome({ success: false, data: { openFailure: "configuration" } }),
+    ).toEqual({
+      opened: false,
+      pendingProcessId: null,
+      error: ACCESS_ERRORS.EVIDENCE_RULE_UNAVAILABLE,
+      blockingReason: null,
+    });
+  });
+
+  it("keeps an unknown open failure generic rather than guessing a way out", () => {
+    expect(
+      readOpenOutcome({ success: false, data: { openFailure: "wat" } }),
+    ).toMatchObject({ opened: false, error: ACCESS_ERRORS.GENERIC });
+  });
+
+  it("lets a named blocking reason speak first, as before", () => {
+    expect(
+      readOpenOutcome({
+        success: false,
+        data: { blockingReasons: ["evidence_missing"], openFailure: "temporary" },
+      }),
+    ).toMatchObject({
+      error: ACCESS_ERRORS.EVIDENCE_MISSING,
+      blockingReason: "evidence_missing",
     });
   });
 
@@ -801,6 +881,37 @@ describe("decideStage", () => {
     ).toMatchObject({
       stage: "error",
       blockingReason: "authorization_revoked",
+    });
+  });
+
+  describe("an open the provider refused after every check passed", () => {
+    const refused = (openFailure) =>
+      readOpenOutcome({ success: false, data: { openFailure } });
+
+    it("stands a temporary failure as its own screen, which passes and hands the button back", () => {
+      const failed = decideStage(
+        scanDoor({ status: LOCKED, result: refused("temporary") }),
+      );
+
+      expect(failed).toMatchObject({
+        stage: "error",
+        error: ACCESS_ERRORS.OPEN_TEMPORARY,
+      });
+      expect(failureMayPass(failed.error)).toBe(true);
+      // Once the screen has passed, the flow drops the result: the button is back.
+      expect(decideStage(scanDoor({ status: LOCKED })).stage).toBe("can_open");
+    });
+
+    it("leads a failure of the setup to the misconfigured door, which stays", () => {
+      const failed = decideStage(
+        scanDoor({ status: LOCKED, result: refused("configuration") }),
+      );
+
+      expect(failed).toMatchObject({
+        stage: "error",
+        error: ACCESS_ERRORS.EVIDENCE_RULE_UNAVAILABLE,
+      });
+      expect(failureMayPass(failed.error)).toBe(false);
     });
   });
 

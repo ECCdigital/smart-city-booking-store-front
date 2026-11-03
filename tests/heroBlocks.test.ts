@@ -11,7 +11,7 @@ import {
   zoneColumn,
   zoneRow,
 } from "~/utils/heroBlocks";
-import type { HeroLayout } from "~~/shared/types/hero";
+import type { HeroLayout, HeroTextBlock } from "~~/shared/types/hero";
 
 import crowdedHeroLayout from "./fixtures/hero-layout/crowded-hero-layout.json";
 import defaultHeroLayout from "./fixtures/hero-layout/default-hero-layout.json";
@@ -24,19 +24,59 @@ const logo = {
   height: 80,
 };
 
+const logoDark = {
+  source: "media" as const,
+  mediaId: "66f1c2000000000000000002",
+  url: "/api/v2/instance/media/66f1c2000000000000000002/file",
+  width: 160,
+  height: 80,
+};
+
 describe("fallbackHeroLayout", () => {
   it("has the shape of the Default Hero Layout: logo, title and subtitle in the middle row", () => {
     const layout = fallbackHeroLayout({
       title: "Marktplatz",
       subtitle: "Entdecken Sie unsere Angebote",
       logo,
+      logoDark: null,
     });
 
-    const expected = structuredClone(defaultHeroLayout);
-    expected.blocks[0]!.image = logo;
-    expected.blocks[2]!.text = { de: "Entdecken Sie unsere Angebote" };
+    // The logo Block follows the app logo, as the backend derives it, with
+    // the app logo put in the way the export puts it in.
+    const expected = structuredClone(defaultHeroLayout) as HeroLayout;
+    expected.blocks[0]!.image = {
+      source: "app-logo",
+      url: "/api/v2/instance/media/66f1c2000000000000000001/file",
+      width: 320,
+      height: 80,
+    };
+    (expected.blocks[2] as HeroTextBlock).text = {
+      de: "Entdecken Sie unsere Angebote",
+    };
 
     expect(layout).toEqual(expected);
+  });
+
+  it("gives the logo Block the app logo's variant for the dark mode", () => {
+    const layout = fallbackHeroLayout({
+      title: "Marktplatz",
+      subtitle: "Entdecken Sie unsere Angebote",
+      logo,
+      logoDark,
+    });
+
+    expect(layout.blocks[0]).toMatchObject({
+      id: "default-logo",
+      image: {
+        source: "app-logo",
+        dark: {
+          url: "/api/v2/instance/media/66f1c2000000000000000002/file",
+          width: 160,
+          height: 80,
+        },
+      },
+    });
+    expect(layout.blocks[0]).not.toHaveProperty("invertInDarkMode");
   });
 
   it("leaves the logo Block out when no logo is known", () => {
@@ -44,6 +84,7 @@ describe("fallbackHeroLayout", () => {
       title: "Marktplatz",
       subtitle: "Entdecken Sie unsere Angebote",
       logo: null,
+      logoDark,
     });
 
     expect(layout.blocks.map((block) => block.id)).toEqual([

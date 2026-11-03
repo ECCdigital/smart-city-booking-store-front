@@ -1,4 +1,5 @@
 import type { UpstreamError } from "~~/server/utils/upstreamError";
+import { storefrontUrl } from "~~/shared/utils/storefrontUrl";
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
@@ -36,8 +37,8 @@ export default defineEventHandler(async (event) => {
                 firstName: String(firstName || "").trim(),
                 lastName: String(lastName || "").trim(),
                 company: String(company || "").trim(),
-                verifyUrl: `${USER_BASE_URL}/register/email-verify`,
-                linkUrl: `${USER_BASE_URL}/card/link`,
+                verifyUrl: storefrontUrl(USER_BASE_URL, "/register/email-verify"),
+                linkUrl: storefrontUrl(USER_BASE_URL, "/card/link"),
                 ...(legalAcceptance ? { legalAcceptance } : {}),
             },
         });
@@ -52,9 +53,9 @@ export default defineEventHandler(async (event) => {
             statusCode: error.status || 500,
             statusMessage:
                 error.data?.message || "Card registration failed",
-            data: {
-                reason: error.data?.reason,
-            },
+            // The backend's body: the `reason` the card login names, or the
+            // refusal of an address on the blacklist.
+            data: error.data,
         });
     }
 });

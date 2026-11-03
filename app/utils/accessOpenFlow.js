@@ -31,6 +31,7 @@ export const ACCESS_ERRORS = Object.freeze({
   TOO_EARLY: "too_early",
   TOO_LATE: "too_late",
   DOOR_UNREACHABLE: "door_unreachable",
+  OPEN_TEMPORARY: "open_temporary",
   OPEN_UNCONFIRMED: "open_unconfirmed",
   CLOSE_FAILED: "close_failed",
   STATUS_UNAVAILABLE: "status_unavailable",
@@ -52,6 +53,20 @@ const REASON_SCREENS = Object.freeze({
   evidence_rule_unavailable: ACCESS_ERRORS.EVIDENCE_RULE_UNAVAILABLE,
   evidence_invalid: ACCESS_ERRORS.EVIDENCE_INVALID,
   evidence_missing: ACCESS_ERRORS.EVIDENCE_MISSING,
+});
+
+/**
+ * The failure classes the backend names for an open that passed every
+ * check and still did not go through (`AccessOpenError`, backend 4.4). It
+ * names the class only, never the provider's detail.
+ *
+ * `configuration` gets no screen of its own: its way out - contact the
+ * administration, the booking stays valid - is the one the misconfigured door
+ * already has, and a case earns a screen only through a way out of its own.
+ */
+const OPEN_FAILURE_SCREENS = Object.freeze({
+  temporary: ACCESS_ERRORS.OPEN_TEMPORARY,
+  configuration: ACCESS_ERRORS.EVIDENCE_RULE_UNAVAILABLE,
 });
 
 /**
@@ -541,9 +556,19 @@ export function buildOpenRequest({ evidence = [] } = {}) {
  * Pass the booking to tell a window that closed while the ready screen sat
  * open ("too late") from one that had not opened yet ("too early").
  *
+ * A refusal names `blockingReasons`, read as before. An open that passed every
+ * check and failed at the provider names `openFailure` instead - see
+ * {@link OPEN_FAILURE_SCREENS}. Where both came, the reason speaks first; an
+ * `openFailure` this module does not know stays generic.
+ *
+ * `retryAfter` comes along only on `open_temporary` and only where the
+ * backend named a readable time (an ISO time, e.g. the end of Salto's block
+ * after `otp_blocked`); without one the field is missing, as in the answer.
+ *
  * @param {{ success?: boolean, data?: Object }|null|undefined} response
  * @param {{ booking?: Object|null, now?: number }} [context]
- * @returns {{ opened: boolean, pendingProcessId: string|null, error: string|null, blockingReason: string|null }}
+ * @returns {{ opened: boolean, pendingProcessId: string|null, error: string|null,
+ *   blockingReason: string|null, retryAfter?: number }} `retryAfter` in epoch ms
  */
 export function readOpenOutcome(response, { booking = null, now } = {}) {
   if (response?.success === true) {
@@ -557,12 +582,26 @@ export function readOpenOutcome(response, { booking = null, now } = {}) {
   }
 
   const blockingReason = response?.data?.blockingReasons?.[0] ?? null;
+  const openFailure = response?.data?.openFailure;
+  const openFailureScreen = Object.hasOwn(OPEN_FAILURE_SCREENS, openFailure ?? "")
+    ? OPEN_FAILURE_SCREENS[openFailure]
+    : null;
+
+  const error =
+    !blockingReason && openFailureScreen
+      ? openFailureScreen
+      : reasonError(blockingReason, booking, now ?? Date.now());
+  const retryAfter =
+    error === ACCESS_ERRORS.OPEN_TEMPORARY
+      ? Date.parse(response?.data?.retryAfter ?? "")
+      : NaN;
 
   return {
     opened: false,
     pendingProcessId: null,
-    error: reasonError(blockingReason, booking, now ?? Date.now()),
+    error,
     blockingReason,
+    ...(Number.isFinite(retryAfter) && { retryAfter }),
   };
 }
 

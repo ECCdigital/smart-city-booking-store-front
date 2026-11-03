@@ -220,7 +220,8 @@ const hasUnsavedChanges = computed(
 );
 
 onBeforeRouteLeave(() => {
-  if (!hasUnsavedChanges.value) {
+  // A session that ended (e.g. during a save) goes to the login regardless.
+  if (!hasUnsavedChanges.value || !authStore.isLoggedIn) {
     return true;
   }
 
@@ -243,7 +244,14 @@ function updateUser({ updatedField, updatedValue }) {
   currentUser.value[updatedField] = updatedValue;
 }
 async function saveUpdatedUser() {
-  await authStore.updateUser(currentUser.value);
+  const result = await authStore.updateUser(currentUser.value);
+  if (!result.success) {
+    notification.error(
+      t("account.changesSaveFailedMessage"),
+      t("account.changesSaveFailed"),
+    );
+    return;
+  }
   originalUser.value = cloneUser(currentUser.value);
   currentUser.value = cloneUser(currentUser.value);
   formVersion.value += 1;

@@ -17,6 +17,7 @@
         <UTooltip v-if="eventId" :text="$t('booking.goToEvent')" class="ml-2">
           <UButton
             icon="i-lucide-calendar"
+            :aria-label="$t('booking.goToEvent')"
             variant="soft"
             class="text-gray-700 dark:text-gray-300"
             @click="goToEvent()"

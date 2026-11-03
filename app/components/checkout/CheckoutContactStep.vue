@@ -1,4 +1,6 @@
 <script setup>
+import { isBusinessContact } from "~/utils/businessBooking.js";
+
 const props = defineProps({
   requiredFieldKeys: {
     type: Array,
@@ -55,6 +57,14 @@ const addressSuggestions = ref([]);
 const isAddressLookupLoading = ref(false);
 let addressLookupDebounce = null;
 let cityLookupDebounce = null;
+
+/** Follows the company until the booker sets the checkbox. */
+const isBusiness = computed({
+  get: () => isBusinessContact(contact.value),
+  set: (value) => {
+    contact.value.isBusiness = Boolean(value);
+  },
+});
 
 function isRequired(key) {
   return props.requiredFieldKeys.includes(key);
@@ -414,6 +424,27 @@ function onAddressSuggestionSelect(suggestion) {
             </template>
           </UInputMenu>
         </UFormField>
+
+        <UCheckbox v-model="isBusiness" class="sm:col-span-2">
+          <template #label>
+            <span class="inline-flex items-center gap-1">
+              {{ $t("checkout.data.businessBookingLabel") }}
+              <!-- The explanation sits in the tooltip; a click on the icon
+                   does not toggle the checkbox. -->
+              <UTooltip :text="$t('checkout.data.businessBookingHint')">
+                <span
+                  tabindex="0"
+                  role="img"
+                  :aria-label="$t('checkout.data.businessBookingHint')"
+                  class="inline-flex cursor-help text-gray-500 dark:text-gray-400"
+                  @click.prevent
+                >
+                  <UIcon name="i-lucide-circle-help" class="w-4 h-4" />
+                </span>
+              </UTooltip>
+            </span>
+          </template>
+        </UCheckbox>
       </div>
     </UCard>
 

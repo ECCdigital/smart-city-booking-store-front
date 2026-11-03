@@ -5,7 +5,6 @@ import {
   fromPriceOf,
   isBookableOffer,
   mergeOffers,
-  offerKey,
   titleOf,
 } from "~/composables/search/offer";
 
@@ -52,11 +51,6 @@ describe("mergeOffers", () => {
   it("lists bookables and events together and reaches tickets through their event", () => {
     const merged = mergeOffers([room, ticket, orphanTicket], [event]);
     expect(merged.map((o) => o.id)).toEqual(["b1", "tk2", "e1"]);
-  });
-
-  it("keys the merged list by kind, tenant and id", () => {
-    expect(offerKey(room)).toBe("room:t1:b1");
-    expect(offerKey(event)).toBe("event:t1:e1");
   });
 });
 

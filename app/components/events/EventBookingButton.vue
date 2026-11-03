@@ -18,7 +18,7 @@
           :icon="isDirectConnection ? 'i-lucide-shopping-cart' : ''"
           :label="isDirectConnection ? 'Jetzt buchen' : 'Buchen'"
           :style="{
-            color: bookingDisabled ? '' : contrastToPrimary,
+            color: bookingDisabled ? '' : 'var(--ui-primary-contrast)',
           }"
           class="justify-center h-full"
           @click="goToTicketOptions"
@@ -50,7 +50,6 @@
   </div>
 </template>
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 import EventTicketOptionsDialog from "~/components/events/EventTicketOptionsDialog.vue";
 
@@ -93,7 +92,6 @@ const tooltipText = computed(() => {
   }
 });
 
-const { contrastToPrimary } = useContrastColor();
 
 const bookingDisabled = computed(
   () =>

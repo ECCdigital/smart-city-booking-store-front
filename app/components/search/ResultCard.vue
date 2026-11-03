@@ -3,7 +3,7 @@
     class="shadow-lg bg-white dark:bg-gray-700 rounded-xl"
     :class="[
       isNotSuitable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer',
-      mapDetailMode ? 'h-72' : '',
+      mapDetailMode ? 'max-h-72' : '',
     ]"
     @click="onGoToDetails"
   >
@@ -49,7 +49,13 @@
           </div>
         </ClientOnly>
       </div>
-      <USeparator color="primary" type="solid" size="xl" class="w-full" />
+      <USeparator
+        color="primary"
+        type="solid"
+        size="xl"
+        class="w-full"
+        :ui="{ border: 'border-[color:var(--ui-accent,var(--ui-primary))]' }"
+      />
     </div>
     <ResultCardBookableContent
       v-if="!isEvent"

@@ -31,7 +31,12 @@
 
         <!-- Meta information on small screens -->
         <div class="space-y-3 md:hidden">
-          <AddressInformationArea :item="item" :is-event="isEvent" />
+          <DetailsAreaEventInformation v-if="isEvent" :item="item" />
+          <AddressInformationArea
+            v-if="showAddress"
+            :item="item"
+            :is-event="isEvent"
+          />
           <PriceInformationArea :item="item" :is-event="isEvent" />
           <DetailsAreaCancellationConditions :item="item" :is-event="isEvent" />
           <BookableCustomFieldsMoreInformation :item="item" />
@@ -59,9 +64,14 @@
         <DetailsAreaRelatedBookables :item="item" class="my-10" />
       </div>
 
-      <!-- Right: Meta information -> address, price, cancellation under price, more info -->
+      <!-- Right: Meta information -> event time and format, address, price, cancellation under price, more info -->
       <div class="hidden md:block space-y-3 md:sticky" :style="stickyMetaStyle">
-        <AddressInformationArea :item="item" :is-event="isEvent" />
+        <DetailsAreaEventInformation v-if="isEvent" :item="item" />
+        <AddressInformationArea
+          v-if="showAddress"
+          :item="item"
+          :is-event="isEvent"
+        />
         <PriceInformationArea :item="item" :is-event="isEvent" />
         <DetailsAreaCancellationConditions :item="item" :is-event="isEvent" />
         <BookableCustomFieldsMoreInformation :item="item" />
@@ -76,11 +86,13 @@ import { useBookableDetailContent } from "~/composables/bookables/useBookableDet
 import DetailsAreaImage from "~/components/detailsArea/DetailsAreaImage.vue";
 import BookableFlagDisplay from "~/components/bookables/BookableFlagDisplay.vue";
 import AddressInformationArea from "~/components/AddressInformationArea.vue";
+import DetailsAreaEventInformation from "~/components/detailsArea/DetailsAreaEventInformation.vue";
 import PriceInformationArea from "~/components/PriceInformationArea.vue";
 import DetailsAreaCancellationConditions from "~/components/detailsArea/DetailsAreaCancellationConditions.vue";
 import BookableCustomFieldsMoreInformation from "~/components/bookables/BookableCustomFieldsMoreInformation.vue";
 import DetailsAreaAvailabilitySection from "~/components/detailsArea/DetailsAreaAvailabilitySection.vue";
 import DetailsAreaAvailabilityResults from "~/components/detailsArea/DetailsAreaAvailabilityResults.vue";
+import { EVENT_FORMAT, eventFormatOf } from "~/utils/eventFormat.js";
 
 const props = defineProps({
   item: {
@@ -103,6 +115,11 @@ const {
   setSearchTimePeriod,
   removeSearchTimePeriod,
 } = useBookableDetailContent(() => props.item, props.isEvent);
+
+// An online event has no place, so it shows no empty address either.
+const showAddress = computed(
+  () => !props.isEvent || eventFormatOf(props.item) !== EVENT_FORMAT.ONLINE,
+);
 
 const titleBlockRef = ref(null);
 const stickyTop = ref(0);

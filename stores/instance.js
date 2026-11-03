@@ -7,12 +7,15 @@ export const useInstanceStore = defineStore("instance", {
   }),
   getters: {
     publicOffersEnabled: (state) =>
-        state.instance?.publicOffersEnabled ?? false,
+      state.instance?.publicOffersEnabled ?? false,
     portalUrl: (state) => state.instance?.portalUrl ?? null,
     ssoEnabled: (state) =>
-        !!state.instance?.applications?.find(
-            (app) => app.id === "keycloak" && app.active
-        ),
+      !!state.instance?.applications?.find(
+        (app) => app.id === "keycloak" && app.active,
+      ),
+    // Whether any tenant of the instance has an active access or locking
+    // system.
+    usesDigitalKeys: (state) => state.instance?.usesDigitalKeys === true,
   },
   actions: {
     async initialize() {
@@ -26,6 +29,7 @@ export const useInstanceStore = defineStore("instance", {
 
       try {
         this.instance = await fetchInstance();
+        console.log("*** Fetched instance:", this.instance);
       } catch (error) {
         console.error("Error fetching instance:", error);
         this.instance = null;

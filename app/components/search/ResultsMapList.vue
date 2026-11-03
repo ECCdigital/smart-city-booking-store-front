@@ -21,7 +21,9 @@
         }}
       </p>
     </div>
-    <div :class="floating ? 'flex-1 min-h-0 overflow-auto p-2' : ''">
+    <div
+      :class="floating ? 'flex-1 min-h-0 overflow-auto p-2' : 'overflow-auto'"
+    >
       <TransitionGroup name="list" tag="div" class="space-y-1">
         <div
           v-for="bookable in bookables"

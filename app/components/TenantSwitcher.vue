@@ -1,7 +1,6 @@
 <script setup>
 import { computed } from "vue";
 import { useTenantStore } from "~~/stores/tenant.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useTenant } from "~/composables/useTenant";
 
 const t = useI18n().t;
@@ -113,8 +112,6 @@ function onClear() {
   });
 }
 
-const { contrastToPrimary } = useContrastColor();
-
 // In the bar the trigger is the user menu's ghost button -- same padding, same
 // (primary, hence invisible on the primary bar) hover -- with the name in place
 // of the avatar. The name gives way before the actions do: it shrinks and clips
@@ -146,7 +143,7 @@ const buttonClass = computed(() =>
       :label="label"
       :class="buttonClass"
       :ui="isBar ? { label: 'truncate', trailingIcon: 'shrink-0' } : undefined"
-      :style="isBar ? { color: contrastToPrimary } : undefined"
+      :style="isBar ? { color: 'var(--ui-header-contrast)' } : undefined"
     />
 
     <template #item-trailing="{ item }">

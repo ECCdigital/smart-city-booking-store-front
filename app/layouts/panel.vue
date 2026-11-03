@@ -4,14 +4,18 @@ import {
   type NavigationPreset,
 } from "~/composables/useNavigationItems";
 import SideNavigation from "~/components/navigation/SideNavigation.vue";
+import { useInstanceStore } from "~~/stores/instance.js";
 
 const route = useRoute();
+const instanceStore = useInstanceStore();
 
-const navItems = computed(
-  () =>
+const navItems = computed(() => {
+  const items =
     navigationPresets[route.meta.navigation as NavigationPreset] ??
-    navigationPresets.user,
-);
+    navigationPresets.user;
+  if (instanceStore.usesDigitalKeys) return items;
+  return items.filter((item) => item.value !== "/mobile-key");
+});
 </script>
 
 <template>

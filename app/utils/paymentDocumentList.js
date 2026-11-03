@@ -1,0 +1,60 @@
+/**
+ * The framework-free part of the invoice list in the account area: which
+ * attachments of the user's bookings are payment documents and how they are
+ * searched. A booking carries its attachments and the bookables it used.
+ */
+
+import { includesText } from "./textSearch.js";
+
+/** The document types the list shows, in the order of its quick filter. */
+export const PAYMENT_TYPES = [
+  "invoice",
+  "receipt",
+  "cancellation",
+  "withdrawal",
+];
+
+/**
+ * The invoices, receipts, cancellation and withdrawal receipts of the
+ * bookings, each named by its title (or file name) and by the titles of its booking's bookables, joined; empty when the
+ * booking names none. `key` tells one document from the others; `tenantId`
+ * and `attachment` say where to fetch the document from.
+ */
+export function paymentDocumentsOf(bookings) {
+  return (bookings ?? []).flatMap((booking) => {
+    const bookableNames = (booking.bookableItems || [])
+      .map((item) => item._bookableUsed?.title)
+      .filter(Boolean)
+      .join(", ");
+
+    return (booking.attachments || [])
+      .filter((attachment) => PAYMENT_TYPES.includes(attachment.type))
+      .map((attachment) => {
+        const timeCreated = Number(attachment.timeCreated) || 0;
+        const title = attachment.title || attachment.name || "";
+        return {
+          key: `${booking.id}/${timeCreated}/${title}`,
+          timeCreated,
+          title,
+          type: attachment.type,
+          bookingId: booking.id,
+          tenantId: booking.tenantId,
+          attachment,
+          bookableNames,
+          booking,
+        };
+      });
+  });
+}
+
+/**
+ * The documents whose bookables hold the searched text, case and accents
+ * aside, and of the chosen type. An empty query and no type keep everything.
+ */
+export function searchPaymentDocuments(documents, query, type = null) {
+  return (documents ?? []).filter(
+    (document) =>
+      (!type || document.type === type) &&
+      includesText(document.bookableNames, query),
+  );
+}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  FAVORITE_STATUS,
   detailPathOf,
   filterEntries,
   isAvailable,
@@ -31,6 +32,16 @@ describe("an entry of the favorites list", () => {
     expect(isAvailable(entry())).toBe(true);
     expect(isAvailable(entry({ status: "unavailable", offer: undefined }))).toBe(false);
     expect(isAvailable(entry({ status: "deleted", offer: undefined }))).toBe(false);
+  });
+
+  it("is not available while unlisted, though it carries the offer", () => {
+    // ECCdigital/tickets#225: an unlisted offer is reached by its checkout
+    // alone, so the entry reads "Nicht verfügbar" and links nowhere.
+    const unlisted = entry({ status: FAVORITE_STATUS.UNLISTED });
+
+    expect(isAvailable(unlisted)).toBe(false);
+    expect(offerOf(unlisted)).toBeNull();
+    expect(titleOf(unlisted)).toBe("Großer Saal (damals)");
   });
 
   it("hands the offer over as the catalog reads it, an event with its Kind", () => {

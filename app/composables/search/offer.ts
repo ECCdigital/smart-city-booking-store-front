@@ -101,31 +101,8 @@ export function kindOf(item: OfferItem): OfferKind | undefined {
   return item.type as OfferKind | undefined;
 }
 
-/**
- * One identity for the merged list. Bookable and event ids come from different
- * collections, so the id alone is not enough.
- */
-export function offerKey(item: OfferItem): string {
-  return `${item.type ?? "bookable"}:${item.tenantId}:${item.id}`;
-}
-
 export function titleOf(item: OfferItem): string {
   return (isEventItem(item) ? item.information?.name : item.title) ?? "";
-}
-
-export function descriptionOf(item: OfferItem): string {
-  if (isEventItem(item)) {
-    return item.information?.description || item.information?.teaserText || "";
-  }
-  return item.description ?? "";
-}
-
-export function tagsOf(item: OfferItem): string[] {
-  return (isEventItem(item) ? item.information?.tags : item.tags) ?? [];
-}
-
-export function flagsOf(item: OfferItem): string[] {
-  return (isEventItem(item) ? item.information?.flags : item.flags) ?? [];
 }
 
 /**

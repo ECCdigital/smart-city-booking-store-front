@@ -12,7 +12,7 @@ import * as locales from "@nuxt/ui/locale";
 
 const { locale } = useI18n();
 const siteName = useSiteName();
-const { version: themeVersion } = await useThemeBundle();
+const { version: themeVersion, fontHref } = await useThemeBundle();
 
 const themeCssHref = computed(() => `/api/theme/css${themeVersion.value}`);
 const faviconHref = computed(() => `/api/theme/favicon${themeVersion.value}`);
@@ -34,5 +34,26 @@ useHead({
     { rel: "stylesheet", href: themeCssHref },
     { rel: "icon", href: faviconHref, key: "favicon" },
   ],
+});
+
+// The instance font is declared with `font-display: optional`: it is used only
+// if it is there for the first paint, and without the preload it never is.
+// `crossorigin` too on the same origin, or the font request would not reuse it.
+useHead({
+  link: computed(() =>
+    fontHref.value
+      ? [
+          {
+            rel: "preload",
+            as: "font",
+            type: "font/woff2",
+            href: fontHref.value,
+            crossorigin: "anonymous",
+            fetchpriority: "high",
+            tagPriority: "critical",
+          },
+        ]
+      : [],
+  ),
 });
 </script>

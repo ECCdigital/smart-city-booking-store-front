@@ -1,13 +1,13 @@
 <template>
   <div style="padding: 50px 0">
-    <div class="flex items-center mb-5">
+    <div class="md:flex items-center justify-between md:mb-5">
       <h2 class="text-2xl font-bold">{{ $t("catalog.type") }}</h2>
-      <div class="flex-1" />
       <UButton
         variant="ghost"
         :label="$t('catalog.showAllOffers')"
         trailing-icon="i-lucide-chevron-right"
         :to="tenantTo('/search')"
+        class="my-2 md:my-0"
       />
     </div>
     <div class="grid sm:grid-cols-2 lg:flex gap-5">

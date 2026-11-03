@@ -1,7 +1,7 @@
 import * as h3 from "h3";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Registration on /api/auth/signup (ECCdigital/tickets#198). The route runs on
+// Registration on /api/auth/signup. The route runs on
 // real h3; Nitro's auto-imports are stubbed with it, and $fetch stands in for
 // the backend and records what the storefront sends to /auth/signup.
 const ORIGIN = "https://booking.example.com";
@@ -72,5 +72,15 @@ describe("signup", () => {
     });
     expect(backendCalls[0]!.body).not.toHaveProperty("firstname");
     expect(backendCalls[0]!.body).not.toHaveProperty("lastname");
+  });
+
+  // an address with an account gets a mail linking
+  // the storefront's „Passwort vergessen“, built from its base URL alone.
+  it("sends the storefront's forgot password page to the backend", async () => {
+    await register({ ...form, forgotPasswordUrl: "https://evil.example/x" });
+
+    expect(backendCalls[0]!.body.forgotPasswordUrl).toBe(
+      `${ORIGIN}/password/forgot`,
+    );
   });
 });

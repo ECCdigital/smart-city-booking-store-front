@@ -20,20 +20,12 @@
   </UButton>
 </template>
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
-
 const { tenantTo } = useTenantRoute();
 
 const t = useI18n().t;
 
-const { contrastToPrimary } = useContrastColor();
-const nameColor = computed(() => {
-  if (contrastToPrimary.value === "#ffffff") {
-    return "text-white hidden md:inline";
-  } else {
-    return "text-black hidden md:inline";
-  }
-});
+// The label sits on the header bar, so it takes the bar's text colour.
+const nameColor = "text-[color:var(--ui-header-contrast)] hidden md:inline";
 
 function goTo(targetString) {
   const router = useRouter();

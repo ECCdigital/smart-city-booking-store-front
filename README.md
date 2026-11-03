@@ -352,7 +352,7 @@ Every proxy answer that carries a release — `/api/catalog/**` (except `mode`),
 
 The image proxy `/api/img` passes the backend's `Cache-Control`, `ETag` and `Last-Modified` of a media file through unchanged and adds no lifetime of its own: how long an offer image may be kept is the backend's decision. Versioned theme assets keep their long lifetime.
 
-`/api/theme/bundle`, `/api/theme/css`, `/api/theme/[slug].css` and `/api/theme/favicon` are **not** in this cache. Their freshness is the Theme Bundle's own: the bundle is held per process and revalidated against the backend with a conditional GET (`NUXT_THEME_REVALIDATE_SECONDS`, `NUXT_THEME_REVALIDATE_TIMEOUT_MS`), and the rendered CSS and favicon bytes are memoised per etag. See [ADR 0001](docs/adr/0001-theme-bundle-revalidation-instead-of-purge.md).
+`/api/theme/bundle`, `/api/theme/css`, `/api/theme/catalog/[slug].css` and `/api/theme/favicon` are **not** in this cache. Their freshness is the Theme Bundle's own: the bundle is held per process and revalidated against the backend with a conditional GET (`NUXT_THEME_REVALIDATE_SECONDS`, `NUXT_THEME_REVALIDATE_TIMEOUT_MS`), and the rendered CSS and favicon bytes are memoised per etag. See [ADR 0001](docs/adr/0001-theme-bundle-revalidation-instead-of-purge.md).
 
 ---
 

@@ -6,8 +6,10 @@
  */
 
 import type {
+  HeroAppLogoReference,
   HeroBlock,
   HeroHeight,
+  HeroImageAddress,
   HeroLayout,
   HeroMediaReference,
   HeroZone,
@@ -20,8 +22,10 @@ export interface FallbackHeroContent {
   /** The title Block's text; the Block is left out when it is empty. */
   title: string;
   subtitle: string;
-  /** The logo Block's image; the Block is left out when none is known. */
+  /** The app logo; the logo Block is left out when none is known. */
   logo: HeroMediaReference | null;
+  /** The app logo's variant for the dark mode, or `null`. */
+  logoDark: HeroMediaReference | null;
 }
 
 /**
@@ -41,12 +45,48 @@ const FALLBACK_BLOCK = {
   hideOnMobile: false,
 } as const;
 
+/** The address and the dimensions of a medium, without the reference around them. */
+function imageAddress(
+  image: HeroMediaReference,
+): Partial<HeroImageAddress> {
+  const { url, width, height } = image;
+  return {
+    ...(url ? { url } : {}),
+    ...(width ? { width } : {}),
+    ...(height ? { height } : {}),
+  };
+}
+
+/**
+ * A reference to the app logo with the app logo put in, as the backend's
+ * export puts it in: the logo's address and dimensions and, under `dark`, the
+ * variant's. Without a logo it carries none, and the Block shows nothing; a
+ * variant alone is no app logo either.
+ */
+export function appLogoReference(
+  logo: HeroMediaReference | null,
+  logoDark: HeroMediaReference | null,
+): HeroAppLogoReference {
+  if (!logo?.url) return { source: "app-logo" };
+
+  const reference: HeroAppLogoReference = {
+    source: "app-logo",
+    ...imageAddress(logo),
+  };
+  if (logoDark?.url) {
+    reference.dark = { ...imageAddress(logoDark), url: logoDark.url };
+  }
+  return reference;
+}
+
 /**
  * The Hero Layout rendered when no Theme Bundle could be read or the one
  * delivered failed validation. It has the shape of the backend's Default
  * Hero Layout — logo on the right, title and subtitle on the left — so the
  * Hero looks the same whether the backend derived it or the storefront did.
- * The logo comes first so it stacks above the title on mobile.
+ * The logo comes first so it stacks above the title on mobile. Like the
+ * backend's, the logo Block follows the app logo: its variant in the dark
+ * mode, or inverted without one.
  */
 export function fallbackHeroLayout(content: FallbackHeroContent): HeroLayout {
   const blocks: HeroBlock[] = [];
@@ -57,10 +97,9 @@ export function fallbackHeroLayout(content: FallbackHeroContent): HeroLayout {
       id: "default-logo",
       type: "image",
       zone: "middle-right",
-      image: content.logo,
+      image: appLogoReference(content.logo, content.logoDark),
       alt: { de: content.title },
       maxHeight: "sm",
-      invertInDarkMode: true,
     });
   }
 

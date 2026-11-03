@@ -71,8 +71,3 @@ export function getKeycloakEndpoints(serverUrl: string, realm: string) {
         logout: `${base}/logout`,
     };
 }
-
-export function invalidateKeycloakCache() {
-    cachedConfig = null;
-    cacheTimestamp = 0;
-}

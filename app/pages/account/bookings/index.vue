@@ -6,6 +6,7 @@
       class="w-full my-2 mb-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6"
     >
       <QuickAccessCard
+        v-if="instanceStore.usesDigitalKeys"
         icon="i-lucide-key-round"
         :title="$t('account.digitalKeys')"
         :description="$t('account.digitalKeysDescription')"
@@ -37,11 +38,20 @@
       />
     </div>
 
-    <BookingsSkeleton v-if="pending" :skeleton-count="9" />
+    <!-- Only the first load: a refresh keeps the cards, and with them a
+         cancellation dialog that is still showing its outcome. -->
+    <BookingsSkeleton v-if="pending && !enrichedBookings" :skeleton-count="9" />
     <BookingSection
       v-else-if="filteredBookings?.length"
       :bookings="filteredBookings"
     />
+    <div
+      v-else-if="bookings.length"
+      class="flex flex-col items-center justify-center py-16 text-center"
+    >
+      <UIcon name="i-lucide-filter-x" class="text-6xl text-gray-400 mb-4" />
+      <p class="text-gray-500">{{ $t("booking.noMatches") }}</p>
+    </div>
     <BookingEmptyState v-else />
   </div>
 </template>
@@ -55,6 +65,7 @@ import { useEvents } from "~/composables/api/useEvents.js";
 import { enrichBookingsWithEventDateTimes } from "~/utils/bookingEventTimes.js";
 import { computed } from "vue";
 import QuickAccessCard from "~/components/user/bookings/QuickAccessCard.vue";
+import { useInstanceStore } from "~~/stores/instance.js";
 
 definePageMeta({
   layout: "panel",
@@ -66,6 +77,7 @@ const { t } = useI18n();
 usePageTitle(() => t("meta.pages.accountBookings"));
 
 const bookingsStore = useBookingStore();
+const instanceStore = useInstanceStore();
 const { fetchEventById } = useEvents();
 
 const { data: enrichedBookings, pending } = useAsyncData(

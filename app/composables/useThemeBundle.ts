@@ -3,9 +3,18 @@ import type { ThemeView } from "~~/shared/types/hero";
 /**
  * What the Live Preview shows in place of the stored Theme View: a Draft has
  * a Portal Name, a Hero Layout and a Background but no etag — it was never
- * saved — so the etag is the one field it cannot carry.
+ * saved — so the etag is a field it cannot carry. Nor does it carry the size
+ * of the logo in the auth cards: the Hero Editor does not edit it, and the
+ * preview shows no auth page. The footer logos stay out for the same reason;
+ * the preview's footer shows none. The logo and its variant for the dark mode
+ * are the stored ones, carried on for the Blocks that follow the app logo.
+ * Nor does it carry the font: the preview is set in the stored one, through
+ * the stored stylesheet and its preload.
  */
-export type HeroPreviewView = Omit<ThemeView, "etag">;
+export type HeroPreviewView = Omit<
+  ThemeView,
+  "etag" | "authLogoSize" | "footerLogos" | "font"
+>;
 
 /**
  * The Draft the Live Preview is showing in place of the stored Theme View, or
@@ -35,7 +44,8 @@ export function useHeroPreviewOverride() {
  *   every theme asset URL carries so a saved change arrives as a new URL
  *   rather than after a cache lifetime. Empty until the first response has
  *   arrived. `version` always follows the fetched bundle — a Draft has no
- *   etag, and the stylesheet it is previewed under is the stored one.
+ *   etag, and the stylesheet it is previewed under is the stored one. So does
+ *   `fontHref`, the instance font's file for the preload, or `null`.
  */
 export function useThemeBundle(slug?: string | null) {
   const key = slug ? `theme-bundle:${slug}` : "theme-bundle";
@@ -56,11 +66,13 @@ export function useThemeBundle(slug?: string | null) {
     return etag ? `?v=${encodeURIComponent(etag)}` : "";
   });
 
+  const fontHref = computed(() => result.data.value?.font?.href ?? null);
+
   // From Nuxt 4.5 on, the result carries its own enumerable then/catch/finally.
   // Spread along, they would make `await useThemeBundle()` resolve to the bare
   // `useFetch` result, without `version` and without the override in `data`.
   const { then: _then, catch: _catch, finally: _finally, ...fields } = result;
-  const bundle = { ...fields, data, version };
+  const bundle = { ...fields, data, version, fontHref };
 
   return Object.assign(
     result.then(() => bundle),

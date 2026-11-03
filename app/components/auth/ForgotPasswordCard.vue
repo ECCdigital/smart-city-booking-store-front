@@ -1,7 +1,8 @@
 <template>
   <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
     <template #header>
-      <h2 class="text-2xl font-semibold text-center">
+      <AuthTitleSection />
+      <h2 class="text-lg font-semibold text-center text-gray-500 dark:text-gray-400">
         {{ $t("forgotPassword.title") }}
       </h2>
 
@@ -26,7 +27,7 @@
         color="primary"
         block
         :loading="loading"
-        :style="{ color: contrastToPrimary }"
+        style="color: var(--ui-primary-contrast)"
         class="mt-2"
       >
         {{ $t("forgotPassword.submit") }}
@@ -45,7 +46,6 @@
 </template>
 
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 defineProps({
   loading: {
@@ -61,7 +61,6 @@ const userData = defineModel("userData", {
 
 const emit = defineEmits(["submit"]);
 
-const { contrastToPrimary } = useContrastColor();
 
 function submitForm() {
   emit("submit");

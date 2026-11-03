@@ -31,7 +31,7 @@
       <UButton
         :label="$t('events.bookAtProvider')"
         class="justify-center px-5"
-        :style="{ color: contrastToPrimary }"
+        style="color: var(--ui-primary-contrast)"
         @click="goToExternalCheckout()"
       />
     </div>
@@ -91,7 +91,6 @@ const {
   timePeriod,
   setSearchTimePeriod,
   removeSearchTimePeriod,
-  contrastToPrimary,
   goToExternalCheckout,
 } = useBookableDetailContent(() => props.item, true);
 

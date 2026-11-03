@@ -21,7 +21,7 @@
           <UButton
             :label="$t('booking.book')"
             class="justify-center px-5"
-            :style="{ color: contrastToPrimary }"
+            style="color: var(--ui-primary-contrast)"
             :disabled="!ticketsAvailable"
             @click="goToCheckout"
           />
@@ -32,7 +32,6 @@
 </template>
 <script setup>
 import BookablePriceDisplay from "~/components/bookables/BookablePriceDisplay.vue";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
 
 
@@ -50,7 +49,6 @@ const ticketsAvailable = computed(
   () => props.ticket.availability?.remaining > 0 || true,
 );
 
-const { contrastToPrimary } = useContrastColor();
 
 function goToCheckout() {
   const route = useRoute();

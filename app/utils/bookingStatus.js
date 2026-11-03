@@ -9,6 +9,7 @@ export const BOOKING_STATUS = Object.freeze({
   CONFIRMED: "confirmed",
   REJECTED: "rejected",
   CANCELLED: "cancelled",
+  WITHDRAWN: "withdrawn",
 });
 
 const BOOKING_STATUSES = Object.values(BOOKING_STATUS);
@@ -22,7 +23,7 @@ const BOOKING_STATUS_I18N = {
   PAYMENT_EXPECTED: "status.payment_expected",
   PAID_COMPLETED: "status.paid_completed",
   REJECTED: "status.rejected",
-  /** Committed (and not rejected), no payable amount or no payment step required */
+  WITHDRAWN: "status.withdrawn",
   CONFIRMED_WITHOUT_PAYMENT: "status.confirmed_without_payment",
 };
 
@@ -39,7 +40,7 @@ export const BOOKING_STATUS_REASONS = {
  * The slice of a booking the status facade reads: `status` first, the
  * derived flags only where a payload carries no status, the price and the
  * refund record for the payment question.
- * @typedef {{ status?: string, isCommitted?: boolean, isPayed?: boolean, isRejected?: boolean, priceEur?: number | string | null, cancellationRefund?: { cancelledFrom?: string } }} StatusBooking
+ * @typedef {{ status?: string, isCommitted?: boolean, isPayed?: boolean, isRejected?: boolean, priceEur?: number | string | null, cancellationRefund?: { cancelledFrom?: string, origin?: string } }} StatusBooking
  */
 
 /**
@@ -115,7 +116,7 @@ export function resolveBookingStatus(booking) {
 }
 
 /**
- * A living booking: neither rejected nor cancelled.
+ * A living booking: neither rejected, cancelled nor withdrawn.
  * @param {StatusBooking} booking
  * @returns {boolean}
  */
@@ -143,10 +144,10 @@ export function isCommittedBooking(booking) {
 }
 
 /**
- * Nothing left to pay: the booking is free, paid, or was cancelled out of the
- * paid state. Only a cancelled booking needs more than `status` to tell -
- * `cancellationRefund.cancelledFrom`, or the paid flag where a payload has
- * no refund record.
+ * Nothing left to pay: the booking is free, paid, or was cancelled or
+ * withdrawn out of the paid state. Only those need more than `status` to
+ * tell - `cancellationRefund.cancelledFrom`, or the paid flag where a
+ * payload has no refund record.
  * @param {StatusBooking} booking
  * @returns {boolean}
  */
@@ -157,7 +158,8 @@ export function isSettledBooking(booking) {
   switch (resolveBookingStatus(booking)) {
     case BOOKING_STATUS.CONFIRMED:
       return true;
-    case BOOKING_STATUS.CANCELLED: {
+    case BOOKING_STATUS.CANCELLED:
+    case BOOKING_STATUS.WITHDRAWN: {
       const cancelledFrom = booking?.cancellationRefund?.cancelledFrom;
       return cancelledFrom
         ? cancelledFrom === BOOKING_STATUS.CONFIRMED
@@ -180,6 +182,8 @@ export function resolveBookingStatusKey(booking) {
     case BOOKING_STATUS.REJECTED:
     case BOOKING_STATUS.CANCELLED:
       return BOOKING_STATUS_I18N.REJECTED;
+    case BOOKING_STATUS.WITHDRAWN:
+      return BOOKING_STATUS_I18N.WITHDRAWN;
     case BOOKING_STATUS.REQUESTED:
       return BOOKING_STATUS_I18N.AWAITING_APPROVAL;
     case BOOKING_STATUS.PAYMENT_DUE:
@@ -201,6 +205,35 @@ export function effectiveBookingStatusI18nKey(booking) {
     return key;
   }
   return resolveBookingStatusKey(booking);
+}
+
+/**
+ * The state as the account names it. A request the customer withdrew
+ * themselves stays `rejected` in the backend, but the audit
+ * `cancellationRefund.origin: "user"` says who did it, and the customer reads
+ * it as cancelled. A booking rejected before that audit existed has no
+ * `cancellationRefund` and stays rejected.
+ * @param {StatusBooking} booking
+ * @returns {string} One of BOOKING_STATUS
+ */
+function resolveDisplayStatus(booking) {
+  const status = resolveBookingStatus(booking);
+  return status === BOOKING_STATUS.REJECTED &&
+    booking?.cancellationRefund?.origin === "user"
+    ? BOOKING_STATUS.CANCELLED
+    : status;
+}
+
+/**
+ * The i18n key of the heading above `rejectionReason`, which the backend
+ * writes for both a rejection and a cancellation.
+ * @param {StatusBooking} booking
+ * @returns {string}
+ */
+export function resolveBookingReasonHeadingKey(booking) {
+  return resolveDisplayStatus(booking) === BOOKING_STATUS.REJECTED
+    ? "account.bookingDetails.rejectionReason"
+    : "account.bookingDetails.cancellationReason";
 }
 
 /**
@@ -238,6 +271,13 @@ const STATUS_PRESENTATION = {
     icon: "i-lucide-x",
     tooltipKey: null,
   },
+  // The tenant accepted the customer's withdrawal.
+  [BOOKING_STATUS.WITHDRAWN]: {
+    labelKey: "booking.status.withdrawn",
+    color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+    icon: "i-lucide-undo-2",
+    tooltipKey: "booking.status.withdrawnTooltip",
+  },
 };
 
 /**
@@ -247,7 +287,7 @@ const STATUS_PRESENTATION = {
  */
 export function resolveBookingStatusChip(booking, t) {
   const status = resolveBookingStatus(booking);
-  const presentation = STATUS_PRESENTATION[status];
+  const presentation = STATUS_PRESENTATION[resolveDisplayStatus(booking)];
 
   return {
     status,
@@ -264,6 +304,6 @@ export function resolveBookingStatusChip(booking, t) {
  * @returns {string}
  */
 export function resolveBookingStatusSearchLabel(booking, t) {
-  const status = resolveBookingStatus(booking);
+  const status = resolveDisplayStatus(booking);
   return t(STATUS_PRESENTATION[status].labelKey).toLowerCase();
 }

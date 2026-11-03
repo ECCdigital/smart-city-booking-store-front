@@ -49,6 +49,34 @@ describe("resolvePaymentDisplayStatus", () => {
     ).toBe("unpaid");
   });
 
+  it("shows an unpaid booking cancelled without a fee as waived", () => {
+    expect(
+      resolvePaymentDisplayStatus({
+        status: "cancelled",
+        priceEur: 10,
+        cancellationRefund: {
+          cancelledFrom: "payment_due",
+          appliedRefundPercentage: 100,
+          cancellationFeeEur: 0,
+        },
+      }),
+    ).toBe("waived");
+  });
+
+  it("keeps an unpaid booking cancelled with a fee as unpaid", () => {
+    expect(
+      resolvePaymentDisplayStatus({
+        status: "cancelled",
+        priceEur: 10,
+        cancellationRefund: {
+          cancelledFrom: "payment_due",
+          appliedRefundPercentage: 50,
+          cancellationFeeEur: 5,
+        },
+      }),
+    ).toBe("unpaid");
+  });
+
   it("does not let a stale paid flag override `status`", () => {
     expect(
       resolvePaymentDisplayStatus({
@@ -91,6 +119,55 @@ describe("resolvePaymentDisplayStatus", () => {
   });
 });
 
+describe("a withdrawn booking", () => {
+  it.each(["requested", "payment_due"])(
+    "withdrawn from %s owes nothing: the payment lapses",
+    (cancelledFrom) => {
+      const booking = {
+        status: "withdrawn",
+        priceEur: 10,
+        cancellationRefund: { cancelledFrom },
+      };
+      expect(resolvePaymentDisplayStatus(booking)).toBe("lapsed");
+      expect(isUnpaidBooking(booking)).toBe(false);
+      expect(isPaidBooking(booking)).toBe(false);
+    },
+  );
+
+  it("withdrawn from confirmed stays paid: the refund is a matter of its own", () => {
+    expect(
+      resolvePaymentDisplayStatus({
+        status: "withdrawn",
+        priceEur: 10,
+        cancellationRefund: { cancelledFrom: "confirmed" },
+      }),
+    ).toBe("paid");
+  });
+
+  it("withdrawn and free stays free", () => {
+    expect(
+      resolvePaymentDisplayStatus({ status: "withdrawn", priceEur: 0 }),
+    ).toBe("free");
+  });
+
+  it("shows the lapsed payment as Entfällt, not as unpaid", () => {
+    expect(
+      resolveBookingPaymentChip(
+        {
+          status: "withdrawn",
+          priceEur: 10,
+          cancellationRefund: { cancelledFrom: "payment_due" },
+        },
+        t,
+      ),
+    ).toMatchObject({
+      status: "lapsed",
+      label: "booking.payment.lapsed",
+      icon: "i-lucide-ban",
+    });
+  });
+});
+
 describe("isPaidBooking / isUnpaidBooking", () => {
   it("agree with the display status", () => {
     const paid = { status: "confirmed", priceEur: 10 };
@@ -111,6 +188,25 @@ describe("resolveBookingPaymentChip", () => {
       status: "unpaid",
       label: "booking.payment.unpaid",
       icon: "i-lucide-hourglass",
+    });
+  });
+
+  it("labels a cancellation with nothing paid and nothing owed as waived", () => {
+    expect(
+      resolveBookingPaymentChip(
+        {
+          status: "cancelled",
+          priceEur: 10,
+          cancellationRefund: {
+            cancelledFrom: "requested",
+            cancellationFeeEur: 0,
+          },
+        },
+        t,
+      ),
+    ).toMatchObject({
+      status: "waived",
+      label: "booking.payment.waived",
     });
   });
 });

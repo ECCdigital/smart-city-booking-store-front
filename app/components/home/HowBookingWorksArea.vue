@@ -1,13 +1,13 @@
 <template>
   <section style="padding: 50px 0">
-    <div class="flex items-center mb-5">
+    <div class="md:flex items-center justify-between md:mb-5">
       <h2 class="text-2xl font-bold">{{ $t("home.howItWorks.title") }}</h2>
-      <div class="flex-1" />
       <UButton
         variant="ghost"
         :label="$t('catalog.showAllOffers')"
         trailing-icon="i-lucide-chevron-right"
         :to="tenantTo('/search')"
+        class="my-2 md:my-0"
       />
     </div>
 
@@ -37,7 +37,10 @@
       </ol>
 
       <!-- The picture is the steps again, drawn; screen readers get the list. -->
-      <BookingFlowIllustration class="min-w-0 lg:col-span-7" aria-hidden="true" />
+      <BookingFlowIllustration
+        class="min-w-0 lg:col-span-7"
+        aria-hidden="true"
+      />
     </div>
   </section>
 </template>

@@ -6,43 +6,35 @@
     <UBadge
       v-bind="$attrs"
       class="z-10 px-2"
-      :color="neutral ? 'neutral' : color"
+      :color="neutral ? 'neutral' : 'primary'"
       size="md"
       :icon="category.icon"
       :aria-label="category.label"
-      :ui="neutral ? NEUTRAL_UI : undefined"
-      :style="neutral ? undefined : { color: contrastToPrimary }"
+      :ui="neutral ? NEUTRAL_UI : ACCENT_UI"
     />
   </UTooltip>
   <UBadge
     v-else
     v-bind="$attrs"
     class="z-10"
-    :color="neutral ? 'neutral' : color"
+    :color="neutral ? 'neutral' : 'primary'"
     size="md"
     :label="category.label"
     :icon="category.icon"
-    :ui="neutral ? NEUTRAL_UI : undefined"
-    :style="neutral ? undefined : { color: contrastToPrimary }"
+    :ui="neutral ? NEUTRAL_UI : ACCENT_UI"
   />
 </template>
 <script setup>
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 
 defineOptions({ inheritAttrs: false });
 
 const { t } = useI18n();
 
-const { contrastToPrimary } = useContrastColor();
 
 const props = defineProps({
   type: {
     type: String,
     required: true,
-  },
-  color: {
-    type: String,
-    default: "primary",
   },
   isEvent: {
     type: Boolean,
@@ -60,6 +52,13 @@ const props = defineProps({
 
 const NEUTRAL_UI = {
   base: "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300",
+};
+
+// The instance's accent with the text colour on it, and primary with its own
+// as the pair to fall back to: the theme stylesheet declares the accent only
+// when the instance set one.
+const ACCENT_UI = {
+  base: "bg-[color:var(--ui-accent,var(--ui-primary))] text-[color:var(--ui-accent-contrast,var(--ui-primary-contrast))]",
 };
 
 //toDo - read dynamically from instance

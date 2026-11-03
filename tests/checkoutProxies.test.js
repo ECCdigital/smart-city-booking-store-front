@@ -124,4 +124,12 @@ describe("the checkout proxies", () => {
 
     expect(await bookableRoute(event)).toEqual(offer);
   });
+
+  it("deliver an unlisted offer, whose direct link leads to the checkout alone", async () => {
+    // ECCdigital/tickets#225: the detail page refuses it, the checkout does not.
+    const offer = { id: "login-room", isPublic: false };
+    upstream.answer = { data: offer, error: null };
+
+    expect(await bookableRoute(event)).toEqual(offer);
+  });
 });

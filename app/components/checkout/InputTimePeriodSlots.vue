@@ -203,7 +203,6 @@
 <script setup>
 import { useBookables } from "~/composables/api/useBookables.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import DateJumper from "~/components/inputs/DateJumper.vue";
 import { parseLocalDateIso } from "~/utils/localDate.js";
 
@@ -244,7 +243,6 @@ const effectiveNumDays = computed(() => (props.compact ? 4 : props.numDays));
 
 const { getBookableAvailability } = useBookables();
 const { t } = useI18n();
-const { contrastToSecondary } = useContrastColor();
 
 const { monthNames, weekdayNames, formatDay } = useFormatting();
 
@@ -714,7 +712,7 @@ function getSlotClass(slot) {
 
 function getSlotStyle(slot) {
   if (!slot.available || !isSlotSelected(slot)) return undefined;
-  return { color: contrastToSecondary.value };
+  return { color: "var(--ui-secondary-contrast)" };
 }
 
 function onSlotClick(slot) {

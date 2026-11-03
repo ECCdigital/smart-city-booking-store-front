@@ -2,7 +2,7 @@
   "name": "smart-city-booking-store-front",
   "type": "module",
   "private": true,
-  "version": "1.2.1-rc.1",
+  "version": "1.2.1",
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
@@ -27,6 +27,7 @@
     "typecheck": "nuxi typecheck"
   },
   "dependencies": {
+    "@capsizecss/unpack": "^4.0.1",
     "@fullcalendar/core": "^6.1.20",
     "@fullcalendar/interaction": "^6.1.20",
     "@fullcalendar/timegrid": "^6.1.20",
@@ -46,6 +47,7 @@
     "dom-serializer": "^3.0.0",
     "dompurify": "~3.4.15",
     "eslint": "^9.33.0",
+    "fontkitten": "^1.0.3",
     "fuse.js": "^7.1.0",
     "h3": "^1.15.11",
     "haversine-distance": "^1.2.4",

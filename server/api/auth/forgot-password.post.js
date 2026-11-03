@@ -1,3 +1,5 @@
+import { storefrontUrl } from "~~/shared/utils/storefrontUrl";
+
 export default defineEventHandler(async (event) => {
   const { email, resetUrl } = await readBody(event);
   const { apiBaseUrl: API_BASE_URL, userBaseUrl: USER_BASE_URL } =
@@ -17,7 +19,7 @@ export default defineEventHandler(async (event) => {
       method: "POST",
       body: {
         id: sanitizedEmail,
-        resetUrl: resetUrl || `${USER_BASE_URL}/password/reset`,
+        resetUrl: resetUrl || storefrontUrl(USER_BASE_URL, "/password/reset"),
       },
     });
 

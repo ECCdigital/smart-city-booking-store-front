@@ -3,10 +3,7 @@ import { useUsers } from "~/composables/api/useUsers.js";
 import { useBookingStore } from "~~/stores/bookings.js";
 import { useFavoritesStore } from "~~/stores/favorites.js";
 import { useAuth } from "~/composables/auth/useAuth.js";
-import {
-  broadcastSessionEnded,
-  isAccountPath,
-} from "~/utils/sharedAuthSync";
+import { broadcastSessionEnded, isAccountPath } from "~/utils/sharedAuthSync";
 import { relayAuthCookies } from "~/utils/ssrAuthCookies";
 
 /**
@@ -26,6 +23,11 @@ export const useAuthStore = defineStore("auth", {
   getters: {
     isLoggedIn: (state) => state.tokenValid && !!state.user,
     getUser: (state) => state.user,
+    displayName: (state) => {
+      const fullname = state.user?.firstName + " " + state.user?.lastName;
+      const suffix = fullname.length > 20 ? "..." : "";
+      return fullname.slice(0, 20) + suffix;
+    },
   },
   actions: {
     /**
@@ -154,16 +156,19 @@ export const useAuthStore = defineStore("auth", {
         await navigateTo(`/login?redirect=${encodeURIComponent(path)}`);
       }
     },
+    /**
+     * Saves the own profile. Answers whether it went through; a failed save
+     * leaves the user as it was (tickets#299).
+     */
     async updateUser(user) {
       const { updateUser } = useUsers();
       try {
         await updateUser({ ...user, syncSelfBookingNames: false });
-
         this.user = user;
-        return this.user;
+        return { success: true };
       } catch (error) {
         console.error("Error updating user in store:", error);
-        this.user = null;
+        return { success: false };
       }
     },
     /**

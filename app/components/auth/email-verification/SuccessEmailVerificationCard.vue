@@ -15,13 +15,14 @@ defineProps({
       class="w-full max-w-md rounded-xl glass"
   >
     <template #header>
+      <AuthTitleSection />
       <div class="flex flex-col justify-center items-center">
         <UIcon
             size="32"
             name="i-lucide-circle-check-big"
             class="text-success"
         />
-        <h2 class="text-2xl font-semibold mb-2">
+        <h2 class="text-lg font-semibold mb-2">
           {{ $t("emailVerification.success.heading") }}
         </h2>
       </div>

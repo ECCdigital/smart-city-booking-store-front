@@ -36,3 +36,15 @@ export function serveVersionedAsset(event: H3Event, etag: string | null): boolea
   }
   return false;
 }
+
+/**
+ * Keeps an answer out of every cache. For a theme asset that came out
+ * degraded — the instance font could not be fetched — which must not be
+ * pinned under its versioned URL for a year, nor revalidated into a 304.
+ *
+ * @param event - The request being answered.
+ */
+export function serveUncached(event: H3Event): void {
+  setHeader(event, "Cache-Control", "no-store");
+  removeResponseHeader(event, "ETag");
+}

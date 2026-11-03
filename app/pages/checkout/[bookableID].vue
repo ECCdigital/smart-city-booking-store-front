@@ -10,14 +10,19 @@ import InputMonthSelection from "../../components/checkout/InputMonthSelection.v
 import InputBlockPeriodSelection from "~/components/checkout/InputBlockPeriodSelection.vue";
 import PriceSummaryBar from "~/components/checkout/PriceSummaryBar.vue";
 import CheckoutContactStep from "~/components/checkout/CheckoutContactStep.vue";
+import { isBusinessContact } from "~/utils/businessBooking.js";
 import CheckoutCustomFields from "~/components/checkout/CheckoutCustomFields.vue";
 import CheckoutPaymentStep from "~/components/checkout/CheckoutPaymentStep.vue";
 import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
+import CheckoutAddressBlacklistedAlert from "~/components/checkout/CheckoutAddressBlacklistedAlert.vue";
 import { useAuthStore } from "~~/stores/auth.js";
 import { useNotification } from "~/composables/useNotification.js";
 import {
   BOOKABLE_NOT_FOUND,
   backendErrorBodyOf,
+  ADDRESS_BLACKLISTED,
+  addressBlacklistedContact,
+  addressBlacklistedMessage,
   resolveCheckoutErrorKey,
   resolveCheckoutFailureKey,
 } from "~/utils/checkoutErrors.js";
@@ -37,6 +42,10 @@ import {
   BOOKING_STATUS,
   resolveBookingStatus,
 } from "~/utils/bookingStatus.js";
+import {
+  toDiscountPercent,
+  useBookingDiscountWaiver,
+} from "~/composables/checkout/useBookingDiscountWaiver";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 
@@ -307,22 +316,14 @@ const requiresManualApproval = computed(() => {
   return v === false || v === "false" || v === 0 || v === "0";
 });
 
-const typeLabels = computed(() => ({
-  room: t("booking.typeRoom"),
-  resource: t("booking.typeResource"),
-  ticket: t("booking.typeTicket"),
-  event: t("booking.typeEvent"),
-}));
-
 const checkoutNavTab = useState("checkoutNavTab", () => {});
 
 watch(
   [leadBookable, () => locale.value],
-  ([b]) => {
-    const type = b?.type;
+  () => {
     const bookableID = route.params.bookableID;
     const tenantID = route.query.tenantId;
-    const label = typeLabels.value[type] || type || "";
+    const label = t("booking.booking");
 
     if (!bookableID || !tenantID) {
       checkoutNavTab.value = { label, url: "" };
@@ -390,12 +391,11 @@ function resetAuthSensitiveCheckoutState() {
   checkoutID.value = null;
   summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
   validationErrors.value = {};
-  bookingDiscountEligibility.value = {};
+  resetBookingDiscountWaiver();
   groupBookingAttemptStatuses.value = {};
   selectedPaymentProviderId.value = null;
   appliedCouponCode.value = null;
   appliedCouponDetails.value = null;
-  bookWithoutDiscountPreference.value = null;
 }
 
 function prunePersistedCheckoutStateForGuest() {
@@ -638,7 +638,34 @@ const contactForm = reactive({
   address: "",
   zipCode: "",
   city: "",
+  // Private or business booking: `null` until the booker sets the
+  // checkbox, then their choice (isBusinessContact).
+  isBusiness: null,
 });
+
+// The refusal of an address on the blacklist: the
+// instance's mail address to write to, empty without one, null while there
+// is none. It stays on the review step instead of a toast, so the address
+// can be clicked or copied, until the address changes or the booking is
+// sent again.
+const blacklistRefusal = ref(null);
+const blacklistRefusalAlert = ref(null);
+
+watch(
+  () => contactForm.email,
+  () => {
+    blacklistRefusal.value = null;
+  },
+);
+
+async function showBlacklistRefusal(apiError) {
+  blacklistRefusal.value = addressBlacklistedContact(apiError.params);
+  await nextTick();
+  blacklistRefusalAlert.value?.$el?.scrollIntoView?.({
+    behavior: "smooth",
+    block: "center",
+  });
+}
 
 const customerComment = ref("");
 const attachmentAccepted = ref({});
@@ -648,8 +675,15 @@ const restoredCustomFieldValues = ref({});
 const selectedPaymentProviderId = ref(null);
 const appliedCouponCode = ref(null);
 const appliedCouponDetails = ref(null);
-const bookWithoutDiscountPreference = ref(null);
-const bookingDiscountEligibility = ref({});
+const {
+  eligibility: bookingDiscountEligibility,
+  preference: bookWithoutDiscountPreference,
+  hasOption: hasBookingDiscountOption,
+  maxPercent: maxBookingDiscountPercent,
+  isWithoutDiscount: isBookingWithoutDiscount,
+  selected: selectedBookWithoutDiscount,
+  reset: resetBookingDiscountWaiver,
+} = useBookingDiscountWaiver();
 
 const hasResolvedFreeCheckout = computed(() => {
   const total = Number(summary.value?.total ?? 0);
@@ -1092,40 +1126,6 @@ const couponForValidation = computed(() => {
   return s || null;
 });
 
-function toDiscountPercent(value) {
-  const percent = Number(value);
-  if (!Number.isFinite(percent)) return 0;
-  return Math.min(100, Math.max(0, Math.round(percent)));
-}
-
-const hasBookingDiscountOption = computed(() =>
-  Object.values(bookingDiscountEligibility.value).some(
-    (value) => toDiscountPercent(value) > 0,
-  ),
-);
-
-const maxBookingDiscountPercent = computed(() => {
-  const values = Object.values(bookingDiscountEligibility.value).map(
-    toDiscountPercent,
-  );
-  return values.length > 0 ? Math.max(...values) : 0;
-});
-
-const isBookingWithoutDiscount = computed(() => {
-  if (!hasBookingDiscountOption.value) return false;
-  if (typeof bookWithoutDiscountPreference.value === "boolean") {
-    return bookWithoutDiscountPreference.value;
-  }
-  return false;
-});
-
-const selectedBookWithoutDiscount = computed({
-  get: () => isBookingWithoutDiscount.value,
-  set: (value) => {
-    bookWithoutDiscountPreference.value = value === true;
-  },
-});
-
 const COUPON_SUMMARY_ROW_ID = "__coupon__";
 
 function isFixedAmountCoupon(details) {
@@ -1507,12 +1507,12 @@ async function validateGroupBookingAttempts() {
   const myToken = ++validationToken;
   isValidating.value = true;
   validationErrors.value = {};
-  bookingDiscountEligibility.value = {};
 
   if (attempts.length === 0) {
     summary.value = { items: [], taxAmount: 0, total: 0, errors: [] };
     checkoutID.value = null;
     groupBookingAttemptStatuses.value = {};
+    bookingDiscountEligibility.value = {};
     if (myToken === validationToken) isValidating.value = false;
     return;
   }
@@ -1574,6 +1574,7 @@ async function validateGroupBookingAttempts() {
         [bookableID]: { reason, error: batchResult.error, isLead: true },
       };
       groupBookingAttemptStatuses.value = {};
+      bookingDiscountEligibility.value = {};
       summary.value = {
         items: [],
         taxAmount: 0,
@@ -1605,6 +1606,7 @@ async function validateGroupBookingAttempts() {
         [bookableID]: { reason, params, isLead: true },
       };
       groupBookingAttemptStatuses.value = {};
+      bookingDiscountEligibility.value = {};
       summary.value = {
         items: [],
         taxAmount: 0,
@@ -2019,6 +2021,9 @@ function restoreCheckoutState() {
             contactForm[key] = parsed.contactForm[key] || "";
           }
         }
+        if (typeof parsed.contactForm.isBusiness === "boolean") {
+          contactForm.isBusiness = parsed.contactForm.isBusiness;
+        }
       }
       if (typeof parsed.customerComment === "string") {
         customerComment.value = parsed.customerComment;
@@ -2298,6 +2303,7 @@ function buildCheckoutPayload() {
 
   if (contactForm.phone?.trim()) payload.phone = contactForm.phone.trim();
   if (contactForm.company?.trim()) payload.company = contactForm.company.trim();
+  payload.isBusiness = isBusinessContact(contactForm);
   if (contactForm.address?.trim()) payload.street = contactForm.address.trim();
   if (contactForm.zipCode?.trim()) payload.zipCode = contactForm.zipCode.trim();
   if (contactForm.city?.trim()) payload.location = contactForm.city.trim();
@@ -2355,6 +2361,7 @@ function buildGroupCheckoutPayload() {
 
   if (contactForm.phone?.trim()) payload.phone = contactForm.phone.trim();
   if (contactForm.company?.trim()) payload.company = contactForm.company.trim();
+  payload.isBusiness = isBusinessContact(contactForm);
   if (contactForm.address?.trim()) payload.street = contactForm.address.trim();
   if (contactForm.zipCode?.trim()) payload.zipCode = contactForm.zipCode.trim();
   if (contactForm.city?.trim()) payload.location = contactForm.city.trim();
@@ -2421,7 +2428,9 @@ function messageForStructuredCheckoutError(apiError) {
       ? apiError.params
       : {};
   let core = null;
-  if (typeof reason === "string" && reason) {
+  if (reason === ADDRESS_BLACKLISTED) {
+    core = addressBlacklistedMessage(params, t);
+  } else if (typeof reason === "string" && reason) {
     if (te(reason)) {
       core = t(reason, params);
     } else {
@@ -2497,6 +2506,7 @@ async function handleFinish() {
   if (!canGoNext.value || checkoutSubmitting.value) return;
 
   checkoutSubmitting.value = true;
+  blacklistRefusal.value = null;
   try {
     const payload = isGroupBookingActive.value
       ? buildGroupCheckoutPayload()
@@ -2528,6 +2538,10 @@ async function handleFinish() {
     }
 
     if (data?.success === false && data?.error) {
+      if (resolveCheckoutErrorKey(data.error) === ADDRESS_BLACKLISTED) {
+        await showBlacklistRefusal(data.error);
+        return;
+      }
       notifyError(messageForStructuredCheckoutErrorNotify(data.error));
       return;
     }
@@ -2999,12 +3013,23 @@ function onReviewEdit(section) {
                           : $t("checkout.data.guestTitle")
                     }}
                   </p>
-                  <p class="text-sm text-gray-600 dark:text-gray-300">
+                  <i18n-t
+                    v-if="requiresLoginForCheckout && isLoggedIn"
+                    keypath="checkout.data.loggedInRequiredDescription"
+                    tag="p"
+                    scope="global"
+                    class="text-sm text-gray-600 dark:text-gray-300"
+                  >
+                    <template #name>
+                      <span class="italic font-semibold">{{
+                        authStore.displayName
+                      }}</span>
+                    </template>
+                  </i18n-t>
+                  <p v-else class="text-sm text-gray-600 dark:text-gray-300">
                     {{
                       requiresLoginForCheckout
-                        ? isLoggedIn
-                          ? $t("checkout.data.loggedInDescription")
-                          : $t("checkout.data.loginRequiredDescription")
+                        ? $t("checkout.data.loginRequiredDescription")
                         : isLoggedIn
                           ? $t("checkout.data.loggedInDescription")
                           : $t("checkout.data.guestDescription")
@@ -3078,6 +3103,12 @@ function onReviewEdit(section) {
           </template>
 
           <template #step-confirm>
+            <CheckoutAddressBlacklistedAlert
+              v-if="blacklistRefusal !== null"
+              ref="blacklistRefusalAlert"
+              class="mb-6"
+              :mail-address="blacklistRefusal"
+            />
             <CheckoutReviewStep
               v-model:applied-coupon="appliedCouponCode"
               v-model:applied-coupon-details="appliedCouponDetails"

@@ -1,5 +1,6 @@
 import { adminOrigin } from "~~/shared/utils/adminOrigin";
 import { parseReturnTarget } from "~~/shared/utils/returnTarget";
+import { storefrontUrl } from "~~/shared/utils/storefrontUrl";
 import { clientIpHeaders, throwIfRateLimited } from "~~/server/utils/rateLimit";
 
 export default defineEventHandler(async (event) => {
@@ -39,7 +40,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-
   try {
     const response = await $fetch(`${API_BASE_URL}/auth/signup`, {
       method: "POST",
@@ -50,7 +50,10 @@ export default defineEventHandler(async (event) => {
         firstName: sanitizedFirstname,
         lastName: sanitizedLastname,
         company: sanitizedCompany,
-        verifyUrl: `${USER_BASE_URL}/register/email-verify`,
+        verifyUrl: storefrontUrl(USER_BASE_URL, "/register/email-verify"),
+        // Linked by the hint an address with an account gets instead of the
+        // verification.
+        forgotPasswordUrl: storefrontUrl(USER_BASE_URL, "/password/forgot"),
         ...(returnTarget ? { nextUrl: returnTarget } : {}),
         ...(legalAcceptance ? { legalAcceptance } : {}),
       },
@@ -66,6 +69,9 @@ export default defineEventHandler(async (event) => {
       success: false,
       statusCode: error.response?.status || 500,
       statusMessage: error.response?.data?.message || "Signup failed",
+      // The backend's body, e.g. the refusal of an address on the blacklist
+      // with the instance's mail address.
+      data: error.data,
     });
   }
 });

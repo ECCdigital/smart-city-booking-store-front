@@ -61,8 +61,9 @@ function failOnBackendFailure(
 
 /**
  * One bookable or event for a direct link: asked in every tenant that can
- * hold it, listed in the bundle or not — the backend decides. What it
- * delivers for no tenant is "not available": a 404, whatever the catalog type.
+ * hold it, listed in the bundle or not. What the backend delivers for no
+ * tenant, or only as unlisted, is "not available": a 404, whatever the
+ * catalog type.
  */
 async function loadDetailItem(
   event: H3Event,

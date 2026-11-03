@@ -3,7 +3,6 @@ import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.
 import { useBookableSearch } from "~/composables/search/useBookableSearch.js";
 import { useBookableBookingMode } from "~/composables/useBookableBookingMode";
 import { useCheckoutRedirect } from "~/composables/utils/useCheckoutRedirect.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import { useSanitizeHtml } from "~/composables/utils/useSanitizeHtml.js";
 
 /**
@@ -174,8 +173,6 @@ export function useBookableDetailContent(itemSource, isEvent) {
     return true; //hasValidTimePeriod.value;
   });
 
-  const { contrastToPrimary } = useContrastColor();
-
   async function setSearchTimePeriod(tp) {
     timePeriod.value = tp;
     await runSearch({
@@ -257,7 +254,6 @@ export function useBookableDetailContent(itemSource, isEvent) {
     timePeriodDuration,
     isBookableAndMatch,
     showAvailabilityResult,
-    contrastToPrimary,
     setSearchTimePeriod,
     removeSearchTimePeriod,
     goToCheckout,

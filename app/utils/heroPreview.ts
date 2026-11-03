@@ -1,9 +1,12 @@
 import type { HeroMode } from "~/composables/useHeroMode";
 import type { HeroPreviewView } from "~/composables/useThemeBundle";
+import { appLogoReference } from "~/utils/heroBlocks";
 import {
   HERO_PREVIEW_DRAFT,
   HERO_PREVIEW_PROTOCOL_VERSION,
+  type HeroAppLogoReference,
   type HeroBlockBase,
+  type HeroLayout,
   type HeroMediaReference,
   type HeroPreviewDraftMessage,
   type HeroPreviewViewport,
@@ -97,6 +100,8 @@ export interface HeroPreviewBuildOptions {
    * Hero Editor does not edit it — so the view keeps showing the stored one.
    */
   logo: HeroMediaReference | null;
+  /** The stored logo's variant for the dark mode, carried on like the logo. */
+  logoDark: HeroMediaReference | null;
   /** Where the first failing field is reported. */
   onIssue: (issue: HeroParseIssue) => void;
 }
@@ -123,15 +128,15 @@ export interface HeroPreviewSnapshot {
  * something an editor asked to see.
  *
  * @param draft - A Draft envelope the addressing check accepted.
- * @param options - The sanitiser, the stored logo, and where to report the
- *   first failing field.
+ * @param options - The sanitiser, the stored logo and its variant, and
+ *   where to report the first failing field.
  * @returns The snapshot, or `null` when the Draft failed validation.
  */
 export function buildHeroPreviewSnapshot(
   draft: HeroPreviewDraftEnvelope,
   options: HeroPreviewBuildOptions,
 ): HeroPreviewSnapshot | null {
-  const { sanitize, logo, onIssue } = options;
+  const { sanitize, logo, logoDark, onIssue } = options;
   const { name, colorMode, selectedBlockId } = draft;
 
   if (typeof name !== "string") {
@@ -156,9 +161,36 @@ export function buildHeroPreviewSnapshot(
   if (!background) return null;
 
   return {
-    view: { name, heroLayout, background, logo },
+    view: {
+      name,
+      heroLayout: withAppLogo(heroLayout, appLogoReference(logo, logoDark)),
+      background,
+      logo,
+      logoDark,
+    },
     colorMode,
     selectedBlockId: selectedBlockId ?? null,
+  };
+}
+
+/**
+ * The layout with every Block that follows the app logo showing the stored
+ * one. In a delivered bundle the backend puts the app logo in; a Draft may
+ * carry what the backend's preview endpoint put in, or nothing at all, and
+ * the stored Theme View answers both alike. A Block with a medium of its own
+ * stays as it is, also one holding a copy of the app logo's medium.
+ */
+function withAppLogo(
+  layout: HeroLayout,
+  appLogo: HeroAppLogoReference,
+): HeroLayout {
+  return {
+    ...layout,
+    blocks: layout.blocks.map((block) =>
+      block.type === "image" && block.image.source === "app-logo"
+        ? { ...block, image: appLogo }
+        : block,
+    ),
   };
 }
 

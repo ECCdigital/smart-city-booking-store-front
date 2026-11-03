@@ -5,6 +5,7 @@ import {
   isCommittedBooking,
   isLiveBooking,
   isSettledBooking,
+  resolveBookingReasonHeadingKey,
   resolveBookingStatus,
   resolveBookingStatusChip,
   resolveBookingStatusKey,
@@ -57,7 +58,11 @@ describe("resolveBookingStatus", () => {
 
   describe("without a status (the v2 status payload) it derives the state from the flags", () => {
     it.each([
-      ["a rejected request", { isRejected: true, isCommitted: false }, "rejected"],
+      [
+        "a rejected request",
+        { isRejected: true, isCommitted: false },
+        "rejected",
+      ],
       [
         "a cancelled booking",
         { isRejected: true, isCommitted: true },
@@ -103,6 +108,8 @@ describe("resolveBookingStatusKey", () => {
       ["rejected", 0, "status.rejected"],
       ["cancelled", 10, "status.rejected"],
       ["cancelled", 0, "status.rejected"],
+      ["withdrawn", 10, "status.withdrawn"],
+      ["withdrawn", 0, "status.withdrawn"],
     ])("%s at %d EUR → %s", (status, priceEur, expected) => {
       expect(resolveBookingStatusKey({ status, priceEur })).toBe(expected);
     });
@@ -225,6 +232,7 @@ describe("isLiveBooking", () => {
     ["confirmed", true],
     ["rejected", false],
     ["cancelled", false],
+    ["withdrawn", false],
   ])("%s → %s", (status, expected) => {
     expect(isLiveBooking({ status })).toBe(expected);
   });
@@ -242,6 +250,7 @@ describe("isCommittedBooking", () => {
     ["confirmed", true],
     ["rejected", false],
     ["cancelled", false],
+    ["withdrawn", false],
   ])("%s → %s", (status, expected) => {
     expect(isCommittedBooking({ status })).toBe(expected);
   });
@@ -302,6 +311,23 @@ describe("isSettledBooking", () => {
       ).toBe(true);
       expect(
         isSettledBooking({ status: "cancelled", priceEur: 10, isPayed: false }),
+      ).toBe(false);
+    });
+
+    it("reads a withdrawn booking the same way: settled where it left confirmed", () => {
+      expect(
+        isSettledBooking({
+          status: "withdrawn",
+          priceEur: 10,
+          cancellationRefund: { cancelledFrom: "confirmed" },
+        }),
+      ).toBe(true);
+      expect(
+        isSettledBooking({
+          status: "withdrawn",
+          priceEur: 10,
+          cancellationRefund: { cancelledFrom: "payment_due" },
+        }),
       ).toBe(false);
     });
 
@@ -371,10 +397,77 @@ describe("resolveBookingStatusChip", () => {
     });
   });
 
+  it("shows a booking whose withdrawal the provider accepted as Widerrufen, with a hint on the refund", () => {
+    expect(resolveBookingStatusChip({ status: "withdrawn" }, t)).toEqual({
+      status: "withdrawn",
+      label: "booking.status.withdrawn",
+      color: RED,
+      icon: "i-lucide-undo-2",
+      tooltip: "booking.status.withdrawnTooltip",
+    });
+  });
+
   it("reads a flag-only payload through the same table", () => {
     expect(
       resolveBookingStatusChip({ isCommitted: true, isRejected: true }, t),
     ).toMatchObject({ status: "cancelled", label: "booking.status.cancelled" });
+  });
+});
+
+// Not the status `withdrawn`: a request the customer cancelled stays
+// `rejected` in the backend.
+describe("a request the customer withdrew themselves", () => {
+  const withdrawn = {
+    status: "rejected",
+    cancellationRefund: { origin: "user" },
+  };
+  const rejectedByAdmin = {
+    status: "rejected",
+    cancellationRefund: { origin: "admin" },
+  };
+  const legacyRejected = { status: "rejected" };
+  const cancelled = { status: "cancelled" };
+
+  it.each([
+    ["rejected with origin user", withdrawn, "booking.status.cancelled"],
+    [
+      "rejected with another origin",
+      rejectedByAdmin,
+      "booking.status.rejected",
+    ],
+    ["rejected without the audit", legacyRejected, "booking.status.rejected"],
+    ["cancelled", cancelled, "booking.status.cancelled"],
+  ])("%s → chip %s", (_name, booking, expected) => {
+    expect(resolveBookingStatusChip(booking, t).label).toBe(expected);
+  });
+
+  it("keeps the booking state on the chip: only the label changes", () => {
+    expect(resolveBookingStatusChip(withdrawn, t).status).toBe("rejected");
+  });
+
+  it.each([
+    [
+      "rejected with origin user",
+      withdrawn,
+      "account.bookingDetails.cancellationReason",
+    ],
+    [
+      "rejected with another origin",
+      rejectedByAdmin,
+      "account.bookingDetails.rejectionReason",
+    ],
+    [
+      "rejected without the audit",
+      legacyRejected,
+      "account.bookingDetails.rejectionReason",
+    ],
+    ["cancelled", cancelled, "account.bookingDetails.cancellationReason"],
+  ])("%s → heading %s", (_name, booking, expected) => {
+    expect(resolveBookingReasonHeadingKey(booking)).toBe(expected);
+  });
+
+  it("is still not a live booking", () => {
+    expect(isLiveBooking(withdrawn)).toBe(false);
   });
 });
 
@@ -386,6 +479,7 @@ describe("resolveBookingStatusSearchLabel", () => {
       "booking.status.confirmed": "Bestätigt",
       "booking.status.rejected": "Abgelehnt",
       "booking.status.cancelled": "Storniert",
+      "booking.status.withdrawn": "Widerrufen",
     })[key];
 
   it.each([
@@ -394,7 +488,17 @@ describe("resolveBookingStatusSearchLabel", () => {
     ["confirmed", "bestätigt"],
     ["rejected", "abgelehnt"],
     ["cancelled", "storniert"],
+    ["withdrawn", "widerrufen"],
   ])("%s searches as %s", (status, expected) => {
     expect(resolveBookingStatusSearchLabel({ status }, german)).toBe(expected);
+  });
+
+  it("searches a request the customer withdrew as cancelled, like its chip", () => {
+    expect(
+      resolveBookingStatusSearchLabel(
+        { status: "rejected", cancellationRefund: { origin: "user" } },
+        german,
+      ),
+    ).toBe("storniert");
   });
 });

@@ -3,6 +3,8 @@ import { ref, computed, reactive } from "vue";
 import { useAuth } from "~/composables/auth/useAuth";
 import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
 import type { CardMethod } from "~~/shared/types/api";
+import { addressBlacklistedRefusalOf } from "~/utils/checkoutErrors.js";
+import CheckoutAddressBlacklistedAlert from "~/components/checkout/CheckoutAddressBlacklistedAlert.vue";
 
 /**
  * A BFF error as `$fetch` hands it to the browser: `createError` puts the
@@ -42,6 +44,7 @@ type Step = "credentials" | "register";
 type State =
     | ""
     | "error"
+    | "blacklisted"
     | "success"
     | "awaiting_verification"
     | "awaiting_link_confirmation";
@@ -49,6 +52,8 @@ type State =
 const step = ref<Step>("credentials");
 const state = ref<State>("");
 const errorMessage = ref("");
+/** The instance's mail address of a refusal on the blacklist, empty without one. */
+const blacklistedMailAddress = ref("");
 const loading = ref(false);
 const showSecret = ref(false);
 
@@ -149,6 +154,12 @@ const submitRegistration = async () => {
 };
 
 const handleError = (error: BffError) => {
+  const blacklisted = addressBlacklistedRefusalOf(error);
+  if (blacklisted !== null) {
+    blacklistedMailAddress.value = blacklisted;
+    state.value = "blacklisted";
+    return;
+  }
   state.value = "error";
   const reason = error.data?.data?.reason;
   const status = error.statusCode || error.data?.statusCode;
@@ -229,6 +240,13 @@ const back = async () => {
           email: registration.email,
         })
       "
+        class="mb-4"
+    />
+
+    <CheckoutAddressBlacklistedAlert
+        v-if="state === 'blacklisted'"
+        :mail-address="blacklistedMailAddress"
+        registration
         class="mb-4"
     />
 

@@ -8,8 +8,10 @@ import {
   errorScreenMoment,
   failureMayPass,
   formatBlockingReasonMessage,
+  passedFailureScreen,
 } from "~/utils/accessErrorScreens.js";
-import { ACCESS_ERRORS } from "~/utils/accessOpenFlow.js";
+import { ACCESS_ERRORS, readOpenOutcome } from "~/utils/accessOpenFlow.js";
+import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 /**
  * A stand-in for vue-i18n's `t` that reads the real `de.json`. The point of
@@ -32,6 +34,9 @@ const KINDS = Object.values(ACCESS_ERRORS);
 const ROWS = Object.entries(ACCESS_ERROR_SCREENS);
 
 const LABEL = "Haupteingang";
+
+/** The formatters a component hands in; outside a component they speak German. */
+const format = useFormatting();
 
 /**
  * `retry: "action"` hands the repeat to the control button under the screen,
@@ -61,6 +66,23 @@ describe("de.json trägt den Wortlaut jeder Zeile", () => {
     expect(wording?.title).toBeTruthy();
     expect(wording?.description).toBeTruthy();
   });
+
+  it.each(ROWS.filter(([, row]) => row.moment))(
+    "has undated wording for %s, which names a moment",
+    (kind) => {
+      expect(de.mobileKey.errors[kind].description_undated).toBeTruthy();
+    },
+  );
+
+  it.each(KINDS)(
+    "has a summary for %s exactly where its screen passes and names a moment",
+    (kind) => {
+      const leavesLine =
+        failureMayPass(kind) && Boolean(ACCESS_ERROR_SCREENS[kind].moment);
+
+      expect(Boolean(de.mobileKey.errors[kind].summary)).toBe(leavesLine);
+    },
+  );
 
   it("kennt keinen Fehlertext ohne Zeile in der Tabelle", () => {
     expect(Object.keys(de.mobileKey.errors).sort()).toEqual([...KINDS].sort());
@@ -107,13 +129,17 @@ describe("der Ausweg eines Falls", () => {
 });
 
 describe("der Ausweg, der unter dem Bildschirm steht", () => {
-  it("liegt bei genau zwei Zeilen im Aktionsknopf", () => {
+  it("hands the repeat to the control button for exactly these rows", () => {
     const handedToButton = ROWS.filter(
       ([, row]) => row.retry === "action",
     ).map(([kind]) => kind);
 
     expect(handedToButton.sort()).toEqual(
-      [ACCESS_ERRORS.DOOR_UNREACHABLE, ACCESS_ERRORS.CLOSE_FAILED].sort(),
+      [
+        ACCESS_ERRORS.DOOR_UNREACHABLE,
+        ACCESS_ERRORS.OPEN_TEMPORARY,
+        ACCESS_ERRORS.CLOSE_FAILED,
+      ].sort(),
     );
   });
 
@@ -128,8 +154,12 @@ describe("der Ausweg, der unter dem Bildschirm steht", () => {
     expect(row.to).toBeUndefined();
   });
 
-  it.each([ACCESS_ERRORS.DOOR_UNREACHABLE, ACCESS_ERRORS.CLOSE_FAILED])(
-    "lässt %s ohne eigenen Knopf stehen",
+  it.each([
+    ACCESS_ERRORS.DOOR_UNREACHABLE,
+    ACCESS_ERRORS.OPEN_TEMPORARY,
+    ACCESS_ERRORS.CLOSE_FAILED,
+  ])(
+    "shows %s without a button of its own",
     (kind) => {
       const screen = buildErrorScreen(kind, { t, label: LABEL });
 
@@ -140,9 +170,13 @@ describe("der Ausweg, der unter dem Bildschirm steht", () => {
 });
 
 describe("failureMayPass", () => {
-  it("nennt genau die zwei Zeilen, deren Bildschirm vergehen darf", () => {
+  it("names exactly the rows whose screen may pass", () => {
     expect(KINDS.filter(failureMayPass).sort()).toEqual(
-      [ACCESS_ERRORS.DOOR_UNREACHABLE, ACCESS_ERRORS.CLOSE_FAILED].sort(),
+      [
+        ACCESS_ERRORS.DOOR_UNREACHABLE,
+        ACCESS_ERRORS.OPEN_TEMPORARY,
+        ACCESS_ERRORS.CLOSE_FAILED,
+      ].sort(),
     );
   });
 
@@ -172,12 +206,120 @@ describe("failureMayPass", () => {
   );
 });
 
+describe("open_temporary, when opening is not possible right now", () => {
+  it("says it can work again shortly, naming the door", () => {
+    const screen = buildErrorScreen(ACCESS_ERRORS.OPEN_TEMPORARY, {
+      t,
+      label: "Labortür XS4 One S",
+    });
+
+    expect(screen.title).toBe("Gerade nicht möglich");
+    expect(screen.description).toBe(
+      "Labortür XS4 One S lässt sich im Moment nicht öffnen. Versuchen Sie es in ein paar Minuten noch einmal.",
+    );
+  });
+
+  it("opens the support contact", () => {
+    expect(ACCESS_ERROR_SCREENS[ACCESS_ERRORS.OPEN_TEMPORARY].help).toBe(true);
+  });
+
+  // Local times, so the clock reads the same wherever the suite runs.
+  const NOW = new Date(2026, 9, 15, 14, 10).getTime();
+  const SOON = new Date(2026, 9, 15, 14, 35).getTime();
+  const TOMORROW = new Date(2026, 9, 16, 8, 5).getTime();
+
+  it("names the time from which it can work again instead of a few minutes", () => {
+    const screen = buildErrorScreen(ACCESS_ERRORS.OPEN_TEMPORARY, {
+      t,
+      label: "Labortür XS4 One S",
+      retryAfter: SOON,
+      now: NOW,
+      format,
+    });
+
+    expect(screen.description).toBe(
+      "Labortür XS4 One S lässt sich im Moment nicht öffnen. Versuchen Sie es ab 14:35 Uhr noch einmal.",
+    );
+  });
+
+  it("names the date as well where the time is not today", () => {
+    const screen = buildErrorScreen(ACCESS_ERRORS.OPEN_TEMPORARY, {
+      t,
+      label: "Labortür XS4 One S",
+      retryAfter: TOMORROW,
+      now: NOW,
+      format,
+    });
+
+    expect(screen.description).toBe(
+      "Labortür XS4 One S lässt sich im Moment nicht öffnen. Versuchen Sie es ab 16.10.2026, 08:05 Uhr noch einmal.",
+    );
+  });
+
+  it("sums itself up in one line with the time, and by its title without one", () => {
+    expect(
+      buildErrorScreen(ACCESS_ERRORS.OPEN_TEMPORARY, {
+        t,
+        label: LABEL,
+        retryAfter: SOON,
+        now: NOW,
+        format,
+      }).summary,
+    ).toBe("Gerade nicht möglich · ab 14:35 Uhr");
+    expect(
+      buildErrorScreen(ACCESS_ERRORS.OPEN_TEMPORARY, { t, label: LABEL })
+        .summary,
+    ).toBe("Gerade nicht möglich");
+  });
+
+  it("keeps the backend's time in the line it leaves under the button once passed", () => {
+    const outcome = readOpenOutcome({
+      success: false,
+      data: {
+        openFailure: "temporary",
+        retryAfter: new Date(SOON).toISOString(),
+      },
+    });
+
+    expect(
+      passedFailureScreen(outcome, { t, label: LABEL, now: NOW, format })
+        .summary,
+    ).toBe("Gerade nicht möglich · ab 14:35 Uhr");
+  });
+
+  it("leaves nothing under the button after a success or a screen that stays", () => {
+    const context = { t, label: LABEL, now: NOW, format };
+
+    expect(passedFailureScreen({ opened: true, error: null }, context)).toBeNull();
+    expect(
+      passedFailureScreen(
+        { opened: false, error: ACCESS_ERRORS.OPEN_UNCONFIRMED },
+        context,
+      ),
+    ).toBeNull();
+    expect(passedFailureScreen(null, context)).toBeNull();
+  });
+
+  it("takes the time the backend names as its moment, and none otherwise", () => {
+    const retryAfter = Date.UTC(2026, 9, 15, 10, 25);
+
+    expect(
+      errorScreenMoment(ACCESS_ERRORS.OPEN_TEMPORARY, { retryAfter }),
+    ).toBe(retryAfter);
+    expect(errorScreenMoment(ACCESS_ERRORS.OPEN_TEMPORARY, {})).toBeNull();
+    expect(
+      errorScreenMoment(ACCESS_ERRORS.DOOR_UNREACHABLE, { retryAfter }),
+    ).toBeNull();
+  });
+});
+
 describe("buildErrorScreen", () => {
   it("nennt bei too_early das Datum, sobald die Buchung eines trägt", () => {
     const screen = buildErrorScreen(ACCESS_ERRORS.TOO_EARLY, {
       t,
       label: LABEL,
-      date: "01.09.2026, 09:00",
+      booking: { timeBegin: new Date(2026, 8, 1, 9, 0).getTime() },
+      format,
     });
 
     expect(screen.description).toContain("01.09.2026, 09:00");
@@ -346,7 +488,8 @@ describe("errorScreenMoment", () => {
     const dated = buildErrorScreen(ACCESS_ERRORS.TOO_LATE, {
       t,
       label: LABEL,
-      date: "17.09.2026, 11:00",
+      booking: { timeEnd: new Date(2026, 8, 17, 11, 0).getTime() },
+      format,
     });
     expect(dated.description).toContain("17.09.2026, 11:00");
     expect(dated.description).toContain(LABEL);

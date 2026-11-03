@@ -19,17 +19,14 @@
           }}</span>
         </template>
       </i18n-t>
-      <div v-if="!isPaymentDocument" class="mt-1 flex items-center">
+      <div
+        v-if="!isPaymentDocument && attachment.requiresAcceptance"
+        class="mt-1 flex items-center"
+      >
         {{ $t("booking.accepted") }}
         <UIcon
-          v-if="attachment.accepted"
           name="i-lucide-square-check-big"
           class="ml-1 text-green-600 dark:text-green-500"
-        />
-        <UIcon
-          v-else
-          name="i-lucide-square"
-          class="ml-1 text-red-600 dark:text-red-500"
         />
       </div>
       <div v-if="isPaymentDocument" class="mt-2 text-sm flex items-center">
@@ -52,9 +49,8 @@
   </div>
 </template>
 <script setup>
-import { useBookings } from "~/composables/api/useBookings.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
-
+import { usePaymentDocument } from "~/composables/usePaymentDocument.js";
 
 const { t } = useI18n();
 
@@ -82,6 +78,7 @@ const props = defineProps({
 });
 
 const { formatDate } = useFormatting();
+const { downloadDocument } = usePaymentDocument();
 
 const attachmentType = computed(() => {
   switch (props.attachment.type) {
@@ -89,6 +86,10 @@ const attachmentType = computed(() => {
       return t("booking.attachmentTypes.invoice");
     case "receipt":
       return t("booking.attachmentTypes.receipt");
+    case "cancellation":
+      return t("booking.attachmentTypes.cancellation");
+    case "withdrawal":
+      return t("booking.attachmentTypes.withdrawal");
     case "agreement":
       return t("booking.attachmentTypes.agreement");
     case "privacy-agreement":
@@ -114,46 +115,14 @@ function getBookableTitle(bookableId) {
   );
 }
 
-async function downloadAttachment() {
+function downloadAttachment() {
   if (!props.isPaymentDocument) {
     return;
   }
-  console.log("Downloading attachment", props.attachment);
-  if (props.bookingId && props.tenantId) {
-    let blob = null;
-    if (props.attachment.type === "receipt") {
-      blob = await useBookings().getBookingReceipt(
-        props.tenantId,
-        props.bookingId,
-        props.attachment.name,
-      );
-    } else if (props.attachment.type === "invoice") {
-      blob = await useBookings().getBookingInvoice(
-        props.tenantId,
-        props.bookingId,
-        props.attachment.name,
-      );
-    }
-
-    if (!blob) {
-      return;
-    }
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute(
-      "download",
-      props.attachment.title ? props.attachment.title : props.attachment.name,
-    );
-    document.body.appendChild(link);
-    link.click();
-  } else {
-    const notification = useNotification();
-    notification.error(
-      t("booking.download.failedMessage"),
-      t("booking.download.failedTitle"),
-    );
-  }
+  downloadDocument(props.attachment, {
+    tenantId: props.tenantId,
+    bookingId: props.bookingId,
+  });
 }
 </script>
 

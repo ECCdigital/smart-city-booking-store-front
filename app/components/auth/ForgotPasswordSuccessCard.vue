@@ -1,6 +1,7 @@
 <template>
   <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
     <template #header>
+      <AuthTitleSection />
       <div class="flex flex-col justify-center items-center">
         <UIcon
           size="32"
@@ -8,7 +9,7 @@
           class="text-success"
         />
 
-        <h2 class="text-2xl font-semibold mb-2">
+        <h2 class="text-lg font-semibold mb-2">
           {{ $t("forgotPassword.success.heading") }}
         </h2>
       </div>

@@ -53,7 +53,15 @@
           variant="outline"
           :placeholder="$t('mobileKey.searchPlaceholder')"
           :aria-label="$t('mobileKey.searchPlaceholder')"
-        />
+          :ui="{ trailing: 'pe-0' }"
+        >
+          <template #trailing>
+            <ClearButton
+              :show-clear-button="!!searchQuery"
+              @clear="searchQuery = ''"
+            />
+          </template>
+        </UInput>
         <ListFilter
           :tenants="tenants"
           :is-disabled="!shownBookings.length"
@@ -88,6 +96,7 @@
 </template>
 
 <script setup>
+import ClearButton from "~/components/inputs/ClearButton.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { useAccessClock } from "~/composables/useAccessClock.js";
 import { useTenantStore } from "~~/stores/tenant.js";

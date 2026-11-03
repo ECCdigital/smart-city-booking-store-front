@@ -1,12 +1,19 @@
 <template>
   <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
     <template #header>
-      <h1 class="text-center text-2xl font-semibold">
+      <AuthTitleSection />
+      <h1 class="text-lg font-semibold text-center text-gray-500 dark:text-gray-400">
         {{ $t("register.title") }}
       </h1>
     </template>
 
     <UForm :state="userData" class="flex flex-col gap-2" @submit="submitForm">
+      <CheckoutAddressBlacklistedAlert
+        v-if="blacklistedMailAddress !== null"
+        :mail-address="blacklistedMailAddress"
+        registration
+        class="mb-2"
+      />
       <div class="flex justify-between">
         <UFormField :label="$t('common.firstName')" required>
           <UInput
@@ -90,7 +97,7 @@
         color="primary"
         block
         :loading="loading"
-        :style="{ color: contrastToPrimary }"
+        style="color: var(--ui-primary-contrast)"
         class="mt-2"
       >
         {{ $t("common.register") }}
@@ -112,7 +119,7 @@
 import PasswordInput from "~/components/auth/PasswordInput.vue";
 import PasswordProgress from "~/components/auth/PasswordProgress.vue";
 import { useLegalAcceptance } from "~/composables/useLegalAcceptance.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
+import CheckoutAddressBlacklistedAlert from "~/components/checkout/CheckoutAddressBlacklistedAlert.vue";
 
 const { t } = useI18n();
 const notification = useNotification();
@@ -127,6 +134,12 @@ defineProps({
     type: String,
     default: "/login",
   },
+  // The instance's mail address of a refusal on the blacklist,
+  // empty without one; null without a refusal.
+  blacklistedMailAddress: {
+    type: String,
+    default: null,
+  },
 });
 
 const userData = defineModel("userData", {
@@ -136,7 +149,6 @@ const userData = defineModel("userData", {
 
 const emit = defineEmits(["submit"]);
 
-const { contrastToPrimary } = useContrastColor();
 
 const {
   documents: legalDocuments,

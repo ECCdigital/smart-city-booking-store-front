@@ -22,7 +22,15 @@
           :placeholder="$t('favorites.page.searchPlaceholder')"
           :aria-label="$t('favorites.page.searchPlaceholder')"
           class="w-full"
-        />
+          :ui="{ trailing: 'pe-0' }"
+        >
+          <template #trailing>
+            <ClearButton
+              :show-clear-button="!!searchQuery"
+              @clear="searchQuery = ''"
+            />
+          </template>
+        </UInput>
         <ListFilter
           :tenants="tenants"
           :kinds="kinds"
@@ -107,6 +115,7 @@
   </div>
 </template>
 <script setup>
+import ClearButton from "~/components/inputs/ClearButton.vue";
 import FavoriteEntryCard from "~/components/favorites/FavoriteEntryCard.vue";
 import ListFilter from "~/components/user/ListFilter.vue";
 import ResultsPagination from "~/components/search/ResultsPagination.vue";

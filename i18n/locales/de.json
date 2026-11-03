@@ -1,6 +1,13 @@
 {
   "welcome": "Willkommen",
   "home": {
+    "providers": {
+      "title": "Angebot nach Anbietern",
+      "bookables": "keine Buchungsobjekte | {count} Buchungsobjekt | {count} Buchungsobjekte",
+      "events": "keine Veranstaltungen | {count} Veranstaltung | {count} Veranstaltungen",
+      "all": "Alle Anbieter",
+      "showOffers": "Angebote ansehen"
+    },
     "howItWorks": {
       "title": "So funktioniert das Buchen",
       "steps": {
@@ -23,6 +30,30 @@
         "period": "{date}, {start} – {end} Uhr",
         "roomLine": "Seminarraum 2 „Weitblick“ · 3 Std.",
         "extraLine": "Beamer (optional) · 1 Stk."
+      }
+    },
+    "mobileKey": {
+      "title": "Türen öffnen mit dem Smartphone",
+      "subtitle": "Direkter Zugang dank digitaler Schlüssel",
+      "intro": "Ein digitaler Schlüssel ist eine Zutrittsberechtigung auf Ihrem Smartphone. Nutzen Sie ihn zum Öffnen von Türen, Schließfächern oder Fahrradboxen. Dieser Schlüssel gilt ausschließlich für Ihre Buchung: Genau an diesem Tag und genau in diesem Zeitraum für das gebuchte Objekt.",
+      "benefitsTitle": "Ihre Vorteile",
+      "benefits": {
+        "noHandover": "Keine Schlüsselübergabe und keine Öffnungszeiten.",
+        "expires": "Gilt nur im gebuchten Zeitraum und erlischt danach von selbst.",
+        "secure": "Kann nicht verloren gehen oder kopiert werden."
+      },
+      "stepsTitle": "So geht's",
+      "steps": {
+        "book": "Buchen und mit Ihrem Konto anmelden.",
+        "appear": "Kurz vor Beginn erscheint der Schlüssel unter „{keys}“.",
+        "open": "Vor der Tür QR-Code scannen und „Öffnen“ tippen."
+      },
+      "toKeys": "Zu meinen Schlüsseln",
+      "sample": {
+        "validToday": "Heute gültig · {start}–{end}",
+        "room": "Seminarraum 2 „Weitblick“",
+        "place": "Volkshochschule · Eingang Schulstraße",
+        "readerInRange": "Lesegerät in Reichweite"
       }
     }
   },
@@ -64,7 +95,7 @@
       "accountBookingDetail": "Buchungsdetails",
       "accountKeys": "Schlüssel",
       "accountKeyDetail": "Schlüsseldetails",
-      "accountInvoices": "Rechnungen",
+      "accountInvoices": "Belege",
       "accountFavorites": "Favoriten",
       "accountSettings": "Einstellungen",
       "accountAppearance": "Darstellung",
@@ -78,6 +109,7 @@
       "notFound": "Seite nicht gefunden",
       "forbidden": "Zugriff verweigert",
       "serverError": "Serverfehler",
+      "tooManyRequests": "Zu viele Anfragen",
       "error": "Fehler",
       "close": "Schließen"
     }
@@ -94,7 +126,7 @@
     "showAll": "Alle anzeigen",
     "showLess": "Weniger anzeigen",
     "clearEntry": "Eintrag löschen",
-    "searchPlaceholder": "Suchen...",
+    "searchPlaceholder": "Suchen",
     "imageLoadFailed": "Bild konnte nicht geladen werden",
     "unsavedChanges": "Sie haben nicht gespeicherte Änderungen.",
     "distanceUnknown": "Distanz nicht ermittelbar.",
@@ -172,7 +204,7 @@
     "keys": "Digitale Schlüssel",
     "activities": "Aktivitäten",
     "digitalKeys": "Digitale Schlüssel",
-    "invoices": "Rechnungen",
+    "invoices": "Belege",
     "account": "Benutzerkonto",
     "backToHome": "Zurück zur Startseite",
     "toOffers": "Zu den Angeboten",
@@ -269,7 +301,7 @@
     },
     "success": {
       "heading": "Bitte prüfe dein Postfach",
-      "description": "Wenn die angegebene E-Mail-Adresse verwendet werden kann, erhältst du in Kürze eine E-Mail mit einem Bestätigungslink. Bitte bestätige darüber deine E-Mail-Adresse, um dein Konto zu aktivieren.",
+      "description": "Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.",
       "resent": "Wenn die E-Mail-Adresse zu einem noch nicht bestätigten Konto gehört, haben wir den Bestätigungslink erneut gesendet.",
       "spamHint": "Wenn du die E-Mail nicht findest, überprüfe bitte auch deinen Spam- oder Werbeordner.",
       "toHome": "Zur Startseite",
@@ -363,7 +395,7 @@
   },
 
   "errors": {
-    "offerNotAvailable": "Dieses Angebot ist nicht (mehr) verfügbar.",
+    "offerNotAvailable": "Dieses Angebot ist derzeit nicht erreichbar.",
     "loadFailed": {
       "title": "Inhalte konnten nicht geladen werden",
       "message": "Bitte versuchen Sie es später erneut."
@@ -380,6 +412,10 @@
       "serverError": {
         "title": "Serverfehler",
         "message": "Ein interner Fehler ist aufgetreten. Bitte versuchen Sie es später erneut."
+      },
+      "tooManyRequests": {
+        "title": "Zu viele Anfragen",
+        "message": "Von Ihrem Netzwerk kamen in kurzer Zeit sehr viele Anfragen. Bitte versuchen Sie es in einigen Minuten erneut."
       },
       "generic": {
         "title": "Ein Fehler ist aufgetreten",
@@ -462,7 +498,6 @@
     "showAllEvents": "Alle Events ansehen",
     "upcoming": "Anstehende Veranstaltungen",
     "ticketOptions": "Ticketoptionen",
-    "ticketOptionsAndAvailability": "Ticketoptionen & Verfügbarkeit",
     "selectDatesHint": "Wählen Sie Daten aus, um die Verfügbarkeit und Preise zu sehen.",
     "bookAtProvider": "Beim Anbieter buchen",
     "notPublicTitle": "Kein öffentliches Event.",
@@ -485,7 +520,14 @@
     "eventDate": "Datum der Veranstaltung",
     "eventDescription": "Beschreibung der Veranstaltung",
     "noEvents": "Keine Veranstaltungen gefunden",
-    "noEvent": "Keine Veranstaltung gefunden"
+    "noEvent": "Keine Veranstaltung gefunden",
+    "participationLink": "Teilnahme-Link",
+    "format": {
+      "label": "Format",
+      "presence": "Präsenz",
+      "hybrid": "Hybrid",
+      "online": "Online"
+    }
   },
   "bookableDetail": {
     "notFound": "Nicht gefunden",
@@ -709,11 +751,21 @@
     "time_period_mismatch": "Für dieses Objekt muss ein vollständiger Zeitslot gebucht werden.",
     "insufficient_lead_time": "Die Buchung liegt zu kurzfristig. Zwischen Buchung und Beginn muss ausreichend Vorbereitungszeit in den Servicezeiten liegen.",
     "time_in_past": "Der gewählte Beginn liegt in der Vergangenheit. Bitte wählen Sie einen Zeitpunkt ab jetzt.",
+    "address_blacklisted": "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an {contact}.",
+    "address_blacklisted_operator": "den Betreiber dieses Angebots",
+    "address_blacklisted_title": "Buchung nicht möglich",
+    "address_blacklisted_copy": "Mailadresse kopieren",
+    "address_blacklisted_copied": "Mailadresse kopiert",
+    "address_blacklisted_copy_failed": "Die Mailadresse ließ sich nicht kopieren. Bitte markieren und kopieren Sie sie von Hand.",
+    "address_blacklisted_registration": "Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wende dich per Mail an {contact}.",
+    "address_blacklisted_registration_title": "Registrierung nicht möglich",
     "generateGroupBooking": "Keine Seriebuchung erzeugt",
     "selectTimePeriodTitle": "Kein Zeitraum ausgewählt",
     "selectTimePeriodHint": "Bitte wählen Sie zunächst einen Zeitraum aus, um die Preisübersicht zu sehen.",
     "data": {
       "contactSectionTitle": "Kontaktdaten",
+      "businessBookingLabel": "Geschäftliche Buchung",
+      "businessBookingHint": "Für ein Unternehmen, einen Verein oder eine Behörde. Ohne Haken gilt die Buchung als privat.",
       "addressLookupLabel": "Adresse suchen",
       "addressLookupPlaceholder": "Adresse eingeben (z. B. Musterstraße 1, Berlin)",
       "addressLookupHint": "Wählen Sie einen Treffer aus, um Straße, PLZ und Stadt automatisch zu übernehmen.",
@@ -732,6 +784,7 @@
       "loginAction": "Jetzt einloggen",
       "loggedInTitle": "Sie sind eingeloggt",
       "loggedInDescription": "Sie können sich ausloggen und diese Buchung stattdessen als Gast abschließen.",
+      "loggedInRequiredDescription": "Diese Buchung erfordert eine Anmeldung und wird mit Ihrem angemeldeten Konto ({name}) abgeschlossen.",
       "logoutGuestAction": "Ausloggen und als Gast fortfahren",
       "customFieldsSectionTitle": "Zusätzliche Angaben",
       "customFieldSelectPlaceholder": "Bitte auswählen",
@@ -794,6 +847,9 @@
       }
     },
     "review": {
+      "bookingKindLabel": "Buchungsart",
+      "bookingKindPrivate": "Privat",
+      "bookingKindBusiness": "Geschäftlich",
       "periodTitle": "Zeitraum",
       "periodMissing": "Kein Zeitraum ausgewählt.",
       "priceTitle": "Preisübersicht",
@@ -885,7 +941,9 @@
       "paymentStateLabel": "Zahlungsstatus",
       "paymentPaid": "Bezahlt",
       "paymentPending": "Nicht bezahlt",
+      "paymentLapsed": "Entfällt",
       "paymentFree": "Kostenfrei",
+      "paymentWaived": "Entfällt",
       "amountLabel": "Betrag",
       "bookingStatusError": "Diese Buchung konnte nicht geladen werden.",
       "summaryTotalLabel": "Buchungen",
@@ -925,6 +983,10 @@
         "rejected": {
           "title": "Anfrage nicht angenommen",
           "body": "Ihre Buchungsanfrage konnte leider nicht angenommen werden. Bei Fragen wenden Sie sich bitte an den Anbieter."
+        },
+        "withdrawn": {
+          "title": "Buchung widerrufen",
+          "body": "Der Anbieter hat Ihren Widerruf angenommen. Es entstehen Ihnen keine Kosten; ein bereits gezahlter Betrag wird vollständig erstattet."
         },
         "confirmed_without_payment": {
           "title": "Abgeschlossen (kostenfrei)",
@@ -1035,16 +1097,15 @@
     "payment_expected": "Zahlung zum Abschluss der Buchung erforderlich",
     "paid_completed": "Bezahlt und abgeschlossen",
     "rejected": "Abgelehnt oder storniert",
+    "withdrawn": "Widerrufen",
     "confirmed_without_payment": "Abgeschlossen (kostenfrei)"
   },
 
   "booking": {
     "emptyTitle": "Keine Buchungen vorhanden",
     "emptyDescription": "Sie haben noch keine Buchungen vorgenommen.",
-    "typeRoom": "Raumbuchung",
-    "typeResource": "Ressourcen-Buchung",
-    "typeTicket": "Ticketbuchung",
-    "typeEvent": "Eventbuchung",
+    "noMatches": "Keine Buchung passt zu Ihrer Suche oder den gewählten Filtern.",
+    "booking": "Buchung",
     "typeAdditional": "Zusatzbuchung",
     "book": "Buchen",
     "attachmentFor": "{type} für {bookable}",
@@ -1067,11 +1128,79 @@
     "eventTime": "Veranstaltungszeit",
     "priceLabel": "Preis:",
     "downloadAppointment": "Termin herunterladen",
+    "actionsFor": "Aktionen zur Buchung #{id}",
     "downloadAppointmentTooltip": "Als Termin herunterladen",
-    "comment": "Ihr Kommentar",
+    "withdrawal": {
+      "action": "Buchung widerrufen",
+      "hint": "Öffnet eine vorbereitete E-Mail an den Anbieter. Der Anbieter prüft Ihren Widerruf und meldet sich bei Ihnen."
+    },
+    "cancellation": {
+      "action": "Buchung stornieren",
+      "title": "Buchung stornieren",
+      "stepRefund": "Schritt 1 von 2: Erstattung prüfen",
+      "stepDetails": "Schritt 2 von 2: Angaben zur Stornierung",
+      "blockedDefault": "Dieser Anbieter erlaubt keine Stornierung über das Portal. Bitte wenden Sie sich direkt an den Anbieter.",
+      "openRequestShort": "Stornoanfrage per E-Mail offen",
+      "openRequestOn": "Stornoanfrage per E-Mail offen seit {date}",
+      "openRequestStillCancellable": "Trotz der offenen Stornoanfrage per E-Mail können Sie die Buchung hier direkt stornieren.",
+      "freeBooking": "Diese Buchung ist kostenfrei. Es wird nichts erstattet.",
+      "unpaidBooking": "Für diese Buchung wurde noch nichts bezahlt, und es fällt keine Stornogebühr an. Die Stornierung ist für Sie kostenfrei.",
+      "unpaidFeeDue": "Für diese Buchung wurde noch nichts bezahlt. Die Stornogebühr von {fee} bleibt trotzdem fällig und ist nach der Stornierung noch zu bezahlen.",
+      "dueNow": "Noch zu zahlen",
+      "originalAmount": "Buchungsbetrag",
+      "fee": "Stornogebühr",
+      "feePercent": "{percent} %",
+      "refund": "Erstattung",
+      "daysBeforeStart": "am Tag des Beginns der Buchung | {n} Tag vor Beginn der Buchung | {n} Tage vor Beginn der Buchung",
+      "tierHint": "Sie stornieren {when}. Bis {tierDays} Tage vor Beginn der Buchung erstattet {tenant} {percent} % des Betrags. Es fallen somit {feePercent} % Stornogebühr an. Der endgültige Betrag steht im Stornobeleg.",
+      "previewFailedTitle": "Die Erstattung lässt sich gerade nicht berechnen.",
+      "previewFailedText": "Buchungsbetrag {amount}. Die Gebühr richtet sich nach den Stornobedingungen von {tenant}; den Betrag erfahren Sie mit dem Stornobeleg.",
+      "previewFailedTitleUnpaid": "Die Stornogebühr lässt sich gerade nicht berechnen.",
+      "previewFailedTextUnpaid": "Buchungsbetrag {amount}, noch nicht bezahlt. Ob eine Stornogebühr anfällt, richtet sich nach den Stornobedingungen von {tenant}; den Betrag erfahren Sie mit dem Stornobeleg.",
+      "recalculate": "Erneut berechnen",
+      "expectedRefund": "Voraussichtliche Erstattung",
+      "reason": "Grund",
+      "reasonPlaceholder": "Zum Beispiel: Termin verschoben, Veranstaltung abgesagt.",
+      "reasonRequired": "Bitte geben Sie einen Grund an.",
+      "bankTitle": "Bankverbindung für die Erstattung",
+      "bankHint": "Die Buchung ist bezahlt. Wie möchten Sie die Rückzahlung klären?",
+      "bankModeForm": "Bankverbindung jetzt angeben",
+      "bankModeFormDescription": "Alle Felder sind optional. Mit IBAN geht die Rückzahlung schneller.",
+      "bankModeEmail": "Klärung per E-Mail",
+      "bankModeEmailDescription": "{tenant} meldet sich wegen der Rückzahlung bei Ihnen.",
+      "accountHolder": "Kontoinhaber",
+      "iban": "IBAN",
+      "bic": "BIC",
+      "bankName": "Bank",
+      "ibanInvalid": "Diese IBAN ist ungültig.",
+      "bicInvalid": "Dieser BIC ist ungültig.",
+      "immediateNote": "Die Buchung wird sofort storniert. Der Vorgang lässt sich nicht rückgängig machen. Sie erhalten eine Bestätigung an {mail}.",
+      "openRequestResolved": "Für diese Buchung ist aktuell noch eine Stornoanfrage per E-Mail offen. Diese wird durch das direkte Stornieren ersetzt. Den Link zur Bestätigung der Stornierung benötigen Sie nicht mehr.",
+      "next": "Weiter",
+      "nextAnyway": "Trotzdem weiter",
+      "back": "Zurück",
+      "confirm": "Jetzt stornieren",
+      "close": "Schließen",
+      "doneTitle": "Buchung storniert",
+      "doneSubtitle": "Bestätigung per E-Mail unterwegs",
+      "doneText": "Die Buchung ist storniert. Wir haben eine Bestätigung an {mail} geschickt.",
+      "doneTextPriced": "Die Buchung ist storniert. Wir haben eine Bestätigung mit dem Stornobeleg an {mail} geschickt; den Beleg finden Sie auch in den Buchungsdetails.",
+      "doneTextRefund": "Die Buchung ist storniert. Die voraussichtliche Erstattung beträgt {refund}. Wir haben eine Bestätigung mit dem Stornobeleg an {mail} geschickt. Den Beleg finden Sie auch in den Buchungsdetails.",
+      "doneTextFeeDue": "Die Buchung ist storniert. Die Stornogebühr von {fee} ist noch zu bezahlen. Wir haben eine Bestätigung mit dem Stornobeleg an {mail} geschickt. Den Beleg finden Sie auch in den Buchungsdetails.",
+      "blockedTitle": "Stornierung hier nicht möglich",
+      "blockedSubtitle": "Stornierung nicht möglich",
+      "blockedText": "{tenant} erlaubt für diese Buchung keine Stornierung über das Portal.",
+      "goneTitle": "Diese Buchung ist bereits storniert oder nicht mehr verfügbar",
+      "goneText": "Es gibt nichts mehr zu stornieren. Ihre Buchungsliste wird jetzt aktualisiert.",
+      "failedTitle": "Die Buchung konnte nicht storniert werden.",
+      "failedText": "Bitte versuchen Sie es erneut. Besteht das Problem weiter, wenden Sie sich an den Anbieter."
+    },
+    "comment": "Kommentar",
     "attachmentTypes": {
       "invoice": "Rechnung",
       "receipt": "Zahlungsbeleg",
+      "cancellation": "Stornobeleg",
+      "withdrawal": "Widerrufbeleg",
       "agreement": "Nutzervereinbarung",
       "privacyAgreement": "Datenschutzerklärung",
       "userManual": "Betriebsanleitung",
@@ -1080,9 +1209,11 @@
       "unknown": "Unbekannter Anhangstyp"
     },
     "download": {
-      "label": "{type} herunterladen",
-      "failedTitle": "Download fehlgeschlagen",
-      "failedMessage": "Das Dokument konnte nicht heruntergeladen werden."
+      "label": "{type} herunterladen"
+    },
+    "document": {
+      "unavailableTitle": "Dokument nicht abrufbar",
+      "unavailableMessage": "Das Dokument konnte nicht geladen werden. Bitte versuchen Sie es später erneut."
     },
     "errors": {
       "notFoundTitle": "Seite nicht gefunden",
@@ -1102,6 +1233,8 @@
       "all": "Alle",
       "filterBy": "Filtern nach:",
       "sortBy": "Sortieren nach:",
+      "filterButton": "Buchungen filtern",
+      "sortButton": "Buchungen sortieren",
       "activeBookings": "Aktive Buchungen",
       "status": "Status:",
       "confirmed": "Bestätigt",
@@ -1134,7 +1267,9 @@
       },
       "free": "Kostenfrei",
       "paid": "Bezahlt",
-      "unpaid": "Nicht bezahlt"
+      "unpaid": "Nicht bezahlt",
+      "waived": "Entfällt",
+      "lapsed": "Entfällt"
     },
     "status": {
       "requested": "Ausstehend",
@@ -1142,7 +1277,9 @@
       "payment_due": "Bestätigt",
       "confirmed": "Bestätigt",
       "rejected": "Abgelehnt",
-      "cancelled": "Storniert"
+      "cancelled": "Storniert",
+      "withdrawn": "Widerrufen",
+      "withdrawnTooltip": "Der Anbieter hat Ihren Widerruf angenommen. Ein bereits gezahlter Betrag wird vollständig erstattet."
     }
   },
 
@@ -1150,7 +1287,8 @@
     "listFilter": {
       "filterBy": "Filtern nach:",
       "tenant": "Anbieter:",
-      "kind": "Typ:"
+      "kind": "Typ:",
+      "clearAll": "Alle Filter entfernen"
     },
     "contactData": "Kontaktdaten",
     "security": "Sicherheit",
@@ -1164,8 +1302,6 @@
       "fr": "Französisch",
       "es": "Spanisch"
     },
-    "settingsPersonalData": "Persönliche Daten",
-    "settingsAppearance": "Darstellung",
     "appearanceTitle": "Optische Darstellung",
     "appearanceColorScheme": "Farbgestaltung",
     "appearanceLanguage": "Sprache",
@@ -1174,6 +1310,8 @@
     "appearanceLight": "Hell",
     "changesSaved": "Änderungen gespeichert",
     "changesSavedMessage": "Ihre Änderungen wurden erfolgreich gespeichert.",
+    "changesSaveFailed": "Speichern fehlgeschlagen",
+    "changesSaveFailedMessage": "Ihre Änderungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     "passwordMismatch": "Die eingegebenen Passwörter stimmen nicht überein.",
     "passwordChangeFailed": "Passwortänderung fehlgeschlagen",
     "passwordChangeFailedMessage": "Ihr Passwort konnte nicht geändert werden. Bitte versuchen Sie es erneut.",
@@ -1181,10 +1319,10 @@
     "currentPasswordWrong": "Das bisherige Passwort stimmt nicht.",
     "activities": "Meine Aktivitäten",
     "digitalKeys": "Digitale Schlüssel",
-    "digitalKeysDescription": "Öffnen Sie Türen, Schließfächer oder Fahrradboxen mit Ihrem Smartphone.",
+    "digitalKeysDescription": "Türen, Schließfächer oder Fahrradboxen direkt mit dem Smartphone öffnen.",
     "quickBookDescription": "Gemerkte Angebote schnell wiederfinden und buchen.",
     "invoicesShortDescription": "Alle Rechnungen und Belege an einem Ort.",
-    "invoicesDescription": "Hier finden Sie Ihre Rechnungen und Zahlungsbelege.",
+    "invoicesDescription": "Alle Rechnungen, Zahlungsbelege und Stornobelege an einem Ort. Direkter Zugriff auf die Buchung über die Buchungs-ID.",
     "favoritesTitle": "Favoriten",
     "appearanceDescription": "Verwalten Sie die Darstellung der Anwendung. Sie können beispielsweise zwischen einem hellen und einem dunklen Design wechseln. Optional können Sie auch die Sprache der Benutzeroberfläche anpassen.",
     "bookedItems": "Gebuchte Objekte",
@@ -1198,23 +1336,40 @@
     },
     "unknownTenant": "Unbekannt",
     "invoices": {
-      "title": "Ihre Rechnungen und Zahlungsbelege",
+      "title": "Meine Belege",
       "emptyTitle": "Keine Rechnungen vorhanden",
       "emptyDescription": "Aktuell sind für Ihr Konto keine Rechnungen verfügbar. Sobald Rechnungen erstellt wurden, werden diese hier angezeigt.",
       "unknownBookable": "Unbekanntes Buchungsobjekt",
       "searchPlaceholder": "Nach Buchungsobjekt suchen",
-      "noMatches": "Keine Rechnung passt zu Ihrer Suche.",
+      "noMatches": "Keine Dokumente passen zu Ihrer Suche oder dem gewählten Filter.",
+      "quickFilter": {
+        "label": "Nach Dokumententyp filtern",
+        "tooltip": "Filtern nach {type}",
+        "invoice": "Rechnungen",
+        "receipt": "Zahlungsbelege",
+        "cancellation": "Stornobelege"
+      },
       "columns": {
         "createdAt": "Erstelldatum",
         "title": "Titel",
         "type": "Dokumenttyp",
         "bookingId": "Buchungs-ID",
         "bookables": "Buchungsobjekte",
-        "paid": "Bezahlt"
+        "paid": "Bezahlt",
+        "actions": "Aktionen"
+      },
+      "actions": {
+        "open": "{title} in neuem Tab öffnen",
+        "download": "{title} herunterladen",
+        "downloadLabel": "Herunterladen",
+        "print": "{title} drucken",
+        "printLabel": "Drucken"
       },
       "types": {
         "invoice": "Rechnung",
         "receipt": "Zahlungsbeleg",
+        "cancellation": "Stornobeleg",
+        "withdrawal": "Widerrufbeleg",
         "unknown": "Unbekannt"
       }
     }
@@ -1365,8 +1520,8 @@
     "helpTitle": "Schlüssel nicht sichtbar oder Tür-Problem?",
     "helpDescription": "Es werden nur Türen angezeigt, für die Sie aktuell eine Buchung mit Schließberechtigung haben. Fehlt ein Schlüssel oder lässt sich eine Tür nicht öffnen, hilft Ihnen unser Support weiter.",
     "helpShowContact": "Hilfe & Kontakt anzeigen",
-    "yourKeys": "Ihre Schlüssel",
-    "yourKeysDescription": "Öffnen und schließen Sie Türen im Zeitraum Ihrer Buchung.",
+    "yourKeys": "Meine digitalen Schlüssel",
+    "yourKeysDescription": "Digitale Schlüssel für Türen, Schließfächer und Fahrradboxen. Einfaches Öffnen und Schließen im Zeitraum der Buchung per Smartphone. Nur für Buchungen mit gültiger Schließberechtigung.",
     "openDoor": "Tür öffnen",
     "scannedDescription": "Sie haben den Code an der Tür gescannt.",
     "whichBooking": "Welche Buchung?",
@@ -1456,6 +1611,12 @@
       "door_unreachable": {
         "title": "{label} nicht erreichbar",
         "description": "Das Schloss antwortet gerade nicht. Das kann an der Verbindung vor Ort liegen."
+      },
+      "open_temporary": {
+        "title": "Gerade nicht möglich",
+        "description": "{label} lässt sich im Moment nicht öffnen. Versuchen Sie es ab {time} Uhr noch einmal.",
+        "description_undated": "{label} lässt sich im Moment nicht öffnen. Versuchen Sie es in ein paar Minuten noch einmal.",
+        "summary": "Gerade nicht möglich · ab {time} Uhr"
       },
       "open_unconfirmed": {
         "title": "Öffnen nicht bestätigt",
@@ -1561,6 +1722,7 @@
   "results": {
     "noLocation": "Ohne Ortsangabe",
     "noOffers": "Keine Angebote gefunden.",
+    "noMatches": "Keine Buchungsobjekte oder Events passen zu den aktuellen Suchkriterien.",
     "noneInArea": "Keine Ergebnisse in diesem Bereich.",
     "fullscreen": "Vollbild",
     "exitFullscreen": "Vollbild beenden",
@@ -1573,6 +1735,10 @@
     "mapView": "Kartenansicht",
     "atThisLocation": "Ergebnisse an diesem Standort:",
     "clickToOpen": "Klick um Auswahl zu öffnen",
+    "clickToSeeAll": "Klick um Alle anzusehen",
+    "offerPosition": "Angebot {n} von {total}",
+    "previousOffer": "Vorheriges Angebot",
+    "nextOffer": "Nächstes Angebot",
     "pagination": {
       "itemsPerPage": "Pro Seite",
       "all": "Alle",
@@ -1636,8 +1802,8 @@
     "failed": "Der Favorit konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     "removeFailed": "Der Favorit konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
     "page": {
-      "title": "Ihre Favoriten",
-      "description": "Hier finden Sie alle Angebote, die Sie als Favorit gemerkt haben.",
+      "title": "Meine Favoriten",
+      "description": "Alle als Favoriten markierte Angebote auf einen Blick. Mit einem Herz markierte Angebote können hier wiedergefunden, verwaltet und gebucht werden.",
       "count": "Keine Favoriten | Ein Favorit | {count} Favoriten",
       "unavailable": "Nicht verfügbar",
       "unavailableHint": "Dieses Angebot ist derzeit nicht erreichbar. Es bleibt gemerkt, bis Sie es entfernen.",

@@ -8,13 +8,13 @@
         :icon="isGreaterThanSm ? '' : 'i-lucide-log-in'"
         variant="ghost"
         class="block px-1 sm:px-2"
-        :style="{ color: contrastToPrimary }"
+        style="color: var(--ui-header-contrast)"
         :to="loginTo"
       />
       <UButton
         v-if="isGreaterThanSm"
         :label="t('common.register')"
-        class="hidden sm:block px-4 text-black dark:text-white bg-white dark:bg-black"
+        class="hidden sm:block px-4 bg-(--ui-header-button) text-(--ui-header-button-contrast)"
         :to="registerTo"
       />
     </template>
@@ -29,12 +29,10 @@
 import UserDropdown from "~/components/UserDropdown.vue";
 import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck";
 import { useAuthStore } from "~~/stores/auth.js";
-import { useContrastColor } from "~/composables/utils/useContrastColor.js";
 import BookingsDropdown from "~/components/BookingsDropdown.vue";
 
 const { t } = useI18n();
 
-const { contrastToPrimary } = useContrastColor();
 const { isGreaterThanSm } = useBreakpointCheck();
 const authStore = useAuthStore();
 const route = useRoute();

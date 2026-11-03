@@ -1,6 +1,7 @@
 import type { Permissions } from "~~/shared/types/api";
 import { adminOrigin } from "~~/shared/utils/adminOrigin";
 import { rateLimitWait } from "~~/shared/utils/retryAfter";
+import { addressBlacklistedRefusalOf } from "~/utils/checkoutErrors.js";
 import {
   parseReturnTarget,
   type ReturnTargetOptions,
@@ -14,6 +15,7 @@ import {
 export type SignupOutcome =
   | { kind: "confirmation" }
   | { kind: "rateLimited"; seconds: number | null }
+  | { kind: "blacklisted"; mailAddress: string }
   | { kind: "failed" };
 
 /**
@@ -21,7 +23,9 @@ export type SignupOutcome =
  *
  * Account-neutral: the backend answers `201` whether or not the address has
  * an account. A `409` of an older backend lands on the same confirmation, so
- * the page never tells a registered address from a new one.
+ * the page never tells a registered address from a new one. The one
+ * exception is an address on the blacklist, refused
+ * on purpose with the instance's mail address to write to.
  *
  * @param error - The rejected `$fetch`, or `null`/`undefined` on success.
  */
@@ -31,6 +35,11 @@ export function signupOutcome(
 ): SignupOutcome {
   if (!error) {
     return { kind: "confirmation" };
+  }
+
+  const mailAddress = addressBlacklistedRefusalOf(error);
+  if (mailAddress !== null) {
+    return { kind: "blacklisted", mailAddress };
   }
 
   const failure = error as { status?: number; statusCode?: number };

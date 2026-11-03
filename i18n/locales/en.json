@@ -1,6 +1,13 @@
 {
   "welcome": "Welcome!",
   "home": {
+    "providers": {
+      "title": "Offers by provider",
+      "bookables": "no bookables | {count} bookable | {count} bookables",
+      "events": "no events | {count} event | {count} events",
+      "all": "All providers",
+      "showOffers": "View offers"
+    },
     "howItWorks": {
       "title": "How booking works",
       "steps": {
@@ -23,6 +30,30 @@
         "period": "{date}, {start} – {end}",
         "roomLine": "Seminar room 2 “Weitblick” · 3 h",
         "extraLine": "Projector (optional) · 1 pc."
+      }
+    },
+    "mobileKey": {
+      "title": "Open doors with the smartphone",
+      "subtitle": "Direct access with digital keys",
+      "intro": "A digital key is an access right on your smartphone. Use it to open doors, lockers, or bike boxes. This key is valid only for your booking: exactly on this day and exactly during this period for the booked object.",
+      "benefitsTitle": "Your benefits",
+      "benefits": {
+        "noHandover": "No key handover and no opening hours.",
+        "expires": "Valid only during the booked period and expires on its own afterwards.",
+        "secure": "Cannot be lost or copied."
+      },
+      "stepsTitle": "How it works",
+      "steps": {
+        "book": "Book and sign in with your account.",
+        "appear": "Shortly before the start, the key appears under “{keys}”.",
+        "open": "At the door, scan the QR code and tap “Open”."
+      },
+      "toKeys": "Go to my keys",
+      "sample": {
+        "validToday": "Valid today · {start}–{end}",
+        "room": "Seminar room 2 “Weitblick”",
+        "place": "Adult education centre · Schulstraße entrance",
+        "readerInRange": "Reader in range"
       }
     }
   },
@@ -64,7 +95,7 @@
       "accountBookingDetail": "Booking details",
       "accountKeys": "Keys",
       "accountKeyDetail": "Key details",
-      "accountInvoices": "Invoices",
+      "accountInvoices": "Documents",
       "accountFavorites": "Favorites",
       "accountSettings": "Settings",
       "accountAppearance": "Appearance",
@@ -78,6 +109,7 @@
       "notFound": "Page not found",
       "forbidden": "Access denied",
       "serverError": "Server error",
+      "tooManyRequests": "Too many requests",
       "error": "Error",
       "close": "Close"
     }
@@ -95,7 +127,7 @@
     "showAll": "Show all",
     "showLess": "Show less",
     "clearEntry": "Clear entry",
-    "searchPlaceholder": "Search...",
+    "searchPlaceholder": "Search",
     "imageLoadFailed": "Image could not be loaded",
     "unsavedChanges": "You have unsaved changes.",
     "distanceUnknown": "Distance unavailable.",
@@ -195,7 +227,7 @@
     "accountBookings": "My bookings",
     "activities": "Activities",
     "digitalKeys": "Keys",
-    "invoices": "Invoices",
+    "invoices": "Documents",
     "account": "Account",
     "resources": "Resources",
     "user": "User",
@@ -216,7 +248,6 @@
     "showAllEvents": "View all events",
     "upcoming": "Upcoming events",
     "ticketOptions": "Ticket options",
-    "ticketOptionsAndAvailability": "Ticket options and availability",
     "selectDatesHint": "Pick dates to see availability and prices.",
     "bookAtProvider": "Book with the provider",
     "notPublicTitle": "Not a public event.",
@@ -231,10 +262,17 @@
     "soldOut": "This ticket type is sold out.",
     "selectTicketOption": "Select a ticket option",
     "noEvent": "No event found",
-    "noEvents": "No events found"
+    "noEvents": "No events found",
+    "participationLink": "Participation link",
+    "format": {
+      "label": "Format",
+      "presence": "In person",
+      "hybrid": "Hybrid",
+      "online": "Online"
+    }
   },
   "errors": {
-    "offerNotAvailable": "This offer is not (or no longer) available.",
+    "offerNotAvailable": "This offer cannot be reached right now.",
     "loadFailed": {
       "title": "The content could not be loaded",
       "message": "Please try again later."
@@ -251,6 +289,10 @@
       "serverError": {
         "title": "Server error",
         "message": "An internal error occurred. Please try again later."
+      },
+      "tooManyRequests": {
+        "title": "Too many requests",
+        "message": "Your network sent a great many requests in a short time. Please try again in a few minutes."
       },
       "generic": {
         "title": "An error occurred",
@@ -330,6 +372,14 @@
     "time_period_mismatch": "A complete time slot must be booked for this object.",
     "insufficient_lead_time": "The booking is too soon. There must be sufficient preparation time within service hours between booking and start.",
     "time_in_past": "The chosen start lies in the past. Please choose a time from now on.",
+    "address_blacklisted": "No booking is possible with this address. If you have questions, please write to {contact}.",
+    "address_blacklisted_operator": "the operator of this offer",
+    "address_blacklisted_title": "Booking not possible",
+    "address_blacklisted_copy": "Copy mail address",
+    "address_blacklisted_copied": "Mail address copied",
+    "address_blacklisted_copy_failed": "The mail address could not be copied. Please select and copy it by hand.",
+    "address_blacklisted_registration": "No registration is possible with this email address. If you have questions, please write to {contact}.",
+    "address_blacklisted_registration_title": "Registration not possible",
     "selectTimePeriodTitle": "Select a time period",
     "selectTimePeriodHint": "Please select a time period first to see the price summary.",
     "maxAmountHint": "Maximum {max} available",
@@ -340,6 +390,8 @@
     "quantityFixed": "Quantity for {item}: {amount}",
     "data": {
       "contactSectionTitle": "Contact details",
+      "businessBookingLabel": "Business booking",
+      "businessBookingHint": "For a company, an association or an authority. Unticked, the booking counts as private.",
       "addressLookupLabel": "Find address",
       "addressLookupPlaceholder": "Enter an address (e.g. Main Street 1, Berlin)",
       "addressLookupHint": "Select a result to auto-fill street, postal code, and city.",
@@ -358,6 +410,7 @@
       "loginAction": "Sign in now",
       "loggedInTitle": "You are signed in",
       "loggedInDescription": "You can sign out and continue this booking as a guest instead.",
+      "loggedInRequiredDescription": "This booking requires sign-in and will be completed with your signed-in account ({name}).",
       "logoutGuestAction": "Sign out and continue as guest",
       "customFieldsSectionTitle": "Additional details",
       "customFieldSelectPlaceholder": "Please select",
@@ -420,6 +473,9 @@
       }
     },
     "review": {
+      "bookingKindLabel": "Booking type",
+      "bookingKindPrivate": "Private",
+      "bookingKindBusiness": "Business",
       "periodTitle": "Time period",
       "periodMissing": "No time period selected.",
       "priceTitle": "Price summary",
@@ -511,7 +567,9 @@
       "paymentStateLabel": "Payment status",
       "paymentPaid": "Paid",
       "paymentPending": "Unpaid",
+      "paymentLapsed": "Not due",
       "paymentFree": "Free of charge",
+      "paymentWaived": "Waived",
       "amountLabel": "Amount",
       "bookingStatusError": "This booking could not be loaded.",
       "summaryTotalLabel": "Bookings",
@@ -550,6 +608,10 @@
         "rejected": {
           "title": "Request not accepted",
           "body": "Unfortunately your booking request could not be accepted. If you have questions, please contact the provider."
+        },
+        "withdrawn": {
+          "title": "Booking withdrawn",
+          "body": "The provider has accepted your withdrawal. It costs you nothing; any amount already paid will be refunded in full."
         },
         "confirmed_without_payment": {
           "title": "Completed (free of charge)",
@@ -690,15 +752,14 @@
     "payment_expected": "Payment required to complete the booking",
     "paid_completed": "Paid and completed",
     "rejected": "Rejected or cancelled",
+    "withdrawn": "Withdrawn",
     "confirmed_without_payment": "Completed (free of charge)"
   },
   "booking": {
     "emptyTitle": "No bookings yet",
     "emptyDescription": "You have not made any bookings yet.",
-    "typeRoom": "Room booking",
-    "typeResource": "Equipment booking",
-    "typeTicket": "Ticket booking",
-    "typeEvent": "Event booking",
+    "noMatches": "No booking matches your search or the chosen filters.",
+    "booking": "Booking",
     "typeAdditional": "Additional booking",
     "book": "Book",
     "attachmentFor": "{type} for {bookable}",
@@ -721,11 +782,79 @@
     "eventTime": "Event time",
     "priceLabel": "Price:",
     "downloadAppointment": "Download appointment",
+    "actionsFor": "Actions for booking #{id}",
     "downloadAppointmentTooltip": "Download as an appointment",
-    "comment": "Your comment",
+    "withdrawal": {
+      "action": "Withdraw from booking",
+      "hint": "Opens a prepared email to the provider. The provider checks your withdrawal and gets back to you."
+    },
+    "cancellation": {
+      "action": "Cancel booking",
+      "title": "Cancel booking",
+      "stepRefund": "Step 1 of 2: Check the refund",
+      "stepDetails": "Step 2 of 2: Cancellation details",
+      "blockedDefault": "This provider does not allow cancellations through the portal. Please contact the provider directly.",
+      "openRequestShort": "Cancellation request by email open",
+      "openRequestOn": "Cancellation request by email open since {date}",
+      "openRequestStillCancellable": "Despite the open cancellation request by email, you can cancel the booking here directly.",
+      "freeBooking": "This booking is free of charge. Nothing will be refunded.",
+      "unpaidBooking": "Nothing has been paid for this booking yet, and no cancellation fee applies. The cancellation is free of charge for you.",
+      "unpaidFeeDue": "Nothing has been paid for this booking yet. The cancellation fee of {fee} is still due and has to be paid after the cancellation.",
+      "dueNow": "Still to pay",
+      "originalAmount": "Booking amount",
+      "fee": "Cancellation fee",
+      "feePercent": "{percent} %",
+      "refund": "Refund",
+      "daysBeforeStart": "on the day the booking starts | {n} day before the booking starts | {n} days before the booking starts",
+      "tierHint": "You are cancelling {when}. Up to {tierDays} days before the start, {tenant} refunds {percent} % of the amount. This leaves a cancellation fee of {feePercent} %. The final amount is stated in the cancellation receipt.",
+      "previewFailedTitle": "The refund cannot be calculated right now.",
+      "previewFailedText": "Booking amount {amount}. The fee follows the cancellation terms of {tenant}; you will learn the amount with the cancellation receipt.",
+      "previewFailedTitleUnpaid": "The cancellation fee cannot be calculated right now.",
+      "previewFailedTextUnpaid": "Booking amount {amount}, not paid yet. Whether a cancellation fee applies follows the cancellation terms of {tenant}; you will learn the amount with the cancellation receipt.",
+      "recalculate": "Calculate again",
+      "expectedRefund": "Expected refund",
+      "reason": "Reason",
+      "reasonPlaceholder": "For example: appointment moved, event called off.",
+      "reasonRequired": "Please state a reason.",
+      "bankTitle": "Bank details for the refund",
+      "bankHint": "This booking is paid. How would you like to settle the refund?",
+      "bankModeForm": "Enter bank details now",
+      "bankModeFormDescription": "All fields are optional. With an IBAN the refund is faster.",
+      "bankModeEmail": "Settle by email",
+      "bankModeEmailDescription": "{tenant} will contact you about the refund.",
+      "accountHolder": "Account holder",
+      "iban": "IBAN",
+      "bic": "BIC",
+      "bankName": "Bank",
+      "ibanInvalid": "This IBAN is not valid.",
+      "bicInvalid": "This BIC is not valid.",
+      "immediateNote": "The booking is cancelled immediately. This cannot be undone. You will receive a confirmation at {mail}.",
+      "openRequestResolved": "A cancellation request by email is still open for this booking. This booking is now cancelled directly through the portal. The link to the cancellation request is no longer needed.",
+      "next": "Continue",
+      "nextAnyway": "Continue anyway",
+      "back": "Back",
+      "confirm": "Cancel now",
+      "close": "Close",
+      "doneTitle": "Booking cancelled",
+      "doneSubtitle": "Confirmation on its way by email",
+      "doneText": "The booking is cancelled. We have sent a confirmation to {mail}.",
+      "doneTextPriced": "The booking is cancelled. We have sent a confirmation with the cancellation receipt to {mail}; the receipt is also in the booking details.",
+      "doneTextRefund": "The booking is cancelled. The expected refund is {refund}. We have sent a confirmation with the cancellation receipt to {mail}. The receipt is also in the booking details.",
+      "doneTextFeeDue": "The booking is cancelled. The cancellation fee of {fee} is still to be paid. We have sent a confirmation with the cancellation receipt to {mail}. The receipt is also in the booking details.",
+      "blockedTitle": "Cancellation not possible here",
+      "blockedSubtitle": "Cancellation not possible",
+      "blockedText": "{tenant} does not allow this booking to be cancelled through the portal.",
+      "goneTitle": "This booking is already cancelled or no longer available",
+      "goneText": "There is nothing left to cancel. Your booking list is being refreshed.",
+      "failedTitle": "The booking could not be cancelled.",
+      "failedText": "Please try again. If the problem persists, contact the provider."
+    },
+    "comment": "Comment",
     "attachmentTypes": {
       "invoice": "Invoice",
       "receipt": "Payment receipt",
+      "cancellation": "Cancellation receipt",
+      "withdrawal": "Withdrawal receipt",
       "agreement": "User agreement",
       "privacyAgreement": "Privacy policy",
       "userManual": "User manual",
@@ -734,9 +863,11 @@
       "unknown": "Unknown attachment type"
     },
     "download": {
-      "label": "Download {type}",
-      "failedTitle": "Download failed",
-      "failedMessage": "The document could not be downloaded."
+      "label": "Download {type}"
+    },
+    "document": {
+      "unavailableTitle": "Document unavailable",
+      "unavailableMessage": "The document could not be loaded. Please try again later."
     },
     "errors": {
       "notFoundTitle": "Page not found",
@@ -756,6 +887,8 @@
       "all": "All",
       "filterBy": "Filter by:",
       "sortBy": "Sort by:",
+      "filterButton": "Filter bookings",
+      "sortButton": "Sort bookings",
       "activeBookings": "Active bookings",
       "status": "Status:",
       "confirmed": "Confirmed",
@@ -788,7 +921,9 @@
       },
       "free": "Free of charge",
       "paid": "Paid",
-      "unpaid": "Unpaid"
+      "unpaid": "Unpaid",
+      "waived": "Waived",
+      "lapsed": "Not due"
     },
     "status": {
       "requested": "Pending",
@@ -796,14 +931,17 @@
       "payment_due": "Confirmed",
       "confirmed": "Confirmed",
       "rejected": "Rejected",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "withdrawn": "Withdrawn",
+      "withdrawnTooltip": "The provider has accepted your withdrawal. Any amount already paid will be refunded in full."
     }
   },
   "account": {
     "listFilter": {
       "filterBy": "Filter by:",
       "tenant": "Provider:",
-      "kind": "Type:"
+      "kind": "Type:",
+      "clearAll": "Clear all filters"
     },
     "contactData": "Contact details",
     "security": "Security",
@@ -817,8 +955,6 @@
       "fr": "French",
       "es": "Spanish"
     },
-    "settingsPersonalData": "Personal details",
-    "settingsAppearance": "Appearance",
     "appearanceTitle": "Appearance",
     "appearanceColorScheme": "Colour scheme",
     "appearanceLanguage": "Language",
@@ -827,6 +963,8 @@
     "appearanceLight": "Light",
     "changesSaved": "Changes saved",
     "changesSavedMessage": "Your changes have been saved.",
+    "changesSaveFailed": "Saving failed",
+    "changesSaveFailedMessage": "Your changes could not be saved. Please try again.",
     "passwordMismatch": "The passwords you entered do not match.",
     "passwordChangeFailed": "Password change failed",
     "passwordChangeFailedMessage": "Your password could not be changed. Please try again.",
@@ -834,10 +972,10 @@
     "currentPasswordWrong": "The current password is not correct.",
     "activities": "My activity",
     "digitalKeys": "Digital keys",
-    "digitalKeysDescription": "Open doors, lockers and bike boxes with your phone.",
+    "digitalKeysDescription": "Open doors, lockers and bike boxes with the phone.",
     "quickBookDescription": "Find and book the offers you saved, in moments.",
     "invoicesShortDescription": "Every invoice and receipt in one place.",
-    "invoicesDescription": "Here you will find your invoices and payment receipts.",
+    "invoicesDescription": "Every invoice, payment receipt and cancellation receipt in one place. Access to related bookings via booking-id.",
     "favoritesTitle": "Favourites",
     "appearanceDescription": "Manage how the app looks. You can switch between a light and a dark theme, and change the language of the interface.",
     "bookedItems": "Booked items",
@@ -851,23 +989,40 @@
     },
     "unknownTenant": "Unknown",
     "invoices": {
-      "title": "Your invoices and receipts",
+      "title": "My documents",
       "emptyTitle": "No invoices available",
       "emptyDescription": "There are currently no invoices for your account. Once invoices have been created, they will appear here.",
       "unknownBookable": "Unknown bookable",
       "searchPlaceholder": "Search by bookable",
-      "noMatches": "No invoice matches your search.",
+      "noMatches": "No documents match your search or the chosen filter.",
+      "quickFilter": {
+        "label": "Filter by document type",
+        "tooltip": "Filter by {type}",
+        "invoice": "Invoices",
+        "receipt": "Receipts",
+        "cancellation": "Cancellation receipts"
+      },
       "columns": {
         "createdAt": "Created",
         "title": "Title",
         "type": "Document type",
         "bookingId": "Booking ID",
         "bookables": "Bookables",
-        "paid": "Paid"
+        "paid": "Paid",
+        "actions": "Actions"
+      },
+      "actions": {
+        "open": "Open {title} in a new tab",
+        "download": "Download {title}",
+        "downloadLabel": "Download",
+        "print": "Print {title}",
+        "printLabel": "Print"
       },
       "types": {
         "invoice": "Invoice",
         "receipt": "Receipt",
+        "cancellation": "Cancellation receipt",
+        "withdrawal": "Withdrawal receipt",
         "unknown": "Unknown"
       }
     }
@@ -1015,8 +1170,8 @@
     "helpTitle": "A key missing, or trouble at the door?",
     "helpDescription": "Only doors you currently hold a booking with access rights for are shown. If a key is missing or a door will not open, our support team can help.",
     "helpShowContact": "Show help and contact",
-    "yourKeys": "Your keys",
-    "yourKeysDescription": "Open and lock doors during your booking.",
+    "yourKeys": "My digital keys",
+    "yourKeysDescription": "Digital keys for doors, lockers and bike boxes. Easy access via smartphone during the booking. Only doors you currently hold a booking with access rights for are shown.",
     "openDoor": "Open the door",
     "scannedDescription": "You scanned the code at the door.",
     "whichBooking": "Which booking?",
@@ -1076,6 +1231,12 @@
       "door_unreachable": {
         "title": "{label} not reachable",
         "description": "The lock is not responding right now. This may be due to the connection on site."
+      },
+      "open_temporary": {
+        "title": "Not possible right now",
+        "description": "{label} cannot be opened at the moment. Please try again from {time}.",
+        "description_undated": "{label} cannot be opened at the moment. Please try again in a few minutes.",
+        "summary": "Not possible right now · from {time}"
       },
       "open_unconfirmed": {
         "title": "Opening not confirmed",
@@ -1211,6 +1372,7 @@
   "results": {
     "noLocation": "No location given",
     "noOffers": "No offers found.",
+    "noMatches": "No bookable items or events match the current search criteria.",
     "noneInArea": "No results in this area.",
     "fullscreen": "Full screen",
     "exitFullscreen": "Exit full screen",
@@ -1223,6 +1385,10 @@
     "mapView": "Map view",
     "atThisLocation": "Results at this location:",
     "clickToOpen": "Click to open the selection",
+    "clickToSeeAll": "Click to see all",
+    "offerPosition": "Offer {n} of {total}",
+    "previousOffer": "Previous offer",
+    "nextOffer": "Next offer",
     "pagination": {
       "itemsPerPage": "Per page",
       "all": "All",
@@ -1290,7 +1456,7 @@
     },
     "success": {
       "heading": "Please check your inbox",
-      "description": "If the address you entered can be used, you will shortly receive an e-mail with a confirmation link. Please use it to confirm your e-mail address and activate your account.",
+      "description": "You will shortly receive an e-mail to complete your registration.",
       "resent": "If the address belongs to an account that is not confirmed yet, we have sent the confirmation link again.",
       "spamHint": "If you cannot find the email, check your spam or promotions folder.",
       "toHome": "To the home page",
@@ -1567,8 +1733,8 @@
     "failed": "The favourite could not be saved. Please try again.",
     "removeFailed": "The favourite could not be removed. Please try again.",
     "page": {
-      "title": "Favourites",
-      "description": "Here you will find all the offers you have saved as favourites.",
+      "title": "My Favourites",
+      "description": "All offers marked as favorites at a glance. Offers marked with a heart can be found, managed, and booked here.",
       "count": "No favourites | One favourite | {count} favourites",
       "unavailable": "Not available",
       "unavailableHint": "This offer cannot be reached right now. It stays saved until you remove it.",
