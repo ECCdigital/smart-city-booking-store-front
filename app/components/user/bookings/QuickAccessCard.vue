@@ -1,7 +1,7 @@
 <template>
-  <div
-    class="flex flex-col cursor-pointer border bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 my-1 md:my-2 hover:shadow-lg transition-shadow border-gray-200 dark:border-gray-700"
-    @click="goTo()"
+  <NuxtLink
+    :to="tenantTo(to)"
+    class="flex flex-col cursor-pointer border bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 my-1 md:my-2 hover:shadow-lg transition-shadow border-gray-200 dark:border-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
   >
     <!-- title and booking-id -->
     <div class="flex items-center justify-between mb-3 h-1/3">
@@ -17,10 +17,10 @@
     <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
       {{ description }}
     </div>
-  </div>
+  </NuxtLink>
 </template>
 <script setup>
-const props = defineProps({
+defineProps({
   title: {
     type: String,
     required: true,
@@ -40,10 +40,4 @@ const props = defineProps({
 });
 
 const { tenantTo } = useTenantRoute();
-
-function goTo() {
-  console.log("goTo", props.to);
-  const router = useRouter();
-  router.push(tenantTo(props.to));
-}
 </script>
