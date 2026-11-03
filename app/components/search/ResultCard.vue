@@ -1,6 +1,6 @@
 <template>
   <div
-    class="shadow-lg bg-white dark:bg-gray-700 rounded-xl"
+    class="shadow-lg bg-white dark:bg-gray-700 rounded-xl has-[.result-card-link:focus-visible]:ring-2 has-[.result-card-link:focus-visible]:ring-[color:var(--ui-accent,var(--ui-primary))]"
     :class="[
       isNotSuitable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer',
       mapDetailMode ? 'max-h-72' : '',
@@ -60,6 +60,7 @@
     <ResultCardBookableContent
       v-if="!isEvent"
       :bookable="item"
+      :details-to="detailsTo"
       :calculated-price="calculatedPrice"
       :is-not-bookable="isNotBookable"
       :is-not-suitable="isNotSuitable"
@@ -70,6 +71,7 @@
       v-if="isEvent"
       v-model:open-ticket-options="openEventTicketOptions"
       :event="item"
+      :details-to="detailsTo"
       :is-not-bookable="isNotBookable"
       :is-not-suitable="isNotSuitable"
       :entry-page-mode="entryPageMode"
@@ -88,7 +90,7 @@ import { useMediaImage } from "~/composables/utils/useMediaImage";
 
 const colorMode = useColorMode();
 const { coverImageOf, imageSource } = useMediaImage();
-const { goToDetails } = useRedirection();
+const { detailsRoute, goToDetails } = useRedirection();
 
 const theme = computed(() => {
   if (colorMode.value === "dark") return "dark";
@@ -143,7 +145,19 @@ const altText = computed(
 const openEventTicketOptions = ref(false);
 const showImageErrorHint = ref(false);
 
-function onGoToDetails() {
+// The title links to the detail page, so the card is reached and opened by
+// keyboard and can be opened in a new tab. The map's compact cards open their
+// details through the map instead and get no link.
+const detailsTo = computed(() =>
+  props.mapDetailMode || !props.item
+    ? null
+    : detailsRoute(props.item.id, props.item.type),
+);
+
+function onGoToDetails(event) {
+  // A click on a link inside the card (the title) is the link's own
+  // navigation, a new tab included; the card must not open the page again.
+  if (event?.target?.closest?.("a")) return;
   if (!props.mapDetailMode && props.item) {
     goToDetails(props.item.id, props.item.type);
   }
