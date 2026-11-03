@@ -1348,7 +1348,8 @@
         "tooltip": "Filtern nach {type}",
         "invoice": "Rechnungen",
         "receipt": "Zahlungsbelege",
-        "cancellation": "Stornobelege"
+        "cancellation": "Stornobelege",
+        "withdrawal": "Widerrufbelege"
       },
       "columns": {
         "createdAt": "Erstelldatum",
