@@ -619,8 +619,9 @@ const feePercent = computed(() => {
 });
 
 /**
- * The tier the refund applied, such as „36 Stunden“ or „2 Tage“; `null`
- * without a scale, where no tier applies.
+ * The tier the refund applied as it is named everywhere, such as „bis 36
+ * Stunden vor Beginn“ or „bis 2 Tage vor Beginn“; `null` without a scale,
+ * where no tier applies.
  */
 function appliedTierOf(hours) {
   if (!Number.isFinite(hours)) return null;
