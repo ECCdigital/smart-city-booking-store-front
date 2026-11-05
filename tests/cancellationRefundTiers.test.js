@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   sortedRefundTiers,
   tierDeadline,
+  timeBeforeStart,
 } from "~/utils/cancellationRefundTiers.js";
 
 describe("tierDeadline", () => {
@@ -11,6 +12,26 @@ describe("tierDeadline", () => {
     expect(tierDeadline(0)).toEqual({ amount: 0, unit: "days" });
     expect(tierDeadline(12)).toEqual({ amount: 12, unit: "hours" });
     expect(tierDeadline(30)).toEqual({ amount: 30, unit: "hours" });
+  });
+});
+
+describe("timeBeforeStart", () => {
+  it("names hours below one day, days with their hours below three days", () => {
+    expect(timeBeforeStart(13)).toEqual({ days: 0, hours: 13 });
+    expect(timeBeforeStart(46)).toEqual({ days: 1, hours: 22 });
+    expect(timeBeforeStart(48)).toEqual({ days: 2, hours: 0 });
+    expect(timeBeforeStart(71)).toEqual({ days: 2, hours: 23 });
+  });
+
+  it("drops the hours from three days on", () => {
+    expect(timeBeforeStart(72)).toEqual({ days: 3, hours: 0 });
+    expect(timeBeforeStart(250)).toEqual({ days: 10, hours: 0 });
+  });
+
+  it("answers null where the time is not known", () => {
+    expect(timeBeforeStart(undefined)).toBeNull();
+    expect(timeBeforeStart(Number.NaN)).toBeNull();
+    expect(timeBeforeStart(-1)).toBeNull();
   });
 });
 

@@ -19,6 +19,25 @@ export function tierDeadline(hoursBeforeStart) {
 }
 
 /**
+ * The time left until the start as the booker reads it: whole days from one
+ * day on, with the hours beside them only below three days and where there
+ * are any; below one day whole hours. `null` where the time is not known.
+ *
+ * @param {number} hoursBeforeStart
+ * @returns {{ days: number, hours: number }|null}
+ */
+export function timeBeforeStart(hoursBeforeStart) {
+  if (!Number.isFinite(hoursBeforeStart) || hoursBeforeStart < 0) return null;
+  if (hoursBeforeStart < HOURS_PER_DAY) {
+    return { days: 0, hours: hoursBeforeStart };
+  }
+  const days = Math.floor(hoursBeforeStart / HOURS_PER_DAY);
+  const hours =
+    hoursBeforeStart < 3 * HOURS_PER_DAY ? hoursBeforeStart % HOURS_PER_DAY : 0;
+  return { days, hours };
+}
+
+/**
  * The tiers of a bookable that name a deadline and a percentage, the longest
  * deadline first.
  *
