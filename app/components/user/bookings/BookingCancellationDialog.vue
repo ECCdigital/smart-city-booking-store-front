@@ -154,13 +154,7 @@
             name="i-lucide-info"
             class="w-4.5 h-4.5 shrink-0 mt-0.5 text-gray-500"
           />
-          <span>
-            {{
-              $t("booking.cancellation.unpaidBooking", {
-                amount: formatPrice(booking.priceEur),
-              })
-            }}
-          </span>
+          <span>{{ unpaidHint }}</span>
         </p>
 
         <!-- Paid: the refund. Unpaid with a fee by the tiers: the fee still to pay. -->
@@ -173,13 +167,7 @@
               name="i-lucide-triangle-alert"
               class="w-4.5 h-4.5 shrink-0 mt-0.5"
             />
-            <span>
-              {{
-                $t("booking.cancellation.unpaidFeeDue", {
-                  fee: formatPrice(preview.data.cancellationFeeEur),
-                })
-              }}
-            </span>
+            <span>{{ unpaidHint }}</span>
           </p>
           <dl class="text-sm">
             <div
@@ -474,7 +462,10 @@ import {
   resolveCancellationFailure,
 } from "~/utils/bookingCancellation.js";
 import { isFreeBooking, isSettledBooking } from "~/utils/bookingStatus.js";
-import { tierDeadline } from "~/utils/cancellationRefundTiers.js";
+import {
+  tierDeadline,
+  timeBeforeStart,
+} from "~/utils/cancellationRefundTiers.js";
 import {
   formatIban,
   isValidBic,
@@ -630,6 +621,36 @@ function appliedTierOf(hours) {
     ? t("booking.cancellation.tierDays", { n: amount }, amount)
     : t("booking.cancellation.tierHours", { n: amount }, amount);
 }
+
+/** The time left until the start, such as „1 Tag und 22 Stunden“; `null` unknown. */
+const timeBeforeStartText = computed(() => {
+  const time = timeBeforeStart(Number(preview.data?.hoursBeforeStart));
+  if (!time) return null;
+  const days = t("booking.cancellation.tierDays", { n: time.days }, time.days);
+  const hours = t(
+    "booking.cancellation.tierHours",
+    { n: time.hours },
+    time.hours,
+  );
+  if (time.days === 0) return hours;
+  if (time.hours === 0) return days;
+  return t("booking.cancellation.timeDaysAndHours", { days, hours });
+});
+
+/** Unpaid: the share refunded by the time left, and what stays to pay. */
+const unpaidHint = computed(() => {
+  const data = preview.data;
+  if (!data) return "";
+  const time = timeBeforeStartText.value;
+  const key = feeDue.value
+    ? "booking.cancellation.unpaidFeeDue"
+    : "booking.cancellation.unpaidBooking";
+  return t(time ? key : `${key}NoTime`, {
+    time,
+    percent: data.appliedRefundPercentage ?? 100,
+    fee: formatPrice(data.cancellationFeeEur),
+  });
+});
 
 const tierHint = computed(() => {
   const data = preview.data;
