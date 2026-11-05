@@ -21,6 +21,15 @@ import {
   MatchStatus,
   type CustomFieldDefinition,
 } from "~/composables/search/catalogFilters";
+import {
+  createRequestCache,
+  idsToCheck,
+  mapWithConcurrency,
+  narrowingKey,
+  periodBatches,
+  PERIOD_CHECK_CONCURRENCY,
+  type NarrowingCriteria,
+} from "~/composables/search/periodChecks";
 
 /** A place the search can measure a distance from or to. */
 interface SearchLocation {
@@ -141,6 +150,13 @@ export function useBookableSearch<TItem extends SearchableItem>(
   const updatedItems = ref<SearchResultItem[]>([]);
 
   const isMounted = ref(false);
+
+  // Availability, price and ticket answers per Offer and period, so a re-run
+  // asks the backend only for what it has not answered yet.
+  const cached = createRequestCache();
+  // Only the latest run may write its results; an older one still waiting
+  // for the backend is dropped.
+  let latestRun = 0;
 
   const bookableSearchTermOptions = {
     keys: ["item.title", "item.description", "item.flags", "item.tags"],
@@ -267,7 +283,20 @@ export function useBookableSearch<TItem extends SearchableItem>(
         .length,
   );
 
+  function narrowingCriteria(): NarrowingCriteria {
+    return {
+      pubEv: query.pubEv,
+      regEv: query.regEv,
+      cat: query.cat,
+      cities: query.cities,
+      tenants: query.tenants,
+      customFields: query.customFields,
+    };
+  }
+
   function setFilterQueryParams(criteria: Partial<CatalogQueryState>) {
+    const keyBefore = narrowingKey(narrowingCriteria());
+
     query.inclNoSuitable =
       typeof criteria.inclNoSuitable === "boolean"
         ? criteria.inclNoSuitable
@@ -285,6 +314,26 @@ export function useBookableSearch<TItem extends SearchableItem>(
     query.end = criteria.end ?? query.end;
 
     query.customFields = criteria.customFields ?? query.customFields;
+
+    // The search only asked about the Offers the old filters kept. Widened or
+    // moved, the newly shown ones need their check; cached answers are reused.
+    if (
+      searchIsInitialized.value &&
+      needsTicketPricing({ timeStart: query.start, timeEnd: query.end }) &&
+      narrowingKey(narrowingCriteria()) !== keyBefore
+    ) {
+      void runSearch(currentQueryCriteria());
+    }
+  }
+
+  function currentQueryCriteria() {
+    return {
+      term: query.term,
+      location: query.location,
+      distance: query.distance,
+      timeStart: query.start,
+      timeEnd: query.end,
+    };
   }
 
   function setSortedQueryParams(sortMode: SortMode) {
@@ -355,6 +404,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
     timeStart: number | null;
     timeEnd: number | null;
   }) {
+    const run = ++latestRun;
     setSearchQueryParams(criteria);
 
     // The URL carries the place as text; the search wants coordinates.
@@ -369,27 +419,43 @@ export function useBookableSearch<TItem extends SearchableItem>(
       toValue(sourceItems),
     );
 
-    if (needsTicketPricing(criteria)) {
-      enrichedItems = await checkTickets(enrichedItems);
-    }
-
-    let bookableItems: SearchResultItem[] = enrichedItems;
-
-    bookableItems = searchForSearchTerm(criteria.term, bookableItems);
-
-    bookableItems = await searchForTimePeriod(
-      { start: criteria.timeStart, end: criteria.timeEnd },
-      bookableItems,
+    // The cheap steps first: term and place narrow the list without a request.
+    let bookableItems: SearchResultItem[] = searchForSearchTerm(
+      criteria.term,
+      enrichedItems,
     );
-
     bookableItems = await searchForLocation(location, bookableItems, distance);
 
-    updatedItems.value = await updateItemStatus(enrichedItems, bookableItems, {
-      start: criteria.timeStart,
-      end: criteria.timeEnd,
-    });
+    // Only the Offers the active filters keep cost requests; the others are
+    // hidden anyway and are checked once a filter shows them.
+    const checkIds = idsToCheck(bookableItems, narrowingCriteria());
 
-    updatedItems.value = updateDistanceToLocation(updatedItems.value, location);
+    if (needsTicketPricing(criteria)) {
+      const withTickets = new Map(
+        (
+          await checkTickets(
+            bookableItems.filter((i) => checkIds.has(i.item.id)),
+          )
+        ).map((i) => [i.item.id, i]),
+      );
+      const replace = (i: SearchResultItem) => withTickets.get(i.item.id) ?? i;
+      enrichedItems = enrichedItems.map(replace);
+      bookableItems = bookableItems.map(replace);
+    }
+
+    const period = { start: criteria.timeStart, end: criteria.timeEnd };
+    bookableItems = await searchForTimePeriod(period, bookableItems, checkIds);
+
+    const items = await updateItemStatus(
+      enrichedItems,
+      bookableItems,
+      period,
+      checkIds,
+    );
+
+    if (run !== latestRun) return;
+
+    updatedItems.value = updateDistanceToLocation(items, location);
 
     searchIsInitialized.value = true;
   }
@@ -550,105 +616,187 @@ export function useBookableSearch<TItem extends SearchableItem>(
     );
   }
 
+  function periodKey(
+    kind: string,
+    item: { id: string; tenantId?: string },
+    start: number,
+    end: number,
+  ) {
+    return `${kind}|${item.tenantId}|${item.id}|${start}|${end}`;
+  }
+
+  /**
+   * Asks the backend for occupancy and price of the bookables to check, one
+   * request per tenant, and keeps the answers for
+   * the single checks that follow. A bookable the backend leaves out is out
+   * of reach and not available; a failed request leaves its bookables to
+   * the single requests.
+   */
+  async function prefetchPeriod(
+    items: SearchResultItem[],
+    start: number,
+    end: number,
+  ) {
+    if (options.getAvailability || options.getPriceForPeriod) return;
+
+    const toAsk = items
+      .filter((i) => i.isBookable && !isEventItem(i.item))
+      .map((i) => ({ id: i.item.id, tenantId: i.item.tenantId as string }))
+      .filter((item) => !cached.has(periodKey("occupancy", item, start, end)));
+
+    await mapWithConcurrency(
+      periodBatches(toAsk),
+      PERIOD_CHECK_CONCURRENCY,
+      async ({ tenantId, ids }) => {
+        const answers: {
+          bookableId: string;
+          isAvailable: boolean;
+          price?: { userGrossPriceEur: number } | null;
+        }[] = await useBookables().getPeriodOccupancies(
+          tenantId,
+          ids,
+          start,
+          end,
+        );
+        const byId = new Map(answers.map((a) => [a.bookableId, a]));
+
+        for (const id of ids) {
+          const item = { id, tenantId };
+          const answer = byId.get(id) ?? { isAvailable: false, price: null };
+          void cached(periodKey("occupancy", item, start, end), async () => answer);
+          if (answer.price) {
+            const price = answer.price;
+            void cached(periodKey("price", item, start, end), async () => price);
+          }
+        }
+      },
+    );
+  }
+
+  function fetchAvailability(item: SearchableItem, start: number, end: number) {
+    return cached(periodKey("occupancy", item, start, end), () =>
+      options.getAvailability
+        ? options.getAvailability(item as TItem, start, end)
+        : useBookables().getBookableOccupancy(
+            item.tenantId,
+            item.id,
+            start,
+            end,
+          ),
+    );
+  }
+
+  function fetchPrice(item: SearchableItem, start: number, end: number) {
+    return cached(periodKey("price", item, start, end), async () => {
+      const price = options.getPriceForPeriod
+        ? await options.getPriceForPeriod(item as TItem, start, end)
+        : await useBookables().getBookablePrice(
+            item.tenantId,
+            item.id,
+            start,
+            end,
+          );
+      // No price is how a failed request answers; it must not be cached.
+      if (!price) throw new Error("No price for period");
+      return price;
+    });
+  }
+
+  /**
+   * Keeps the Offers that can be had in the period. Only the ones in
+   * `checkIds` are asked about; the rest pass unchecked, the filters hide
+   * them. An Offer whose check fails stays in the list: one refused request
+   * must not empty a search, and the checkout checks again.
+   */
   async function searchForTimePeriod(
     timePeriod: TimePeriod | null,
     items: SearchResultItem[],
+    checkIds: Set<string>,
   ) {
-    if (!timePeriod || timePeriod.start === null) {
+    if (!timePeriod || timePeriod.start === null || timePeriod.end === null) {
       return items;
     }
+    const start = timePeriod.start;
+    const end = timePeriod.end;
 
-    const checkAvailability = async (item: SearchResultItem) => {
-      if (isEventItem(item.item)) {
-        // An event is on during the period when it overlaps it; it does not
-        // have to fit inside a two-hour room search.
-        return {
-          item,
-          isAvailable: eventOverlapsPeriod(item.item, timePeriod),
-        };
-      } else {
-        const availability = options.getAvailability
-          ? await options.getAvailability(
-              item.item as TItem,
-              timePeriod.start!,
-              timePeriod.end!,
-            )
-          : await useBookables().getBookableOccupancy(
-              item.item.tenantId,
-              item.item.id,
-              timePeriod.start!,
-              timePeriod.end!,
-            );
+    await prefetchPeriod(
+      items.filter((i) => checkIds.has(i.item.id)),
+      start,
+      end,
+    );
 
-        return {
-          item,
-          isAvailable: availability.isAvailable,
-        };
-      }
-    };
+    const availability = await mapWithConcurrency(
+      items,
+      PERIOD_CHECK_CONCURRENCY,
+      async (item) => {
+        if (!checkIds.has(item.item.id)) return true;
+        if (isEventItem(item.item)) {
+          // An event is on during the period when it overlaps it; it does not
+          // have to fit inside a two-hour room search.
+          return eventOverlapsPeriod(item.item, timePeriod);
+        }
+        // An Offer that cannot be booked at all is not available in any
+        // period; the backend would say the same.
+        if (!item.isBookable) return false;
 
-    const availabilityChecks = await Promise.all(items.map(checkAvailability));
-    return availabilityChecks
-      .filter((result) => result.isAvailable)
-      .map((result) => result.item);
+        return (await fetchAvailability(item.item, start, end)).isAvailable;
+      },
+    );
+
+    return items.filter((_, index) => availability[index] !== false);
   }
 
+  /**
+   * Sets each Offer's match status and, for a bookable that matched a period
+   * and was checked, the price of that period. Prices are fetched only for
+   * those, with the same limit on requests in flight.
+   */
   async function updateItemStatus(
     itemsWithStatus: SearchResultItem[],
     bookableItems: SearchResultItem[],
     timePeriod: TimePeriod | null,
+    checkIds: Set<string>,
   ) {
-    const temp = await Promise.all(
-      itemsWithStatus.map(async (item) => {
-        const isSuitable = bookableItems.some(
-          (b) => b.item.id === item.item.id,
-        );
+    const suitableIds = new Set(bookableItems.map((b) => b.item.id));
+    const start = timePeriod?.start ?? null;
+    const end = timePeriod?.end ?? null;
 
-        if (item.matchStatus === MatchStatus.TOO_FAR) {
-          return {
-            ...item,
-            isBookable: item.isBookable,
-            matchStatus: isSuitable ? MatchStatus.MATCH : MatchStatus.TOO_FAR,
-            calculatedPrice: null,
-          };
-        } else {
-          let price = null;
-          if (
-            item.isBookable &&
-            timePeriod &&
-            timePeriod.start !== null &&
-            timePeriod.end !== null &&
-            !isEventItem(item.item)
-          ) {
-            try {
-              price = options.getPriceForPeriod
-                ? await options.getPriceForPeriod(
-                    item.item as TItem,
-                    timePeriod.start,
-                    timePeriod.end,
-                  )
-                : await useBookables().getBookablePrice(
-                    item.item.tenantId,
-                    item.item.id,
-                    timePeriod.start,
-                    timePeriod.end,
-                  );
-            } catch {
-              price = null;
-            }
-          }
-
-          return {
-            ...item,
-            isBookable: item.isBookable,
-            matchStatus: isSuitable ? MatchStatus.MATCH : MatchStatus.NO_MATCH,
-            calculatedPrice: isSuitable ? price : null,
-          };
+    const prices = await mapWithConcurrency(
+      itemsWithStatus,
+      PERIOD_CHECK_CONCURRENCY,
+      async (item) => {
+        if (
+          start === null ||
+          end === null ||
+          item.matchStatus === MatchStatus.TOO_FAR ||
+          !item.isBookable ||
+          isEventItem(item.item) ||
+          !suitableIds.has(item.item.id) ||
+          !checkIds.has(item.item.id)
+        ) {
+          return null;
         }
-      }),
+        return fetchPrice(item.item, start, end);
+      },
     );
 
-    return temp;
+    return itemsWithStatus.map((item, index) => {
+      const isSuitable = suitableIds.has(item.item.id);
+
+      if (item.matchStatus === MatchStatus.TOO_FAR) {
+        return {
+          ...item,
+          matchStatus: isSuitable ? MatchStatus.MATCH : MatchStatus.TOO_FAR,
+          calculatedPrice: null,
+        };
+      }
+
+      return {
+        ...item,
+        matchStatus: isSuitable ? MatchStatus.MATCH : MatchStatus.NO_MATCH,
+        calculatedPrice: isSuitable ? (prices[index] ?? null) : null,
+      };
+    });
   }
 
   function removeDistanceToLocation(items: SearchResultItem[]) {
@@ -687,47 +835,52 @@ export function useBookableSearch<TItem extends SearchableItem>(
     });
   }
 
+  /**
+   * Prices and checks every ticket of the given events, a few requests at a
+   * time. An event whose ticket requests fail keeps its tickets as they were.
+   */
   async function checkTickets(events: SearchResultItem[]) {
-    const result = await Promise.allSettled(
-      events.map(async (event) => {
-        if (
-          isEventItem(event.item) &&
-          event.item.tickets &&
-          event.item.tickets.length > 0
-        ) {
-          const updatedTickets = await Promise.all(
-            event.item.tickets.map(async (ticket) => {
-              const ticketPrice = await useBookables().getBookablePrice(
-                event.item.tenantId,
+    const withTickets = events.filter(
+      (event) =>
+        isEventItem(event.item) &&
+        event.item.tickets &&
+        event.item.tickets.length > 0,
+    );
+
+    const updated = await mapWithConcurrency(
+      withTickets,
+      PERIOD_CHECK_CONCURRENCY,
+      async (event) => {
+        const { tenantId } = event.item;
+        const tickets = [];
+        for (const ticket of event.item.tickets ?? []) {
+          const [calculatedPrice, availability] = await Promise.all([
+            cached(`ticket-price|${tenantId}|${ticket.id}`, async () => {
+              const price = await useBookables().getBookablePrice(
+                tenantId,
                 ticket.id,
               );
-              const ticketAvailability =
-                await useBookables().getBookableOccupancy(
-                  event.item.tenantId,
-                  ticket.id,
-                );
-              return {
-                ...ticket,
-                calculatedPrice: ticketPrice,
-                availability: ticketAvailability,
-              };
-            }),
-          );
-          return {
-            ...event,
-            item: {
-              ...event.item,
-              tickets: updatedTickets,
-            },
-          };
-        } else {
-          return event;
+              // No price is how a failed request answers; not cached.
+              if (!price) throw new Error("No ticket price");
+              return price;
+            }).catch(() => null),
+            cached(`ticket-occupancy|${tenantId}|${ticket.id}`, () =>
+              useBookables().getBookableOccupancy(tenantId, ticket.id),
+            ),
+          ]);
+          tickets.push({ ...ticket, calculatedPrice, availability });
         }
-      }),
+        return { ...event, item: { ...event.item, tickets } };
+      },
     );
-    return result.map((r, index) =>
-      r.status === "fulfilled" ? r.value : events[index],
+
+    const byId = new Map(
+      withTickets.map((event, index) => [
+        event.item.id,
+        updated[index] ?? event,
+      ]),
     );
+    return events.map((event) => byId.get(event.item.id) ?? event);
   }
 
   const hasUrlCriteria = computed(
