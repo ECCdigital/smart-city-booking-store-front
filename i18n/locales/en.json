@@ -522,6 +522,7 @@
       "lineQtyPrice": "{qty} × {price}",
       "edit": "Edit",
       "commitBooking": "Book with obligation to pay",
+      "commitBookingFree": "Book now",
       "backToPayment": "Back to payment",
       "backToData": "Back to your details",
       "termsHint": "By completing this booking you accept our terms and conditions.",

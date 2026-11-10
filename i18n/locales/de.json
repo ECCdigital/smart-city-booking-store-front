@@ -896,6 +896,7 @@
       "lineQtyPrice": "{qty} × {price}",
       "edit": "Bearbeiten",
       "commitBooking": "Zahlungspflichtig buchen",
+      "commitBookingFree": "Verbindlich buchen",
       "backToPayment": "Zurück zur Zahlung",
       "backToData": "Zurück zu den Daten",
       "termsHint": "Mit der Buchung akzeptieren Sie unsere Geschäftsbedingungen.",
