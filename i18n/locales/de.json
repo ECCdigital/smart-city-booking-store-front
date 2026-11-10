@@ -93,6 +93,7 @@
       "checkoutStatus": "Buchungsstatus",
       "accountBookings": "Meine Buchungen",
       "accountBookingDetail": "Buchungsdetails",
+      "accountProofs": "Nachweise einreichen",
       "accountKeys": "Schlüssel",
       "accountKeyDetail": "Schlüsseldetails",
       "accountInvoices": "Belege",
@@ -1817,6 +1818,67 @@
       "searchPlaceholder": "Nach Titel suchen",
       "noMatches": "Kein Favorit passt zu Ihrer Suche oder den gewählten Filtern.",
       "loadFailed": "Ihre Favoriten konnten nicht geladen werden."
+    }
+  },
+  "customerUploads": {
+    "title": "Nachweise",
+    "required": "Pflicht",
+    "optional": "Optional",
+    "sensitive": "Besonders schutzwürdig",
+    "sensitiveHint": "Dieser Nachweis enthält besonders schützenswerte Daten. Der Anbieter löscht die Datei deshalb sofort nach der Prüfung.",
+    "state": {
+      "open": "Offen · bis {deadline} (noch {days} Tag) | Offen · bis {deadline} (noch {days} Tage)",
+      "openWithoutDeadline": "Offen",
+      "submitted": "Eingereicht · wird geprüft",
+      "rejected": "Abgelehnt · neu hochladen",
+      "overdue": "Frist abgelaufen am {deadline}",
+      "fulfilled": "Geprüft am {reviewedAt} · Datei gelöscht"
+    },
+    "rejectionReason": "Grund der Ablehnung: {reason}",
+    "lateHint": "Die Frist ist vorbei. Du kannst trotzdem einreichen, der Anbieter „{tenant}“ entscheidet, ob der Nachweis noch angenommen wird.",
+    "replace": "Ersetzen",
+    "delete": "Löschen",
+    "changeUntilReview": "Bis zur Prüfung kannst du die Datei ersetzen oder löschen. Nach der Prüfung löscht {tenant} sie.",
+    "dropHint": "Datei hierher ziehen oder",
+    "chooseFile": "Datei auswählen",
+    "limits": "{formats} · max. {size} MB",
+    "maxFiles": "höchstens {count} Dateien",
+    "submitNow": "Jetzt einreichen",
+    "pageIntro": "Deine Anbieter brauchen zu diesen Buchungen noch Nachweise.",
+    "nothingMissing": "Es fehlen keine Nachweise.",
+    "provider": "Anbieter",
+    "providerReviews": "sieht und prüft diese Nachweise",
+    "bookingNumber": "Buchung #{id}",
+    "manage": "Nachweise verwalten",
+    "count": "Keine Nachweise | Ein Nachweis | {count} Nachweise",
+    "searchPlaceholder": "Buchung, Angebot, Anbieter oder Nachweis suchen",
+    "noMatches": "Kein Nachweis passt zu deiner Suche oder den gewählten Filtern.",
+    "filter": {
+      "status": "Status:",
+      "category": "Kategorie:",
+      "statuses": {
+        "open": "Offen",
+        "outstanding": "Ausstehend",
+        "overdue": "Abgelaufen",
+        "submitted": "Eingereicht",
+        "rejected": "Abgelehnt"
+      }
+    },
+    "toBooking": "Zur Buchung",
+    "errors": {
+      "format": "Diese Datei hat kein erlaubtes Format. Erlaubt: {formats}.",
+      "size": "Die Datei ist zu groß. Erlaubt sind höchstens {size} MB.",
+      "fieldFull": "Für diesen Nachweis sind maximal {count} Dokumente erlaubt. Sie haben bereits {count} Dokumente hochgeladen. Ersetzen oder löschen Sie bestehende Dokumente.",
+      "bookingLimit": "Für diese Buchung sind schon so viele Nachweise gespeichert wie erlaubt.",
+      "virus": "In der Datei wurde Schadsoftware gefunden. Sie wurde nicht gespeichert.",
+      "scanner": "Die Datei kann gerade nicht geprüft werden. Bitte versuche es später erneut.",
+      "rateLimit": "Zu viele Versuche. Bitte versuche es später erneut.",
+      "notOpen": "Für diese Buchung kannst du gerade keine Nachweise einreichen.",
+      "alreadyReviewed": "Dieser Nachweis wurde schon geprüft und kann nicht mehr geändert werden.",
+      "fileMissing": "Bitte wähle eine Datei aus.",
+      "requiredMissing": "Bitte füge diesen Nachweis hinzu.",
+      "notFound": "Dieser Nachweis wurde nicht gefunden. Bitte lade die Seite neu.",
+      "generic": "Die Datei konnte nicht hochgeladen werden. Bitte versuche es erneut."
     }
   }
 }

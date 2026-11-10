@@ -108,6 +108,11 @@ import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useIcalDownload } from "~/composables/api/useIcalDownload.js";
 import { isFreeBooking, isLiveBooking } from "~/utils/bookingStatus.js";
 import {
+  customerUploadFieldsOf,
+  hasPendingProofs,
+  proofPageLink,
+} from "~/utils/customerUploads.js";
+import {
   CANCELLATION_AVAILABILITY,
   cancellationAvailabilityOf,
   cancellationContactHintOf,
@@ -187,6 +192,23 @@ const actionOptions = computed(() => {
       label: t("booking.downloadAppointment"),
       icon: "i-lucide-calendar-arrow-down",
       onSelect: onDownloadIcal,
+    });
+  }
+
+  // Proofs asked for: to the page „Nachweise
+  // einreichen“ at the whole booking, marked, while a field is not checked,
+  // else to the details, whose section
+  // „Nachweise“ shows the checked ones.
+  if (customerUploadFieldsOf(props.booking).length > 0) {
+    options.push({
+      label: t("customerUploads.manage"),
+      icon: "i-lucide-file-check",
+      onSelect: () =>
+        useRouter().push(
+          hasPendingProofs(props.booking)
+            ? proofPageLink(props.booking.id)
+            : { path: `/account/bookings/${props.booking.id}` },
+        ),
     });
   }
 

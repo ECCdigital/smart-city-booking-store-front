@@ -1,9 +1,10 @@
 <template>
   <!--
-    The filter of the account lists (favorites, mobile keys): one button
-    with a chip while a filter is on, a dropdown behind it, for provider and
-    type. The groups are drawn from the entries themselves; a list without
-    Kinds shows no type group.
+    The filter of the account lists (favorites, mobile keys, proofs): one
+    button with a chip while a filter is on, a dropdown behind it, for
+    provider and type. The groups are drawn from the entries themselves; a
+    list without Kinds shows no type group. A list may add groups of its own
+    (`groups`), each a set of checkboxes emitted under its key.
   -->
   <UDropdownMenu
     arrow
@@ -47,6 +48,15 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  /**
+   * Further groups of checkboxes after provider and type:
+   * `[{ key, label, options: [{ value, label, icon }] }]`; the chosen values
+   * of each go out as `{ [key]: [...] }` with the filter.
+   */
+  groups: {
+    type: Array,
+    default: () => [],
+  },
 });
 const emit = defineEmits(["setFilter"]);
 
@@ -63,9 +73,15 @@ const KIND_ITEMS = {
 
 const selectedTenantIds = ref([]);
 const selectedKinds = ref([]);
+const selectedGroups = ref({});
+
+const selectedOf = (key) => selectedGroups.value[key] ?? [];
 
 const hasFiltersApplied = computed(
-  () => selectedTenantIds.value.length > 0 || selectedKinds.value.length > 0,
+  () =>
+    selectedTenantIds.value.length > 0 ||
+    selectedKinds.value.length > 0 ||
+    Object.values(selectedGroups.value).some((values) => values.length > 0),
 );
 
 // A removed favorite can take the last entry of a provider or a Kind with
@@ -157,6 +173,23 @@ const filterItems = () => [
         ],
       ]
     : []),
+  ...props.groups.map((group) => [
+    heading(group.label),
+    ...group.options.map((option, index) =>
+      checkbox({
+        label: option.label,
+        icon: option.icon,
+        checked: selectedOf(group.key).includes(option.value),
+        last: index === group.options.length - 1,
+        onChecked: (checked) => {
+          selectedGroups.value = {
+            ...selectedGroups.value,
+            [group.key]: toggled(selectedOf(group.key), option.value, checked),
+          };
+        },
+      }),
+    ),
+  ]),
   [
     {
       label: t("account.listFilter.clearAll"),
@@ -165,6 +198,7 @@ const filterItems = () => [
       onSelect() {
         selectedTenantIds.value = [];
         selectedKinds.value = [];
+        selectedGroups.value = {};
         onSetFilter();
       },
     },
@@ -181,6 +215,9 @@ function onSetFilter() {
   emit("setFilter", {
     tenantIds: selectedTenantIds.value,
     kinds: selectedKinds.value,
+    ...Object.fromEntries(
+      props.groups.map((group) => [group.key, selectedOf(group.key)]),
+    ),
   });
 }
 </script>

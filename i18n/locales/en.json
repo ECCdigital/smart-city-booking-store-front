@@ -93,6 +93,7 @@
       "checkoutStatus": "Booking status",
       "accountBookings": "My bookings",
       "accountBookingDetail": "Booking details",
+      "accountProofs": "Submit proofs",
       "accountKeys": "Keys",
       "accountKeyDetail": "Key details",
       "accountInvoices": "Documents",
@@ -1748,6 +1749,67 @@
       "searchPlaceholder": "Search by title",
       "noMatches": "No favourite matches your search or the chosen filters.",
       "loadFailed": "Your favourites could not be loaded."
+    }
+  },
+  "customerUploads": {
+    "title": "Proofs",
+    "required": "Required",
+    "optional": "Optional",
+    "sensitive": "Especially sensitive",
+    "sensitiveHint": "This proof holds especially sensitive data. The provider therefore deletes the file right after the review.",
+    "state": {
+      "open": "Open · until {deadline} ({days} day left) | Open · until {deadline} ({days} days left)",
+      "openWithoutDeadline": "Open",
+      "submitted": "Submitted · being reviewed",
+      "rejected": "Rejected · upload again",
+      "overdue": "Deadline passed on {deadline}",
+      "fulfilled": "Reviewed on {reviewedAt} · file deleted"
+    },
+    "rejectionReason": "Reason for the rejection: {reason}",
+    "lateHint": "The deadline has passed. You can still submit; the provider “{tenant}” decides whether the proof is still accepted.",
+    "replace": "Replace",
+    "delete": "Delete",
+    "changeUntilReview": "Until the review you can replace or delete the file. After the review {tenant} deletes it.",
+    "dropHint": "Drag a file here or",
+    "chooseFile": "Choose file",
+    "limits": "{formats} · max. {size} MB",
+    "maxFiles": "up to {count} files",
+    "submitNow": "Submit now",
+    "pageIntro": "Your providers still need proofs for these bookings.",
+    "nothingMissing": "No proofs are missing.",
+    "provider": "Provider",
+    "providerReviews": "sees and reviews these proofs",
+    "bookingNumber": "Booking #{id}",
+    "manage": "Manage proofs",
+    "count": "No proofs | One proof | {count} proofs",
+    "searchPlaceholder": "Search booking, offer, provider or proof",
+    "noMatches": "No proof matches your search or the chosen filters.",
+    "filter": {
+      "status": "Status:",
+      "category": "Category:",
+      "statuses": {
+        "open": "Open",
+        "outstanding": "Outstanding",
+        "overdue": "Overdue",
+        "submitted": "Submitted",
+        "rejected": "Rejected"
+      }
+    },
+    "toBooking": "To the booking",
+    "errors": {
+      "format": "This file is not in an allowed format. Allowed: {formats}.",
+      "size": "The file is too large. At most {size} MB are allowed.",
+      "fieldFull": "This proof allows at most {count} documents. You have already uploaded {count} documents. Replace or delete existing documents.",
+      "bookingLimit": "This booking already holds as many proofs as allowed.",
+      "virus": "Malware was found in the file. It was not stored.",
+      "scanner": "The file cannot be checked right now. Please try again later.",
+      "rateLimit": "Too many attempts. Please try again later.",
+      "notOpen": "You cannot submit proofs for this booking right now.",
+      "alreadyReviewed": "This proof has already been reviewed and can no longer be changed.",
+      "fileMissing": "Please choose a file.",
+      "requiredMissing": "Please add this proof.",
+      "notFound": "This proof was not found. Please reload the page.",
+      "generic": "The file could not be uploaded. Please try again."
     }
   }
 }

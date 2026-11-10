@@ -132,6 +132,9 @@
       </div>
     </div>
 
+    <!-- customer uploads ("Nachweise") -->
+    <BookingProofsSection :booking="booking" />
+
     <!-- invoices and receipts  -->
     <div v-if="paymentDocuments.length > 0" class="mb-5">
       <p class="font-medium">{{ $t("account.invoicesAndReceipts") }}</p>
@@ -212,6 +215,7 @@ import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { useAccessClock } from "~/composables/useAccessClock.js";
 import { readAccessPointsAnswer } from "~/utils/accessOpenFlow.js";
 import AccessPointListRow from "~/components/mobileKey/AccessPointListRow.vue";
+import BookingProofsSection from "~/components/user/proofs/BookingProofsSection.vue";
 
 const { t } = useI18n();
 

@@ -12,6 +12,16 @@ export const useBookingStore = defineStore("booking", {
       state.bookings.filter((b) => b.bookableId === bookableId),
   },
   actions: {
+    /**
+     * Takes the state of a booking's customer uploads as an upload route
+     * answers it, so the pages show it without loading every booking again.
+     */
+    setCustomerUploadState(bookingId, customerUploadState) {
+      const booking = this.bookings.find((b) => b.id === bookingId);
+      if (booking && customerUploadState) {
+        booking.customerUploadState = customerUploadState;
+      }
+    },
     async fetchBookings({ force = false } = {}) {
       if (this.initialized && !force) return this.bookings;
       const { fetchBookings } = useBookings();
