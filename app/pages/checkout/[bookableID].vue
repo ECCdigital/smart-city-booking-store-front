@@ -12,6 +12,14 @@ import PriceSummaryBar from "~/components/checkout/PriceSummaryBar.vue";
 import CheckoutContactStep from "~/components/checkout/CheckoutContactStep.vue";
 import { isBusinessContact } from "~/utils/businessBooking.js";
 import CheckoutCustomFields from "~/components/checkout/CheckoutCustomFields.vue";
+import CheckoutCustomerUploads from "~/components/checkout/CheckoutCustomerUploads.vue";
+import {
+  checkoutUploadFieldsOf,
+  checkoutUploadRefusalOf,
+  customerUploadErrorKey,
+  formatsLabel,
+  missingCheckoutUploads,
+} from "~/utils/customerUploads.js";
 import CheckoutPaymentStep from "~/components/checkout/CheckoutPaymentStep.vue";
 import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
 import CheckoutAddressBlacklistedAlert from "~/components/checkout/CheckoutAddressBlacklistedAlert.vue";
@@ -626,8 +634,47 @@ const reviewCustomFieldRows = computed(() => {
       value: display,
     });
   }
+  for (const field of checkoutUploadFields.value) {
+    const names = (checkoutUploadFiles.value[field.id] || []).map(
+      (file) => file.name,
+    );
+    rows.push({ label: field.label, value: names.join(", ") || "–" });
+  }
   return rows;
 });
+
+// The upload fields "in the checkout": the files
+// go with the checkout of a single booking. Files live in memory only,
+// never in the stored checkout state.
+const checkoutUploadFields = computed(() =>
+  checkoutUploadFieldsOf(leadBookable.value),
+);
+const checkoutUploadFiles = ref({});
+// The backend's refusal of a file, shown under its field.
+const checkoutUploadRefusal = ref(null);
+
+watch(checkoutUploadFiles, () => {
+  checkoutUploadRefusal.value = null;
+});
+
+/** The message of a refused customer upload of the checkout. */
+function checkoutUploadMessage({ code, params = {} }) {
+  if (code === "customer_upload_required_missing") {
+    return t("checkout.customer_upload_required", {
+      fields: (params.labels || []).join(", "),
+    });
+  }
+  const field = checkoutUploadFields.value.find(
+    (candidate) => candidate.id === params.fieldId,
+  );
+  const message = t(customerUploadErrorKey(code), {
+    formats: formatsLabel(params.formats ?? field?.formats ?? []),
+    size: params.maxFileSizeMb ?? field?.maxFileSizeMb,
+    count: params.maxFiles ?? field?.maxFiles,
+    tenant: "",
+  });
+  return field ? `${field.label}: ${message}` : message;
+}
 
 const contactForm = reactive({
   firstName: "",
@@ -850,6 +897,13 @@ const isDataStepComplete = computed(() => {
     } else {
       if (!isNonEmptyContactValue(value)) return false;
     }
+  }
+  const missingUploads = missingCheckoutUploads(
+    checkoutUploadFields.value,
+    checkoutUploadFiles.value,
+  );
+  if (missingUploads.length > 0) {
+    return false;
   }
   return true;
 });
@@ -2512,15 +2566,31 @@ async function handleFinish() {
       ? buildGroupCheckoutPayload()
       : buildCheckoutPayload();
 
+    checkoutUploadRefusal.value = null;
     const { data, error } = isGroupBookingActive.value
       ? await completeGroupCheckout(payload)
-      : await completeCheckout(payload);
+      : await completeCheckout(payload, checkoutUploadFiles.value);
 
     // useApiClient has checked the session after a 401: a refused or failed
     // token renewal has signed the person out by now (tickets#108).
     const auth = { isLoggedIn: authStore.isLoggedIn };
     if (isLoginRefusal(error, auth) || isLoginRefusal(data, auth)) {
       offerLoginAfterRefusal();
+      return;
+    }
+
+    // A file refused, or a required one missing:
+    // nothing was booked; back to the data step, the reason at its field.
+    const uploadRefusal = checkoutUploadRefusalOf(
+      data?.success === false ? data.error : backendErrorBodyOf(error),
+    );
+    if (uploadRefusal) {
+      checkoutUploadRefusal.value = {
+        fieldId: uploadRefusal.params.fieldId ?? null,
+        ...uploadRefusal,
+      };
+      notifyError(checkoutUploadMessage(uploadRefusal));
+      currentStep.value = stepNumberByKey("data") ?? currentStep.value;
       return;
     }
 
@@ -3070,7 +3140,16 @@ function onReviewEdit(section) {
                     :required-field-keys="mergedRequiredContactFields"
                     :comment-required="isCommentRequired"
                     :attachments="checkoutVisibleAttachments"
-                  />
+                  >
+                    <template #after-documents>
+                      <CheckoutCustomerUploads
+                        v-if="checkoutUploadFields.length > 0"
+                        v-model:files="checkoutUploadFiles"
+                        :fields="checkoutUploadFields"
+                        :refusal="checkoutUploadRefusal"
+                      />
+                    </template>
+                  </CheckoutContactStep>
                 </div>
               </Pane>
 
@@ -3092,7 +3171,16 @@ function onReviewEdit(section) {
               :required-field-keys="mergedRequiredContactFields"
               :comment-required="isCommentRequired"
               :attachments="checkoutVisibleAttachments"
-            />
+            >
+              <template #after-documents>
+                <CheckoutCustomerUploads
+                  v-if="checkoutUploadFields.length > 0"
+                  v-model:files="checkoutUploadFiles"
+                  :fields="checkoutUploadFields"
+                  :refusal="checkoutUploadRefusal"
+                />
+              </template>
+            </CheckoutContactStep>
           </template>
 
           <template #step-payment>

@@ -1,4 +1,8 @@
 import { permissionCheckOfFailure } from "~/utils/checkoutLogin.js";
+import {
+  checkoutUploadParts,
+  hasCheckoutUploads,
+} from "~/utils/customerUploads.js";
 import { useAuthStore } from "~~/stores/auth";
 
 export function useCheckout() {
@@ -76,9 +80,29 @@ export function useCheckout() {
   };
 
 
-  const completeCheckout = async (payload) => {
+  /**
+   * Completes a single checkout. With files of the upload fields "in the
+   * checkout" it goes as multipart to its own
+   * Nitro route, which streams it to the backend; the answer is the same.
+   *
+   * @param {Object} payload The checkout, `tenantID` and `simulate` included
+   * @param {Record<string, File[]>} [files] The chosen files by field id
+   */
+  const completeCheckout = async (payload, files = {}) => {
     const api = useApiClient();
-    return api.post(`/api/checkout/complete`, payload);
+    if (!hasCheckoutUploads(files)) {
+      return api.post(`/api/checkout/complete`, payload);
+    }
+    const { tenantID, simulate: _simulate, ...body } = payload;
+    const form = new FormData();
+    for (const [name, value] of checkoutUploadParts(body, files)) {
+      if (typeof value === "string") form.append(name, value);
+      else form.append(name, value, value.name);
+    }
+    return api.post(
+      `/api/checkout/complete-with-uploads?tenantID=${encodeURIComponent(tenantID)}`,
+      form,
+    );
   };
 
   const completeGroupCheckout = async (payload) => {

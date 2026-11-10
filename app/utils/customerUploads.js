@@ -356,6 +356,108 @@ export function customerUploadErrorOf(error) {
 }
 
 /**
+ * The upload fields a checkout asks for, as the
+ * backend answers them with the offer: those "in the checkout", only while
+ * the tenant has customer uploads on, each with the size limit that counts.
+ *
+ * @param {Object|null} bookable The offer of `GET /api/checkout/:id`
+ * @returns {Array<{ id: string, label: string, hint: string,
+ *   consentText: string, required: boolean, maxFiles: number,
+ *   formats: string[], maxFileSizeMb: number }>}
+ */
+export function checkoutUploadFieldsOf(bookable) {
+  const fields = bookable?.checkoutUploadFields;
+  return Array.isArray(fields) ? fields : [];
+}
+
+/**
+ * What the checkout checks before a file is added to a field: size,
+ * number, format, as on the page „Nachweise einreichen“.
+ *
+ * @param {{ name?: string, type?: string, size: number }} file
+ * @param {Object} field An upload field of {@link checkoutUploadFieldsOf}
+ * @param {number} chosen The files already chosen for the field
+ * @returns {{ code: string, params: Object }|null} Null when it may go.
+ */
+export function precheckCheckoutUpload(file, field, chosen) {
+  return precheckCustomerUpload(file, {
+    ...field,
+    remainingFiles: field.maxFiles - chosen,
+  });
+}
+
+/**
+ * The required upload fields of the checkout without a file.
+ *
+ * @param {Object[]} fields
+ * @param {Record<string, File[]>} files The chosen files by field id
+ * @returns {Object[]}
+ */
+export function missingCheckoutUploads(fields, files) {
+  return fields.filter(
+    (field) => field.required && !(files?.[field.id]?.length > 0),
+  );
+}
+
+/** The form field of a multipart checkout that carries its JSON body. */
+export const CHECKOUT_BODY_FIELD = "checkout";
+/** The prefix of a file's form field; the id of its upload field follows. */
+export const CHECKOUT_FILE_PREFIX = "customerUpload:";
+
+/**
+ * The parts of a multipart checkout, in their order: the checkout as JSON,
+ * then each file under its field.
+ *
+ * @param {Object} body The checkout's body
+ * @param {Record<string, File[]>} files The chosen files by field id
+ * @returns {Array<[string, string|File]>}
+ */
+export function checkoutUploadParts(body, files) {
+  const parts = [[CHECKOUT_BODY_FIELD, JSON.stringify(body)]];
+  for (const [fieldId, chosen] of Object.entries(files || {})) {
+    for (const file of chosen || []) {
+      parts.push([`${CHECKOUT_FILE_PREFIX}${fieldId}`, file]);
+    }
+  }
+  return parts;
+}
+
+/** Whether there is any file to send with the checkout. */
+export function hasCheckoutUploads(files) {
+  return Object.values(files || {}).some((chosen) => chosen?.length > 0);
+}
+
+const CHECKOUT_UPLOAD_REASONS = Object.freeze([
+  "checkout.customer_upload_refused",
+  "checkout.customer_upload_required",
+]);
+
+/**
+ * A refused checkout as a refused customer upload: the backend's reasons
+ * of the checkout (`error.reason` with the code in `params`), and the
+ * storefront's own refusal before the backend (`code`).
+ *
+ * @param {Object|null} apiError `data.error` of the checkout, or the body
+ *   of a failed request
+ * @returns {{ code: string, params: Object }|null} Null for any other
+ *   refusal.
+ */
+export function checkoutUploadRefusalOf(apiError) {
+  if (!apiError || typeof apiError !== "object") return null;
+  const params = apiError.params ?? {};
+  if (CHECKOUT_UPLOAD_REASONS.includes(apiError.reason)) {
+    return { code: params.code, params };
+  }
+  if (
+    typeof apiError.code === "string" &&
+    apiError.code.startsWith("customer_upload_")
+  ) {
+    return { code: apiError.code, params };
+  }
+  return null;
+}
+
+/**
  * The status filter of the page „Nachweise einreichen“. The options overlap
  * on purpose: „ausstehend“ is every field not handed in whose deadline has
  * not passed, so an open field and a rejected one before the deadline.

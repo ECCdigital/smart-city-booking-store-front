@@ -560,5 +560,9 @@ function onAddressSuggestionSelect(suggestion) {
         </li>
       </ul>
     </UCard>
+
+    <!-- Directly below „Hinweise und Dokumente“: the proofs of the
+         checkout. -->
+    <slot name="after-documents" />
   </div>
 </template>

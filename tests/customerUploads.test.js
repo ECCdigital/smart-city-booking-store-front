@@ -7,13 +7,19 @@ import {
   proofTargetOf,
   acceptOf,
   filterProofGroups,
+  checkoutUploadFieldsOf,
+  checkoutUploadParts,
+  checkoutUploadRefusalOf,
   customerUploadErrorKey,
   customerUploadErrorOf,
   customerUploadFieldView,
   daysLeft,
   formatOfFile,
+  hasCheckoutUploads,
   hasPendingProofs,
+  missingCheckoutUploads,
   pendingProofGroups,
+  precheckCheckoutUpload,
   precheckCustomerUpload,
 } from "~/utils/customerUploads.js";
 
@@ -400,6 +406,121 @@ describe("refusals", () => {
     });
     expect(customerUploadErrorOf({ statusCode: 429, data: {} }).code).toBe(
       "customer_upload_rate_limited",
+    );
+  });
+});
+
+describe("the upload fields of the checkout (ECCdigital/tickets#827)", () => {
+  const checkoutField = (overrides = {}) => ({
+    id: "f1",
+    label: "Vereinsausweis",
+    hint: "",
+    consentText: "",
+    required: true,
+    maxFiles: 2,
+    formats: ["pdf", "jpeg"],
+    maxFileSizeMb: 1,
+    ...overrides,
+  });
+  const pdf = (size = 1000, name = "ausweis.pdf") => ({
+    name,
+    type: "application/pdf",
+    size,
+  });
+
+  it("reads the fields off the offer, none where it names none", () => {
+    expect(
+      checkoutUploadFieldsOf({ checkoutUploadFields: [checkoutField()] }),
+    ).toHaveLength(1);
+    expect(checkoutUploadFieldsOf({})).toEqual([]);
+    expect(checkoutUploadFieldsOf(null)).toEqual([]);
+  });
+
+  it("checks size, number and format before a file is taken", () => {
+    const f = checkoutField();
+    expect(precheckCheckoutUpload(pdf(), f, 0)).toBeNull();
+    expect(precheckCheckoutUpload(pdf(2 * MB), f, 0)?.code).toBe(
+      "customer_upload_too_large",
+    );
+    expect(precheckCheckoutUpload(pdf(), f, 2)?.code).toBe(
+      "customer_upload_field_full",
+    );
+    expect(
+      precheckCheckoutUpload(
+        { name: "a.png", type: "image/png", size: 10 },
+        f,
+        0,
+      )?.code,
+    ).toBe("customer_upload_format_not_allowed");
+  });
+
+  it("names the required fields without a file", () => {
+    const fields = [
+      checkoutField(),
+      checkoutField({ id: "f2", required: false }),
+      checkoutField({ id: "f3" }),
+    ];
+    expect(
+      missingCheckoutUploads(fields, { f1: [pdf()], f3: [] }).map((f) => f.id),
+    ).toEqual(["f3"]);
+    expect(missingCheckoutUploads(fields, {}).map((f) => f.id)).toEqual([
+      "f1",
+      "f3",
+    ]);
+  });
+
+  it("puts the checkout as JSON first, then each file under its field", () => {
+    const a = pdf(10, "a.pdf");
+    const b = pdf(10, "b.pdf");
+    const parts = checkoutUploadParts(
+      { mail: "erika@example.test" },
+      {
+        f1: [a, b],
+        f2: [],
+      },
+    );
+    expect(parts).toEqual([
+      ["checkout", JSON.stringify({ mail: "erika@example.test" })],
+      ["customerUpload:f1", a],
+      ["customerUpload:f1", b],
+    ]);
+    expect(hasCheckoutUploads({ f1: [a] })).toBe(true);
+    expect(hasCheckoutUploads({ f1: [] })).toBe(false);
+    expect(hasCheckoutUploads(undefined)).toBe(false);
+  });
+
+  it("reads a refused customer upload off the checkout's answer", () => {
+    expect(
+      checkoutUploadRefusalOf({
+        reason: "checkout.customer_upload_refused",
+        params: { code: "customer_upload_virus_found", fieldId: "f1" },
+      }),
+    ).toEqual({
+      code: "customer_upload_virus_found",
+      params: { code: "customer_upload_virus_found", fieldId: "f1" },
+    });
+    expect(
+      checkoutUploadRefusalOf({
+        reason: "checkout.customer_upload_required",
+        params: { code: "customer_upload_required_missing", fieldIds: ["f1"] },
+      })?.code,
+    ).toBe("customer_upload_required_missing");
+    // The storefront's own refusal before the backend.
+    expect(
+      checkoutUploadRefusalOf({
+        code: "customer_upload_booking_limit",
+        params: { maxTotalSizeMb: 100 },
+      })?.code,
+    ).toBe("customer_upload_booking_limit");
+    expect(
+      checkoutUploadRefusalOf({ reason: "checkout.event_full", params: {} }),
+    ).toBeNull();
+    expect(checkoutUploadRefusalOf(null)).toBeNull();
+  });
+
+  it("has a message for a missing required field", () => {
+    expect(customerUploadErrorKey("customer_upload_required_missing")).toBe(
+      "customerUploads.errors.requiredMissing",
     );
   });
 });

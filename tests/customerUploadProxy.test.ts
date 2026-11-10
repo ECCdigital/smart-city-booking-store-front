@@ -50,6 +50,7 @@ vi.stubGlobal("createError", (input: { statusMessage?: string }) =>
 vi.stubGlobal("$fetch", async () => state.instance);
 
 const {
+  checkoutLimit,
   expiresSoon,
   exceedsLimit,
   forwardCustomerUpload,
@@ -248,6 +249,108 @@ describe("the customer upload route", () => {
     await forwardCustomerUpload(event() as never, { method: "POST", path: PATH, fetchImpl });
 
     expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+});
+
+describe("the checkout with files (ECCdigital/tickets#827)", () => {
+  const query: { value: Record<string, unknown> } = { value: {} };
+  vi.stubGlobal("getQuery", () => query.value);
+
+  beforeEach(() => {
+    resetCustomerUploadLimitCache();
+    renewAccessToken.mockClear();
+    state.headers = { "content-type": MULTIPART };
+    state.cookies = {};
+    state.status = 200;
+    state.instance = {
+      customerUploadLimits: { maxFileSizeMb: 1, maxTotalSizeMbPerBooking: 3 },
+    };
+    query.value = { tenantID: "t1" };
+  });
+
+  async function route() {
+    return (await import("~~/server/api/checkout/complete-with-uploads.post"))
+      .default as unknown as (event: unknown) => Promise<unknown>;
+  }
+
+  it("streams a guest's checkout to the backend's checkout, without a token, and answers it", async () => {
+    const answer = { success: true, data: { booking: { id: "B1" }, payment: null } };
+    const { fetchImpl, calls } = backend(200, answer);
+    vi.stubGlobal("fetch", fetchImpl);
+
+    const result = await (await route())(event(new Uint8Array(2 * 1024 * 1024)));
+
+    expect(result).toEqual(answer);
+    expect(calls[0].url).toBe("http://backend.test/api/v2/t1/checkout?simulate=false");
+    expect(calls[0].received).toBe(2 * 1024 * 1024);
+    const headers = calls[0].init.headers as Record<string, string>;
+    expect(headers.authorization).toBeUndefined();
+  });
+
+  it("sends the token of a signed-in customer", async () => {
+    state.cookies = { "access-token": token(Date.now() / 1000 + 3600) };
+    const { fetchImpl, calls } = backend(200, { success: true });
+
+    await forwardCustomerUpload(event() as never, {
+      method: "POST",
+      path: "/api/v2/t1/checkout",
+      requireSignIn: false,
+      bodyLimit: checkoutLimit,
+      fetchImpl,
+    });
+
+    const headers = calls[0].init.headers as Record<string, string>;
+    expect(headers.authorization).toMatch(/^Bearer /);
+  });
+
+  it("refuses a body above the limit of a booking's files before the backend is asked", async () => {
+    state.headers["content-length"] = String(4 * 1024 * 1024);
+    const { fetchImpl } = backend(200, {});
+
+    const err = await thrown(
+      forwardCustomerUpload(event() as never, {
+        method: "POST",
+        path: "/api/v2/t1/checkout",
+        requireSignIn: false,
+        bodyLimit: checkoutLimit,
+        fetchImpl,
+      }),
+    );
+
+    expect(err.statusCode).toBe(400);
+    expect(err.data.code).toBe("customer_upload_booking_limit");
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("passes the backend's refusal of the checkout on as it is", async () => {
+    const refusal = {
+      success: false,
+      error: {
+        reason: "checkout.customer_upload_refused",
+        checkType: null,
+        params: { code: "customer_upload_virus_found", fieldId: "f1" },
+      },
+    };
+    const { fetchImpl } = backend(200, refusal);
+
+    const result = await forwardCustomerUpload(event() as never, {
+      method: "POST",
+      path: "/api/v2/t1/checkout",
+      requireSignIn: false,
+      bodyLimit: checkoutLimit,
+      fetchImpl,
+    });
+
+    expect(result).toEqual(refusal);
+  });
+
+  it("needs the tenant", async () => {
+    query.value = {};
+
+    const handler = await route();
+    const err = await thrown(Promise.resolve().then(() => handler(event())));
+
+    expect(err.statusCode).toBe(400);
   });
 });
 
