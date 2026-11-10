@@ -28,6 +28,8 @@
       />
     </div>
 
+    <MissingProofsBanner :bookings="bookings" class="mb-4" />
+
     <div class="md:flex justify-between items-center w-full mb-4">
       <h2 class="mt-5 text-xl font-bold">
         {{ $t("meta.pages.accountBookings") }}
@@ -66,6 +68,7 @@ import { enrichBookingsWithEventDateTimes } from "~/utils/bookingEventTimes.js";
 import { computed } from "vue";
 import QuickAccessCard from "~/components/user/bookings/QuickAccessCard.vue";
 import { useInstanceStore } from "~~/stores/instance.js";
+import MissingProofsBanner from "~/components/user/proofs/MissingProofsBanner.vue";
 
 definePageMeta({
   layout: "panel",

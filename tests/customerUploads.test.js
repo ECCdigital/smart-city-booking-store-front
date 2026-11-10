@@ -18,6 +18,9 @@ import {
   hasCheckoutUploads,
   hasPendingProofs,
   missingCheckoutUploads,
+  missingProofsBannerOf,
+  missingProofsChipOf,
+  missingProofsOf,
   pendingProofGroups,
   precheckCheckoutUpload,
   precheckCustomerUpload,
@@ -674,5 +677,107 @@ describe("the way to a proof from the card and the details (ECCdigital/tickets#8
     );
     expect(mostUrgentProofFieldOf(withFields("fulfilled"))).toBe(null);
     expect(mostUrgentProofFieldOf({ id: "B1" })).toBe(null);
+  });
+});
+
+describe("the missing proofs of „Meine Buchungen“ (ECCdigital/tickets#828)", () => {
+  /** A booking with the backend's state over its required fields. */
+  const bookingWith = (state, fields, overrides = {}) => ({
+    id: "B-1",
+    customerUploadState: { state, fields },
+    ...overrides,
+  });
+
+  it("counts the required fields still to hand in, with the earliest deadline", () => {
+    const booking = bookingWith("missing", [
+      field({ fieldId: "a", deadline: NOW + 9 * DAY }),
+      field({ fieldId: "b", state: "rejected", deadline: NOW + 4 * DAY }),
+      field({ fieldId: "c", state: "submitted", deadline: NOW + 1 * DAY }),
+      field({ fieldId: "d", state: "fulfilled", deadline: NOW + 1 * DAY }),
+      field({ fieldId: "e", required: false, deadline: NOW + 1 * DAY }),
+    ]);
+
+    expect(missingProofsOf(booking)).toEqual({
+      count: 2,
+      deadline: NOW + 4 * DAY,
+      nextDeadline: NOW + 4 * DAY,
+      overdue: false,
+    });
+    expect(missingProofsChipOf(booking)).toEqual({
+      count: 2,
+      deadline: NOW + 4 * DAY,
+      color: "warning",
+      labelKey: "customerUploads.missingChip.withDeadline",
+    });
+  });
+
+  it("follows the backend's state of the booking, red once it is overdue", () => {
+    const booking = bookingWith("overdue", [
+      field({ state: "overdue", deadline: NOW - DAY, pastDeadline: true }),
+    ]);
+
+    expect(missingProofsChipOf(booking)).toMatchObject({
+      count: 1,
+      deadline: NOW - DAY,
+      color: "error",
+    });
+    expect(missingProofsOf(booking).nextDeadline).toBeNull();
+  });
+
+  it("names no deadline for a booking without a start", () => {
+    const booking = bookingWith("missing", [field({ deadline: null })]);
+    expect(missingProofsChipOf(booking)).toMatchObject({
+      deadline: null,
+      labelKey: "customerUploads.missingChip.withoutDeadline",
+    });
+  });
+
+  it("shows nothing without a required field missing", () => {
+    for (const booking of [
+      {},
+      { customerUploadState: null },
+      bookingWith(null, [field({ required: false })]),
+      bookingWith("toReview", [field({ state: "submitted" })]),
+      bookingWith("fulfilled", [field({ state: "fulfilled" })]),
+    ]) {
+      expect(missingProofsOf(booking)).toBeNull();
+      expect(missingProofsChipOf(booking)).toBeNull();
+    }
+    expect(missingProofsBannerOf([])).toBeNull();
+    expect(
+      missingProofsBannerOf([
+        bookingWith("toReview", [field({ state: "submitted" })]),
+      ]),
+    ).toBeNull();
+  });
+
+  it("the banner counts the bookings and names the next deadline not passed", () => {
+    const banner = missingProofsBannerOf([
+      bookingWith("overdue", [
+        field({ state: "overdue", deadline: NOW - DAY, pastDeadline: true }),
+      ]),
+      bookingWith("missing", [field({ deadline: NOW + 6 * DAY })]),
+      bookingWith("missing", [
+        field({ deadline: NOW + 3 * DAY }),
+        field({ fieldId: "f2", deadline: NOW + 2 * DAY }),
+      ]),
+      bookingWith("toReview", [field({ state: "submitted" })]),
+    ]);
+
+    expect(banner).toEqual({
+      bookingCount: 3,
+      nextDeadline: NOW + 2 * DAY,
+      overdue: true,
+    });
+  });
+
+  it("the banner names no deadline where only passed ones are left", () => {
+    expect(
+      missingProofsBannerOf([
+        bookingWith("overdue", [
+          field({ state: "overdue", deadline: NOW - DAY, pastDeadline: true }),
+        ]),
+      ]),
+    ).toEqual({ bookingCount: 1, nextDeadline: null, overdue: true });
   });
 });

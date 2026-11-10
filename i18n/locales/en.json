@@ -1801,6 +1801,18 @@
         "rejected": "Rejected"
       }
     },
+    "allSubmitted": "Proof submitted · being reviewed | All {count} proofs submitted · being reviewed",
+    "showProofs": "Show proofs",
+    "hideProofs": "Hide proofs",
+    "missingChip": {
+      "withDeadline": "{count} proof missing · until {deadline} | {count} proofs missing · until {deadline}",
+      "withoutDeadline": "{count} proof missing | {count} proofs missing"
+    },
+    "missingBanner": {
+      "title": "Proofs are still missing for {count} booking | Proofs are still missing for {count} bookings",
+      "nextDeadline": "Next deadline: {deadline}",
+      "overdue": "The deadline has passed. You can still submit."
+    },
     "toBooking": "To the booking",
     "errors": {
       "format": "This file is not in an allowed format. Allowed: {formats}.",

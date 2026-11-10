@@ -1870,6 +1870,18 @@
         "rejected": "Abgelehnt"
       }
     },
+    "allSubmitted": "Nachweis eingereicht · wird geprüft | Alle {count} Nachweise eingereicht · werden geprüft",
+    "showProofs": "Nachweise anzeigen",
+    "hideProofs": "Nachweise ausblenden",
+    "missingChip": {
+      "withDeadline": "{count} Nachweis fehlt · bis {deadline} | {count} Nachweise fehlen · bis {deadline}",
+      "withoutDeadline": "{count} Nachweis fehlt | {count} Nachweise fehlen"
+    },
+    "missingBanner": {
+      "title": "Für {count} Buchung fehlen noch Nachweise | Für {count} Buchungen fehlen noch Nachweise",
+      "nextDeadline": "Nächste Frist: {deadline}",
+      "overdue": "Die Frist ist abgelaufen. Du kannst trotzdem noch einreichen."
+    },
     "toBooking": "Zur Buchung",
     "errors": {
       "format": "Diese Datei hat kein erlaubtes Format. Erlaubt: {formats}.",

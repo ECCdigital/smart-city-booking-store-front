@@ -219,6 +219,100 @@ export function customerUploadFieldsOf(booking) {
   return booking?.customerUploadState?.fields ?? [];
 }
 
+/** The states of the booking, as the backend derives them over its required fields. */
+const BOOKING_PROOF_STATE = Object.freeze({
+  OVERDUE: "overdue",
+  MISSING: "missing",
+});
+
+/** The states of a field that still wants a file from the customer. */
+const MISSING_FIELD_STATES = [S.OPEN, S.REJECTED, S.OVERDUE];
+
+const earliest = (deadlines) => {
+  const known = deadlines.filter((deadline) => typeof deadline === "number");
+  return known.length ? Math.min(...known) : null;
+};
+
+/**
+ * The required proofs of a booking still missing:
+ * read off the backend's state of the booking (`missing` or `overdue`) and
+ * its required fields that are open, rejected or overdue - no rule of its
+ * own for deadlines. Null where nothing required is missing.
+ *
+ * @param {Object} booking As `GET /api/bookings` answers it
+ * @returns {{ count: number, deadline: number|null, overdue: boolean,
+ *   nextDeadline: number|null }|null} `deadline` is the earliest deadline of
+ *   the missing fields, `nextDeadline` the earliest one not passed yet,
+ *   `overdue` whether the backend counts the booking overdue.
+ */
+export function missingProofsOf(booking) {
+  const state = booking?.customerUploadState?.state;
+  if (
+    state !== BOOKING_PROOF_STATE.MISSING &&
+    state !== BOOKING_PROOF_STATE.OVERDUE
+  ) {
+    return null;
+  }
+  const fields = customerUploadFieldsOf(booking).filter(
+    (field) => field.required && MISSING_FIELD_STATES.includes(field.state),
+  );
+  if (fields.length === 0) return null;
+  return {
+    count: fields.length,
+    deadline: earliest(fields.map((field) => field.deadline)),
+    nextDeadline: earliest(
+      fields
+        .filter((field) => !field.pastDeadline)
+        .map((field) => field.deadline),
+    ),
+    overdue: state === BOOKING_PROOF_STATE.OVERDUE,
+  };
+}
+
+/**
+ * The chip „N Nachweise fehlen · bis …“ on the card of „Meine Buchungen“:
+ * the number of missing required proofs and
+ * their earliest deadline, red once the backend counts the booking
+ * overdue. Null where nothing required is missing.
+ *
+ * @param {Object} booking
+ * @returns {{ count: number, deadline: number|null, color: string,
+ *   labelKey: string }|null}
+ */
+export function missingProofsChipOf(booking) {
+  const missing = missingProofsOf(booking);
+  if (!missing) return null;
+  return {
+    count: missing.count,
+    deadline: missing.deadline,
+    color: missing.overdue ? "error" : "warning",
+    labelKey:
+      missing.deadline === null
+        ? "customerUploads.missingChip.withoutDeadline"
+        : "customerUploads.missingChip.withDeadline",
+  };
+}
+
+/**
+ * The banner „Für N Buchungen fehlen noch Nachweise“ above „Meine
+ * Buchungen“: how many bookings miss a required
+ * proof and the next deadline among them not passed yet; without one, only
+ * passed deadlines are left (`overdue`). Null where no booking misses one.
+ *
+ * @param {Object[]} bookings As `GET /api/bookings` answers them
+ * @returns {{ bookingCount: number, nextDeadline: number|null,
+ *   overdue: boolean }|null}
+ */
+export function missingProofsBannerOf(bookings = []) {
+  const missing = bookings.map(missingProofsOf).filter(Boolean);
+  if (missing.length === 0) return null;
+  return {
+    bookingCount: missing.length,
+    nextDeadline: earliest(missing.map((entry) => entry.nextDeadline)),
+    overdue: missing.some((entry) => entry.overdue),
+  };
+}
+
 /**
  * Whether the page „Nachweise einreichen“ has something for a booking: a
  * field that is not checked.
