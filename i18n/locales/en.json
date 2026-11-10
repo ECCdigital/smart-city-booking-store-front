@@ -1754,6 +1754,18 @@
     }
   },
   "customerUploads": {
+    "alsoFor": "Also counts for these dates of the series:",
+    "alsoForOption": "Booking #{id} · {date} · {field}",
+    "group": {
+      "intro": "Each date of your series needs the following proofs. You can use one file for several dates.",
+      "introGuest": "Each date of your series needs the following proofs. Without signing in, upload a file of its own for each date.",
+      "for": "Counts for the dates",
+      "forOne": "Counts for the date",
+      "member": "Date {n} · {date}",
+      "memberUndated": "Date {n}",
+      "missing": "Still missing for: {members}",
+      "maxFiles": "at most {count} files per date"
+    },
     "title": "Proofs",
     "required": "Required",
     "optional": "Optional",
@@ -1815,6 +1827,7 @@
     },
     "toBooking": "To the booking",
     "errors": {
+      "targetInvalid": "This file cannot count for the chosen dates. Please choose the dates again.",
       "format": "This file is not in an allowed format. Allowed: {formats}.",
       "size": "The file is too large. At most {size} MB are allowed.",
       "fieldFull": "This proof allows at most {count} documents. You have already uploaded {count} documents. Replace or delete existing documents.",

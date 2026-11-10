@@ -1823,6 +1823,18 @@
     }
   },
   "customerUploads": {
+    "alsoFor": "Gilt auch für diese Termine der Serie:",
+    "alsoForOption": "Buchung #{id} · {date} · {field}",
+    "group": {
+      "intro": "Für jeden Termin Ihrer Serie werden folgende Nachweise benötigt. Eine Datei können Sie für mehrere Termine verwenden.",
+      "introGuest": "Für jeden Termin Ihrer Serie werden folgende Nachweise benötigt. Ohne Anmeldung laden Sie für jeden Termin eine eigene Datei hoch.",
+      "for": "Gilt für die Termine",
+      "forOne": "Gilt für den Termin",
+      "member": "Termin {n} · {date}",
+      "memberUndated": "Termin {n}",
+      "missing": "Fehlt noch für: {members}",
+      "maxFiles": "höchstens {count} Dateien je Termin"
+    },
     "title": "Nachweise",
     "required": "Pflicht",
     "optional": "Optional",
@@ -1884,6 +1896,7 @@
     },
     "toBooking": "Zur Buchung",
     "errors": {
+      "targetInvalid": "Diese Datei kann nicht für die gewählten Termine gelten. Bitte wählen Sie die Termine erneut.",
       "format": "Diese Datei hat kein erlaubtes Format. Erlaubt: {formats}.",
       "size": "Die Datei ist zu groß. Erlaubt sind höchstens {size} MB.",
       "fieldFull": "Für diesen Nachweis sind maximal {count} Dokumente erlaubt. Sie haben bereits {count} Dokumente hochgeladen. Ersetzen oder löschen Sie bestehende Dokumente.",

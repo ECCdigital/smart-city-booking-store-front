@@ -25,6 +25,13 @@ import {
   pendingProofGroups,
   precheckCheckoutUpload,
   precheckCustomerUpload,
+  customerUploadTargetsOf,
+  defaultGroupAttempts,
+  groupCheckoutUploadParts,
+  groupFilesAt,
+  groupUploadKey,
+  missingGroupCheckoutUploads,
+  precheckGroupCheckoutUpload,
 } from "~/utils/customerUploads.js";
 
 /**
@@ -797,6 +804,93 @@ describe("linkRefusalOf (ECCdigital/tickets#829)", () => {
     );
     expect(customerUploadErrorKey("customer_upload_link_invalid")).toBe(
       "customerUploads.errors.linkInvalid",
+    );
+  });
+});
+
+describe("the files of a series checkout (ECCdigital/tickets#833)", () => {
+  const card = {
+    id: "card",
+    label: "Vereinsausweis",
+    required: true,
+    maxFiles: 1,
+    formats: ["pdf"],
+    maxFileSizeMb: 1,
+  };
+  const social = { ...card, id: "social", required: false };
+  const pdf = (name = "ausweis.pdf", size = 1024) => ({
+    name,
+    type: "application/pdf",
+    size,
+  });
+  const upload = (key, fieldId, attempts) => ({
+    key,
+    fieldId,
+    file: pdf(`${key}.pdf`),
+    attempts,
+  });
+
+  it("gives each new file a key of its own", () => {
+    expect(groupUploadKey([])).toBe("file-1");
+    expect(groupUploadKey([upload("file-2", "card", [0])])).toBe("file-3");
+  });
+
+  it("counts the files of a field at each date", () => {
+    const uploads = [upload("a", "card", [0, 1]), upload("b", "social", [1])];
+    expect(groupFilesAt(uploads, 1, "card")).toHaveLength(1);
+    expect(groupFilesAt(uploads, 2, "card")).toHaveLength(0);
+  });
+
+  it("puts a new file at every date with room, a guest's at the first", () => {
+    const uploads = [upload("a", "card", [1])];
+    expect(defaultGroupAttempts(card, uploads, 3, false)).toEqual([0, 2]);
+    expect(defaultGroupAttempts(card, uploads, 3, true)).toEqual([0]);
+  });
+
+  it("checks size and format first, then the number at each date", () => {
+    expect(
+      precheckGroupCheckoutUpload(pdf("big.pdf", 2 * 1024 * 1024), card, [0], [])
+        ?.code,
+    ).toBe("customer_upload_too_large");
+    expect(
+      precheckGroupCheckoutUpload(pdf(), card, [0, 1], [upload("a", "card", [1])]),
+    ).toEqual({
+      code: "customer_upload_field_full",
+      params: { maxFiles: 1, attempt: 1 },
+    });
+    expect(precheckGroupCheckoutUpload(pdf(), card, [], [])?.code).toBe(
+      "customer_upload_field_full",
+    );
+    expect(precheckGroupCheckoutUpload(pdf(), card, [0, 1], [])).toBeNull();
+  });
+
+  it("names the required fields still missing at each date", () => {
+    expect(
+      missingGroupCheckoutUploads([card, social], [upload("a", "card", [0, 2])], 3),
+    ).toEqual([{ attempt: 1, field: card }]);
+  });
+
+  it("sends the checkout with the targets of each file, then each file under its key", () => {
+    const uploads = [upload("a", "card", [0, 1])];
+    expect(customerUploadTargetsOf(uploads)).toEqual({
+      a: [
+        { attempt: 0, fieldId: "card" },
+        { attempt: 1, fieldId: "card" },
+      ],
+    });
+    const parts = groupCheckoutUploadParts({ mail: "x" }, uploads);
+    expect(JSON.parse(parts[0][1])).toEqual({
+      mail: "x",
+      customerUploadTargets: customerUploadTargetsOf(uploads),
+    });
+    expect(parts.slice(1).map(([name, file]) => [name, file.name])).toEqual([
+      ["customerUpload:a", "a.pdf"],
+    ]);
+  });
+
+  it("names a refused target of the series", () => {
+    expect(customerUploadErrorKey("customer_upload_target_invalid")).toBe(
+      "customerUploads.errors.targetInvalid",
     );
   });
 });

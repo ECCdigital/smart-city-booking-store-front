@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { createProofDrafts } from "~/composables/useProofDrafts.js";
 import {
   fieldWithDrafts,
+  seriesTargetOptionsOf,
+  submissionAlsoForOf,
   submissionFormOf,
   submissionOrderOf,
   submissionOutcomeOf,
@@ -151,5 +153,100 @@ describe("the body of „Nachweise einreichen“", () => {
         { fieldId: "club-card" },
       ]).remainingFiles,
     ).toBe(0);
+  });
+});
+
+/**
+ * A file of a series for other dates too: the
+ * draft notes the fields of the other bookings, the form names them by the
+ * file's position.
+ */
+describe("proofs for several dates of a series", () => {
+  const field = (fieldId, overrides = {}) => ({
+    fieldId,
+    label: fieldId === "card" ? "Ausweis" : "Sozialpass",
+    state: "open",
+    remainingFiles: 1,
+    ...overrides,
+  });
+  const booking = (id, timeBegin, fields, groupIds = ["B1", "B2", "B3"]) => ({
+    id,
+    timeBegin,
+    timeEnd: timeBegin + 3600_000,
+    customerUploadState: {
+      fields,
+      group: groupIds ? { id: "G-1", bookingIds: groupIds } : null,
+    },
+  });
+
+  it("offers the fields of the other dates with room, the same field preset", () => {
+    const own = booking("B1", 1000, [field("card")]);
+    const bookings = [
+      booking("B3", 3000, [field("card"), field("social")]),
+      own,
+      booking("B2", 2000, [field("card", { state: "fulfilled" })]),
+      booking("X", 500, [field("card")]),
+    ];
+
+    expect(seriesTargetOptionsOf(own, bookings, "card")).toEqual([
+      {
+        bookingId: "B3",
+        fieldId: "card",
+        fieldLabel: "Ausweis",
+        timeBegin: 3000,
+        timeEnd: 3000 + 3600_000,
+        preset: true,
+      },
+      {
+        bookingId: "B3",
+        fieldId: "social",
+        fieldLabel: "Sozialpass",
+        timeBegin: 3000,
+        timeEnd: 3000 + 3600_000,
+        preset: false,
+      },
+    ]);
+  });
+
+  it("offers nothing outside a series", () => {
+    const own = booking("B1", 1000, [field("card")], null);
+    expect(seriesTargetOptionsOf(own, [own], "card")).toEqual([]);
+  });
+
+  it("notes the other dates at a draft, none for a replacement", () => {
+    const drafts = createProofDrafts();
+    const target = { bookingId: "B2", fieldId: "card" };
+    drafts.add("B1", { fieldId: "card", file: file("a.pdf"), alsoFor: [target] });
+    drafts.add("B1", {
+      fieldId: "card",
+      replacing: "M1",
+      file: file("b.pdf"),
+      alsoFor: [target],
+    });
+    const [first, second] = drafts.of("B1");
+    expect(first.alsoFor).toEqual([target]);
+    expect(second.alsoFor).toEqual([]);
+
+    drafts.setAlsoFor("B1", first.id, []);
+    expect(drafts.of("B1")[0].alsoFor).toEqual([]);
+  });
+
+  it("sends the other dates by the position of each new file", () => {
+    const target = { bookingId: "B2", fieldId: "card" };
+    const ordered = [
+      { fieldId: "card", replacing: null, file: file("a.pdf"), alsoFor: [] },
+      {
+        fieldId: "card",
+        replacing: null,
+        file: file("b.pdf"),
+        alsoFor: [{ ...target, fieldLabel: "x" }],
+      },
+      { fieldId: "card", replacing: "M1", file: file("c.pdf"), alsoFor: [target] },
+    ];
+    expect(submissionAlsoForOf(ordered)).toEqual({ 1: [target] });
+
+    const form = submissionFormOf(ordered);
+    expect(JSON.parse(form.get("alsoFor"))).toEqual({ 1: [target] });
+    expect(submissionFormOf([ordered[0]]).get("alsoFor")).toBeNull();
   });
 });

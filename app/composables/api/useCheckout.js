@@ -1,6 +1,7 @@
 import { permissionCheckOfFailure } from "~/utils/checkoutLogin.js";
 import {
   checkoutUploadParts,
+  groupCheckoutUploadParts,
   hasCheckoutUploads,
 } from "~/utils/customerUploads.js";
 import { useAuthStore } from "~~/stores/auth";
@@ -105,9 +106,30 @@ export function useCheckout() {
     );
   };
 
-  const completeGroupCheckout = async (payload) => {
+  /**
+   * Completes the checkout of a series. With files of the upload fields "in
+   * the checkout" (each `{ key, fieldId, file,
+   * attempts }`) it goes as multipart to its own Nitro route, which streams
+   * it to the backend; the answer is the same.
+   *
+   * @param {Object} payload The checkout, `tenantID` and `simulate` included
+   * @param {Object[]} [uploads] The files of the series
+   */
+  const completeGroupCheckout = async (payload, uploads = []) => {
     const api = useApiClient();
-    return api.post(`/api/checkout/group-complete`, payload);
+    if (!uploads?.length) {
+      return api.post(`/api/checkout/group-complete`, payload);
+    }
+    const { tenantID, simulate: _simulate, ...body } = payload;
+    const form = new FormData();
+    for (const [name, value] of groupCheckoutUploadParts(body, uploads)) {
+      if (typeof value === "string") form.append(name, value);
+      else form.append(name, value, value.name);
+    }
+    return api.post(
+      `/api/checkout/group-complete-with-uploads?tenantID=${encodeURIComponent(tenantID)}`,
+      form,
+    );
   };
 
   const validateGroupBookable = async ({

@@ -160,10 +160,82 @@ export function submissionOrderOf(drafts = []) {
 export function submissionFormOf(drafts = []) {
   const form = new FormData();
   const ordered = submissionOrderOf(drafts);
+  const alsoFor = submissionAlsoForOf(ordered);
+  if (Object.keys(alsoFor).length > 0) {
+    form.append("alsoFor", JSON.stringify(alsoFor));
+  }
   for (const draft of ordered) {
     form.append(submissionPartName(draft), draft.file, draft.file.name);
   }
   return form;
+}
+
+/**
+ * The other bookings of the series each new file counts for too,
+ * by its position in {@link submissionOrderOf}:
+ * the form field `alsoFor` of „Nachweise einreichen“. A replacement counts
+ * for its own booking alone.
+ *
+ * @param {Array<{replacing?: string|null, alsoFor?: Array<{bookingId: string, fieldId: string}>}>} ordered
+ * @returns {Record<number, Array<{bookingId: string, fieldId: string}>>}
+ */
+export function submissionAlsoForOf(ordered = []) {
+  const alsoFor = {};
+  ordered.forEach((draft, index) => {
+    if (draft.replacing || !draft.alsoFor?.length) return;
+    alsoFor[index] = draft.alsoFor.map(({ bookingId, fieldId }) => ({
+      bookingId,
+      fieldId,
+    }));
+  });
+  return alsoFor;
+}
+
+/**
+ * The upload fields of the other bookings of a booking's series a new file
+ * can count for too: every field of those
+ * bookings with room for a file and not fulfilled, by their begin. Those
+ * of the same field are preset - there is no rule which fields are "the
+ * same", so the customer may change it. With the file, only the fields that
+ * take it by size and format. None outside a series.
+ *
+ * @param {Object} booking The booking the file is chosen at
+ * @param {Object[]} bookings The customer's bookings
+ * @param {string} fieldId The field the file is chosen for
+ * @param {{ name?: string, type?: string, size: number }|null} [file]
+ * @returns {Array<{bookingId: string, fieldId: string, fieldLabel: string, timeBegin: number|null, timeEnd: number|null, preset: boolean}>}
+ */
+export function seriesTargetOptionsOf(
+  booking,
+  bookings = [],
+  fieldId,
+  file = null,
+) {
+  const members = new Set(
+    booking?.customerUploadState?.group?.bookingIds ?? [],
+  );
+  members.delete(booking?.id);
+  if (members.size === 0) return [];
+  return bookings
+    .filter((other) => members.has(other.id))
+    .sort((a, b) => (a.timeBegin ?? 0) - (b.timeBegin ?? 0))
+    .flatMap((other) =>
+      customerUploadFieldsOf(other)
+        .filter(
+          (field) =>
+            field.state !== S.FULFILLED &&
+            (field.remainingFiles ?? 0) > 0 &&
+            (!file || precheckCustomerUpload(file, field) === null),
+        )
+        .map((field) => ({
+          bookingId: other.id,
+          fieldId: field.fieldId,
+          fieldLabel: field.label,
+          timeBegin: other.timeBegin ?? null,
+          timeEnd: other.timeEnd ?? null,
+          preset: field.fieldId === fieldId,
+        })),
+    );
 }
 
 /**
@@ -819,4 +891,122 @@ export function mostUrgentProofFieldOf(booking) {
     if (field) return field.fieldId;
   }
   return null;
+}
+
+/*
+ * The upload fields "in the checkout" of a series:
+ * the customer hands a file in once and chooses the bookings of the series
+ * it counts for, each with the field the file was chosen for. A file of the
+ * series is `{ key, fieldId, file, attempts }`, `attempts` the indices of
+ * the series' booking attempts. A guest has no choice: each of their files
+ * is for one booking.
+ */
+
+/** A key for a new file of the series, unique among `uploads`. */
+export function groupUploadKey(uploads = []) {
+  const taken = new Set(uploads.map((upload) => upload.key));
+  let n = uploads.length + 1;
+  while (taken.has(`file-${n}`)) n += 1;
+  return `file-${n}`;
+}
+
+/** The files of the series chosen for a field at one booking attempt. */
+export function groupFilesAt(uploads, attempt, fieldId) {
+  return (uploads || []).filter(
+    (upload) => upload.fieldId === fieldId && upload.attempts.includes(attempt),
+  );
+}
+
+/**
+ * The bookings a new file of a field is for, before the customer changes
+ * it: every booking with room left in the field, a guest's first one.
+ */
+export function defaultGroupAttempts(field, uploads, memberCount, guest) {
+  const withRoom = [...Array(memberCount).keys()].filter(
+    (attempt) =>
+      groupFilesAt(uploads, attempt, field.id).length < field.maxFiles,
+  );
+  return guest ? withRoom.slice(0, 1) : withRoom;
+}
+
+/**
+ * What the series checkout checks before a file is added, as for a single
+ * booking: size and format of the file, the number at each of its bookings.
+ *
+ * @returns {{ code: string, params: Object }|null} Null when it may go.
+ */
+export function precheckGroupCheckoutUpload(file, field, attempts, uploads) {
+  const ofFile = precheckCheckoutUpload(file, field, 0);
+  if (ofFile) return ofFile;
+  const full =
+    attempts.length === 0
+      ? -1
+      : attempts.find(
+          (attempt) =>
+            groupFilesAt(uploads, attempt, field.id).length >= field.maxFiles,
+        );
+  if (full === undefined) return null;
+  return {
+    code: "customer_upload_field_full",
+    params: {
+      maxFiles: field.maxFiles,
+      ...(full >= 0 ? { attempt: full } : {}),
+    },
+  };
+}
+
+/**
+ * The required upload fields of the checkout without a file, per booking
+ * attempt of the series.
+ *
+ * @returns {{ attempt: number, field: Object }[]}
+ */
+export function missingGroupCheckoutUploads(fields, uploads, memberCount) {
+  const missing = [];
+  for (let attempt = 0; attempt < memberCount; attempt += 1) {
+    for (const field of fields) {
+      if (
+        field.required &&
+        groupFilesAt(uploads, attempt, field.id).length === 0
+      ) {
+        missing.push({ attempt, field });
+      }
+    }
+  }
+  return missing;
+}
+
+/**
+ * `customerUploadTargets` of a series checkout: by the key of each file its
+ * bookings, each with the file's field.
+ */
+export function customerUploadTargetsOf(uploads) {
+  return Object.fromEntries(
+    (uploads || []).map((upload) => [
+      upload.key,
+      upload.attempts.map((attempt) => ({ attempt, fieldId: upload.fieldId })),
+    ]),
+  );
+}
+
+/**
+ * The parts of a multipart series checkout: the checkout with its targets
+ * as JSON, then each file under its key.
+ *
+ * @returns {Array<[string, string|File]>}
+ */
+export function groupCheckoutUploadParts(body, uploads) {
+  return [
+    [
+      CHECKOUT_BODY_FIELD,
+      JSON.stringify({
+        ...body,
+        customerUploadTargets: customerUploadTargetsOf(uploads),
+      }),
+    ],
+    ...(uploads || []).map((upload) => [
+      `${CHECKOUT_FILE_PREFIX}${upload.key}`,
+      upload.file,
+    ]),
+  ];
 }

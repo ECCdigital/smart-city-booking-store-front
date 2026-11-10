@@ -354,6 +354,65 @@ describe("the checkout with files (ECCdigital/tickets#827)", () => {
   });
 });
 
+describe("the series checkout with files (ECCdigital/tickets#833)", () => {
+  const query: { value: Record<string, unknown> } = { value: {} };
+
+  beforeEach(() => {
+    // Stubbed here, not at collection: the checkout's tests above keep theirs.
+    vi.stubGlobal("getQuery", () => query.value);
+    resetCustomerUploadLimitCache();
+    state.headers = { "content-type": MULTIPART };
+    state.cookies = {};
+    state.status = 200;
+    state.instance = {
+      customerUploadLimits: { maxFileSizeMb: 1, maxTotalSizeMbPerBooking: 3 },
+    };
+    query.value = { tenantID: "t1" };
+  });
+
+  async function route() {
+    return (
+      await import("~~/server/api/checkout/group-complete-with-uploads.post")
+    ).default as unknown as (event: unknown) => Promise<unknown>;
+  }
+
+  it("streams the series to the backend's group checkout and answers it", async () => {
+    const answer = { success: true, data: { groupBooking: { id: "G-1" } } };
+    const { fetchImpl, calls } = backend(200, answer);
+    vi.stubGlobal("fetch", fetchImpl);
+
+    const result = await (await route())(event(new Uint8Array(1024)));
+
+    expect(result).toEqual(answer);
+    expect(calls[0].url).toBe(
+      "http://backend.test/api/v2/t1/checkout/group?simulate=false",
+    );
+    expect(calls[0].received).toBe(1024);
+  });
+
+  it("refuses a body above the limit before the backend is asked", async () => {
+    state.headers["content-length"] = String(4 * 1024 * 1024);
+    const { fetchImpl } = backend(200, {});
+    vi.stubGlobal("fetch", fetchImpl);
+
+    const err = await thrown(
+      Promise.resolve().then(async () => (await route())(event())),
+    );
+
+    expect(err.data.code).toBe("customer_upload_booking_limit");
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("needs the tenant", async () => {
+    query.value = {};
+
+    const handler = await route();
+    const err = await thrown(Promise.resolve().then(() => handler(event())));
+
+    expect(err.statusCode).toBe(400);
+  });
+});
+
 describe("expiresSoon", () => {
   it("reads the expiry off the token and leaves an unreadable one alone", () => {
     const now = 1_000_000_000_000;

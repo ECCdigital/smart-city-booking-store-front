@@ -13,12 +13,14 @@ import CheckoutContactStep from "~/components/checkout/CheckoutContactStep.vue";
 import { isBusinessContact } from "~/utils/businessBooking.js";
 import CheckoutCustomFields from "~/components/checkout/CheckoutCustomFields.vue";
 import CheckoutCustomerUploads from "~/components/checkout/CheckoutCustomerUploads.vue";
+import CheckoutGroupCustomerUploads from "~/components/checkout/CheckoutGroupCustomerUploads.vue";
 import {
   checkoutUploadFieldsOf,
   checkoutUploadRefusalOf,
   customerUploadErrorKey,
   formatsLabel,
   missingCheckoutUploads,
+  missingGroupCheckoutUploads,
 } from "~/utils/customerUploads.js";
 import CheckoutPaymentStep from "~/components/checkout/CheckoutPaymentStep.vue";
 import CheckoutReviewStep from "~/components/checkout/CheckoutReviewStep.vue";
@@ -635,25 +637,30 @@ const reviewCustomFieldRows = computed(() => {
     });
   }
   for (const field of checkoutUploadFields.value) {
-    const names = (checkoutUploadFiles.value[field.id] || []).map(
-      (file) => file.name,
-    );
+    const names = isGroupBookingActive.value
+      ? groupCheckoutUploads.value
+          .filter((upload) => upload.fieldId === field.id)
+          .map((upload) => upload.file.name)
+      : (checkoutUploadFiles.value[field.id] || []).map((file) => file.name);
     rows.push({ label: field.label, value: names.join(", ") || "–" });
   }
   return rows;
 });
 
 // The upload fields "in the checkout": the files
-// go with the checkout of a single booking. Files live in memory only,
+// go with the checkout of a single booking - in a series each file with the
+// dates it counts for. Files live in memory only,
 // never in the stored checkout state.
 const checkoutUploadFields = computed(() =>
   checkoutUploadFieldsOf(leadBookable.value),
 );
 const checkoutUploadFiles = ref({});
+// The files of a series, each `{ key, fieldId, file, attempts }`.
+const groupCheckoutUploads = ref([]);
 // The backend's refusal of a file, shown under its field.
 const checkoutUploadRefusal = ref(null);
 
-watch(checkoutUploadFiles, () => {
+watch([checkoutUploadFiles, groupCheckoutUploads], () => {
   checkoutUploadRefusal.value = null;
 });
 
@@ -898,10 +905,16 @@ const isDataStepComplete = computed(() => {
       if (!isNonEmptyContactValue(value)) return false;
     }
   }
-  const missingUploads = missingCheckoutUploads(
-    checkoutUploadFields.value,
-    checkoutUploadFiles.value,
-  );
+  const missingUploads = isGroupBookingActive.value
+    ? missingGroupCheckoutUploads(
+        checkoutUploadFields.value,
+        groupCheckoutUploads.value,
+        groupBookingAttempts.value.length,
+      )
+    : missingCheckoutUploads(
+        checkoutUploadFields.value,
+        checkoutUploadFiles.value,
+      );
   if (missingUploads.length > 0) {
     return false;
   }
@@ -1124,6 +1137,18 @@ const groupBookingAttemptStatuses = ref({});
 
 const isGroupBookingActive = computed(
   () => groupBookingEnabled.value && useGroupBooking.value,
+);
+
+// Another series, or none: the files chosen for the dates of the old one
+// name them by position, so they go.
+watch(
+  () =>
+    isGroupBookingActive.value
+      ? groupBookingAttempts.value.map((a) => `${a.start}-${a.end}`).join(",")
+      : "",
+  () => {
+    groupCheckoutUploads.value = [];
+  },
 );
 
 watch(groupBookingEnabled, (enabled) => {
@@ -2568,7 +2593,7 @@ async function handleFinish() {
 
     checkoutUploadRefusal.value = null;
     const { data, error } = isGroupBookingActive.value
-      ? await completeGroupCheckout(payload)
+      ? await completeGroupCheckout(payload, groupCheckoutUploads.value)
       : await completeCheckout(payload, checkoutUploadFiles.value);
 
     // useApiClient has checked the session after a 401: a refused or failed
@@ -3142,8 +3167,19 @@ function onReviewEdit(section) {
                     :attachments="checkoutVisibleAttachments"
                   >
                     <template #after-documents>
+                      <CheckoutGroupCustomerUploads
+                        v-if="
+                          isGroupBookingActive &&
+                            checkoutUploadFields.length > 0
+                        "
+                        v-model:uploads="groupCheckoutUploads"
+                        :fields="checkoutUploadFields"
+                        :members="groupBookingAttempts"
+                        :guest="!authStore.isLoggedIn"
+                        :refusal="checkoutUploadRefusal"
+                      />
                       <CheckoutCustomerUploads
-                        v-if="checkoutUploadFields.length > 0"
+                        v-else-if="checkoutUploadFields.length > 0"
                         v-model:files="checkoutUploadFiles"
                         :fields="checkoutUploadFields"
                         :refusal="checkoutUploadRefusal"
@@ -3173,8 +3209,16 @@ function onReviewEdit(section) {
               :attachments="checkoutVisibleAttachments"
             >
               <template #after-documents>
+                <CheckoutGroupCustomerUploads
+                  v-if="isGroupBookingActive && checkoutUploadFields.length > 0"
+                  v-model:uploads="groupCheckoutUploads"
+                  :fields="checkoutUploadFields"
+                  :members="groupBookingAttempts"
+                  :guest="!authStore.isLoggedIn"
+                  :refusal="checkoutUploadRefusal"
+                />
                 <CheckoutCustomerUploads
-                  v-if="checkoutUploadFields.length > 0"
+                  v-else-if="checkoutUploadFields.length > 0"
                   v-model:files="checkoutUploadFiles"
                   :fields="checkoutUploadFields"
                   :refusal="checkoutUploadRefusal"
