@@ -1,7 +1,7 @@
 /**
  * The customer uploads of a booking through the BFF:
  * hand one in for an upload field, replace one, delete one while it is not
- * checked. Each call answers `{ data, error }` as `useApiClient` does; on
+ * checked, or every chosen one of a booking at once. Each call answers `{ data, error }` as `useApiClient` does; on
  * success `data.customerUploadState` is the booking's state afresh.
  *
  * With `link`, the signed link of a guest's booking:
@@ -11,6 +11,8 @@
  * @param {Object} [options]
  * @param {string} [options.link] The token of a guest's link
  */
+import { submissionFormOf } from "~/utils/customerUploads.js";
+
 export function useCustomerUploads({ link = "" } = {}) {
   const api = useApiClient();
   const opts = link ? { headers: { "x-customer-upload-link": link } } : {};
@@ -47,5 +49,21 @@ export function useCustomerUploads({ link = "" } = {}) {
       opts,
     );
 
-  return { read, upload, replace, remove };
+  /**
+   * Every chosen proof of a booking at once, the button „Nachweise
+   * einreichen“: new files and replacements, all
+   * stored or none.
+   */
+  const submitAll = (tenantId, bookingId, drafts) =>
+    api.post(
+      link
+        ? "/api/proof-link"
+        : `/api/bookings/${encodeURIComponent(tenantId)}/${encodeURIComponent(
+            bookingId,
+          )}/customer-uploads`,
+      submissionFormOf(drafts),
+      opts,
+    );
+
+  return { read, upload, replace, remove, submitAll };
 }

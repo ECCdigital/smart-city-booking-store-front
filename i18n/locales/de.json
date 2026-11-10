@@ -1914,6 +1914,17 @@
         "title": "Buchung nicht geladen",
         "text": "Die Buchung konnte gerade nicht geladen werden. Bitte versuche es später noch einmal."
       }
-    }
+    },
+    "submitAll": "Nachweise einreichen",
+    "draft": "Noch nicht eingereicht",
+    "draftReplacement": "Ersetzt „{name}“ – noch nicht eingereicht",
+    "draftRemove": "Entfernen",
+    "draftsPending": "{count} Datei wartet auf das Einreichen. | {count} Dateien warten auf das Einreichen.",
+    "draftsNone": "Wähle Dateien aus und reiche sie dann gesammelt ein.",
+    "submitted": "Deine Nachweise sind eingereicht.",
+    "draftRefused": "Fehler",
+    "submittedPartly": "Beim Upload einzelner Nachweise ist ein Fehler aufgetreten. Die betroffenen Dateien sind am jeweiligen Nachweis markiert.",
+    "submittedNone": "Fehler beim Einreichen der Nachweise.",
+    "unsavedLeave": "Es gibt Nachweise, die du noch nicht eingereicht hast. Wenn du die Seite verlässt, gehen sie verloren. Seite trotzdem verlassen?"
   }
 }

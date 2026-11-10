@@ -120,6 +120,96 @@ export function precheckCustomerUpload(
   return null;
 }
 
+/**
+ * The form field of a proof handed in with the button „Nachweise
+ * einreichen“: `customerUpload:<fieldId>`, a
+ * replacement `customerUpload:<fieldId>:<mediaId>`.
+ *
+ * @param {{fieldId: string, replacing?: string|null}} draft
+ */
+export function submissionPartName({ fieldId, replacing = null }) {
+  return `${CHECKOUT_FILE_PREFIX}${fieldId}${replacing ? `:${replacing}` : ""}`;
+}
+
+/**
+ * The chosen proofs in the order the backend reads them: grouped by form
+ * field in the order each field first comes, as it groups the files of a
+ * request. The backend names a refused file by its position in this order.
+ *
+ * @template {{fieldId: string, replacing?: string|null}} T
+ * @param {T[]} drafts
+ * @returns {T[]}
+ */
+export function submissionOrderOf(drafts = []) {
+  const byPart = new Map();
+  for (const draft of drafts) {
+    const name = submissionPartName(draft);
+    if (!byPart.has(name)) byPart.set(name, []);
+    byPart.get(name).push(draft);
+  }
+  return [...byPart.values()].flat();
+}
+
+/**
+ * The multipart body of every proof of a booking at once: each chosen file
+ * under {@link submissionPartName}, in {@link submissionOrderOf}.
+ *
+ * @param {Array<{fieldId: string, replacing?: string|null, file: File}>} drafts
+ * @returns {FormData}
+ */
+export function submissionFormOf(drafts = []) {
+  const form = new FormData();
+  const ordered = submissionOrderOf(drafts);
+  for (const draft of ordered) {
+    form.append(submissionPartName(draft), draft.file, draft.file.name);
+  }
+  return form;
+}
+
+/**
+ * What the answer of „Nachweise einreichen“ means for the files sent: the
+ * ids of those stored, and per refused one its id with its refusal.
+ *
+ * @param {Array<{id: number}>} sent The drafts in {@link submissionOrderOf}
+ * @param {Array<{index: number, code: string, params?: Object}>} refused
+ * @returns {{storedIds: number[], refusals: Array<{id: number, refusal: {code: string, params: Object}}>}}
+ */
+export function submissionOutcomeOf(sent = [], refused = []) {
+  const refusals = refused
+    .filter((entry) => sent[entry.index])
+    .map((entry) => ({
+      id: sent[entry.index].id,
+      refusal: { code: entry.code, params: entry.params ?? {} },
+    }));
+  const refusedIds = new Set(refusals.map((entry) => entry.id));
+  return {
+    storedIds: sent
+      .map((draft) => draft.id)
+      .filter((id) => !refusedIds.has(id)),
+    refusals,
+  };
+}
+
+/**
+ * An upload field as the page shows it while files are chosen but not
+ * handed in: each new file takes a place of the field, a replacement none.
+ *
+ * @param {Object} field Of the derived state
+ * @param {Array<{fieldId: string, replacing?: string|null}>} drafts Of the
+ *   field's booking
+ * @returns {Object}
+ */
+export function fieldWithDrafts(field, drafts = []) {
+  const added = drafts.filter(
+    (draft) => draft.fieldId === field.fieldId && !draft.replacing,
+  ).length;
+  if (added === 0) return field;
+  return {
+    ...field,
+    remainingFiles: Math.max(0, (field.remainingFiles ?? 0) - added),
+  };
+}
+
 /** Whole days until a deadline, never below 0. */
 export function daysLeft(deadline, now = Date.now()) {
   if (deadline === null || deadline === undefined) return null;
