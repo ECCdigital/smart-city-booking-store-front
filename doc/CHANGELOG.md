@@ -9,6 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Changed
 
+- The checkout's last button reads „Verbindlich buchen“ instead of „Zahlungspflichtig buchen“ when the total is 0 EUR, also after a discount, for every tenant ([ECCdigital/tickets#937](https://github.com/ECCdigital/tickets/issues/937)). Key `checkout.review.commitBookingFree`
 - Notice after the registration ([ECCdigital/tickets#600](https://github.com/ECCdigital/tickets/issues/600)): „Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.“, the same for every address. The signup sends the backend `forgotPasswordUrl`, the storefront's page „Passwort vergessen“ (`/password/forgot` under `NUXT_USER_BASE_URL`); an address with a verified account gets a mail with a button to it from the backend with ECCdigital/tickets#600
 ### Added
 

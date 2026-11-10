@@ -257,6 +257,11 @@ const formattedTimeRange = computed(() => {
   )}, ${formatTime(end)}`;
 });
 
+/** Total of 0 EUR, also after discounts: nothing to pay, so no "obligation to pay". */
+const isFreeBooking = computed(
+  () => props.summary?.total <= 0.005 && !!props.summary?.items?.length,
+);
+
 const summaryItemsNoCoupon = computed(() =>
   (props.summary?.items || []).filter((row) => row?.id !== COUPON_ROW_ID),
 );
@@ -905,9 +910,7 @@ const bookingDiscountDescription = computed(() => {
               <span
                 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white tabular-nums text-right"
               >
-                <template
-                  v-if="summary.total <= 0.005 && summary.items?.length"
-                >
+                <template v-if="isFreeBooking">
                   {{ $t("checkout.review.totalFree") }}
                 </template>
                 <template v-else>{{ formatEur(summary.total) }}</template>
@@ -937,7 +940,11 @@ const bookingDiscountDescription = computed(() => {
               :loading="isSubmitting"
               @click="onFinish"
             >
-              {{ $t("checkout.review.commitBooking") }}
+              {{
+                isFreeBooking
+                  ? $t("checkout.review.commitBookingFree")
+                  : $t("checkout.review.commitBooking")
+              }}
             </UButton>
             <div class="text-center">
               <UButton
