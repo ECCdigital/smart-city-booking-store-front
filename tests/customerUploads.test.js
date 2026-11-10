@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  mostUrgentProofFieldOf,
+  proofAnchorId,
+  proofPageLink,
+  proofTargetOf,
   acceptOf,
   filterProofGroups,
   customerUploadErrorKey,
@@ -119,6 +123,38 @@ describe("customerUploadFieldView", () => {
       reason: "abgelaufen",
       canUpload: true,
       lateHint: true,
+    });
+  });
+
+  it("names the reason of the open reopen, and „Erneut anfordern“ as such", () => {
+    const requested = customerUploadFieldView(
+      field({
+        state: "rejected",
+        reopen: { kind: "requestedAgain", reason: "Rückseite fehlt", at: 3 },
+        uploads: [upload("accepted", 1)],
+      }),
+      NOW,
+    );
+    expect(requested).toMatchObject({
+      color: "error",
+      labelKey: "customerUploads.state.requestedAgain",
+      reason: "Rückseite fehlt",
+      reasonKey: "customerUploads.requestAgainReason",
+      canUpload: true,
+    });
+
+    const rejected = customerUploadFieldView(
+      field({
+        state: "rejected",
+        reopen: { kind: "rejected", reason: "unleserlich", at: 2 },
+        uploads: [upload("rejected", 2, "unleserlich")],
+      }),
+      NOW,
+    );
+    expect(rejected).toMatchObject({
+      labelKey: "customerUploads.state.rejected",
+      reason: "unleserlich",
+      reasonKey: "customerUploads.rejectionReason",
     });
   });
 
@@ -459,5 +495,63 @@ describe("filterProofGroups", () => {
     expect(result).toHaveLength(1);
     expect(result[0].tenant.id).toBe("verein");
     expect(result[0].bookings).toHaveLength(1);
+  });
+});
+
+describe("the proof a mail opens the page at (ECCdigital/tickets#826)", () => {
+  it("reads booking and field off the query", () => {
+    expect(proofTargetOf({ booking: "B1", field: "f1" })).toEqual({
+      bookingId: "B1",
+      fieldId: "f1",
+    });
+    expect(proofTargetOf({ booking: ["B1", "B2"] })).toEqual({
+      bookingId: "B1",
+      fieldId: null,
+    });
+    expect(proofTargetOf({ field: "f1" })).toBe(null);
+    expect(proofTargetOf({})).toBe(null);
+    expect(proofTargetOf(undefined)).toBe(null);
+  });
+
+  it("names a booking's section and its fields by safe ids", () => {
+    expect(proofAnchorId("B1")).toBe("proof-B1");
+    expect(proofAnchorId("B1", "test824-ausweis")).toBe(
+      "proof-B1-test824-ausweis",
+    );
+    expect(proofAnchorId("B 1", "a/b")).toBe("proof-B_1-a_b");
+  });
+});
+
+describe("the way to a proof from the card and the details (ECCdigital/tickets#826)", () => {
+  const withFields = (...states) => ({
+    id: "B1",
+    customerUploadState: {
+      fields: states.map((state, index) => ({ fieldId: `f${index}`, state })),
+    },
+  });
+
+  it("opens the page at the booking and the field", () => {
+    expect(proofPageLink("B1", "f1")).toEqual({
+      path: "/account/proofs",
+      query: { booking: "B1", field: "f1" },
+    });
+    expect(proofPageLink("B1")).toEqual({
+      path: "/account/proofs",
+      query: { booking: "B1" },
+    });
+  });
+
+  it("leads the card to the most urgent field: rejected, overdue, open, submitted", () => {
+    expect(
+      mostUrgentProofFieldOf(
+        withFields("submitted", "open", "overdue", "rejected"),
+      ),
+    ).toBe("f3");
+    expect(mostUrgentProofFieldOf(withFields("open", "overdue"))).toBe("f1");
+    expect(mostUrgentProofFieldOf(withFields("fulfilled", "submitted"))).toBe(
+      "f1",
+    );
+    expect(mostUrgentProofFieldOf(withFields("fulfilled"))).toBe(null);
+    expect(mostUrgentProofFieldOf({ id: "B1" })).toBe(null);
   });
 });

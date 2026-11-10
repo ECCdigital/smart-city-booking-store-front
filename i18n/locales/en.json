@@ -1762,10 +1762,12 @@
       "openWithoutDeadline": "Open",
       "submitted": "Submitted · being reviewed",
       "rejected": "Rejected · upload again",
+      "requestedAgain": "Requested again · upload again",
       "overdue": "Deadline passed on {deadline}",
       "fulfilled": "Reviewed on {reviewedAt} · file deleted"
     },
     "rejectionReason": "Reason for the rejection: {reason}",
+    "requestAgainReason": "Reason: {reason}",
     "lateHint": "The deadline has passed. You can still submit; the provider “{tenant}” decides whether the proof is still accepted.",
     "replace": "Replace",
     "delete": "Delete",

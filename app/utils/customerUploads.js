@@ -503,3 +503,19 @@ export function proofPageLink(bookingId, fieldId = null) {
   if (fieldId) query.field = fieldId;
   return { path: "/account/proofs", query };
 }
+
+/**
+ * The upload field of a booking the card leads to: the most urgent one not
+ * checked, in the order of {@link URGENCY}; null while all are checked.
+ *
+ * @param {Object} booking
+ * @returns {string|null} Its `fieldId`
+ */
+export function mostUrgentProofFieldOf(booking) {
+  const fields = customerUploadFieldsOf(booking);
+  for (const state of URGENCY) {
+    const field = fields.find((candidate) => candidate.state === state);
+    if (field) return field.fieldId;
+  }
+  return null;
+}

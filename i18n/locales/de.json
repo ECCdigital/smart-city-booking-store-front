@@ -1831,10 +1831,12 @@
       "openWithoutDeadline": "Offen",
       "submitted": "Eingereicht · wird geprüft",
       "rejected": "Abgelehnt · neu hochladen",
+      "requestedAgain": "Erneut angefordert · neu hochladen",
       "overdue": "Frist abgelaufen am {deadline}",
       "fulfilled": "Geprüft am {reviewedAt} · Datei gelöscht"
     },
     "rejectionReason": "Grund der Ablehnung: {reason}",
+    "requestAgainReason": "Grund: {reason}",
     "lateHint": "Die Frist ist vorbei. Du kannst trotzdem einreichen, der Anbieter „{tenant}“ entscheidet, ob der Nachweis noch angenommen wird.",
     "replace": "Ersetzen",
     "delete": "Löschen",
