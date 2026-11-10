@@ -1827,7 +1827,24 @@
       "fileMissing": "Please choose a file.",
       "requiredMissing": "Please add this proof.",
       "notFound": "This proof was not found. Please reload the page.",
-      "generic": "The file could not be uploaded. Please try again."
+      "generic": "The file could not be uploaded. Please try again.",
+      "linkInvalid": "This link is invalid. Please use the link from your latest email about the booking.",
+      "linkExpired": "The booking has ended. You can no longer hand in proofs with this link."
+    },
+    "link": {
+      "intro": "The provider {name} still needs proofs for the booking. They can be handed in until the end of the booking and replaced or deleted until the provider has reviewed them. Once reviewed, the documents are deleted at the provider.",
+      "invalid": {
+        "title": "Invalid link",
+        "text": "This link is invalid. Please use the link from your latest email about the booking."
+      },
+      "expired": {
+        "title": "Link expired",
+        "text": "The booking has ended. You can no longer hand in proofs with this link."
+      },
+      "error": {
+        "title": "Booking not loaded",
+        "text": "The booking could not be loaded right now. Please try again later."
+      }
     }
   }
 }

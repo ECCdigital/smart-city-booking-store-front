@@ -17,6 +17,7 @@ import {
   formatOfFile,
   hasCheckoutUploads,
   hasPendingProofs,
+  linkRefusalOf,
   missingCheckoutUploads,
   missingProofsBannerOf,
   missingProofsChipOf,
@@ -779,5 +780,23 @@ describe("the missing proofs of „Meine Buchungen“ (ECCdigital/tickets#828)",
         ]),
       ]),
     ).toEqual({ bookingCount: 1, nextDeadline: null, overdue: true });
+  });
+});
+
+describe("linkRefusalOf (ECCdigital/tickets#829)", () => {
+  it("tells an expired link from an invalid one and from any other failure", () => {
+    expect(linkRefusalOf("customer_upload_link_expired")).toBe("expired");
+    expect(linkRefusalOf("customer_upload_link_invalid")).toBe("invalid");
+    expect(linkRefusalOf(undefined)).toBe("error");
+    expect(linkRefusalOf("booking_not_found")).toBe("error");
+  });
+
+  it("names a refusal of the link while uploading", () => {
+    expect(customerUploadErrorKey("customer_upload_link_expired")).toBe(
+      "customerUploads.errors.linkExpired",
+    );
+    expect(customerUploadErrorKey("customer_upload_link_invalid")).toBe(
+      "customerUploads.errors.linkInvalid",
+    );
   });
 });

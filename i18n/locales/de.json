@@ -1896,7 +1896,24 @@
       "fileMissing": "Bitte wähle eine Datei aus.",
       "requiredMissing": "Bitte füge diesen Nachweis hinzu.",
       "notFound": "Dieser Nachweis wurde nicht gefunden. Bitte lade die Seite neu.",
-      "generic": "Die Datei konnte nicht hochgeladen werden. Bitte versuche es erneut."
+      "generic": "Die Datei konnte nicht hochgeladen werden. Bitte versuche es erneut.",
+      "linkInvalid": "Dieser Link ist ungültig. Bitte nutze den Link aus deiner letzten E-Mail zur Buchung.",
+      "linkExpired": "Die Buchung ist beendet. Über diesen Link kannst du keine Nachweise mehr einreichen."
+    },
+    "link": {
+      "intro": "Der Anbieter {name} benötigt für die Buchung noch Nachweise. Diese können bis zum Ende der Buchung eingereicht und bis zur Prüfung durch den Anbieter ersetzt oder gelöscht werden. Nach der Prüfung der Dokumente werden diese beim Anbieter gelöscht.",
+      "invalid": {
+        "title": "Link ungültig",
+        "text": "Dieser Link ist ungültig. Bitte nutze den Link aus deiner letzten E-Mail zur Buchung."
+      },
+      "expired": {
+        "title": "Link abgelaufen",
+        "text": "Die Buchung ist beendet. Über diesen Link kannst du keine Nachweise mehr einreichen."
+      },
+      "error": {
+        "title": "Buchung nicht geladen",
+        "text": "Die Buchung konnte gerade nicht geladen werden. Bitte versuche es später noch einmal."
+      }
     }
   }
 }

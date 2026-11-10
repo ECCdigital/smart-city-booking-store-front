@@ -423,6 +423,21 @@ const ERROR_KEYS = Object.freeze({
 });
 
 /**
+ * Why the page of a guest's signed link shows no
+ * booking, from the code the backend refuses the link with: `expired` after
+ * the end of the booking, `invalid` for any other link, `error` for
+ * anything else.
+ *
+ * @param {string|undefined} code
+ * @returns {"expired"|"invalid"|"error"}
+ */
+export function linkRefusalOf(code) {
+  if (code === "customer_upload_link_expired") return "expired";
+  if (code === "customer_upload_link_invalid") return "invalid";
+  return "error";
+}
+
+/**
  * The message key of a refusal, from the code the backend (or the page's own
  * check) answers; a generic one for anything else.
  *
