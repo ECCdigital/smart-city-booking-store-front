@@ -1494,6 +1494,7 @@
     "phoneSupport": "Telefon-Support:",
     "contactPersonLabel": "Kontaktperson:",
     "bikeBoxHelp": "Hilfe bei Problemen mit der Fahrradbox",
+    "compartmentHelp": "Hilfe bei Problemen mit dem Fach",
     "emergencyContact": "Notfallkontakt & Vorgehen bei Störungen",
     "checkingBookings": "Ihre Buchungen werden geprüft …",
     "severalBookingsMatch": "Mehrere Ihrer Buchungen passen gerade zu dieser Tür.",
@@ -1548,6 +1549,8 @@
       },
       "codeHint": "Code an der Tür eingeben",
       "title": {
+        "assignedCompartment": "{label} — Schrank {lockerBank}, Fach {number}",
+        "assignedCompartmentNumber": "{label} — Fach {number}",
         "lockerCompartment": "Fahrradbox Nr. {compartment}",
         "lockerBooking": "Fahrradbox #{id}",
         "locker": "Fahrradbox",

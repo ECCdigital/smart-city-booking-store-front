@@ -14,7 +14,18 @@
         />
         <div class="text-left">
           <p class="font-semibold text-gray-900 dark:text-white text-sm">
-            {{ $t("mobileKey.bikeBoxHelp") }}
+            {{
+              help.accessPoint
+                ? $t("mobileKey.compartmentHelp")
+                : $t("mobileKey.bikeBoxHelp")
+            }}
+          </p>
+          <p
+            v-if="help.accessPoint"
+            class="text-sm text-gray-700 dark:text-gray-300"
+            data-test="emergency-help-compartment"
+          >
+            {{ accessPointTitle(help.accessPoint, t) }}
           </p>
           <p class="text-xs text-gray-500 dark:text-gray-400">
             {{ $t("mobileKey.emergencyContact") }}
@@ -40,10 +51,15 @@
 </template>
 
 <script setup>
+import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { useEmergencyHelp } from "~/composables/useEmergencyHelp.js";
-import { decideEmergencyHelp } from "~/utils/emergencyHelp.js";
+import { readAccessPointsAnswer } from "~/utils/accessOpenFlow.js";
+import { accessPointTitle } from "~/utils/accessPointDisplay.js";
+import {
+  decideEmergencyHelp,
+  holdsAssignedCompartment,
+} from "~/utils/emergencyHelp.js";
 import EmergencyHelpContent from "~/components/mobileKey/EmergencyHelpContent.vue";
-
 
 const props = defineProps({
   tenantId: { type: String, required: true },
@@ -59,8 +75,29 @@ const { tenant, fetchCustomerServiceInfo } = useEmergencyHelp(
   null,
   toRef(props, "booking"),
 );
+const { t } = useI18n();
+const { getAccessPoints } = useAccessPoints();
+
 await fetchCustomerServiceInfo();
 
+// A Fach the platform assigned (Open Locker) is named and confirmed by the
+// per-booking projection alone - the stored booking knows no Anlage name, and
+// the projection is read fresh, so a Fach changed meanwhile shows as it is.
+// Without such a Fach nothing is loaded; a read that fails leaves the help
+// as the stored booking has it.
+const accessPoints = ref([]);
+if (holdsAssignedCompartment(props.booking)) {
+  try {
+    accessPoints.value = readAccessPointsAnswer(
+      await getAccessPoints(props.tenantId, props.booking.id),
+    ).points;
+  } catch {
+    accessPoints.value = [];
+  }
+}
+
 /** Nothing to show - no confirmed compartment with a contact - means no accordion. */
-const help = computed(() => decideEmergencyHelp(tenant.value, props.booking));
+const help = computed(() =>
+  decideEmergencyHelp(tenant.value, props.booking, accessPoints.value),
+);
 </script>

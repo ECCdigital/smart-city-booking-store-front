@@ -1144,6 +1144,7 @@
     "phoneSupport": "Phone support:",
     "contactPersonLabel": "Contact person:",
     "bikeBoxHelp": "Help with the bike box",
+    "compartmentHelp": "Help with the compartment",
     "emergencyContact": "Emergency contact and what to do if something fails",
     "checkingBookings": "Checking your bookings...",
     "severalBookingsMatch": "Several of your bookings match this door right now.",
@@ -1195,6 +1196,8 @@
       },
       "codeHint": "Enter the code at the door",
       "title": {
+        "assignedCompartment": "{label} — cabinet {lockerBank}, compartment {number}",
+        "assignedCompartmentNumber": "{label} — compartment {number}",
         "lockerCompartment": "Bike box no. {compartment}",
         "lockerBooking": "Bike box #{id}",
         "locker": "Bike box",
