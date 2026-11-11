@@ -50,12 +50,12 @@
       <div
         v-for="pendingUpload in pendingUploads"
         :key="pendingUpload.mediaId"
-        class="flex items-center justify-between gap-2 bg-gray-50 dark:bg-gray-800 rounded px-3 py-2 mt-2 text-sm"
+        class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2 bg-gray-50 dark:bg-gray-800 rounded px-3 py-2 mt-2 text-sm"
       >
-        <span class="flex items-center gap-1 min-w-0 flex-1">
-          <UIcon name="i-lucide-file-check" class="shrink-0" />
+        <span class="flex items-center gap-1 min-w-0 sm:flex-1">
+          <UIcon name="i-lucide-file-check" class="shrink-0 self-start mt-0.5 sm:self-auto sm:mt-0" />
           <span
-            class="truncate"
+            class="break-all sm:truncate"
             :title="pendingUpload.originalFileName"
             :class="{
               'line-through text-gray-500': replacementOf(pendingUpload),
@@ -66,7 +66,7 @@
             >· {{ sizeLabel(pendingUpload.size) }}</span
           >
         </span>
-        <span class="flex gap-1 shrink-0">
+        <span class="flex gap-1 shrink-0 self-end sm:self-auto">
           <UButton
             size="xs"
             variant="ghost"
@@ -105,14 +105,16 @@
           : 'border-amber-500/60 bg-amber-500/10'
       "
     >
-      <div class="flex items-center justify-between gap-2">
-        <span class="flex flex-wrap items-center gap-1 min-w-0 flex-1">
+      <div
+        class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2"
+      >
+        <span class="flex flex-wrap items-center gap-1 min-w-0 sm:flex-1">
           <UIcon
             :name="draft.refusal ? 'i-lucide-file-x' : 'i-lucide-file-clock'"
             class="shrink-0"
           />
           <span
-            class="truncate min-w-0 max-w-[calc(100%-1.5rem)]"
+            class="break-all sm:truncate min-w-0 max-w-[calc(100%-1.5rem)]"
             :title="draft.file.name"
             >{{ draft.file.name }}</span
           >
@@ -123,17 +125,29 @@
             :color="draft.refusal ? 'error' : 'warning'"
             variant="subtle"
             size="sm"
-            class="shrink-0"
-            :label="
-              draft.refusal
-                ? $t('customerUploads.draftRefused')
-                : draft.replacing
-                  ? $t('customerUploads.draftReplacement', {
-                      name: replacedName(draft.replacing),
-                    })
-                  : $t('customerUploads.draft')
-            "
-          />
+            class="shrink-0 max-w-full"
+          >
+            <template v-if="draft.refusal">
+              {{ $t("customerUploads.draftRefused") }}
+            </template>
+            <!-- the old name only where there is room; it stays crossed out
+                 at its file above -->
+            <template v-else-if="draft.replacing">
+              <span class="sm:hidden">
+                {{ $t("customerUploads.draftReplacementShort") }}
+              </span>
+              <span class="hidden sm:inline">
+                {{
+                  $t("customerUploads.draftReplacement", {
+                    name: replacedName(draft.replacing),
+                  })
+                }}
+              </span>
+            </template>
+            <template v-else>
+              {{ $t("customerUploads.draft") }}
+            </template>
+          </UBadge>
           <span
             v-if="draft.refusal"
             data-test="proof-draft-refusal"
@@ -147,7 +161,7 @@
           variant="ghost"
           color="neutral"
           icon="i-lucide-x"
-          class="shrink-0"
+          class="shrink-0 self-end sm:self-auto"
           :label="$t('customerUploads.draftRemove')"
           :disabled="busy"
           @click="drafts.remove(booking.id, draft.id)"
@@ -219,7 +233,7 @@
       class="hidden"
       :accept="acceptOf(field.formats)"
       @change="onFileChosen"
-    />
+    >
 
     <UAlert
       v-if="errorMessage"

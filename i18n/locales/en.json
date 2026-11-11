@@ -1861,6 +1861,7 @@
     "submitAll": "Submit proofs",
     "draft": "Not submitted yet",
     "draftReplacement": "Replaces “{name}” – not submitted yet",
+    "draftReplacementShort": "Replaces existing file – not submitted yet",
     "draftRemove": "Remove",
     "draftsPending": "{count} file is waiting to be submitted. | {count} files are waiting to be submitted.",
     "draftsNone": "Choose files, then submit them all at once.",

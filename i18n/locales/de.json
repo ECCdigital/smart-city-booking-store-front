@@ -1930,6 +1930,7 @@
     "submitAll": "Nachweise einreichen",
     "draft": "Noch nicht eingereicht",
     "draftReplacement": "Ersetzt „{name}“ – noch nicht eingereicht",
+    "draftReplacementShort": "Ersetzt bestehende Datei – noch nicht eingereicht",
     "draftRemove": "Entfernen",
     "draftsPending": "{count} Datei wartet auf das Einreichen. | {count} Dateien warten auf das Einreichen.",
     "draftsNone": "Wähle Dateien aus und reiche sie dann gesammelt ein.",
