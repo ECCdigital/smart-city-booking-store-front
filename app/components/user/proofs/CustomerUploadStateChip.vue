@@ -18,7 +18,7 @@ import { useFormatting } from "~/composables/utils/useFormatting.js";
 /**
  * The state of one upload field as a chip: open
  * with deadline and days left, submitted, rejected, overdue, or checked with
- * its date and the note that the file is deleted.
+ * its date and, where its file is gone, the note that it is deleted.
  */
 const props = defineProps({
   field: {

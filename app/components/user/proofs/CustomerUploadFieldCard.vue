@@ -88,7 +88,14 @@
         </span>
       </div>
       <p class="text-xs text-gray-500 mt-1">
-        {{ $t("customerUploads.changeUntilReview", { tenant: tenantName }) }}
+        {{
+          $t(
+            field.category === "sensitive"
+              ? "customerUploads.changeUntilReviewSensitive"
+              : "customerUploads.changeUntilReview",
+            { tenant: tenantName },
+          )
+        }}
       </p>
     </template>
 

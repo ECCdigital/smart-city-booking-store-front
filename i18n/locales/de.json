@@ -1847,14 +1847,16 @@
       "rejected": "Abgelehnt · neu hochladen",
       "requestedAgain": "Erneut angefordert · neu hochladen",
       "overdue": "Frist abgelaufen am {deadline}",
-      "fulfilled": "Geprüft am {reviewedAt} · Datei gelöscht"
+      "fulfilled": "Geprüft am {reviewedAt} · Datei gelöscht",
+      "fulfilledKept": "Geprüft am {reviewedAt}"
     },
     "rejectionReason": "Grund der Ablehnung: {reason}",
     "requestAgainReason": "Grund: {reason}",
     "lateHint": "Die Frist ist vorbei. Du kannst trotzdem einreichen, der Anbieter „{tenant}“ entscheidet, ob der Nachweis noch angenommen wird.",
     "replace": "Ersetzen",
     "delete": "Löschen",
-    "changeUntilReview": "Bis zur Prüfung kannst du die Datei ersetzen oder löschen. Nach der Prüfung löscht {tenant} sie.",
+    "changeUntilReview": "Bis zur Prüfung kannst du die Datei ersetzen oder löschen.",
+    "changeUntilReviewSensitive": "Bis zur Prüfung kannst du die Datei ersetzen oder löschen. Nach der Prüfung löscht {tenant} sie.",
     "dropHint": "Datei hierher ziehen oder",
     "chooseFile": "Datei auswählen",
     "remove": "Entfernen",
@@ -1913,7 +1915,7 @@
       "linkExpired": "Die Buchung ist beendet. Über diesen Link kannst du keine Nachweise mehr einreichen."
     },
     "link": {
-      "intro": "Der Anbieter {name} benötigt für die Buchung noch Nachweise. Diese können bis zum Ende der Buchung eingereicht und bis zur Prüfung durch den Anbieter ersetzt oder gelöscht werden. Nach der Prüfung der Dokumente werden diese beim Anbieter gelöscht.",
+      "intro": "Der Anbieter {name} benötigt für die Buchung noch Nachweise. Diese können bis zum Ende der Buchung eingereicht und bis zur Prüfung durch den Anbieter ersetzt oder gelöscht werden. Besonders schutzwürdige Nachweise löscht der Anbieter nach der Prüfung.",
       "invalid": {
         "title": "Link ungültig",
         "text": "Dieser Link ist ungültig. Bitte nutze den Link aus deiner letzten E-Mail zur Buchung."

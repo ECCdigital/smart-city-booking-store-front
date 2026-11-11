@@ -1778,14 +1778,16 @@
       "rejected": "Rejected · upload again",
       "requestedAgain": "Requested again · upload again",
       "overdue": "Deadline passed on {deadline}",
-      "fulfilled": "Reviewed on {reviewedAt} · file deleted"
+      "fulfilled": "Reviewed on {reviewedAt} · file deleted",
+      "fulfilledKept": "Reviewed on {reviewedAt}"
     },
     "rejectionReason": "Reason for the rejection: {reason}",
     "requestAgainReason": "Reason: {reason}",
     "lateHint": "The deadline has passed. You can still submit; the provider “{tenant}” decides whether the proof is still accepted.",
     "replace": "Replace",
     "delete": "Delete",
-    "changeUntilReview": "Until the review you can replace or delete the file. After the review {tenant} deletes it.",
+    "changeUntilReview": "Until the review you can replace or delete the file.",
+    "changeUntilReviewSensitive": "Until the review you can replace or delete the file. After the review {tenant} deletes it.",
     "dropHint": "Drag a file here or",
     "chooseFile": "Choose file",
     "remove": "Remove",
@@ -1844,7 +1846,7 @@
       "linkExpired": "The booking has ended. You can no longer hand in proofs with this link."
     },
     "link": {
-      "intro": "The provider {name} still needs proofs for the booking. They can be handed in until the end of the booking and replaced or deleted until the provider has reviewed them. Once reviewed, the documents are deleted at the provider.",
+      "intro": "The provider {name} still needs proofs for the booking. They can be handed in until the end of the booking and replaced or deleted until the provider has reviewed them. The provider deletes especially sensitive proofs once reviewed.",
       "invalid": {
         "title": "Invalid link",
         "text": "This link is invalid. Please use the link from your latest email about the booking."

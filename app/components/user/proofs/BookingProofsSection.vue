@@ -56,8 +56,8 @@ import {
 
 /**
  * The section „Nachweise“ of the booking details:
- * each upload field with its state, a checked one with its date and the
- * note that the file is deleted, a rejected one with its reason,
+ * each upload field with its state, a checked one with its date and, for a
+ * deleted file, the note that it is deleted, a rejected one with its reason,
  * and the way to the page „Nachweise
  * einreichen“ at each field that is not checked, opened at that field.
  */

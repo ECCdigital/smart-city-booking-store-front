@@ -193,9 +193,23 @@ describe("customerUploadFieldView", () => {
     );
     expect(fulfilled).toMatchObject({
       color: "success",
-      labelKey: "customerUploads.state.fulfilled",
+      labelKey: "customerUploads.state.fulfilledKept",
       labelParams: { reviewedAt: 1234 },
       canUpload: false,
+    });
+  });
+
+  it("says the file is deleted only where the check deleted it", () => {
+    const accepted = upload("accepted", 1234);
+    accepted.review.fileDeleted = true;
+    expect(
+      customerUploadFieldView(
+        field({ state: "fulfilled", uploads: [accepted] }),
+        NOW,
+      ),
+    ).toMatchObject({
+      labelKey: "customerUploads.state.fulfilled",
+      labelParams: { reviewedAt: 1234 },
     });
   });
 });

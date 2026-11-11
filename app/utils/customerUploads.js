@@ -350,17 +350,19 @@ export function customerUploadFieldView(field, now = Date.now()) {
         labelKey: "customerUploads.state.overdue",
         lateHint: true,
       };
-    case S.FULFILLED:
+    case S.FULFILLED: {
+      // Only a sensitive file is deleted with its check; a normal one stays.
+      const accepted = lastReviewed(field, "accepted");
       return {
         ...base,
         color: "success",
-        labelKey: "customerUploads.state.fulfilled",
-        labelParams: {
-          reviewedAt:
-            lastReviewed(field, "accepted")?.review.reviewedAt ?? null,
-        },
+        labelKey: accepted?.review.fileDeleted
+          ? "customerUploads.state.fulfilled"
+          : "customerUploads.state.fulfilledKept",
+        labelParams: { reviewedAt: accepted?.review.reviewedAt ?? null },
         canUpload: false,
       };
+    }
     default:
       return {
         ...base,
