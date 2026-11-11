@@ -83,7 +83,9 @@ export function assignedCompartmentTitle(accessPoint, t) {
     return null;
   }
 
-  const label = accessPoint.label || t("mobileKey.accessPoint.title.locker");
+  // „Fahrradbox“ is the iFBS box alone; an Anlage without a name is one.
+  const label =
+    accessPoint.label || t("mobileKey.accessPoint.title.lockerSystem");
   return assigned.lockerBankName
     ? t("mobileKey.accessPoint.title.assignedCompartment", {
         label,
@@ -94,6 +96,25 @@ export function assignedCompartmentTitle(accessPoint, t) {
         label,
         number: assigned.number,
       });
+}
+
+/**
+ * The name the open sheet and its stages say: a Fach the platform assigned
+ * by Anlage, Schrank and number ({@link assignedCompartmentTitle}), anything
+ * else by its label, „Der Zugang“ without one. Read off the payload, not off
+ * the read door: a refused door still has a name, and the error screen has
+ * to say which door it is talking about.
+ *
+ * @param {Object|null|undefined} accessPoint
+ * @param {(key: string, params?: Object) => string} t vue-i18n's translator
+ * @returns {string}
+ */
+export function accessPointName(accessPoint, t) {
+  return (
+    assignedCompartmentTitle(accessPoint, t) ||
+    accessPoint?.label ||
+    t("mobileKey.accessPointFallback")
+  );
 }
 
 /**

@@ -7,6 +7,7 @@ import en from "~~/i18n/locales/en.json";
 import {
   ACCESS_POINT_LOCK_STATES,
   accessPointLock,
+  accessPointName,
   accessPointTitle,
   accessWindowLine,
   needsCodeAtDoor,
@@ -105,6 +106,15 @@ describe("accessPointTitle", () => {
       );
     });
 
+    it("calls an Anlage without a label a Schließfachanlage, never a bike box - that is iFBS alone", () => {
+      expect(accessPointTitle(assignedFach({ label: "" }), t)).toBe(
+        "Schließfachanlage — Schrank Quartiersschrank Hafen, Fach 3",
+      );
+      expect(
+        accessPointTitle(assignedFach({ label: "" }), translator("en")),
+      ).toBe("Locker system — cabinet Quartiersschrank Hafen, compartment 3");
+    });
+
     it("keeps the fixed Fach a door with its label", () => {
       expect(
         accessPointTitle(
@@ -156,6 +166,38 @@ describe("accessPointTitle", () => {
     ).toBe("Bike box #4711");
     expect(accessPointTitle({ type: "locker" }, english)).toBe("Bike box");
     expect(accessPointTitle(null, english)).toBe("Unknown door");
+  });
+});
+
+/**
+ * The name the open sheet and its stages say: the Fach the platform
+ * assigned by Anlage, Schrank and number, any other door by its label.
+ */
+describe("accessPointName", () => {
+  it("names an assigned Fach by Anlage, Schließfachschrank and number", () => {
+    expect(
+      accessPointName(
+        {
+          type: "locker",
+          label: "Fächer Bahnhof",
+          assignedCompartment: { number: 3, lockerBankName: "Hafen" },
+        },
+        t,
+      ),
+    ).toBe("Fächer Bahnhof — Schrank Hafen, Fach 3");
+  });
+
+  it("names any other door by its label, a bike box too", () => {
+    expect(accessPointName({ type: "door", label: "Nebeneingang" }, t)).toBe(
+      "Nebeneingang",
+    );
+    expect(
+      accessPointName({ type: "locker", label: "Box 7", compartment: "7" }, t),
+    ).toBe("Box 7");
+  });
+
+  it("falls back to „Der Zugang“ without a label", () => {
+    expect(accessPointName({ type: "door" }, t)).toBe("Der Zugang");
   });
 });
 
