@@ -729,12 +729,11 @@ export function checkoutUploadRefusalOf(apiError) {
 }
 
 /**
- * The status filter of the page „Nachweise einreichen“. The options overlap
- * on purpose: „ausstehend“ is every field not handed in whose deadline has
- * not passed, so an open field and a rejected one before the deadline.
+ * The status filter of the page „Nachweise einreichen“. „Ausstehend“ is every
+ * field still to hand in whose deadline has not passed, so an open field and a
+ * rejected one before the deadline; there is no separate option for open ones.
  */
 export const PROOF_STATUS_FILTER = Object.freeze({
-  OPEN: "open",
   OVERDUE: "overdue",
   OUTSTANDING: "outstanding",
   SUBMITTED: "submitted",
@@ -750,8 +749,6 @@ export const PROOF_STATUS_FILTER = Object.freeze({
  */
 export function matchesProofStatus(field, status) {
   switch (status) {
-    case PROOF_STATUS_FILTER.OPEN:
-      return field.state === S.OPEN;
     case PROOF_STATUS_FILTER.OVERDUE:
       return (
         field.state === S.OVERDUE ||

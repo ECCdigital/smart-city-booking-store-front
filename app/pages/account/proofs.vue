@@ -279,7 +279,6 @@ const filterGroups = computed(() => [
     key: "statuses",
     label: t("customerUploads.filter.status"),
     options: [
-      [PROOF_STATUS_FILTER.OPEN, "i-lucide-file-clock"],
       [PROOF_STATUS_FILTER.OUTSTANDING, "i-lucide-hourglass"],
       [PROOF_STATUS_FILTER.OVERDUE, "i-lucide-calendar-x"],
       [PROOF_STATUS_FILTER.SUBMITTED, "i-lucide-file-check"],

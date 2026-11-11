@@ -1806,7 +1806,6 @@
       "status": "Status:",
       "category": "Category:",
       "statuses": {
-        "open": "Open",
         "outstanding": "Outstanding",
         "overdue": "Overdue",
         "submitted": "Submitted",

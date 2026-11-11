@@ -1875,7 +1875,6 @@
       "status": "Status:",
       "category": "Kategorie:",
       "statuses": {
-        "open": "Offen",
         "outstanding": "Ausstehend",
         "overdue": "Abgelaufen",
         "submitted": "Eingereicht",
