@@ -1201,6 +1201,7 @@
         "lockerCompartment": "Bike box no. {compartment}",
         "lockerBooking": "Bike box #{id}",
         "locker": "Bike box",
+        "lockerSystem": "Locker system",
         "unknownDoor": "Unknown door"
       }
     },

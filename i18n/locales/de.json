@@ -1554,6 +1554,7 @@
         "lockerCompartment": "Fahrradbox Nr. {compartment}",
         "lockerBooking": "Fahrradbox #{id}",
         "locker": "Fahrradbox",
+        "lockerSystem": "Schließfachanlage",
         "unknownDoor": "Unbekannte Tür"
       }
     },

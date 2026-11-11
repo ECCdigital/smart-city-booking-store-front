@@ -83,7 +83,9 @@ export function assignedCompartmentTitle(accessPoint, t) {
     return null;
   }
 
-  const label = accessPoint.label || t("mobileKey.accessPoint.title.locker");
+  // „Fahrradbox“ is the iFBS box alone; an Anlage without a name is one.
+  const label =
+    accessPoint.label || t("mobileKey.accessPoint.title.lockerSystem");
   return assigned.lockerBankName
     ? t("mobileKey.accessPoint.title.assignedCompartment", {
         label,

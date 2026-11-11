@@ -105,6 +105,15 @@ describe("accessPointTitle", () => {
       );
     });
 
+    it("calls an Anlage without a label a Schließfachanlage, never a bike box - that is iFBS alone", () => {
+      expect(accessPointTitle(assignedFach({ label: "" }), t)).toBe(
+        "Schließfachanlage — Schrank Quartiersschrank Hafen, Fach 3",
+      );
+      expect(
+        accessPointTitle(assignedFach({ label: "" }), translator("en")),
+      ).toBe("Locker system — cabinet Quartiersschrank Hafen, compartment 3");
+    });
+
     it("keeps the fixed Fach a door with its label", () => {
       expect(
         accessPointTitle(
