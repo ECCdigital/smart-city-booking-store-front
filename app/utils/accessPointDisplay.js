@@ -40,6 +40,11 @@ import {
  * @param {(key: string, params?: Object) => string} t vue-i18n's translator
  */
 export function accessPointTitle(accessPoint, t) {
+  const assigned = assignedCompartmentTitle(accessPoint, t);
+  if (assigned) {
+    return assigned;
+  }
+
   if (accessPoint?.type === "locker") {
     if (accessPoint.compartment) {
       return t("mobileKey.accessPoint.title.lockerCompartment", {
@@ -57,6 +62,38 @@ export function accessPointTitle(accessPoint, t) {
   }
 
   return accessPoint?.label || t("mobileKey.accessPoint.title.unknownDoor");
+}
+
+/**
+ * The name of a Fach the platform assigned at an Open Locker
+ * Schließfachanlage (`assignedCompartment`, backend tickets#1040): the
+ * Anlage (`label`), the Schließfachschrank and the number - „{Anlage} —
+ * Schrank {Name}, Fach {Nummer}“, without the Schrank where it is unknown.
+ * `null` for anything else, so a caller that names a door by its label
+ * elsewhere keeps doing so. The data decides, not the provider: a
+ * compartment the provider assigns (iFBS, Pareva) carries none.
+ *
+ * @param {Object|null|undefined} accessPoint
+ * @param {(key: string, params?: Object) => string} t vue-i18n's translator
+ * @returns {string|null}
+ */
+export function assignedCompartmentTitle(accessPoint, t) {
+  const assigned = accessPoint?.assignedCompartment;
+  if (accessPoint?.type !== "locker" || assigned?.number == null) {
+    return null;
+  }
+
+  const label = accessPoint.label || t("mobileKey.accessPoint.title.locker");
+  return assigned.lockerBankName
+    ? t("mobileKey.accessPoint.title.assignedCompartment", {
+        label,
+        lockerBank: assigned.lockerBankName,
+        number: assigned.number,
+      })
+    : t("mobileKey.accessPoint.title.assignedCompartmentNumber", {
+        label,
+        number: assigned.number,
+      });
 }
 
 /**

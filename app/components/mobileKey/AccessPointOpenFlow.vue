@@ -194,6 +194,7 @@ import AccessPointStatusScreen from "~/components/mobileKey/AccessPointStatusScr
 import AccessPointStepper from "~/components/mobileKey/AccessPointStepper.vue";
 import SupportContactLine from "~/components/mobileKey/SupportContactLine.vue";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
+import { assignedCompartmentTitle } from "~/utils/accessPointDisplay.js";
 import { useAccessNow } from "~/composables/useAccessClock.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import {
@@ -382,7 +383,14 @@ const passedResult = ref(null);
 const evidenceCollectedHere = ref([]);
 
 const bookingId = computed(() => String(props.booking.id));
-const accessPointLabel = computed(() => props.accessPoint.label || t("mobileKey.accessPointFallback"));
+// A Fach the platform assigned is named by Anlage, Schrank and number, so the
+// sheet says which Fach opens; anything else keeps its label.
+const accessPointLabel = computed(
+  () =>
+    assignedCompartmentTitle(props.accessPoint, t) ||
+    props.accessPoint.label ||
+    t("mobileKey.accessPointFallback"),
+);
 
 /**
  * The proof in hand, wherever it came from - the scan URL (#3) or the scanner

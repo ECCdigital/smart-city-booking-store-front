@@ -67,6 +67,58 @@ describe("accessPointTitle", () => {
     ).toBe("Fahrradbox");
   });
 
+  describe("a Fach the platform assigned (Open Locker)", () => {
+    const assignedFach = (overrides = {}) => ({
+      id: "anlage-1:9b2f6c1e",
+      type: "locker",
+      provider: "open-locker",
+      label: "Fächer Bahnhof",
+      compartment: null,
+      externalBookingId: null,
+      assignedCompartment: {
+        number: 3,
+        lockerBankName: "Quartiersschrank Hafen",
+      },
+      ...overrides,
+    });
+
+    it("names it by Anlage, Schließfachschrank and number - not a bike box", () => {
+      expect(accessPointTitle(assignedFach(), t)).toBe(
+        "Fächer Bahnhof — Schrank Quartiersschrank Hafen, Fach 3",
+      );
+    });
+
+    it("names it by Anlage and number where the Schließfachschrank is unknown", () => {
+      expect(
+        accessPointTitle(
+          assignedFach({
+            assignedCompartment: { number: 3, lockerBankName: null },
+          }),
+          t,
+        ),
+      ).toBe("Fächer Bahnhof — Fach 3");
+    });
+
+    it("names it in the language of the page", () => {
+      expect(accessPointTitle(assignedFach(), translator("en"))).toBe(
+        "Fächer Bahnhof — cabinet Quartiersschrank Hafen, compartment 3",
+      );
+    });
+
+    it("keeps the fixed Fach a door with its label", () => {
+      expect(
+        accessPointTitle(
+          {
+            type: "door",
+            provider: "open-locker",
+            label: "Quartiersschrank Hafen · Fach 3",
+          },
+          t,
+        ),
+      ).toBe("Quartiersschrank Hafen · Fach 3");
+    });
+  });
+
   it("lets type decide, not provider", () => {
     // The same provider that runs the lockers also runs doors; #13, #15.
     expect(
