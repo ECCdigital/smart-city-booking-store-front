@@ -184,7 +184,7 @@ import AccessPointCard from "~/components/mobileKey/AccessPointCard.vue";
 import AccessPointErrorScreen from "~/components/mobileKey/AccessPointErrorScreen.vue";
 import AccessPointOpenFlow from "~/components/mobileKey/AccessPointOpenFlow.vue";
 import AccessPointPanelButton from "~/components/mobileKey/AccessPointPanelButton.vue";
-import { assignedCompartmentTitle } from "~/utils/accessPointDisplay.js";
+import { accessPointName } from "~/utils/accessPointDisplay.js";
 import {
   ACCESS_ERRORS,
   isUnlocked,
@@ -234,14 +234,7 @@ const door = computed(() => readAccessPoint(props.accessPoint));
  * case the name is needed most: a refused door still has a label, and the
  * error screen says which door it is talking about or it says nothing useful.
  */
-// A Fach the platform assigned is named by Anlage, Schrank and number, so the
-// sheet says which Fach opens; anything else keeps its label.
-const accessPointLabel = computed(
-  () =>
-    assignedCompartmentTitle(props.accessPoint, t) ||
-    props.accessPoint.label ||
-    t("mobileKey.accessPointFallback"),
-);
+const accessPointLabel = computed(() => accessPointName(props.accessPoint, t));
 
 /**
  * The last status the flow reported. It was passed straight on before; the

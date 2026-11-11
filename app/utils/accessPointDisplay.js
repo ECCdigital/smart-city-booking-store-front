@@ -99,6 +99,25 @@ export function assignedCompartmentTitle(accessPoint, t) {
 }
 
 /**
+ * The name the open sheet and its stages say: a Fach the platform assigned
+ * by Anlage, Schrank and number ({@link assignedCompartmentTitle}), anything
+ * else by its label, „Der Zugang“ without one. Read off the payload, not off
+ * the read door: a refused door still has a name, and the error screen has
+ * to say which door it is talking about.
+ *
+ * @param {Object|null|undefined} accessPoint
+ * @param {(key: string, params?: Object) => string} t vue-i18n's translator
+ * @returns {string}
+ */
+export function accessPointName(accessPoint, t) {
+  return (
+    assignedCompartmentTitle(accessPoint, t) ||
+    accessPoint?.label ||
+    t("mobileKey.accessPointFallback")
+  );
+}
+
+/**
  * Whether the person has to enter a code at the door itself. Keyed by the
  * backend's `mode` (`remote | authorization | both`): `authorization` is the
  * backend's word for a door that takes a code or a card; `code` never came
