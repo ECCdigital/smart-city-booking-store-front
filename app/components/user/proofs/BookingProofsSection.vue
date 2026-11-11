@@ -25,7 +25,7 @@
         <!-- rejected or requested again: the reason -->
         <p
           v-if="reasonOf(field)"
-          class="text-sm text-red-700 dark:text-red-400 mt-1"
+          class="text-sm text-error mt-1"
         >
           {{ $t(reasonOf(field).key, { reason: reasonOf(field).reason }) }}
         </p>

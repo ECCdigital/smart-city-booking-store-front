@@ -38,10 +38,10 @@
     <p v-if="field.hint" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
       {{ field.hint }}
     </p>
-    <p v-if="view.reason" class="text-sm text-red-700 dark:text-red-400 mt-1">
+    <p v-if="view.reason" class="text-sm text-error mt-1">
       {{ $t(view.reasonKey, { reason: view.reason }) }}
     </p>
-    <p v-if="view.lateHint" class="text-sm text-red-700 dark:text-red-400 mt-1">
+    <p v-if="view.lateHint" class="text-sm text-error mt-1">
       {{ $t("customerUploads.lateHint", { tenant: tenantName }) }}
     </p>
 
