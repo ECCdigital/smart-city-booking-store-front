@@ -8,6 +8,39 @@
       "all": "All providers",
       "showOffers": "View offers"
     },
+    "greeting": {
+      "label": "Your bookings and keys",
+      "hello": "Hello",
+      "helloName": "Hello, {name}",
+      "privacyHint": "Your bookings and keys – visible to you only.",
+      "loading": "Loading …",
+      "nextBooking": {
+        "title": "Next booking",
+        "link": "View booking",
+        "none": "No upcoming booking.",
+        "all": "My bookings"
+      },
+      "key": {
+        "title": "Mobile Key",
+        "readyTitle": "Access for {day} is ready.",
+        "readyText": "Open the doors from {time} directly at the device.",
+        "activeTitle": "Your access is active now.",
+        "activeText": "Open the doors until {time} directly at the device.",
+        "none": "No upcoming access.",
+        "link": "Open keys"
+      },
+      "favorites": {
+        "title": "Favorites",
+        "count": "No saved offers | {count} saved offer | {count} saved offers",
+        "link": "View favorites"
+      }
+    },
+    "nearby": {
+      "title": "Near you",
+      "count": "No offer with a location | {count} offer with a location | {count} offers with a location",
+      "openSearch": "Open the map in the search",
+      "hint": "Click a pin to see the offer. Filters and the list are on the search page."
+    },
     "howItWorks": {
       "title": "How booking works",
       "steps": {

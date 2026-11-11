@@ -8,6 +8,39 @@
       "all": "Alle Anbieter",
       "showOffers": "Angebote ansehen"
     },
+    "greeting": {
+      "label": "Ihre Buchungen und Schlüssel",
+      "hello": "Guten Tag",
+      "helloName": "Guten Tag, {name}",
+      "privacyHint": "Ihre Buchungen und Schlüssel – nur für Sie sichtbar.",
+      "loading": "Wird geladen …",
+      "nextBooking": {
+        "title": "Nächste Buchung",
+        "link": "Buchung ansehen",
+        "none": "Keine anstehende Buchung.",
+        "all": "Meine Buchungen"
+      },
+      "key": {
+        "title": "Mobile Key",
+        "readyTitle": "Zutritt für {day} ist bereit.",
+        "readyText": "Türen öffnen Sie ab {time} Uhr direkt am Gerät.",
+        "activeTitle": "Ihr Zutritt ist jetzt aktiv.",
+        "activeText": "Türen öffnen Sie bis {time} Uhr direkt am Gerät.",
+        "none": "Kein anstehender Zutritt.",
+        "link": "Schlüssel öffnen"
+      },
+      "favorites": {
+        "title": "Favoriten",
+        "count": "Keine gemerkten Angebote | {count} gemerktes Angebot | {count} gemerkte Angebote",
+        "link": "Favoriten ansehen"
+      }
+    },
+    "nearby": {
+      "title": "In Ihrer Nähe",
+      "count": "Kein Angebot mit Standort | {count} Angebot mit Standort | {count} Angebote mit Standort",
+      "openSearch": "Karte in der Suche öffnen",
+      "hint": "Ein Klick auf einen Pin zeigt das Angebot. Filter und Liste gibt es auf der Suchseite."
+    },
     "howItWorks": {
       "title": "So funktioniert das Buchen",
       "steps": {

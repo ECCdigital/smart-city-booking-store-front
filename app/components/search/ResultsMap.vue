@@ -23,7 +23,9 @@
       :class="
         isFullscreen
           ? 'absolute inset-0'
-          : 'relative w-full lg:flex-1 lg:min-w-0 h-[80vh] my-2 mr-0.5 rounded'
+          : compact
+            ? 'relative w-full h-[28rem] rounded-2xl'
+            : 'relative w-full lg:flex-1 lg:min-w-0 h-[80vh] my-2 mr-0.5 rounded'
       "
     >
       <ClientOnly>
@@ -88,7 +90,7 @@
         @close-details="closeBookableDetails"
       />
 
-      <div class="absolute right-4 top-4 z-1001">
+      <div v-if="!compact" class="absolute right-4 top-4 z-1001">
         <div
           class="flex items-center gap-3 rounded-xl py-1.5"
           :class="isFullscreen ? 'pl-4' : ''"
@@ -157,7 +159,7 @@
       leave-to-class="translate-x-4 opacity-0"
     >
       <ResultsMapList
-        v-if="!isFullscreen || showList"
+        v-if="!compact && (!isFullscreen || showList)"
         v-model="currentBookable"
         :bookables="visibleBookables"
         :without-location="withoutLocation"
@@ -190,6 +192,11 @@ const props = defineProps({
   suitableCount: {
     type: Number,
     default: null,
+  },
+  // The start page's map: no list, no full screen, a fixed height.
+  compact: {
+    type: Boolean,
+    default: false,
   },
 });
 
