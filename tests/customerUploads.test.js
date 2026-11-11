@@ -613,12 +613,13 @@ describe("filterProofGroups", () => {
 
   it("filters by any of the chosen status options", () => {
     const by = (...statuses) => ids(filterProofGroups(groups, { statuses }));
-    expect(by("open")).toEqual(["open"]);
+    // No option „Offen“ any more: „Ausstehend“ covers open fields.
+    expect(by("open")).toEqual([]);
     expect(by("overdue")).toEqual(["rejLate", "late"]);
     expect(by("outstanding")).toEqual(["rej", "open"]);
     expect(by("submitted")).toEqual(["sub"]);
     expect(by("rejected")).toEqual(["rej", "rejLate"]);
-    expect(by("open", "submitted")).toEqual(["sub", "open"]);
+    expect(by("outstanding", "submitted")).toEqual(["sub", "rej", "open"]);
   });
 
   it("filters by „besonders schutzwürdig“", () => {
