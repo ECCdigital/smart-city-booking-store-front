@@ -1225,7 +1225,8 @@
         "title": "Not your compartment",
         "description": "{label} does not belong to your booking. Your compartment: {own}.",
         "description_several": "{label} does not belong to your booking. Your compartments: {own}.",
-        "description_unnamed": "{label} does not belong to your booking. Yours is another compartment of this locker system."
+        "description_unnamed": "{label} does not belong to your booking. Yours is another compartment of this locker system.",
+        "ownListed": "{list}; {place}"
       },
       "stale_scan_code": {
         "title": "Sticker out of date",
