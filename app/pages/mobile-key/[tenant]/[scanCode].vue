@@ -1,8 +1,8 @@
 <template>
   <div class="w-full max-w-xl mx-auto mb-10">
     <PageHeader
-      :title="$t('mobileKey.openDoor')"
-      :description="$t('mobileKey.scannedDescription')"
+      :title="wording.title"
+      :description="wording.description"
       class="mb-5"
     />
 
@@ -33,7 +33,7 @@
       <div>
         <h2 class="text-lg font-semibold">{{ $t("mobileKey.whichBooking") }}</h2>
         <p class="text-sm text-neutral-500">
-          {{ $t("mobileKey.severalBookingsMatch") }}
+          {{ wording.severalBookingsMatch }}
         </p>
       </div>
       <UButton
@@ -122,7 +122,9 @@ import {
   isUnlocked,
   readAccessPoint,
   readScanResolution,
+  scanBookingLookup,
 } from "~/utils/accessOpenFlow.js";
+import { accessPointName, scanPageWording } from "~/utils/accessPointDisplay.js";
 
 definePageMeta({
   requiresAuth: true,
@@ -163,18 +165,16 @@ const status = ref(undefined);
 const isOpen = computed(() => isUnlocked(status.value) === true);
 
 /**
- * The door by the name the sticker resolved to, kept apart from the door
- * itself: the payload can be refused while its label is perfectly good, and
- * that is the case where the error screen needs a name most.
+ * The door as the sticker resolved to it, kept apart from the door itself:
+ * the payload can be refused while its name is perfectly good, and that is
+ * the case where the error screen needs a name most.
  */
-const scannedLabel = ref(null);
+const scannedPoint = ref(null);
+
+/** Door or Fach: the frame of the page says which one was scanned. */
+const wording = computed(() => scanPageWording(scannedPoint.value, t));
 
 const responsePayload = (response) => response?.data ?? response;
-
-const BOOKING_QUERY = {
-  includeAccessPoints: "true",
-  includeBuffer: "true",
-};
 
 function fail(kind, reason = null) {
   errorKind.value = kind;
@@ -189,7 +189,7 @@ function fail(kind, reason = null) {
 async function start() {
   stage.value = "loading";
   accessPoint.value = null;
-  scannedLabel.value = null;
+  scannedPoint.value = null;
   booking.value = null;
   candidates.value = [];
   status.value = undefined;
@@ -204,7 +204,7 @@ async function start() {
       return;
     }
 
-    scannedLabel.value = resolution.accessPoint.label ?? null;
+    scannedPoint.value = resolution.accessPoint;
     accessPoint.value = readAccessPoint(resolution.accessPoint);
 
     // A door that does not say what it demands, or what it can do, is not
@@ -224,13 +224,15 @@ async function start() {
 /**
  * Asks for the bookings that are active for this door right now. Only when
  * none is, the wider list is fetched as well - it is what tells "too early"
- * apart from "too late" and from "no booking at all".
+ * apart from "too late" and from "no booking at all". A Fach is asked for at
+ * its Anlage (`scanBookingLookup`), both times, and compared by its own id.
  */
 async function resolveBooking() {
+  const lookup = scanBookingLookup(accessPoint.value);
   const active =
     responsePayload(
-      await getBookingsForAccessPoint(accessPoint.value.id, {
-        ...BOOKING_QUERY,
+      await getBookingsForAccessPoint(lookup.accessPointId, {
+        ...lookup.query,
         filter: "active",
         includeEligibility: "true",
       }),
@@ -249,8 +251,8 @@ async function resolveBooking() {
   if (outcome.error === ACCESS_ERRORS.NO_BOOKING) {
     context.otherBookings =
       responsePayload(
-        await getBookingsForAccessPoint(accessPoint.value.id, {
-          ...BOOKING_QUERY,
+        await getBookingsForAccessPoint(lookup.accessPointId, {
+          ...lookup.query,
           filter: "all",
           // Eligibility here is not about opening - it is what keeps unpaid
           // bookings in the answer, so someone who has one is told when it
@@ -298,10 +300,11 @@ const bookingTimeRange = (candidate) =>
   t("mobileKey.bookingNumber", { id: candidate?.id });
 
 /**
- * The door by name - the wording never says "the door", it says which one.
- * Until the sticker resolves there is no name to say.
+ * The door by name - the wording never says "the door", it says which one;
+ * a Fach by Anlage, Schrank and number. Until the sticker resolves there is
+ * no name to say.
  */
-const accessPointLabel = computed(() => scannedLabel.value || t("mobileKey.accessPointFallback"));
+const accessPointLabel = computed(() => accessPointName(scannedPoint.value, t));
 
 watch([tenantId, scanCode], () => {
   start();

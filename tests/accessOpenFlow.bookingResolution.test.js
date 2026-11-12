@@ -7,6 +7,7 @@ import {
   mapBlockingReason,
   readScanResolution,
   remoteOperable,
+  scanBookingLookup,
 } from "~/utils/accessOpenFlow.js";
 
 const NOW = Date.UTC(2026, 7, 12, 18, 30);
@@ -566,6 +567,165 @@ describe("decideBookingOutcome", () => {
 
   it("reports no booking at all when nothing matches", () => {
     expect(decide()).toEqual({
+      screen: "error",
+      error: ACCESS_ERRORS.NO_BOOKING,
+      booking: null,
+      blockingReason: null,
+    });
+  });
+});
+
+describe("scanBookingLookup", () => {
+  it("asks for the bookings at the Anlage of a scanned Fach, with its Fächer", () => {
+    expect(
+      scanBookingLookup({ id: "anlage-1:fach-3", lockerSystemId: "anlage-1" }),
+    ).toEqual({
+      accessPointId: "anlage-1",
+      query: {
+        includeAccessPoints: "true",
+        includeBuffer: "true",
+        includeLockers: "true",
+      },
+    });
+  });
+
+  it("asks for the bookings at a scanned door as before", () => {
+    expect(scanBookingLookup({ id: "door-1", type: "door" })).toEqual({
+      accessPointId: "door-1",
+      query: { includeAccessPoints: "true", includeBuffer: "true" },
+    });
+  });
+});
+
+/**
+ * A scanned Fach of an Open Locker Schließfachanlage: resolve-scan names it
+ * `<anlage>:<Fach-UUID>`, and a booking read at the Anlage with
+ * `includeLockers` lists its Fächer under the same ids - in `accessPointIds`,
+ * in the eligibility and in `accessPoints` with their windows.
+ */
+describe("decideBookingOutcome at a scanned Fach", () => {
+  const FACH_3 = "anlage-1:fach-3";
+  const FACH_7 = "anlage-1:fach-7";
+
+  const fachEntry = (id, number, overrides = {}) => ({
+    id,
+    type: "locker",
+    label: "Fächer Bahnhof",
+    accessFrom: NOW - HOUR,
+    accessTo: NOW + HOUR,
+    assignedCompartment: { number, lockerBankName: "Labor Fachbank 1" },
+    ...overrides,
+  });
+
+  const fachBooking = (fachIds, overrides = {}) =>
+    booking({
+      accessPointIds: ["anlage-1", ...fachIds],
+      accessPoints: fachIds.map((id, index) => fachEntry(id, index + 1)),
+      accessEligibility: {
+        blockingReasons: [],
+        primaryBlockingReason: null,
+        operableAccessPointIds: fachIds,
+        remoteOperableAccessPointIds: fachIds,
+      },
+      ...overrides,
+    });
+
+  const decideFach = (overrides = {}) => decide({ accessPointId: FACH_3, ...overrides });
+
+  it("opens the scanned Fach with the booking that holds it", () => {
+    const own = fachBooking([FACH_3]);
+
+    expect(decideFach({ activeBookings: [own] })).toEqual({
+      screen: "ready",
+      booking: own,
+    });
+  });
+
+  it("opens the scanned Fach of a booking that holds several", () => {
+    const several = fachBooking([FACH_7, FACH_3]);
+
+    expect(decideFach({ activeBookings: [several] })).toEqual({
+      screen: "ready",
+      booking: several,
+    });
+  });
+
+  it("asks which booking where several hold the scanned Fach", () => {
+    const first = fachBooking([FACH_3], { id: "B-1042" });
+    const second = fachBooking([FACH_3], { id: "B-1043" });
+
+    expect(decideFach({ activeBookings: [first, second] })).toEqual({
+      screen: "select",
+      bookings: [first, second],
+    });
+  });
+
+  it("does not open the scanned Fach with a booking that holds another one", () => {
+    const other = fachBooking([FACH_7]);
+
+    expect(decideFach({ activeBookings: [other] }).screen).toBe("error");
+  });
+
+  it("says not yet before the window of the Fach", () => {
+    const upcoming = fachBooking([FACH_3], {
+      isCommitted: true,
+      isRejected: false,
+      accessEligibility: undefined,
+      timeBegin: NOW + 2 * HOUR,
+      timeEnd: NOW + 3 * HOUR,
+    });
+
+    expect(decideFach({ otherBookings: [upcoming] })).toEqual({
+      screen: "error",
+      error: ACCESS_ERRORS.TOO_EARLY,
+      booking: upcoming,
+      blockingReason: null,
+    });
+  });
+
+  it("says over after the window of the Fach", () => {
+    const past = fachBooking([FACH_3], {
+      isCommitted: true,
+      isRejected: false,
+      accessEligibility: undefined,
+      timeBegin: NOW - 3 * HOUR,
+      timeEnd: NOW - 2 * HOUR,
+    });
+
+    expect(decideFach({ otherBookings: [past] })).toEqual({
+      screen: "error",
+      error: ACCESS_ERRORS.TOO_LATE,
+      booking: past,
+      blockingReason: null,
+    });
+  });
+
+  it("reads the window of the scanned Fach for an active booking outside it", () => {
+    const early = fachBooking([FACH_3], {
+      accessPoints: [
+        fachEntry(FACH_3, 3, {
+          accessFrom: NOW + HOUR,
+          accessTo: NOW + 2 * HOUR,
+        }),
+      ],
+      accessEligibility: {
+        blockingReasons: ["outside_access_window"],
+        primaryBlockingReason: "outside_access_window",
+        operableAccessPointIds: [],
+        remoteOperableAccessPointIds: [],
+      },
+    });
+
+    expect(decideFach({ activeBookings: [early] })).toEqual({
+      screen: "error",
+      error: ACCESS_ERRORS.TOO_EARLY,
+      booking: early,
+      blockingReason: "outside_access_window",
+    });
+  });
+
+  it("reports no booking where none is at the Anlage", () => {
+    expect(decideFach()).toEqual({
       screen: "error",
       error: ACCESS_ERRORS.NO_BOOKING,
       booking: null,
