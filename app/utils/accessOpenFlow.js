@@ -454,6 +454,36 @@ function outOfWindowOutcome(bookings, now) {
 }
 
 /**
+ * The Fach of an Open Locker Schließfachanlage an access point stands for,
+ * as the person looks for it - number and Schrank, nothing else: the one the
+ * platform assigned to a booking (`assignedCompartment`, backend
+ * tickets#1040), or the one a scan resolved to (`compartment` as an object,
+ * backend tickets#1057). `null` for anything else - a door, the box number
+ * string of iFBS, a Fach without a number.
+ *
+ * @param {Object|null|undefined} accessPoint
+ * @returns {{ number: number, lockerBankName: string|null }|null}
+ */
+export function compartmentOf(accessPoint) {
+  if (accessPoint?.type !== "locker") {
+    return null;
+  }
+
+  const compartment =
+    accessPoint.assignedCompartment ??
+    (accessPoint.compartment && typeof accessPoint.compartment === "object"
+      ? accessPoint.compartment
+      : null);
+
+  return compartment?.number == null
+    ? null
+    : {
+        number: compartment.number,
+        lockerBankName: compartment.lockerBankName ?? null,
+      };
+}
+
+/**
  * The one place an access-point payload enters the flow, and the place a future
  * change of its form lands.
  *
@@ -876,7 +906,7 @@ export function decideScanMatch(
     if (sameId(scanned.lockerSystemId, lockerSystemOf(expectedAccessPointId))) {
       return {
         ...noMatch(SCAN_MISMATCHES.WRONG_COMPARTMENT, label),
-        scannedCompartment: scannedCompartmentOf(scanned),
+        scannedCompartment: compartmentOf(scanned),
       };
     }
     return noMatch(SCAN_MISMATCHES.WRONG_DOOR, label);
@@ -909,25 +939,6 @@ function lockerSystemOf(accessPointId) {
   const separator = id.indexOf(":");
 
   return separator > 0 ? id.slice(0, separator) : null;
-}
-
-/**
- * @private
- * The Fach a scan resolved to as the person looks for it - number and
- * Schrank, nothing else of what resolve-scan says about it.
- */
-function scannedCompartmentOf(scanned) {
-  const compartment =
-    scanned.compartment && typeof scanned.compartment === "object"
-      ? scanned.compartment
-      : null;
-
-  return compartment
-    ? {
-        number: compartment.number ?? null,
-        lockerBankName: compartment.lockerBankName ?? null,
-      }
-    : null;
 }
 
 /**

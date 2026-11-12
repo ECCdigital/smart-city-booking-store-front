@@ -17,8 +17,8 @@
  * already that button, and the row shows none of its own.
  */
 
-import { ACCESS_ERRORS } from "~/utils/accessOpenFlow.js";
-import { compartmentOf, compartmentPlace } from "~/utils/accessPointDisplay.js";
+import { ACCESS_ERRORS, compartmentOf } from "~/utils/accessOpenFlow.js";
+import { compartmentPlace } from "~/utils/accessPointDisplay.js";
 import { bookingWindow, doorWindow, findDoor } from "~/utils/accessWindow.js";
 
 const searchPath = (tenantId) => `/t/${tenantId}/search`;
