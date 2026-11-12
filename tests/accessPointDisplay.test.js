@@ -508,3 +508,43 @@ describe("accessPointLock", () => {
     }
   });
 });
+
+describe("the scanner's word for another Fach of the same Anlage", () => {
+  // How `AccessPointScanEvidence.vue` puts it together: both Fächer in the
+  // short form, the scanned one first.
+  const said = (translate, scanned, own) =>
+    translate("mobileKey.evidence.wrong_compartment.description", {
+      scanned: compartmentPlace(scanned, translate),
+      own: compartmentPlace(own, translate),
+    });
+
+  it("names the scanned Fach and the person's own", () => {
+    expect(t("mobileKey.evidence.wrong_compartment.title")).toBe(
+      "Anderes Fach",
+    );
+    expect(
+      said(
+        t,
+        { number: 7, lockerBankName: "Y" },
+        { number: 3, lockerBankName: "X" },
+      ),
+    ).toBe("Das ist Schrank Y, Fach 7. Ihr Fach: Schrank X, Fach 3.");
+  });
+
+  it("speaks the language of the page", () => {
+    const english = translator("en");
+
+    expect(english("mobileKey.evidence.wrong_compartment.title")).toBe(
+      "Different compartment",
+    );
+    expect(
+      said(
+        english,
+        { number: 7, lockerBankName: "Y" },
+        { number: 3, lockerBankName: "X" },
+      ),
+    ).toBe(
+      "This is cabinet Y, compartment 7. Your compartment: cabinet X, compartment 3.",
+    );
+  });
+});

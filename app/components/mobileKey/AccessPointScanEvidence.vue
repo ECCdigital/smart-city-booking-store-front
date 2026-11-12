@@ -115,6 +115,25 @@
       </template>
     </UAlert>
 
+    <!--
+      No way out either: the other Fach of the same Anlage is not the person's
+      to open. Naming both is the way - it tells them where to scan instead.
+    -->
+    <UAlert
+      v-else-if="lastMiss?.mismatch === 'wrong_compartment'"
+      class="mt-3"
+      color="warning"
+      variant="subtle"
+      icon="i-lucide-tag"
+      :title="t('mobileKey.evidence.wrong_compartment.title')"
+      :description="
+        t('mobileKey.evidence.wrong_compartment.description', {
+          scanned: scannedCompartmentPlace,
+          own: ownCompartmentPlace,
+        })
+      "
+    />
+
     <!-- No way out: a jump there would be an arrival at a stranger's tenant. -->
     <UAlert
       v-else-if="lastMiss?.mismatch === 'wrong_tenant'"
@@ -158,7 +177,7 @@
 /**
  * The proof of presence, collected where the person stands: the camera reads
  * the sticker next to the door, the server says which door it belongs to, and
- * what comes back either is the proof or is one of three misses.
+ * what comes back either is the proof or is one of four misses.
  *
  * Two jobs are deliberately not here. **Decoding** is the library's, and it
  * sits alone in this component so swapping it stays cheap (§ 5.1). **The
@@ -170,6 +189,11 @@ import { QrcodeStream, setZXingModuleOverrides } from "vue-qrcode-reader";
 
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { decideScanMatch, readScannedCode } from "~/utils/accessOpenFlow.js";
+import {
+  accessPointName,
+  compartmentOf,
+  compartmentPlace,
+} from "~/utils/accessPointDisplay.js";
 
 // The WASM file would come from fastly.jsdelivr.net out of the box. Not
 // acceptable for opening a door - it lies under public/wasm/ and has to match
@@ -236,10 +260,12 @@ const torchOn = ref(false);
 
 /**
  * The last scan that came back a miss, as one fact: which miss it was, the
- * door it named and the page that door is on. One ref rather than three, so
- * the alert cannot outlive the scan it belongs to.
+ * door it named, the page that door is on and - for another Fach of the same
+ * Anlage - that Fach. One ref rather than four, so the alert cannot outlive
+ * the scan it belongs to.
  *
- * @type {import("vue").Ref<{ mismatch: string, label: string, path: string }|null>}
+ * @type {import("vue").Ref<{ mismatch: string, label: string, path: string,
+ *   compartment: { number: number|null, lockerBankName: string|null }|null }|null>}
  */
 const lastMiss = ref(null);
 
@@ -248,7 +274,7 @@ const resolving = ref(false);
 
 /**
  * That the code was read, and read as *this* door's. Only a hit sets it; the
- * three misses have their own, staying word in the alert below and must not
+ * misses have their own, staying word in the alert below and must not
  * light up with it. It is never taken back, because the stage it belongs to
  * ends with it.
  */
@@ -261,11 +287,25 @@ const hit = ref(false);
  */
 const handledCode = ref("");
 
-const accessPointLabel = computed(() => props.accessPoint.label || t("mobileKey.accessPointFallback"));
+const accessPointLabel = computed(() => accessPointName(props.accessPoint, t));
 
 /** A door that names none is still a door to switch to, just an unnamed one. */
 const scannedDoorLabel = computed(
   () => lastMiss.value?.label || t("mobileKey.evidence.wrong_door.unnamed"),
+);
+
+/** The other Fach just scanned, as the person finds it in the Anlage. */
+const scannedCompartmentPlace = computed(
+  () =>
+    compartmentPlace(lastMiss.value?.compartment, t) ||
+    t("mobileKey.evidence.wrong_compartment.unnamed"),
+);
+
+/** The person's own Fach - the one this panel stands for. */
+const ownCompartmentPlace = computed(
+  () =>
+    compartmentPlace(compartmentOf(props.accessPoint), t) ||
+    accessPointLabel.value,
 );
 
 /**
@@ -351,6 +391,7 @@ async function applyScanOutcome(outcome, scanned) {
           mismatch: outcome.mismatch,
           label: outcome.scannedLabel || "",
           path: scanned.path,
+          compartment: outcome.scannedCompartment ?? null,
         };
 
   if (outcome.matched) {
