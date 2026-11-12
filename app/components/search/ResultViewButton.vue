@@ -10,6 +10,8 @@
         :color="view === option.value ? 'secondary' : 'neutral'"
         :variant="view === option.value ? 'solid' : 'soft'"
         class="first:rounded-l-lg last:rounded-r-lg px-3"
+        :aria-label="option.label"
+        :aria-pressed="view === option.value"
         :style="
           view === option.value ? { color: 'var(--ui-secondary-contrast)' } : undefined
         "

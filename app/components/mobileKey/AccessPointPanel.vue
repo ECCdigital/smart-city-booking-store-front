@@ -39,6 +39,7 @@
             color="primary"
             size="md"
             class="shrink-0"
+            :aria-label="$t('mobileKey.close')"
             @click="onCloseDialog"
           />
         </div>
@@ -122,6 +123,7 @@
               color="primary"
               size="md"
               class="shrink-0"
+              :aria-label="$t('mobileKey.close')"
               @click="onCloseDialog"
             />
           </div>
