@@ -399,7 +399,7 @@
     "payment_failed": "Payment could not be started. Please try again or choose another payment method.",
     "payment_provider_unavailable": "The selected payment method is not available right now.",
     "locker_unavailable": "The booking could not be completed (locker reservation). Please check the time slot or your selection.",
-    "compartments_unavailable": "No compartment is left for the selected period. Please choose another period.",
+    "compartments_unavailable": "This period was just booked out. Please choose another period.",
     "invoice_payment_not_permitted": "Invoice payment is not enabled for your account.",
     "capacity_exceeded": "The maximum capacity for this object has been reached.",
     "max_amount_per_booking_exceeded": "A single booking may include at most {maxAmountPerBooking} units of this object.",
@@ -1180,6 +1180,7 @@
     "phoneSupport": "Phone support:",
     "contactPersonLabel": "Contact person:",
     "bikeBoxHelp": "Help with the bike box",
+    "compartmentHelp": "Help with the compartment",
     "emergencyContact": "Emergency contact and what to do if something fails",
     "checkingBookings": "Checking your bookings...",
     "severalBookingsMatch": "Several of your bookings match this door right now.",
@@ -1231,9 +1232,12 @@
       },
       "codeHint": "Enter the code at the door",
       "title": {
+        "assignedCompartment": "{label} — cabinet {lockerBank}, compartment {number}",
+        "assignedCompartmentNumber": "{label} — compartment {number}",
         "lockerCompartment": "Bike box no. {compartment}",
         "lockerBooking": "Bike box #{id}",
         "locker": "Bike box",
+        "lockerSystem": "Locker system",
         "unknownDoor": "Unknown door"
       }
     },
