@@ -130,9 +130,12 @@
 
       <!--
         Leaflet's own zoom control is off; these two buttons zoom instead.
+        The compact map drops the box's padding, so they sit on the same
+        edge as the start page's location button.
       -->
       <div
-        class="absolute top-4 left-4 z-1001 flex flex-col gap-1 rounded-xl p-1.5"
+        class="absolute top-4 left-4 z-1001 flex flex-col gap-1 rounded-xl"
+        :class="compact ? '' : 'p-1.5'"
       >
         <UButton
           icon="i-lucide-plus"
