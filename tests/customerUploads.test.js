@@ -539,27 +539,59 @@ describe("the missing proofs of „Meine Buchungen“ (ECCdigital/tickets#828)",
     ...overrides,
   });
 
-  it("counts the required fields still to hand in, with the earliest deadline", () => {
+  it("counts every proof still to hand in, required or not, with the next deadline", () => {
     const booking = bookingWith("missing", [
       field({ fieldId: "a", deadline: NOW + 9 * DAY }),
       field({ fieldId: "b", state: "rejected", deadline: NOW + 4 * DAY }),
       field({ fieldId: "c", state: "submitted", deadline: NOW + 1 * DAY }),
       field({ fieldId: "d", state: "fulfilled", deadline: NOW + 1 * DAY }),
-      field({ fieldId: "e", required: false, deadline: NOW + 1 * DAY }),
+      field({ fieldId: "e", required: false, deadline: NOW + 2 * DAY }),
+      field({
+        fieldId: "f",
+        required: false,
+        state: "overdue",
+        deadline: NOW - DAY,
+        pastDeadline: true,
+      }),
     ]);
 
     expect(missingProofsOf(booking)).toEqual({
-      count: 2,
-      deadline: NOW + 4 * DAY,
-      nextDeadline: NOW + 4 * DAY,
+      count: 4,
+      deadline: NOW + 2 * DAY,
+      nextDeadline: NOW + 2 * DAY,
       overdue: false,
       beforeRelease: false,
     });
     expect(missingProofsChipOf(booking)).toEqual({
-      count: 2,
-      deadline: NOW + 4 * DAY,
+      count: 4,
+      deadline: NOW + 2 * DAY,
       color: "warning",
       labelKey: "customerUploads.missingChip.withDeadline",
+    });
+  });
+
+  it("names a passed deadline only where no other is left", () => {
+    const passed = field({
+      state: "overdue",
+      deadline: NOW - DAY,
+      pastDeadline: true,
+    });
+    expect(missingProofsOf(bookingWith("overdue", [passed])).deadline).toBe(
+      NOW - DAY,
+    );
+    // Due before the release: that, not the passed date.
+    expect(
+      missingProofsChipOf(
+        bookingWith("overdue", [
+          passed,
+          field({ fieldId: "f2", timing: "beforeRelease", deadline: null }),
+        ]),
+      ),
+    ).toMatchObject({
+      count: 2,
+      deadline: null,
+      color: "error",
+      labelKey: "customerUploads.missingChip.beforeRelease",
     });
   });
 
@@ -652,7 +684,7 @@ describe("the missing proofs of „Meine Buchungen“ (ECCdigital/tickets#828)",
     ).toEqual({ bookingCount: 1, nextDeadline: null, overdue: true });
   });
 
-  it("the banner's choice lists the bookings by deadline, a passed one first, then by start", () => {
+  it("the banner's choice lists overdue bookings first, then by deadline, then by start", () => {
     const list = missingProofBookingsOf([
       bookingWith("missing", [field({ deadline: NOW + 6 * DAY })], {
         id: "later",

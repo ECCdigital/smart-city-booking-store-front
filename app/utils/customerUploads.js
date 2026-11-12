@@ -407,17 +407,20 @@ const earliest = (deadlines) => {
 };
 
 /**
- * The required proofs of a booking still missing:
- * read off the backend's state of the booking (`missing` or `overdue`) and
- * its required fields that are open, rejected or overdue - no rule of its
- * own for deadlines. Null where nothing required is missing.
+ * The proofs of a booking still to hand in, where a required one is
+ * missing: read off the backend's state of the booking (`missing` or
+ * `overdue`); then every field, required or not, that is open, rejected or
+ * overdue counts - no rule of its own for deadlines. Null where nothing
+ * required is missing.
  *
  * @param {Object} booking As `GET /api/bookings` answers it
  * @returns {{ count: number, deadline: number|null, overdue: boolean,
- *   nextDeadline: number|null, beforeRelease: boolean }|null} `deadline` is the earliest deadline of
- *   the missing fields, `nextDeadline` the earliest one not passed yet,
- *   `overdue` whether the backend counts the booking overdue,
- *   `beforeRelease` whether one of them is due before the release.
+ *   nextDeadline: number|null, beforeRelease: boolean }|null} `count` is
+ *   the number of those fields, `nextDeadline` their earliest deadline not
+ *   passed yet, `beforeRelease` whether one of them is due before the
+ *   release, `deadline` the date to name: the next deadline, else none for
+ *   one due before the release, else the earliest passed one. `overdue` is
+ *   whether the backend counts the booking overdue.
  */
 export function missingProofsOf(booking) {
   const state = booking?.customerUploadState?.state;
@@ -427,30 +430,33 @@ export function missingProofsOf(booking) {
   ) {
     return null;
   }
-  const fields = customerUploadFieldsOf(booking).filter(
-    (field) => field.required && MISSING_FIELD_STATES.includes(field.state),
+  const fields = customerUploadFieldsOf(booking).filter((field) =>
+    MISSING_FIELD_STATES.includes(field.state),
   );
-  if (fields.length === 0) return null;
+  if (!fields.some((field) => field.required)) return null;
+  const nextDeadline = earliest(
+    fields.filter((field) => !field.pastDeadline).map((field) => field.deadline),
+  );
+  const beforeRelease = fields.some(
+    (field) => field.timing === UPLOAD_TIMING_BEFORE_RELEASE,
+  );
   return {
     count: fields.length,
-    deadline: earliest(fields.map((field) => field.deadline)),
-    nextDeadline: earliest(
-      fields
-        .filter((field) => !field.pastDeadline)
-        .map((field) => field.deadline),
-    ),
+    deadline:
+      nextDeadline ??
+      (beforeRelease ? null : earliest(fields.map((field) => field.deadline))),
+    nextDeadline,
     overdue: state === BOOKING_PROOF_STATE.OVERDUE,
-    beforeRelease: fields.some(
-      (field) => field.timing === UPLOAD_TIMING_BEFORE_RELEASE,
-    ),
+    beforeRelease,
   };
 }
 
 /**
- * The chip „N Nachweise fehlen · bis …“ on the card of „Meine Buchungen“:
- * the number of missing required proofs and
- * their earliest deadline, red once the backend counts the booking
- * overdue. Null where nothing required is missing.
+ * The chip „N Nachweise fehlen · bis …“ on the card of „Meine Buchungen“
+ * and in the banner's choice: the number of proofs still to hand in and the
+ * next deadline, or „vor Freigabe“ ({@link missingProofsOf}), red once the
+ * backend counts the booking overdue. Null where nothing required is
+ * missing.
  *
  * @param {Object} booking
  * @returns {{ count: number, deadline: number|null, color: string,
@@ -496,8 +502,8 @@ export function missingProofsBannerOf(bookings = []) {
 /**
  * The bookings whose required proofs are still missing, for the dialog of
  * the banner above „Meine Buchungen“: each with {@link missingProofsOf},
- * the earliest deadline first, a passed one before the rest, then the
- * earlier start; a booking without a deadline last.
+ * one the backend counts overdue first, then the earlier deadline it
+ * names, then the earlier start; a booking without a deadline last.
  *
  * @param {Object[]} bookings As `GET /api/bookings` answers them
  * @returns {Array<{ booking: Object, count: number, deadline: number|null,
@@ -513,6 +519,7 @@ export function missingProofBookingsOf(bookings = []) {
     .filter(Boolean)
     .sort(
       (a, b) =>
+        Number(b.overdue) - Number(a.overdue) ||
         at(a.deadline) - at(b.deadline) ||
         at(a.booking.timeBegin) - at(b.booking.timeBegin),
     );
