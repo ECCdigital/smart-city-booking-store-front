@@ -25,61 +25,19 @@
         </template>
       </i18n-t>
 
-      <section
-        :id="proofAnchorId(booking.id)"
-        class="border-2 border-gray-200 dark:border-gray-700 rounded-xl mb-5 overflow-hidden scroll-mt-24"
-      >
-        <div
-          class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3"
-        >
-          <UBadge
-            color="neutral"
-            variant="subtle"
-            class="mb-1"
-            :label="$t('customerUploads.bookingNumber', { id: booking.id })"
-          />
-          <h2 class="font-bold text-lg leading-tight">{{ title }}</h2>
-          <p
-            v-if="booking.timeBegin"
-            class="text-sm text-primary font-semibold"
-          >
-            {{ formatDateRange(booking.timeBegin, booking.timeEnd) }}
-          </p>
-        </div>
-        <div class="p-4 space-y-3">
-          <p
-            v-if="fields.length === 0"
-            class="text-gray-600 dark:text-gray-400"
-          >
-            {{ $t("customerUploads.nothingMissing") }}
-          </p>
-          <CustomerUploadFieldCard
-            v-for="field in fields"
-            :id="proofAnchorId(booking.id, field.fieldId)"
-            :key="field.fieldId"
-            class="scroll-mt-24"
-            :booking="booking"
-            :field="field"
-            :tenant-name="tenant.name"
-            :link="link"
-            @state="onState"
-          />
-        </div>
-        <ProofSubmitBar
-          v-if="fields.length > 0"
-          :booking="booking"
-          :tenant-name="tenant.name"
-          :link="link"
-          @state="onState"
-        />
-      </section>
+      <ProofBookingPanel
+        :booking="booking"
+        :tenant-name="tenant.name"
+        :link="link"
+        :target-field-id="targetField"
+        @state="onState"
+      />
     </template>
   </div>
 </template>
 <script setup>
 import BookingsSkeleton from "~/components/user/bookings/BookingsSkeleton.vue";
-import CustomerUploadFieldCard from "~/components/user/proofs/CustomerUploadFieldCard.vue";
-import ProofSubmitBar from "~/components/user/proofs/ProofSubmitBar.vue";
+import ProofBookingPanel from "~/components/user/proofs/ProofBookingPanel.vue";
 import {
   PROOF_DRAFTS_KEY,
   createProofDrafts,
@@ -89,10 +47,7 @@ import { useCustomerUploads } from "~/composables/api/useCustomerUploads.js";
 import {
   customerUploadErrorOf,
   linkRefusalOf,
-  pendingProofGroups,
-  proofAnchorId,
 } from "~/utils/customerUploads.js";
-import { useFormatting } from "~/composables/utils/useFormatting.js";
 
 /**
  * The page „Nachweise einreichen“ of a guest: the
@@ -121,7 +76,6 @@ const one = (value) => (Array.isArray(value) ? value[0] : value);
 const link = computed(() => one(route.query.link) ?? "");
 const targetField = computed(() => one(route.query.field) ?? null);
 
-const { formatDateRange } = useFormatting();
 const { read } = useCustomerUploads({ link: link.value });
 
 const drafts = createProofDrafts();
@@ -147,19 +101,6 @@ const answer = computed(() => result.value?.answer ?? null);
 const tenant = computed(() => answer.value?.tenant ?? { id: "", name: "" });
 const booking = computed(() => answer.value?.booking ?? null);
 
-/** The fields not checked yet, as on the page under the account. */
-const fields = computed(() => {
-  if (!booking.value) return [];
-  const [group] = pendingProofGroups([booking.value]);
-  return group?.bookings[0]?.fields ?? [];
-});
-
-const title = computed(
-  () =>
-    booking.value?.bookableItems?.[0]?._bookableUsed?.title ||
-    t("booking.unknownBookable"),
-);
-
 // The data of `useAsyncData` is shallow: the new state takes the place of
 // the whole answer, or the page would not show it.
 function onState(customerUploadState) {
@@ -173,22 +114,4 @@ function onState(customerUploadState) {
     },
   };
 }
-
-// The field the mail names, scrolled into view once it is there.
-const scrolled = ref(false);
-watch(
-  fields,
-  async () => {
-    if (!import.meta.client || scrolled.value || !targetField.value) return;
-    await nextTick();
-    const element = document.getElementById(
-      proofAnchorId(booking.value?.id ?? "", targetField.value),
-    );
-    if (element) {
-      scrolled.value = true;
-      element.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  },
-  { immediate: true },
-);
 </script>

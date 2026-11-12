@@ -468,13 +468,38 @@ export function missingProofsChipOf(booking) {
  *   overdue: boolean }|null}
  */
 export function missingProofsBannerOf(bookings = []) {
-  const missing = bookings.map(missingProofsOf).filter(Boolean);
+  const missing = missingProofBookingsOf(bookings);
   if (missing.length === 0) return null;
   return {
     bookingCount: missing.length,
     nextDeadline: earliest(missing.map((entry) => entry.nextDeadline)),
     overdue: missing.some((entry) => entry.overdue),
   };
+}
+
+/**
+ * The bookings whose required proofs are still missing, for the dialog of
+ * the banner above „Meine Buchungen“: each with {@link missingProofsOf},
+ * the earliest deadline first, a passed one before the rest, then the
+ * earlier start; a booking without a deadline last.
+ *
+ * @param {Object[]} bookings As `GET /api/bookings` answers them
+ * @returns {Array<{ booking: Object, count: number, deadline: number|null,
+ *   overdue: boolean, nextDeadline: number|null }>}
+ */
+export function missingProofBookingsOf(bookings = []) {
+  const at = (value) => (typeof value === "number" ? value : Infinity);
+  return bookings
+    .map((booking) => {
+      const missing = missingProofsOf(booking);
+      return missing ? { booking, ...missing } : null;
+    })
+    .filter(Boolean)
+    .sort(
+      (a, b) =>
+        at(a.deadline) - at(b.deadline) ||
+        at(a.booking.timeBegin) - at(b.booking.timeBegin),
+    );
 }
 
 /**
@@ -487,84 +512,21 @@ export function hasPendingProofs(booking) {
   );
 }
 
+/**
+ * The fields the page „Nachweise einreichen“ shows for a booking: every one
+ * that is not checked. A checked field is only in the booking details.
+ *
+ * @param {Object} booking
+ * @returns {CustomerUploadField[]}
+ */
+export function pendingProofFieldsOf(booking) {
+  return customerUploadFieldsOf(booking).filter(
+    (field) => field.state !== S.FULFILLED,
+  );
+}
+
 /** What the customer has to do first: rejected, overdue, open, submitted. */
 const URGENCY = [S.REJECTED, S.OVERDUE, S.OPEN, S.SUBMITTED];
-
-const rankOf = (state) => {
-  const rank = URGENCY.indexOf(state);
-  return rank === -1 ? URGENCY.length : rank;
-};
-
-/**
- * How urgent the proofs of a booking are: the rank of its most urgent field
- * in the order of {@link URGENCY}, then the earliest deadline among the
- * fields of that rank, then the start of the booking. Read off the
- * backend's states and deadlines - no rule of its own for deadlines.
- *
- * @param {{ booking: Object, fields: CustomerUploadField[] }} entry
- * @returns {[number, number, number]} Smaller is more urgent.
- */
-export function proofUrgencyOf({ booking, fields }) {
-  const rank = Math.min(...fields.map((field) => rankOf(field.state)));
-  const deadlines = fields
-    .filter((field) => rankOf(field.state) === rank)
-    .map((field) => field.deadline)
-    .filter((deadline) => typeof deadline === "number");
-  return [
-    rank,
-    deadlines.length ? Math.min(...deadlines) : Infinity,
-    booking.timeBegin ?? Infinity,
-  ];
-}
-
-const compareUrgency = (a, b) => {
-  const [x, y] = [proofUrgencyOf(a), proofUrgencyOf(b)];
-  return x[0] - y[0] || x[1] - y[1] || x[2] - y[2];
-};
-
-/**
- * The page „Nachweise einreichen“: the fields that are not checked, by
- * booking in the order of their urgency ({@link proofUrgencyOf}), grouped by
- * tenant; a tenant stands where its most urgent booking does. A checked
- * field is only in the booking details. A booking whose fields are all
- * handed in and wait for their check is `complete`: the page shows it
- * collapsed.
- *
- * @param {Object[]} bookings As `GET /api/bookings` answers them
- * @returns {Array<{ tenant: { id: string, name: string }, bookings:
- *   Array<{ booking: Object, fields: CustomerUploadField[],
- *   complete: boolean }> }>}
- */
-export function pendingProofGroups(bookings = []) {
-  const entries = bookings
-    .map((booking) => {
-      const fields = customerUploadFieldsOf(booking).filter(
-        (field) => field.state !== S.FULFILLED,
-      );
-      return {
-        booking,
-        fields,
-        complete:
-          fields.length > 0 &&
-          fields.every((field) => field.state === S.SUBMITTED),
-      };
-    })
-    .filter((entry) => entry.fields.length > 0)
-    .sort(compareUrgency);
-
-  const groups = new Map();
-  for (const entry of entries) {
-    const id = entry.booking.tenant?.id ?? entry.booking.tenantId;
-    if (!groups.has(id)) {
-      groups.set(id, {
-        tenant: { id, name: entry.booking.tenant?.name ?? id },
-        bookings: [],
-      });
-    }
-    groups.get(id).bookings.push(entry);
-  }
-  return [...groups.values()];
-}
 
 const ERROR_KEYS = Object.freeze({
   customer_upload_format_not_allowed: "format",
@@ -730,109 +692,9 @@ export function checkoutUploadRefusalOf(apiError) {
   return null;
 }
 
-/**
- * The status filter of the page „Nachweise einreichen“. „Ausstehend“ is every
- * field still to hand in whose deadline has not passed, so an open field and a
- * rejected one before the deadline; there is no separate option for open ones.
- */
-export const PROOF_STATUS_FILTER = Object.freeze({
-  OVERDUE: "overdue",
-  OUTSTANDING: "outstanding",
-  SUBMITTED: "submitted",
-  REJECTED: "rejected",
-});
-
-/**
- * Whether an upload field matches one option of the status filter.
- *
- * @param {CustomerUploadField} field
- * @param {string} status One of {@link PROOF_STATUS_FILTER}
- * @returns {boolean}
- */
-export function matchesProofStatus(field, status) {
-  switch (status) {
-    case PROOF_STATUS_FILTER.OVERDUE:
-      return (
-        field.state === S.OVERDUE ||
-        (field.state === S.REJECTED && field.pastDeadline)
-      );
-    case PROOF_STATUS_FILTER.OUTSTANDING:
-      return (
-        (field.state === S.OPEN || field.state === S.REJECTED) &&
-        !field.pastDeadline
-      );
-    case PROOF_STATUS_FILTER.SUBMITTED:
-      return field.state === S.SUBMITTED;
-    case PROOF_STATUS_FILTER.REJECTED:
-      return field.state === S.REJECTED;
-    default:
-      return false;
-  }
-}
-
-const normalized = (text) =>
-  String(text ?? "")
-    .toLocaleLowerCase()
-    .trim();
-
-/** The title a booking box of the page shows. */
+/** The title of a booking's bookable, empty without one. */
 export function proofBookingTitleOf(booking) {
   return booking?.bookableItems?.[0]?._bookableUsed?.title ?? "";
-}
-
-/**
- * The page „Nachweise einreichen“ narrowed by its search and filters.
- * Search and filters narrow together. The search finds a booking by its
- * number, its title or its provider, with all its fields, and a field by
- * its label; the filters take providers, status options (any of them) and
- * „besonders schutzwürdig“. A booking without a field left and a provider
- * without a booking left are not shown.
- *
- * @param {ReturnType<typeof pendingProofGroups>} groups
- * @param {Object} [filter]
- * @param {string} [filter.query]
- * @param {string[]} [filter.tenantIds]
- * @param {string[]} [filter.statuses] Out of {@link PROOF_STATUS_FILTER}
- * @param {boolean} [filter.sensitiveOnly]
- * @returns {ReturnType<typeof pendingProofGroups>}
- */
-export function filterProofGroups(
-  groups,
-  { query = "", tenantIds = [], statuses = [], sensitiveOnly = false } = {},
-) {
-  const q = normalized(query);
-  const fieldPasses = (field) =>
-    (statuses.length === 0 ||
-      statuses.some((status) => matchesProofStatus(field, status))) &&
-    (!sensitiveOnly || field.category === "sensitive");
-
-  return groups
-    .filter(
-      (group) => tenantIds.length === 0 || tenantIds.includes(group.tenant.id),
-    )
-    .map((group) => ({
-      ...group,
-      bookings: group.bookings
-        .map((entry) => {
-          const bookingMatches =
-            !q ||
-            [
-              entry.booking.id,
-              proofBookingTitleOf(entry.booking),
-              group.tenant.name,
-            ]
-              .map(normalized)
-              .some((text) => text.includes(q));
-          const fields = entry.fields.filter(
-            (field) =>
-              fieldPasses(field) &&
-              (bookingMatches || normalized(field.label).includes(q)),
-          );
-          return { ...entry, fields };
-        })
-        .filter((entry) => entry.fields.length > 0),
-    }))
-    .filter((group) => group.bookings.length > 0);
 }
 
 /**

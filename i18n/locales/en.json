@@ -982,7 +982,7 @@
     "favoritesTitle": "Favourites",
     "appearanceDescription": "Manage how the app looks. You can switch between a light and a dark theme, and change the language of the interface.",
     "bookedItems": "Booked items",
-    "invoicesAndReceipts": "Invoices and receipts",
+    "receipts": "Receipts",
     "attachments": "Attachments",
     "changePassword": "Change password",
     "newPasswordRepeat": "New password (repeat)",
@@ -1795,28 +1795,16 @@
     "limits": "{formats} · max. {size} MB",
     "maxFiles": "up to {count} files",
     "submitNow": "Submit now",
-    "pageIntro": "Your providers still need proofs for these bookings.",
     "nothingMissing": "No proofs are missing.",
+    "bookingNotFound": "This booking was not found.",
+    "chooseBooking": {
+      "title": "Which booking do you want to hand in proofs for?",
+      "text": "These bookings are still missing proofs."
+    },
     "provider": "Provider",
     "providerReviews": "sees and reviews these proofs",
     "bookingNumber": "Booking #{id}",
     "manage": "Manage proofs",
-    "count": "No proofs | One proof | {count} proofs",
-    "searchPlaceholder": "Search booking, offer, provider or proof",
-    "noMatches": "No proof matches your search or the chosen filters.",
-    "filter": {
-      "status": "Status:",
-      "category": "Category:",
-      "statuses": {
-        "outstanding": "Outstanding",
-        "overdue": "Overdue",
-        "submitted": "Submitted",
-        "rejected": "Rejected"
-      }
-    },
-    "allSubmitted": "Proof submitted · being reviewed | All {count} proofs submitted · being reviewed",
-    "showProofs": "Show proofs",
-    "hideProofs": "Hide proofs",
     "missingChip": {
       "withDeadline": "{count} proof missing · until {deadline} | {count} proofs missing · until {deadline}",
       "withoutDeadline": "{count} proof missing | {count} proofs missing"

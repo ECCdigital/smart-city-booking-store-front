@@ -1,17 +1,23 @@
 <template>
   <!-- Required proofs still missing: the number
        and the earliest deadline; a click leads to the page „Nachweise
-       einreichen“ at the most urgent field. Renders nothing otherwise. -->
-  <NuxtLink
+       einreichen“ at the most urgent field, unless the chip stands in a
+       link of its own (`linked` off). Renders nothing otherwise. -->
+  <component
+    :is="linked ? NuxtLink : 'span'"
     v-if="chip"
-    :to="proofPageLink(booking.id, mostUrgentProofFieldOf(booking))"
-    class="flex items-center px-3 py-1 rounded-full text-xs font-medium"
+    v-bind="
+      linked
+        ? { to: proofPageLink(booking.id, mostUrgentProofFieldOf(booking)) }
+        : {}
+    "
+    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
     :class="chipClass"
-    @click.stop
+    @click="linked && $event.stopPropagation()"
   >
     <UIcon name="i-lucide-file-clock" class="w-4 h-4 mr-1 shrink-0" />
     {{ label }}
-  </NuxtLink>
+  </component>
 </template>
 <script setup>
 import {
@@ -26,7 +32,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  /** Off where the chip stands in a link of its own, as in the dialog of the banner. */
+  linked: {
+    type: Boolean,
+    default: true,
+  },
 });
+
+const NuxtLink = resolveComponent("NuxtLink");
 
 const { t } = useI18n();
 const { formatDay } = useFormatting();

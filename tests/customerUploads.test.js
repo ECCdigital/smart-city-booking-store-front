@@ -6,7 +6,6 @@ import {
   proofPageLink,
   proofTargetOf,
   acceptOf,
-  filterProofGroups,
   checkoutUploadFieldsOf,
   checkoutUploadParts,
   checkoutUploadRefusalOf,
@@ -22,7 +21,8 @@ import {
   missingProofsBannerOf,
   missingProofsChipOf,
   missingProofsOf,
-  pendingProofGroups,
+  pendingProofFieldsOf,
+  missingProofBookingsOf,
   precheckCheckoutUpload,
   precheckCustomerUpload,
   customerUploadTargetsOf,
@@ -281,116 +281,30 @@ describe("formats", () => {
   });
 });
 
-describe("pendingProofGroups", () => {
-  const booking = (id, tenant, timeBegin, fields) => ({
-    id,
-    tenantId: tenant.id,
-    tenant,
-    timeBegin,
+describe("the fields of a booking on the page", () => {
+  const booking = (fields) => ({
+    id: "B",
     customerUploadState: { state: "missing", fields },
   });
-  const stadt = { id: "stadt", name: "Stadt Bad Belzig" };
-  const verein = { id: "verein", name: "Sportverein" };
 
-  it("groups by tenant and sorts equally urgent bookings by their start", () => {
-    const groups = pendingProofGroups([
-      booking("B2", stadt, 300, [field()]),
-      booking("B1", verein, 100, [field()]),
-      booking("B3", stadt, 200, [field()]),
-    ]);
-
-    expect(groups.map((g) => g.tenant.name)).toEqual([
-      "Sportverein",
-      "Stadt Bad Belzig",
-    ]);
-    expect(groups[1].bookings.map((e) => e.booking.id)).toEqual(["B3", "B2"]);
-  });
-
-  it("sorts by urgency: rejected, overdue, open, submitted", () => {
-    const groups = pendingProofGroups([
-      booking("submitted", stadt, 100, [field({ state: "submitted" })]),
-      booking("open", stadt, 200, [field()]),
-      booking("overdue", stadt, 300, [
-        field({ state: "overdue", pastDeadline: true }),
-      ]),
-      booking("rejected", stadt, 400, [
-        field({ fieldId: "a", state: "submitted" }),
-        field({ fieldId: "b", state: "rejected" }),
-      ]),
-    ]);
-
-    expect(groups[0].bookings.map((e) => e.booking.id)).toEqual([
-      "rejected",
-      "overdue",
-      "open",
-      "submitted",
-    ]);
-  });
-
-  it("puts the earlier deadline first among equally urgent bookings, then the start", () => {
-    const groups = pendingProofGroups([
-      booking("later", stadt, 100, [field({ deadline: NOW + 9 * DAY })]),
-      booking("sooner", stadt, 500, [field({ deadline: NOW + 2 * DAY })]),
-      booking("noDeadline", stadt, 50, [field({ deadline: null })]),
-      booking("noDeadlineEarlier", stadt, 10, [field({ deadline: null })]),
-    ]);
-
-    expect(groups[0].bookings.map((e) => e.booking.id)).toEqual([
-      "sooner",
-      "later",
-      "noDeadlineEarlier",
-      "noDeadline",
-    ]);
-  });
-
-  it("puts a tenant where its most urgent booking stands", () => {
-    const groups = pendingProofGroups([
-      booking("V1", verein, 100, [field({ state: "submitted" })]),
-      booking("S1", stadt, 200, [field({ state: "rejected" })]),
-    ]);
-    expect(groups.map((g) => g.tenant.id)).toEqual(["stadt", "verein"]);
-  });
-
-  it("marks a booking complete once every field is handed in", () => {
-    const [group] = pendingProofGroups([
-      booking("all", stadt, 100, [
-        field({ fieldId: "a", state: "submitted" }),
-        field({ fieldId: "b", state: "submitted" }),
-        field({ fieldId: "c", state: "fulfilled" }),
-      ]),
-      booking("some", stadt, 200, [
-        field({ fieldId: "a", state: "submitted" }),
-        field({ fieldId: "b" }),
-      ]),
-    ]);
-
+  it("shows every field not checked yet", () => {
     expect(
-      Object.fromEntries(group.bookings.map((e) => [e.booking.id, e.complete])),
-    ).toEqual({ all: true, some: false });
-  });
-
-  it("leaves checked fields and bookings without anything open out", () => {
-    const groups = pendingProofGroups([
-      booking("B1", stadt, 100, [
-        field({ fieldId: "done", state: "fulfilled" }),
-        field({ fieldId: "open" }),
-      ]),
-      booking("B2", stadt, 200, [field({ state: "fulfilled" })]),
-      { id: "B3", tenantId: "stadt", timeBegin: 300 },
-    ]);
-
-    expect(groups).toHaveLength(1);
-    expect(groups[0].bookings).toHaveLength(1);
-    expect(groups[0].bookings[0].fields.map((f) => f.fieldId)).toEqual([
-      "open",
-    ]);
+      pendingProofFieldsOf(
+        booking([
+          field({ fieldId: "done", state: "fulfilled" }),
+          field({ fieldId: "open" }),
+          field({ fieldId: "sub", state: "submitted" }),
+        ]),
+      ).map((f) => f.fieldId),
+    ).toEqual(["open", "sub"]);
+    expect(pendingProofFieldsOf({ id: "B" })).toEqual([]);
   });
 
   it("tells whether a booking has something for the page", () => {
-    expect(hasPendingProofs(booking("B", stadt, 1, [field()]))).toBe(true);
-    expect(
-      hasPendingProofs(booking("B", stadt, 1, [field({ state: "fulfilled" })])),
-    ).toBe(false);
+    expect(hasPendingProofs(booking([field()]))).toBe(true);
+    expect(hasPendingProofs(booking([field({ state: "fulfilled" })]))).toBe(
+      false,
+    );
     expect(hasPendingProofs({ id: "B" })).toBe(false);
   });
 });
@@ -547,101 +461,6 @@ describe("the upload fields of the checkout (ECCdigital/tickets#827)", () => {
     expect(customerUploadErrorKey("customer_upload_required_missing")).toBe(
       "customerUploads.errors.requiredMissing",
     );
-  });
-});
-
-describe("filterProofGroups", () => {
-  const stadt = { id: "stadt", name: "Stadt Bad Belzig" };
-  const verein = { id: "verein", name: "Sportverein" };
-  const booking = (id, tenant, title, fields) => ({
-    id,
-    tenantId: tenant.id,
-    tenant,
-    timeBegin: 1,
-    bookableItems: [{ _bookableUsed: { title } }],
-    customerUploadState: { fields },
-  });
-  const groups = pendingProofGroups([
-    booking("AAAA-1111", stadt, "Turnhalle", [
-      field({ fieldId: "open", label: "Vereinsausweis", state: "open" }),
-      field({
-        fieldId: "late",
-        label: "Satzung",
-        state: "overdue",
-        pastDeadline: true,
-      }),
-    ]),
-    booking("BBBB-2222", verein, "Sportplatz", [
-      field({ fieldId: "sub", label: "Ausweis", state: "submitted" }),
-      field({
-        fieldId: "rej",
-        label: "Attest",
-        state: "rejected",
-        category: "sensitive",
-      }),
-      field({
-        fieldId: "rejLate",
-        label: "Liste",
-        state: "rejected",
-        pastDeadline: true,
-      }),
-    ]),
-  ]);
-  const ids = (result) =>
-    result.flatMap((g) =>
-      g.bookings.flatMap((e) => e.fields.map((f) => f.fieldId)),
-    );
-
-  it("shows everything without search and filters", () => {
-    expect(ids(filterProofGroups(groups))).toEqual([
-      // The booking with a rejected proof first.
-      "sub",
-      "rej",
-      "rejLate",
-      "open",
-      "late",
-    ]);
-  });
-
-  it("filters by provider", () => {
-    expect(ids(filterProofGroups(groups, { tenantIds: ["verein"] }))).toEqual([
-      "sub",
-      "rej",
-      "rejLate",
-    ]);
-  });
-
-  it("filters by any of the chosen status options", () => {
-    const by = (...statuses) => ids(filterProofGroups(groups, { statuses }));
-    // No option „Offen“ any more: „Ausstehend“ covers open fields.
-    expect(by("open")).toEqual([]);
-    expect(by("overdue")).toEqual(["rejLate", "late"]);
-    expect(by("outstanding")).toEqual(["rej", "open"]);
-    expect(by("submitted")).toEqual(["sub"]);
-    expect(by("rejected")).toEqual(["rej", "rejLate"]);
-    expect(by("outstanding", "submitted")).toEqual(["sub", "rej", "open"]);
-  });
-
-  it("filters by „besonders schutzwürdig“", () => {
-    expect(ids(filterProofGroups(groups, { sensitiveOnly: true }))).toEqual([
-      "rej",
-    ]);
-  });
-
-  it("finds a booking by number, title or provider, a field by its label", () => {
-    const find = (query) => ids(filterProofGroups(groups, { query }));
-    expect(find("bbbb")).toEqual(["sub", "rej", "rejLate"]);
-    expect(find("turnhalle")).toEqual(["open", "late"]);
-    expect(find("sportverein")).toEqual(["sub", "rej", "rejLate"]);
-    expect(find("attest")).toEqual(["rej"]);
-    expect(find("nichts")).toEqual([]);
-  });
-
-  it("drops bookings and providers with nothing left", () => {
-    const result = filterProofGroups(groups, { statuses: ["submitted"] });
-    expect(result).toHaveLength(1);
-    expect(result[0].tenant.id).toBe("verein");
-    expect(result[0].bookings).toHaveLength(1);
   });
 });
 
@@ -802,6 +621,35 @@ describe("the missing proofs of „Meine Buchungen“ (ECCdigital/tickets#828)",
         ]),
       ]),
     ).toEqual({ bookingCount: 1, nextDeadline: null, overdue: true });
+  });
+
+  it("the banner's choice lists the bookings by deadline, a passed one first, then by start", () => {
+    const list = missingProofBookingsOf([
+      bookingWith("missing", [field({ deadline: NOW + 6 * DAY })], {
+        id: "later",
+        timeBegin: 100,
+      }),
+      bookingWith("missing", [field({ deadline: null })], {
+        id: "noDeadline",
+        timeBegin: 50,
+      }),
+      bookingWith("overdue", [
+        field({ state: "overdue", deadline: NOW - DAY, pastDeadline: true }),
+      ], { id: "overdue", timeBegin: 300 }),
+      bookingWith("missing", [field({ deadline: NOW + 6 * DAY })], {
+        id: "sameDeadlineEarlier",
+        timeBegin: 10,
+      }),
+      bookingWith("toReview", [field({ state: "submitted" })], { id: "done" }),
+    ]);
+
+    expect(list.map((entry) => entry.booking.id)).toEqual([
+      "overdue",
+      "sameDeadlineEarlier",
+      "later",
+      "noDeadline",
+    ]);
+    expect(list[0]).toMatchObject({ count: 1, deadline: NOW - DAY, overdue: true });
   });
 });
 

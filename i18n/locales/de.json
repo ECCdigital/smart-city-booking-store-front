@@ -1329,7 +1329,7 @@
     "favoritesTitle": "Favoriten",
     "appearanceDescription": "Verwalten Sie die Darstellung der Anwendung. Sie können beispielsweise zwischen einem hellen und einem dunklen Design wechseln. Optional können Sie auch die Sprache der Benutzeroberfläche anpassen.",
     "bookedItems": "Gebuchte Objekte",
-    "invoicesAndReceipts": "Rechnungen und Zahlungsbelege",
+    "receipts": "Belege",
     "attachments": "Anhänge",
     "changePassword": "Passwort ändern",
     "newPasswordRepeat": "Neues Passwort (Wiederholung)",
@@ -1864,28 +1864,16 @@
     "limits": "{formats} · max. {size} MB",
     "maxFiles": "höchstens {count} Dateien",
     "submitNow": "Jetzt einreichen",
-    "pageIntro": "Deine Anbieter brauchen zu diesen Buchungen noch Nachweise.",
     "nothingMissing": "Es fehlen keine Nachweise.",
+    "bookingNotFound": "Diese Buchung wurde nicht gefunden.",
+    "chooseBooking": {
+      "title": "Für welche Buchung möchtest du Nachweise einreichen?",
+      "text": "Für diese Buchungen fehlen noch Nachweise."
+    },
     "provider": "Anbieter",
     "providerReviews": "sieht und prüft diese Nachweise",
     "bookingNumber": "Buchung #{id}",
     "manage": "Nachweise verwalten",
-    "count": "Keine Nachweise | Ein Nachweis | {count} Nachweise",
-    "searchPlaceholder": "Buchung, Angebot, Anbieter oder Nachweis suchen",
-    "noMatches": "Kein Nachweis passt zu deiner Suche oder den gewählten Filtern.",
-    "filter": {
-      "status": "Status:",
-      "category": "Kategorie:",
-      "statuses": {
-        "outstanding": "Ausstehend",
-        "overdue": "Abgelaufen",
-        "submitted": "Eingereicht",
-        "rejected": "Abgelehnt"
-      }
-    },
-    "allSubmitted": "Nachweis eingereicht · wird geprüft | Alle {count} Nachweise eingereicht · werden geprüft",
-    "showProofs": "Nachweise anzeigen",
-    "hideProofs": "Nachweise ausblenden",
     "missingChip": {
       "withDeadline": "{count} Nachweis fehlt · bis {deadline} | {count} Nachweise fehlen · bis {deadline}",
       "withoutDeadline": "{count} Nachweis fehlt | {count} Nachweise fehlen"

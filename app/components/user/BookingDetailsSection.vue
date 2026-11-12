@@ -135,9 +135,12 @@
     <!-- customer uploads ("Nachweise") -->
     <BookingProofsSection :booking="booking" />
 
-    <!-- invoices and receipts  -->
-    <div v-if="paymentDocuments.length > 0" class="mb-5">
-      <p class="font-medium">{{ $t("account.invoicesAndReceipts") }}</p>
+    <!-- invoices and receipts ("Belege") -->
+    <BookingDetailsCollapsible
+      v-if="paymentDocuments.length > 0"
+      :title="$t('account.receipts')"
+      :count="paymentDocuments.length"
+    >
       <BookingDetailsAttachmentCard
         v-for="(attachment, i) in paymentDocuments"
         :key="i"
@@ -146,18 +149,21 @@
         :booking-id="booking.id"
         :tenant-id="booking.tenantId"
       />
-    </div>
+    </BookingDetailsCollapsible>
 
     <!-- attachments  -->
-    <div v-if="otherDocuments.length > 0" class="mb-5">
-      <p class="font-medium">{{ $t("account.attachments") }}</p>
+    <BookingDetailsCollapsible
+      v-if="otherDocuments.length > 0"
+      :title="$t('account.attachments')"
+      :count="otherDocuments.length"
+    >
       <BookingDetailsAttachmentCard
         v-for="(attachment, i) in otherDocuments"
         :key="i"
         :attachment="attachment"
         :bookables="bookableTitles"
       />
-    </div>
+    </BookingDetailsCollapsible>
 
     <!-- comments  -->
     <div v-if="booking.comment" class="mb-5">
@@ -216,6 +222,7 @@ import { useAccessClock } from "~/composables/useAccessClock.js";
 import { readAccessPointsAnswer } from "~/utils/accessOpenFlow.js";
 import AccessPointListRow from "~/components/mobileKey/AccessPointListRow.vue";
 import BookingProofsSection from "~/components/user/proofs/BookingProofsSection.vue";
+import BookingDetailsCollapsible from "~/components/user/bookings/BookingDetailsCollapsible.vue";
 
 const { t } = useI18n();
 

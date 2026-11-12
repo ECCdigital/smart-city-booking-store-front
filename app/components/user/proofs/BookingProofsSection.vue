@@ -2,8 +2,11 @@
   <!-- each field a card like the documents of the booking: required as the
        small type line, the label, the state; the way to the page
        „Nachweise einreichen“ as the button on the right, as the download -->
-  <div v-if="fields.length > 0" class="mb-5">
-    <p class="font-medium">{{ $t("customerUploads.title") }}</p>
+  <BookingDetailsCollapsible
+    v-if="fields.length > 0"
+    :title="$t('customerUploads.title')"
+    :count="fields.length"
+  >
     <div
       v-for="field in fields"
       :key="field.fieldId"
@@ -23,10 +26,7 @@
           <CustomerUploadStateChip :field="field" :framed="false" />
         </div>
         <!-- rejected or requested again: the reason -->
-        <p
-          v-if="reasonOf(field)"
-          class="text-sm text-error mt-1"
-        >
+        <p v-if="reasonOf(field)" class="text-sm text-error mt-1">
           {{ $t(reasonOf(field).key, { reason: reasonOf(field).reason }) }}
         </p>
       </div>
@@ -43,10 +43,11 @@
         </UTooltip>
       </div>
     </div>
-  </div>
+  </BookingDetailsCollapsible>
 </template>
 <script setup>
 import CustomerUploadStateChip from "~/components/user/proofs/CustomerUploadStateChip.vue";
+import BookingDetailsCollapsible from "~/components/user/bookings/BookingDetailsCollapsible.vue";
 import {
   CUSTOMER_UPLOAD_FIELD_STATE,
   customerUploadFieldView,
