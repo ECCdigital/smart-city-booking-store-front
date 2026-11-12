@@ -1721,6 +1721,11 @@
         "action": "Zu {scanned} wechseln",
         "unnamed": "einem anderen Zugang"
       },
+      "wrong_compartment": {
+        "title": "Anderes Fach",
+        "description": "Das ist {scanned}. Ihr Fach: {own}.",
+        "unnamed": "ein anderes Fach"
+      },
       "wrong_tenant": {
         "title": "Anderer Anbieter",
         "description": "Dieser QR-Code gehört zu einem anderen Anbieter."

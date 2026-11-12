@@ -789,12 +789,13 @@ export function readScannedCode(rawValue) {
 }
 
 /**
- * The three ways a scan can fail to be the proof, kept apart because their ways
- * out differ - not {@link ACCESS_ERRORS} values: all three stay inside the
+ * The four ways a scan can fail to be the proof, kept apart because their ways
+ * out differ - not {@link ACCESS_ERRORS} values: all four stay inside the
  * evidence stage, where the scanner keeps running.
  */
 const SCAN_MISMATCHES = Object.freeze({
   WRONG_DOOR: "wrong_door",
+  WRONG_COMPARTMENT: "wrong_compartment",
   WRONG_TENANT: "wrong_tenant",
   UNREADABLE: "unreadable",
 });
@@ -818,6 +819,16 @@ const SCAN_MISMATCHES = Object.freeze({
  * The tenant therefore outranks the door: both are misses, but only one of them
  * may be jumped to.
  *
+ * **A Fach of a Schließfachanlage** matches by its id, `<anlage>:<fach>`, the
+ * same one the booking lists (backend tickets#1057). The sticker of another
+ * Fach of the same Anlage - same `lockerSystemId`, other id - is
+ * `wrong_compartment`: it names that Fach (`scannedCompartment`, `{ number,
+ * lockerBankName }`) so the person can find their own, and offers no jump,
+ * because the other Fach is not theirs to open. The panel's Fach names its
+ * Anlage by its id alone - the booking's projection carries no
+ * `lockerSystemId` - so the Anlage is read off the id's prefix. A door, the
+ * Anlage's own code or a Fach of another Anlage stays `wrong_door`.
+ *
  * **Both sides have to name their tenant.** `resolve-scan` sends `tenantId`,
  * so an answer without one is a broken answer, not a comparison to be waived:
  * a side nobody can name is a miss. Anything short of a readable payload never
@@ -831,8 +842,10 @@ const SCAN_MISMATCHES = Object.freeze({
  * @param {string} [expectation.expectedTenantId] The tenant that panel belongs to
  * @param {string} [expectation.scanCode] The code as it was decoded from the sticker
  * @returns {{ matched: boolean, evidence: Object[],
- *   mismatch: null|"wrong_door"|"wrong_tenant"|"unreadable",
- *   scannedLabel: string|null }}
+ *   mismatch: null|"wrong_door"|"wrong_compartment"|"wrong_tenant"|"unreadable",
+ *   scannedLabel: string|null,
+ *   scannedCompartment?: { number: number|null, lockerBankName: string|null }|null }}
+ *   `scannedCompartment` only for `wrong_compartment`
  */
 export function decideScanMatch(
   response,
@@ -860,6 +873,12 @@ export function decideScanMatch(
     return noMatch(SCAN_MISMATCHES.WRONG_TENANT, label);
   }
   if (!sameId(scanned.id, expectedAccessPointId)) {
+    if (sameId(scanned.lockerSystemId, lockerSystemOf(expectedAccessPointId))) {
+      return {
+        ...noMatch(SCAN_MISMATCHES.WRONG_COMPARTMENT, label),
+        scannedCompartment: scannedCompartmentOf(scanned),
+      };
+    }
     return noMatch(SCAN_MISMATCHES.WRONG_DOOR, label);
   }
 
@@ -878,6 +897,37 @@ export function decideScanMatch(
  */
 function noMatch(mismatch, scannedLabel) {
   return { matched: false, evidence: [], mismatch, scannedLabel };
+}
+
+/**
+ * @private
+ * The Anlage a Fach's id names: the part before the first `:` of
+ * `<anlage>:<fach>`. `null` for an id without one - a door, an Anlage.
+ */
+function lockerSystemOf(accessPointId) {
+  const id = isStated(accessPointId) ? String(accessPointId) : "";
+  const separator = id.indexOf(":");
+
+  return separator > 0 ? id.slice(0, separator) : null;
+}
+
+/**
+ * @private
+ * The Fach a scan resolved to as the person looks for it - number and
+ * Schrank, nothing else of what resolve-scan says about it.
+ */
+function scannedCompartmentOf(scanned) {
+  const compartment =
+    scanned.compartment && typeof scanned.compartment === "object"
+      ? scanned.compartment
+      : null;
+
+  return compartment
+    ? {
+        number: compartment.number ?? null,
+        lockerBankName: compartment.lockerBankName ?? null,
+      }
+    : null;
 }
 
 /**

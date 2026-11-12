@@ -1333,6 +1333,11 @@
         "title": "Different access point",
         "unnamed": "another access point"
       },
+      "wrong_compartment": {
+        "title": "Different compartment",
+        "description": "This is {scanned}. Your compartment: {own}.",
+        "unnamed": "another compartment"
+      },
       "wrong_tenant": {
         "description": "This QR code belongs to a different provider.",
         "title": "Different provider"
