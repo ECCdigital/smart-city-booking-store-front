@@ -1843,6 +1843,7 @@
     "state": {
       "open": "Offen · bis {deadline} (noch {days} Tag) | Offen · bis {deadline} (noch {days} Tage)",
       "openWithoutDeadline": "Offen",
+      "openBeforeRelease": "Offen · Vor Freigabe einzureichen",
       "submitted": "Eingereicht · wird geprüft",
       "rejected": "Abgelehnt · neu hochladen",
       "requestedAgain": "Erneut angefordert · neu hochladen",
@@ -1876,7 +1877,8 @@
     "manage": "Nachweise verwalten",
     "missingChip": {
       "withDeadline": "{count} Nachweis fehlt · bis {deadline} | {count} Nachweise fehlen · bis {deadline}",
-      "withoutDeadline": "{count} Nachweis fehlt | {count} Nachweise fehlen"
+      "withoutDeadline": "{count} Nachweis fehlt | {count} Nachweise fehlen",
+      "beforeRelease": "{count} Nachweis fehlt · vor Freigabe | {count} Nachweise fehlen · vor Freigabe"
     },
     "missingBanner": {
       "title": "Für {count} Buchung fehlen noch Nachweise | Für {count} Buchungen fehlen noch Nachweise",

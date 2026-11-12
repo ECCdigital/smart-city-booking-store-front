@@ -15,6 +15,9 @@
  * @property {number} maxFiles
  * @property {string[]} formats Out of `pdf`, `jpeg`, `png`
  * @property {number} maxFileSizeMb
+ * @property {string} timing When the upload is due: `checkout`,
+ *   `beforeRelease` (before the tenant releases the booking, no deadline)
+ *   or `afterConfirmation`
  * @property {number|null} deadline Epoch milliseconds
  * @property {boolean} pastDeadline
  * @property {string} state One of {@link CUSTOMER_UPLOAD_FIELD_STATE}
@@ -41,6 +44,9 @@ const DAY = 24 * 60 * 60 * 1000;
 const MEGABYTE = 1024 * 1024;
 /** From this many days before the deadline an open field stands out. */
 export const DEADLINE_WARNING_DAYS = 3;
+
+/** The `timing` of a field due before the tenant releases the booking. */
+const UPLOAD_TIMING_BEFORE_RELEASE = "beforeRelease";
 
 const FORMATS = Object.freeze({
   pdf: { mimeTypes: ["application/pdf"], extensions: ["pdf"] },
@@ -370,10 +376,13 @@ export function customerUploadFieldView(field, now = Date.now()) {
           days !== null && days <= DEADLINE_WARNING_DAYS
             ? "warning"
             : "neutral",
+        // Due before the release, which has no date: no deadline to name.
         labelKey:
-          field.deadline === null
-            ? "customerUploads.state.openWithoutDeadline"
-            : "customerUploads.state.open",
+          field.timing === UPLOAD_TIMING_BEFORE_RELEASE
+            ? "customerUploads.state.openBeforeRelease"
+            : field.deadline === null
+              ? "customerUploads.state.openWithoutDeadline"
+              : "customerUploads.state.open",
       };
   }
 }
@@ -405,9 +414,10 @@ const earliest = (deadlines) => {
  *
  * @param {Object} booking As `GET /api/bookings` answers it
  * @returns {{ count: number, deadline: number|null, overdue: boolean,
- *   nextDeadline: number|null }|null} `deadline` is the earliest deadline of
+ *   nextDeadline: number|null, beforeRelease: boolean }|null} `deadline` is the earliest deadline of
  *   the missing fields, `nextDeadline` the earliest one not passed yet,
- *   `overdue` whether the backend counts the booking overdue.
+ *   `overdue` whether the backend counts the booking overdue,
+ *   `beforeRelease` whether one of them is due before the release.
  */
 export function missingProofsOf(booking) {
   const state = booking?.customerUploadState?.state;
@@ -430,6 +440,9 @@ export function missingProofsOf(booking) {
         .map((field) => field.deadline),
     ),
     overdue: state === BOOKING_PROOF_STATE.OVERDUE,
+    beforeRelease: fields.some(
+      (field) => field.timing === UPLOAD_TIMING_BEFORE_RELEASE,
+    ),
   };
 }
 
@@ -450,10 +463,13 @@ export function missingProofsChipOf(booking) {
     count: missing.count,
     deadline: missing.deadline,
     color: missing.overdue ? "error" : "warning",
+    // Without a date, one due before the release says so.
     labelKey:
-      missing.deadline === null
-        ? "customerUploads.missingChip.withoutDeadline"
-        : "customerUploads.missingChip.withDeadline",
+      missing.deadline !== null
+        ? "customerUploads.missingChip.withDeadline"
+        : missing.beforeRelease
+          ? "customerUploads.missingChip.beforeRelease"
+          : "customerUploads.missingChip.withoutDeadline",
   };
 }
 

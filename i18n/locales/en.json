@@ -1774,6 +1774,7 @@
     "state": {
       "open": "Open · until {deadline} ({days} day left) | Open · until {deadline} ({days} days left)",
       "openWithoutDeadline": "Open",
+      "openBeforeRelease": "Open · Due before approval",
       "submitted": "Submitted · being reviewed",
       "rejected": "Rejected · upload again",
       "requestedAgain": "Requested again · upload again",
@@ -1807,7 +1808,8 @@
     "manage": "Manage proofs",
     "missingChip": {
       "withDeadline": "{count} proof missing · until {deadline} | {count} proofs missing · until {deadline}",
-      "withoutDeadline": "{count} proof missing | {count} proofs missing"
+      "withoutDeadline": "{count} proof missing | {count} proofs missing",
+      "beforeRelease": "{count} proof missing · before approval | {count} proofs missing · before approval"
     },
     "missingBanner": {
       "title": "Proofs are still missing for {count} booking | Proofs are still missing for {count} bookings",

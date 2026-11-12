@@ -10,6 +10,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 ### Changed
 
 - Booking details: „Rechnungen und Zahlungsbelege“ is now „Belege“, and the sections „Belege“, „Anhänge“ and „Nachweise“ open and close by their heading, with the number of entries beside it. All three start open
+- An open proof due before the release (`timing: beforeRelease`, no deadline) shows „Offen · Vor Freigabe einzureichen“ instead of „Offen“; the chip on the booking card and in the banner's choice says „N Nachweise fehlen · vor Freigabe“ where no missing proof has a deadline
 - Deletion of proofs told by their category: a checked field shows „Geprüft am …“ and adds „· Datei gelöscht“ only where the check deleted the file; „Nach der Prüfung löscht … sie.“ below a file handed in stands only at a field „besonders schutzwürdig“; the page „Nachweise einreichen“ says „Besonders schutzwürdige Nachweise löscht der Anbieter nach der Prüfung.“ A normal proof stays with the booking. Needs the backend with `fileDeleted` only for a deleted file
 - Notice after the registration ([ECCdigital/tickets#600](https://github.com/ECCdigital/tickets/issues/600)): „Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.“, the same for every address. The signup sends the backend `forgotPasswordUrl`, the storefront's page „Passwort vergessen“ (`/password/forgot` under `NUXT_USER_BASE_URL`); an address with a verified account gets a mail with a button to it from the backend with ECCdigital/tickets#600
 ### Added

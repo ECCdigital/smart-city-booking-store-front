@@ -99,6 +99,15 @@ describe("customerUploadFieldView", () => {
     ).toBe("customerUploads.state.openWithoutDeadline");
   });
 
+  it("names an open field due before the release by that, without a deadline", () => {
+    const view = customerUploadFieldView(
+      field({ timing: "beforeRelease", deadline: null }),
+      NOW,
+    );
+    expect(view.labelKey).toBe("customerUploads.state.openBeforeRelease");
+    expect(view.color).toBe("neutral");
+  });
+
   it("lets a submitted field be changed, and take more files while there is room", () => {
     const submitted = customerUploadFieldView(
       field({
@@ -544,6 +553,7 @@ describe("the missing proofs of „Meine Buchungen“ (ECCdigital/tickets#828)",
       deadline: NOW + 4 * DAY,
       nextDeadline: NOW + 4 * DAY,
       overdue: false,
+      beforeRelease: false,
     });
     expect(missingProofsChipOf(booking)).toEqual({
       count: 2,
@@ -564,6 +574,25 @@ describe("the missing proofs of „Meine Buchungen“ (ECCdigital/tickets#828)",
       color: "error",
     });
     expect(missingProofsOf(booking).nextDeadline).toBeNull();
+  });
+
+  it("says „vor Freigabe“ where a proof due before the release has no deadline", () => {
+    const beforeRelease = field({ timing: "beforeRelease", deadline: null });
+    expect(
+      missingProofsChipOf(bookingWith("missing", [beforeRelease])),
+    ).toMatchObject({
+      deadline: null,
+      labelKey: "customerUploads.missingChip.beforeRelease",
+    });
+    // A date of another missing proof wins.
+    expect(
+      missingProofsChipOf(
+        bookingWith("missing", [
+          beforeRelease,
+          field({ fieldId: "f2", deadline: NOW + 2 * DAY }),
+        ]),
+      ).labelKey,
+    ).toBe("customerUploads.missingChip.withDeadline");
   });
 
   it("names no deadline for a booking without a start", () => {
