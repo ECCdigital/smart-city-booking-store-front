@@ -9,10 +9,10 @@
     </div>
 
     <!-- Help Information -->
-    <GeneralHelpSection :bookings="bookings" />
+    <GeneralHelpSection v-if="bookings.length" :bookings="bookings" />
 
-    <!-- View Switch -->
-    <div class="flex my-5 justify-between">
+    <!-- View Switch, search and filter only once there are keys to show. -->
+    <div v-if="bookings.length" class="flex my-5 justify-between">
       <div class="space-x-2">
         <UButton
           icon="i-lucide-list"
@@ -71,17 +71,11 @@
     </div>
 
     <div v-if="viewMode === 'list'" class="space-y-3 mb-15">
-      <UCard v-if="bookings.length && !shownBookings.length">
-        <div class="flex flex-col items-center justify-center py-10">
-          <UIcon
-            name="i-lucide-filter-x"
-            class="w-12 h-12 text-neutral-400 mb-3"
-          />
-          <p class="text-sm text-neutral-500">
-            {{ $t("mobileKey.noMatches") }}
-          </p>
-        </div>
-      </UCard>
+      <ListEmptyState
+        v-if="bookings.length && !shownBookings.length"
+        icon="i-lucide-filter-x"
+        :description="$t('mobileKey.noMatches')"
+      />
       <MobileKeyBookingList
         v-else
         :bookings="shownBookings"
@@ -103,6 +97,7 @@ import { useTenantStore } from "~~/stores/tenant.js";
 import { compareByAccessWindow } from "~/utils/accessWindow.js";
 import GeneralHelpSection from "~/components/mobileKey/GeneralHelpSection.vue";
 import MobileKeyBookingList from "~/components/mobileKey/MobileKeyBookingList.vue";
+import ListEmptyState from "~/components/user/ListEmptyState.vue";
 import ListFilter from "~/components/user/ListFilter.vue";
 import {
   filterAccessBookingsByTenant,
