@@ -13,7 +13,11 @@
  * know maps to a generic error - never to a silent success.
  */
 
-import { isCommittedBooking } from "~/utils/bookingStatus.js";
+import {
+  BOOKING_STATUS,
+  isCommittedBooking,
+  resolveBookingStatus,
+} from "~/utils/bookingStatus.js";
 import {
   ACCESS_WINDOW_STATES,
   bookingWindow,
@@ -242,9 +246,10 @@ export function scanBookingLookup(accessPoint) {
  * A scanned Fach (`lockerSystemId` given, its Anlage) is compared by its own
  * id like a door, and two outcomes are its own (backend tickets#1058, same
  * rule as the access log entry `wrong_compartment`): where no active booking
- * holds the scanned Fach but one holds another Fach of the Anlage, the page
- * says „Nicht Ihr Fach“ with every Fach of the Anlage the person's active
- * bookings hold (`compartments`) and opens nothing. Where nothing is active,
+ * holds the scanned Fach but a confirmed one holds another Fach of the
+ * Anlage, the page says „Nicht Ihr Fach“ with every Fach of the Anlage the
+ * person's active confirmed bookings hold (`compartments`) and opens nothing;
+ * an active booking not confirmed yet gets its own reason at its Fach. Where nothing is active,
  * every booking holding a Fach of the Anlage counts for "not yet" and "over",
  * and the outcome names the person's Fach (`accessPoint`) - the scanned one
  * where the booking holds it - so the screen says which Fach and its window.
@@ -314,16 +319,31 @@ export function decideBookingOutcome({
         heldCompartments(booking, lockerSystemId).length > 0,
     );
 
+  // „Nicht Ihr Fach“ by the rule of the access log entry (backend
+  // tickets#1058): only a confirmed booking holds its Fach. The projection
+  // names no revoked Fach, so a revoked one still counts here.
   const elsewhere = holding(activeBookings);
-  if (elsewhere.length > 0) {
+  const confirmed = elsewhere.filter(
+    (booking) => resolveBookingStatus(booking) === BOOKING_STATUS.CONFIRMED,
+  );
+  if (confirmed.length > 0) {
     return {
       screen: "error",
       error: ACCESS_ERRORS.WRONG_COMPARTMENT,
-      booking: elsewhere[0],
+      booking: confirmed[0],
       blockingReason: null,
-      compartments: elsewhere.flatMap((booking) =>
+      compartments: confirmed.flatMap((booking) =>
         heldCompartments(booking, lockerSystemId),
       ),
+    };
+  }
+  if (elsewhere.length > 0) {
+    // Not confirmed yet - unpaid, awaiting approval: the booking opens no
+    // Fach, so the page names its own reason at the person's Fach.
+    const [held] = heldCompartments(elsewhere[0], lockerSystemId);
+    return {
+      ...blockedOutcome(elsewhere[0], held.id, now),
+      accessPoint: held,
     };
   }
 

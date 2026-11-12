@@ -617,8 +617,11 @@ describe("decideBookingOutcome at a scanned Fach", () => {
     ...overrides,
   });
 
+  /** A confirmed booking holding Fächer of the Anlage, active now. */
   const fachBooking = (fachIds, overrides = {}) =>
     booking({
+      isCommitted: true,
+      isPayed: true,
       accessPointIds: ["anlage-1", ...fachIds],
       accessPoints: fachIds.map((id, index) => fachEntry(id, index + 1)),
       accessEligibility: {
@@ -695,6 +698,46 @@ describe("decideBookingOutcome at a scanned Fach", () => {
       "anlage-1:fach-9",
       "anlage-1:fach-11",
     ]);
+  });
+
+  /** Active, holding a Fach, but not confirmed: the payment is missing. */
+  const unpaidFachBooking = (fachIds, overrides = {}) =>
+    fachBooking(fachIds, {
+      id: "B-1043",
+      isPayed: false,
+      priceEur: 12,
+      accessEligibility: {
+        blockingReasons: ["payment_required"],
+        primaryBlockingReason: "payment_required",
+        operableAccessPointIds: [],
+        remoteOperableAccessPointIds: [],
+      },
+      ...overrides,
+    });
+
+  // The same rule as the access log entry `wrong_compartment` (backend
+  // tickets#1058): only a confirmed booking holds its Fach there.
+  it("says not „Nicht Ihr Fach“ for an unpaid booking, but its own reason at its Fach", () => {
+    const unpaid = unpaidFachBooking([FACH_7]);
+
+    expect(decideFach({ activeBookings: [unpaid] })).toEqual({
+      screen: "error",
+      error: ACCESS_ERRORS.PAYMENT_REQUIRED,
+      booking: unpaid,
+      blockingReason: "payment_required",
+      accessPoint: fachEntry(FACH_7, 1),
+    });
+  });
+
+  it("names only the Fächer of confirmed bookings in „Nicht Ihr Fach“", () => {
+    const confirmed = fachBooking([FACH_7]);
+    const unpaid = unpaidFachBooking(["anlage-1:fach-9"]);
+
+    const outcome = decideFach({ activeBookings: [unpaid, confirmed] });
+
+    expect(outcome.error).toBe(ACCESS_ERRORS.WRONG_COMPARTMENT);
+    expect(outcome.booking).toBe(confirmed);
+    expect(outcome.compartments.map((entry) => entry.id)).toEqual([FACH_7]);
   });
 
   it("names only the Fächer of the scanned Anlage", () => {
