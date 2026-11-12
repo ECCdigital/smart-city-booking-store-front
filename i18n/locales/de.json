@@ -1824,7 +1824,7 @@
   },
   "customerUploads": {
     "alsoFor": "Gilt auch für diese Termine der Serie:",
-    "alsoForOption": "Buchung #{id} · {date} · {field}",
+    "alsoForOption": "Buchung #{id} · {date}",
     "group": {
       "intro": "Für jeden Termin Ihrer Serie werden folgende Nachweise benötigt. Eine Datei können Sie für mehrere Termine verwenden.",
       "introGuest": "Für jeden Termin Ihrer Serie werden folgende Nachweise benötigt. Ohne Anmeldung laden Sie für jeden Termin eine eigene Datei hoch.",

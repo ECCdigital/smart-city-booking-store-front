@@ -179,12 +179,14 @@ describe("proofs for several dates of a series", () => {
     },
   });
 
-  it("offers the fields of the other dates with room, the same field preset", () => {
-    const own = booking("B1", 1000, [field("card")]);
+  it("offers the same field at the other dates with room, no other field", () => {
+    const series = ["B1", "B2", "B3", "B4"];
+    const own = booking("B1", 1000, [field("card")], series);
     const bookings = [
       booking("B3", 3000, [field("card"), field("social")]),
       own,
       booking("B2", 2000, [field("card", { state: "fulfilled" })]),
+      booking("B4", 4000, [field("card", { remainingFiles: 0 })], series),
       booking("X", 500, [field("card")]),
     ];
 
@@ -192,18 +194,8 @@ describe("proofs for several dates of a series", () => {
       {
         bookingId: "B3",
         fieldId: "card",
-        fieldLabel: "Ausweis",
         timeBegin: 3000,
         timeEnd: 3000 + 3600_000,
-        preset: true,
-      },
-      {
-        bookingId: "B3",
-        fieldId: "social",
-        fieldLabel: "Sozialpass",
-        timeBegin: 3000,
-        timeEnd: 3000 + 3600_000,
-        preset: false,
       },
     ]);
   });

@@ -198,18 +198,17 @@ export function submissionAlsoForOf(ordered = []) {
 }
 
 /**
- * The upload fields of the other bookings of a booking's series a new file
- * can count for too: every field of those
- * bookings with room for a file and not fulfilled, by their begin. Those
- * of the same field are preset - there is no rule which fields are "the
- * same", so the customer may change it. With the file, only the fields that
- * take it by size and format. None outside a series.
+ * The other dates of a booking's series a new file can count for too: the
+ * same upload field at each of the other bookings, where it has room for a
+ * file and is not fulfilled, by their begin; all of them preset. With the
+ * file, only the fields that take it by size and format. None outside a
+ * series.
  *
  * @param {Object} booking The booking the file is chosen at
  * @param {Object[]} bookings The customer's bookings
  * @param {string} fieldId The field the file is chosen for
  * @param {{ name?: string, type?: string, size: number }|null} [file]
- * @returns {Array<{bookingId: string, fieldId: string, fieldLabel: string, timeBegin: number|null, timeEnd: number|null, preset: boolean}>}
+ * @returns {Array<{bookingId: string, fieldId: string, timeBegin: number|null, timeEnd: number|null}>}
  */
 export function seriesTargetOptionsOf(
   booking,
@@ -229,6 +228,7 @@ export function seriesTargetOptionsOf(
       customerUploadFieldsOf(other)
         .filter(
           (field) =>
+            field.fieldId === fieldId &&
             field.state !== S.FULFILLED &&
             (field.remainingFiles ?? 0) > 0 &&
             (!file || precheckCustomerUpload(file, field) === null),
@@ -236,10 +236,8 @@ export function seriesTargetOptionsOf(
         .map((field) => ({
           bookingId: other.id,
           fieldId: field.fieldId,
-          fieldLabel: field.label,
           timeBegin: other.timeBegin ?? null,
           timeEnd: other.timeEnd ?? null,
-          preset: field.fieldId === fieldId,
         })),
     );
 }

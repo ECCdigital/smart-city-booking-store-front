@@ -191,7 +191,7 @@
             size="xs"
             :label="optionLabel(option)"
             :model-value="isAlsoFor(draft, option)"
-            :disabled="busy || takenElsewhere(draft, option)"
+            :disabled="busy"
             @update:model-value="setAlsoFor(draft, option, $event)"
           />
         </div>
@@ -341,15 +341,6 @@ function isAlsoFor(draft, option) {
   return (draft.alsoFor ?? []).some((target) => sameTarget(target, option));
 }
 
-/** A booking takes a file once: another field of it is chosen already. */
-function takenElsewhere(draft, option) {
-  return (draft.alsoFor ?? []).some(
-    (target) =>
-      target.bookingId === option.bookingId &&
-      target.fieldId !== option.fieldId,
-  );
-}
-
 function setAlsoFor(draft, option, on) {
   const rest = (draft.alsoFor ?? []).filter(
     (target) => !sameTarget(target, option),
@@ -367,7 +358,6 @@ function optionLabel(option) {
   return t("customerUploads.alsoForOption", {
     id: option.bookingId,
     date: option.timeBegin ? formatDate(option.timeBegin) : "",
-    field: option.fieldLabel,
   });
 }
 
@@ -473,10 +463,11 @@ function send(file) {
     fieldId: props.field.fieldId,
     replacing: replacing.value,
     file,
-    // Preset: the same field at the other dates of the series.
-    alsoFor: seriesOptionsFor(file)
-      .filter((option) => option.preset)
-      .map(({ bookingId, fieldId }) => ({ bookingId, fieldId })),
+    // Preset: the same field at every other date of the series.
+    alsoFor: seriesOptionsFor(file).map(({ bookingId, fieldId }) => ({
+      bookingId,
+      fieldId,
+    })),
   });
 }
 

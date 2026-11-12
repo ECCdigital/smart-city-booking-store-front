@@ -1755,7 +1755,7 @@
   },
   "customerUploads": {
     "alsoFor": "Also counts for these dates of the series:",
-    "alsoForOption": "Booking #{id} · {date} · {field}",
+    "alsoForOption": "Booking #{id} · {date}",
     "group": {
       "intro": "Each date of your series needs the following proofs. You can use one file for several dates.",
       "introGuest": "Each date of your series needs the following proofs. Without signing in, upload a file of its own for each date.",
