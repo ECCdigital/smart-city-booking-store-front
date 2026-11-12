@@ -46,7 +46,7 @@ export function accessPointTitle(accessPoint, t) {
   }
 
   if (accessPoint?.type === "locker") {
-    if (accessPoint.compartment) {
+    if (isBoxNumber(accessPoint.compartment)) {
       return t("mobileKey.accessPoint.title.lockerCompartment", {
         compartment: accessPoint.compartment,
       });
@@ -65,21 +65,83 @@ export function accessPointTitle(accessPoint, t) {
 }
 
 /**
- * The name of a Fach the platform assigned at an Open Locker
- * Schließfachanlage (`assignedCompartment`, backend tickets#1040): the
- * Anlage (`label`), the Schließfachschrank and the number - „{Anlage} —
- * Schrank {Name}, Fach {Nummer}“, without the Schrank where it is unknown.
- * `null` for anything else, so a caller that names a door by its label
- * elsewhere keeps doing so. The data decides, not the provider: a
- * compartment the provider assigns (iFBS, Pareva) carries none.
+ * @private
+ * The box number iFBS names in `compartment` - a string, or a number. A Fach
+ * of Open Locker that resolve-scan names there is an object and no box.
+ */
+function isBoxNumber(compartment) {
+  return (
+    (typeof compartment === "string" && compartment !== "") ||
+    typeof compartment === "number"
+  );
+}
+
+/**
+ * The Fach of an Open Locker Schließfachanlage an access point stands for,
+ * `{ number, lockerBankName }`: the one the platform assigned to a booking
+ * (`assignedCompartment`, backend tickets#1040), or the one a scan resolved
+ * to (`compartment` as an object, backend tickets#1057). `null` for anything
+ * else - a door, or the box number string of iFBS.
+ *
+ * @param {Object|null|undefined} accessPoint
+ * @returns {{ number: number, lockerBankName: string|null }|null}
+ */
+export function compartmentOf(accessPoint) {
+  if (accessPoint?.type !== "locker") {
+    return null;
+  }
+
+  const compartment =
+    accessPoint.assignedCompartment ??
+    (accessPoint.compartment && typeof accessPoint.compartment === "object"
+      ? accessPoint.compartment
+      : null);
+
+  return compartment?.number == null ? null : compartment;
+}
+
+/**
+ * Where a Fach stands within its Anlage, without the Anlage: „Schrank
+ * {Name}, Fach {Nummer}“, „Fach {Nummer}“ where the Schrank is unknown. The
+ * short form for a sentence that has already named the Anlage, or names
+ * Fächer side by side - „Ihr Fach: Schrank X, Fach N“.
+ *
+ * @param {{ number: number, lockerBankName?: string|null }|null|undefined} compartment
+ *   A Fach as {@link compartmentOf} reads it
+ * @param {(key: string, params?: Object) => string} t vue-i18n's translator
+ * @returns {string|null} `null` without a number
+ */
+export function compartmentPlace(compartment, t) {
+  if (compartment?.number == null) {
+    return null;
+  }
+
+  return compartment.lockerBankName
+    ? t("mobileKey.accessPoint.title.compartmentPlace", {
+        lockerBank: compartment.lockerBankName,
+        number: compartment.number,
+      })
+    : t("mobileKey.accessPoint.title.compartmentPlaceNumber", {
+        number: compartment.number,
+      });
+}
+
+/**
+ * The name of a Fach at an Open Locker Schließfachanlage - assigned to a
+ * booking or reached by a scan, see {@link compartmentOf}: the Anlage
+ * (`label`), the Schließfachschrank and the number - „{Anlage} — Schrank
+ * {Name}, Fach {Nummer}“, without the Schrank where it is unknown. `null` for
+ * anything else, so a caller that names a door by its label elsewhere keeps
+ * doing so. The data decides, not the provider: a compartment the provider
+ * assigns (iFBS, Pareva) carries none.
  *
  * @param {Object|null|undefined} accessPoint
  * @param {(key: string, params?: Object) => string} t vue-i18n's translator
  * @returns {string|null}
  */
 export function assignedCompartmentTitle(accessPoint, t) {
-  const assigned = accessPoint?.assignedCompartment;
-  if (accessPoint?.type !== "locker" || assigned?.number == null) {
+  const assigned = compartmentOf(accessPoint);
+  if (!assigned) {
     return null;
   }
 
@@ -115,6 +177,33 @@ export function accessPointName(accessPoint, t) {
     accessPoint?.label ||
     t("mobileKey.accessPointFallback")
   );
+}
+
+/**
+ * What the scan landing page says around the place the sticker named: its
+ * title, the line under it, and the line over the choice of bookings. At a
+ * Fach of a Schließfachanlage - the scan resolved to one when it names a
+ * `lockerSystemId` (backend tickets#1057) - it speaks of the Fach, anywhere
+ * else of the door; before anything is resolved, of the door too.
+ *
+ * @param {Object|null|undefined} accessPoint The resolved access point
+ * @param {(key: string, params?: Object) => string} t vue-i18n's translator
+ * @returns {{ title: string, description: string, severalBookingsMatch: string }}
+ */
+export function scanPageWording(accessPoint, t) {
+  if (accessPoint?.lockerSystemId) {
+    return {
+      title: t("mobileKey.openCompartment"),
+      description: t("mobileKey.scannedDescriptionCompartment"),
+      severalBookingsMatch: t("mobileKey.severalBookingsMatchCompartment"),
+    };
+  }
+
+  return {
+    title: t("mobileKey.openDoor"),
+    description: t("mobileKey.scannedDescription"),
+    severalBookingsMatch: t("mobileKey.severalBookingsMatch"),
+  };
 }
 
 /**

@@ -10,7 +10,10 @@ import {
   accessPointName,
   accessPointTitle,
   accessWindowLine,
+  compartmentOf,
+  compartmentPlace,
   needsCodeAtDoor,
+  scanPageWording,
 } from "~/utils/accessPointDisplay.js";
 
 const HOUR = 60 * 60 * 1000;
@@ -129,6 +132,75 @@ describe("accessPointTitle", () => {
     });
   });
 
+  describe("a Fach as resolve-scan names it (Open Locker)", () => {
+    // resolve-scan sends the Fach as `compartment`, an object - unlike the
+    // box number string iFBS names in a booking's projection.
+    const scannedFach = (overrides = {}) => ({
+      id: "anlage-1:9b2f6c1e",
+      lockerSystemId: "anlage-1",
+      type: "locker",
+      provider: "open-locker",
+      label: "Fächer Bahnhof",
+      compartment: {
+        number: 3,
+        lockerBankName: "Quartiersschrank Hafen",
+        outOfService: false,
+      },
+      ...overrides,
+    });
+
+    it("names it by Anlage, Schließfachschrank and number - not a bike box", () => {
+      expect(accessPointTitle(scannedFach(), t)).toBe(
+        "Fächer Bahnhof — Schrank Quartiersschrank Hafen, Fach 3",
+      );
+    });
+
+    it("names it the same way out of service - the page makes no case of it", () => {
+      expect(
+        accessPointTitle(
+          scannedFach({
+            compartment: {
+              number: 3,
+              lockerBankName: "Quartiersschrank Hafen",
+              outOfService: true,
+            },
+          }),
+          t,
+        ),
+      ).toBe("Fächer Bahnhof — Schrank Quartiersschrank Hafen, Fach 3");
+    });
+
+    it("names it by Anlage and number where the Schließfachschrank is unknown", () => {
+      expect(
+        accessPointTitle(
+          scannedFach({ compartment: { number: 3, lockerBankName: null } }),
+          t,
+        ),
+      ).toBe("Fächer Bahnhof — Fach 3");
+    });
+
+    it("names it in the language of the page", () => {
+      expect(accessPointTitle(scannedFach(), translator("en"))).toBe(
+        "Fächer Bahnhof — cabinet Quartiersschrank Hafen, compartment 3",
+      );
+    });
+
+    it("gives the error screens the same name", () => {
+      expect(accessPointName(scannedFach(), t)).toBe(
+        "Fächer Bahnhof — Schrank Quartiersschrank Hafen, Fach 3",
+      );
+    });
+
+    it("keeps a box number string the iFBS bike box", () => {
+      expect(
+        accessPointTitle(
+          { type: "locker", label: "Radstation", compartment: "12" },
+          t,
+        ),
+      ).toBe("Fahrradbox Nr. 12");
+    });
+  });
+
   it("lets type decide, not provider", () => {
     // The same provider that runs the lockers also runs doors; #13, #15.
     expect(
@@ -166,6 +238,110 @@ describe("accessPointTitle", () => {
     ).toBe("Bike box #4711");
     expect(accessPointTitle({ type: "locker" }, english)).toBe("Bike box");
     expect(accessPointTitle(null, english)).toBe("Unknown door");
+  });
+});
+
+/** What the scan landing page says around the place the sticker named. */
+describe("scanPageWording", () => {
+  it("speaks of the Fach where the scan resolved to one", () => {
+    expect(
+      scanPageWording({ id: "anlage-1:fach-3", lockerSystemId: "anlage-1" }, t),
+    ).toEqual({
+      title: "Fach öffnen",
+      description: "Sie haben den Code am Fach gescannt.",
+      severalBookingsMatch:
+        "Mehrere Ihrer Buchungen passen gerade zu diesem Fach.",
+    });
+  });
+
+  it("speaks of the door otherwise", () => {
+    expect(scanPageWording({ id: "door-1", type: "door" }, t)).toEqual({
+      title: "Tür öffnen",
+      description: "Sie haben den Code an der Tür gescannt.",
+      severalBookingsMatch:
+        "Mehrere Ihrer Buchungen passen gerade zu dieser Tür.",
+    });
+  });
+
+  it("speaks of the door while nothing is resolved yet", () => {
+    expect(scanPageWording(null, t).title).toBe("Tür öffnen");
+  });
+
+  it("speaks the language of the page", () => {
+    expect(
+      scanPageWording(
+        { id: "anlage-1:fach-3", lockerSystemId: "anlage-1" },
+        translator("en"),
+      ),
+    ).toEqual({
+      title: "Open the compartment",
+      description: "You scanned the code at the compartment.",
+      severalBookingsMatch:
+        "Several of your bookings match this compartment right now.",
+    });
+  });
+});
+
+/**
+ * The short form of a Fach for a sentence that has already named the Anlage
+ * or names Fächer side by side - „Ihr Fach: Schrank X, Fach N“.
+ */
+describe("compartmentPlace", () => {
+  it("names the Schließfachschrank and the number, without the Anlage", () => {
+    expect(
+      compartmentPlace({ number: 3, lockerBankName: "Labor Fachbank 1" }, t),
+    ).toBe("Schrank Labor Fachbank 1, Fach 3");
+  });
+
+  it("names the number alone where the Schließfachschrank is unknown", () => {
+    expect(compartmentPlace({ number: 3, lockerBankName: null }, t)).toBe(
+      "Fach 3",
+    );
+  });
+
+  it("speaks the language of the page", () => {
+    const english = translator("en");
+
+    expect(
+      compartmentPlace(
+        { number: 3, lockerBankName: "Labor Fachbank 1" },
+        english,
+      ),
+    ).toBe("cabinet Labor Fachbank 1, compartment 3");
+    expect(compartmentPlace({ number: 3 }, english)).toBe("compartment 3");
+  });
+
+  it("says nothing without a number", () => {
+    expect(compartmentPlace(null, t)).toBeNull();
+    expect(compartmentPlace({ number: null }, t)).toBeNull();
+  });
+
+  it("takes the Fach of a booking and of a scan alike", () => {
+    const fromBooking = compartmentOf({
+      type: "locker",
+      compartment: null,
+      assignedCompartment: { number: 3, lockerBankName: "Labor Fachbank 1" },
+    });
+    const fromScan = compartmentOf({
+      type: "locker",
+      compartment: {
+        number: 7,
+        lockerBankName: "Labor Fachbank 1",
+        outOfService: false,
+      },
+    });
+
+    expect(compartmentPlace(fromBooking, t)).toBe(
+      "Schrank Labor Fachbank 1, Fach 3",
+    );
+    expect(compartmentPlace(fromScan, t)).toBe(
+      "Schrank Labor Fachbank 1, Fach 7",
+    );
+  });
+
+  it("reads no Fach from an iFBS box or a door", () => {
+    expect(compartmentOf({ type: "locker", compartment: "12" })).toBeNull();
+    expect(compartmentOf({ type: "door", label: "Haupteingang" })).toBeNull();
   });
 });
 

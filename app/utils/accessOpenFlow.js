@@ -199,6 +199,37 @@ export function doorBlockingReason(booking, accessPointId, now = Date.now()) {
   return null;
 }
 
+const SCAN_BOOKING_QUERY = Object.freeze({
+  includeAccessPoints: "true",
+  includeBuffer: "true",
+});
+
+/**
+ * Where the scan landing page asks for the person's bookings behind a
+ * resolved sticker. A door is asked by its own id. A Fach of a
+ * Schließfachanlage (resolve-scan names its `lockerSystemId`, backend
+ * tickets#1057) is no stored access point: its bookings are read at the
+ * Anlage with `includeLockers`, which lists each booking's Fächer under the
+ * very id resolve-scan gave the Fach (`<anlage>:<Fach-UUID>`) - so
+ * {@link decideBookingOutcome} compares with the Fach's id, never the
+ * Anlage's.
+ *
+ * @param {{ id: string, lockerSystemId?: string }} accessPoint The resolved
+ *   access point
+ * @returns {{ accessPointId: string, query: Object }} The id to ask at and
+ *   the query to ask with; the caller adds `filter` and `includeEligibility`
+ */
+export function scanBookingLookup(accessPoint) {
+  if (accessPoint?.lockerSystemId) {
+    return {
+      accessPointId: accessPoint.lockerSystemId,
+      query: { ...SCAN_BOOKING_QUERY, includeLockers: "true" },
+    };
+  }
+
+  return { accessPointId: accessPoint?.id, query: { ...SCAN_BOOKING_QUERY } };
+}
+
 /**
  * Picks the booking the door should be opened with.
  *
@@ -234,7 +265,7 @@ export function decideBookingOutcome({
   // Openable through the API, not merely operable: a code door with a grant
   // is operable and would still refuse the open - see `remoteOperable`.
   const openable = candidates.filter((booking) =>
-    remoteOperable(booking, accessPointId),
+    remoteOperable(booking, accessPointId, now),
   );
 
   if (openable.length === 1) {
