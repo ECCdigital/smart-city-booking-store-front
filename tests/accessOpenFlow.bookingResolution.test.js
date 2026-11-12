@@ -630,7 +630,17 @@ describe("decideBookingOutcome at a scanned Fach", () => {
       ...overrides,
     });
 
-  const decideFach = (overrides = {}) => decide({ accessPointId: FACH_3, ...overrides });
+  const decideFach = (overrides = {}) =>
+    decide({ accessPointId: FACH_3, lockerSystemId: "anlage-1", ...overrides });
+
+  /** A booking as the wider query returns it, holding Fächer of the Anlage. */
+  const fachBookingOutside = (fachIds, overrides = {}) =>
+    fachBooking(fachIds, {
+      isCommitted: true,
+      isRejected: false,
+      accessEligibility: undefined,
+      ...overrides,
+    });
 
   it("opens the scanned Fach with the booking that holds it", () => {
     const own = fachBooking([FACH_3]);
@@ -660,10 +670,107 @@ describe("decideBookingOutcome at a scanned Fach", () => {
     });
   });
 
-  it("does not open the scanned Fach with a booking that holds another one", () => {
+  it("says „Nicht Ihr Fach“ with the Fach the person holds, opening nothing", () => {
     const other = fachBooking([FACH_7]);
 
-    expect(decideFach({ activeBookings: [other] }).screen).toBe("error");
+    expect(decideFach({ activeBookings: [other] })).toEqual({
+      screen: "error",
+      error: ACCESS_ERRORS.WRONG_COMPARTMENT,
+      booking: other,
+      blockingReason: null,
+      compartments: [fachEntry(FACH_7, 1)],
+    });
+  });
+
+  it("names every Fach of the Anlage the person holds in active bookings", () => {
+    const first = fachBooking([FACH_7, "anlage-1:fach-9"], { id: "B-1042" });
+    const second = fachBooking(["anlage-1:fach-11"], { id: "B-1043" });
+
+    const outcome = decideFach({ activeBookings: [first, second] });
+
+    expect(outcome.error).toBe(ACCESS_ERRORS.WRONG_COMPARTMENT);
+    expect(outcome.booking).toBe(first);
+    expect(outcome.compartments.map((entry) => entry.id)).toEqual([
+      FACH_7,
+      "anlage-1:fach-9",
+      "anlage-1:fach-11",
+    ]);
+  });
+
+  it("names only the Fächer of the scanned Anlage", () => {
+    const other = fachBooking([FACH_7], {
+      accessPointIds: [FACH_7, "anlage-2:fach-1", "door-1"],
+      accessPoints: [
+        fachEntry(FACH_7, 7),
+        fachEntry("anlage-2:fach-1", 1),
+        { id: "door-1", type: "door", label: "Haupteingang" },
+      ],
+    });
+
+    expect(decideFach({ activeBookings: [other] }).compartments).toEqual([
+      fachEntry(FACH_7, 7),
+    ]);
+  });
+
+  it("opens with the booking that holds the scanned Fach, though another holds a different one", () => {
+    const own = fachBooking([FACH_3], { id: "B-1042" });
+    const other = fachBooking([FACH_7], { id: "B-1043" });
+
+    expect(decideFach({ activeBookings: [other, own] })).toEqual({
+      screen: "ready",
+      booking: own,
+    });
+  });
+
+  it("does not count a Fach only held before its assignment as the person's", () => {
+    const placeholder = fachBooking([], {
+      accessPointIds: ["anlage-1:hold"],
+      accessPoints: [
+        { id: "anlage-1:hold", type: "locker", label: "Fächer Bahnhof" },
+      ],
+    });
+
+    expect(decideFach({ activeBookings: [placeholder] }).error).toBe(
+      ACCESS_ERRORS.NO_BOOKING,
+    );
+  });
+
+  it("does not count a booking of another tenant", () => {
+    const elsewhere = fachBooking([FACH_7], { tenantId: "nachbarstadt" });
+
+    expect(decideFach({ activeBookings: [elsewhere] }).error).toBe(
+      ACCESS_ERRORS.NO_BOOKING,
+    );
+  });
+
+  it("says not yet with the person's Fach where the booking only begins later", () => {
+    const upcoming = fachBookingOutside([FACH_7], {
+      timeBegin: NOW + 2 * HOUR,
+      timeEnd: NOW + 3 * HOUR,
+    });
+
+    expect(decideFach({ otherBookings: [upcoming] })).toEqual({
+      screen: "error",
+      error: ACCESS_ERRORS.TOO_EARLY,
+      booking: upcoming,
+      blockingReason: null,
+      accessPoint: fachEntry(FACH_7, 1),
+    });
+  });
+
+  it("says over with the person's Fach where the booking has ended", () => {
+    const past = fachBookingOutside([FACH_7], {
+      timeBegin: NOW - 3 * HOUR,
+      timeEnd: NOW - 2 * HOUR,
+    });
+
+    expect(decideFach({ otherBookings: [past] })).toEqual({
+      screen: "error",
+      error: ACCESS_ERRORS.TOO_LATE,
+      booking: past,
+      blockingReason: null,
+      accessPoint: fachEntry(FACH_7, 1),
+    });
   });
 
   it("says not yet before the window of the Fach", () => {
@@ -680,6 +787,7 @@ describe("decideBookingOutcome at a scanned Fach", () => {
       error: ACCESS_ERRORS.TOO_EARLY,
       booking: upcoming,
       blockingReason: null,
+      accessPoint: fachEntry(FACH_3, 1),
     });
   });
 
@@ -697,7 +805,19 @@ describe("decideBookingOutcome at a scanned Fach", () => {
       error: ACCESS_ERRORS.TOO_LATE,
       booking: past,
       blockingReason: null,
+      accessPoint: fachEntry(FACH_3, 1),
     });
+  });
+
+  it("names the scanned Fach of a booking that holds it among others, not yet", () => {
+    const upcoming = fachBookingOutside([FACH_7, FACH_3], {
+      timeBegin: NOW + 2 * HOUR,
+      timeEnd: NOW + 3 * HOUR,
+    });
+
+    expect(decideFach({ otherBookings: [upcoming] }).accessPoint).toEqual(
+      fachEntry(FACH_3, 2),
+    );
   });
 
   it("reads the window of the scanned Fach for an active booking outside it", () => {

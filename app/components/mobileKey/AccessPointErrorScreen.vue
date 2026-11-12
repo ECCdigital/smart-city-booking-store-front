@@ -80,6 +80,14 @@ const props = defineProps({
     type: Number,
     default: null,
   },
+  /**
+   * The Fächer the person holds at the scanned Anlage, as their booking lists
+   * them: `wrong_compartment` („Nicht Ihr Fach“) names them.
+   */
+  compartments: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 /**
@@ -101,6 +109,7 @@ const screen = computed(() =>
     blockingReason: props.blockingReason,
     accessPointId: props.accessPointId,
     retryAfter: props.retryAfter,
+    compartments: props.compartments,
     format,
   }),
 );

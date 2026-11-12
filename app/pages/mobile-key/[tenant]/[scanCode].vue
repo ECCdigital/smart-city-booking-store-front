@@ -89,7 +89,8 @@
         :booking="booking"
         :tenant-id="tenantId"
         :blocking-reason="blockingReason"
-        :access-point-id="accessPoint?.id ?? null"
+        :access-point-id="namedPoint?.id ?? accessPoint?.id ?? null"
+        :compartments="ownCompartments"
         @retry="start"
       />
 
@@ -156,6 +157,15 @@ const booking = ref(null);
 const candidates = ref([]);
 
 /**
+ * At a Fach the outcome may name the person's own instead of the scanned
+ * one: the Fach whose window "not yet" or "over" speaks of (`namedPoint`),
+ * or every Fach of the Anlage they hold, for „Nicht Ihr Fach“
+ * (`ownCompartments`).
+ */
+const namedPoint = ref(null);
+const ownCompartments = ref([]);
+
+/**
  * The last status the flow reported. The card stands above the flow now rather
  * than only on the way to it, so it has to follow the door instead of claiming
  * "locked" for as long as the page is open - the very thing ticket 06 took out
@@ -192,6 +202,8 @@ async function start() {
   scannedPoint.value = null;
   booking.value = null;
   candidates.value = [];
+  namedPoint.value = null;
+  ownCompartments.value = [];
   status.value = undefined;
 
   try {
@@ -240,6 +252,7 @@ async function resolveBooking() {
 
   const context = {
     accessPointId: accessPoint.value.id,
+    lockerSystemId: accessPoint.value.lockerSystemId ?? null,
     tenantId: tenantId.value,
     activeBookings: active,
     otherBookings: [],
@@ -268,6 +281,8 @@ async function resolveBooking() {
 
 function applyOutcome(outcome) {
   booking.value = outcome.booking ?? null;
+  namedPoint.value = outcome.accessPoint ?? null;
+  ownCompartments.value = outcome.compartments ?? [];
 
   if (outcome.screen === "ready") {
     stage.value = "flow";
@@ -301,10 +316,12 @@ const bookingTimeRange = (candidate) =>
 
 /**
  * The door by name - the wording never says "the door", it says which one;
- * a Fach by Anlage, Schrank and number. Until the sticker resolves there is
- * no name to say.
+ * a Fach by Anlage, Schrank and number - the person's own where the outcome
+ * names it. Until the sticker resolves there is no name to say.
  */
-const accessPointLabel = computed(() => accessPointName(scannedPoint.value, t));
+const accessPointLabel = computed(() =>
+  accessPointName(namedPoint.value ?? scannedPoint.value, t),
+);
 
 watch([tenantId, scanCode], () => {
   start();
