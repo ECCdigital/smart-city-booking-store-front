@@ -12,7 +12,6 @@
       "label": "Your bookings and keys",
       "hello": "Hello",
       "helloName": "Hello, {name}",
-      "privacyHint": "Your bookings and keys – visible to you only.",
       "loading": "Loading …",
       "nextBooking": {
         "title": "Next booking",
@@ -27,7 +26,7 @@
         "activeTitle": "Your access is active now.",
         "activeText": "Open the doors until {time} directly at the device.",
         "none": "No upcoming access.",
-        "link": "Open keys"
+        "link": "View keys"
       },
       "favorites": {
         "title": "Favorites",
@@ -38,6 +37,10 @@
     "nearby": {
       "title": "Near you",
       "count": "No offer with a location | {count} offer with a location | {count} offers with a location",
+      "countNearby": "No offer within {radius} km | {count} offer within {radius} km | {count} offers within {radius} km",
+      "useLocation": "My location",
+      "noneNearby": "There are no offers within {radius} km, so the map shows all of them.",
+      "locationUnavailable": "Your location is not available, so the map shows all offers.",
       "openSearch": "Open the map in the search",
       "hint": "Click a pin to see the offer. Filters and the list are on the search page."
     },

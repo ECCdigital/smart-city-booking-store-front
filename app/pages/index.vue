@@ -23,13 +23,13 @@
         </ClientOnly>
       </div>
 
+      <!-- Main Categories -->
+      <MainCategoryArea />
+
       <TenantOffersArea
         v-if="!error && !isTenantContext"
         :tenants="tenantStore.getTenants"
       />
-
-      <!-- Main Categories -->
-      <MainCategoryArea />
 
       <!-- A failed load is not an empty catalog -->
       <UAlert

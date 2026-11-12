@@ -12,7 +12,6 @@
       "label": "Ihre Buchungen und Schlüssel",
       "hello": "Guten Tag",
       "helloName": "Guten Tag, {name}",
-      "privacyHint": "Ihre Buchungen und Schlüssel – nur für Sie sichtbar.",
       "loading": "Wird geladen …",
       "nextBooking": {
         "title": "Nächste Buchung",
@@ -27,7 +26,7 @@
         "activeTitle": "Ihr Zutritt ist jetzt aktiv.",
         "activeText": "Türen öffnen Sie bis {time} Uhr direkt am Gerät.",
         "none": "Kein anstehender Zutritt.",
-        "link": "Schlüssel öffnen"
+        "link": "Schlüssel ansehen"
       },
       "favorites": {
         "title": "Favoriten",
@@ -38,6 +37,10 @@
     "nearby": {
       "title": "In Ihrer Nähe",
       "count": "Kein Angebot mit Standort | {count} Angebot mit Standort | {count} Angebote mit Standort",
+      "countNearby": "Kein Angebot im Umkreis von {radius} km | {count} Angebot im Umkreis von {radius} km | {count} Angebote im Umkreis von {radius} km",
+      "useLocation": "Mein Standort",
+      "noneNearby": "Im Umkreis von {radius} km gibt es keine Angebote, die Karte zeigt alle.",
+      "locationUnavailable": "Ihr Standort ist nicht verfügbar, die Karte zeigt alle Angebote.",
       "openSearch": "Karte in der Suche öffnen",
       "hint": "Ein Klick auf einen Pin zeigt das Angebot. Filter und Liste gibt es auf der Suchseite."
     },

@@ -5,13 +5,8 @@
     class="mt-10 rounded-2xl border border-primary/20 bg-primary/5 dark:bg-primary/10 p-4 md:p-5"
     :aria-label="$t('home.greeting.label')"
   >
-    <p class="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-      <span class="text-lg font-bold text-gray-900 dark:text-white">
-        {{ greeting }}
-      </span>
-      <span class="text-sm text-gray-600 dark:text-gray-400">
-        {{ $t("home.greeting.privacyHint") }}
-      </span>
+    <p class="mb-4 text-lg font-bold text-gray-900 dark:text-white">
+      {{ greeting }}
     </p>
 
     <ul class="m-0 p-0 list-none grid gap-3 md:grid-cols-3">
