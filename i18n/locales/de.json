@@ -1621,7 +1621,8 @@
         "title": "Nicht Ihr Fach",
         "description": "{label} gehört nicht zu Ihrer Buchung. Ihr Fach: {own}.",
         "description_several": "{label} gehört nicht zu Ihrer Buchung. Ihre Fächer: {own}.",
-        "description_unnamed": "{label} gehört nicht zu Ihrer Buchung. Ihr Fach ist ein anderes dieser Anlage."
+        "description_unnamed": "{label} gehört nicht zu Ihrer Buchung. Ihr Fach ist ein anderes dieser Anlage.",
+        "ownListed": "{list}; {place}"
       },
       "door_unreachable": {
         "title": "{label} nicht erreichbar",

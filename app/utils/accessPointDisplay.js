@@ -1,4 +1,4 @@
-import { isUnlocked } from "~/utils/accessOpenFlow.js";
+import { compartmentOf, isUnlocked } from "~/utils/accessOpenFlow.js";
 import {
   ACCESS_WINDOW_STATES,
   doorWindow,
@@ -77,37 +77,13 @@ function isBoxNumber(compartment) {
 }
 
 /**
- * The Fach of an Open Locker Schließfachanlage an access point stands for,
- * `{ number, lockerBankName }`: the one the platform assigned to a booking
- * (`assignedCompartment`, backend tickets#1040), or the one a scan resolved
- * to (`compartment` as an object, backend tickets#1057). `null` for anything
- * else - a door, or the box number string of iFBS.
- *
- * @param {Object|null|undefined} accessPoint
- * @returns {{ number: number, lockerBankName: string|null }|null}
- */
-export function compartmentOf(accessPoint) {
-  if (accessPoint?.type !== "locker") {
-    return null;
-  }
-
-  const compartment =
-    accessPoint.assignedCompartment ??
-    (accessPoint.compartment && typeof accessPoint.compartment === "object"
-      ? accessPoint.compartment
-      : null);
-
-  return compartment?.number == null ? null : compartment;
-}
-
-/**
  * Where a Fach stands within its Anlage, without the Anlage: „Schrank
  * {Name}, Fach {Nummer}“, „Fach {Nummer}“ where the Schrank is unknown. The
  * short form for a sentence that has already named the Anlage, or names
  * Fächer side by side - „Ihr Fach: Schrank X, Fach N“.
  *
  * @param {{ number: number, lockerBankName?: string|null }|null|undefined} compartment
- *   A Fach as {@link compartmentOf} reads it
+ *   A Fach as `compartmentOf` (accessOpenFlow.js) reads it
  * @param {(key: string, params?: Object) => string} t vue-i18n's translator
  * @returns {string|null} `null` without a number
  */
@@ -128,7 +104,7 @@ export function compartmentPlace(compartment, t) {
 
 /**
  * The name of a Fach at an Open Locker Schließfachanlage - assigned to a
- * booking or reached by a scan, see {@link compartmentOf}: the Anlage
+ * booking or reached by a scan, see `compartmentOf`: the Anlage
  * (`label`), the Schließfachschrank and the number - „{Anlage} — Schrank
  * {Name}, Fach {Nummer}“, without the Schrank where it is unknown. `null` for
  * anything else, so a caller that names a door by its label elsewhere keeps

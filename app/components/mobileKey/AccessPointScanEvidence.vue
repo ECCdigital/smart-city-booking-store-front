@@ -188,10 +188,13 @@
 import { QrcodeStream, setZXingModuleOverrides } from "vue-qrcode-reader";
 
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
-import { decideScanMatch, readScannedCode } from "~/utils/accessOpenFlow.js";
+import {
+  compartmentOf,
+  decideScanMatch,
+  readScannedCode,
+} from "~/utils/accessOpenFlow.js";
 import {
   accessPointName,
-  compartmentOf,
   compartmentPlace,
 } from "~/utils/accessPointDisplay.js";
 

@@ -10,11 +10,11 @@ import {
   accessPointName,
   accessPointTitle,
   accessWindowLine,
-  compartmentOf,
   compartmentPlace,
   needsCodeAtDoor,
   scanPageWording,
 } from "~/utils/accessPointDisplay.js";
+import { compartmentOf } from "~/utils/accessOpenFlow.js";
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;

@@ -17,8 +17,8 @@
  * already that button, and the row shows none of its own.
  */
 
-import { ACCESS_ERRORS } from "~/utils/accessOpenFlow.js";
-import { compartmentOf, compartmentPlace } from "~/utils/accessPointDisplay.js";
+import { ACCESS_ERRORS, compartmentOf } from "~/utils/accessOpenFlow.js";
+import { compartmentPlace } from "~/utils/accessPointDisplay.js";
 import { bookingWindow, doorWindow, findDoor } from "~/utils/accessWindow.js";
 
 const searchPath = (tenantId) => `/t/${tenantId}/search`;
@@ -406,7 +406,9 @@ function describeFailure(
 /**
  * „Nicht Ihr Fach“ names where to go instead: the person's Fach, or all of
  * them, each the short way („Schrank X, Fach N“) since the Anlage is the
- * scanned one. Without a Fach to name, the sentence ends after the first half.
+ * scanned one, joined by `ownListed` - not by a comma, which the short way
+ * holds itself. Without a Fach to name, the sentence ends after the first
+ * half.
  */
 function describeWrongCompartment({ t, label, wording, compartments }) {
   const places = (compartments || [])
@@ -421,7 +423,12 @@ function describeWrongCompartment({ t, label, wording, compartments }) {
     places.length === 1
       ? `${wording}.description`
       : `${wording}.description_several`,
-    { label, own: places.join("; ") },
+    {
+      label,
+      own: places.reduce((list, place) =>
+        t(`${wording}.ownListed`, { list, place }),
+      ),
+    },
   );
 }
 

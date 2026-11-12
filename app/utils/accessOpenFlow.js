@@ -13,7 +13,11 @@
  * know maps to a generic error - never to a silent success.
  */
 
-import { isCommittedBooking } from "~/utils/bookingStatus.js";
+import {
+  BOOKING_STATUS,
+  isCommittedBooking,
+  resolveBookingStatus,
+} from "~/utils/bookingStatus.js";
 import {
   ACCESS_WINDOW_STATES,
   bookingWindow,
@@ -242,9 +246,10 @@ export function scanBookingLookup(accessPoint) {
  * A scanned Fach (`lockerSystemId` given, its Anlage) is compared by its own
  * id like a door, and two outcomes are its own (backend tickets#1058, same
  * rule as the access log entry `wrong_compartment`): where no active booking
- * holds the scanned Fach but one holds another Fach of the Anlage, the page
- * says „Nicht Ihr Fach“ with every Fach of the Anlage the person's active
- * bookings hold (`compartments`) and opens nothing. Where nothing is active,
+ * holds the scanned Fach but a confirmed one holds another Fach of the
+ * Anlage, the page says „Nicht Ihr Fach“ with every Fach of the Anlage the
+ * person's active confirmed bookings hold (`compartments`) and opens nothing;
+ * an active booking not confirmed yet gets its own reason at its Fach. Where nothing is active,
  * every booking holding a Fach of the Anlage counts for "not yet" and "over",
  * and the outcome names the person's Fach (`accessPoint`) - the scanned one
  * where the booking holds it - so the screen says which Fach and its window.
@@ -314,16 +319,31 @@ export function decideBookingOutcome({
         heldCompartments(booking, lockerSystemId).length > 0,
     );
 
+  // „Nicht Ihr Fach“ by the rule of the access log entry (backend
+  // tickets#1058): only a confirmed booking holds its Fach. The projection
+  // names no revoked Fach, so a revoked one still counts here.
   const elsewhere = holding(activeBookings);
-  if (elsewhere.length > 0) {
+  const confirmed = elsewhere.filter(
+    (booking) => resolveBookingStatus(booking) === BOOKING_STATUS.CONFIRMED,
+  );
+  if (confirmed.length > 0) {
     return {
       screen: "error",
       error: ACCESS_ERRORS.WRONG_COMPARTMENT,
-      booking: elsewhere[0],
+      booking: confirmed[0],
       blockingReason: null,
-      compartments: elsewhere.flatMap((booking) =>
+      compartments: confirmed.flatMap((booking) =>
         heldCompartments(booking, lockerSystemId),
       ),
+    };
+  }
+  if (elsewhere.length > 0) {
+    // Not confirmed yet - unpaid, awaiting approval: the booking opens no
+    // Fach, so the page names its own reason at the person's Fach.
+    const [held] = heldCompartments(elsewhere[0], lockerSystemId);
+    return {
+      ...blockedOutcome(elsewhere[0], held.id, now),
+      accessPoint: held,
     };
   }
 
@@ -451,6 +471,36 @@ function outOfWindowOutcome(bookings, now) {
     booking: null,
     blockingReason: null,
   };
+}
+
+/**
+ * The Fach of an Open Locker Schließfachanlage an access point stands for,
+ * as the person looks for it - number and Schrank, nothing else: the one the
+ * platform assigned to a booking (`assignedCompartment`, backend
+ * tickets#1040), or the one a scan resolved to (`compartment` as an object,
+ * backend tickets#1057). `null` for anything else - a door, the box number
+ * string of iFBS, a Fach without a number.
+ *
+ * @param {Object|null|undefined} accessPoint
+ * @returns {{ number: number, lockerBankName: string|null }|null}
+ */
+export function compartmentOf(accessPoint) {
+  if (accessPoint?.type !== "locker") {
+    return null;
+  }
+
+  const compartment =
+    accessPoint.assignedCompartment ??
+    (accessPoint.compartment && typeof accessPoint.compartment === "object"
+      ? accessPoint.compartment
+      : null);
+
+  return compartment?.number == null
+    ? null
+    : {
+        number: compartment.number,
+        lockerBankName: compartment.lockerBankName ?? null,
+      };
 }
 
 /**
@@ -876,7 +926,7 @@ export function decideScanMatch(
     if (sameId(scanned.lockerSystemId, lockerSystemOf(expectedAccessPointId))) {
       return {
         ...noMatch(SCAN_MISMATCHES.WRONG_COMPARTMENT, label),
-        scannedCompartment: scannedCompartmentOf(scanned),
+        scannedCompartment: compartmentOf(scanned),
       };
     }
     return noMatch(SCAN_MISMATCHES.WRONG_DOOR, label);
@@ -909,25 +959,6 @@ function lockerSystemOf(accessPointId) {
   const separator = id.indexOf(":");
 
   return separator > 0 ? id.slice(0, separator) : null;
-}
-
-/**
- * @private
- * The Fach a scan resolved to as the person looks for it - number and
- * Schrank, nothing else of what resolve-scan says about it.
- */
-function scannedCompartmentOf(scanned) {
-  const compartment =
-    scanned.compartment && typeof scanned.compartment === "object"
-      ? scanned.compartment
-      : null;
-
-  return compartment
-    ? {
-        number: compartment.number ?? null,
-        lockerBankName: compartment.lockerBankName ?? null,
-      }
-    : null;
 }
 
 /**
