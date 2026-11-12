@@ -699,6 +699,110 @@ describe("decideScanMatch", () => {
       scannedLabel: null,
     });
   });
+
+  describe("at a Fach of a Schließfachanlage", () => {
+    /** The panel of Fach 3: its id is the one the booking lists, `<anlage>:<fach>`. */
+    const FACH_PANEL = {
+      expectedAccessPointId: "anlage-1:fach-3",
+      expectedTenantId: "rostock",
+    };
+
+    /** A Fach as resolve-scan hands it out (backend tickets#1057). */
+    const fach = (id, number, lockerBankName, fields = {}) => ({
+      id,
+      lockerSystemId: id.split(":")[0],
+      label: "Radstation Hauptbahnhof",
+      tenantId: "rostock",
+      type: "locker",
+      provider: "openLocker",
+      validationRuleTypes: ["qrScan"],
+      capabilities: ["open"],
+      compartment: { number, lockerBankName, outOfService: false },
+      ...fields,
+    });
+    const FACH_3 = fach("anlage-1:fach-3", 3, "A");
+    const FACH_7 = fach("anlage-1:fach-7", 7, "B");
+    const FACH_3_ELSEWHERE = fach("anlage-2:fach-3", 3, "A", {
+      label: "Radstation Altstadt",
+    });
+
+    it("takes the code of the person's own Fach as the proof - the ids are the same", () => {
+      expect(
+        decideScanMatch(resolved(FACH_3), {
+          ...FACH_PANEL,
+          scanCode: "SC-F3",
+        }),
+      ).toEqual({
+        matched: true,
+        evidence: [{ type: "qrScan", scanCode: "SC-F3" }],
+        mismatch: null,
+        scannedLabel: "Radstation Hauptbahnhof",
+      });
+    });
+
+    it("names the other Fach of the same Anlage instead of offering a switch to it", () => {
+      expect(
+        decideScanMatch(resolved(FACH_7), {
+          ...FACH_PANEL,
+          scanCode: "SC-F7",
+        }),
+      ).toEqual({
+        matched: false,
+        evidence: [],
+        mismatch: "wrong_compartment",
+        scannedLabel: "Radstation Hauptbahnhof",
+        scannedCompartment: { number: 7, lockerBankName: "B" },
+      });
+    });
+
+    it("keeps a Fach of another Anlage a different access point", () => {
+      expect(
+        decideScanMatch(resolved(FACH_3_ELSEWHERE), {
+          ...FACH_PANEL,
+          scanCode: "SC-X3",
+        }),
+      ).toEqual({
+        matched: false,
+        evidence: [],
+        mismatch: "wrong_door",
+        scannedLabel: "Radstation Altstadt",
+      });
+    });
+
+    it("keeps a door a different access point", () => {
+      expect(
+        decideScanMatch(resolved(HAUPTEINGANG), {
+          ...FACH_PANEL,
+          scanCode: "SC-7F3K9Q",
+        }),
+      ).toMatchObject({ matched: false, mismatch: "wrong_door" });
+    });
+
+    it("keeps the Anlage's own code a different access point - only a Fach proves a Fach", () => {
+      const anlage = {
+        ...HAUPTEINGANG,
+        id: "anlage-1",
+        label: "Radstation Hauptbahnhof",
+        type: "locker",
+      };
+
+      expect(
+        decideScanMatch(resolved(anlage), {
+          ...FACH_PANEL,
+          scanCode: "SC-A1",
+        }),
+      ).toMatchObject({ matched: false, mismatch: "wrong_door" });
+    });
+
+    it("lets a foreign tenant outrank a Fach of the same Anlage id", () => {
+      expect(
+        decideScanMatch(resolved({ ...FACH_7, tenantId: "stadtwerke" }), {
+          ...FACH_PANEL,
+          scanCode: "SC-F7",
+        }),
+      ).toMatchObject({ matched: false, mismatch: "wrong_tenant" });
+    });
+  });
 });
 
 const EVERY_CAPABILITY = ["open", "close", "getStatus"];
@@ -831,6 +935,34 @@ describe("decideStage", () => {
         scanDoor({ status: LOCKED, evidence: [{ type: "geofence" }] }),
       ).stage,
     ).toBe("evidence");
+  });
+
+  it("sends a Fach through the evidence stage when its Anlage demands a scan - the Fach inherits the Anlage's rules", () => {
+    // The Fach as a booking lists it: the Anlage's rules under the Fach's id.
+    const fach = readAccessPoint({
+      id: "anlage-1:fach-3",
+      tenantId: "rostock",
+      type: "locker",
+      provider: "openLocker",
+      label: "Radstation Hauptbahnhof",
+      mode: "remote",
+      validationRuleTypes: ["qrScan"],
+      capabilities: ["open"],
+      assignedCompartment: { number: 3, lockerBankName: "A" },
+    });
+
+    expect(
+      decideStage({
+        validationRuleTypes: fach.validationRuleTypes,
+        capabilities: fach.capabilities,
+        status: LOCKED,
+        evidence: [],
+      }),
+    ).toMatchObject({
+      stage: "evidence",
+      steps: ["verify", "open"],
+      currentStep: 0,
+    });
   });
 
   it("skips the evidence stage for evidence from the scan URL - that scan already happened at the door", () => {
