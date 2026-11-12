@@ -38,6 +38,7 @@ export const ACCESS_ERRORS = Object.freeze({
   EVIDENCE_RULE_UNAVAILABLE: "evidence_rule_unavailable",
   EVIDENCE_INVALID: "evidence_invalid",
   EVIDENCE_MISSING: "evidence_missing",
+  WRONG_COMPARTMENT: "wrong_compartment",
   GENERIC: "generic",
 });
 
@@ -238,25 +239,42 @@ export function scanBookingLookup(accessPoint) {
  * consulted only when nothing is active, so the page can say "not yet" or
  * "that was yesterday" instead of a bare "no booking".
  *
+ * A scanned Fach (`lockerSystemId` given, its Anlage) is compared by its own
+ * id like a door, and two outcomes are its own (backend tickets#1058, same
+ * rule as the access log entry `wrong_compartment`): where no active booking
+ * holds the scanned Fach but one holds another Fach of the Anlage, the page
+ * says „Nicht Ihr Fach“ with every Fach of the Anlage the person's active
+ * bookings hold (`compartments`) and opens nothing. Where nothing is active,
+ * every booking holding a Fach of the Anlage counts for "not yet" and "over",
+ * and the outcome names the person's Fach (`accessPoint`) - the scanned one
+ * where the booking holds it - so the screen says which Fach and its window.
+ *
  * @param {Object} params
- * @param {string} params.accessPointId The scanned door
+ * @param {string} params.accessPointId The scanned door or Fach
  * @param {string} params.tenantId Tenant from the scanned URL
+ * @param {string|null} [params.lockerSystemId] The Anlage of a scanned Fach,
+ *   as resolve-scan names it
  * @param {Object[]} [params.activeBookings]
  * @param {Object[]} [params.otherBookings]
  * @param {number} [params.now]
  * @returns {{ screen: "ready", booking: Object }
  *   | { screen: "select", bookings: Object[] }
- *   | { screen: "error", error: string, booking: Object|null, blockingReason: string|null }}
+ *   | { screen: "error", error: string, booking: Object|null,
+ *       blockingReason: string|null, compartments?: Object[],
+ *       accessPoint?: Object }}
  */
 export function decideBookingOutcome({
   accessPointId,
   tenantId,
+  lockerSystemId = null,
   activeBookings = [],
   otherBookings = [],
   now = Date.now(),
 }) {
+  const inTenant = (booking) =>
+    String(booking?.tenantId) === String(tenantId);
   const belongsHere = (booking) =>
-    String(booking?.tenantId) === String(tenantId) &&
+    inTenant(booking) &&
     (booking?.accessPointIds || []).some(
       (id) => String(id) === String(accessPointId),
     );
@@ -285,7 +303,61 @@ export function decideBookingOutcome({
     return blockedOutcome(speaking ?? candidates[0], accessPointId, now);
   }
 
-  return outOfWindowOutcome(otherBookings.filter(belongsHere), now);
+  if (!lockerSystemId) {
+    return outOfWindowOutcome(otherBookings.filter(belongsHere), now);
+  }
+
+  const holding = (bookings) =>
+    bookings.filter(
+      (booking) =>
+        inTenant(booking) &&
+        heldCompartments(booking, lockerSystemId).length > 0,
+    );
+
+  const elsewhere = holding(activeBookings);
+  if (elsewhere.length > 0) {
+    return {
+      screen: "error",
+      error: ACCESS_ERRORS.WRONG_COMPARTMENT,
+      booking: elsewhere[0],
+      blockingReason: null,
+      compartments: elsewhere.flatMap((booking) =>
+        heldCompartments(booking, lockerSystemId),
+      ),
+    };
+  }
+
+  const outcome = outOfWindowOutcome(holding(otherBookings), now);
+  if (!outcome.booking) {
+    return outcome;
+  }
+
+  const held = heldCompartments(outcome.booking, lockerSystemId);
+  return {
+    ...outcome,
+    accessPoint:
+      held.find((entry) => String(entry.id) === String(accessPointId)) ??
+      held[0],
+  };
+}
+
+/**
+ * @private
+ * The Fächer of one Anlage a booking holds, as its `accessPoints` list them:
+ * an entry under `<anlage>:…` with the Fach the platform assigned. A
+ * placeholder held before the assignment (`<anlage>:hold`) names no Fach and
+ * is none.
+ *
+ * @param {Object} booking A booking with `accessPoints`
+ * @param {string} lockerSystemId The Anlage
+ * @returns {Object[]} The Fach entries, in the booking's order
+ */
+function heldCompartments(booking, lockerSystemId) {
+  const prefix = `${lockerSystemId}:`;
+  return (booking?.accessPoints || []).filter(
+    (entry) =>
+      String(entry?.id).startsWith(prefix) && entry?.assignedCompartment,
+  );
 }
 
 /**

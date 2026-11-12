@@ -1617,6 +1617,12 @@
         "description": "Ihr Zugang endete am {date}. {label} lässt sich damit nicht mehr öffnen.",
         "description_undated": "Ihr Zugang ist beendet. {label} lässt sich damit nicht mehr öffnen."
       },
+      "wrong_compartment": {
+        "title": "Nicht Ihr Fach",
+        "description": "{label} gehört nicht zu Ihrer Buchung. Ihr Fach: {own}.",
+        "description_several": "{label} gehört nicht zu Ihrer Buchung. Ihre Fächer: {own}.",
+        "description_unnamed": "{label} gehört nicht zu Ihrer Buchung. Ihr Fach ist ein anderes dieser Anlage."
+      },
       "door_unreachable": {
         "title": "{label} nicht erreichbar",
         "description": "Das Schloss antwortet gerade nicht. Das kann an der Verbindung vor Ort liegen."

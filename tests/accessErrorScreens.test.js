@@ -406,6 +406,51 @@ describe("buildErrorScreen", () => {
   });
 });
 
+describe("wrong_compartment, a scan at a Fach the person does not hold", () => {
+  const SCANNED = "Fächer Bahnhof — Schrank Labor, Fach 3";
+  const fach = (number, lockerBankName = "Labor") => ({
+    id: `anlage-1:fach-${number}`,
+    type: "locker",
+    label: "Fächer Bahnhof",
+    assignedCompartment: { number, lockerBankName },
+  });
+
+  it("says „Nicht Ihr Fach“ and names the person's Fach", () => {
+    const screen = buildErrorScreen(ACCESS_ERRORS.WRONG_COMPARTMENT, {
+      t,
+      label: SCANNED,
+      compartments: [fach(7)],
+    });
+
+    expect(screen.title).toBe("Nicht Ihr Fach");
+    expect(screen.description).toBe(
+      `${SCANNED} gehört nicht zu Ihrer Buchung. Ihr Fach: Schrank Labor, Fach 7.`,
+    );
+  });
+
+  it("names every Fach of the person", () => {
+    const screen = buildErrorScreen(ACCESS_ERRORS.WRONG_COMPARTMENT, {
+      t,
+      label: SCANNED,
+      compartments: [fach(7), fach(2, "Hafen")],
+    });
+
+    expect(screen.description).toBe(
+      `${SCANNED} gehört nicht zu Ihrer Buchung. Ihre Fächer: Schrank Labor, Fach 7; Schrank Hafen, Fach 2.`,
+    );
+  });
+
+  it("offers no way to open, only the context exit", () => {
+    const screen = buildErrorScreen(ACCESS_ERRORS.WRONG_COMPARTMENT, {
+      t,
+      label: SCANNED,
+      compartments: [fach(7)],
+    });
+
+    expect(screen.exit).toBeNull();
+  });
+});
+
 describe("formatBlockingReasonMessage", () => {
   it("nimmt den ersten Grund, den das Backend nennt", () => {
     expect(

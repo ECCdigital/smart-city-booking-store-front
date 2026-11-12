@@ -1221,6 +1221,12 @@
         "description": "Your access ended on {date}. {label} can no longer be opened with it.",
         "description_undated": "Your access has ended. {label} can no longer be opened with it."
       },
+      "wrong_compartment": {
+        "title": "Not your compartment",
+        "description": "{label} does not belong to your booking. Your compartment: {own}.",
+        "description_several": "{label} does not belong to your booking. Your compartments: {own}.",
+        "description_unnamed": "{label} does not belong to your booking. Yours is another compartment of this locker system."
+      },
       "stale_scan_code": {
         "title": "Sticker out of date",
         "description": "This QR code has been replaced and is no longer valid. Please let the administration know so the sticker can be renewed."
