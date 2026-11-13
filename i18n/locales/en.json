@@ -784,6 +784,11 @@
     "downloadAppointment": "Download appointment",
     "actionsFor": "Actions for booking #{id}",
     "downloadAppointmentTooltip": "Download as an appointment",
+    "series": {
+      "label": "Recurring booking",
+      "tooltip": "Part of a recurring booking with {count} bookings",
+      "details": "Part of a series of {count} bookings in total"
+    },
     "withdrawal": {
       "action": "Withdraw from booking",
       "hint": "Opens a prepared email to the provider. The provider checks your withdrawal and gets back to you."

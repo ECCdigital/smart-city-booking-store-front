@@ -18,6 +18,26 @@
           >
             #{{ booking.id }}
           </div>
+          <!-- Part of a series -->
+          <UTooltip
+            v-if="booking.series"
+            :text="
+              $t('booking.series.tooltip', {
+                count: booking.series.bookingCount,
+              })
+            "
+          >
+            <span
+              class="flex items-center ml-1 text-gray-500 dark:text-gray-400"
+              @click.stop
+            >
+              <UIcon
+                name="i-lucide-repeat"
+                class="w-4 h-4"
+                :aria-label="$t('booking.series.label')"
+              />
+            </span>
+          </UTooltip>
           <div
             v-if="isActive"
             class="bg-primary/60 text-gray-800 dark:text-gray-200 text-xs font-semibold px-2 py-1 rounded-full"

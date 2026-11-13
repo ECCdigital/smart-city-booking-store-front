@@ -11,6 +11,18 @@
         <p>{{ formatDate(booking.timeCreated) }}</p>
       </div>
     </div>
+    <!-- Part of a series -->
+    <div v-if="booking.series" class="mb-5">
+      <p class="font-medium">{{ $t("booking.series.label") }}</p>
+      <p class="flex items-center gap-1">
+        <UIcon name="i-lucide-repeat" class="w-4 h-4 shrink-0" />
+        {{
+          $t("booking.series.details", {
+            count: booking.series.bookingCount,
+          })
+        }}
+      </p>
+    </div>
     <div class="flex mb-5">
       <div class="basis-1/2">
         <p class="font-medium">{{ $t("tenants.tenant") }}</p>
