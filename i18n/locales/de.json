@@ -1498,6 +1498,7 @@
     "emergencyContact": "Notfallkontakt & Vorgehen bei Störungen",
     "checkingBookings": "Ihre Buchungen werden geprüft …",
     "severalBookingsMatch": "Mehrere Ihrer Buchungen passen gerade zu dieser Tür.",
+    "severalBookingsMatchCompartment": "Mehrere Ihrer Buchungen passen gerade zu diesem Fach.",
     "toKeyList": "Zur Schlüsselliste",
     "loadFailed": "Ihre Schlüssel konnten nicht geladen werden.",
     "upcoming": "Kommend",
@@ -1525,6 +1526,8 @@
     "yourKeysDescription": "Digitale Schlüssel für Türen, Schließfächer und Fahrradboxen. Einfaches Öffnen und Schließen im Zeitraum der Buchung per Smartphone. Nur für Buchungen mit gültiger Schließberechtigung.",
     "openDoor": "Tür öffnen",
     "scannedDescription": "Sie haben den Code an der Tür gescannt.",
+    "openCompartment": "Fach öffnen",
+    "scannedDescriptionCompartment": "Sie haben den Code am Fach gescannt.",
     "whichBooking": "Welche Buchung?",
     "noKeysFound": "Keine Schlüssel gefunden",
     "searchPlaceholder": "Suchen",
@@ -1551,6 +1554,8 @@
       "title": {
         "assignedCompartment": "{label} — Schrank {lockerBank}, Fach {number}",
         "assignedCompartmentNumber": "{label} — Fach {number}",
+        "compartmentPlace": "Schrank {lockerBank}, Fach {number}",
+        "compartmentPlaceNumber": "Fach {number}",
         "lockerCompartment": "Fahrradbox Nr. {compartment}",
         "lockerBooking": "Fahrradbox #{id}",
         "locker": "Fahrradbox",
@@ -1611,6 +1616,13 @@
         "title": "Zugang beendet",
         "description": "Ihr Zugang endete am {date}. {label} lässt sich damit nicht mehr öffnen.",
         "description_undated": "Ihr Zugang ist beendet. {label} lässt sich damit nicht mehr öffnen."
+      },
+      "wrong_compartment": {
+        "title": "Nicht Ihr Fach",
+        "description": "{label} gehört nicht zu Ihrer Buchung. Ihr Fach: {own}.",
+        "description_several": "{label} gehört nicht zu Ihrer Buchung. Ihre Fächer: {own}.",
+        "description_unnamed": "{label} gehört nicht zu Ihrer Buchung. Ihr Fach ist ein anderes dieser Anlage.",
+        "ownListed": "{list}; {place}"
       },
       "door_unreachable": {
         "title": "{label} nicht erreichbar",
@@ -1709,6 +1721,11 @@
         "description": "Der gescannte Code gehört zu {scanned}, nicht zu {label}.",
         "action": "Zu {scanned} wechseln",
         "unnamed": "einem anderen Zugang"
+      },
+      "wrong_compartment": {
+        "title": "Anderes Fach",
+        "description": "Das ist {scanned}. Ihr Fach: {own}.",
+        "unnamed": "ein anderes Fach"
       },
       "wrong_tenant": {
         "title": "Anderer Anbieter",

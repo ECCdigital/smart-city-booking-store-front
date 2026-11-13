@@ -1148,6 +1148,7 @@
     "emergencyContact": "Emergency contact and what to do if something fails",
     "checkingBookings": "Checking your bookings...",
     "severalBookingsMatch": "Several of your bookings match this door right now.",
+    "severalBookingsMatchCompartment": "Several of your bookings match this compartment right now.",
     "toKeyList": "To the key list",
     "loadFailed": "Your keys could not be loaded.",
     "upcoming": "Upcoming",
@@ -1175,6 +1176,8 @@
     "yourKeysDescription": "Digital keys for doors, lockers and bike boxes. Easy access via smartphone during the booking. Only doors you currently hold a booking with access rights for are shown.",
     "openDoor": "Open the door",
     "scannedDescription": "You scanned the code at the door.",
+    "openCompartment": "Open the compartment",
+    "scannedDescriptionCompartment": "You scanned the code at the compartment.",
     "whichBooking": "Which booking?",
     "noKeysFound": "No keys found",
     "searchPlaceholder": "Search",
@@ -1198,6 +1201,8 @@
       "title": {
         "assignedCompartment": "{label} — cabinet {lockerBank}, compartment {number}",
         "assignedCompartmentNumber": "{label} — compartment {number}",
+        "compartmentPlace": "cabinet {lockerBank}, compartment {number}",
+        "compartmentPlaceNumber": "compartment {number}",
         "lockerCompartment": "Bike box no. {compartment}",
         "lockerBooking": "Bike box #{id}",
         "locker": "Bike box",
@@ -1215,6 +1220,13 @@
         "title": "Access ended",
         "description": "Your access ended on {date}. {label} can no longer be opened with it.",
         "description_undated": "Your access has ended. {label} can no longer be opened with it."
+      },
+      "wrong_compartment": {
+        "title": "Not your compartment",
+        "description": "{label} does not belong to your booking. Your compartment: {own}.",
+        "description_several": "{label} does not belong to your booking. Your compartments: {own}.",
+        "description_unnamed": "{label} does not belong to your booking. Yours is another compartment of this locker system.",
+        "ownListed": "{list}; {place}"
       },
       "stale_scan_code": {
         "title": "Sticker out of date",
@@ -1321,6 +1333,11 @@
         "description": "The code you scanned belongs to {scanned}, not to {label}.",
         "title": "Different access point",
         "unnamed": "another access point"
+      },
+      "wrong_compartment": {
+        "title": "Different compartment",
+        "description": "This is {scanned}. Your compartment: {own}.",
+        "unnamed": "another compartment"
       },
       "wrong_tenant": {
         "description": "This QR code belongs to a different provider.",

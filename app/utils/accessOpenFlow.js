@@ -13,7 +13,11 @@
  * know maps to a generic error - never to a silent success.
  */
 
-import { isCommittedBooking } from "~/utils/bookingStatus.js";
+import {
+  BOOKING_STATUS,
+  isCommittedBooking,
+  resolveBookingStatus,
+} from "~/utils/bookingStatus.js";
 import {
   ACCESS_WINDOW_STATES,
   bookingWindow,
@@ -38,6 +42,7 @@ export const ACCESS_ERRORS = Object.freeze({
   EVIDENCE_RULE_UNAVAILABLE: "evidence_rule_unavailable",
   EVIDENCE_INVALID: "evidence_invalid",
   EVIDENCE_MISSING: "evidence_missing",
+  WRONG_COMPARTMENT: "wrong_compartment",
   GENERIC: "generic",
 });
 
@@ -199,6 +204,37 @@ export function doorBlockingReason(booking, accessPointId, now = Date.now()) {
   return null;
 }
 
+const SCAN_BOOKING_QUERY = Object.freeze({
+  includeAccessPoints: "true",
+  includeBuffer: "true",
+});
+
+/**
+ * Where the scan landing page asks for the person's bookings behind a
+ * resolved sticker. A door is asked by its own id. A Fach of a
+ * Schließfachanlage (resolve-scan names its `lockerSystemId`, backend
+ * tickets#1057) is no stored access point: its bookings are read at the
+ * Anlage with `includeLockers`, which lists each booking's Fächer under the
+ * very id resolve-scan gave the Fach (`<anlage>:<Fach-UUID>`) - so
+ * {@link decideBookingOutcome} compares with the Fach's id, never the
+ * Anlage's.
+ *
+ * @param {{ id: string, lockerSystemId?: string }} accessPoint The resolved
+ *   access point
+ * @returns {{ accessPointId: string, query: Object }} The id to ask at and
+ *   the query to ask with; the caller adds `filter` and `includeEligibility`
+ */
+export function scanBookingLookup(accessPoint) {
+  if (accessPoint?.lockerSystemId) {
+    return {
+      accessPointId: accessPoint.lockerSystemId,
+      query: { ...SCAN_BOOKING_QUERY, includeLockers: "true" },
+    };
+  }
+
+  return { accessPointId: accessPoint?.id, query: { ...SCAN_BOOKING_QUERY } };
+}
+
 /**
  * Picks the booking the door should be opened with.
  *
@@ -207,25 +243,43 @@ export function doorBlockingReason(booking, accessPointId, now = Date.now()) {
  * consulted only when nothing is active, so the page can say "not yet" or
  * "that was yesterday" instead of a bare "no booking".
  *
+ * A scanned Fach (`lockerSystemId` given, its Anlage) is compared by its own
+ * id like a door, and two outcomes are its own (backend tickets#1058, same
+ * rule as the access log entry `wrong_compartment`): where no active booking
+ * holds the scanned Fach but a confirmed one holds another Fach of the
+ * Anlage, the page says „Nicht Ihr Fach“ with every Fach of the Anlage the
+ * person's active confirmed bookings hold (`compartments`) and opens nothing;
+ * an active booking not confirmed yet gets its own reason at its Fach. Where nothing is active,
+ * every booking holding a Fach of the Anlage counts for "not yet" and "over",
+ * and the outcome names the person's Fach (`accessPoint`) - the scanned one
+ * where the booking holds it - so the screen says which Fach and its window.
+ *
  * @param {Object} params
- * @param {string} params.accessPointId The scanned door
+ * @param {string} params.accessPointId The scanned door or Fach
  * @param {string} params.tenantId Tenant from the scanned URL
+ * @param {string|null} [params.lockerSystemId] The Anlage of a scanned Fach,
+ *   as resolve-scan names it
  * @param {Object[]} [params.activeBookings]
  * @param {Object[]} [params.otherBookings]
  * @param {number} [params.now]
  * @returns {{ screen: "ready", booking: Object }
  *   | { screen: "select", bookings: Object[] }
- *   | { screen: "error", error: string, booking: Object|null, blockingReason: string|null }}
+ *   | { screen: "error", error: string, booking: Object|null,
+ *       blockingReason: string|null, compartments?: Object[],
+ *       accessPoint?: Object }}
  */
 export function decideBookingOutcome({
   accessPointId,
   tenantId,
+  lockerSystemId = null,
   activeBookings = [],
   otherBookings = [],
   now = Date.now(),
 }) {
+  const inTenant = (booking) =>
+    String(booking?.tenantId) === String(tenantId);
   const belongsHere = (booking) =>
-    String(booking?.tenantId) === String(tenantId) &&
+    inTenant(booking) &&
     (booking?.accessPointIds || []).some(
       (id) => String(id) === String(accessPointId),
     );
@@ -234,7 +288,7 @@ export function decideBookingOutcome({
   // Openable through the API, not merely operable: a code door with a grant
   // is operable and would still refuse the open - see `remoteOperable`.
   const openable = candidates.filter((booking) =>
-    remoteOperable(booking, accessPointId),
+    remoteOperable(booking, accessPointId, now),
   );
 
   if (openable.length === 1) {
@@ -254,7 +308,76 @@ export function decideBookingOutcome({
     return blockedOutcome(speaking ?? candidates[0], accessPointId, now);
   }
 
-  return outOfWindowOutcome(otherBookings.filter(belongsHere), now);
+  if (!lockerSystemId) {
+    return outOfWindowOutcome(otherBookings.filter(belongsHere), now);
+  }
+
+  const holding = (bookings) =>
+    bookings.filter(
+      (booking) =>
+        inTenant(booking) &&
+        heldCompartments(booking, lockerSystemId).length > 0,
+    );
+
+  // „Nicht Ihr Fach“ by the rule of the access log entry (backend
+  // tickets#1058): only a confirmed booking holds its Fach. The projection
+  // names no revoked Fach, so a revoked one still counts here.
+  const elsewhere = holding(activeBookings);
+  const confirmed = elsewhere.filter(
+    (booking) => resolveBookingStatus(booking) === BOOKING_STATUS.CONFIRMED,
+  );
+  if (confirmed.length > 0) {
+    return {
+      screen: "error",
+      error: ACCESS_ERRORS.WRONG_COMPARTMENT,
+      booking: confirmed[0],
+      blockingReason: null,
+      compartments: confirmed.flatMap((booking) =>
+        heldCompartments(booking, lockerSystemId),
+      ),
+    };
+  }
+  if (elsewhere.length > 0) {
+    // Not confirmed yet - unpaid, awaiting approval: the booking opens no
+    // Fach, so the page names its own reason at the person's Fach.
+    const [held] = heldCompartments(elsewhere[0], lockerSystemId);
+    return {
+      ...blockedOutcome(elsewhere[0], held.id, now),
+      accessPoint: held,
+    };
+  }
+
+  const outcome = outOfWindowOutcome(holding(otherBookings), now);
+  if (!outcome.booking) {
+    return outcome;
+  }
+
+  const held = heldCompartments(outcome.booking, lockerSystemId);
+  return {
+    ...outcome,
+    accessPoint:
+      held.find((entry) => String(entry.id) === String(accessPointId)) ??
+      held[0],
+  };
+}
+
+/**
+ * @private
+ * The Fächer of one Anlage a booking holds, as its `accessPoints` list them:
+ * an entry under `<anlage>:…` with the Fach the platform assigned. A
+ * placeholder held before the assignment (`<anlage>:hold`) names no Fach and
+ * is none.
+ *
+ * @param {Object} booking A booking with `accessPoints`
+ * @param {string} lockerSystemId The Anlage
+ * @returns {Object[]} The Fach entries, in the booking's order
+ */
+function heldCompartments(booking, lockerSystemId) {
+  const prefix = `${lockerSystemId}:`;
+  return (booking?.accessPoints || []).filter(
+    (entry) =>
+      String(entry?.id).startsWith(prefix) && entry?.assignedCompartment,
+  );
 }
 
 /**
@@ -348,6 +471,36 @@ function outOfWindowOutcome(bookings, now) {
     booking: null,
     blockingReason: null,
   };
+}
+
+/**
+ * The Fach of an Open Locker Schließfachanlage an access point stands for,
+ * as the person looks for it - number and Schrank, nothing else: the one the
+ * platform assigned to a booking (`assignedCompartment`, backend
+ * tickets#1040), or the one a scan resolved to (`compartment` as an object,
+ * backend tickets#1057). `null` for anything else - a door, the box number
+ * string of iFBS, a Fach without a number.
+ *
+ * @param {Object|null|undefined} accessPoint
+ * @returns {{ number: number, lockerBankName: string|null }|null}
+ */
+export function compartmentOf(accessPoint) {
+  if (accessPoint?.type !== "locker") {
+    return null;
+  }
+
+  const compartment =
+    accessPoint.assignedCompartment ??
+    (accessPoint.compartment && typeof accessPoint.compartment === "object"
+      ? accessPoint.compartment
+      : null);
+
+  return compartment?.number == null
+    ? null
+    : {
+        number: compartment.number,
+        lockerBankName: compartment.lockerBankName ?? null,
+      };
 }
 
 /**
@@ -686,12 +839,13 @@ export function readScannedCode(rawValue) {
 }
 
 /**
- * The three ways a scan can fail to be the proof, kept apart because their ways
- * out differ - not {@link ACCESS_ERRORS} values: all three stay inside the
+ * The four ways a scan can fail to be the proof, kept apart because their ways
+ * out differ - not {@link ACCESS_ERRORS} values: all four stay inside the
  * evidence stage, where the scanner keeps running.
  */
 const SCAN_MISMATCHES = Object.freeze({
   WRONG_DOOR: "wrong_door",
+  WRONG_COMPARTMENT: "wrong_compartment",
   WRONG_TENANT: "wrong_tenant",
   UNREADABLE: "unreadable",
 });
@@ -715,6 +869,16 @@ const SCAN_MISMATCHES = Object.freeze({
  * The tenant therefore outranks the door: both are misses, but only one of them
  * may be jumped to.
  *
+ * **A Fach of a Schließfachanlage** matches by its id, `<anlage>:<fach>`, the
+ * same one the booking lists (backend tickets#1057). The sticker of another
+ * Fach of the same Anlage - same `lockerSystemId`, other id - is
+ * `wrong_compartment`: it names that Fach (`scannedCompartment`, `{ number,
+ * lockerBankName }`) so the person can find their own, and offers no jump,
+ * because the other Fach is not theirs to open. The panel's Fach names its
+ * Anlage by its id alone - the booking's projection carries no
+ * `lockerSystemId` - so the Anlage is read off the id's prefix. A door, the
+ * Anlage's own code or a Fach of another Anlage stays `wrong_door`.
+ *
  * **Both sides have to name their tenant.** `resolve-scan` sends `tenantId`,
  * so an answer without one is a broken answer, not a comparison to be waived:
  * a side nobody can name is a miss. Anything short of a readable payload never
@@ -728,8 +892,10 @@ const SCAN_MISMATCHES = Object.freeze({
  * @param {string} [expectation.expectedTenantId] The tenant that panel belongs to
  * @param {string} [expectation.scanCode] The code as it was decoded from the sticker
  * @returns {{ matched: boolean, evidence: Object[],
- *   mismatch: null|"wrong_door"|"wrong_tenant"|"unreadable",
- *   scannedLabel: string|null }}
+ *   mismatch: null|"wrong_door"|"wrong_compartment"|"wrong_tenant"|"unreadable",
+ *   scannedLabel: string|null,
+ *   scannedCompartment?: { number: number|null, lockerBankName: string|null }|null }}
+ *   `scannedCompartment` only for `wrong_compartment`
  */
 export function decideScanMatch(
   response,
@@ -757,6 +923,12 @@ export function decideScanMatch(
     return noMatch(SCAN_MISMATCHES.WRONG_TENANT, label);
   }
   if (!sameId(scanned.id, expectedAccessPointId)) {
+    if (sameId(scanned.lockerSystemId, lockerSystemOf(expectedAccessPointId))) {
+      return {
+        ...noMatch(SCAN_MISMATCHES.WRONG_COMPARTMENT, label),
+        scannedCompartment: compartmentOf(scanned),
+      };
+    }
     return noMatch(SCAN_MISMATCHES.WRONG_DOOR, label);
   }
 
@@ -775,6 +947,18 @@ export function decideScanMatch(
  */
 function noMatch(mismatch, scannedLabel) {
   return { matched: false, evidence: [], mismatch, scannedLabel };
+}
+
+/**
+ * @private
+ * The Anlage a Fach's id names: the part before the first `:` of
+ * `<anlage>:<fach>`. `null` for an id without one - a door, an Anlage.
+ */
+function lockerSystemOf(accessPointId) {
+  const id = isStated(accessPointId) ? String(accessPointId) : "";
+  const separator = id.indexOf(":");
+
+  return separator > 0 ? id.slice(0, separator) : null;
 }
 
 /**

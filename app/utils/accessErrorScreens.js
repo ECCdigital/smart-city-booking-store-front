@@ -17,7 +17,8 @@
  * already that button, and the row shows none of its own.
  */
 
-import { ACCESS_ERRORS } from "~/utils/accessOpenFlow.js";
+import { ACCESS_ERRORS, compartmentOf } from "~/utils/accessOpenFlow.js";
+import { compartmentPlace } from "~/utils/accessPointDisplay.js";
 import { bookingWindow, doorWindow, findDoor } from "~/utils/accessWindow.js";
 
 const searchPath = (tenantId) => `/t/${tenantId}/search`;
@@ -167,6 +168,13 @@ export const ACCESS_ERROR_SCREENS = Object.freeze({
     icon: "i-lucide-scan-line",
     color: "warning",
   },
+  // A scan at a Fach the person does not hold, while they hold another of
+  // the Anlage. The way out is walking to their own Fach, which the wording
+  // names - no button here can take them there.
+  [ACCESS_ERRORS.WRONG_COMPARTMENT]: {
+    icon: "i-lucide-map-pin",
+    color: "warning",
+  },
   [ACCESS_ERRORS.GENERIC]: {
     icon: "i-lucide-triangle-alert",
     color: "error",
@@ -281,6 +289,8 @@ function formatMoment(shows, moment, { now, format }) {
  * @param {string|number|null} [context.accessPointId] The door, for its own
  *   Access Window (see {@link errorScreenMoment})
  * @param {number|null} [context.retryAfter] From when to try again, epoch ms
+ * @param {Object[]} [context.compartments] The Fächer the person holds at the
+ *   Anlage, as their booking lists them - what `wrong_compartment` names
  * @param {number} [context.now] epoch ms, to tell a time today from a later one
  * @param {{ formatDate: Function, formatTime: Function }} [context.format]
  *   `useFormatting()`, needed wherever a moment can be known
@@ -299,6 +309,7 @@ export function buildErrorScreen(
     blockingReason = null,
     accessPointId = null,
     retryAfter = null,
+    compartments = [],
     now = Date.now(),
     format = null,
   },
@@ -329,6 +340,7 @@ export function buildErrorScreen(
       blockingReason,
       when,
       wording,
+      compartments,
     }),
     // Only a screen that passes leaves a line behind, so only such a row with
     // a moment carries `summary` in `de.json`.
@@ -367,7 +379,15 @@ export function passedFailureScreen(result, context) {
  * Conditional wording is two keys, and the choice is made here - `de.json`
  * carries sentences, not logic.
  */
-function describeFailure(kind, row, { t, label, blockingReason, when, wording }) {
+function describeFailure(
+  kind,
+  row,
+  { t, label, blockingReason, when, wording, compartments },
+) {
+  if (kind === ACCESS_ERRORS.WRONG_COMPARTMENT) {
+    return describeWrongCompartment({ t, label, wording, compartments });
+  }
+
   if (row.moment && !when) {
     return t(`${wording}.description_undated`, { label });
   }
@@ -381,6 +401,35 @@ function describeFailure(kind, row, { t, label, blockingReason, when, wording })
   }
 
   return t(`${wording}.description`, { label, ...when });
+}
+
+/**
+ * „Nicht Ihr Fach“ names where to go instead: the person's Fach, or all of
+ * them, each the short way („Schrank X, Fach N“) since the Anlage is the
+ * scanned one, joined by `ownListed` - not by a comma, which the short way
+ * holds itself. Without a Fach to name, the sentence ends after the first
+ * half.
+ */
+function describeWrongCompartment({ t, label, wording, compartments }) {
+  const places = (compartments || [])
+    .map((entry) => compartmentPlace(compartmentOf(entry), t))
+    .filter(Boolean);
+
+  if (places.length === 0) {
+    return t(`${wording}.description_unnamed`, { label });
+  }
+
+  return t(
+    places.length === 1
+      ? `${wording}.description`
+      : `${wording}.description_several`,
+    {
+      label,
+      own: places.reduce((list, place) =>
+        t(`${wording}.ownListed`, { list, place }),
+      ),
+    },
+  );
 }
 
 function buildExit(row, { t, booking, tenantId }) {
