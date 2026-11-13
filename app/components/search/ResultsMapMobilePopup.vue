@@ -1,14 +1,15 @@
 <template>
 <div>
+  <!-- The sheet lets touches through to the map, so the map can still be
+       moved while it is open; a tap on the map closes it (ResultsMap). -->
   <!-- One Item Per Pin-->
   <Transition name="bottom-up" mode="out-in">
     <div
         v-if="showCurrentBookable && currentBookable"
-        class="fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
-        @click="emit('closeDetails')"
+        class="pointer-events-none fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
     >
       <div
-          class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl"
+          class="pointer-events-auto mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl"
           @click.stop="emit('openDetails',currentBookable, true)"
       >
         <ResultCard
@@ -26,11 +27,10 @@
   <Transition name="bottom-up" mode="out-in">
     <div
         v-if="showCurrentGroup && currentGroup"
-        class="fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
-        @click="emit('closeDetails')"
+        class="pointer-events-none fixed inset-0 z-[1000] flex items-end justify-center md:hidden"
     >
       <div
-          class="mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl"
+          class="pointer-events-auto mb-4 w-[92%] max-w-md overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl"
           @click.stop
       >
         <UCarousel
@@ -95,7 +95,7 @@ defineProps({
   },
 });
 
-const emit = defineEmits(["openDetails", "closeDetails"]);
+const emit = defineEmits(["openDetails"]);
 </script>
 
 
