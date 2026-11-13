@@ -4,6 +4,7 @@
     :options="{
       minWidth: 320,
       maxWidth: 320,
+      className: 'results-map-popup',
     }"
     class="justify-center bg-transparent hidden md:flex"
     @remove="emit('closeGroup')"
@@ -117,5 +118,13 @@ function onSelect(index) {
 
 .leaflet-popup-close-button {
   display: none !important;
+}
+
+/* Leaflet opens the popup on the phone too, where the bottom sheet shows the
+   Offers; its empty wrapper stayed behind as a white dot on the pin. */
+@media (max-width: 767px) {
+  .results-map-popup {
+    display: none !important;
+  }
 }
 </style>
