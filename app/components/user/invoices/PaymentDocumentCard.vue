@@ -46,8 +46,8 @@
       <div class="flex gap-1">
         <UButton
           icon="i-lucide-download"
-          color="neutral"
-          variant="soft"
+          color="primary"
+          variant="solid"
           size="sm"
           :label="t('account.invoices.actions.downloadLabel')"
           :aria-label="
@@ -57,8 +57,8 @@
         />
         <UButton
           icon="i-lucide-printer"
-          color="neutral"
-          variant="soft"
+          color="primary"
+          variant="solid"
           size="sm"
           :label="t('account.invoices.actions.printLabel')"
           :aria-label="
