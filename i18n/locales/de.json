@@ -1825,6 +1825,10 @@
   "customerUploads": {
     "alsoFor": "Gilt auch für diese Termine der Serie:",
     "alsoForOption": "Buchung #{id} · {date}",
+    "series": {
+      "dates": "Serie · {count} Termin | Serie · {count} Termine",
+      "stateAtDates": "Stand an den Terminen"
+    },
     "group": {
       "intro": "Für jeden Termin Ihrer Serie werden folgende Nachweise benötigt. Eine Datei können Sie für mehrere Termine verwenden.",
       "for": "Gilt für die Termine",
@@ -1904,6 +1908,7 @@
     },
     "link": {
       "intro": "Der Anbieter {name} benötigt für die Buchung noch Nachweise. Diese können bis zum Ende der Buchung eingereicht und bis zur Prüfung durch den Anbieter ersetzt oder gelöscht werden. Besonders schutzwürdige Nachweise löscht der Anbieter nach der Prüfung.",
+      "introSeries": "Der Anbieter {name} benötigt für die Termine deiner Serie noch Nachweise. Eine Datei kann für mehrere Termine gelten: Wähle bei jeder Datei die Termine aus. Nachweise können bis zum Ende des jeweiligen Termins eingereicht und bis zur Prüfung gelöscht werden. Besonders schutzwürdige Nachweise löscht der Anbieter nach der Prüfung.",
       "invalid": {
         "title": "Link ungültig",
         "text": "Dieser Link ist ungültig. Bitte nutze den Link aus deiner letzten E-Mail zur Buchung."

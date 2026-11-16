@@ -2,7 +2,8 @@
   <div class="w-full" style="max-width: 800px">
     <PageHeader :title="$t('meta.pages.accountProofs')" class="mb-1" />
 
-    <BookingsSkeleton v-if="pending" :skeleton-count="1" />
+    <!-- Only the first time: read afresh, the page stays as it is. -->
+    <BookingsSkeleton v-if="pending && !result" :skeleton-count="1" />
 
     <UAlert
       v-else-if="refusal"
@@ -13,9 +14,13 @@
       :description="$t(`customerUploads.link.${refusal}.text`)"
     />
 
-    <template v-else-if="booking">
+    <template v-else-if="bookings.length > 0">
       <i18n-t
-        keypath="customerUploads.link.intro"
+        :keypath="
+          bookings.length > 1
+            ? 'customerUploads.link.introSeries'
+            : 'customerUploads.link.intro'
+        "
         tag="p"
         scope="global"
         class="text-sm text-gray-600 dark:text-gray-400 mb-4"
@@ -25,8 +30,18 @@
         </template>
       </i18n-t>
 
+      <!-- A series' link: every proof of the series once. -->
+      <ProofSeriesPanel
+        v-if="bookings.length > 1"
+        :bookings="bookings"
+        :tenant-name="tenant.name"
+        :link="link"
+        :target-field-id="targetField"
+        @reload="refresh"
+      />
       <ProofBookingPanel
-        :booking="booking"
+        v-else
+        :booking="bookings[0]"
         :tenant-name="tenant.name"
         :link="link"
         :target-field-id="targetField"
@@ -38,6 +53,7 @@
 <script setup>
 import BookingsSkeleton from "~/components/user/bookings/BookingsSkeleton.vue";
 import ProofBookingPanel from "~/components/user/proofs/ProofBookingPanel.vue";
+import ProofSeriesPanel from "~/components/user/proofs/ProofSeriesPanel.vue";
 import {
   PROOF_DRAFTS_KEY,
   createProofDrafts,
@@ -52,7 +68,8 @@ import {
 /**
  * The page „Nachweise einreichen“ of a guest: the
  * signed link of the mail (`?link=…&field=…`) opens it with the one booking
- * of the link, without an account and without a menu. The guest hands in,
+ * of the link - or, with the link of a series, every proof of the series
+ * once - without an account and without a menu. The guest hands in,
  * replaces and deletes proofs until they are checked, and hands in anew
  * after a rejection. The link holds until the booking ends. Chosen files
  * wait for the button „Nachweise einreichen“; leaving the page with some
@@ -83,7 +100,11 @@ provide(PROOF_DRAFTS_KEY, drafts);
 useUnsavedProofsGuard(drafts);
 
 // Answered as data, so it survives the server rendering.
-const { data: result, pending } = useAsyncData("proof-link", async () => {
+const {
+  data: result,
+  pending,
+  refresh,
+} = useAsyncData("proof-link", async () => {
   if (!link.value) return { refusal: "invalid", answer: null };
   const { data, error } = await read();
   if (error) {
@@ -99,18 +120,18 @@ const refusal = computed(() => result.value?.refusal ?? null);
 const answer = computed(() => result.value?.answer ?? null);
 
 const tenant = computed(() => answer.value?.tenant ?? { id: "", name: "" });
-const booking = computed(() => answer.value?.booking ?? null);
+const bookings = computed(() => answer.value?.bookings ?? []);
 
 // The data of `useAsyncData` is shallow: the new state takes the place of
 // the whole answer, or the page would not show it.
 function onState(customerUploadState) {
   const current = answer.value;
-  if (!current?.booking || !customerUploadState) return;
+  if (!current?.bookings?.length || !customerUploadState) return;
   result.value = {
     ...result.value,
     answer: {
       ...current,
-      booking: { ...current.booking, customerUploadState },
+      bookings: [{ ...current.bookings[0], customerUploadState }],
     },
   };
 }

@@ -1756,6 +1756,10 @@
   "customerUploads": {
     "alsoFor": "Also counts for these dates of the series:",
     "alsoForOption": "Booking #{id} · {date}",
+    "series": {
+      "dates": "Series · {count} date | Series · {count} dates",
+      "stateAtDates": "State at the dates"
+    },
     "group": {
       "intro": "Each date of your series needs the following proofs. You can use one file for several dates.",
       "for": "Counts for the dates",
@@ -1835,6 +1839,7 @@
     },
     "link": {
       "intro": "The provider {name} still needs proofs for the booking. They can be handed in until the end of the booking and replaced or deleted until the provider has reviewed them. The provider deletes especially sensitive proofs once reviewed.",
+      "introSeries": "The provider {name} still needs proofs for the dates of your series. One file can count for several dates: choose the dates at each file. Proofs can be handed in until the end of each date and deleted until they are reviewed. The provider deletes especially sensitive proofs once reviewed.",
       "invalid": {
         "title": "Invalid link",
         "text": "This link is invalid. Please use the link from your latest email about the booking."

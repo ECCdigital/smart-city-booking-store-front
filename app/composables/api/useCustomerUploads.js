@@ -4,9 +4,10 @@
  * checked, or every chosen one of a booking at once. Each call answers `{ data, error }` as `useApiClient` does; on
  * success `data.customerUploadState` is the booking's state afresh.
  *
- * With `link`, the signed link of a guest's booking:
+ * With `link`, the signed link of a guest's booking or series:
  * the calls go to `/api/proof-link/...` with the token in
- * `X-Customer-Upload-Link`, and `read` loads the one booking of the link.
+ * `X-Customer-Upload-Link` and the booking in `?booking=…` (a series' link
+ * opens several), and `read` loads the bookings of the link.
  *
  * @param {Object} [options]
  * @param {string} [options.link] The token of a guest's link
@@ -17,12 +18,19 @@ export function useCustomerUploads({ link = "" } = {}) {
   const api = useApiClient();
   const opts = link ? { headers: { "x-customer-upload-link": link } } : {};
 
-  const fieldPath = (tenantId, bookingId, fieldId) =>
-    link
-      ? `/api/proof-link/${encodeURIComponent(fieldId)}`
+  const bookingQuery = (bookingId) =>
+    `?booking=${encodeURIComponent(bookingId)}`;
+
+  const fieldPath = (tenantId, bookingId, fieldId, mediaId = null) => {
+    const media = mediaId ? `/${encodeURIComponent(mediaId)}` : "";
+    return link
+      ? `/api/proof-link/${encodeURIComponent(fieldId)}${media}${bookingQuery(
+          bookingId,
+        )}`
       : `/api/bookings/${encodeURIComponent(tenantId)}/${encodeURIComponent(
           bookingId,
-        )}/customer-uploads/${encodeURIComponent(fieldId)}`;
+        )}/customer-uploads/${encodeURIComponent(fieldId)}${media}`;
+  };
 
   const formOf = (file) => {
     const form = new FormData();
@@ -30,7 +38,7 @@ export function useCustomerUploads({ link = "" } = {}) {
     return form;
   };
 
-  /** The booking of the link: `{ tenant, booking }`. */
+  /** The bookings of the link: `{ tenant, bookings }`. */
   const read = () => api.get("/api/proof-link", opts);
 
   const upload = (tenantId, bookingId, fieldId, file) =>
@@ -38,16 +46,13 @@ export function useCustomerUploads({ link = "" } = {}) {
 
   const replace = (tenantId, bookingId, fieldId, mediaId, file) =>
     api.put(
-      `${fieldPath(tenantId, bookingId, fieldId)}/${encodeURIComponent(mediaId)}`,
+      fieldPath(tenantId, bookingId, fieldId, mediaId),
       formOf(file),
       opts,
     );
 
   const remove = (tenantId, bookingId, fieldId, mediaId) =>
-    api.delete(
-      `${fieldPath(tenantId, bookingId, fieldId)}/${encodeURIComponent(mediaId)}`,
-      opts,
-    );
+    api.delete(fieldPath(tenantId, bookingId, fieldId, mediaId), opts);
 
   /**
    * Every chosen proof of a booking at once, the button „Nachweise
@@ -57,7 +62,7 @@ export function useCustomerUploads({ link = "" } = {}) {
   const submitAll = (tenantId, bookingId, drafts) =>
     api.post(
       link
-        ? "/api/proof-link"
+        ? `/api/proof-link${bookingQuery(bookingId)}`
         : `/api/bookings/${encodeURIComponent(tenantId)}/${encodeURIComponent(
             bookingId,
           )}/customer-uploads`,

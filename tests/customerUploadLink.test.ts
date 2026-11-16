@@ -16,6 +16,7 @@ vi.mock("~~/server/service/AuthService.js", () => ({
 
 const state = {
   headers: {} as Record<string, string>,
+  query: {} as Record<string, string>,
   cookies: {} as Record<string, string>,
   responseHeaders: {} as Record<string, unknown>,
   status: 200,
@@ -34,6 +35,7 @@ vi.stubGlobal(
   "getRequestHeader",
   (_event: unknown, name: string) => state.headers[name],
 );
+vi.stubGlobal("getQuery", () => state.query);
 vi.stubGlobal("getCookie", (_event: unknown, name: string) => state.cookies[name]);
 vi.stubGlobal(
   "getRequestWebStream",
@@ -64,6 +66,9 @@ const linkFor = (tenantId: string, bookingId: string) =>
   )}.c2lnbmF0dXJl`;
 
 const LINK = linkFor("t1", "B1");
+const SERIES_LINK = `${Buffer.from(JSON.stringify({ t: "t1", g: "G1" })).toString(
+  "base64url",
+)}.c2lnbmF0dXJl`;
 
 function event(body = new Uint8Array(100)) {
   return {
@@ -92,14 +97,19 @@ describe("the link of a guest", () => {
     resetCustomerUploadLimitCache();
     renewAccessToken.mockClear();
     state.headers = { [LINK_HEADER]: LINK };
+    state.query = {};
     // A stale session of someone else in the same browser.
     state.cookies = { "access-token": "h.e30.s" };
     state.responseHeaders = {};
     state.status = 200;
   });
 
-  it("names tenant and booking", () => {
+  it("names tenant and booking, or the group of a series' link", () => {
     expect(linkTargetOf(LINK)).toEqual({ tenantId: "t1", bookingId: "B1" });
+    expect(linkTargetOf(SERIES_LINK)).toEqual({
+      tenantId: "t1",
+      groupBookingId: "G1",
+    });
     expect(linkTargetOf("")).toBeNull();
     expect(linkTargetOf("kein-token")).toBeNull();
     expect(linkTargetOf("a.b.c")).toBeNull();
@@ -117,6 +127,21 @@ describe("the link of a guest", () => {
     expect(request.headers).toEqual({ [LINK_HEADER]: LINK });
   });
 
+  it("takes the booking of a series' link from the page, refusing none", async () => {
+    state.headers = { [LINK_HEADER]: SERIES_LINK };
+    state.query = { booking: "B2" };
+
+    expect(linkRequestOf(event() as never, "/f1").path).toBe(
+      "/api/v2/t1/bookings/B2/customer-uploads-by-link/f1",
+    );
+    expect(linkRequestOf(event() as never, "", { all: true }).path).toBe(
+      "/api/v2/t1/customer-uploads-by-link",
+    );
+
+    state.query = {};
+    expect(() => linkRequestOf(event() as never, "/f1")).toThrow();
+  });
+
   it("is refused before the backend when it cannot be read", async () => {
     state.headers = { [LINK_HEADER]: "kaputt" };
     const fetchImpl = vi.fn();
@@ -130,8 +155,11 @@ describe("the link of a guest", () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
-  it("reads the booking without the session", async () => {
-    const answer = { tenant: { id: "t1", name: "Stadt" }, booking: { id: "B1" } };
+  it("reads the bookings of the link without the session", async () => {
+    const answer = {
+      tenant: { id: "t1", name: "Stadt" },
+      bookings: [{ id: "B1" }],
+    };
     const fetchImpl = vi.fn(async () => answer);
 
     const result = await forwardByLink(
@@ -139,6 +167,7 @@ describe("the link of a guest", () => {
       "GET",
       "",
       fetchImpl as never,
+      { all: true },
     );
 
     expect(result).toEqual(answer);
@@ -146,9 +175,7 @@ describe("the link of a guest", () => {
       string,
       { method: string; headers: Record<string, string> },
     ];
-    expect(url).toBe(
-      "http://backend.test/api/v2/t1/bookings/B1/customer-uploads-by-link",
-    );
+    expect(url).toBe("http://backend.test/api/v2/t1/customer-uploads-by-link");
     expect(init.method).toBe("GET");
     expect(init.headers[LINK_HEADER]).toBe(LINK);
     expect(init.headers).not.toHaveProperty("Authorization");

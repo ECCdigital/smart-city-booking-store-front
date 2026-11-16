@@ -546,6 +546,98 @@ export function pendingProofFieldsOf(booking) {
   );
 }
 
+/*
+ * The page „Nachweise einreichen“ of a guest's series: each upload field
+ * once for the whole series, with its state at each date, as in the
+ * checkout of a series. A chosen file names the dates it counts for; the
+ * button hands every file in, one request per first date of a file, the
+ * other dates as its `alsoFor`.
+ */
+
+/**
+ * The upload fields of a series, once each in the order they first come,
+ * with every date that has the field: its booking, its own field and its
+ * number in the series (by begin). A field checked at every date is left
+ * out.
+ *
+ * @param {Object[]} bookings The bookings of the series' link
+ * @returns {Array<{ fieldId: string, field: CustomerUploadField,
+ *   dates: Array<{ booking: Object, field: CustomerUploadField,
+ *   number: number }> }>} `field` is the field of its first date not checked
+ */
+export function seriesProofFieldsOf(bookings = []) {
+  const ordered = [...bookings].sort(
+    (a, b) => (a.timeBegin ?? 0) - (b.timeBegin ?? 0),
+  );
+  const byField = new Map();
+  ordered.forEach((booking, index) => {
+    for (const field of customerUploadFieldsOf(booking)) {
+      if (!byField.has(field.fieldId)) {
+        byField.set(field.fieldId, { fieldId: field.fieldId, dates: [] });
+      }
+      byField.get(field.fieldId).dates.push({ booking, field, number: index + 1 });
+    }
+  });
+  return [...byField.values()]
+    .map((entry) => ({
+      ...entry,
+      field: entry.dates.find((date) => date.field.state !== S.FULFILLED)
+        ?.field,
+    }))
+    .filter((entry) => entry.field);
+}
+
+/**
+ * The dates a chosen file of a series' field can count for: those whose
+ * field is not checked and takes the file by size, format and number, the
+ * files chosen there already counted (`drafts`, the other drafts of the
+ * page). Preset are the dates still waiting for a file (open, rejected,
+ * overdue); where none does, every date that takes it.
+ *
+ * @param {ReturnType<typeof seriesProofFieldsOf>[number]} entry
+ * @param {{ name?: string, type?: string, size: number }} file
+ * @param {Array<{ fieldId: string, alsoFor: Array<{ bookingId: string }> }>} [drafts]
+ * @returns {Array<{ bookingId: string, fieldId: string, preset: boolean }>}
+ */
+export function seriesDraftDatesOf(entry, file, drafts = []) {
+  const takes = entry.dates.filter(({ booking, field }) => {
+    if (field.state === S.FULFILLED) return false;
+    const chosenHere = drafts.filter(
+      (draft) =>
+        draft.fieldId === field.fieldId &&
+        (draft.alsoFor ?? []).some((t) => t.bookingId === booking.id),
+    );
+    return precheckCustomerUpload(file, fieldWithDrafts(field, chosenHere)) === null;
+  });
+  const waiting = (field) => MISSING_FIELD_STATES.includes(field.state);
+  const anyWaiting = takes.some(({ field }) => waiting(field));
+  return takes.map(({ booking, field }) => ({
+    bookingId: booking.id,
+    fieldId: field.fieldId,
+    preset: !anyWaiting || waiting(field),
+  }));
+}
+
+/**
+ * The requests of „Nachweise einreichen“ on the page of a series: the
+ * chosen files by the first date each counts for, each with the other dates
+ * as its `alsoFor`. A draft of the page names all its dates in `alsoFor`.
+ *
+ * @template {{ alsoFor: Array<{ bookingId: string, fieldId: string }> }} T
+ * @param {T[]} drafts
+ * @returns {Array<{ bookingId: string, drafts: T[] }>}
+ */
+export function seriesSubmissionsOf(drafts = []) {
+  const byBooking = new Map();
+  for (const draft of drafts) {
+    const [first, ...rest] = draft.alsoFor ?? [];
+    if (!first) continue;
+    if (!byBooking.has(first.bookingId)) byBooking.set(first.bookingId, []);
+    byBooking.get(first.bookingId).push({ ...draft, alsoFor: rest });
+  }
+  return [...byBooking].map(([bookingId, list]) => ({ bookingId, drafts: list }));
+}
+
 /** What the customer has to do first: rejected, overdue, open, submitted. */
 const URGENCY = [S.REJECTED, S.OVERDUE, S.OPEN, S.SUBMITTED];
 

@@ -22,6 +22,9 @@ import {
   missingProofsChipOf,
   missingProofsOf,
   pendingProofFieldsOf,
+  seriesDraftDatesOf,
+  seriesProofFieldsOf,
+  seriesSubmissionsOf,
   missingProofBookingsOf,
   precheckCheckoutUpload,
   precheckCustomerUpload,
@@ -315,6 +318,77 @@ describe("the fields of a booking on the page", () => {
       false,
     );
     expect(hasPendingProofs({ id: "B" })).toBe(false);
+  });
+});
+
+describe("the page of a guest's series", () => {
+  const member = (id, timeBegin, fields) => ({
+    id,
+    timeBegin,
+    customerUploadState: { state: "missing", fields },
+  });
+  const pdf = file("vertrag.pdf", "application/pdf");
+
+  it("shows each field once with every date, numbered by begin, a checked one left out", () => {
+    const entries = seriesProofFieldsOf([
+      member("B2", 200, [field({ state: "submitted" }), field({ fieldId: "f2", state: "fulfilled" })]),
+      member("B1", 100, [field({ state: "fulfilled" }), field({ fieldId: "f2", state: "fulfilled" })]),
+    ]);
+
+    expect(entries.map((entry) => entry.fieldId)).toEqual(["f1"]);
+    expect(
+      entries[0].dates.map(({ booking, number }) => [booking.id, number]),
+    ).toEqual([
+      ["B1", 1],
+      ["B2", 2],
+    ]);
+    // The field of its first date not checked.
+    expect(entries[0].field.state).toBe("submitted");
+  });
+
+  it("offers the dates that take a file, the ones waiting for it preset", () => {
+    const [entry] = seriesProofFieldsOf([
+      member("B1", 100, [field()]),
+      member("B2", 200, [field({ state: "submitted", remainingFiles: 1 })]),
+      member("B3", 300, [field({ state: "fulfilled" })]),
+      member("B4", 400, [field({ state: "rejected" })]),
+    ]);
+
+    expect(seriesDraftDatesOf(entry, pdf)).toEqual([
+      { bookingId: "B1", fieldId: "f1", preset: true },
+      { bookingId: "B2", fieldId: "f1", preset: false },
+      { bookingId: "B4", fieldId: "f1", preset: true },
+    ]);
+    expect(seriesDraftDatesOf(entry, file("x.gif", "image/gif"))).toEqual([]);
+  });
+
+  it("counts the files chosen at a date already, and presets all where none waits", () => {
+    const [entry] = seriesProofFieldsOf([
+      member("B1", 100, [field({ state: "submitted", remainingFiles: 1 })]),
+      member("B2", 200, [field({ state: "submitted", remainingFiles: 1 })]),
+    ]);
+    const chosen = [{ fieldId: "f1", alsoFor: [{ bookingId: "B1" }] }];
+
+    expect(seriesDraftDatesOf(entry, pdf, chosen)).toEqual([
+      { bookingId: "B2", fieldId: "f1", preset: true },
+    ]);
+  });
+
+  it("hands the files in by their first date, the others as alsoFor", () => {
+    const a = { id: 1, fieldId: "f1", alsoFor: [{ bookingId: "B1", fieldId: "f1" }, { bookingId: "B2", fieldId: "f1" }] };
+    const b = { id: 2, fieldId: "f2", alsoFor: [{ bookingId: "B2", fieldId: "f2" }] };
+    const c = { id: 3, fieldId: "f2", alsoFor: [{ bookingId: "B1", fieldId: "f2" }] };
+
+    expect(seriesSubmissionsOf([a, b, c])).toEqual([
+      {
+        bookingId: "B1",
+        drafts: [
+          { ...a, alsoFor: [{ bookingId: "B2", fieldId: "f1" }] },
+          { ...c, alsoFor: [] },
+        ],
+      },
+      { bookingId: "B2", drafts: [{ ...b, alsoFor: [] }] },
+    ]);
   });
 });
 
