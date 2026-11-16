@@ -9,6 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Changed
 
+- „Pauschalpreis“ under „Preisinformationen“ is filled with the accent or, without one, with secondary, its text black; the theme computes that colour also from hex with alpha (`#rrggbbaa`, `#rgba`, as the Admin UI stores it), so a light secondary such as `#FDD835FF` gets black text instead of white. Browsers keep a cached theme until the instance colours change
 - Small screens: the key page hides the „Liste“ button, and on „Meine Buchungen“ the filter and sort buttons are as tall as the search field, with the same space above and below that row
 - Small screens: the bookable detail page shows „Alles ansehen“ under the description only when there is a description
 - Small screens: on the bookable detail page „Zurück“, the favourite button, „Jetzt buchen“ and the actions menu fit in one row

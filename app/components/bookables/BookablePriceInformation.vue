@@ -82,11 +82,10 @@
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 
-// With an accent the badge is filled with it and its text in the contrast
-// colour. Without one every part falls back to the secondary outline it
-// always had: no fill, secondary text, a secondary ring at 50 %.
+// Filled with the accent, or with secondary without one, its text always
+// black.
 const FLAT_RATE_UI = {
-  base: "bg-[color:var(--ui-accent,transparent)] text-[color:var(--ui-accent-contrast,var(--ui-secondary))] ring-[color:var(--ui-accent,color-mix(in_oklab,var(--ui-secondary)_50%,transparent))]",
+  base: "bg-[color:var(--ui-accent,var(--ui-secondary))] text-black ring-[color:var(--ui-accent,var(--ui-secondary))]",
 };
 
 const { t } = useI18n();
