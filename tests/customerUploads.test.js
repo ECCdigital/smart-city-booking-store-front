@@ -765,10 +765,9 @@ describe("the files of a series checkout (ECCdigital/tickets#833)", () => {
     expect(groupFilesAt(uploads, 2, "card")).toHaveLength(0);
   });
 
-  it("puts a new file at every date with room, a guest's at the first", () => {
+  it("puts a new file at every date with room, for a guest too", () => {
     const uploads = [upload("a", "card", [1])];
-    expect(defaultGroupAttempts(card, uploads, 3, false)).toEqual([0, 2]);
-    expect(defaultGroupAttempts(card, uploads, 3, true)).toEqual([0]);
+    expect(defaultGroupAttempts(card, uploads, 3)).toEqual([0, 2]);
   });
 
   it("checks size and format first, then the number at each date", () => {

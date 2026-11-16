@@ -1827,9 +1827,7 @@
     "alsoForOption": "Buchung #{id} · {date}",
     "group": {
       "intro": "Für jeden Termin Ihrer Serie werden folgende Nachweise benötigt. Eine Datei können Sie für mehrere Termine verwenden.",
-      "introGuest": "Für jeden Termin Ihrer Serie werden folgende Nachweise benötigt. Ohne Anmeldung laden Sie für jeden Termin eine eigene Datei hoch.",
       "for": "Gilt für die Termine",
-      "forOne": "Gilt für den Termin",
       "member": "Termin {n} · {date}",
       "memberUndated": "Termin {n}",
       "missing": "Fehlt noch für: {members}",

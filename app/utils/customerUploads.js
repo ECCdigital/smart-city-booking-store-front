@@ -780,8 +780,7 @@ export function mostUrgentProofFieldOf(booking) {
  * the customer hands a file in once and chooses the bookings of the series
  * it counts for, each with the field the file was chosen for. A file of the
  * series is `{ key, fieldId, file, attempts }`, `attempts` the indices of
- * the series' booking attempts. A guest has no choice: each of their files
- * is for one booking.
+ * the series' booking attempts. A guest chooses as a signed-in customer does.
  */
 
 /** A key for a new file of the series, unique among `uploads`. */
@@ -801,14 +800,13 @@ export function groupFilesAt(uploads, attempt, fieldId) {
 
 /**
  * The bookings a new file of a field is for, before the customer changes
- * it: every booking with room left in the field, a guest's first one.
+ * it: every booking with room left in the field.
  */
-export function defaultGroupAttempts(field, uploads, memberCount, guest) {
-  const withRoom = [...Array(memberCount).keys()].filter(
+export function defaultGroupAttempts(field, uploads, memberCount) {
+  return [...Array(memberCount).keys()].filter(
     (attempt) =>
       groupFilesAt(uploads, attempt, field.id).length < field.maxFiles,
   );
-  return guest ? withRoom.slice(0, 1) : withRoom;
 }
 
 /**

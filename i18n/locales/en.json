@@ -1758,9 +1758,7 @@
     "alsoForOption": "Booking #{id} · {date}",
     "group": {
       "intro": "Each date of your series needs the following proofs. You can use one file for several dates.",
-      "introGuest": "Each date of your series needs the following proofs. Without signing in, upload a file of its own for each date.",
       "for": "Counts for the dates",
-      "forOne": "Counts for the date",
       "member": "Date {n} · {date}",
       "memberUndated": "Date {n}",
       "missing": "Still missing for: {members}",

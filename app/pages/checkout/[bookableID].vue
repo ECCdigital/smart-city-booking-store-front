@@ -3175,7 +3175,6 @@ function onReviewEdit(section) {
                         v-model:uploads="groupCheckoutUploads"
                         :fields="checkoutUploadFields"
                         :members="groupBookingAttempts"
-                        :guest="!authStore.isLoggedIn"
                         :refusal="checkoutUploadRefusal"
                       />
                       <CheckoutCustomerUploads
@@ -3214,7 +3213,6 @@ function onReviewEdit(section) {
                   v-model:uploads="groupCheckoutUploads"
                   :fields="checkoutUploadFields"
                   :members="groupBookingAttempts"
-                  :guest="!authStore.isLoggedIn"
                   :refusal="checkoutUploadRefusal"
                 />
                 <CheckoutCustomerUploads

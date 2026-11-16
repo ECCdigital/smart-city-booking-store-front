@@ -14,8 +14,8 @@ import {
  * The upload fields "in the checkout" of a series
  * (in the UI „Nachweise“), in the look of the single checkout's: the
  * customer hands a file in once and ticks the dates of the series it
- * counts for, each with the field the file was chosen for. A guest has no
- * choice: each file is for one date. Size, format and the number at each
+ * counts for, each with the field the file was chosen for; every date with
+ * room is ticked at first, for a guest too. Size, format and the number at each
  * date are checked before a file is taken; the files go with the series'
  * checkout request, not before.
  */
@@ -29,11 +29,6 @@ const props = defineProps({
   members: {
     type: Array,
     default: () => [],
-  },
-  /** Whether nobody is signed in: one date per file. */
-  guest: {
-    type: Boolean,
-    default: false,
   },
   /** A refusal of the backend to show under its field: `{ fieldId, code, params }`. */
   refusal: {
@@ -88,8 +83,8 @@ function missingOf(field) {
 
 function hasRoom(field) {
   return (
-    defaultGroupAttempts(field, uploads.value, props.members.length, false)
-      .length > 0
+    defaultGroupAttempts(field, uploads.value, props.members.length).length >
+    0
   );
 }
 
@@ -134,12 +129,7 @@ function addFiles(field, list) {
   let next = [...uploads.value];
   let message = "";
   for (const file of list) {
-    const attempts = defaultGroupAttempts(
-      field,
-      next,
-      props.members.length,
-      props.guest,
-    );
+    const attempts = defaultGroupAttempts(field, next, props.members.length);
     const refusal = precheckGroupCheckoutUpload(file, field, attempts, next);
     if (refusal) {
       message = messageOf(field, refusal.code, refusal.params);
@@ -211,11 +201,7 @@ function removeUpload(upload) {
           {{ $t("customerUploads.title") }}
         </h3>
         <p class="text-[11px] text-gray-600 dark:text-gray-300">
-          {{
-            guest
-              ? $t("customerUploads.group.introGuest")
-              : $t("customerUploads.group.intro")
-          }}
+          {{ $t("customerUploads.group.intro") }}
         </p>
       </div>
     </template>
@@ -278,45 +264,22 @@ function removeUpload(upload) {
           </div>
           <fieldset class="mt-1">
             <legend class="text-[11px] text-gray-600 dark:text-gray-300">
-              {{
-                guest
-                  ? $t("customerUploads.group.forOne")
-                  : $t("customerUploads.group.for")
-              }}
+              {{ $t("customerUploads.group.for") }}
             </legend>
             <div class="flex flex-col gap-0.5 mt-0.5">
-              <template v-if="guest">
-                <label
-                  v-for="(_, attempt) in members"
-                  :key="attempt"
-                  class="flex items-center gap-1.5 text-[11px] text-gray-900 dark:text-white"
-                  :class="{ 'opacity-50': !canTake(field, upload, attempt) }"
-                >
-                  <input
-                    type="radio"
-                    :name="`group-upload-${upload.key}`"
-                    :checked="upload.attempts.includes(attempt)"
-                    :disabled="!canTake(field, upload, attempt)"
-                    @change="setAttempts(upload, [attempt])"
-                  >
-                  {{ memberLabel(attempt) }}
-                </label>
-              </template>
-              <template v-else>
-                <UCheckbox
-                  v-for="(_, attempt) in members"
-                  :key="attempt"
-                  size="xs"
-                  :label="memberLabel(attempt)"
-                  :model-value="upload.attempts.includes(attempt)"
-                  :disabled="
-                    !canTake(field, upload, attempt) ||
-                      (upload.attempts.length === 1 &&
-                        upload.attempts[0] === attempt)
-                  "
-                  @update:model-value="toggleAttempt(upload, attempt, $event)"
-                />
-              </template>
+              <UCheckbox
+                v-for="(_, attempt) in members"
+                :key="attempt"
+                size="xs"
+                :label="memberLabel(attempt)"
+                :model-value="upload.attempts.includes(attempt)"
+                :disabled="
+                  !canTake(field, upload, attempt) ||
+                    (upload.attempts.length === 1 &&
+                      upload.attempts[0] === attempt)
+                "
+                @update:model-value="toggleAttempt(upload, attempt, $event)"
+              />
             </div>
           </fieldset>
         </div>
