@@ -9,6 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Changed
 
+- The German storefront addresses users with „Sie“ throughout ([ECCdigital/tickets#928](https://github.com/ECCdigital/tickets/issues/928)): the rate-limit notices, the password strength hint, the notice after the registration and the blacklist notices of checkout and registration and the map tooltips („Klick um …“) no longer use „du“
 - „Zeitraum gerade ausgebucht“ ([ECCdigital/tickets#1039](https://github.com/ECCdigital/tickets/issues/1039)): a checkout refused with `checkout.compartments_unavailable` - the last free Fach of an Open Locker Schließfachanlage taken just before, or a Pareva Anlage full - says „Zeitraum gerade ausgebucht. Bitte wählen Sie einen anderen Zeitraum.“ (en „This period was just booked out. Please choose another period.“) instead of „Für den gewählten Zeitraum ist kein Fach mehr frei.“. Needs the backend with ECCdigital/tickets#1039 for Open Locker
 - Notice after the registration ([ECCdigital/tickets#600](https://github.com/ECCdigital/tickets/issues/600)): „Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.“, the same for every address. The signup sends the backend `forgotPasswordUrl`, the storefront's page „Passwort vergessen“ (`/password/forgot` under `NUXT_USER_BASE_URL`); an address with a verified account gets a mail with a button to it from the backend with ECCdigital/tickets#600
 ### Added
