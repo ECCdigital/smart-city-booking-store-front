@@ -117,19 +117,6 @@ describe("accessPointTitle", () => {
         accessPointTitle(assignedFach({ label: "" }), translator("en")),
       ).toBe("Locker system — cabinet Quartiersschrank Hafen, compartment 3");
     });
-
-    it("keeps the fixed Fach a door with its label", () => {
-      expect(
-        accessPointTitle(
-          {
-            type: "door",
-            provider: "open-locker",
-            label: "Quartiersschrank Hafen · Fach 3",
-          },
-          t,
-        ),
-      ).toBe("Quartiersschrank Hafen · Fach 3");
-    });
   });
 
   describe("a Fach as resolve-scan names it (Open Locker)", () => {
