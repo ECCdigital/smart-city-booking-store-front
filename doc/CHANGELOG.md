@@ -9,6 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Changed
 
+- A Fach of Open Locker comes only as a Fach of an Anlage ([ECCdigital/tickets#1163](https://github.com/ECCdigital/tickets/issues/1163)): Open Locker knows only the Schließfachanlage, so the Mobile Key names every such Fach „{Anlage} — Schrank {Name}, Fach {Nummer}“, an Anlage with a single Fach included. The display itself is unchanged, a door keeps its label; only the test of a Fach named by its label goes
 - „Zeitraum gerade ausgebucht“ ([ECCdigital/tickets#1039](https://github.com/ECCdigital/tickets/issues/1039)): a checkout refused with `checkout.compartments_unavailable` - the last free Fach of an Open Locker Schließfachanlage taken just before, or a Pareva Anlage full - says „Zeitraum gerade ausgebucht. Bitte wählen Sie einen anderen Zeitraum.“ (en „This period was just booked out. Please choose another period.“) instead of „Für den gewählten Zeitraum ist kein Fach mehr frei.“. Needs the backend with ECCdigital/tickets#1039 for Open Locker
 - Notice after the registration ([ECCdigital/tickets#600](https://github.com/ECCdigital/tickets/issues/600)): „Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.“, the same for every address. The signup sends the backend `forgotPasswordUrl`, the storefront's page „Passwort vergessen“ (`/password/forgot` under `NUXT_USER_BASE_URL`); an address with a verified account gets a mail with a button to it from the backend with ECCdigital/tickets#600
 ### Added
