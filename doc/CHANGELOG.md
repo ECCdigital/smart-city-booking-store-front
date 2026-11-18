@@ -11,6 +11,10 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 - `docker-publish.yml` refuses to build a tag that is not `v` plus the `version` of `package.json` (ECCdigital/tickets#1018). A release candidate tagged without `npm version` built an image whose app still reported the previous version
 
+### Fixed
+
+- The checkout leaves out an optional add-on the backend no longer has (404) instead of showing the whole offer as not available (ECCdigital/tickets#781). A missing mandatory add-on still makes the offer not available, every other failure stays „Laden fehlgeschlagen“
+
 ## [1.2.1] — 2026-10-14
 
 ### Added
