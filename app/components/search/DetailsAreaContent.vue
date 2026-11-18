@@ -60,6 +60,8 @@
         />
 
         <DetailsAreaTicketOptions v-if="isEvent" :item="item" />
+        <DetailsAreaEventSpeakers v-if="isEvent" :item="item" />
+        <DetailsAreaEventProgram v-if="isEvent" :item="item" />
 
         <DetailsAreaRelatedBookables :item="item" class="my-10" />
       </div>
@@ -92,6 +94,8 @@ import DetailsAreaCancellationConditions from "~/components/detailsArea/DetailsA
 import BookableCustomFieldsMoreInformation from "~/components/bookables/BookableCustomFieldsMoreInformation.vue";
 import DetailsAreaAvailabilitySection from "~/components/detailsArea/DetailsAreaAvailabilitySection.vue";
 import DetailsAreaAvailabilityResults from "~/components/detailsArea/DetailsAreaAvailabilityResults.vue";
+import DetailsAreaEventSpeakers from "~/components/detailsArea/DetailsAreaEventSpeakers.vue";
+import DetailsAreaEventProgram from "~/components/detailsArea/DetailsAreaEventProgram.vue";
 import { EVENT_FORMAT, eventFormatOf } from "~/utils/eventFormat.js";
 
 const props = defineProps({

@@ -264,6 +264,10 @@
     "noEvent": "No event found",
     "noEvents": "No events found",
     "participationLink": "Participation link",
+    "contactPerson": "Contact person:",
+    "speakers": "Speakers",
+    "program": "Program",
+    "programTime": "{time}",
     "format": {
       "label": "Format",
       "presence": "In person",

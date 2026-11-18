@@ -522,6 +522,10 @@
     "noEvents": "Keine Veranstaltungen gefunden",
     "noEvent": "Keine Veranstaltung gefunden",
     "participationLink": "Teilnahme-Link",
+    "contactPerson": "Kontaktperson:",
+    "speakers": "Referent:innen",
+    "program": "Programm",
+    "programTime": "{time} Uhr",
     "format": {
       "label": "Format",
       "presence": "Präsenz",
