@@ -9,6 +9,22 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Changed
 
+- CI gate „protected files“ ([ECCdigital/tickets#425](https://github.com/ECCdigital/tickets/issues/425)): the new job `protected-files`, required by `ci-ok`, blocks a pull request that deletes or changes an existing test, adds `.skip`, `.only` or `.todo`, or changes an accepted ADR or the CI configuration, unless the ticket it references (`Refs ECCdigital/tickets#<n>`) names the file; new tests are free. It runs the rule from ECCdigital/portolan with the read-only GitHub App „Portolan Gate“ (org secrets `GATE_APP_ID`, `GATE_PRIVATE_KEY`); pull requests from forks get no secrets and stay blocked until an admin bypasses the gate. No code change
+- „Zeitraum gerade ausgebucht“ ([ECCdigital/tickets#1039](https://github.com/ECCdigital/tickets/issues/1039)): a checkout refused with `checkout.compartments_unavailable` - the last free Fach of an Open Locker Schließfachanlage taken just before, or a Pareva Anlage full - says „Zeitraum gerade ausgebucht. Bitte wählen Sie einen anderen Zeitraum.“ (en „This period was just booked out. Please choose another period.“) instead of „Für den gewählten Zeitraum ist kein Fach mehr frei.“. Needs the backend with ECCdigital/tickets#1039 for Open Locker
+- Agent docs follow skills setup `ecc-12` (template „GitHub Portolan, Produkt-Repo“): `docs/agents/issue-tracker.md` points at `GLOSSARY.md` of `ECCdigital/tickets` and knows the `ablauf` switch, `docs/agents/domain.md` is added. No code change
+
+### Added
+
+- The assigned Open Locker Fach by name ([ECCdigital/tickets#1040](https://github.com/ECCdigital/tickets/issues/1040)): a Fach the platform assigned at an Open Locker Schließfachanlage reads „{Anlage} — Schrank {Name}, Fach {Nummer}“ („{Anlage} — Fach {Nummer}“ without a known Schrank, „Schließfachanlage“ for an Anlage without a name - „Fahrradbox“ stays iFBS) in the booking details, on the Mobile Key page and its sheet, and in „Hilfe bei Problemen mit dem Fach“, which shows once the Fach's access runs, with the booking number; the booking details list it from the Vormerkung on. „Fahrradbox …“ stays for iFBS, the fixed Fach keeps its label. Needs the backend with ECCdigital/tickets#1040
+
+### Fixed
+
+- The cards that only reacted to a mouse click are reached and opened by keyboard (WCAG 2.1.1): the category cards under „Was möchten Sie buchen?“ on the start page and the quick access cards on „Meine Aktivitäten“ are links now, and the result cards of `/search` and of the start page's events link their title to the detail page, so the favorite heart stays a button of its own; a focused card shows a ring, and every one of them opens in a new tab as well. A click on a link inside a result card (the title, a link in an event's teaser) no longer opens the detail page a second time. The compact cards of the map are unchanged
+
+## [1.3.0] — 2026-11-18
+
+### Changed
+
 - Notice after the registration ([ECCdigital/tickets#600](https://github.com/ECCdigital/tickets/issues/600)): „Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.“, the same for every address. The signup sends the backend `forgotPasswordUrl`, the storefront's page „Passwort vergessen“ (`/password/forgot` under `NUXT_USER_BASE_URL`); an address with a verified account gets a mail with a button to it from the backend with ECCdigital/tickets#600
 ### Added
 
@@ -21,7 +37,6 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
-- The cards that only reacted to a mouse click are reached and opened by keyboard (WCAG 2.1.1): the category cards under „Was möchten Sie buchen?“ on the start page and the quick access cards on „Meine Aktivitäten“ are links now, and the result cards of `/search` and of the start page's events link their title to the detail page, so the favorite heart stays a button of its own; a focused card shows a ring, and every one of them opens in a new tab as well. A click on a link inside a result card (the title, a link in an event's teaser) no longer opens the detail page a second time. The compact cards of the map are unchanged
 - „Passwort vergessen“ names a hit rate limit (ECCdigital/tickets#302): a `429` of `/api/auth/forgot-password` shows „Zu viele Anfragen“ (`errors.page.tooManyRequests`) instead of the general error; the form stays
 - The map on the detail page no longer shows a white square beside the pin (ECCdigital/tickets#644): it was Leaflet's default `leaflet-div-icon` box, and the `scoped` style meant to clear it never reached the icon Leaflet renders. The style is now global, as in `ResultsMapMarkerIcon`
 - The booking details show an attachment as accepted when the checkout required a tick for it (ECCdigital/tickets#641): the checkout does not finish without the tick at a shown, required attachment (`show` and `required` in the booking's `_bookableUsed`), but never sent it, so the backend stored no `accepted` and every attachment showed as not accepted. „Akzeptiert“ shows only at such attachments now, always ticked, and no longer at those that never asked for a tick; the stored `accepted` is not read. Rule in `app/utils/bookingAttachmentAccepted.js`
