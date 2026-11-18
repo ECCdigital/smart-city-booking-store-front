@@ -694,6 +694,7 @@
     "noAddress": "No address available.",
     "addressCopiedTitle": "Address copied",
     "addressCopiedMessage": "The address has been copied to your clipboard.",
+    "copyAddress": "Copy address",
     "viewDetails": "View details",
     "view": "View",
     "showMore": "Show more",

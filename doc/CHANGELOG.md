@@ -17,6 +17,10 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 - The assigned Open Locker Fach by name ([ECCdigital/tickets#1040](https://github.com/ECCdigital/tickets/issues/1040)): a Fach the platform assigned at an Open Locker Schließfachanlage reads „{Anlage} — Schrank {Name}, Fach {Nummer}“ („{Anlage} — Fach {Nummer}“ without a known Schrank, „Schließfachanlage“ for an Anlage without a name - „Fahrradbox“ stays iFBS) in the booking details, on the Mobile Key page and its sheet, and in „Hilfe bei Problemen mit dem Fach“, which shows once the Fach's access runs, with the booking number; the booking details list it from the Vormerkung on. „Fahrradbox …“ stays for iFBS, the fixed Fach keeps its label. Needs the Open Locker backend, which comes after backend 4.5.0: name and help need a Fach with `assignedCompartment`, which only it sends, so with backend 4.5.0 nothing changes here
 
+### Fixed
+
+- Icon-only buttons have an accessible name (WCAG 4.1.2): „Filter zurücksetzen“ and „Schließen“ in the filter, „Schließen“ in the time-period picker and in the mobile-key panel now carry an `aria-label`; the list/map switch names its view and tells which one is active (`aria-pressed`). The copy icon next to an address is a button now, reachable by keyboard and named „Adresse kopieren“ (`bookableDetail.copyAddress`) instead of an icon with a click handler
+
 ## [1.3.0] — 2026-11-18
 
 ### Changed
