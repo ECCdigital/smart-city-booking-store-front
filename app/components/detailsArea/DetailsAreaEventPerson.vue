@@ -10,7 +10,7 @@
     :class="{ 'bg-white dark:bg-gray-700 rounded-lg p-3': framed }"
   >
     <UAvatar
-      :src="imageSource(person.image, 'thumbnail')?.src"
+      :src="mounted ? imageSource(person.image, 'thumbnail')?.src : undefined"
       :alt="person.name"
       size="lg"
       class="shrink-0"
@@ -53,5 +53,13 @@ defineProps({
 });
 
 const { imageSource } = useMediaImage();
+
+// The photo is set only in the browser: a photo that fails to load during
+// server rendering errors before hydration, so the avatar never hears of it
+// and shows the broken image instead of the initials.
+const mounted = ref(false);
+onMounted(() => {
+  mounted.value = true;
+});
 </script>
 <style scoped></style>
