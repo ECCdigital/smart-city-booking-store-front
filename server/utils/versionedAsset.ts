@@ -1,4 +1,5 @@
 import type { H3Event } from "h3";
+import { themeAssetVersion } from "~~/shared/utils/themeAssetVersion";
 
 /** A year, the longest `max-age` HTTP asks caches to honour. */
 const IMMUTABLE = "public, max-age=31536000, immutable";
@@ -27,7 +28,7 @@ export function serveVersionedAsset(event: H3Event, etag: string | null): boolea
   setHeader(event, "Cache-Control", versioned ? IMMUTABLE : REVALIDATING);
   if (!etag) return false;
 
-  const quoted = `"${etag}"`;
+  const quoted = `"${themeAssetVersion(etag)}"`;
   setHeader(event, "ETag", quoted);
 
   if (getHeader(event, "if-none-match") === quoted) {

@@ -82,10 +82,10 @@
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 
-// Filled with the accent, or with secondary without one, its text always
-// black.
+// Filled with the accent, or with secondary without one, its text in that
+// colour's contrast.
 const FLAT_RATE_UI = {
-  base: "bg-[color:var(--ui-accent,var(--ui-secondary))] text-black ring-[color:var(--ui-accent,var(--ui-secondary))]",
+  base: "bg-[color:var(--ui-accent,var(--ui-secondary))] text-[color:var(--ui-accent-contrast,var(--ui-secondary-contrast))] ring-[color:var(--ui-accent,var(--ui-secondary))]",
 };
 
 const { t } = useI18n();

@@ -1,4 +1,5 @@
 import type { ThemeView } from "~~/shared/types/hero";
+import { themeAssetVersion } from "~~/shared/utils/themeAssetVersion";
 
 /**
  * What the Live Preview shows in place of the stored Theme View: a Draft has
@@ -63,7 +64,7 @@ export function useThemeBundle(slug?: string | null) {
 
   const version = computed(() => {
     const etag = result.data.value?.etag;
-    return etag ? `?v=${encodeURIComponent(etag)}` : "";
+    return etag ? `?v=${encodeURIComponent(themeAssetVersion(etag))}` : "";
   });
 
   const fontHref = computed(() => result.data.value?.font?.href ?? null);
