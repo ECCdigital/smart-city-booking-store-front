@@ -18,7 +18,9 @@
     <button
       type="button"
       class="block w-full text-left font-semibold text-primary hover:underline break-words cursor-pointer"
-      :aria-label="t('account.invoices.actions.open', { title: paymentDocument.title })"
+      :aria-label="
+        t('account.invoices.actions.open', { title: paymentDocument.title })
+      "
       @click="emit('open')"
     >
       {{ paymentDocument.title }}
@@ -46,23 +48,27 @@
       <div class="flex gap-1">
         <UButton
           icon="i-lucide-download"
-          color="primary"
           variant="solid"
           size="sm"
+          :style="{ color: 'var(--ui-primary-contrast)' }"
           :label="t('account.invoices.actions.downloadLabel')"
           :aria-label="
-            t('account.invoices.actions.download', { title: paymentDocument.title })
+            t('account.invoices.actions.download', {
+              title: paymentDocument.title,
+            })
           "
           @click="emit('download')"
         />
         <UButton
           icon="i-lucide-printer"
-          color="primary"
           variant="solid"
           size="sm"
+          :style="{ color: 'var(--ui-primary-contrast)' }"
           :label="t('account.invoices.actions.printLabel')"
           :aria-label="
-            t('account.invoices.actions.print', { title: paymentDocument.title })
+            t('account.invoices.actions.print', {
+              title: paymentDocument.title,
+            })
           "
           @click="emit('print')"
         />
