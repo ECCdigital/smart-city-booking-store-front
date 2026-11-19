@@ -90,7 +90,7 @@ describe("the refusal of an address on the blacklist", () => {
     expect(link.textContent.trim()).toBe(OPERATOR);
     expect(title(root)).toBe("Buchung nicht möglich");
     expect(text(root)).toBe(
-      `Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an ${OPERATOR}.`,
+      `Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wenden Sie sich per Mail an ${OPERATOR}.`,
     );
   });
 
@@ -112,7 +112,7 @@ describe("the refusal of an address on the blacklist", () => {
     expect(root.querySelector("a")).toBeNull();
     expect(root.querySelector("button")).toBeNull();
     expect(text(root)).toBe(
-      "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an den Betreiber dieses Angebots.",
+      "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wenden Sie sich per Mail an den Betreiber dieses Angebots.",
     );
   });
 
@@ -134,7 +134,7 @@ describe("the refusal of a registration", () => {
 
     expect(title(root)).toBe("Registrierung nicht möglich");
     expect(text(root)).toBe(
-      `Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wende dich per Mail an ${OPERATOR}.`,
+      `Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wenden Sie sich per Mail an ${OPERATOR}.`,
     );
     expect(root.querySelector("a").getAttribute("href")).toBe(
       `mailto:${OPERATOR}`,
@@ -145,7 +145,7 @@ describe("the refusal of a registration", () => {
     const { root } = mountAlert("de", "", true);
 
     expect(text(root)).toBe(
-      "Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wende dich per Mail an den Betreiber dieses Angebots.",
+      "Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wenden Sie sich per Mail an den Betreiber dieses Angebots.",
     );
   });
 
