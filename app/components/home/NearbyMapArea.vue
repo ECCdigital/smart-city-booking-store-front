@@ -1,11 +1,18 @@
 <template>
-  <section v-if="allPlaced.length > 0" style="padding: 50px 0">
+  <!-- Kept until the Offers have come and none has a location. -->
+  <section
+    v-if="!loaded || allPlaced.length > 0"
+    ref="sectionRef"
+    style="padding: 50px 0"
+  >
     <div class="md:flex items-end justify-between mb-5 gap-4">
       <div class="space-y-1.5">
         <h2 class="text-2xl font-bold">{{ $t("home.nearby.title") }}</h2>
         <p class="text-gray-600 dark:text-gray-400" aria-live="polite">
           {{
-            showsNearby
+            !loaded
+              ? $t("home.greeting.loading")
+              : showsNearby
               ? $t(
                   "home.nearby.countNearby",
                   { count: shown.length, radius: NEARBY_RADIUS_KM },
@@ -25,7 +32,9 @@
     </div>
 
     <!-- The search page's map without its list, filter and full screen. -->
-    <div class="relative">
+    <!-- Same height as the compact map, so nothing jumps when it comes. -->
+    <USkeleton v-if="!loaded" class="h-[28rem] w-full rounded-2xl" />
+    <div v-else class="relative">
       <ResultsMap :bookables="shown" compact />
       <!-- Small, on the map like its zoom buttons: the browser asks for the
            position only after this click. A second click shows all again. -->
@@ -67,12 +76,12 @@ import ResultsMap from "~/components/search/ResultsMap.vue";
 import { isBookableOffer, mergeOffers } from "~/composables/search/offer";
 import { MatchStatus } from "~/composables/search/catalogFilters";
 import { NEARBY_RADIUS_KM, placedOffers } from "~/utils/nearbyOffers.js";
+import { useCatalog } from "~/composables/api/useCatalog.js";
+import { useCatalogStore } from "~~/stores/catalog.js";
+import { useTenantStore } from "~~/stores/tenant.js";
+import { useIntersectionObserver } from "@vueuse/core";
 
 const props = defineProps({
-  bookables: {
-    type: Array,
-    required: true,
-  },
   events: {
     type: Array,
     default: () => [],
@@ -80,10 +89,54 @@ const props = defineProps({
 });
 
 const { tenantTo } = useTenantRoute();
+const route = useRoute();
+const { tenantID } = useTenant();
+const { fetchCatalogBundle } = useCatalog();
+const catalogStore = useCatalogStore();
+const tenantStore = useTenantStore();
+
+/**
+ * The bookables for the map: fetched on the client only, once the section
+ * comes near the viewport, and held here rather than in the store, so they
+ * stay out of the SSR payload and the page's first request.
+ */
+const bookables = ref([]);
+const loaded = ref(false);
+const sectionRef = ref(null);
+
+async function loadBookables() {
+  try {
+    const data = await fetchCatalogBundle({
+      slug: route.params.catalogSlug || null,
+      tenantID: tenantID.value,
+      include: "bookables",
+      base: false,
+      catalogType: catalogStore.catalog?.type ?? null,
+      catalogTenantID: catalogStore.catalog?.tenantId ?? null,
+      tenantIDs: tenantStore.tenants.map((tenant) => tenant.id),
+    });
+    bookables.value = data?.bookables ?? [];
+  } catch (error) {
+    // The map is an extra on the start page: it shows the events alone.
+    console.error("[home] nearby bookables failed:", error);
+  } finally {
+    loaded.value = true;
+  }
+}
+
+const { stop } = useIntersectionObserver(
+  sectionRef,
+  ([entry]) => {
+    if (!entry?.isIntersecting) return;
+    stop();
+    loadBookables();
+  },
+  { rootMargin: "300px" },
+);
 
 // The same Offers the search page puts on its map, all of them matching.
 const offers = computed(() =>
-  mergeOffers(props.bookables, props.events).map((item) => ({
+  mergeOffers(bookables.value, props.events).map((item) => ({
     item,
     isBookable: isBookableOffer(item),
     matchStatus: MatchStatus.MATCH,

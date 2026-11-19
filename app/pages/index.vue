@@ -44,10 +44,8 @@
       <template v-else>
         <LatestEventsArea v-if="allEvents.length > 0" :items="allEvents" />
 
-        <NearbyMapArea
-          :bookables="bookableStore.getBookables"
-          :events="allEvents"
-        />
+        <!-- Loads its bookables on the client, when it comes into view. -->
+        <NearbyMapArea :events="allEvents" />
       </template>
 
       <HowBookingWorksArea />
@@ -67,7 +65,6 @@ import MobileKeyArea from "~/components/home/MobileKeyArea.vue";
 import TenantOffersArea from "~/components/home/TenantOffersArea.vue";
 import HomeGreetingArea from "~/components/home/HomeGreetingArea.vue";
 import NearbyMapArea from "~/components/home/NearbyMapArea.vue";
-import { useBookableStore } from "~~/stores/bookable.js";
 import { useTenantStore } from "~~/stores/tenant.js";
 import { useInstanceStore } from "~~/stores/instance.js";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
@@ -85,7 +82,6 @@ const route = useRoute();
 const { tenantTo } = useTenantRoute();
 const { loadBundle } = useCatalogBundle();
 const eventStore = useEventStore();
-const bookableStore = useBookableStore();
 const { tenantID, isTenantContext } = useTenant();
 const tenantStore = useTenantStore();
 const instanceStore = useInstanceStore();
@@ -100,7 +96,7 @@ const { error } = useLazyAsyncData(
   () =>
     `catalog-bundle-home:${catalogSlug.value ?? "root"}:${tenantID.value ?? "all"}`,
   (nuxtApp) =>
-    loadBundle({ slug: catalogSlug.value, include: ["bookables", "events"] }).catch(
+    loadBundle({ slug: catalogSlug.value, include: ["events"] }).catch(
       (failure) => {
         if (
           isTenantNotAvailable({ tenantID: tenantID.value, error: failure })
