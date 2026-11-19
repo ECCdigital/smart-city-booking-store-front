@@ -4,6 +4,7 @@ import {
   compartmentsOf,
   customerServiceOf,
   decideEmergencyHelp,
+  holdsAssignedCompartment,
   supportContactOf,
   withAccessApps,
   hasAccessApps,
@@ -272,6 +273,121 @@ describe("decideEmergencyHelp", () => {
     expect(
       decideEmergencyHelp(undefined, { accessInfo: [grantedIfbsCompartment()] }),
     ).toBeNull();
+  });
+});
+
+describe("the Fach the platform assigned (Open Locker)", () => {
+  const LOCKER_CONTACT = Object.freeze({
+    name: "Service Fächer",
+    phone: "+49 431 123456",
+    email: "faecher@example.org",
+  });
+
+  /** An `accessInfo` entry of a Fach assigned in the Vormerkung. */
+  const assignedEntry = (overrides = {}) => ({
+    accessPointId: "anlage-1",
+    accessPointType: "locker",
+    provider: "open-locker",
+    externalId: "",
+    mode: "remote",
+    bookableId: "faecher",
+    grant: null,
+    hold: { holdId: null, expiresAt: null, compartment: null },
+    compartment: null,
+    assignedCompartment: {
+      id: "9b2f6c1e",
+      number: 3,
+      lockerBank: { id: "bank-1", name: "Quartiersschrank Hafen" },
+    },
+    isProvisioned: true,
+    revokedAt: null,
+    ...overrides,
+  });
+
+  /** The same Fach as the per-booking projection answers it. */
+  const assignedPoint = (overrides = {}) => ({
+    id: "anlage-1:9b2f6c1e",
+    type: "locker",
+    provider: "open-locker",
+    label: "Fächer Bahnhof",
+    isProvisioned: true,
+    externalBookingId: null,
+    compartment: null,
+    assignedCompartment: {
+      number: 3,
+      lockerBankName: "Quartiersschrank Hafen",
+    },
+    ...overrides,
+  });
+
+  const tenantWithOpenLocker = () => ({
+    id: "kiel",
+    accessApps: [{ id: "open-locker", customerService: { ...LOCKER_CONTACT } }],
+  });
+
+  it("tells a booking holding a Fach the platform assigned, revoked ones left out", () => {
+    expect(holdsAssignedCompartment({ accessInfo: [assignedEntry()] })).toBe(
+      true,
+    );
+    expect(
+      holdsAssignedCompartment({
+        accessInfo: [assignedEntry({ revokedAt: 1, isProvisioned: false })],
+      }),
+    ).toBe(false);
+    expect(
+      holdsAssignedCompartment({ accessInfo: [grantedIfbsCompartment()] }),
+    ).toBe(false);
+    expect(holdsAssignedCompartment(undefined)).toBe(false);
+  });
+
+  it("offers the contact for the provisioned Fach, with the projected Fach and the booking number", () => {
+    const help = decideEmergencyHelp(
+      tenantWithOpenLocker(),
+      { id: "B-42", accessInfo: [assignedEntry()] },
+      [assignedPoint()],
+    );
+
+    expect(help).toEqual({
+      providerId: "open-locker",
+      serviceInfo: LOCKER_CONTACT,
+      processId: "B-42",
+      compartment: null,
+      accessPoint: assignedPoint(),
+    });
+  });
+
+  it("has nothing to say for a Fach not provisioned yet", () => {
+    expect(
+      decideEmergencyHelp(
+        tenantWithOpenLocker(),
+        { id: "B-42", accessInfo: [assignedEntry({ isProvisioned: false })] },
+        [assignedPoint({ isProvisioned: false })],
+      ),
+    ).toBeNull();
+  });
+
+  it("has nothing to say without the projection", () => {
+    expect(
+      decideEmergencyHelp(tenantWithOpenLocker(), {
+        id: "B-42",
+        accessInfo: [assignedEntry()],
+      }),
+    ).toBeNull();
+  });
+
+  it("keeps iFBS as it was, without a projected Fach", () => {
+    const help = decideEmergencyHelp(
+      tenantWithIfbs(),
+      { id: "B-42", accessInfo: [grantedIfbsCompartment()] },
+      [assignedPoint()],
+    );
+
+    expect(help).toEqual({
+      providerId: "ifbs",
+      serviceInfo: IFBS_CONTACT,
+      processId: "4711",
+      compartment: "12",
+    });
   });
 });
 

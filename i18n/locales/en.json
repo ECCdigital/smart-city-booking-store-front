@@ -116,6 +116,7 @@
   },
   "common": {
     "actions": "Actions",
+    "browseOffers": "Browse offers",
     "clearInput": "Clear input",
     "phoneNumber": "Phone number",
     "comingSoon": "Coming soon",
@@ -363,7 +364,7 @@
     "payment_failed": "Payment could not be started. Please try again or choose another payment method.",
     "payment_provider_unavailable": "The selected payment method is not available right now.",
     "locker_unavailable": "The booking could not be completed (locker reservation). Please check the time slot or your selection.",
-    "compartments_unavailable": "No compartment is left for the selected period. Please choose another period.",
+    "compartments_unavailable": "This period was just booked out. Please choose another period.",
     "invoice_payment_not_permitted": "Invoice payment is not enabled for your account.",
     "capacity_exceeded": "The maximum capacity for this object has been reached.",
     "max_amount_per_booking_exceeded": "A single booking may include at most {maxAmountPerBooking} units of this object.",
@@ -695,6 +696,7 @@
     "noAddress": "No address available.",
     "addressCopiedTitle": "Address copied",
     "addressCopiedMessage": "The address has been copied to your clipboard.",
+    "copyAddress": "Copy address",
     "viewDetails": "View details",
     "view": "View",
     "showMore": "Show more",
@@ -991,8 +993,8 @@
     "unknownTenant": "Unknown",
     "invoices": {
       "title": "My documents",
-      "emptyTitle": "No invoices available",
-      "emptyDescription": "There are currently no invoices for your account. Once invoices have been created, they will appear here.",
+      "emptyTitle": "No documents available",
+      "emptyDescription": "There are currently no documents for your account. Once documents have been created, they will appear here.",
       "unknownBookable": "Unknown bookable",
       "searchPlaceholder": "Search by bookable",
       "noMatches": "No documents match your search or the chosen filter.",
@@ -1001,7 +1003,8 @@
         "tooltip": "Filter by {type}",
         "invoice": "Invoices",
         "receipt": "Receipts",
-        "cancellation": "Cancellation receipts"
+        "cancellation": "Cancellation receipts",
+        "withdrawal": "Withdrawal receipts"
       },
       "columns": {
         "createdAt": "Created",
@@ -1145,6 +1148,7 @@
     "phoneSupport": "Phone support:",
     "contactPersonLabel": "Contact person:",
     "bikeBoxHelp": "Help with the bike box",
+    "compartmentHelp": "Help with the compartment",
     "emergencyContact": "Emergency contact and what to do if something fails",
     "checkingBookings": "Checking your bookings...",
     "severalBookingsMatch": "Several of your bookings match this door right now.",
@@ -1176,7 +1180,8 @@
     "openDoor": "Open the door",
     "scannedDescription": "You scanned the code at the door.",
     "whichBooking": "Which booking?",
-    "noKeysFound": "No keys found",
+    "emptyTitle": "No keys yet",
+    "emptyDescription": "Once you have booked an offer with digital access, you will find its key here.",
     "searchPlaceholder": "Search",
     "noMatches": "No key matches your search or the chosen filters.",
     "lockSystemInfo": "Information and status of the locking system",
@@ -1196,9 +1201,12 @@
       },
       "codeHint": "Enter the code at the door",
       "title": {
+        "assignedCompartment": "{label} — cabinet {lockerBank}, compartment {number}",
+        "assignedCompartmentNumber": "{label} — compartment {number}",
         "lockerCompartment": "Bike box no. {compartment}",
         "lockerBooking": "Bike box #{id}",
         "locker": "Bike box",
+        "lockerSystem": "Locker system",
         "unknownDoor": "Unknown door"
       }
     },
@@ -1745,7 +1753,6 @@
       "undo": "Undo",
       "emptyTitle": "No favourites yet",
       "emptyDescription": "Tap the heart on an offer in the catalogue or on its detail page to find it here again.",
-      "browseOffers": "Browse offers",
       "searchPlaceholder": "Search by title",
       "noMatches": "No favourite matches your search or the chosen filters.",
       "loadFailed": "Your favourites could not be loaded."
