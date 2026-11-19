@@ -106,6 +106,7 @@
               variant="ghost"
               icon="i-lucide-x"
               size="sm"
+              :aria-label="$t('meta.pages.close')"
               @click="closeAndReset"
             />
             <UButton label="OK" size="md" class="" @click="onSelect" />
@@ -169,6 +170,7 @@
             icon="i-lucide-x"
             size="sm"
             class="rounded-xl"
+            :aria-label="$t('meta.pages.close')"
             @click="closeAndReset"
           />
         </div>

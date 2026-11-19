@@ -541,6 +541,7 @@
     "noAddress": "Keine Adresse bekannt.",
     "addressCopiedTitle": "Adresse erfolgreich kopiert!",
     "addressCopiedMessage": "Die Adresse wurde in Ihre Zwischenablage kopiert.",
+    "copyAddress": "Adresse kopieren",
     "viewDetails": "Details ansehen",
     "view": "Ansehen",
     "showMore": "Mehr anzeigen",
