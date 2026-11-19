@@ -14,6 +14,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 - Agent docs follow skills setup `ecc-12` (template „GitHub Portolan, Produkt-Repo“): `docs/agents/issue-tracker.md` points at `GLOSSARY.md` of `ECCdigital/tickets` and knows the `ablauf` switch, `docs/agents/domain.md` is added. No code change
 - „Rechnungen“ shows the icon `i-lucide-file-text` instead of `i-lucide-wallet-cards` in the navigation, the user menu and the quick access card, and in place of the 🧾 emoji when „Meine Belege“ is empty (ECCdigital/tickets#798). The empty state there reads „Keine Belege vorhanden“
 - The account lists Buchungen, Schlüssel, Favoriten and Belege share one empty state, as on Favoriten, with no entries and with no matches (ECCdigital/tickets#799): `ListEmptyState` replaces `BookingEmptyState` and the cards on Schlüssel. Buchungen and Schlüssel offer „Angebote entdecken“ like Favoriten; Schlüssel reads „Keine Schlüssel vorhanden“ with a description instead of „Keine Schlüssel gefunden“. As on Favoriten and Belege, Buchungen shows search and filter, and Schlüssel the help „Schlüssel nicht sichtbar oder Tür-Problem?“, the button „Liste“, search and filter, only once there is an entry. The key `favorites.page.browseOffers` moves to `common.browseOffers`
+- The checkout's last button reads „Verbindlich buchen“ instead of „Zahlungspflichtig buchen“ when the total is 0 EUR, also after a discount, for every tenant ([ECCdigital/tickets#937](https://github.com/ECCdigital/tickets/issues/937)). Key `checkout.review.commitBookingFree`
 
 ### Added
 
