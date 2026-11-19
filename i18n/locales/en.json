@@ -1000,7 +1000,8 @@
         "tooltip": "Filter by {type}",
         "invoice": "Invoices",
         "receipt": "Receipts",
-        "cancellation": "Cancellation receipts"
+        "cancellation": "Cancellation receipts",
+        "withdrawal": "Withdrawal receipts"
       },
       "columns": {
         "createdAt": "Created",
