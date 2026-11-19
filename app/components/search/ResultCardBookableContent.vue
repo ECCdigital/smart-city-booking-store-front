@@ -17,7 +17,14 @@
               : 'text-lg'
         "
       >
-        {{ bookable.title }}
+        <NuxtLink
+          v-if="detailsTo"
+          :to="detailsTo"
+          class="result-card-link focus-visible:outline-none focus-visible:underline"
+        >
+          {{ bookable.title }}
+        </NuxtLink>
+        <template v-else>{{ bookable.title }}</template>
       </p>
       <p>{{ getTenantName(bookable.tenantId) }}</p>
 
@@ -69,6 +76,11 @@ const props = defineProps({
     required: true,
   },
   searchParams: {
+    type: Object,
+    default: null,
+  },
+  // Route of the detail page; the title links to it when set.
+  detailsTo: {
     type: Object,
     default: null,
   },

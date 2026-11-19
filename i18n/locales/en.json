@@ -152,6 +152,7 @@
   },
   "common": {
     "actions": "Actions",
+    "browseOffers": "Browse offers",
     "clearInput": "Clear input",
     "phoneNumber": "Phone number",
     "comingSoon": "Coming soon",
@@ -558,6 +559,7 @@
       "lineQtyPrice": "{qty} × {price}",
       "edit": "Edit",
       "commitBooking": "Book with obligation to pay",
+      "commitBookingFree": "Book now",
       "backToPayment": "Back to payment",
       "backToData": "Back to your details",
       "termsHint": "By completing this booking you accept our terms and conditions.",
@@ -723,13 +725,14 @@
     "cancellationTitleShort": "Cancellation terms",
     "cancellationHint": "The earlier you cancel, the higher the refund.",
     "refund": "refund",
-    "onStartDay": "On the start day",
-    "untilOneDayBefore": "Up to 1 day before the start",
-    "untilDaysBefore": "Up to {days} days before the start",
+    "untilStart": "Up to the start",
+    "untilDaysBefore": "Up to {n} days before the start | Up to {n} day before the start | Up to {n} days before the start",
+    "untilHoursBefore": "Up to {n} hours before the start | Up to {n} hour before the start | Up to {n} hours before the start",
     "organiser": "Organiser:",
     "noAddress": "No address available.",
     "addressCopiedTitle": "Address copied",
     "addressCopiedMessage": "The address has been copied to your clipboard.",
+    "copyAddress": "Copy address",
     "viewDetails": "View details",
     "view": "View",
     "showMore": "Show more",
@@ -820,6 +823,11 @@
     "downloadAppointment": "Download appointment",
     "actionsFor": "Actions for booking #{id}",
     "downloadAppointmentTooltip": "Download as an appointment",
+    "series": {
+      "label": "Recurring booking",
+      "tooltip": "Part of a recurring booking with {count} bookings",
+      "details": "Part of a series of {count} bookings in total"
+    },
     "withdrawal": {
       "action": "Withdraw from booking",
       "hint": "Opens a prepared email to the provider. The provider checks your withdrawal and gets back to you."
@@ -841,8 +849,11 @@
       "fee": "Cancellation fee",
       "feePercent": "{percent} %",
       "refund": "Refund",
-      "daysBeforeStart": "on the day the booking starts | {n} day before the booking starts | {n} days before the booking starts",
-      "tierHint": "You are cancelling {when}. Up to {tierDays} days before the start, {tenant} refunds {percent} % of the amount. This leaves a cancellation fee of {feePercent} %. The final amount is stated in the cancellation receipt.",
+      "tierAtStart": "up to the start",
+      "tierDays": "up to {n} days before the start | up to {n} day before the start | up to {n} days before the start",
+      "tierHours": "up to {n} hours before the start | up to {n} hour before the start | up to {n} hours before the start",
+      "refundHint": "{tenant} refunds {percent} % of the amount. This leaves a cancellation fee of {feePercent} %. The final amount is stated in the cancellation receipt.",
+      "tierHint": "The refund tier “{tier}” applies: {tenant} refunds {percent} % of the amount. This leaves a cancellation fee of {feePercent} %. The final amount is stated in the cancellation receipt.",
       "previewFailedTitle": "The refund cannot be calculated right now.",
       "previewFailedText": "Booking amount {amount}. The fee follows the cancellation terms of {tenant}; you will learn the amount with the cancellation receipt.",
       "previewFailedTitleUnpaid": "The cancellation fee cannot be calculated right now.",
@@ -1026,8 +1037,8 @@
     "unknownTenant": "Unknown",
     "invoices": {
       "title": "My documents",
-      "emptyTitle": "No invoices available",
-      "emptyDescription": "There are currently no invoices for your account. Once invoices have been created, they will appear here.",
+      "emptyTitle": "No documents available",
+      "emptyDescription": "There are currently no documents for your account. Once documents have been created, they will appear here.",
       "unknownBookable": "Unknown bookable",
       "searchPlaceholder": "Search by bookable",
       "noMatches": "No documents match your search or the chosen filter.",
@@ -1036,7 +1047,8 @@
         "tooltip": "Filter by {type}",
         "invoice": "Invoices",
         "receipt": "Receipts",
-        "cancellation": "Cancellation receipts"
+        "cancellation": "Cancellation receipts",
+        "withdrawal": "Withdrawal receipts"
       },
       "columns": {
         "createdAt": "Created",
@@ -1212,7 +1224,8 @@
     "openDoor": "Open the door",
     "scannedDescription": "You scanned the code at the door.",
     "whichBooking": "Which booking?",
-    "noKeysFound": "No keys found",
+    "emptyTitle": "No keys yet",
+    "emptyDescription": "Once you have booked an offer with digital access, you will find its key here.",
     "searchPlaceholder": "Search",
     "noMatches": "No key matches your search or the chosen filters.",
     "lockSystemInfo": "Information and status of the locking system",
@@ -1784,7 +1797,6 @@
       "undo": "Undo",
       "emptyTitle": "No favourites yet",
       "emptyDescription": "Tap the heart on an offer in the catalogue or on its detail page to find it here again.",
-      "browseOffers": "Browse offers",
       "searchPlaceholder": "Search by title",
       "noMatches": "No favourite matches your search or the chosen filters.",
       "loadFailed": "Your favourites could not be loaded."
