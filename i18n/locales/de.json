@@ -229,9 +229,9 @@
   },
   "rateLimit": {
     "title": "Zu viele Versuche",
-    "seconds": "Bitte versuche es in {count} Sekunde erneut. | Bitte versuche es in {count} Sekunden erneut.",
-    "minutes": "Bitte versuche es in {count} Minute erneut. | Bitte versuche es in {count} Minuten erneut.",
-    "later": "Bitte versuche es später erneut."
+    "seconds": "Bitte versuchen Sie es in {count} Sekunde erneut. | Bitte versuchen Sie es in {count} Sekunden erneut.",
+    "minutes": "Bitte versuchen Sie es in {count} Minute erneut. | Bitte versuchen Sie es in {count} Minuten erneut.",
+    "later": "Bitte versuchen Sie es später erneut."
   },
   "login": {
     "logoutErrorMessage": {
@@ -291,7 +291,7 @@
     },
     "passwordStrengthCheck": {
       "description": "Muss enthalten",
-      "nonePassword": "Gib ein Passwort ein",
+      "nonePassword": "Geben Sie ein Passwort ein",
       "weakPassword": "Schwaches Passwort",
       "mediumPassword": "Mittleres Passwort",
       "strongPassword": "Starkes Passwort",
@@ -301,10 +301,10 @@
       "number": "Mindestens eine Zahl (0-9)"
     },
     "success": {
-      "heading": "Bitte prüfe dein Postfach",
-      "description": "Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.",
+      "heading": "Bitte prüfen Sie Ihr Postfach",
+      "description": "Sie erhalten in Kürze eine E-Mail, um Ihre Registrierung abzuschließen.",
       "resent": "Wenn die E-Mail-Adresse zu einem noch nicht bestätigten Konto gehört, haben wir den Bestätigungslink erneut gesendet.",
-      "spamHint": "Wenn du die E-Mail nicht findest, überprüfe bitte auch deinen Spam- oder Werbeordner.",
+      "spamHint": "Wenn Sie die E-Mail nicht finden, überprüfen Sie bitte auch Ihren Spam- oder Werbeordner.",
       "toHome": "Zur Startseite",
       "toLogin": "Zur Anmeldung"
     }
@@ -753,13 +753,13 @@
     "time_period_mismatch": "Für dieses Objekt muss ein vollständiger Zeitslot gebucht werden.",
     "insufficient_lead_time": "Die Buchung liegt zu kurzfristig. Zwischen Buchung und Beginn muss ausreichend Vorbereitungszeit in den Servicezeiten liegen.",
     "time_in_past": "Der gewählte Beginn liegt in der Vergangenheit. Bitte wählen Sie einen Zeitpunkt ab jetzt.",
-    "address_blacklisted": "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an {contact}.",
+    "address_blacklisted": "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wenden Sie sich per Mail an {contact}.",
     "address_blacklisted_operator": "den Betreiber dieses Angebots",
     "address_blacklisted_title": "Buchung nicht möglich",
     "address_blacklisted_copy": "Mailadresse kopieren",
     "address_blacklisted_copied": "Mailadresse kopiert",
     "address_blacklisted_copy_failed": "Die Mailadresse ließ sich nicht kopieren. Bitte markieren und kopieren Sie sie von Hand.",
-    "address_blacklisted_registration": "Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wende dich per Mail an {contact}.",
+    "address_blacklisted_registration": "Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wenden Sie sich per Mail an {contact}.",
     "address_blacklisted_registration_title": "Registrierung nicht möglich",
     "generateGroupBooking": "Keine Seriebuchung erzeugt",
     "selectTimePeriodTitle": "Kein Zeitraum ausgewählt",
@@ -1748,8 +1748,8 @@
     "listView": "Listenansicht",
     "mapView": "Kartenansicht",
     "atThisLocation": "Ergebnisse an diesem Standort:",
-    "clickToOpen": "Klick um Auswahl zu öffnen",
-    "clickToSeeAll": "Klick um Alle anzusehen",
+    "clickToOpen": "Klicken Sie, um die Auswahl zu öffnen",
+    "clickToSeeAll": "Klicken Sie, um alle anzusehen",
     "offerPosition": "Angebot {n} von {total}",
     "previousOffer": "Vorheriges Angebot",
     "nextOffer": "Nächstes Angebot",
