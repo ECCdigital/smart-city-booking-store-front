@@ -9,7 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Changed
 
-- Small screens: on „Rechnungen“ the buttons „Herunterladen“ and „Drucken“ of each card are in the primary colour, their text in its contrast colour
+- „Rechnungen“: the buttons „Herunterladen“ and „Drucken“ of each card are in the primary colour, their text in its contrast colour
 - „Pauschalpreis“ under „Preisinformationen“ is filled with the accent or, without one, with secondary, its text in that colour's contrast; the theme computes that colour also from hex with alpha (`#rrggbbaa`, `#rgba`, as the Admin UI stores it), so a light secondary such as `#FDD835FF` gets black text instead of white. The theme assets' URLs carry a render revision besides the bundle's etag, so a browser loads the new contrast colours without the instance colours changing
 - Small screens: the key page hides the „Liste“ button, and on „Meine Buchungen“ the filter and sort buttons are as tall as the search field, with the same space above and below that row
 - Small screens: the bookable detail page shows „Alles ansehen“ under the description only when there is a description
