@@ -13,9 +13,10 @@
     </div>
     <div class="md:flex md:space-x-2">
       <div
-        v-for="(b, i) in latestEvents.slice(0, numberOfVisibleEvents)"
+        v-for="(b, i) in latestEvents.slice(0, 4)"
         :key="i"
-        class="flex basis-1/3 mb-2"
+        class="basis-1/3 mb-2"
+        :class="i === 3 ? 'hidden lg:flex' : 'flex'"
       >
         <ResultCard
           :item="b"
@@ -30,7 +31,6 @@
 </template>
 <script setup>
 import ResultCard from "~/components/search/ResultCard.vue";
-import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 
 const props = defineProps({
   items: {
@@ -41,8 +41,6 @@ const props = defineProps({
 
 const { tenantTo } = useTenantRoute();
 
-const { isGreaterThanLg } = useBreakpointCheck();
-
 const latestEvents = computed(() => {
   const events = props.items;
   return events.sort(
@@ -50,14 +48,6 @@ const latestEvents = computed(() => {
       new Date(a.information.startDate).getTime() -
       new Date(b.information.startDate).getTime(),
   );
-});
-
-const numberOfVisibleEvents = computed(() => {
-  if (isGreaterThanLg.value) {
-    return 4;
-  } else {
-    return 3;
-  }
 });
 
 function goToEventsPage() {

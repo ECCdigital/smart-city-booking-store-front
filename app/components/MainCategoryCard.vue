@@ -6,24 +6,30 @@
     the card's box in the flow instead and push the whole row around.
     `relative` plus `hover:z-10` keeps the lifted card above its neighbours;
     the scale is dropped for visitors who ask for less motion, the ring stays.
+    The card is a link, so it is reached and opened by keyboard as well; the
+    keyboard focus shows the hover ring on the card.
   -->
-  <UCard
-      class="mainCategoryCard relative h-full cursor-pointer bg-white dark:bg-gray-700 text-black dark:text-gray-200 shadow-lg transition duration-200 ease-out hover:z-10 hover:scale-105 hover:shadow-xl hover:ring-2 hover:ring-[color:var(--ui-accent,var(--ui-primary))] motion-reduce:transition-none motion-reduce:hover:scale-100"
-      variant="solid"
-      @click="goToCategory"
+  <NuxtLink
+    :to="categoryTo"
+    class="group block h-full rounded-lg focus-visible:outline-none"
   >
-    <template #header>
-      <div class="w-full flex justify-center mt-5">
-        <div class="bg-[color:var(--ui-accent,var(--ui-primary))] rounded-full p-3 pb-1 shadow-lg avatar-hover">
-          <UIcon :name="category.icon" style="color: var(--ui-accent-contrast, var(--ui-primary-contrast))" class="avatar-hover" size="24"/>
+    <UCard
+        class="mainCategoryCard relative h-full cursor-pointer bg-white dark:bg-gray-700 text-black dark:text-gray-200 shadow-lg transition duration-200 ease-out hover:z-10 hover:scale-105 hover:shadow-xl hover:ring-2 hover:ring-[color:var(--ui-accent,var(--ui-primary))] group-focus-visible:ring-2 group-focus-visible:ring-[color:var(--ui-accent,var(--ui-primary))] motion-reduce:transition-none motion-reduce:hover:scale-100"
+        variant="solid"
+    >
+      <template #header>
+        <div class="w-full flex justify-center mt-5">
+          <div class="bg-[color:var(--ui-accent,var(--ui-primary))] rounded-full p-3 pb-1 shadow-lg avatar-hover">
+            <UIcon :name="category.icon" style="color: var(--ui-accent-contrast, var(--ui-primary-contrast))" class="avatar-hover" size="24"/>
+          </div>
         </div>
+      </template>
+      <div class="text-center -mt-5 space-y-1">
+        <p class="text-xl font-bold">{{ category.title }}</p>
+        <p>{{ props.category.description }}</p>
       </div>
-    </template>
-    <div class="text-center -mt-5 space-y-1">
-      <p class="text-xl font-bold">{{ category.title }}</p>
-      <p>{{ props.category.description }}</p>
-    </div>
-  </UCard>
+    </UCard>
+  </NuxtLink>
 </template>
 <script setup>
 
@@ -38,13 +44,9 @@ const {tenantTo} = useTenantRoute();
 
 
 
-const router = useRouter()
-
-function goToCategory() {
-  router.push(
-    tenantTo({ path: "/search", query: { cat: props.category.cat } }),
-  );
-}
+const categoryTo = computed(() =>
+  tenantTo({ path: "/search", query: { cat: props.category.cat } }),
+);
 </script>
 <style scoped>
 :deep(.mainCategoryCard:hover .avatar-hover) {
