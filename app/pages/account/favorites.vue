@@ -87,36 +87,30 @@
       />
     </div>
 
-    <div
+    <ListEmptyState
       v-else-if="entries.length"
-      class="flex flex-col items-center justify-center py-16 text-center"
-    >
-      <UIcon name="i-lucide-filter-x" class="text-6xl text-gray-400 mb-4" />
-      <p class="text-gray-500">{{ $t("favorites.page.noMatches") }}</p>
-    </div>
+      icon="i-lucide-filter-x"
+      :description="$t('favorites.page.noMatches')"
+    />
 
-    <div
+    <ListEmptyState
       v-else
-      class="flex flex-col items-center justify-center py-16 text-center"
+      icon="i-lucide-heart"
+      :title="$t('favorites.page.emptyTitle')"
+      :description="$t('favorites.page.emptyDescription')"
     >
-      <UIcon name="i-lucide-heart" class="text-6xl text-gray-400 mb-4" />
-      <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">
-        {{ $t("favorites.page.emptyTitle") }}
-      </h2>
-      <p class="text-gray-500 max-w-md mb-6">
-        {{ $t("favorites.page.emptyDescription") }}
-      </p>
       <UButton
-        :label="$t('favorites.page.browseOffers')"
+        :label="$t('common.browseOffers')"
         icon="i-lucide-search"
         :to="tenantTo('/search')"
       />
-    </div>
+    </ListEmptyState>
   </div>
 </template>
 <script setup>
 import ClearButton from "~/components/inputs/ClearButton.vue";
 import FavoriteEntryCard from "~/components/favorites/FavoriteEntryCard.vue";
+import ListEmptyState from "~/components/user/ListEmptyState.vue";
 import ListFilter from "~/components/user/ListFilter.vue";
 import ResultsPagination from "~/components/search/ResultsPagination.vue";
 import { useFavorites } from "~/composables/api/useFavorites.js";
