@@ -19,6 +19,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 ### Added
 
 - The assigned Open Locker Fach by name ([ECCdigital/tickets#1040](https://github.com/ECCdigital/tickets/issues/1040)): a Fach the platform assigned at an Open Locker Schließfachanlage reads „{Anlage} — Schrank {Name}, Fach {Nummer}“ („{Anlage} — Fach {Nummer}“ without a known Schrank, „Schließfachanlage“ for an Anlage without a name - „Fahrradbox“ stays iFBS) in the booking details, on the Mobile Key page and its sheet, and in „Hilfe bei Problemen mit dem Fach“, which shows once the Fach's access runs, with the booking number; the booking details list it from the Vormerkung on. „Fahrradbox …“ stays for iFBS, the fixed Fach keeps its label. Needs the Open Locker backend, which comes after backend 4.5.0: name and help need a Fach with `assignedCompartment`, which only it sends, so with backend 4.5.0 nothing changes here
+- Series bookings are marked ([ECCdigital/tickets#999](https://github.com/ECCdigital/tickets/issues/999)): a booking that belongs to a series shows a repeat icon after its booking number on the BookingCard, with the tooltip „Teil einer Serienbuchung mit {n} Buchungen“, and „Serienbuchung“ with the total number of bookings in the series in the booking details. The BFF route `GET /api/bookings` adds `series: { id, bookingCount }` from the user's group bookings of each tenant (`GET /api/:tenant/group-bookings`)
 
 ### Fixed
 
