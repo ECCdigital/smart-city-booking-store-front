@@ -103,7 +103,9 @@ export function compartmentsOf(booking) {
 /**
  * What the emergency help has to show for a booking: the first confirmed
  * compartment whose provider has a contact at the tenant, with the contact
- * and the compartment's booking id (glossary "bestätigtes Fach"). A
+ * and the compartment's booking id (glossary "bestätigtes Fach"); for a Fach
+ * the platform assigned (Open Locker) the provisioned one among
+ * `accessPoints`, with the booking number and the projected Fach. A
  * compartment on hold, a revoked one, or one of a provider the tenant names
  * no contact for (Pareva mails on its own) yields nothing - the accordion
  * then stays away rather than showing a contact with nothing to say.
@@ -112,10 +114,12 @@ export function compartmentsOf(booking) {
  *   (`bookingTenantOf`)
  * @param {Object|undefined} booking A booking as `/api/bookings/assigned`
  *   sends it
+ * @param {Object[]} [accessPoints] The booking's access points as the
+ *   per-booking projection answers them
  * @returns {{ providerId: string, serviceInfo: Object, processId: string,
- *   compartment: string|null }|null}
+ *   compartment: string|null, accessPoint?: Object }|null}
  */
-export function decideEmergencyHelp(tenant, booking) {
+export function decideEmergencyHelp(tenant, booking, accessPoints = []) {
   for (const candidate of compartmentsOf(booking)) {
     if (!candidate.isConfirmed) continue;
     const serviceInfo = customerServiceOf(tenant, candidate.provider);
@@ -127,7 +131,44 @@ export function decideEmergencyHelp(tenant, booking) {
       compartment: candidate.compartment,
     };
   }
+
+  // A Fach the platform assigned (Open Locker) has no grant and no process
+  // number: it is confirmed once its access is provisioned, the hotline goes
+  // by the platform's booking number, and its name - Anlage, Schrank,
+  // number - is the projection's, which alone knows the Anlage.
+  for (const accessPoint of accessPoints ?? []) {
+    if (!accessPoint?.assignedCompartment || accessPoint.isProvisioned !== true)
+      continue;
+    const serviceInfo = customerServiceOf(tenant, accessPoint.provider);
+    if (!serviceInfo || !booking?.id) continue;
+    return {
+      providerId: accessPoint.provider,
+      serviceInfo,
+      processId: String(booking.id),
+      compartment: null,
+      accessPoint,
+    };
+  }
   return null;
+}
+
+/**
+ * Whether the booking holds a Fach the platform assigned at an Open Locker
+ * Schließfachanlage (`assignedCompartment` on an `accessInfo` entry not
+ * revoked) - the one case the emergency help needs the per-booking
+ * projection for.
+ *
+ * @param {Object|undefined} booking A booking as `/api/bookings/assigned`
+ *   sends it
+ * @returns {boolean}
+ */
+export function holdsAssignedCompartment(booking) {
+  return (booking?.accessInfo ?? []).some(
+    (entry) =>
+      entry.accessPointType === "locker" &&
+      entry.assignedCompartment &&
+      !entry.revokedAt,
+  );
 }
 
 /**
