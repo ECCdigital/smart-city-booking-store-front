@@ -9,6 +9,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Changed
 
+- The cancellation dialog names the refund tier „bis x vor Beginn“, as the detail page does ([ECCdigital/tickets#808](https://github.com/ECCdigital/tickets/issues/808)): „Es gilt die Erstattungsstufe „bis 2 Tage vor Beginn““ instead of „„2 Tage““, „bis zum Beginn“ at 0 hours; English alike
 - Refund tiers in hours ([ECCdigital/tickets#637](https://github.com/ECCdigital/tickets/issues/637)): the cancellation conditions of an offer read the tiers' `hoursBeforeStart` and name a deadline that divides by 24 in days („Bis 2 Tage vor Beginn“), any other in hours („Bis 12 Stunden vor Beginn“), the lowest at 0 „Bis zum Beginn“. The cancellation dialog names the tier that applies („Es gilt die Erstattungsstufe „36 Stunden““) instead of the time before the start, which in whole days did not match a tier in hours. Needs backend 4.4
 - Notice after the registration ([ECCdigital/tickets#600](https://github.com/ECCdigital/tickets/issues/600)): „Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.“, the same for every address. The signup sends the backend `forgotPasswordUrl`, the storefront's page „Passwort vergessen“ (`/password/forgot` under `NUXT_USER_BASE_URL`); an address with a verified account gets a mail with a button to it from the backend with ECCdigital/tickets#600
 
