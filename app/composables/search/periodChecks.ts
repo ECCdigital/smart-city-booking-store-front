@@ -176,6 +176,23 @@ export function periodResultOf(answer: PeriodOccupancy | undefined): {
 }
 
 /**
+ * Which search run may still write its results. `start` hands a run its
+ * token; a later `start` or an `invalidate` (a reset, a rebuild of the list)
+ * outdates it, so a run still waiting for the backend cannot bring back a
+ * period that is no longer chosen.
+ */
+export function createRunGuard() {
+  let latest = 0;
+  return {
+    start: () => ++latest,
+    invalidate: () => {
+      latest++;
+    },
+    isCurrent: (run: number) => run === latest,
+  };
+}
+
+/**
  * Remembers one answer per key for the lifetime of a search component, so a
  * re-run with the same period or a widened filter asks only for what is new.
  * A failed request is forgotten and asked again next time.

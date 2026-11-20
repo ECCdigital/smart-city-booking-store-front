@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { MatchStatus } from "~/composables/search/catalogFilters";
 import {
   createRequestCache,
+  createRunGuard,
   idsToCheck,
   isMissingPeriodRoute,
   mapWithConcurrency,
@@ -206,6 +207,35 @@ describe("periodResultOf", () => {
       isAvailable: false,
       price: null,
     });
+  });
+});
+
+describe("createRunGuard", () => {
+  it("lets only the latest run write", () => {
+    const runs = createRunGuard();
+    const first = runs.start();
+    const second = runs.start();
+
+    expect(runs.isCurrent(first)).toBe(false);
+    expect(runs.isCurrent(second)).toBe(true);
+  });
+
+  it("outdates a running search on a reset, so it cannot bring its period back", () => {
+    const runs = createRunGuard();
+    const run = runs.start();
+
+    runs.invalidate();
+
+    expect(runs.isCurrent(run)).toBe(false);
+  });
+
+  it("lets a run started after a reset write", () => {
+    const runs = createRunGuard();
+    runs.start();
+    runs.invalidate();
+    const run = runs.start();
+
+    expect(runs.isCurrent(run)).toBe(true);
   });
 });
 

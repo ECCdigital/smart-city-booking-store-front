@@ -23,6 +23,7 @@ import {
 } from "~/composables/search/catalogFilters";
 import {
   createRequestCache,
+  createRunGuard,
   idsToCheck,
   isMissingPeriodRoute,
   mapWithConcurrency,
@@ -158,8 +159,8 @@ export function useBookableSearch<TItem extends SearchableItem>(
   // asks the backend only for what it has not answered yet.
   const cached = createRequestCache();
   // Only the latest run may write its results; an older one still waiting
-  // for the backend is dropped.
-  let latestRun = 0;
+  // for the backend is dropped, and so is one a reset outdated.
+  const runs = createRunGuard();
   // Set once the backend answers that it has no batch route: from then on
   // the single requests, as before the batch existed.
   let periodBatchMissing = false;
@@ -354,6 +355,8 @@ export function useBookableSearch<TItem extends SearchableItem>(
   }
 
   function initializeResults() {
+    // A run still waiting for the backend must not overwrite this list.
+    runs.invalidate();
     updatedItems.value = toValue(sourceItems).map((item) => ({
       item,
       isBookable: isBookableOffer(item),
@@ -413,7 +416,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
     timeStart: number | null;
     timeEnd: number | null;
   }) {
-    const run = ++latestRun;
+    const run = runs.start();
     setSearchQueryParams(criteria);
 
     // The URL carries the place as text; the search wants coordinates.
@@ -471,7 +474,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
       checkIds,
     );
 
-    if (run !== latestRun) return;
+    if (!runs.isCurrent(run)) return;
 
     updatedItems.value = updateDistanceToLocation(items, location);
 
@@ -937,6 +940,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
     () => toValue(sourceItems),
     async (val, oldVal) => {
       if (!val || val.length === 0) {
+        runs.invalidate();
         updatedItems.value = [];
         return;
       }
