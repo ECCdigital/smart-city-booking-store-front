@@ -23,15 +23,18 @@
   </UCard>
 
   <!-- no bookings available -->
-  <UCard v-else-if="bookings.length === 0">
-    <div class="flex flex-col items-center justify-center py-10">
-      <UIcon
-        name="i-lucide-calendar-off"
-        class="w-12 h-12 text-neutral-400 mb-3"
-      />
-      <p class="text-sm text-neutral-500">{{ $t("mobileKey.noKeysFound") }}</p>
-    </div>
-  </UCard>
+  <ListEmptyState
+    v-else-if="bookings.length === 0"
+    icon="i-lucide-key-round"
+    :title="$t('mobileKey.emptyTitle')"
+    :description="$t('mobileKey.emptyDescription')"
+  >
+    <UButton
+      :label="$t('common.browseOffers')"
+      icon="i-lucide-search"
+      :to="tenantTo('/search')"
+    />
+  </ListEmptyState>
 
   <!-- else: the cards come, go and move with the shared list transition -->
   <TransitionGroup v-else name="card-list" tag="div" class="space-y-3">
@@ -135,12 +138,14 @@
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { useAccessNow } from "~/composables/useAccessClock.js";
 import AccessPointListRow from "~/components/mobileKey/AccessPointListRow.vue";
+import ListEmptyState from "~/components/user/ListEmptyState.vue";
 import {
   ACCESS_WINDOW_STATES,
   bookingWindowState,
 } from "~/utils/accessWindow.js";
 
 const { t } = useI18n();
+const { tenantTo } = useTenantRoute();
 
 
 defineProps({

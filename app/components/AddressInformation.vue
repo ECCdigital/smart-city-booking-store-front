@@ -18,9 +18,12 @@
         v-if="location.length && enableCopyButton"
         class="grid place-content-center shrink-0"
       >
-        <UIcon
-          name="i-lucide-copy"
-          class="size-5 cursor-pointer"
+        <UButton
+          icon="i-lucide-copy"
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          :aria-label="$t('bookableDetail.copyAddress')"
           @click="copyAddressToClipboard"
         />
       </div>

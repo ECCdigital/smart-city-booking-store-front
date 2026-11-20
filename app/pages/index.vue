@@ -16,10 +16,20 @@
         </div>
       </div>
 
-      <!-- Main Categories -->
+      <!-- Signed-in person's next booking, key and favorites -->
       <div class="pt-20 sm:pt-25 md:pt-10">
-        <MainCategoryArea />
+        <ClientOnly>
+          <HomeGreetingArea />
+        </ClientOnly>
       </div>
+
+      <!-- Main Categories -->
+      <MainCategoryArea />
+
+      <TenantOffersArea
+        v-if="!error && !isTenantContext"
+        :tenants="tenantStore.getTenants"
+      />
 
       <!-- A failed load is not an empty catalog -->
       <UAlert
@@ -31,12 +41,12 @@
         :title="$t('errors.loadFailed.title')"
         :description="$t('errors.loadFailed.message')"
       />
-      <LatestEventsArea v-else-if="allEvents.length > 0" :items="allEvents" />
+      <template v-else>
+        <LatestEventsArea v-if="allEvents.length > 0" :items="allEvents" />
 
-      <TenantOffersArea
-        v-if="!error && !isTenantContext"
-        :tenants="tenantStore.getTenants"
-      />
+        <!-- Loads its bookables on the client, when it comes into view. -->
+        <NearbyMapArea :events="allEvents" />
+      </template>
 
       <HowBookingWorksArea />
 
@@ -53,6 +63,8 @@ import LatestEventsArea from "~/components/LatestEventsArea.vue";
 import HowBookingWorksArea from "~/components/home/HowBookingWorksArea.vue";
 import MobileKeyArea from "~/components/home/MobileKeyArea.vue";
 import TenantOffersArea from "~/components/home/TenantOffersArea.vue";
+import HomeGreetingArea from "~/components/home/HomeGreetingArea.vue";
+import NearbyMapArea from "~/components/home/NearbyMapArea.vue";
 import { useTenantStore } from "~~/stores/tenant.js";
 import { useInstanceStore } from "~~/stores/instance.js";
 import { useCatalogQueryState } from "~/composables/search/useCatalogQueryState.js";
