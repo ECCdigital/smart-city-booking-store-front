@@ -28,6 +28,24 @@ export function useBookables() {
 
     return data;
   };
+  /**
+   * Occupancy and price of many bookables of one tenant in one period: one
+   * entry per bookable found, with `price` where it is available.
+   */
+  const getPeriodOccupancies = async (tenantID, bookableIds, start, end) => {
+    const api = useApiClient();
+
+    const { data, error } = await api.post(
+      `/api/bookables/${tenantID}/period-occupancy`,
+      { bookableIds, start, end },
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  };
   const getBookableAvailability = async ({
     tenantID,
     bookableId,
@@ -104,6 +122,7 @@ export function useBookables() {
   return {
     fetchBookables,
     getBookableOccupancy,
+    getPeriodOccupancies,
     getBookableAvailability,
     getBookablePrice,
     getBlockPeriods,

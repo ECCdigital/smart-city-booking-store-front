@@ -153,11 +153,21 @@ export function useBookableDetailContent(itemSource, isEvent) {
 
   const { requiresTimeSelection } = useBookableBookingMode(() => item.value);
 
+  // A match whose period could not be checked is not offered for booking:
+  // nothing is known about the period.
   const isBookableAndMatch = computed(() => {
     const entry = items.value[0];
     if (!entry) return false;
-    return entry.matchStatus === "match" && entry.isBookable !== false;
+    return (
+      entry.matchStatus === "match" &&
+      entry.isBookable !== false &&
+      !entry.availabilityUnchecked
+    );
   });
+
+  const isAvailabilityUnchecked = computed(
+    () => items.value[0]?.availabilityUnchecked === true,
+  );
 
   const hasValidTimePeriod = computed(() => {
     const start = timePeriod.value?.start;
@@ -253,6 +263,7 @@ export function useBookableDetailContent(itemSource, isEvent) {
     timePeriod,
     timePeriodDuration,
     isBookableAndMatch,
+    isAvailabilityUnchecked,
     showAvailabilityResult,
     setSearchTimePeriod,
     removeSearchTimePeriod,

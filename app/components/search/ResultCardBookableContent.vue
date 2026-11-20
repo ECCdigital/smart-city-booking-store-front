@@ -46,6 +46,12 @@
     </div>
 
     <!-- Preis -->
+    <p
+      v-if="availabilityUnchecked && !isNotSuitable"
+      class="w-full text-xs text-right text-gray-500 dark:text-gray-400"
+    >
+      {{ $t("filter.availabilityUnchecked") }}
+    </p>
     <div
       v-if="!isNotSuitable"
       class="w-full flex justify-end text-md font-bold"
@@ -81,6 +87,11 @@ const props = defineProps({
     default: false,
   },
   isNotBookable: {
+    type: Boolean,
+    default: false,
+  },
+  /** The period could not be checked: list price and a hint instead. */
+  availabilityUnchecked: {
     type: Boolean,
     default: false,
   },

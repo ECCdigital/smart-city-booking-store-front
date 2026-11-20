@@ -21,6 +21,22 @@ import {
   MatchStatus,
   type CustomFieldDefinition,
 } from "~/composables/search/catalogFilters";
+import {
+  createRequestCache,
+  availabilityOf,
+  createRunGuard,
+  PERIOD_CACHE_TTL_MS,
+  idsToCheck,
+  isMissingPeriodRoute,
+  locationForRerun,
+  mapWithConcurrency,
+  narrowingKey,
+  periodBatches,
+  periodResultOf,
+  PERIOD_CHECK_CONCURRENCY,
+  type PeriodOccupancy,
+  type NarrowingCriteria,
+} from "~/composables/search/periodChecks";
 
 /** A place the search can measure a distance from or to. */
 interface SearchLocation {
@@ -39,6 +55,12 @@ export interface SearchResultItem {
   isBookable: boolean;
   matchStatus: string;
   calculatedPrice?: { userGrossPriceEur: number } | null;
+  /**
+   * A match whose availability in the searched period is unknown: its check
+   * failed or could not run. Listed, but not counted as a fitting result,
+   * shown without the period's price and not offered for booking.
+   */
+  availabilityUnchecked?: boolean;
 }
 
 interface UseBookableSearchOptions<TItem> {
@@ -53,6 +75,14 @@ interface UseBookableSearchOptions<TItem> {
     start: number,
     end: number,
   ) => Promise<{ userGrossPriceEur: number } | null>;
+  /**
+   * Ask the backend only about the Offers the catalog filters of the query
+   * keep. For a list the filters narrow, the Result Page: the others are
+   * hidden there anyway. Off by default, so a view that shows the Offers
+   * whatever the filters say, such as a detail page whose URL still carries
+   * the Result Page's filters, checks every one of them.
+   */
+  narrowByFilters?: boolean;
 }
 
 /**
@@ -104,6 +134,20 @@ export async function searchAddress(address: string) {
 const DEFAULT_DISTANCE_KM = 20;
 
 /**
+ * The answers about availability, price and tickets, shared by every search
+ * on the client: the detail page runs one search per component that shows
+ * the Offer, and they ask once between them. Kept for a minute.
+ */
+let sharedPeriodCache: ReturnType<typeof createRequestCache> | null = null;
+function periodCacheFor(ownFetchers: boolean) {
+  // Own fetchers answer in their own way, and on the server nothing is
+  // shared between the requests of different visitors.
+  if (ownFetchers || import.meta.server) return createRequestCache();
+  sharedPeriodCache ??= createRequestCache({ ttlMs: PERIOD_CACHE_TTL_MS });
+  return sharedPeriodCache;
+}
+
+/**
  * A location that arrives as text, as it does from the URL, becomes a place
  * with coordinates when the geocoder knows it; the search then measures
  * distances exactly as for a place picked in the search bar. Text the
@@ -141,6 +185,21 @@ export function useBookableSearch<TItem extends SearchableItem>(
   const updatedItems = ref<SearchResultItem[]>([]);
 
   const isMounted = ref(false);
+
+  // Availability, price and ticket answers per Offer and period, so a re-run
+  // or another search on the page asks only for what is not answered yet.
+  const cached = periodCacheFor(
+    !!(options.getAvailability || options.getPriceForPeriod),
+  );
+  // Only the latest run may write its results; an older one still waiting
+  // for the backend is dropped, and so is one a reset outdated.
+  const runs = createRunGuard();
+  // Set once the backend answers that it has no batch route: from then on
+  // the single requests, as before the batch existed.
+  let periodBatchMissing = false;
+  // The place the last run searched around, with its coordinates; a re-run
+  // reuses it instead of geocoding its display text again.
+  let lastLocation: string | SearchLocation | null = null;
 
   const bookableSearchTermOptions = {
     keys: ["item.title", "item.description", "item.flags", "item.tags"],
@@ -261,13 +320,36 @@ export function useBookableSearch<TItem extends SearchableItem>(
     return price === 0 ? -1 : price;
   }
 
+  // A match whose period could not be checked is listed, but not counted
+  // as fitting: nothing is known about the period.
   const suitableCount = computed(
     () =>
-      sortedItems.value.filter((l) => l.matchStatus === MatchStatus.MATCH)
-        .length,
+      sortedItems.value.filter(
+        (l) => l.matchStatus === MatchStatus.MATCH && !l.availabilityUnchecked,
+      ).length,
+  );
+  const uncheckedCount = computed(
+    () =>
+      sortedItems.value.filter(
+        (l) => l.matchStatus === MatchStatus.MATCH && l.availabilityUnchecked,
+      ).length,
   );
 
+  function narrowingCriteria(): NarrowingCriteria {
+    return {
+      pubEv: query.pubEv,
+      regEv: query.regEv,
+      cat: query.cat,
+      cities: query.cities,
+      tenants: query.tenants,
+      customFields: query.customFields,
+      distance: query.distance,
+    };
+  }
+
   function setFilterQueryParams(criteria: Partial<CatalogQueryState>) {
+    const keyBefore = narrowingKey(narrowingCriteria());
+
     query.inclNoSuitable =
       typeof criteria.inclNoSuitable === "boolean"
         ? criteria.inclNoSuitable
@@ -285,6 +367,33 @@ export function useBookableSearch<TItem extends SearchableItem>(
     query.end = criteria.end ?? query.end;
 
     query.customFields = criteria.customFields ?? query.customFields;
+
+    // The search only asked about the Offers the old filters and radius kept.
+    // Widened or moved, the newly shown ones need their check; cached answers
+    // are reused. Without the re-run a wider radius would lift an Offer the
+    // location search set aside (`too-far`) to a match, unchecked.
+    if (
+      options.narrowByFilters &&
+      searchIsInitialized.value &&
+      needsTicketPricing({ timeStart: query.start, timeEnd: query.end }) &&
+      narrowingKey(narrowingCriteria()) !== keyBefore
+    ) {
+      void runSearch(currentQueryCriteria());
+    }
+  }
+
+  /**
+   * The query as a search runs it: the URL's on the first run, and a re-run
+   * around the place the last run used.
+   */
+  function currentQueryCriteria() {
+    return {
+      term: query.term,
+      location: locationForRerun(lastLocation, query.location),
+      distance: query.distance,
+      timeStart: query.start,
+      timeEnd: query.end,
+    };
   }
 
   function setSortedQueryParams(sortMode: SortMode) {
@@ -296,6 +405,8 @@ export function useBookableSearch<TItem extends SearchableItem>(
   }
 
   function initializeResults() {
+    // A run still waiting for the backend must not overwrite this list.
+    runs.invalidate();
     updatedItems.value = toValue(sourceItems).map((item) => ({
       item,
       isBookable: isBookableOffer(item),
@@ -355,10 +466,12 @@ export function useBookableSearch<TItem extends SearchableItem>(
     timeStart: number | null;
     timeEnd: number | null;
   }) {
+    const run = runs.start();
     setSearchQueryParams(criteria);
 
     // The URL carries the place as text; the search wants coordinates.
     const location = await resolveLocation(criteria.location);
+    if (runs.isCurrent(run)) lastLocation = location;
     const distance =
       typeof location === "object" && location.coordinates
         ? (criteria.distance ?? DEFAULT_DISTANCE_KM)
@@ -369,32 +482,66 @@ export function useBookableSearch<TItem extends SearchableItem>(
       toValue(sourceItems),
     );
 
-    if (needsTicketPricing(criteria)) {
-      enrichedItems = await checkTickets(enrichedItems);
-    }
-
-    let bookableItems: SearchResultItem[] = enrichedItems;
-
-    bookableItems = searchForSearchTerm(criteria.term, bookableItems);
-
-    bookableItems = await searchForTimePeriod(
-      { start: criteria.timeStart, end: criteria.timeEnd },
-      bookableItems,
+    // The cheap steps first: term and place narrow the list without a request.
+    let bookableItems: SearchResultItem[] = searchForSearchTerm(
+      criteria.term,
+      enrichedItems,
     );
-
     bookableItems = await searchForLocation(location, bookableItems, distance);
 
-    updatedItems.value = await updateItemStatus(enrichedItems, bookableItems, {
-      start: criteria.timeStart,
-      end: criteria.timeEnd,
-    });
+    // On the Result Page only the Offers the active filters keep cost
+    // requests; the others are hidden there and are checked once a filter
+    // shows them. Elsewhere every Offer found is checked.
+    const checkIds = options.narrowByFilters
+      ? idsToCheck(bookableItems, narrowingCriteria())
+      : new Set(bookableItems.map((i) => i.item.id));
 
-    updatedItems.value = updateDistanceToLocation(updatedItems.value, location);
+    if (needsTicketPricing(criteria)) {
+      const withTickets = new Map(
+        (
+          await checkTickets(
+            bookableItems.filter((i) => checkIds.has(i.item.id)),
+          )
+        ).map((i) => [i.item.id, i]),
+      );
+      const replace = (i: SearchResultItem) => withTickets.get(i.item.id) ?? i;
+      enrichedItems = enrichedItems.map(replace);
+      bookableItems = bookableItems.map(replace);
+    }
+
+    const period = { start: criteria.timeStart, end: criteria.timeEnd };
+    // One request per tenant first. Offers whose batch failed are not asked
+    // about one by one; they stay unchecked in this run.
+    const batchFailed = await prefetchPeriod(
+      bookableItems.filter((i) => checkIds.has(i.item.id)),
+      period,
+    );
+
+    const { available, unchecked } = await searchForTimePeriod(
+      period,
+      bookableItems,
+      checkIds,
+      batchFailed,
+    );
+    bookableItems = available;
+
+    const items = await updateItemStatus(
+      enrichedItems,
+      bookableItems,
+      period,
+      checkIds,
+      unchecked,
+    );
+
+    if (!runs.isCurrent(run)) return;
+
+    updatedItems.value = updateDistanceToLocation(items, location);
 
     searchIsInitialized.value = true;
   }
 
   function resetResults() {
+    lastLocation = null;
     setSearchQueryParams();
     initializeResults();
     searchIsInitialized.value = false;
@@ -550,105 +697,237 @@ export function useBookableSearch<TItem extends SearchableItem>(
     );
   }
 
+  function periodKey(
+    kind: string,
+    item: { id: string; tenantId?: string },
+    start: number,
+    end: number,
+  ) {
+    return `${kind}|${item.tenantId}|${item.id}|${start}|${end}`;
+  }
+
+  /**
+   * Asks the backend for occupancy and price of the bookables to check, one
+   * request per tenant, and keeps the answers for the single checks that
+   * follow. A bookable the backend leaves out is out of reach and not
+   * available.
+   *
+   * A backend without the route leaves the bookables to the single
+   * requests, from then on without trying the batch again. Any other failed
+   * request, a `429` above all, must not fan out into two requests per
+   * Offer: its bookables are returned and stay unchecked in this run, shown
+   * with their list price; the next run asks the batch again.
+   *
+   * @returns The ids of the bookables left unchecked.
+   */
+  async function prefetchPeriod(
+    items: SearchResultItem[],
+    timePeriod: TimePeriod,
+  ): Promise<Set<string>> {
+    const unchecked = new Set<string>();
+    const { start, end } = timePeriod;
+    if (
+      start === null ||
+      end === null ||
+      options.getAvailability ||
+      options.getPriceForPeriod ||
+      periodBatchMissing
+    ) {
+      return unchecked;
+    }
+
+    const toAsk = items
+      .filter((i) => i.isBookable && !isEventItem(i.item))
+      .map((i) => ({ id: i.item.id, tenantId: i.item.tenantId as string }))
+      .filter((item) => !cached.has(periodKey("occupancy", item, start, end)));
+
+    await mapWithConcurrency(
+      periodBatches(toAsk),
+      PERIOD_CHECK_CONCURRENCY,
+      async ({ tenantId, ids }) => {
+        const batch = useBookables()
+          .getPeriodOccupancies(tenantId, ids, start, end)
+          .then(
+            (answers: PeriodOccupancy[]) =>
+              new Map(
+                ids.map((id) => [
+                  id,
+                  periodResultOf(answers.find((a) => a.bookableId === id)),
+                ]),
+              ),
+          );
+
+        // Each answer is kept before the request goes out, so a search that
+        // starts meanwhile (a re-run, another component of the page) waits
+        // for this batch instead of sending it again. A failed batch is
+        // forgotten with its entries.
+        for (const id of ids) {
+          const item = { id, tenantId };
+          cached(periodKey("occupancy", item, start, end), async () => ({
+            isAvailable: (await batch).get(id)!.isAvailable,
+          })).catch(() => {});
+          cached(
+            periodKey("price", item, start, end),
+            async () => (await batch).get(id)!.price,
+          ).catch(() => {});
+        }
+
+        try {
+          await batch;
+        } catch (error) {
+          if (isMissingPeriodRoute(error)) {
+            periodBatchMissing = true;
+          } else {
+            ids.forEach((id) => unchecked.add(id));
+          }
+        }
+      },
+    );
+    return unchecked;
+  }
+
+  function fetchAvailability(item: SearchableItem, start: number, end: number) {
+    return cached(periodKey("occupancy", item, start, end), () =>
+      options.getAvailability
+        ? options.getAvailability(item as TItem, start, end)
+        : useBookables().getBookableOccupancy(
+            item.tenantId,
+            item.id,
+            start,
+            end,
+          ),
+    );
+  }
+
+  function fetchPrice(item: SearchableItem, start: number, end: number) {
+    return cached(periodKey("price", item, start, end), async () => {
+      const price = options.getPriceForPeriod
+        ? await options.getPriceForPeriod(item as TItem, start, end)
+        : await useBookables().getBookablePrice(
+            item.tenantId,
+            item.id,
+            start,
+            end,
+          );
+      // No price is how a failed request answers; it must not be cached.
+      if (!price) throw new Error("No price for period");
+      return price;
+    });
+  }
+
+  /**
+   * Keeps the Offers that can be had in the period. Only the ones in
+   * `checkIds` are asked about. The rest, hidden by the filters for now,
+   * pass as unchecked unless an earlier run answered for them: a widened
+   * filter shows them as unchecked until its re-run has asked, never as
+   * available. An Offer whose check fails, or whose batch failed
+   * (`batchFailed`), stays in the list as unchecked too: one refused
+   * request must not empty a search, nor show a booked period as free.
+   * Events and Offers that cannot be booked need no request and are always
+   * decided.
+   *
+   * @returns The Offers kept, and the ids of those among them unchecked.
+   */
   async function searchForTimePeriod(
     timePeriod: TimePeriod | null,
     items: SearchResultItem[],
-  ) {
-    if (!timePeriod || timePeriod.start === null) {
-      return items;
+    checkIds: Set<string>,
+    batchFailed: Set<string>,
+  ): Promise<{ available: SearchResultItem[]; unchecked: Set<string> }> {
+    const unchecked = new Set<string>();
+    if (!timePeriod || timePeriod.start === null || timePeriod.end === null) {
+      return { available: items, unchecked };
     }
+    const start = timePeriod.start;
+    const end = timePeriod.end;
 
-    const checkAvailability = async (item: SearchResultItem) => {
-      if (isEventItem(item.item)) {
-        // An event is on during the period when it overlaps it; it does not
-        // have to fit inside a two-hour room search.
-        return {
-          item,
-          isAvailable: eventOverlapsPeriod(item.item, timePeriod),
-        };
-      } else {
-        const availability = options.getAvailability
-          ? await options.getAvailability(
-              item.item as TItem,
-              timePeriod.start!,
-              timePeriod.end!,
-            )
-          : await useBookables().getBookableOccupancy(
-              item.item.tenantId,
-              item.item.id,
-              timePeriod.start!,
-              timePeriod.end!,
-            );
+    const availability = await mapWithConcurrency(
+      items,
+      PERIOD_CHECK_CONCURRENCY,
+      async (item) => {
+        if (isEventItem(item.item)) {
+          // An event is on during the period when it overlaps it; it does not
+          // have to fit inside a two-hour room search.
+          return eventOverlapsPeriod(item.item, timePeriod);
+        }
+        // An Offer that cannot be booked at all is not available in any
+        // period; the backend would say the same.
+        if (!item.isBookable) return false;
 
-        return {
-          item,
-          isAvailable: availability.isAvailable,
-        };
-      }
-    };
+        const answered = cached.has(
+          periodKey("occupancy", item.item, start, end),
+        );
+        if (!checkIds.has(item.item.id) && !answered) return null;
+        if (batchFailed.has(item.item.id)) return null;
 
-    const availabilityChecks = await Promise.all(items.map(checkAvailability));
-    return availabilityChecks
-      .filter((result) => result.isAvailable)
-      .map((result) => result.item);
+        return (await fetchAvailability(item.item, start, end)).isAvailable;
+      },
+    );
+
+    const available = items.filter((item, index) => {
+      const state = availabilityOf(availability[index]);
+      if (state === "unchecked") unchecked.add(item.item.id);
+      return state !== "unavailable";
+    });
+    return { available, unchecked };
   }
 
+  /**
+   * Sets each Offer's match status and, for a bookable that matched a period
+   * and was checked, the price of that period. Prices are fetched only for
+   * those, with the same limit on requests in flight.
+   */
   async function updateItemStatus(
     itemsWithStatus: SearchResultItem[],
     bookableItems: SearchResultItem[],
     timePeriod: TimePeriod | null,
+    checkIds: Set<string>,
+    unchecked: Set<string>,
   ) {
-    const temp = await Promise.all(
-      itemsWithStatus.map(async (item) => {
-        const isSuitable = bookableItems.some(
-          (b) => b.item.id === item.item.id,
-        );
+    const suitableIds = new Set(bookableItems.map((b) => b.item.id));
+    const start = timePeriod?.start ?? null;
+    const end = timePeriod?.end ?? null;
 
-        if (item.matchStatus === MatchStatus.TOO_FAR) {
-          return {
-            ...item,
-            isBookable: item.isBookable,
-            matchStatus: isSuitable ? MatchStatus.MATCH : MatchStatus.TOO_FAR,
-            calculatedPrice: null,
-          };
-        } else {
-          let price = null;
-          if (
-            item.isBookable &&
-            timePeriod &&
-            timePeriod.start !== null &&
-            timePeriod.end !== null &&
-            !isEventItem(item.item)
-          ) {
-            try {
-              price = options.getPriceForPeriod
-                ? await options.getPriceForPeriod(
-                    item.item as TItem,
-                    timePeriod.start,
-                    timePeriod.end,
-                  )
-                : await useBookables().getBookablePrice(
-                    item.item.tenantId,
-                    item.item.id,
-                    timePeriod.start,
-                    timePeriod.end,
-                  );
-            } catch {
-              price = null;
-            }
-          }
-
-          return {
-            ...item,
-            isBookable: item.isBookable,
-            matchStatus: isSuitable ? MatchStatus.MATCH : MatchStatus.NO_MATCH,
-            calculatedPrice: isSuitable ? price : null,
-          };
+    const prices = await mapWithConcurrency(
+      itemsWithStatus,
+      PERIOD_CHECK_CONCURRENCY,
+      async (item) => {
+        if (
+          start === null ||
+          end === null ||
+          item.matchStatus === MatchStatus.TOO_FAR ||
+          !item.isBookable ||
+          isEventItem(item.item) ||
+          !suitableIds.has(item.item.id) ||
+          unchecked.has(item.item.id) ||
+          // Outside the filters only an answer already kept, no request.
+          (!checkIds.has(item.item.id) &&
+            !cached.has(periodKey("price", item.item, start, end)))
+        ) {
+          return null;
         }
-      }),
+        return fetchPrice(item.item, start, end);
+      },
     );
 
-    return temp;
+    return itemsWithStatus.map((item, index) => {
+      const isSuitable = suitableIds.has(item.item.id);
+
+      if (item.matchStatus === MatchStatus.TOO_FAR) {
+        return {
+          ...item,
+          matchStatus: isSuitable ? MatchStatus.MATCH : MatchStatus.TOO_FAR,
+          calculatedPrice: null,
+        };
+      }
+
+      return {
+        ...item,
+        matchStatus: isSuitable ? MatchStatus.MATCH : MatchStatus.NO_MATCH,
+        calculatedPrice: isSuitable ? (prices[index] ?? null) : null,
+        availabilityUnchecked: isSuitable && unchecked.has(item.item.id),
+      };
+    });
   }
 
   function removeDistanceToLocation(items: SearchResultItem[]) {
@@ -687,47 +966,52 @@ export function useBookableSearch<TItem extends SearchableItem>(
     });
   }
 
+  /**
+   * Prices and checks every ticket of the given events, a few requests at a
+   * time. An event whose ticket requests fail keeps its tickets as they were.
+   */
   async function checkTickets(events: SearchResultItem[]) {
-    const result = await Promise.allSettled(
-      events.map(async (event) => {
-        if (
-          isEventItem(event.item) &&
-          event.item.tickets &&
-          event.item.tickets.length > 0
-        ) {
-          const updatedTickets = await Promise.all(
-            event.item.tickets.map(async (ticket) => {
-              const ticketPrice = await useBookables().getBookablePrice(
-                event.item.tenantId,
+    const withTickets = events.filter(
+      (event) =>
+        isEventItem(event.item) &&
+        event.item.tickets &&
+        event.item.tickets.length > 0,
+    );
+
+    const updated = await mapWithConcurrency(
+      withTickets,
+      PERIOD_CHECK_CONCURRENCY,
+      async (event) => {
+        const { tenantId } = event.item;
+        const tickets = [];
+        for (const ticket of event.item.tickets ?? []) {
+          const [calculatedPrice, availability] = await Promise.all([
+            cached(`ticket-price|${tenantId}|${ticket.id}`, async () => {
+              const price = await useBookables().getBookablePrice(
+                tenantId,
                 ticket.id,
               );
-              const ticketAvailability =
-                await useBookables().getBookableOccupancy(
-                  event.item.tenantId,
-                  ticket.id,
-                );
-              return {
-                ...ticket,
-                calculatedPrice: ticketPrice,
-                availability: ticketAvailability,
-              };
-            }),
-          );
-          return {
-            ...event,
-            item: {
-              ...event.item,
-              tickets: updatedTickets,
-            },
-          };
-        } else {
-          return event;
+              // No price is how a failed request answers; not cached.
+              if (!price) throw new Error("No ticket price");
+              return price;
+            }).catch(() => null),
+            cached(`ticket-occupancy|${tenantId}|${ticket.id}`, () =>
+              useBookables().getBookableOccupancy(tenantId, ticket.id),
+            ),
+          ]);
+          tickets.push({ ...ticket, calculatedPrice, availability });
         }
-      }),
+        return { ...event, item: { ...event.item, tickets } };
+      },
     );
-    return result.map((r, index) =>
-      r.status === "fulfilled" ? r.value : events[index],
+
+    const byId = new Map(
+      withTickets.map((event, index) => [
+        event.item.id,
+        updated[index] ?? event,
+      ]),
     );
+    return events.map((event) => byId.get(event.item.id) ?? event);
   }
 
   const hasUrlCriteria = computed(
@@ -747,6 +1031,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
     () => toValue(sourceItems),
     async (val, oldVal) => {
       if (!val || val.length === 0) {
+        runs.invalidate();
         updatedItems.value = [];
         return;
       }
@@ -758,13 +1043,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
       }
 
       if (searchIsInitialized.value && isMounted.value) {
-        await runSearch({
-          term: query.term,
-          location: query.location,
-          distance: query.distance,
-          timeStart: query.start,
-          timeEnd: query.end,
-        });
+        await runSearch(currentQueryCriteria());
         return;
       }
 
@@ -778,13 +1057,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
 
     if (hasUrlCriteria.value && toValue(sourceItems).length > 0) {
       searchIsInitialized.value = true;
-      await runSearch({
-        term: query.term,
-        location: query.location,
-        distance: query.distance,
-        timeStart: query.start,
-        timeEnd: query.end,
-      });
+      await runSearch(currentQueryCriteria());
     }
   });
 
@@ -796,6 +1069,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
     filteredItems,
     sortedItems,
     suitableCount,
+    uncheckedCount,
     setFilterQueryParams,
     setSortedQueryParams,
     setViewQueryParams,
