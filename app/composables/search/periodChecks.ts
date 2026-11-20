@@ -228,27 +228,50 @@ export function createRunGuard() {
 }
 
 /**
- * Remembers one answer per key for the lifetime of a search component, so a
- * re-run with the same period or a widened filter asks only for what is new.
- * A failed request is forgotten and asked again next time.
+ * Remembers one answer per key, so a re-run with the same period, a widened
+ * filter or a second search on the same page asks only for what is new. An
+ * answer is kept from the moment it is asked for, so a request on its way
+ * is shared too. A failed request is forgotten and asked again next time;
+ * with `ttlMs`, an answer is forgotten once it is that old, since bookings
+ * go on while the page stays open.
  */
-export function createRequestCache() {
-  const entries = new Map<string, Promise<unknown>>();
+export function createRequestCache({
+  ttlMs = Infinity,
+  now = () => Date.now(),
+}: { ttlMs?: number; now?: () => number } = {}) {
+  const entries = new Map<string, { promise: Promise<unknown>; at: number }>();
+
+  function fresh(key: string) {
+    const entry = entries.get(key);
+    if (!entry) return undefined;
+    if (now() - entry.at >= ttlMs) {
+      entries.delete(key);
+      return undefined;
+    }
+    return entry;
+  }
 
   function cached<R>(key: string, request: () => Promise<R>) {
-    const hit = entries.get(key) as Promise<R> | undefined;
-    if (hit) return hit;
+    const hit = fresh(key);
+    if (hit) return hit.promise as Promise<R>;
 
     const pending = request().catch((error) => {
-      entries.delete(key);
+      if (entries.get(key)?.promise === pending) entries.delete(key);
       throw error;
     });
-    entries.set(key, pending);
+    entries.set(key, { promise: pending, at: now() });
     return pending;
   }
 
   return Object.assign(cached, {
     /** Whether an answer for the key is kept or on its way. */
-    has: (key: string) => entries.has(key),
+    has: (key: string) => fresh(key) !== undefined,
   });
 }
+
+/**
+ * How long the search keeps an answer about availability and price: long
+ * enough to share it between the searches of one page and its re-runs,
+ * short enough that a booking made meanwhile shows on the next search.
+ */
+export const PERIOD_CACHE_TTL_MS = 60_000;

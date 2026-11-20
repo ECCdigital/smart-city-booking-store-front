@@ -25,6 +25,7 @@ import {
   createRequestCache,
   availabilityOf,
   createRunGuard,
+  PERIOD_CACHE_TTL_MS,
   idsToCheck,
   isMissingPeriodRoute,
   locationForRerun,
@@ -133,6 +134,20 @@ export async function searchAddress(address: string) {
 const DEFAULT_DISTANCE_KM = 20;
 
 /**
+ * The answers about availability, price and tickets, shared by every search
+ * on the client: the detail page runs one search per component that shows
+ * the Offer, and they ask once between them. Kept for a minute.
+ */
+let sharedPeriodCache: ReturnType<typeof createRequestCache> | null = null;
+function periodCacheFor(ownFetchers: boolean) {
+  // Own fetchers answer in their own way, and on the server nothing is
+  // shared between the requests of different visitors.
+  if (ownFetchers || import.meta.server) return createRequestCache();
+  sharedPeriodCache ??= createRequestCache({ ttlMs: PERIOD_CACHE_TTL_MS });
+  return sharedPeriodCache;
+}
+
+/**
  * A location that arrives as text, as it does from the URL, becomes a place
  * with coordinates when the geocoder knows it; the search then measures
  * distances exactly as for a place picked in the search bar. Text the
@@ -172,8 +187,10 @@ export function useBookableSearch<TItem extends SearchableItem>(
   const isMounted = ref(false);
 
   // Availability, price and ticket answers per Offer and period, so a re-run
-  // asks the backend only for what it has not answered yet.
-  const cached = createRequestCache();
+  // or another search on the page asks only for what is not answered yet.
+  const cached = periodCacheFor(
+    !!(options.getAvailability || options.getPriceForPeriod),
+  );
   // Only the latest run may write its results; an older one still waiting
   // for the backend is dropped, and so is one a reset outdated.
   const runs = createRunGuard();
@@ -725,32 +742,40 @@ export function useBookableSearch<TItem extends SearchableItem>(
       periodBatches(toAsk),
       PERIOD_CHECK_CONCURRENCY,
       async ({ tenantId, ids }) => {
-        let answers: PeriodOccupancy[];
-        try {
-          answers = await useBookables().getPeriodOccupancies(
-            tenantId,
-            ids,
-            start,
-            end,
+        const batch = useBookables()
+          .getPeriodOccupancies(tenantId, ids, start, end)
+          .then(
+            (answers: PeriodOccupancy[]) =>
+              new Map(
+                ids.map((id) => [
+                  id,
+                  periodResultOf(answers.find((a) => a.bookableId === id)),
+                ]),
+              ),
           );
+
+        // Each answer is kept before the request goes out, so a search that
+        // starts meanwhile (a re-run, another component of the page) waits
+        // for this batch instead of sending it again. A failed batch is
+        // forgotten with its entries.
+        for (const id of ids) {
+          const item = { id, tenantId };
+          cached(periodKey("occupancy", item, start, end), async () => ({
+            isAvailable: (await batch).get(id)!.isAvailable,
+          })).catch(() => {});
+          cached(
+            periodKey("price", item, start, end),
+            async () => (await batch).get(id)!.price,
+          ).catch(() => {});
+        }
+
+        try {
+          await batch;
         } catch (error) {
           if (isMissingPeriodRoute(error)) {
             periodBatchMissing = true;
           } else {
             ids.forEach((id) => unchecked.add(id));
-          }
-          return;
-        }
-        const byId = new Map(answers.map((a) => [a.bookableId, a]));
-
-        for (const id of ids) {
-          const item = { id, tenantId };
-          const { isAvailable, price } = periodResultOf(byId.get(id));
-          void cached(periodKey("occupancy", item, start, end), async () => ({
-            isAvailable,
-          }));
-          if (isAvailable === true) {
-            void cached(periodKey("price", item, start, end), async () => price);
           }
         }
       },

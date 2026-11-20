@@ -300,4 +300,57 @@ describe("createRequestCache", () => {
     ).rejects.toThrow("429");
     expect(await cached("k", async () => ++calls)).toBe(2);
   });
+
+  it("shares a request on its way: a second search waits instead of asking again", async () => {
+    const cached = createRequestCache();
+    let calls = 0;
+    let release!: (n: number) => void;
+    const request = () => {
+      calls++;
+      return new Promise<number>((resolve) => (release = resolve));
+    };
+
+    const first = cached("k", request);
+    expect(cached.has("k")).toBe(true);
+    const second = cached("k", request);
+    release(7);
+
+    expect(await first).toBe(7);
+    expect(await second).toBe(7);
+    expect(calls).toBe(1);
+  });
+
+  it("forgets an answer once it is older than the ttl", async () => {
+    let clock = 0;
+    const cached = createRequestCache({ ttlMs: 60_000, now: () => clock });
+    let calls = 0;
+    const request = async () => ++calls;
+
+    await cached("k", request);
+    clock = 59_999;
+    expect(cached.has("k")).toBe(true);
+    await cached("k", request);
+    clock = 60_000;
+    expect(cached.has("k")).toBe(false);
+    await cached("k", request);
+
+    expect(calls).toBe(2);
+  });
+
+  it("keeps a newer answer when an expired request fails late", async () => {
+    let clock = 0;
+    const cached = createRequestCache({ ttlMs: 10, now: () => clock });
+    let fail!: (e: Error) => void;
+    const old = cached(
+      "k",
+      () => new Promise<number>((_, reject) => (fail = reject)),
+    ).catch(() => "failed");
+
+    clock = 10;
+    expect(await cached("k", async () => 2)).toBe(2);
+    fail(new Error("late"));
+    expect(await old).toBe("failed");
+
+    expect(cached.has("k")).toBe(true);
+  });
 });
