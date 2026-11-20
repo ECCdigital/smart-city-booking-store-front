@@ -122,6 +122,30 @@ export function periodBatches(
   return batches;
 }
 
+/** One bookable as the backend's period request answers it. */
+export interface PeriodOccupancy {
+  bookableId: string;
+  isAvailable: boolean;
+  /** The check that refused, or `error` where the checks could not run. */
+  reason?: string;
+  price?: { userGrossPriceEur: number } | null;
+}
+
+/**
+ * What the search keeps of one bookable of a period request. Left out of
+ * the answer, it is out of reach and not available. `error` says nothing
+ * about the period: like a failed request it keeps the Offer in the list,
+ * with its list price. No price is asked again, the backend answered.
+ */
+export function periodResultOf(answer: PeriodOccupancy | undefined): {
+  isAvailable: boolean;
+  price: { userGrossPriceEur: number } | null;
+} {
+  if (!answer) return { isAvailable: false, price: null };
+  if (answer.reason === "error") return { isAvailable: true, price: null };
+  return { isAvailable: answer.isAvailable, price: answer.price ?? null };
+}
+
 /**
  * Remembers one answer per key for the lifetime of a search component, so a
  * re-run with the same period or a widened filter asks only for what is new.

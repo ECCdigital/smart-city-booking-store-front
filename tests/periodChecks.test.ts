@@ -7,6 +7,7 @@ import {
   mapWithConcurrency,
   narrowingKey,
   periodBatches,
+  periodResultOf,
   type NarrowingCriteria,
 } from "~/composables/search/periodChecks";
 
@@ -130,6 +131,45 @@ describe("periodBatches", () => {
         { id: "a", tenantId: "t" },
       ]),
     ).toEqual([{ tenantId: "t", ids: ["a"] }]);
+  });
+});
+
+describe("periodResultOf", () => {
+  const PRICE = { userGrossPriceEur: 23.8 };
+
+  it("keeps availability and price of an available bookable", () => {
+    expect(
+      periodResultOf({ bookableId: "a", isAvailable: true, price: PRICE }),
+    ).toEqual({ isAvailable: true, price: PRICE });
+  });
+
+  it("drops a refused bookable", () => {
+    expect(
+      periodResultOf({
+        bookableId: "a",
+        isAvailable: false,
+        reason: "opening-hours",
+        price: null,
+      }),
+    ).toEqual({ isAvailable: false, price: null });
+  });
+
+  it("keeps a bookable whose checks could not run, with its list price", () => {
+    expect(
+      periodResultOf({
+        bookableId: "a",
+        isAvailable: false,
+        reason: "error",
+        price: null,
+      }),
+    ).toEqual({ isAvailable: true, price: null });
+  });
+
+  it("drops a bookable the answer leaves out", () => {
+    expect(periodResultOf(undefined)).toEqual({
+      isAvailable: false,
+      price: null,
+    });
   });
 });
 

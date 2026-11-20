@@ -27,7 +27,9 @@ import {
   mapWithConcurrency,
   narrowingKey,
   periodBatches,
+  periodResultOf,
   PERIOD_CHECK_CONCURRENCY,
+  type PeriodOccupancy,
   type NarrowingCriteria,
 } from "~/composables/search/periodChecks";
 
@@ -648,24 +650,17 @@ export function useBookableSearch<TItem extends SearchableItem>(
       periodBatches(toAsk),
       PERIOD_CHECK_CONCURRENCY,
       async ({ tenantId, ids }) => {
-        const answers: {
-          bookableId: string;
-          isAvailable: boolean;
-          price?: { userGrossPriceEur: number } | null;
-        }[] = await useBookables().getPeriodOccupancies(
-          tenantId,
-          ids,
-          start,
-          end,
-        );
+        const answers: PeriodOccupancy[] =
+          await useBookables().getPeriodOccupancies(tenantId, ids, start, end);
         const byId = new Map(answers.map((a) => [a.bookableId, a]));
 
         for (const id of ids) {
           const item = { id, tenantId };
-          const answer = byId.get(id) ?? { isAvailable: false, price: null };
-          void cached(periodKey("occupancy", item, start, end), async () => answer);
-          if (answer.price) {
-            const price = answer.price;
+          const { isAvailable, price } = periodResultOf(byId.get(id));
+          void cached(periodKey("occupancy", item, start, end), async () => ({
+            isAvailable,
+          }));
+          if (isAvailable) {
             void cached(periodKey("price", item, start, end), async () => price);
           }
         }
