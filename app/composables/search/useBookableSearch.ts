@@ -293,6 +293,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
       cities: query.cities,
       tenants: query.tenants,
       customFields: query.customFields,
+      distance: query.distance,
     };
   }
 
@@ -317,8 +318,10 @@ export function useBookableSearch<TItem extends SearchableItem>(
 
     query.customFields = criteria.customFields ?? query.customFields;
 
-    // The search only asked about the Offers the old filters kept. Widened or
-    // moved, the newly shown ones need their check; cached answers are reused.
+    // The search only asked about the Offers the old filters and radius kept.
+    // Widened or moved, the newly shown ones need their check; cached answers
+    // are reused. Without the re-run a wider radius would lift an Offer the
+    // location search set aside (`too-far`) to a match, unchecked.
     if (
       searchIsInitialized.value &&
       needsTicketPricing({ timeStart: query.start, timeEnd: query.end }) &&

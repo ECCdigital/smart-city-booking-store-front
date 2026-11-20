@@ -47,14 +47,22 @@ export async function mapWithConcurrency<T, R>(
 /** The filters that narrow which Offers a search asks the backend about. */
 export type NarrowingCriteria = Pick<
   CatalogFilterCriteria,
-  "pubEv" | "regEv" | "cat" | "cities" | "tenants" | "customFields"
+  | "pubEv"
+  | "regEv"
+  | "cat"
+  | "cities"
+  | "tenants"
+  | "customFields"
+  | "distance"
 >;
 
 /**
  * The ids of the Offers the active filters keep. Only these are worth an
  * availability or price request: the rest are hidden by the filters anyway.
  * Price and distance are left out, the one needs the price this check
- * fetches, the other was settled by the location search.
+ * fetches, the other was settled by the location search: an Offer outside
+ * the radius is never asked about, so a wider radius needs a new search
+ * (`narrowingKey`).
  */
 export function idsToCheck<T extends FilterableItem>(
   items: T[],
@@ -92,6 +100,7 @@ export function narrowingKey(criteria: NarrowingCriteria): string {
     Object.entries(criteria.customFields ?? {}).sort(([a], [b]) =>
       a.localeCompare(b),
     ),
+    criteria.distance ?? null,
   ]);
 }
 

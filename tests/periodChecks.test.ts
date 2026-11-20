@@ -18,6 +18,7 @@ const NO_FILTERS: NarrowingCriteria = {
   cities: [],
   tenants: [],
   customFields: {},
+  distance: null,
 };
 
 function wrap(id: string, tenantId: string, type = "room") {
@@ -93,6 +94,15 @@ describe("narrowingKey", () => {
   it("changes with the tenants", () => {
     expect(narrowingKey({ ...NO_FILTERS, tenants: ["a"] })).not.toBe(
       narrowingKey({ ...NO_FILTERS, tenants: ["a", "b"] }),
+    );
+  });
+
+  it("changes with the radius, so a wider one checks the Offers it adds", () => {
+    expect(narrowingKey({ ...NO_FILTERS, distance: 20 })).not.toBe(
+      narrowingKey({ ...NO_FILTERS, distance: 30 }),
+    );
+    expect(narrowingKey({ ...NO_FILTERS, distance: null })).not.toBe(
+      narrowingKey({ ...NO_FILTERS, distance: 30 }),
     );
   });
 });
