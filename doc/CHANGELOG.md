@@ -7,6 +7,12 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ## [Unreleased]
 
+### Fixed
+
+- A search with a period no longer runs into the rate limit and shows the prices of that period ([ECCdigital/tickets#850](https://github.com/ECCdigital/tickets/issues/850)): it asks once per tenant, only about the Offers the filters show; needs the backend's `POST /api/:tenant/bookables/occupancy`. An Offer whose availability could not be checked is listed as „nicht geprüft“, not as available.
+
+## [1.3.0] — 2026-11-18
+
 ### Changed
 
 - Notice after the registration ([ECCdigital/tickets#600](https://github.com/ECCdigital/tickets/issues/600)): „Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.“, the same for every address. The signup sends the backend `forgotPasswordUrl`, the storefront's page „Passwort vergessen“ (`/password/forgot` under `NUXT_USER_BASE_URL`); an address with a verified account gets a mail with a button to it from the backend with ECCdigital/tickets#600
@@ -21,7 +27,6 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
-- A search with a period no longer runs into the rate limit and shows the prices of that period ([ECCdigital/tickets#850](https://github.com/ECCdigital/tickets/issues/850)): it asks once per tenant, only about the Offers the filters show; needs the backend's `POST /api/:tenant/bookables/occupancy`. An Offer whose availability could not be checked is listed as „nicht geprüft“, not as available.
 - „Passwort vergessen“ names a hit rate limit (ECCdigital/tickets#302): a `429` of `/api/auth/forgot-password` shows „Zu viele Anfragen“ (`errors.page.tooManyRequests`) instead of the general error; the form stays
 - The map on the detail page no longer shows a white square beside the pin (ECCdigital/tickets#644): it was Leaflet's default `leaflet-div-icon` box, and the `scoped` style meant to clear it never reached the icon Leaflet renders. The style is now global, as in `ResultsMapMarkerIcon`
 - The booking details show an attachment as accepted when the checkout required a tick for it (ECCdigital/tickets#641): the checkout does not finish without the tick at a shown, required attachment (`show` and `required` in the booking's `_bookableUsed`), but never sent it, so the backend stored no `accepted` and every attachment showed as not accepted. „Akzeptiert“ shows only at such attachments now, always ticked, and no longer at those that never asked for a tick; the stored `accepted` is not read. Rule in `app/utils/bookingAttachmentAccepted.js`
