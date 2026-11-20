@@ -18,7 +18,7 @@
           icon="i-lucide-list"
           :variant="viewMode === 'list' ? 'subtle' : 'ghost'"
           :label="$t('mobileKey.viewList')"
-          class="px-3"
+          class="px-3 hidden sm:inline-flex"
           @click="() => (viewMode = 'list')"
         />
         <!--

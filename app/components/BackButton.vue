@@ -6,7 +6,7 @@
       icon="i-lucide-arrow-left"
       color="primary"
       variant="outline"
-      class="justify-center px-5"
+      class="justify-center px-2 sm:px-5"
       @click="$router.back()"
     />
   </div>

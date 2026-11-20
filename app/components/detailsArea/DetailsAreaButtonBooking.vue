@@ -3,7 +3,7 @@
     v-if="item.isBookable && !isEvent"
     :label="$t('bookableDetail.bookNow')"
     icon="i-lucide-shopping-cart"
-    class="justify-center px-5"
+    class="justify-center px-2 sm:px-5"
     style="color: var(--ui-primary-contrast); cursor: pointer"
     @click="goToCheckout()"
   />

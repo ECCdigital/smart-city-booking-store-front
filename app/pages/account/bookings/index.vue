@@ -28,13 +28,14 @@
       />
     </div>
 
-    <div class="md:flex justify-between items-center w-full mb-4">
+    <div class="md:flex justify-between items-center w-full mb-3 md:mb-4">
       <h2 class="mt-5 text-xl font-bold">
         {{ $t("meta.pages.accountBookings") }}
       </h2>
       <!-- Search and filter only once there is something to narrow. -->
       <BookingSearchFilterArea
         v-if="bookings.length"
+        class="mt-3 md:mt-0"
         :bookings="bookings"
         @update:bookings="setFilteredBookings"
       />

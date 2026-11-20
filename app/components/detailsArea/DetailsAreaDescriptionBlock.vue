@@ -8,7 +8,7 @@
         {{ item.eventOrganizer.name }}
       </p>
     </div>
-    <div class="flex justify-end md:hidden">
+    <div v-if="hasDescription" class="flex justify-end md:hidden">
       <UButton
         :label="$t('bookableDetail.viewAll')"
         variant="ghost"
@@ -52,6 +52,16 @@ const props = defineProps({
 const { htmlDescription } = useBookableDetailContent(
   () => props.item,
   props.isEvent,
+);
+
+// An editor leaves markup such as `<p></p>` behind for an empty description,
+// so the text without tags decides, not the HTML string.
+const hasDescription = computed(
+  () =>
+    !!htmlDescription.value
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim(),
 );
 
 const showFullDescription = ref(false);

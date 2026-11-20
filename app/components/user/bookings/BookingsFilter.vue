@@ -22,14 +22,14 @@
       content: 'w-56',
     }"
   >
-    <UChip :show="hasFiltersApplied" inset class="mt-2 md:mt-0">
+    <UChip :show="hasFiltersApplied" inset>
       <UButton
         icon="i-lucide-list-filter"
         :aria-label="$t('booking.filter.filterButton')"
         size="md"
         variant="outline"
         color="neutral"
-        class="md:mt-0 ml-1 h-full"
+        class="ml-1 h-full"
       />
     </UChip>
   </UDropdownMenu>
@@ -49,7 +49,7 @@
       size="md"
       variant="outline"
       color="neutral"
-      class="mt-2 md:mt-0 ml-1"
+      class="ml-1"
     />
   </UDropdownMenu>
 </template>

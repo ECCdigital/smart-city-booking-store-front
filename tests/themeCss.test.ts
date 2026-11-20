@@ -174,11 +174,30 @@ describe("renderThemeCss: contrast colours", () => {
     expect(declarations(css, "--ui-secondary-contrast")).toEqual(["#ffffff", "#ffffff"]);
   });
 
-  it("gives white for colour names, rgb() and other hex lengths", () => {
+  it("reads #rrggbbaa and #rgba as the colour without its alpha", () => {
+    // The Admin UI's colour picker stores #FDD835FF: a light yellow.
+    const css = renderThemeCss({
+      etag: "contrast-alpha",
+      colors: { primary: "#112233FF", secondary: "#FDD835FF" },
+      defaults: DEFAULTS,
+    });
+    const short = renderThemeCss({
+      etag: "contrast-alpha-short",
+      colors: { primary: "#fe60", secondary: "#123f" },
+      defaults: DEFAULTS,
+    });
+
+    expect(declarations(css, "--ui-primary-contrast")).toEqual(["#ffffff", "#ffffff"]);
+    expect(declarations(css, "--ui-secondary-contrast")).toEqual(["#000000", "#000000"]);
+    expect(declarations(short, "--ui-primary-contrast")).toEqual(["#000000", "#000000"]);
+    expect(declarations(short, "--ui-secondary-contrast")).toEqual(["#ffffff", "#ffffff"]);
+  });
+
+  it("gives white for colour names, rgb() and hex of 5 or 7 digits", () => {
     for (const [index, pair] of [
       { primary: "white", secondary: "yellow" },
       { primary: "rgb(255, 255, 255)", secondary: "hsl(0, 0%, 100%)" },
-      { primary: "#ffffffff", secondary: "#ffff" },
+      { primary: "#fffff", secondary: "#fffffff" },
     ].entries()) {
       const css = renderThemeCss({
         etag: `contrast-other-${index}`,
