@@ -7,6 +7,8 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ## [Unreleased]
 
+## [1.3.1] — 2026-11-20
+
 ### Fixed
 
 - A search with a period no longer runs into the rate limit and shows the prices of that period ([ECCdigital/tickets#850](https://github.com/ECCdigital/tickets/issues/850)): it asks once per tenant, only about the Offers the filters show; needs the backend's `POST /api/:tenant/bookables/occupancy`. An Offer whose availability could not be checked is listed as „nicht geprüft“, not as available.
