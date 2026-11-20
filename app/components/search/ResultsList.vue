@@ -8,6 +8,7 @@
         :item="b.item"
         :is-not-bookable="!b.isBookable"
         :calculated-price="b.calculatedPrice"
+        :availability-unchecked="!!b.availabilityUnchecked"
         :entry-page-mode="entryPageMode"
         :eager="i === 0"
         class="my-2"

@@ -29,6 +29,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 - The assigned Open Locker Fach by name ([ECCdigital/tickets#1040](https://github.com/ECCdigital/tickets/issues/1040)): a Fach the platform assigned at an Open Locker Schließfachanlage reads „{Anlage} — Schrank {Name}, Fach {Nummer}“ („{Anlage} — Fach {Nummer}“ without a known Schrank, „Schließfachanlage“ for an Anlage without a name - „Fahrradbox“ stays iFBS) in the booking details, on the Mobile Key page and its sheet, and in „Hilfe bei Problemen mit dem Fach“, which shows once the Fach's access runs, with the booking number; the booking details list it from the Vormerkung on. „Fahrradbox …“ stays for iFBS, the fixed Fach keeps its label. Needs the Open Locker backend, which comes after backend 4.5.0: name and help need a Fach with `assignedCompartment`, which only it sends, so with backend 4.5.0 nothing changes here
 - Series bookings are marked ([ECCdigital/tickets#999](https://github.com/ECCdigital/tickets/issues/999)): a booking that belongs to a series shows a repeat icon after its booking number on the BookingCard, with the tooltip „Teil einer Serienbuchung mit {n} Buchungen“, and „Serienbuchung“ with the total number of bookings in the series in the booking details. The BFF route `GET /api/bookings` adds `series: { id, bookingCount }` from the user's group bookings of each tenant (`GET /api/:tenant/group-bookings`)
+- Contact person, speakers and program on the event details ([ECCdigital/tickets#1176](https://github.com/ECCdigital/tickets/issues/1176)): the contact person (photo, name, phone, mail) shows under „Veranstalter“, the speakers (photo, name, mail) and the program (days by date with their items by time) under „Ticketoptionen“, each only when the event has it. On narrow screens „Alles ansehen“ follows the description directly, and its dialog names the event in its title („Beschreibung von …“), which was empty for events. A long title wraps clear of the close button. The cancellation conditions show for events too, under the price information, with the tiers their tickets carry from the tenant. A photo that does not load shows the initials. Reads the fields the admin UI already keeps (`eventOrganizer`, `schedules`); no backend change
 
 ### Fixed
 
@@ -38,6 +39,14 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 - The map of the results on small screens no longer shows a white dot on the selected pin (ECCdigital/tickets#1073): it was Leaflet's empty popup wrapper, now hidden below `md`
 - The map of the results on small screens can be moved while a chosen pin's Offer is shown at the bottom (ECCdigital/tickets#1073): the sheet covered the whole map and took every touch; a tap on the map closes it
 - A pin with several Offers on small screens shows them at the bottom of the screen as on large screens (ECCdigital/tickets#1073): „1 / 2“ and the arrow buttons above the card instead of arrows over the price and dots below it (`ResultsMapGroupCarousel`)
+- Start page, upcoming events: the server and the first client render show the same cards, so a viewport below 1024 px no longer logs a hydration mismatch at `LatestEventsArea`. All four cards are rendered and the fourth is hidden below `lg` with CSS instead of a JS breakpoint
+
+## [1.3.1] — 2026-11-20
+
+### Fixed
+
+- A search with a period no longer runs into the rate limit and shows the prices of that period ([ECCdigital/tickets#850](https://github.com/ECCdigital/tickets/issues/850)): it asks once per tenant, only about the Offers the filters show; needs the backend's `POST /api/:tenant/bookables/occupancy`. An Offer whose availability could not be checked is listed as „nicht geprüft“, not as available.
+- The period search counts against the backend's per-IP limit of each visitor, not of the storefront server ([ECCdigital/tickets#1254](https://github.com/ECCdigital/tickets/issues/1254)): `/api/bookables/:tenantID/period-occupancy` forwards `X-Forwarded-For` and hands a `429` on with `Retry-After`.
 
 ## [1.3.0] — 2026-11-18
 
@@ -46,7 +55,6 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 - Notice after the registration ([ECCdigital/tickets#600](https://github.com/ECCdigital/tickets/issues/600)): „Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.“, the same for every address. The signup sends the backend `forgotPasswordUrl`, the storefront's page „Passwort vergessen“ (`/password/forgot` under `NUXT_USER_BASE_URL`); an address with a verified account gets a mail with a button to it from the backend with ECCdigital/tickets#600
 ### Added
 
-- Contact person, speakers and program on the event details ([ECCdigital/tickets#1176](https://github.com/ECCdigital/tickets/issues/1176)): the contact person (photo, name, phone, mail) shows under „Veranstalter“, the speakers (photo, name, mail) and the program (days by date with their items by time) under „Ticketoptionen“, each only when the event has it. On narrow screens „Alles ansehen“ follows the description directly, and its dialog names the event in its title („Beschreibung von …“), which was empty for events. A long title wraps clear of the close button. The cancellation conditions show for events too, under the price information, with the tiers their tickets carry from the tenant. A photo that does not load shows the initials. Reads the fields the admin UI already keeps (`eventOrganizer`, `schedules`); no backend change
 - The registration says when an address is on the blacklist ([ECCdigital/tickets#628](https://github.com/ECCdigital/tickets/issues/628)): by password, SSO and card it shows „Registrierung nicht möglich“ with „Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wende dich per Mail an …“ and the instance's mail address, or „den Betreiber dieses Angebots“ without one, instead of the neutral confirmation. The BFF routes hand the backend's refusal on. Needs the backend with the same ticket
 - The checkout says when an address is on the blacklist ([ECCdigital/tickets#627](https://github.com/ECCdigital/tickets/issues/627)): „Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an …“ as a notice on the review step instead of a toast: the instance's mail address is a `mailto:` link with a button to copy it, without one it names „den Betreiber dieses Angebots“ (`checkout.address_blacklisted`). The notice goes when the address changes or the booking is sent again. Needs the backend with the same ticket
 - „Widerrufbeleg“ ([ECCdigital/tickets#611](https://github.com/ECCdigital/tickets/issues/611)): the receipt of an accepted withdrawal (attachment type `withdrawal`) is listed among the invoices and receipts of the booking details and in the list of receipts in the account, and is opened, downloaded and printed through the new BFF route `GET /api/bookings/:tenantID/:bookingId/withdrawal-receipt/:receiptName`. Needs the backend that issues it
@@ -56,7 +64,6 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
-- Start page, upcoming events: the server and the first client render show the same cards, so a viewport below 1024 px no longer logs a hydration mismatch at `LatestEventsArea`. All four cards are rendered and the fourth is hidden below `lg` with CSS instead of a JS breakpoint
 - „Passwort vergessen“ names a hit rate limit (ECCdigital/tickets#302): a `429` of `/api/auth/forgot-password` shows „Zu viele Anfragen“ (`errors.page.tooManyRequests`) instead of the general error; the form stays
 - The map on the detail page no longer shows a white square beside the pin (ECCdigital/tickets#644): it was Leaflet's default `leaflet-div-icon` box, and the `scoped` style meant to clear it never reached the icon Leaflet renders. The style is now global, as in `ResultsMapMarkerIcon`
 - The booking details show an attachment as accepted when the checkout required a tick for it (ECCdigital/tickets#641): the checkout does not finish without the tick at a shown, required attachment (`show` and `required` in the booking's `_bookableUsed`), but never sent it, so the backend stored no `accepted` and every attachment showed as not accepted. „Akzeptiert“ shows only at such attachments now, always ticked, and no longer at those that never asked for a tick; the stored `accepted` is not read. Rule in `app/utils/bookingAttachmentAccepted.js`
@@ -121,6 +128,16 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 - The Cooldown button prototype: the page `/prototype/cooldown-button` and its three variants with the variant switcher under `app/components/prototype/`. The Cooldown itself on the Control Button stays. No behaviour change for bookers
 - Six components nothing rendered any more: `AlreadyVerifiedCardLinkCard`, `checkout/InputTimePeriod` (empty), `inputs/InputDate`, `inputs/TimePickerDialog`, `search/DetailsAreaEventContent` (events render through `DetailsAreaContent`) and `user/settings/SettingsNavigation`, with the keys only they used: `events.ticketOptionsAndAvailability`, `account.settingsAppearance`, `account.settingsPersonalData`. No behaviour change
 - Composables and helpers nothing called any more: `useMemberships`, `useMobileKey`, `useSsoConfig`, `useFeatures`, `useCalendarDateField`; `descriptionOf`, `tagsOf`, `flagsOf` and `offerKey` (with its test) from `search/offer.ts`; `readCalendarDateFromDateFieldRoot`, `readTimeFromTimeFieldRoot`, `calendarDateToJsDate` and `jsDateToCalendarDate` from `localDate.js`; `attemptsSignature` from `recurrence.js`; `invalidateKeycloakCache` on the server. The BFF routes only `useMemberships` and `useMobileKey` called (`/api/memberships/my`, `/api/bookings/…/mobile-key/…`) stay for now. No behaviour change
+
+## [1.2.2] — 2026-11-20
+
+### Added
+
+- `docker-publish.yml` refuses to build a tag that is not `v` plus the `version` of `package.json` (ECCdigital/tickets#1018). A release candidate tagged without `npm version` built an image whose app still reported the previous version
+
+### Fixed
+
+- The checkout leaves out an optional add-on the backend no longer has (404) instead of showing the whole offer as not available (ECCdigital/tickets#781). A missing mandatory add-on still makes the offer not available, every other failure stays „Laden fehlgeschlagen“
 
 ## [1.2.1] — 2026-10-14
 

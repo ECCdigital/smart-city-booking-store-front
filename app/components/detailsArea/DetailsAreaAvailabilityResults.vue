@@ -27,6 +27,13 @@
           @click="goToCheckout()"
         />
         <UButton
+          v-else-if="isAvailabilityUnchecked"
+          :label="$t('bookableDetail.availabilityUnchecked')"
+          color="neutral"
+          variant="soft"
+          class="justify-center px-2 md:px-5"
+        />
+        <UButton
           v-else
           :label="$t('bookableDetail.unavailable')"
           color="neutral"
@@ -58,6 +65,7 @@ const props = defineProps({
 
 const {
   isBookableAndMatch,
+  isAvailabilityUnchecked,
   showAvailabilityResult,
   goToCheckout,
 } = useBookableDetailContent(() => props.item);
