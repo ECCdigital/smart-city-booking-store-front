@@ -40,6 +40,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 - The map of the results on small screens can be moved while a chosen pin's Offer is shown at the bottom (ECCdigital/tickets#1073): the sheet covered the whole map and took every touch; a tap on the map closes it
 - A pin with several Offers on small screens shows them at the bottom of the screen as on large screens (ECCdigital/tickets#1073): „1 / 2“ and the arrow buttons above the card instead of arrows over the price and dots below it (`ResultsMapGroupCarousel`)
 - Start page, upcoming events: the server and the first client render show the same cards, so a viewport below 1024 px no longer logs a hydration mismatch at `LatestEventsArea`. All four cards are rendered and the fourth is hidden below `lg` with CSS instead of a JS breakpoint
+- A release builds its Docker image again ([ECCdigital/tickets#1319](https://github.com/ECCdigital/tickets/issues/1319)): `docker-publish.yml` runs on GitHub's `ubuntu-latest` unless the self-hosted runner is chosen on a manual start. Before, a release left the runner empty and the workflow failed before it started, and a manual start preset the self-hosted runner, which is offline
 
 ## [1.3.1] — 2026-11-20
 
