@@ -382,7 +382,10 @@ export function useBookableSearch<TItem extends SearchableItem>(
     }
   }
 
-  /** The query as a re-run searches it, around the place the last run used. */
+  /**
+   * The query as a search runs it: the URL's on the first run, and a re-run
+   * around the place the last run used.
+   */
   function currentQueryCriteria() {
     return {
       term: query.term,
@@ -1054,13 +1057,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
 
     if (hasUrlCriteria.value && toValue(sourceItems).length > 0) {
       searchIsInitialized.value = true;
-      await runSearch({
-        term: query.term,
-        location: query.location,
-        distance: query.distance,
-        timeStart: query.start,
-        timeEnd: query.end,
-      });
+      await runSearch(currentQueryCriteria());
     }
   });
 
