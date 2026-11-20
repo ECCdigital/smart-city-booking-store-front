@@ -24,6 +24,7 @@ import {
 import {
   createRequestCache,
   idsToCheck,
+  isMissingPeriodRoute,
   mapWithConcurrency,
   narrowingKey,
   periodBatches,
@@ -159,6 +160,9 @@ export function useBookableSearch<TItem extends SearchableItem>(
   // Only the latest run may write its results; an older one still waiting
   // for the backend is dropped.
   let latestRun = 0;
+  // Set once the backend answers that it has no batch route: from then on
+  // the single requests, as before the batch existed.
+  let periodBatchMissing = false;
 
   const bookableSearchTermOptions = {
     keys: ["item.title", "item.description", "item.flags", "item.tags"],
@@ -449,6 +453,15 @@ export function useBookableSearch<TItem extends SearchableItem>(
     }
 
     const period = { start: criteria.timeStart, end: criteria.timeEnd };
+    // One request per tenant first. Offers whose batch failed leave the
+    // checked set for this run: neither the period check nor the price asks
+    // about them one by one.
+    const unchecked = await prefetchPeriod(
+      bookableItems.filter((i) => checkIds.has(i.item.id)),
+      period,
+    );
+    unchecked.forEach((id) => checkIds.delete(id));
+
     bookableItems = await searchForTimePeriod(period, bookableItems, checkIds);
 
     const items = await updateItemStatus(
@@ -632,17 +645,33 @@ export function useBookableSearch<TItem extends SearchableItem>(
 
   /**
    * Asks the backend for occupancy and price of the bookables to check, one
-   * request per tenant, and keeps the answers for
-   * the single checks that follow. A bookable the backend leaves out is out
-   * of reach and not available; a failed request leaves its bookables to
-   * the single requests.
+   * request per tenant, and keeps the answers for the single checks that
+   * follow. A bookable the backend leaves out is out of reach and not
+   * available.
+   *
+   * A backend without the route leaves the bookables to the single
+   * requests, from then on without trying the batch again. Any other failed
+   * request, a `429` above all, must not fan out into two requests per
+   * Offer: its bookables are returned and stay unchecked in this run, shown
+   * with their list price; the next run asks the batch again.
+   *
+   * @returns The ids of the bookables left unchecked.
    */
   async function prefetchPeriod(
     items: SearchResultItem[],
-    start: number,
-    end: number,
-  ) {
-    if (options.getAvailability || options.getPriceForPeriod) return;
+    timePeriod: TimePeriod,
+  ): Promise<Set<string>> {
+    const unchecked = new Set<string>();
+    const { start, end } = timePeriod;
+    if (
+      start === null ||
+      end === null ||
+      options.getAvailability ||
+      options.getPriceForPeriod ||
+      periodBatchMissing
+    ) {
+      return unchecked;
+    }
 
     const toAsk = items
       .filter((i) => i.isBookable && !isEventItem(i.item))
@@ -653,8 +682,22 @@ export function useBookableSearch<TItem extends SearchableItem>(
       periodBatches(toAsk),
       PERIOD_CHECK_CONCURRENCY,
       async ({ tenantId, ids }) => {
-        const answers: PeriodOccupancy[] =
-          await useBookables().getPeriodOccupancies(tenantId, ids, start, end);
+        let answers: PeriodOccupancy[];
+        try {
+          answers = await useBookables().getPeriodOccupancies(
+            tenantId,
+            ids,
+            start,
+            end,
+          );
+        } catch (error) {
+          if (isMissingPeriodRoute(error)) {
+            periodBatchMissing = true;
+          } else {
+            ids.forEach((id) => unchecked.add(id));
+          }
+          return;
+        }
         const byId = new Map(answers.map((a) => [a.bookableId, a]));
 
         for (const id of ids) {
@@ -669,6 +712,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
         }
       },
     );
+    return unchecked;
   }
 
   function fetchAvailability(item: SearchableItem, start: number, end: number) {
@@ -702,9 +746,10 @@ export function useBookableSearch<TItem extends SearchableItem>(
 
   /**
    * Keeps the Offers that can be had in the period. Only the ones in
-   * `checkIds` are asked about; the rest pass unchecked, the filters hide
-   * them. An Offer whose check fails stays in the list: one refused request
-   * must not empty a search, and the checkout checks again.
+   * `checkIds` are asked about; the rest pass unchecked: the filters hide
+   * them, or their batch failed. An Offer whose check fails stays in the
+   * list: one refused request must not empty a search, and the checkout
+   * checks again.
    */
   async function searchForTimePeriod(
     timePeriod: TimePeriod | null,
@@ -716,12 +761,6 @@ export function useBookableSearch<TItem extends SearchableItem>(
     }
     const start = timePeriod.start;
     const end = timePeriod.end;
-
-    await prefetchPeriod(
-      items.filter((i) => checkIds.has(i.item.id)),
-      start,
-      end,
-    );
 
     const availability = await mapWithConcurrency(
       items,

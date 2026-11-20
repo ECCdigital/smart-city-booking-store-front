@@ -131,6 +131,26 @@ export function periodBatches(
   return batches;
 }
 
+/**
+ * Whether a failed period request means the backend has no such route (an
+ * older backend): `404`/`405` without an error code of the backend, whose
+ * router answers an unknown path with a plain page. Only then are single
+ * requests worth it. Any other failure, a `429` above all, must not fan
+ * out into two requests per Offer; a `404 tenant_not_found` carries a code.
+ */
+export function isMissingPeriodRoute(error: unknown): boolean {
+  const { statusCode, data } = (error ?? {}) as {
+    statusCode?: number;
+    data?: unknown;
+  };
+  if (statusCode !== 404 && statusCode !== 405) return false;
+  const code =
+    data && typeof data === "object" && "code" in data
+      ? (data as { code?: unknown }).code
+      : undefined;
+  return !code;
+}
+
 /** One bookable as the backend's period request answers it. */
 export interface PeriodOccupancy {
   bookableId: string;

@@ -4,6 +4,7 @@ import { MatchStatus } from "~/composables/search/catalogFilters";
 import {
   createRequestCache,
   idsToCheck,
+  isMissingPeriodRoute,
   mapWithConcurrency,
   narrowingKey,
   periodBatches,
@@ -141,6 +142,31 @@ describe("periodBatches", () => {
         { id: "a", tenantId: "t" },
       ]),
     ).toEqual([{ tenantId: "t", ids: ["a"] }]);
+  });
+});
+
+describe("isMissingPeriodRoute", () => {
+  it("is a backend without the route: 404 or 405 with its plain page", () => {
+    const page = "<pre>Cannot POST /api/test/bookables/occupancy</pre>";
+    expect(isMissingPeriodRoute({ statusCode: 404, data: page })).toBe(true);
+    expect(isMissingPeriodRoute({ statusCode: 405 })).toBe(true);
+  });
+
+  it("is not a backend error with a code, such as tenant_not_found", () => {
+    expect(
+      isMissingPeriodRoute({
+        statusCode: 404,
+        data: { error: "NotFoundError", code: "tenant_not_found" },
+      }),
+    ).toBe(false);
+  });
+
+  it("is not a rate limit or any other failure: those must not fan out", () => {
+    for (const statusCode of [429, 400, 500, 502, 503]) {
+      expect(isMissingPeriodRoute({ statusCode })).toBe(false);
+    }
+    expect(isMissingPeriodRoute(undefined)).toBe(false);
+    expect(isMissingPeriodRoute(new Error("network"))).toBe(false);
   });
 });
 
