@@ -55,9 +55,16 @@ const props = defineProps({
   },
 });
 
-const normalizedCancellationRefundTiers = computed(() =>
-  sortedRefundTiers(props.item?.cancellationRefundTiers),
-);
+// The tiers are the tenant's: a bookable carries them itself, an event on
+// each of its tickets, all alike.
+const normalizedCancellationRefundTiers = computed(() => {
+  const source = props.isEvent
+    ? props.item?.tickets?.find((ticket) =>
+        Array.isArray(ticket?.cancellationRefundTiers),
+      )
+    : props.item;
+  return sortedRefundTiers(source?.cancellationRefundTiers);
+});
 
 const hasCancellationRefundTiers = computed(
   () => normalizedCancellationRefundTiers.value.length > 0,

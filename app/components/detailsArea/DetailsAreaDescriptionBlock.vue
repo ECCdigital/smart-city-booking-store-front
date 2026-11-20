@@ -1,13 +1,6 @@
 <template>
   <div>
     <div class="line-clamp-3 md:line-clamp-none" v-html="htmlDescription" />
-
-    <div v-if="isEvent" class="flex gap-2 mt-4">
-      <p class="font-semibold">{{ $t("bookableDetail.organiser") }}</p>
-      <p>
-        {{ item.eventOrganizer.name }}
-      </p>
-    </div>
     <div v-if="hasDescription" class="flex justify-end md:hidden">
       <UButton
         :label="$t('bookableDetail.viewAll')"
@@ -17,14 +10,29 @@
       />
     </div>
 
+    <div v-if="isEvent" class="mt-4">
+      <div class="flex gap-2">
+        <p class="font-semibold">{{ $t("bookableDetail.organiser") }}</p>
+        <p>
+          {{ item.eventOrganizer.name }}
+        </p>
+      </div>
+      <DetailsAreaEventContactPerson :item="item" class="mt-2" />
+    </div>
+
     <BookableCustomFieldsDescription v-if="!isEvent" :item="item" />
 
     <UModal
       v-model:open="showFullDescription"
-      :title="$t('bookableDetail.descriptionTitle', { title: item?.title })"
+      :title="$t('bookableDetail.descriptionTitle', { title })"
       size="lg"
       class="max-h-[80vh]"
-      :ui="{ overlay: 'backdrop-blur-md' }"
+      :ui="{
+        overlay: 'backdrop-blur-md',
+        // The close button sits absolutely at the end of the header; a long
+        // title keeps clear of it instead of running underneath.
+        title: 'pe-8 break-words',
+      }"
     >
       <template #body>
         <div class="p-4" v-html="htmlDescription" />
@@ -36,6 +44,7 @@
 <script setup>
 import { useBookableDetailContent } from "~/composables/bookables/useBookableDetailContent.js";
 import BookableCustomFieldsDescription from "~/components/bookables/BookableCustomFieldsDescription.vue";
+import DetailsAreaEventContactPerson from "~/components/detailsArea/DetailsAreaEventContactPerson.vue";
 
 
 const props = defineProps({
@@ -49,7 +58,7 @@ const props = defineProps({
   },
 });
 
-const { htmlDescription } = useBookableDetailContent(
+const { htmlDescription, title } = useBookableDetailContent(
   () => props.item,
   props.isEvent,
 );
