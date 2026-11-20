@@ -66,20 +66,27 @@ function isSafeColorPair(colors: ThemeCssColors | null | undefined): boolean {
 const BLACK = "#000000";
 const WHITE = "#ffffff";
 
-/** `#rgb` or `#rrggbb`, the only forms the contrast is computed from. */
-const HEX_COLOR = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+/**
+ * `#rgb`, `#rrggbb` and the same with alpha (`#rgba`, `#rrggbbaa`, as the
+ * Admin UI's colour picker stores them), the forms the contrast is computed
+ * from. The alpha is left out: the colour is read as opaque.
+ */
+const HEX_COLOR = /^#(?:([0-9a-f]{3})[0-9a-f]?|([0-9a-f]{6})(?:[0-9a-f]{2})?)$/i;
+
+/** `#rgb` or `#rrggbb`, the only forms an accent takes. */
+const OPAQUE_HEX_COLOR = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 /**
  * The text colour on a colour: black above a luma of 180, white otherwise —
  * the rule `useContrastColor` applied on the client, so no instance changes
- * its look. Only `#rgb` and `#rrggbb` are computed; any other value (a colour
- * name, `rgb()`, `hsl()`) gives white, as it did before.
+ * its look. Only hex colours are computed, with or without alpha; any other
+ * value (a colour name, `rgb()`, `hsl()`) gives white, as it did before.
  */
 function contrastOf(color: string): string {
   const match = HEX_COLOR.exec(color.trim());
   if (!match) return WHITE;
 
-  const digits = match[1]!;
+  const digits = (match[1] ?? match[2])!;
   const hex =
     digits.length === 3
       ? [...digits].map((digit) => digit + digit).join("")
@@ -102,7 +109,7 @@ function contrastOf(color: string): string {
  */
 function accentOf(colors: ThemeCssColors | null | undefined): string | null {
   const accent = colors?.accent;
-  return typeof accent === "string" && HEX_COLOR.test(accent) ? accent : null;
+  return typeof accent === "string" && OPAQUE_HEX_COLOR.test(accent) ? accent : null;
 }
 
 function headerOf(value: unknown): ThemeCssHeader {

@@ -22,10 +22,10 @@
       <ul class="space-y-2">
         <li
           v-for="tier in normalizedCancellationRefundTiers"
-          :key="`${tier.daysBeforeStart}-${tier.refundPercentage}`"
+          :key="`${tier.hoursBeforeStart}-${tier.refundPercentage}`"
           class="rounded-md bg-white/70 dark:bg-gray-800/70 px-3 py-2 flex items-center justify-between gap-4"
         >
-          <span>{{ formatDaysBeforeStart(tier.daysBeforeStart) }}</span>
+          <span>{{ formatDeadline(tier.hoursBeforeStart) }}</span>
           <span class="font-semibold text-right"
             >{{ tier.refundPercentage }} % <br class="block md:hidden" />
             {{ $t("bookableDetail.refund") }}</span
@@ -37,6 +37,10 @@
 </template>
 <script setup>
 import { computed } from "vue";
+import {
+  sortedRefundTiers,
+  tierDeadline,
+} from "~/utils/cancellationRefundTiers.js";
 
 const { t } = useI18n();
 
@@ -53,43 +57,28 @@ const props = defineProps({
 
 // The tiers are the tenant's: a bookable carries them itself, an event on
 // each of its tickets, all alike.
-const rawCancellationRefundTiers = computed(() => {
+const normalizedCancellationRefundTiers = computed(() => {
   const source = props.isEvent
     ? props.item?.tickets?.find((ticket) =>
         Array.isArray(ticket?.cancellationRefundTiers),
       )
     : props.item;
-  return Array.isArray(source?.cancellationRefundTiers)
-    ? source.cancellationRefundTiers
-    : [];
-});
-
-const normalizedCancellationRefundTiers = computed(() => {
-  const tiers = rawCancellationRefundTiers.value;
-
-  return [...tiers]
-    .filter(
-      (tier) =>
-        Number.isFinite(tier?.daysBeforeStart) &&
-        Number.isFinite(tier?.refundPercentage),
-    )
-    .sort((left, right) => right.daysBeforeStart - left.daysBeforeStart);
+  return sortedRefundTiers(source?.cancellationRefundTiers);
 });
 
 const hasCancellationRefundTiers = computed(
   () => normalizedCancellationRefundTiers.value.length > 0,
 );
 
-function formatDaysBeforeStart(daysBeforeStart) {
-  if (daysBeforeStart === 0) {
-    return t("bookableDetail.onStartDay");
+function formatDeadline(hoursBeforeStart) {
+  if (hoursBeforeStart === 0) {
+    return t("bookableDetail.untilStart");
   }
 
-  if (daysBeforeStart === 1) {
-    return t("bookableDetail.untilOneDayBefore");
-  }
-
-  return t("bookableDetail.untilDaysBefore", { days: daysBeforeStart });
+  const { amount, unit } = tierDeadline(hoursBeforeStart);
+  return unit === "days"
+    ? t("bookableDetail.untilDaysBefore", { n: amount }, amount)
+    : t("bookableDetail.untilHoursBefore", { n: amount }, amount);
 }
 </script>
 <style scoped></style>

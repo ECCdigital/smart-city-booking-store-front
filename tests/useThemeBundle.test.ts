@@ -37,7 +37,7 @@ describe("useThemeBundle, awaited as during server rendering", () => {
 
   it("keeps the version of the stored bundle", async () => {
     const { version } = await useThemeBundle();
-    expect(version.value).toBe("?v=abc%201");
+    expect(version.value).toBe("?v=abc%201.r2");
   });
 
   it("prefers the Live Preview's Draft in data", async () => {
@@ -64,6 +64,6 @@ describe("useThemeBundle, not awaited", () => {
   it("carries data and version right away", () => {
     const { data, version } = useThemeBundle();
     expect(data.value).toEqual(stored);
-    expect(version.value).toBe("?v=abc%201");
+    expect(version.value).toBe("?v=abc%201.r2");
   });
 });

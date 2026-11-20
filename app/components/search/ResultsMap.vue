@@ -23,7 +23,9 @@
       :class="
         isFullscreen
           ? 'absolute inset-0'
-          : 'relative w-full lg:flex-1 lg:min-w-0 h-[80vh] my-2 mr-0.5 rounded'
+          : compact
+            ? 'relative w-full h-[28rem] rounded-2xl'
+            : 'relative w-full lg:flex-1 lg:min-w-0 h-[80vh] my-2 mr-0.5 rounded'
       "
     >
       <ClientOnly>
@@ -37,6 +39,7 @@
           @ready="onMapReady"
           @moveend="updateMapBounds"
           @zoomend="updateMapBounds"
+          @click="onMapClick"
         >
           <LTileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -85,10 +88,9 @@
         :show-current-bookable="showCurrentBookable"
         :show-current-group="showMultiPinItems"
         @open-details="openBookableDetails"
-        @close-details="closeBookableDetails"
       />
 
-      <div class="absolute right-4 top-4 z-1001">
+      <div v-if="!compact" class="absolute right-4 top-4 z-1001">
         <div
           class="flex items-center gap-3 rounded-xl py-1.5"
           :class="isFullscreen ? 'pl-4' : ''"
@@ -128,9 +130,12 @@
 
       <!--
         Leaflet's own zoom control is off; these two buttons zoom instead.
+        The compact map drops the box's padding, so they sit on the same
+        edge as the start page's location button.
       -->
       <div
-        class="absolute top-4 left-4 z-1001 flex flex-col gap-1 rounded-xl p-1.5"
+        class="absolute top-4 left-4 z-1001 flex flex-col gap-1 rounded-xl"
+        :class="compact ? '' : 'p-1.5'"
       >
         <UButton
           icon="i-lucide-plus"
@@ -157,7 +162,7 @@
       leave-to-class="translate-x-4 opacity-0"
     >
       <ResultsMapList
-        v-if="!isFullscreen || showList"
+        v-if="!compact && (!isFullscreen || showList)"
         v-model="currentBookable"
         :bookables="visibleBookables"
         :without-location="withoutLocation"
@@ -190,6 +195,11 @@ const props = defineProps({
   suitableCount: {
     type: Number,
     default: null,
+  },
+  // The start page's map: no list, no full screen, a fixed height.
+  compact: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -485,6 +495,13 @@ function closeBookableDetails() {
 
   showMultiPinItems.value = false;
   currentMultiPinGroup.value = null;
+}
+
+// On the phone a tap on the map, not on a pin, closes the sheet below.
+function onMapClick() {
+  if (window.matchMedia("(min-width: 768px)").matches) return;
+
+  closeBookableDetails();
 }
 
 function onMapReady() {

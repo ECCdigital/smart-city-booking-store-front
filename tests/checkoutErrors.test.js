@@ -152,13 +152,13 @@ describe("the refusal of an address on the blacklist", () => {
     expect(
       addressBlacklistedMessage({ mailAddress: "betrieb@example.test" }, translator("de")),
     ).toBe(
-      "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an betrieb@example.test.",
+      "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wenden Sie sich per Mail an betrieb@example.test.",
     );
   });
 
   it("names the operator of the offer where the instance has no mail address", () => {
     const expected =
-      "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an den Betreiber dieses Angebots.";
+      "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wenden Sie sich per Mail an den Betreiber dieses Angebots.";
 
     expect(addressBlacklistedMessage({ mailAddress: "" }, translator("de"))).toBe(expected);
     expect(addressBlacklistedMessage({ mailAddress: "  " }, translator("de"))).toBe(expected);

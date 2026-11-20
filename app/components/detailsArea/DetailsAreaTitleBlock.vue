@@ -6,7 +6,7 @@
       </p>
       <h2 class="text-2xl font-bold">{{ title }}</h2>
     </div>
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="flex flex-wrap items-center gap-2 sm:gap-3">
       <slot name="back" />
       <div class="ml-auto flex items-center space-x-2">
         <slot name="actions" />

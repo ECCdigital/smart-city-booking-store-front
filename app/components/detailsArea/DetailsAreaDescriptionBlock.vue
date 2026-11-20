@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="line-clamp-3 md:line-clamp-none" v-html="htmlDescription" />
-    <div class="flex justify-end md:hidden">
+    <div v-if="hasDescription" class="flex justify-end md:hidden">
       <UButton
         :label="$t('bookableDetail.viewAll')"
         variant="ghost"
@@ -61,6 +61,16 @@ const props = defineProps({
 const { htmlDescription, title } = useBookableDetailContent(
   () => props.item,
   props.isEvent,
+);
+
+// An editor leaves markup such as `<p></p>` behind for an empty description,
+// so the text without tags decides, not the HTML string.
+const hasDescription = computed(
+  () =>
+    !!htmlDescription.value
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim(),
 );
 
 const showFullDescription = ref(false);

@@ -8,6 +8,42 @@
       "all": "Alle Anbieter",
       "showOffers": "Angebote ansehen"
     },
+    "greeting": {
+      "label": "Ihre Buchungen und Schlüssel",
+      "hello": "Guten Tag",
+      "helloName": "Guten Tag, {name}",
+      "loading": "Wird geladen …",
+      "nextBooking": {
+        "title": "Nächste Buchung",
+        "link": "Buchung ansehen",
+        "none": "Keine anstehende Buchung.",
+        "all": "Meine Buchungen"
+      },
+      "key": {
+        "title": "Mobile Key",
+        "readyTitle": "Zutritt für {day} ist bereit.",
+        "readyText": "Türen öffnen Sie ab {time} Uhr direkt am Gerät.",
+        "activeTitle": "Ihr Zutritt ist jetzt aktiv.",
+        "activeText": "Türen öffnen Sie bis {time} Uhr direkt am Gerät.",
+        "none": "Kein anstehender Zutritt.",
+        "link": "Schlüssel ansehen"
+      },
+      "favorites": {
+        "title": "Favoriten",
+        "count": "Keine gemerkten Angebote | {count} gemerktes Angebot | {count} gemerkte Angebote",
+        "link": "Favoriten ansehen"
+      }
+    },
+    "nearby": {
+      "title": "In Ihrer Nähe",
+      "count": "Kein Angebot mit Standort | {count} Angebot mit Standort | {count} Angebote mit Standort",
+      "countNearby": "Kein Angebot im Umkreis von {radius} km | {count} Angebot im Umkreis von {radius} km | {count} Angebote im Umkreis von {radius} km",
+      "useLocation": "Mein Standort",
+      "noneNearby": "Im Umkreis von {radius} km gibt es keine Angebote, die Karte zeigt alle.",
+      "locationUnavailable": "Ihr Standort ist nicht verfügbar, die Karte zeigt alle Angebote.",
+      "openSearch": "Karte in der Suche öffnen",
+      "hint": "Ein Klick auf einen Pin zeigt das Angebot. Filter und Liste gibt es auf der Suchseite."
+    },
     "howItWorks": {
       "title": "So funktioniert das Buchen",
       "steps": {
@@ -116,6 +152,7 @@
   },
   "common": {
     "actions": "Aktionen",
+    "browseOffers": "Angebote entdecken",
     "clearInput": "Eingabe löschen",
     "phoneNumber": "Telefonnummer",
     "comingSoon": "Demnächst verfügbar",
@@ -228,9 +265,9 @@
   },
   "rateLimit": {
     "title": "Zu viele Versuche",
-    "seconds": "Bitte versuche es in {count} Sekunde erneut. | Bitte versuche es in {count} Sekunden erneut.",
-    "minutes": "Bitte versuche es in {count} Minute erneut. | Bitte versuche es in {count} Minuten erneut.",
-    "later": "Bitte versuche es später erneut."
+    "seconds": "Bitte versuchen Sie es in {count} Sekunde erneut. | Bitte versuchen Sie es in {count} Sekunden erneut.",
+    "minutes": "Bitte versuchen Sie es in {count} Minute erneut. | Bitte versuchen Sie es in {count} Minuten erneut.",
+    "later": "Bitte versuchen Sie es später erneut."
   },
   "login": {
     "logoutErrorMessage": {
@@ -290,7 +327,7 @@
     },
     "passwordStrengthCheck": {
       "description": "Muss enthalten",
-      "nonePassword": "Gib ein Passwort ein",
+      "nonePassword": "Geben Sie ein Passwort ein",
       "weakPassword": "Schwaches Passwort",
       "mediumPassword": "Mittleres Passwort",
       "strongPassword": "Starkes Passwort",
@@ -300,10 +337,10 @@
       "number": "Mindestens eine Zahl (0-9)"
     },
     "success": {
-      "heading": "Bitte prüfe dein Postfach",
-      "description": "Du erhältst in Kürze eine E-Mail, um deine Registrierung abzuschließen.",
+      "heading": "Bitte prüfen Sie Ihr Postfach",
+      "description": "Sie erhalten in Kürze eine E-Mail, um Ihre Registrierung abzuschließen.",
       "resent": "Wenn die E-Mail-Adresse zu einem noch nicht bestätigten Konto gehört, haben wir den Bestätigungslink erneut gesendet.",
-      "spamHint": "Wenn du die E-Mail nicht findest, überprüfe bitte auch deinen Spam- oder Werbeordner.",
+      "spamHint": "Wenn Sie die E-Mail nicht finden, überprüfen Sie bitte auch Ihren Spam- oder Werbeordner.",
       "toHome": "Zur Startseite",
       "toLogin": "Zur Anmeldung"
     }
@@ -538,13 +575,14 @@
     "cancellationTitleShort": "Stornierungsbedingungen",
     "cancellationHint": "Je früher storniert wird, desto höher ist die Rückerstattung.",
     "refund": "Rückerstattung",
-    "onStartDay": "Am Starttag",
-    "untilOneDayBefore": "Bis 1 Tag vor Beginn",
-    "untilDaysBefore": "Bis {days} Tage vor Beginn",
+    "untilStart": "Bis zum Beginn",
+    "untilDaysBefore": "Bis {n} Tage vor Beginn | Bis {n} Tag vor Beginn | Bis {n} Tage vor Beginn",
+    "untilHoursBefore": "Bis {n} Stunden vor Beginn | Bis {n} Stunde vor Beginn | Bis {n} Stunden vor Beginn",
     "organiser": "Veranstalter:",
     "noAddress": "Keine Adresse bekannt.",
     "addressCopiedTitle": "Adresse erfolgreich kopiert!",
     "addressCopiedMessage": "Die Adresse wurde in Ihre Zwischenablage kopiert.",
+    "copyAddress": "Adresse kopieren",
     "viewDetails": "Details ansehen",
     "view": "Ansehen",
     "showMore": "Mehr anzeigen",
@@ -755,13 +793,13 @@
     "time_period_mismatch": "Für dieses Objekt muss ein vollständiger Zeitslot gebucht werden.",
     "insufficient_lead_time": "Die Buchung liegt zu kurzfristig. Zwischen Buchung und Beginn muss ausreichend Vorbereitungszeit in den Servicezeiten liegen.",
     "time_in_past": "Der gewählte Beginn liegt in der Vergangenheit. Bitte wählen Sie einen Zeitpunkt ab jetzt.",
-    "address_blacklisted": "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an {contact}.",
+    "address_blacklisted": "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wenden Sie sich per Mail an {contact}.",
     "address_blacklisted_operator": "den Betreiber dieses Angebots",
     "address_blacklisted_title": "Buchung nicht möglich",
     "address_blacklisted_copy": "Mailadresse kopieren",
     "address_blacklisted_copied": "Mailadresse kopiert",
     "address_blacklisted_copy_failed": "Die Mailadresse ließ sich nicht kopieren. Bitte markieren und kopieren Sie sie von Hand.",
-    "address_blacklisted_registration": "Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wende dich per Mail an {contact}.",
+    "address_blacklisted_registration": "Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Bei Fragen wenden Sie sich per Mail an {contact}.",
     "address_blacklisted_registration_title": "Registrierung nicht möglich",
     "generateGroupBooking": "Keine Seriebuchung erzeugt",
     "selectTimePeriodTitle": "Kein Zeitraum ausgewählt",
@@ -900,6 +938,7 @@
       "lineQtyPrice": "{qty} × {price}",
       "edit": "Bearbeiten",
       "commitBooking": "Zahlungspflichtig buchen",
+      "commitBookingFree": "Verbindlich buchen",
       "backToPayment": "Zurück zur Zahlung",
       "backToData": "Zurück zu den Daten",
       "termsHint": "Mit der Buchung akzeptieren Sie unsere Geschäftsbedingungen.",
@@ -1134,6 +1173,11 @@
     "downloadAppointment": "Termin herunterladen",
     "actionsFor": "Aktionen zur Buchung #{id}",
     "downloadAppointmentTooltip": "Als Termin herunterladen",
+    "series": {
+      "label": "Serienbuchung",
+      "tooltip": "Teil einer Serienbuchung mit {count} Buchungen",
+      "details": "Teil einer Serie mit insgesamt {count} Buchungen"
+    },
     "withdrawal": {
       "action": "Buchung widerrufen",
       "hint": "Öffnet eine vorbereitete E-Mail an den Anbieter. Der Anbieter prüft Ihren Widerruf und meldet sich bei Ihnen."
@@ -1155,8 +1199,11 @@
       "fee": "Stornogebühr",
       "feePercent": "{percent} %",
       "refund": "Erstattung",
-      "daysBeforeStart": "am Tag des Beginns der Buchung | {n} Tag vor Beginn der Buchung | {n} Tage vor Beginn der Buchung",
-      "tierHint": "Sie stornieren {when}. Bis {tierDays} Tage vor Beginn der Buchung erstattet {tenant} {percent} % des Betrags. Es fallen somit {feePercent} % Stornogebühr an. Der endgültige Betrag steht im Stornobeleg.",
+      "tierAtStart": "bis zum Beginn",
+      "tierDays": "bis {n} Tage vor Beginn | bis {n} Tag vor Beginn | bis {n} Tage vor Beginn",
+      "tierHours": "bis {n} Stunden vor Beginn | bis {n} Stunde vor Beginn | bis {n} Stunden vor Beginn",
+      "refundHint": "{tenant} erstattet {percent} % des Betrags. Es fallen somit {feePercent} % Stornogebühr an. Der endgültige Betrag steht im Stornobeleg.",
+      "tierHint": "Es gilt die Erstattungsstufe „{tier}“: {tenant} erstattet {percent} % des Betrags. Es fallen somit {feePercent} % Stornogebühr an. Der endgültige Betrag steht im Stornobeleg.",
       "previewFailedTitle": "Die Erstattung lässt sich gerade nicht berechnen.",
       "previewFailedText": "Buchungsbetrag {amount}. Die Gebühr richtet sich nach den Stornobedingungen von {tenant}; den Betrag erfahren Sie mit dem Stornobeleg.",
       "previewFailedTitleUnpaid": "Die Stornogebühr lässt sich gerade nicht berechnen.",
@@ -1341,8 +1388,8 @@
     "unknownTenant": "Unbekannt",
     "invoices": {
       "title": "Meine Belege",
-      "emptyTitle": "Keine Rechnungen vorhanden",
-      "emptyDescription": "Aktuell sind für Ihr Konto keine Rechnungen verfügbar. Sobald Rechnungen erstellt wurden, werden diese hier angezeigt.",
+      "emptyTitle": "Keine Belege vorhanden",
+      "emptyDescription": "Aktuell sind für Ihr Konto keine Belege verfügbar. Sobald Belege erstellt wurden, werden diese hier angezeigt.",
       "unknownBookable": "Unbekanntes Buchungsobjekt",
       "searchPlaceholder": "Nach Buchungsobjekt suchen",
       "noMatches": "Keine Dokumente passen zu Ihrer Suche oder dem gewählten Filter.",
@@ -1351,7 +1398,8 @@
         "tooltip": "Filtern nach {type}",
         "invoice": "Rechnungen",
         "receipt": "Zahlungsbelege",
-        "cancellation": "Stornobelege"
+        "cancellation": "Stornobelege",
+        "withdrawal": "Widerrufbelege"
       },
       "columns": {
         "createdAt": "Erstelldatum",
@@ -1530,7 +1578,8 @@
     "openDoor": "Tür öffnen",
     "scannedDescription": "Sie haben den Code an der Tür gescannt.",
     "whichBooking": "Welche Buchung?",
-    "noKeysFound": "Keine Schlüssel gefunden",
+    "emptyTitle": "Keine Schlüssel vorhanden",
+    "emptyDescription": "Sobald Sie ein Angebot mit digitalem Zugang gebucht haben, finden Sie den Schlüssel hier.",
     "searchPlaceholder": "Suchen",
     "noMatches": "Kein Schlüssel passt zu Ihrer Suche oder den gewählten Filtern.",
     "noAddress": "Keine Adresse angegeben",
@@ -1742,8 +1791,8 @@
     "listView": "Listenansicht",
     "mapView": "Kartenansicht",
     "atThisLocation": "Ergebnisse an diesem Standort:",
-    "clickToOpen": "Klick um Auswahl zu öffnen",
-    "clickToSeeAll": "Klick um Alle anzusehen",
+    "clickToOpen": "Klicken Sie, um die Auswahl zu öffnen",
+    "clickToSeeAll": "Klicken Sie, um alle anzusehen",
     "offerPosition": "Angebot {n} von {total}",
     "previousOffer": "Vorheriges Angebot",
     "nextOffer": "Nächstes Angebot",
@@ -1821,7 +1870,6 @@
       "undo": "Rückgängig",
       "emptyTitle": "Noch keine Favoriten",
       "emptyDescription": "Markieren Sie Angebote im Katalog oder in der Detailansicht mit dem Herz, um sie hier wiederzufinden.",
-      "browseOffers": "Angebote entdecken",
       "searchPlaceholder": "Nach Titel suchen",
       "noMatches": "Kein Favorit passt zu Ihrer Suche oder den gewählten Filtern.",
       "loadFailed": "Ihre Favoriten konnten nicht geladen werden."
