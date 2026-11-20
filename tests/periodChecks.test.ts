@@ -6,6 +6,7 @@ import {
   createRunGuard,
   idsToCheck,
   isMissingPeriodRoute,
+  locationForRerun,
   mapWithConcurrency,
   narrowingKey,
   periodBatches,
@@ -207,6 +208,27 @@ describe("periodResultOf", () => {
       isAvailable: false,
       price: null,
     });
+  });
+});
+
+describe("locationForRerun", () => {
+  const BREMEN = {
+    display_address: "Bremen, Deutschland",
+    coordinates: { points: [8.8, 53.08] as [number, number] },
+  };
+
+  it("keeps the chosen place with its coordinates while the query names it", () => {
+    expect(locationForRerun(BREMEN, "Bremen, Deutschland")).toBe(BREMEN);
+  });
+
+  it("takes the query's text once the place changed or was cleared", () => {
+    expect(locationForRerun(BREMEN, "Hamburg")).toBe("Hamburg");
+    expect(locationForRerun(BREMEN, "")).toBe("");
+  });
+
+  it("takes the query's text where the last run searched by text or not at all", () => {
+    expect(locationForRerun("Bremen", "Bremen")).toBe("Bremen");
+    expect(locationForRerun(null, "Bremen")).toBe("Bremen");
   });
 });
 

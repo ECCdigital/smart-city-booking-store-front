@@ -26,6 +26,7 @@ import {
   createRunGuard,
   idsToCheck,
   isMissingPeriodRoute,
+  locationForRerun,
   mapWithConcurrency,
   narrowingKey,
   periodBatches,
@@ -164,6 +165,9 @@ export function useBookableSearch<TItem extends SearchableItem>(
   // Set once the backend answers that it has no batch route: from then on
   // the single requests, as before the batch existed.
   let periodBatchMissing = false;
+  // The place the last run searched around, with its coordinates; a re-run
+  // reuses it instead of geocoding its display text again.
+  let lastLocation: string | SearchLocation | null = null;
 
   const bookableSearchTermOptions = {
     keys: ["item.title", "item.description", "item.flags", "item.tags"],
@@ -336,10 +340,11 @@ export function useBookableSearch<TItem extends SearchableItem>(
     }
   }
 
+  /** The query as a re-run searches it, around the place the last run used. */
   function currentQueryCriteria() {
     return {
       term: query.term,
-      location: query.location,
+      location: locationForRerun(lastLocation, query.location),
       distance: query.distance,
       timeStart: query.start,
       timeEnd: query.end,
@@ -421,6 +426,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
 
     // The URL carries the place as text; the search wants coordinates.
     const location = await resolveLocation(criteria.location);
+    if (runs.isCurrent(run)) lastLocation = location;
     const distance =
       typeof location === "object" && location.coordinates
         ? (criteria.distance ?? DEFAULT_DISTANCE_KM)
@@ -482,6 +488,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
   }
 
   function resetResults() {
+    lastLocation = null;
     setSearchQueryParams();
     initializeResults();
     searchIsInitialized.value = false;
@@ -952,13 +959,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
       }
 
       if (searchIsInitialized.value && isMounted.value) {
-        await runSearch({
-          term: query.term,
-          location: query.location,
-          distance: query.distance,
-          timeStart: query.start,
-          timeEnd: query.end,
-        });
+        await runSearch(currentQueryCriteria());
         return;
       }
 

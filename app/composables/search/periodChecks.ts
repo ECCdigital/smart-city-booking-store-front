@@ -176,6 +176,27 @@ export function periodResultOf(answer: PeriodOccupancy | undefined): {
 }
 
 /**
+ * The place a re-run of the search (a changed filter, a reloaded list)
+ * searches around: the one the last run used, coordinates and all, as long
+ * as it is still the place of the query. Geocoding its display text again
+ * could land elsewhere or nowhere, and costs a call to the geocoder.
+ */
+export function locationForRerun<L extends { display_address?: string }>(
+  lastLocation: string | L | null | undefined,
+  queryLocation: string,
+): string | L {
+  if (
+    lastLocation &&
+    typeof lastLocation === "object" &&
+    queryLocation &&
+    lastLocation.display_address === queryLocation
+  ) {
+    return lastLocation;
+  }
+  return queryLocation;
+}
+
+/**
  * Which search run may still write its results. `start` hands a run its
  * token; a later `start` or an `invalidate` (a reset, a rebuild of the list)
  * outdates it, so a run still waiting for the backend cannot bring back a
