@@ -22,6 +22,7 @@ import {
   resolveCheckoutFailureKey,
 } from "~/utils/checkoutErrors.js";
 import { isNotAvailableError } from "~/utils/catalogDetail.js";
+import { loadCheckoutAddons } from "~/utils/checkoutAddons.js";
 import {
   LOGIN_REQUIRED,
   checkoutAuthAction,
@@ -202,12 +203,9 @@ const {
           fetchCheckoutPermissions(tenantID, bookableID),
         ]);
 
-      const additionalIds = leadBookable?.checkoutBookableIds || [];
-      const additionalBookables = await Promise.all(
-        additionalIds.map(async ({ bookableId, mandatory }) => ({
-          item: await fetchBookable(bookableId, tenantID),
-          mandatory,
-        })),
+      const additionalBookables = await loadCheckoutAddons(
+        leadBookable?.checkoutBookableIds,
+        (id) => fetchBookable(id, tenantID),
       );
 
       return {
