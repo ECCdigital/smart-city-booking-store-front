@@ -163,16 +163,30 @@ export interface PeriodOccupancy {
 /**
  * What the search keeps of one bookable of a period request. Left out of
  * the answer, it is out of reach and not available. `error` says nothing
- * about the period: like a failed request it keeps the Offer in the list,
- * with its list price. No price is asked again, the backend answered.
+ * about the period: `isAvailable` is `null`, unknown, as after a failed
+ * request. No price is asked again, the backend answered.
  */
 export function periodResultOf(answer: PeriodOccupancy | undefined): {
-  isAvailable: boolean;
+  isAvailable: boolean | null;
   price: { userGrossPriceEur: number } | null;
 } {
   if (!answer) return { isAvailable: false, price: null };
-  if (answer.reason === "error") return { isAvailable: true, price: null };
+  if (answer.reason === "error") return { isAvailable: null, price: null };
   return { isAvailable: answer.isAvailable, price: answer.price ?? null };
+}
+
+/**
+ * What one period check says about an Offer: `true` available, `false` not,
+ * and `null` or `undefined` (the check failed or could not run) unchecked.
+ * An unchecked Offer stays in the list, marked: neither shown as available
+ * nor hidden as booked, since nothing is known about the period.
+ */
+export function availabilityOf(
+  result: boolean | null | undefined,
+): "available" | "unavailable" | "unchecked" {
+  if (result === true) return "available";
+  if (result === false) return "unavailable";
+  return "unchecked";
 }
 
 /**

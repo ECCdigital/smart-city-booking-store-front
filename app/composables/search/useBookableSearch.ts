@@ -23,6 +23,7 @@ import {
 } from "~/composables/search/catalogFilters";
 import {
   createRequestCache,
+  availabilityOf,
   createRunGuard,
   idsToCheck,
   isMissingPeriodRoute,
@@ -53,6 +54,12 @@ export interface SearchResultItem {
   isBookable: boolean;
   matchStatus: string;
   calculatedPrice?: { userGrossPriceEur: number } | null;
+  /**
+   * A match whose availability in the searched period is unknown: its check
+   * failed or could not run. Listed, but not counted as a fitting result,
+   * shown without the period's price and not offered for booking.
+   */
+  availabilityUnchecked?: boolean;
 }
 
 interface UseBookableSearchOptions<TItem> {
@@ -296,10 +303,19 @@ export function useBookableSearch<TItem extends SearchableItem>(
     return price === 0 ? -1 : price;
   }
 
+  // A match whose period could not be checked is listed, but not counted
+  // as fitting: nothing is known about the period.
   const suitableCount = computed(
     () =>
-      sortedItems.value.filter((l) => l.matchStatus === MatchStatus.MATCH)
-        .length,
+      sortedItems.value.filter(
+        (l) => l.matchStatus === MatchStatus.MATCH && !l.availabilityUnchecked,
+      ).length,
+  );
+  const uncheckedCount = computed(
+    () =>
+      sortedItems.value.filter(
+        (l) => l.matchStatus === MatchStatus.MATCH && l.availabilityUnchecked,
+      ).length,
   );
 
   function narrowingCriteria(): NarrowingCriteria {
@@ -474,22 +490,27 @@ export function useBookableSearch<TItem extends SearchableItem>(
     }
 
     const period = { start: criteria.timeStart, end: criteria.timeEnd };
-    // One request per tenant first. Offers whose batch failed leave the
-    // checked set for this run: neither the period check nor the price asks
-    // about them one by one.
-    const unchecked = await prefetchPeriod(
+    // One request per tenant first. Offers whose batch failed are not asked
+    // about one by one; they stay unchecked in this run.
+    const batchFailed = await prefetchPeriod(
       bookableItems.filter((i) => checkIds.has(i.item.id)),
       period,
     );
-    unchecked.forEach((id) => checkIds.delete(id));
 
-    bookableItems = await searchForTimePeriod(period, bookableItems, checkIds);
+    const { available, unchecked } = await searchForTimePeriod(
+      period,
+      bookableItems,
+      checkIds,
+      batchFailed,
+    );
+    bookableItems = available;
 
     const items = await updateItemStatus(
       enrichedItems,
       bookableItems,
       period,
       checkIds,
+      unchecked,
     );
 
     if (!runs.isCurrent(run)) return;
@@ -728,7 +749,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
           void cached(periodKey("occupancy", item, start, end), async () => ({
             isAvailable,
           }));
-          if (isAvailable) {
+          if (isAvailable === true) {
             void cached(periodKey("price", item, start, end), async () => price);
           }
         }
@@ -768,18 +789,22 @@ export function useBookableSearch<TItem extends SearchableItem>(
 
   /**
    * Keeps the Offers that can be had in the period. Only the ones in
-   * `checkIds` are asked about; the rest pass unchecked: the filters hide
-   * them, or their batch failed. An Offer whose check fails stays in the
-   * list: one refused request must not empty a search, and the checkout
-   * checks again.
+   * `checkIds` are asked about; the rest pass, the filters hide them. An
+   * Offer whose check fails, or whose batch failed (`batchFailed`), stays
+   * in the list as unchecked: one refused request must not empty a search,
+   * nor show a booked period as free.
+   *
+   * @returns The Offers kept, and the ids of those among them unchecked.
    */
   async function searchForTimePeriod(
     timePeriod: TimePeriod | null,
     items: SearchResultItem[],
     checkIds: Set<string>,
-  ) {
+    batchFailed: Set<string>,
+  ): Promise<{ available: SearchResultItem[]; unchecked: Set<string> }> {
+    const unchecked = new Set<string>();
     if (!timePeriod || timePeriod.start === null || timePeriod.end === null) {
-      return items;
+      return { available: items, unchecked };
     }
     const start = timePeriod.start;
     const end = timePeriod.end;
@@ -789,6 +814,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
       PERIOD_CHECK_CONCURRENCY,
       async (item) => {
         if (!checkIds.has(item.item.id)) return true;
+        if (batchFailed.has(item.item.id)) return null;
         if (isEventItem(item.item)) {
           // An event is on during the period when it overlaps it; it does not
           // have to fit inside a two-hour room search.
@@ -802,7 +828,12 @@ export function useBookableSearch<TItem extends SearchableItem>(
       },
     );
 
-    return items.filter((_, index) => availability[index] !== false);
+    const available = items.filter((item, index) => {
+      const state = availabilityOf(availability[index]);
+      if (state === "unchecked") unchecked.add(item.item.id);
+      return state !== "unavailable";
+    });
+    return { available, unchecked };
   }
 
   /**
@@ -815,6 +846,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
     bookableItems: SearchResultItem[],
     timePeriod: TimePeriod | null,
     checkIds: Set<string>,
+    unchecked: Set<string>,
   ) {
     const suitableIds = new Set(bookableItems.map((b) => b.item.id));
     const start = timePeriod?.start ?? null;
@@ -831,7 +863,8 @@ export function useBookableSearch<TItem extends SearchableItem>(
           !item.isBookable ||
           isEventItem(item.item) ||
           !suitableIds.has(item.item.id) ||
-          !checkIds.has(item.item.id)
+          !checkIds.has(item.item.id) ||
+          unchecked.has(item.item.id)
         ) {
           return null;
         }
@@ -854,6 +887,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
         ...item,
         matchStatus: isSuitable ? MatchStatus.MATCH : MatchStatus.NO_MATCH,
         calculatedPrice: isSuitable ? (prices[index] ?? null) : null,
+        availabilityUnchecked: isSuitable && unchecked.has(item.item.id),
       };
     });
   }
@@ -1003,6 +1037,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
     filteredItems,
     sortedItems,
     suitableCount,
+    uncheckedCount,
     setFilterQueryParams,
     setSortedQueryParams,
     setViewQueryParams,

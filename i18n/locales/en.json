@@ -347,6 +347,8 @@
     "eventsSection": "Events",
     "customFieldsBookablesOnly": "Applies to bookable items.",
     "fittingResults": "{count} matching result | {count} matching results",
+    "uncheckedResults": "{count} not checked | {count} not checked",
+    "availabilityUnchecked": "Availability in the period not checked",
     "provider": "Provider"
   },
   "checkout": {
@@ -706,6 +708,7 @@
     "viewBookingOptions": "View booking options",
     "book": "Book",
     "unavailable": "Unavailable",
+    "availabilityUnchecked": "Not checked",
     "viewAll": "View all",
     "descriptionTitle": "Description of {title}",
     "moreInfo": "More information",

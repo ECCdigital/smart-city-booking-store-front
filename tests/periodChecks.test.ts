@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { MatchStatus } from "~/composables/search/catalogFilters";
 import {
+  availabilityOf,
   createRequestCache,
   createRunGuard,
   idsToCheck,
@@ -192,7 +193,7 @@ describe("periodResultOf", () => {
     ).toEqual({ isAvailable: false, price: null });
   });
 
-  it("keeps a bookable whose checks could not run, with its list price", () => {
+  it("leaves a bookable whose checks could not run unknown, not free", () => {
     expect(
       periodResultOf({
         bookableId: "a",
@@ -200,7 +201,7 @@ describe("periodResultOf", () => {
         reason: "error",
         price: null,
       }),
-    ).toEqual({ isAvailable: true, price: null });
+    ).toEqual({ isAvailable: null, price: null });
   });
 
   it("drops a bookable the answer leaves out", () => {
@@ -229,6 +230,18 @@ describe("locationForRerun", () => {
   it("takes the query's text where the last run searched by text or not at all", () => {
     expect(locationForRerun("Bremen", "Bremen")).toBe("Bremen");
     expect(locationForRerun(null, "Bremen")).toBe("Bremen");
+  });
+});
+
+describe("availabilityOf", () => {
+  it("tells available from booked", () => {
+    expect(availabilityOf(true)).toBe("available");
+    expect(availabilityOf(false)).toBe("unavailable");
+  });
+
+  it("calls a failed or unknown check unchecked, never available", () => {
+    expect(availabilityOf(undefined)).toBe("unchecked");
+    expect(availabilityOf(null)).toBe("unchecked");
   });
 });
 

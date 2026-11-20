@@ -28,7 +28,10 @@
         <span
           v-if="searchIsInitialized"
           class="text-black dark:text-white lg:font-bold"
-          >{{ $t("filter.fittingResults", suitableCount) }}</span
+          >{{ $t("filter.fittingResults", suitableCount)
+          }}<template v-if="uncheckedCount > 0"
+            >, {{ $t("filter.uncheckedResults", uncheckedCount) }}</template
+          ></span
         >
         <div class="" style="flex: 1" />
         <div class="grid md:flex gap-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
@@ -191,6 +194,7 @@ const {
   updatedItems: searchedOffers,
   sortedItems: sortedOffers,
   suitableCount,
+  uncheckedCount,
   setFilterQueryParams,
   setSortedQueryParams,
   setViewQueryParams,
@@ -209,6 +213,7 @@ const currentView = ref(query.viewMode);
 const hasVisibleOffers = computed(
   () =>
     suitableCount.value > 0 ||
+    uncheckedCount.value > 0 ||
     (query.inclNoSuitable && sortedOffers.value.length > 0),
 );
 </script>
