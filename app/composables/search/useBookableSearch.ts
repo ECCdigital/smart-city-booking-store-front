@@ -789,10 +789,14 @@ export function useBookableSearch<TItem extends SearchableItem>(
 
   /**
    * Keeps the Offers that can be had in the period. Only the ones in
-   * `checkIds` are asked about; the rest pass, the filters hide them. An
-   * Offer whose check fails, or whose batch failed (`batchFailed`), stays
-   * in the list as unchecked: one refused request must not empty a search,
-   * nor show a booked period as free.
+   * `checkIds` are asked about. The rest, hidden by the filters for now,
+   * pass as unchecked unless an earlier run answered for them: a widened
+   * filter shows them as unchecked until its re-run has asked, never as
+   * available. An Offer whose check fails, or whose batch failed
+   * (`batchFailed`), stays in the list as unchecked too: one refused
+   * request must not empty a search, nor show a booked period as free.
+   * Events and Offers that cannot be booked need no request and are always
+   * decided.
    *
    * @returns The Offers kept, and the ids of those among them unchecked.
    */
@@ -813,8 +817,6 @@ export function useBookableSearch<TItem extends SearchableItem>(
       items,
       PERIOD_CHECK_CONCURRENCY,
       async (item) => {
-        if (!checkIds.has(item.item.id)) return true;
-        if (batchFailed.has(item.item.id)) return null;
         if (isEventItem(item.item)) {
           // An event is on during the period when it overlaps it; it does not
           // have to fit inside a two-hour room search.
@@ -823,6 +825,12 @@ export function useBookableSearch<TItem extends SearchableItem>(
         // An Offer that cannot be booked at all is not available in any
         // period; the backend would say the same.
         if (!item.isBookable) return false;
+
+        const answered = cached.has(
+          periodKey("occupancy", item.item, start, end),
+        );
+        if (!checkIds.has(item.item.id) && !answered) return null;
+        if (batchFailed.has(item.item.id)) return null;
 
         return (await fetchAvailability(item.item, start, end)).isAvailable;
       },
@@ -863,8 +871,10 @@ export function useBookableSearch<TItem extends SearchableItem>(
           !item.isBookable ||
           isEventItem(item.item) ||
           !suitableIds.has(item.item.id) ||
-          !checkIds.has(item.item.id) ||
-          unchecked.has(item.item.id)
+          unchecked.has(item.item.id) ||
+          // Outside the filters only an answer already kept, no request.
+          (!checkIds.has(item.item.id) &&
+            !cached.has(periodKey("price", item.item, start, end)))
         ) {
           return null;
         }
