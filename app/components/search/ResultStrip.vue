@@ -78,6 +78,7 @@
       :calculated-price="price"
       :is-not-suitable="isNotSuitable"
       :is-not-bookable="isNotBookable"
+      :availability-unchecked="availabilityUnchecked"
       :entry-page-mode="entryPageMode"
       :map-mode="mapMode"
       :map-list-mode="mapListMode"
@@ -129,6 +130,11 @@ const props = defineProps({
     default: false,
   },
   isNotBookable: {
+    type: Boolean,
+    default: false,
+  },
+  /** The period could not be checked: list price and a hint instead. */
+  availabilityUnchecked: {
     type: Boolean,
     default: false,
   },

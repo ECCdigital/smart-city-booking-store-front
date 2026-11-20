@@ -66,6 +66,12 @@
         :class="mapMode ? 'w-full' : 'basis-2/5 ml-auto grid'"
       >
         <!-- Preis -->
+        <p
+          v-if="availabilityUnchecked && !isNotSuitable"
+          class="text-xs text-right text-gray-500 dark:text-gray-400"
+        >
+          {{ $t("filter.availabilityUnchecked") }}
+        </p>
         <BookablePriceDisplay
           v-if="!isNotBookable && !isNotSuitable"
           :bookable="bookable"
@@ -146,6 +152,11 @@ const props = defineProps({
     default: false,
   },
   isNotBookable: {
+    type: Boolean,
+    default: false,
+  },
+  /** The period could not be checked: list price and a hint instead. */
+  availabilityUnchecked: {
     type: Boolean,
     default: false,
   },

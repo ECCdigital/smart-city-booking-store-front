@@ -595,6 +595,7 @@
     "viewBookingOptions": "Buchungsoptionen ansehen",
     "book": "Buchen",
     "unavailable": "Nicht verfügbar",
+    "availabilityUnchecked": "Nicht geprüft",
     "viewAll": "Alles ansehen",
     "descriptionTitle": "Beschreibung von {title}",
     "moreInfo": "Weitere Informationen",
@@ -659,6 +660,8 @@
     "eventsSection": "Veranstaltungen",
     "customFieldsBookablesOnly": "Gilt für Buchungsobjekte.",
     "fittingResults": "{count} passendes Ergebnis | {count} passende Ergebnisse",
+    "uncheckedResults": "{count} nicht geprüft | {count} nicht geprüft",
+    "availabilityUnchecked": "Verfügbarkeit im Zeitraum nicht geprüft",
     "provider": "Anbieter"
   },
 
