@@ -67,6 +67,14 @@ interface UseBookableSearchOptions<TItem> {
     start: number,
     end: number,
   ) => Promise<{ userGrossPriceEur: number } | null>;
+  /**
+   * Ask the backend only about the Offers the catalog filters of the query
+   * keep. For a list the filters narrow, the Result Page: the others are
+   * hidden there anyway. Off by default, so a view that shows the Offers
+   * whatever the filters say, such as a detail page whose URL still carries
+   * the Result Page's filters, checks every one of them.
+   */
+  narrowByFilters?: boolean;
 }
 
 /**
@@ -332,6 +340,7 @@ export function useBookableSearch<TItem extends SearchableItem>(
     // are reused. Without the re-run a wider radius would lift an Offer the
     // location search set aside (`too-far`) to a match, unchecked.
     if (
+      options.narrowByFilters &&
       searchIsInitialized.value &&
       needsTicketPricing({ timeStart: query.start, timeEnd: query.end }) &&
       narrowingKey(narrowingCriteria()) !== keyBefore
@@ -444,9 +453,12 @@ export function useBookableSearch<TItem extends SearchableItem>(
     );
     bookableItems = await searchForLocation(location, bookableItems, distance);
 
-    // Only the Offers the active filters keep cost requests; the others are
-    // hidden anyway and are checked once a filter shows them.
-    const checkIds = idsToCheck(bookableItems, narrowingCriteria());
+    // On the Result Page only the Offers the active filters keep cost
+    // requests; the others are hidden there and are checked once a filter
+    // shows them. Elsewhere every Offer found is checked.
+    const checkIds = options.narrowByFilters
+      ? idsToCheck(bookableItems, narrowingCriteria())
+      : new Set(bookableItems.map((i) => i.item.id));
 
     if (needsTicketPricing(criteria)) {
       const withTickets = new Map(

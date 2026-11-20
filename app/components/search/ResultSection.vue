@@ -196,7 +196,11 @@ const {
   setViewQueryParams,
   runSearch,
   resetResults,
-} = useBookableSearch({ sourceItems });
+} = useBookableSearch({
+  sourceItems,
+  // The filter area narrows this list, so only what it keeps is checked.
+  narrowByFilters: true,
+});
 
 const currentView = ref(query.viewMode);
 
