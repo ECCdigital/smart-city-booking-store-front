@@ -93,6 +93,16 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 - Six components nothing rendered any more: `AlreadyVerifiedCardLinkCard`, `checkout/InputTimePeriod` (empty), `inputs/InputDate`, `inputs/TimePickerDialog`, `search/DetailsAreaEventContent` (events render through `DetailsAreaContent`) and `user/settings/SettingsNavigation`, with the keys only they used: `events.ticketOptionsAndAvailability`, `account.settingsAppearance`, `account.settingsPersonalData`. No behaviour change
 - Composables and helpers nothing called any more: `useMemberships`, `useMobileKey`, `useSsoConfig`, `useFeatures`, `useCalendarDateField`; `descriptionOf`, `tagsOf`, `flagsOf` and `offerKey` (with its test) from `search/offer.ts`; `readCalendarDateFromDateFieldRoot`, `readTimeFromTimeFieldRoot`, `calendarDateToJsDate` and `jsDateToCalendarDate` from `localDate.js`; `attemptsSignature` from `recurrence.js`; `invalidateKeycloakCache` on the server. The BFF routes only `useMemberships` and `useMobileKey` called (`/api/memberships/my`, `/api/bookings/…/mobile-key/…`) stay for now. No behaviour change
 
+## [1.2.2] — 2026-11-20
+
+### Added
+
+- `docker-publish.yml` refuses to build a tag that is not `v` plus the `version` of `package.json` (ECCdigital/tickets#1018). A release candidate tagged without `npm version` built an image whose app still reported the previous version
+
+### Fixed
+
+- The checkout leaves out an optional add-on the backend no longer has (404) instead of showing the whole offer as not available (ECCdigital/tickets#781). A missing mandatory add-on still makes the offer not available, every other failure stays „Laden fehlgeschlagen“
+
 ## [1.2.1] — 2026-10-14
 
 ### Added
