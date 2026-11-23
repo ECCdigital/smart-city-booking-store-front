@@ -70,6 +70,15 @@
       </template>
     </div>
 
+    <UAlert
+      v-if="startedHoursHint"
+      :title="startedHoursHint"
+      icon="i-lucide-info"
+      variant="ghost"
+      class="p-1 text-info w-full my-2 text-sm flex items-center justify-center"
+      :ui="{ wrapper: 'flex-initial' }"
+      data-test="started-hours-hint"
+    />
     <div v-if="holidayHint" class="text-center italic w-full">
       {{ holidayHint }}
     </div>
@@ -81,6 +90,7 @@
 
 <script setup>
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+import { countsStartedHours } from "~/utils/startedHours.js";
 
 // Filled with the accent, or with secondary without one, its text in that
 // colour's contrast.
@@ -139,6 +149,12 @@ const fixedPriceHint = computed(() => {
       : t("price.quantity");
   return t("price.independentOf", { unit });
 });
+
+const startedHoursHint = computed(() =>
+  !forFreeHint.value && countsStartedHours(props.item)
+    ? t("price.startedHoursHint")
+    : "",
+);
 
 const holidayHint = computed(() => {
   if (!props.item.priceCategories) return "";
