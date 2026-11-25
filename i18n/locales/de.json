@@ -1793,6 +1793,7 @@
     "inMapViewCount": "keine Angebote | {count} Angebot | {count} Angebote",
     "listView": "Listenansicht",
     "mapView": "Kartenansicht",
+    "viewSwitch": "Ansicht wählen",
     "atThisLocation": "Ergebnisse an diesem Standort:",
     "clickToOpen": "Klicken Sie, um die Auswahl zu öffnen",
     "clickToSeeAll": "Klicken Sie, um alle anzusehen",
