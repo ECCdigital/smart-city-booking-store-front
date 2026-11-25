@@ -3,6 +3,7 @@ import { createI18n } from "vue-i18n";
 
 import de from "~~/i18n/locales/de.json";
 import en from "~~/i18n/locales/en.json";
+import { timeBeforeStart } from "~/utils/cancellationRefundTiers.js";
 
 /**
  * The unpaid hint of the cancellation dialog names the time before the start
@@ -31,6 +32,21 @@ describe("the time in the unpaid hint", () => {
   it("does the same in English", () => {
     expect(unpaidHint("en", 2, 1)).toBe(
       "This booking has not been paid yet. As you cancel 2 days and 1 hour before the start of the booking, 25 % is refunded to you. An amount of 30,00 € remains to be paid.",
+    );
+  });
+});
+
+describe("an unpaid booking without a start to count from", () => {
+  it("takes the backend's null as no time, not as 0 hours", () => {
+    expect(timeBeforeStart(null)).toBeNull();
+  });
+
+  it("says the hint without the time", () => {
+    const { t } = createI18n({ locale: "de", messages: { de, en } }).global;
+    expect(
+      t("booking.cancellation.unpaidBookingNoTime", { percent: 100 }),
+    ).toBe(
+      "Diese Buchung wurde noch nicht bezahlt. Sie bekommen 100 % erstattet. Es fallen für Sie somit keine Kosten an.",
     );
   });
 });

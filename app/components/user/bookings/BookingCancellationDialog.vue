@@ -625,7 +625,7 @@ function appliedTierOf(hours) {
 
 /** The time left until the start, such as „1 Tag und 22 Stunden“; `null` unknown. */
 const timeBeforeStartText = computed(() => {
-  const time = timeBeforeStart(Number(preview.data?.hoursBeforeStart));
+  const time = timeBeforeStart(preview.data?.hoursBeforeStart);
   if (!time) return null;
   const days = t("booking.cancellation.timeDays", { n: time.days }, time.days);
   const hours = t(
