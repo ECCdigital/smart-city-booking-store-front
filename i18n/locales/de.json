@@ -1169,7 +1169,7 @@
       "tierDays": "bis {n} Tage vor Beginn | bis {n} Tag vor Beginn | bis {n} Tage vor Beginn",
       "tierHours": "bis {n} Stunden vor Beginn | bis {n} Stunde vor Beginn | bis {n} Stunden vor Beginn",
       "refundHint": "{tenant} erstattet {percent} % des Betrags. Es werden somit {feePercent} % des Betrages einbehalten. Der endgültige Betrag steht im Stornobeleg.",
-      "tierHint": "Es gilt die Erstattungsstufe „{tier}“: {tenant} erstattet {percent} % des Betrags. Es werden {feePercent} % des zu zahlenden Betrags einbehalten. Der endgültige Betrag steht im Stornobeleg.",
+      "tierHint": "Es gilt die Erstattungsstufe „{tier}“: {tenant} erstattet {percent} % des Betrags. Es werden somit {feePercent} % des Betrages einbehalten. Der endgültige Betrag steht im Stornobeleg.",
       "refundHintUnpaid": "Der endgültige Betrag steht im Stornobeleg.",
       "tierHintUnpaid": "Es gilt die Erstattungsstufe „{tier}“. Der endgültige Betrag steht im Stornobeleg.",
       "previewFailedTitle": "Die Erstattung lässt sich gerade nicht berechnen.",
