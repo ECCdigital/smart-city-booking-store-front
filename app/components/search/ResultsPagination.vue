@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="total > 0"
-    class="mt-4 mb-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between"
+    class="mt-4 mb-6 flex flex-wrap items-center justify-between gap-3"
   >
     <div class="flex items-center gap-2">
       <label :for="selectId" class="text-sm whitespace-nowrap">
@@ -23,6 +23,7 @@
       :total="total"
       :sibling-count="1"
       show-edges
+      class="order-last flex w-full justify-center sm:order-none sm:w-auto"
     >
       <template #first>
         <span class="hidden" />
