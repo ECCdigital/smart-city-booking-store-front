@@ -1,5 +1,5 @@
 <template>
-  <UModal v-model:open="isOpen">
+  <UModal v-model:open="isOpen" :title="$t('filter.title')">
     <UChip :show="hasFilters" color="secondary" inset>
       <UButton
         :label="$t('filter.open')"
@@ -12,24 +12,22 @@
     </UChip>
 
     <template #content>
-      <UCard>
-        <FilterArea
-          v-model:is-initailized="isInitialized"
-          :bookables="bookables"
-          :include-non-suitable="includeNonSuitable"
-          :categories="categories"
-          :cities="cities"
-          :tenants="tenants"
-          :distance="distance"
-          :price="price"
-          :only-public-events="onlyPublicEvents"
-          :only-registration-needed-events="onlyRegistrationNeededEvents"
-          :custom-fields="customFields"
-          use-as-dialog
-          @filter="onFilter"
-          @close="() => (isOpen = false)"
-        />
-      </UCard>
+      <FilterArea
+        v-model:is-initailized="isInitialized"
+        :bookables="bookables"
+        :include-non-suitable="includeNonSuitable"
+        :categories="categories"
+        :cities="cities"
+        :tenants="tenants"
+        :distance="distance"
+        :price="price"
+        :only-public-events="onlyPublicEvents"
+        :only-registration-needed-events="onlyRegistrationNeededEvents"
+        :custom-fields="customFields"
+        use-as-dialog
+        @filter="onFilter"
+        @close="() => (isOpen = false)"
+      />
     </template>
   </UModal>
 </template>
