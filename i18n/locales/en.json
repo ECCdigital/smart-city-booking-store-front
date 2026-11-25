@@ -811,6 +811,8 @@
       "unpaidFeeDue": "This booking has not been paid yet. As you cancel {time} before the start of the booking, {percent} % is refunded to you. An amount of {fee} remains to be paid.",
       "unpaidFeeDueNoTime": "This booking has not been paid yet. {percent} % is refunded to you. An amount of {fee} remains to be paid.",
       "timeDaysAndHours": "{days} and {hours}",
+      "timeDays": "{n} days | {n} day | {n} days",
+      "timeHours": "{n} hours | {n} hour | {n} hours",
       "dueNow": "Still to pay",
       "originalAmount": "Booking amount",
       "fee": "Retained amount",

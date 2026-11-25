@@ -1157,6 +1157,8 @@
       "unpaidFeeDue": "Diese Buchung wurde noch nicht bezahlt. Da Sie {time} vor Buchungsbeginn stornieren, bekommen Sie {percent} % erstattet. Ein Betrag von {fee} bleibt zu zahlen.",
       "unpaidFeeDueNoTime": "Diese Buchung wurde noch nicht bezahlt. Sie bekommen {percent} % erstattet. Ein Betrag von {fee} bleibt zu zahlen.",
       "timeDaysAndHours": "{days} und {hours}",
+      "timeDays": "{n} Tage | {n} Tag | {n} Tage",
+      "timeHours": "{n} Stunden | {n} Stunde | {n} Stunden",
       "dueNow": "Noch zu zahlen",
       "originalAmount": "Buchungsbetrag",
       "fee": "Einbehaltener Betrag",

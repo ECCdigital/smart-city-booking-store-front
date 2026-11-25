@@ -627,9 +627,9 @@ function appliedTierOf(hours) {
 const timeBeforeStartText = computed(() => {
   const time = timeBeforeStart(Number(preview.data?.hoursBeforeStart));
   if (!time) return null;
-  const days = t("booking.cancellation.tierDays", { n: time.days }, time.days);
+  const days = t("booking.cancellation.timeDays", { n: time.days }, time.days);
   const hours = t(
-    "booking.cancellation.tierHours",
+    "booking.cancellation.timeHours",
     { n: time.hours },
     time.hours,
   );
