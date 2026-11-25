@@ -38,6 +38,20 @@ export function timeBeforeStart(hoursBeforeStart) {
 }
 
 /**
+ * The refund share of a preview as the backend's mails read it: the applied
+ * percentage, else the suggested one, else 0. One value for every hint.
+ *
+ * @param {{ appliedRefundPercentage?: number|null, suggestedRefundPercentage?: number|null }} [preview]
+ * @returns {number}
+ */
+export function refundPercentOf(preview) {
+  const applied = preview?.appliedRefundPercentage;
+  if (Number.isFinite(applied)) return applied;
+  const suggested = preview?.suggestedRefundPercentage;
+  return Number.isFinite(suggested) ? suggested : 0;
+}
+
+/**
  * The tiers of a bookable that name a deadline and a percentage, the longest
  * deadline first.
  *

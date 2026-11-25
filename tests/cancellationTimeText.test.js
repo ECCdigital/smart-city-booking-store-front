@@ -3,7 +3,10 @@ import { createI18n } from "vue-i18n";
 
 import de from "~~/i18n/locales/de.json";
 import en from "~~/i18n/locales/en.json";
-import { timeBeforeStart } from "~/utils/cancellationRefundTiers.js";
+import {
+  refundPercentOf,
+  timeBeforeStart,
+} from "~/utils/cancellationRefundTiers.js";
 
 /**
  * The unpaid hint of the cancellation dialog names the time before the start
@@ -46,5 +49,23 @@ describe("an unpaid booking without a start to count from", () => {
     expect(t("booking.cancellation.unpaidBookingNoTime")).toBe(
       "Diese Buchung wurde noch nicht bezahlt. Der gesamte Betrag entfällt. Es fallen für Sie somit keine Kosten an.",
     );
+  });
+});
+
+describe("refundPercentOf", () => {
+  it("takes the applied share, else the suggested, else 0, as the backend does", () => {
+    expect(
+      refundPercentOf({
+        appliedRefundPercentage: 25,
+        suggestedRefundPercentage: 50,
+      }),
+    ).toBe(25);
+    expect(
+      refundPercentOf({
+        appliedRefundPercentage: null,
+        suggestedRefundPercentage: 50,
+      }),
+    ).toBe(50);
+    expect(refundPercentOf({})).toBe(0);
   });
 });

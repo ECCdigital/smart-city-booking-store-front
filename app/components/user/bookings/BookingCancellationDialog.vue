@@ -472,6 +472,7 @@ import {
 } from "~/utils/bookingCancellation.js";
 import { isFreeBooking, isSettledBooking } from "~/utils/bookingStatus.js";
 import {
+  refundPercentOf,
   tierDeadline,
   timeBeforeStart,
 } from "~/utils/cancellationRefundTiers.js";
@@ -613,10 +614,13 @@ const period = computed(() => {
   return begin && end ? `${formatDate(begin)} – ${formatDate(end)}` : "";
 });
 
-const feePercent = computed(() => {
-  const refundPercent = Number(preview.data?.appliedRefundPercentage);
-  return Number.isFinite(refundPercent) ? 100 - refundPercent : null;
-});
+/** The refund share, the same for every hint and line of the dialog. */
+const refundPercent = computed(() =>
+  preview.data ? refundPercentOf(preview.data) : null,
+);
+const feePercent = computed(() =>
+  refundPercent.value === null ? null : 100 - refundPercent.value,
+);
 
 /**
  * The tier the refund applied as it is named everywhere, such as „bis 36
@@ -655,9 +659,7 @@ const amountLineLabel = computed(() =>
   t(isPaid.value ? "booking.cancellation.fee" : "booking.cancellation.dropped"),
 );
 const amountLinePercent = computed(() => {
-  if (isPaid.value) return feePercent.value;
-  const refundPercent = Number(preview.data?.appliedRefundPercentage);
-  return Number.isFinite(refundPercent) ? refundPercent : null;
+  return isPaid.value ? feePercent.value : refundPercent.value;
 });
 
 /** Unpaid: the share that drops by the time left, and what stays to pay. */
@@ -670,7 +672,7 @@ const unpaidHint = computed(() => {
     : "booking.cancellation.unpaidBooking";
   return t(time ? key : `${key}NoTime`, {
     time,
-    percent: data.appliedRefundPercentage ?? 100,
+    percent: refundPercent.value,
     fee: formatPrice(data.cancellationFeeEur),
   });
 });
@@ -687,8 +689,8 @@ const tierHint = computed(() => {
     {
       tier,
       tenant: tenantName.value,
-      percent: data.appliedRefundPercentage ?? 0,
-      feePercent: feePercent.value ?? 100,
+      percent: refundPercent.value,
+      feePercent: feePercent.value,
     },
   );
 });
