@@ -132,7 +132,7 @@
             <div
               class="flex justify-between py-2.5 border-b border-gray-100 dark:border-gray-800"
             >
-              <dt>{{ $t("booking.cancellation.fee") }}</dt>
+              <dt>{{ amountLineLabel }}</dt>
               <dd><USkeleton class="h-4 w-16" /></dd>
             </div>
             <div
@@ -184,18 +184,27 @@
               class="flex justify-between gap-3 py-2.5 border-b border-gray-100 dark:border-gray-800"
             >
               <dt class="text-gray-700 dark:text-gray-300">
-                {{ $t("booking.cancellation.fee") }}
-                <span v-if="feePercent !== null" class="text-gray-400 ml-1.5">
+                {{ amountLineLabel }}
+                <span
+                  v-if="amountLinePercent !== null"
+                  class="text-gray-400 ml-1.5"
+                >
                   {{
                     $t("booking.cancellation.feePercent", {
-                      percent: feePercent,
+                      percent: amountLinePercent,
                     })
                   }}
                 </span>
               </dt>
               <dd class="tabular-nums">
-                {{ isPaid ? "−" : "" }}
-                {{ formatPrice(preview.data.cancellationFeeEur) }}
+                −
+                {{
+                  formatPrice(
+                    isPaid
+                      ? preview.data.cancellationFeeEur
+                      : preview.data.refundAmountEur,
+                  )
+                }}
               </dd>
             </div>
             <div
@@ -638,7 +647,20 @@ const timeBeforeStartText = computed(() => {
   return t("booking.cancellation.timeDaysAndHours", { days, hours });
 });
 
-/** Unpaid: the share refunded by the time left, and what stays to pay. */
+/**
+ * The line between the booking amount and the total: paid, what is
+ * retained of the refund; unpaid, what drops of the amount due.
+ */
+const amountLineLabel = computed(() =>
+  t(isPaid.value ? "booking.cancellation.fee" : "booking.cancellation.dropped"),
+);
+const amountLinePercent = computed(() => {
+  if (isPaid.value) return feePercent.value;
+  const refundPercent = Number(preview.data?.appliedRefundPercentage);
+  return Number.isFinite(refundPercent) ? refundPercent : null;
+});
+
+/** Unpaid: the share that drops by the time left, and what stays to pay. */
 const unpaidHint = computed(() => {
   const data = preview.data;
   if (!data) return "";
@@ -657,8 +679,11 @@ const tierHint = computed(() => {
   const data = preview.data;
   if (!data) return "";
   const tier = appliedTierOf(data.appliedTierHours);
+  const unpaid = isPaid.value ? "" : "Unpaid";
   return t(
-    tier ? "booking.cancellation.tierHint" : "booking.cancellation.refundHint",
+    tier
+      ? `booking.cancellation.tierHint${unpaid}`
+      : `booking.cancellation.refundHint${unpaid}`,
     {
       tier,
       tenant: tenantName.value,
