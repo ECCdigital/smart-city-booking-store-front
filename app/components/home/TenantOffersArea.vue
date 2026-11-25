@@ -5,6 +5,7 @@
       <div class="flex-1" />
       <UButton
         variant="ghost"
+        :class="FOCUS_OUTLINE"
         :label="$t('home.providers.all')"
         trailing-icon="i-lucide-chevron-right"
         to="/search"
@@ -17,7 +18,8 @@
              only shows on the instance home. -->
         <NuxtLink
           :to="`/t/${tile.id}/search`"
-          class="flex flex-col justify-between h-full gap-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 transition duration-200 ease-out hover:shadow-lg hover:ring-2 hover:ring-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+          :class="[CARD_SURFACE, CARD_HOVER, CARD_FOCUS]"
+          class="group flex flex-col justify-between h-full gap-2 p-4"
         >
           <div class="flex items-center gap-4">
             <span
@@ -73,6 +75,8 @@
 </template>
 
 <script setup>
+import { FOCUS_OUTLINE } from "~/utils/focusClasses.js";
+import { CARD_FOCUS, CARD_HOVER, CARD_SURFACE } from "~/utils/cardClasses.js";
 import { tenantAccent, tenantTiles } from "~/utils/tenantOffers.js";
 
 // Written out whole so Tailwind finds the classes.

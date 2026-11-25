@@ -4,6 +4,7 @@
       <h2 class="text-2xl font-bold">{{ $t("home.howItWorks.title") }}</h2>
       <UButton
         variant="ghost"
+        :class="FOCUS_OUTLINE"
         :label="$t('catalog.showAllOffers')"
         trailing-icon="i-lucide-chevron-right"
         :to="tenantTo('/search')"
@@ -12,7 +13,8 @@
     </div>
 
     <div
-      class="grid gap-10 lg:grid-cols-12 lg:items-center rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 md:p-10 lg:p-12"
+      :class="CARD_SURFACE"
+      class="grid gap-10 lg:grid-cols-12 lg:items-center p-5 md:p-10 lg:p-12"
     >
       <ol class="lg:col-span-5 m-0 p-0 list-none space-y-7">
         <li
@@ -46,6 +48,8 @@
 </template>
 
 <script setup>
+import { FOCUS_OUTLINE } from "~/utils/focusClasses.js";
+import { CARD_SURFACE } from "~/utils/cardClasses.js";
 import BookingFlowIllustration from "~/components/home/BookingFlowIllustration.vue";
 
 const { t } = useI18n();

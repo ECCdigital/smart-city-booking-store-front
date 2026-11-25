@@ -24,6 +24,7 @@
       </div>
       <UButton
         variant="ghost"
+        :class="FOCUS_OUTLINE"
         :label="$t('home.nearby.openSearch')"
         trailing-icon="i-lucide-chevron-right"
         :to="tenantTo({ path: '/search', query: { view: 'map' } })"
@@ -72,6 +73,7 @@
 </template>
 
 <script setup>
+import { FOCUS_OUTLINE } from "~/utils/focusClasses.js";
 import ResultsMap from "~/components/search/ResultsMap.vue";
 import { isBookableOffer, mergeOffers } from "~/composables/search/offer";
 import { MatchStatus } from "~/composables/search/catalogFilters";
