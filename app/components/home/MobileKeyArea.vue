@@ -8,7 +8,8 @@
     </div>
 
     <div
-      class="grid gap-10 lg:grid-cols-12 lg:items-center rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 md:p-10 lg:p-12"
+      :class="CARD_SURFACE"
+      class="grid gap-10 lg:grid-cols-12 lg:items-center p-5 md:p-10 lg:p-12"
     >
       <div class="lg:col-span-8 space-y-6">
         <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -76,6 +77,7 @@
 </template>
 
 <script setup>
+import { CARD_SURFACE } from "~/utils/cardClasses.js";
 import MobileKeyIllustration from "~/components/home/MobileKeyIllustration.vue";
 
 const { t } = useI18n();

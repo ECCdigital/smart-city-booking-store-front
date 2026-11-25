@@ -1,9 +1,13 @@
 <template>
+  <!-- The shared card look; the hover only where a click opens the details,
+       not in the map's compact cards. A focused title link shows the focus of
+       `CARD_FOCUS` on the whole card. -->
   <div
-    class="shadow-lg bg-white dark:bg-gray-700 rounded-xl has-[.result-card-link:focus-visible]:ring-2 has-[.result-card-link:focus-visible]:ring-[color:var(--ui-accent,var(--ui-primary))]"
+    class="has-[.result-card-link:focus-visible]:outline-2 has-[.result-card-link:focus-visible]:outline-offset-2 has-[.result-card-link:focus-visible]:outline-gray-900 dark:has-[.result-card-link:focus-visible]:outline-white has-[.result-card-link:focus-visible]:ring-2 has-[.result-card-link:focus-visible]:ring-[color:var(--ui-accent,var(--ui-secondary))]"
     :class="[
+      CARD_SURFACE,
+      mapDetailMode ? 'max-h-72' : CARD_HOVER,
       isNotSuitable ? 'opacity-70 dark:opacity-50' : 'cursor-pointer',
-      mapDetailMode ? 'max-h-72' : '',
     ]"
     @click="onGoToDetails"
   >
@@ -28,16 +32,16 @@
           v-bind="image"
           :alt="altText"
           :loading="eager ? 'eager' : 'lazy'"
-          class="w-full object-cover rounded-t-xl"
+          class="w-full object-cover rounded-t-2xl"
           @error="onImageError"
         />
         <ClientOnly v-else>
           <div
-            class="w-full h-full rounded-t-xl flex flex-col items-center justify-center gap-2"
+            class="w-full h-full rounded-t-2xl flex flex-col items-center justify-center gap-2"
           >
             <ImagePlaceholder
               :theme="theme"
-              class="w-full h-full rounded-t-xl"
+              class="w-full h-full rounded-t-2xl"
             />
             <div
               v-if="showImageErrorHint"
@@ -88,6 +92,7 @@ import BookableTypeBadge from "~/components/bookables/BookableTypeBadge.vue";
 import FavoriteButton from "~/components/favorites/FavoriteButton.vue";
 import { useRedirection } from "~/composables/utils/useRedirection.js";
 import { useMediaImage } from "~/composables/utils/useMediaImage";
+import { CARD_HOVER, CARD_SURFACE } from "~/utils/cardClasses.js";
 
 const colorMode = useColorMode();
 const { coverImageOf, imageSource } = useMediaImage();

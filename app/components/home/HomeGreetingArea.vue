@@ -122,10 +122,10 @@ import { useFavoritesStore } from "~~/stores/favorites.js";
 import { useInstanceStore } from "~~/stores/instance.js";
 import { useAccessPoints } from "~/composables/api/useAccessPoints.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+import { CARD_SURFACE } from "~/utils/cardClasses.js";
 import { bookingSpan, nextBooking, nextKey } from "~/utils/homeGreeting.js";
 
-const CARD =
-  "flex flex-col gap-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4";
+const CARD = `flex flex-col gap-1 p-4 ${CARD_SURFACE}`;
 const CARD_TITLE =
   "flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1";
 const CARD_TEXT = "text-sm text-gray-600 dark:text-gray-400";

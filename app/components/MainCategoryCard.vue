@@ -1,21 +1,20 @@
 <template>
   <!--
-    The hover lift is a transform and a ring, and nothing else: both paint
-    outside the layout, so the cards beside and below this one stay where they
-    are. A negative margin or a border that only exists on hover would resize
-    the card's box in the flow instead and push the whole row around.
-    `relative` plus `hover:z-10` keeps the lifted card above its neighbours;
-    the scale is dropped for visitors who ask for less motion, the ring stays.
-    The card is a link, so it is reached and opened by keyboard as well; the
-    keyboard focus shows the hover ring on the card.
+    The card wears the shared card look (`~/utils/cardClasses.js`): its hover
+    is a shadow and a ring, both painted outside the layout, so the cards
+    beside and below this one stay where they are. The card is a link, so it is
+    reached and opened by keyboard as well; the keyboard focus is on the link,
+    which has the card's shape.
   -->
   <NuxtLink
     :to="categoryTo"
-    class="group block h-full rounded-lg focus-visible:outline-none"
+    :class="CARD_FOCUS"
+    class="block h-full rounded-2xl"
   >
     <UCard
-        class="mainCategoryCard relative h-full cursor-pointer bg-white dark:bg-gray-700 text-black dark:text-gray-200 shadow-lg transition duration-200 ease-out hover:z-10 hover:scale-105 hover:shadow-xl hover:ring-2 hover:ring-[color:var(--ui-accent,var(--ui-primary))] group-focus-visible:ring-2 group-focus-visible:ring-[color:var(--ui-accent,var(--ui-primary))] motion-reduce:transition-none motion-reduce:hover:scale-100"
-        variant="solid"
+      :class="[CARD_SURFACE, CARD_HOVER]"
+      class="mainCategoryCard h-full cursor-pointer text-black dark:text-gray-200"
+      variant="solid"
     >
       <template #header>
         <div class="w-full flex justify-center mt-5">
@@ -32,6 +31,7 @@
   </NuxtLink>
 </template>
 <script setup>
+import { CARD_FOCUS, CARD_HOVER, CARD_SURFACE } from "~/utils/cardClasses.js";
 
 const props = defineProps({
   category: {
@@ -53,5 +53,12 @@ const categoryTo = computed(() =>
   transform: scale(1.15);
   transition: transform 0.2s;
   rotate: 2deg;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :deep(.mainCategoryCard:hover .avatar-hover) {
+    transform: none;
+    rotate: none;
+  }
 }
 </style>
