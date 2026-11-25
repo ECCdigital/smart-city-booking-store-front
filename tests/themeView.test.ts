@@ -142,6 +142,32 @@ describe("buildThemeView", () => {
       expect(issues).toEqual([]);
     },
   );
+  it.each(["glass", "solid"])(
+    "carries the surface of the auth cards, %s",
+    (style) => {
+      const view = buildThemeView(
+        bundleWith({ authCardStyle: style }),
+        "e",
+        withIssues(),
+      );
+
+      expect(view.authCardStyle).toBe(style);
+    },
+  );
+
+  it.each([undefined, null, "frosted", "", false])(
+    "reads the surface of the auth cards as glass when it is %s",
+    (style) => {
+      const { issues, onIssue } = withIssues();
+
+      const view = buildThemeView(bundleWith({ authCardStyle: style }), "e", {
+        onIssue,
+      });
+
+      expect(view.authCardStyle).toBe("glass");
+      expect(issues).toEqual([]);
+    },
+  );
 });
 
 describe("buildThemeView, footer logos", () => {
@@ -449,6 +475,7 @@ describe("defaultThemeView", () => {
       logo: null,
       logoDark: null,
       authLogoSize: "sm",
+      authCardStyle: "glass",
       footerLogos: [],
       font: null,
     });

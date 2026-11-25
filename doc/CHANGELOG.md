@@ -7,6 +7,10 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ## [Unreleased]
 
+### Added
+
+- Auth cards without glass ([ECCdigital/tickets#1365](https://github.com/ECCdigital/tickets/issues/1365)): with `authCardStyle: "solid"` in the Theme Bundle the cards of the login, sign-up, password, email and card verification and SSO pages are opaque, white in light and gray-900 in dark, instead of translucent and blurred over the Background. `glass` stays the default, also for a backend without the field. Every auth card takes its surface from the class `auth-card` instead of `glass`, so the reset password card and the action cards of the email and card verification now share the glass of the others; needs the backend with ECCdigital/tickets#1365 to take effect
+
 ### Changed
 
 - „Rechnungen“: the buttons „Herunterladen“ and „Drucken“ of each card are in the primary colour, their text in its contrast colour
@@ -33,6 +37,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- „oder“ in the login card and the hint of the card login read with enough contrast in dark (`gray-400`, WCAG AA), on glass as on the opaque card
 - Icon-only buttons have an accessible name (WCAG 4.1.2): „Filter zurücksetzen“ and „Schließen“ in the filter, „Schließen“ in the time-period picker and in the mobile-key panel now carry an `aria-label`; the list/map switch names its view and tells which one is active (`aria-pressed`). The copy icon next to an address is a button now, reachable by keyboard and named „Adresse kopieren“ (`bookableDetail.copyAddress`) instead of an icon with a click handler
 - The cards that only reacted to a mouse click are reached and opened by keyboard (WCAG 2.1.1): the category cards under „Was möchten Sie buchen?“ on the start page and the quick access cards on „Meine Aktivitäten“ are links now, and the result cards of `/search` and of the start page's events link their title to the detail page, so the favorite heart stays a button of its own; a focused card shows a ring, and every one of them opens in a new tab as well. A click on a link inside a result card (the title, a link in an event's teaser) no longer opens the detail page a second time. The compact cards of the map are unchanged
 - The quick filter for withdrawal receipts on „Meine Belege“ reads „Widerrufbelege“ instead of its i18n key (`account.invoices.quickFilter.withdrawal` was missing)

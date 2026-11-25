@@ -51,6 +51,8 @@ export interface ThemeBundle {
   logoDark?: unknown;
   /** The height step of the logo in the auth cards, read by `buildThemeView`. */
   authLogoSize?: unknown;
+  /** The surface of the auth cards, read by `buildThemeView`. */
+  authCardStyle?: unknown;
   /** The logos of the footer row, read by `parseFooterLogos`. */
   footerLogos?: unknown;
   /**
