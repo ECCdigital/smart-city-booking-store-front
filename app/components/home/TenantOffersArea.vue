@@ -5,6 +5,7 @@
       <div class="flex-1" />
       <UButton
         variant="ghost"
+        :class="FOCUS_OUTLINE"
         :label="$t('home.providers.all')"
         trailing-icon="i-lucide-chevron-right"
         to="/search"
@@ -74,6 +75,7 @@
 </template>
 
 <script setup>
+import { FOCUS_OUTLINE } from "~/utils/focusClasses.js";
 import { CARD_FOCUS, CARD_HOVER, CARD_SURFACE } from "~/utils/cardClasses.js";
 import { tenantAccent, tenantTiles } from "~/utils/tenantOffers.js";
 

@@ -4,6 +4,7 @@
       <h2 class="text-2xl font-bold">{{ $t("catalog.type") }}</h2>
       <UButton
         variant="ghost"
+        :class="FOCUS_OUTLINE"
         :label="$t('catalog.showAllOffers')"
         trailing-icon="i-lucide-chevron-right"
         :to="tenantTo('/search')"
@@ -22,6 +23,7 @@
   </div>
 </template>
 <script setup>
+import { FOCUS_OUTLINE } from "~/utils/focusClasses.js";
 import MainCategoryCard from "~/components/MainCategoryCard.vue";
 
 const { t } = useI18n();

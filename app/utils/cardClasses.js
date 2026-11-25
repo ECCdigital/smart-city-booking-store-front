@@ -1,3 +1,5 @@
+import { FOCUS_OUTLINE } from "./focusClasses.js";
+
 /**
  * The one look of a card: the start page's areas and the result cards share
  * it, so they read as one set. Complete class literals, so Tailwind finds them.
@@ -19,5 +21,4 @@ export const CARD_HOVER =
  * For a card that is itself the focused link; `ResultCard` writes the same
  * for a focused link inside it.
  */
-export const CARD_FOCUS =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 dark:focus-visible:outline-white focus-visible:ring-2 focus-visible:ring-[color:var(--ui-accent,var(--ui-secondary))]";
+export const CARD_FOCUS = `${FOCUS_OUTLINE} focus-visible:ring-2 focus-visible:ring-[color:var(--ui-accent,var(--ui-secondary))]`;

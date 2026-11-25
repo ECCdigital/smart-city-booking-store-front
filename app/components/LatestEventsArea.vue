@@ -5,10 +5,11 @@
       <UButton
         v-if="latestEvents.length > 3"
         variant="ghost"
+        :class="FOCUS_OUTLINE"
         :label="$t('events.showAllEvents')"
         trailing-icon="i-lucide-chevron-right"
+        :to="tenantTo({ path: '/search', query: { cat: 'event' } })"
         class="my-2 md:my-0"
-        @click="goToEventsPage()"
       />
     </div>
     <div class="md:flex md:space-x-2">
@@ -30,6 +31,7 @@
   </div>
 </template>
 <script setup>
+import { FOCUS_OUTLINE } from "~/utils/focusClasses.js";
 import ResultCard from "~/components/search/ResultCard.vue";
 
 const props = defineProps({
@@ -50,9 +52,5 @@ const latestEvents = computed(() => {
   );
 });
 
-function goToEventsPage() {
-  const router = useRouter();
-  router.push(tenantTo({ path: "/search", query: { cat: "event" } }));
-}
 </script>
 <style scoped></style>
