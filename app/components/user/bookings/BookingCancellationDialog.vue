@@ -474,7 +474,7 @@ import { isFreeBooking, isSettledBooking } from "~/utils/bookingStatus.js";
 import {
   refundPercentOf,
   tierDeadline,
-  timeBeforeStart,
+  wordTimeBeforeStart,
 } from "~/utils/cancellationRefundTiers.js";
 import {
   formatIban,
@@ -637,19 +637,9 @@ function appliedTierOf(hours) {
 }
 
 /** The time left until the start, such as „1 Tag und 22 Stunden“; `null` unknown. */
-const timeBeforeStartText = computed(() => {
-  const time = timeBeforeStart(preview.data?.hoursBeforeStart);
-  if (!time) return null;
-  const days = t("booking.cancellation.timeDays", { n: time.days }, time.days);
-  const hours = t(
-    "booking.cancellation.timeHours",
-    { n: time.hours },
-    time.hours,
-  );
-  if (time.days === 0) return hours;
-  if (time.hours === 0) return days;
-  return t("booking.cancellation.timeDaysAndHours", { days, hours });
-});
+const timeBeforeStartText = computed(() =>
+  wordTimeBeforeStart(preview.data?.timeBeforeStart, t),
+);
 
 /**
  * The line between the booking amount and the total: paid, what is

@@ -19,25 +19,6 @@ export function tierDeadline(hoursBeforeStart) {
 }
 
 /**
- * The time left until the start as the booker reads it: whole days from one
- * day on, with the hours beside them only below three days and where there
- * are any; below one day whole hours. `null` where the time is not known.
- *
- * @param {number} hoursBeforeStart
- * @returns {{ days: number, hours: number }|null}
- */
-export function timeBeforeStart(hoursBeforeStart) {
-  if (!Number.isFinite(hoursBeforeStart) || hoursBeforeStart < 0) return null;
-  if (hoursBeforeStart < HOURS_PER_DAY) {
-    return { days: 0, hours: hoursBeforeStart };
-  }
-  const days = Math.floor(hoursBeforeStart / HOURS_PER_DAY);
-  const hours =
-    hoursBeforeStart < 3 * HOURS_PER_DAY ? hoursBeforeStart % HOURS_PER_DAY : 0;
-  return { days, hours };
-}
-
-/**
  * The refund share of a preview as the backend's mails read it: the applied
  * percentage, else the suggested one, else 0. One value for every hint.
  *
@@ -49,6 +30,31 @@ export function refundPercentOf(preview) {
   if (Number.isFinite(applied)) return applied;
   const suggested = preview?.suggestedRefundPercentage;
   return Number.isFinite(suggested) ? suggested : 0;
+}
+
+/**
+ * The time before the start in the UI language, such as „1 Tag und 22
+ * Stunden“. The backend applies the rule (`timeBeforeStart` of the preview:
+ * days, and hours only where they are named, else 0); this only words it.
+ * `null` where the preview names no time.
+ *
+ * @param {{ days?: number, hours?: number }|null} [time]
+ * @param {Function} t vue-i18n's `t`
+ * @returns {string|null}
+ */
+export function wordTimeBeforeStart(time, t) {
+  if (!Number.isFinite(time?.days) || !Number.isFinite(time?.hours)) {
+    return null;
+  }
+  const days = t("booking.cancellation.timeDays", { n: time.days }, time.days);
+  const hours = t(
+    "booking.cancellation.timeHours",
+    { n: time.hours },
+    time.hours,
+  );
+  if (time.days === 0) return hours;
+  if (time.hours === 0) return days;
+  return t("booking.cancellation.timeDaysAndHours", { days, hours });
 }
 
 /**
