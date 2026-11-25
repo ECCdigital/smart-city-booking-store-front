@@ -37,6 +37,7 @@
           @ready="onMapReady"
           @moveend="updateMapBounds"
           @zoomend="updateMapBounds"
+          @click="onMapClick"
         >
           <LTileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -85,7 +86,6 @@
         :show-current-bookable="showCurrentBookable"
         :show-current-group="showMultiPinItems"
         @open-details="openBookableDetails"
-        @close-details="closeBookableDetails"
       />
 
       <div class="absolute right-4 top-4 z-1001">
@@ -485,6 +485,13 @@ function closeBookableDetails() {
 
   showMultiPinItems.value = false;
   currentMultiPinGroup.value = null;
+}
+
+// On the phone a tap on the map, not on a pin, closes the sheet below.
+function onMapClick() {
+  if (window.matchMedia("(min-width: 768px)").matches) return;
+
+  closeBookableDetails();
 }
 
 function onMapReady() {

@@ -20,7 +20,14 @@
     <div v-else class="w-full">
       <!-- Title -->
       <p class="font-bold" :class="hasLongTitle ? 'text-base line-clamp-3' : 'text-lg'">
-        {{ event.information.name }}
+        <NuxtLink
+          v-if="detailsTo"
+          :to="detailsTo"
+          class="result-card-link focus-visible:outline-none focus-visible:underline"
+        >
+          {{ event.information.name }}
+        </NuxtLink>
+        <template v-else>{{ event.information.name }}</template>
       </p>
       <p>{{ getTenantName(event.tenantId) }}</p>
 
@@ -88,6 +95,11 @@ const props = defineProps({
   event: {
     type: Object,
     required: true,
+  },
+  // Route of the detail page; the title links to it when set.
+  detailsTo: {
+    type: Object,
+    default: null,
   },
   isNotSuitable: {
     type: Boolean,

@@ -107,6 +107,23 @@ describe("resolveCheckoutErrorKey", () => {
   });
 });
 
+describe("the wording of a compartment shortage", () => {
+  // The same refusal for an Open Locker Anlage whose last free Fach was just
+  // taken and for a Pareva Anlage that is full: either way the period is
+  // booked out.
+  const wording = {
+    de: "Zeitraum gerade ausgebucht. Bitte wählen Sie einen anderen Zeitraum.",
+    en: "This period was just booked out. Please choose another period.",
+  };
+
+  it.each([
+    ["de", de],
+    ["en", en],
+  ])("%s names checkout.compartments_unavailable as just booked out", (locale, messages) => {
+    expect(messages.checkout.compartments_unavailable).toBe(wording[locale]);
+  });
+});
+
 describe("the wording of an offer that is no longer available", () => {
   const wording = {
     de: "Dieses Angebot ist nicht mehr verfügbar und kann nicht gebucht werden.",
@@ -135,13 +152,13 @@ describe("the refusal of an address on the blacklist", () => {
     expect(
       addressBlacklistedMessage({ mailAddress: "betrieb@example.test" }, translator("de")),
     ).toBe(
-      "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an betrieb@example.test.",
+      "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wenden Sie sich per Mail an betrieb@example.test.",
     );
   });
 
   it("names the operator of the offer where the instance has no mail address", () => {
     const expected =
-      "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wende dich per Mail an den Betreiber dieses Angebots.";
+      "Mit dieser Adresse ist keine Buchung möglich. Bei Fragen wenden Sie sich per Mail an den Betreiber dieses Angebots.";
 
     expect(addressBlacklistedMessage({ mailAddress: "" }, translator("de"))).toBe(expected);
     expect(addressBlacklistedMessage({ mailAddress: "  " }, translator("de"))).toBe(expected);

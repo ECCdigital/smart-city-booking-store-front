@@ -25,7 +25,7 @@ export const navigationPresets = {
     {
       value: "/account/invoices",
       labelKey: "navigation.invoices",
-      icon: "i-lucide-wallet-cards",
+      icon: "i-lucide-file-text",
       disabled: false,
     },
     {

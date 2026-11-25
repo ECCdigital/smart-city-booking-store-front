@@ -1,17 +1,28 @@
 export function useRedirection() {
   const { tenantTo } = useTenantRoute();
 
-  function goToDetails(id, type) {
-    const router = useRouter();
+  // The detail page of an Offer, or null for a type without one. Links and
+  // click handlers share it, so both open the same page.
+  function detailsRoute(id, type) {
     if (type === "event") {
-      router.push(tenantTo(`/events/${id}`));
-    } else if (
+      return tenantTo(`/events/${id}`);
+    }
+    if (
       type === "room" ||
       type === "resource" ||
       type === "ticket" ||
       type === "event-location"
     ) {
-      router.push(tenantTo(`/bookables/${id}`));
+      return tenantTo(`/bookables/${id}`);
+    }
+    return null;
+  }
+
+  function goToDetails(id, type) {
+    const route = detailsRoute(id, type);
+    if (route) {
+      const router = useRouter();
+      router.push(route);
     }
   }
 
@@ -29,5 +40,5 @@ export function useRedirection() {
     }
   }
 
-  return { goToDetails, goToDetailsNewTab };
+  return { detailsRoute, goToDetails, goToDetailsNewTab };
 }
