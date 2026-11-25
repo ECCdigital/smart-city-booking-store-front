@@ -1749,6 +1749,7 @@
     "quantity": "Quantity",
     "independentOf": "This price applies regardless of the {unit} booked.",
     "holidayHint": "(Prices may differ on public holidays.)",
+    "startedHoursHint": "Every started hour is charged in full.",
     "unitHour": "hrs",
     "unitDay": "day(s)",
     "unitItem": "item(s)",

@@ -1822,6 +1822,7 @@
     "quantity": "Menge",
     "independentOf": "Dieser Preis gilt unabhängig von der gebuchten {unit}.",
     "holidayHint": "(An Feiertagen können abweichende Preise gelten.)",
+    "startedHoursHint": "Jede angefangene Stunde wird voll berechnet.",
     "unitHour": "Std.",
     "unitDay": "Tag(e)",
     "unitItem": "Stück",
