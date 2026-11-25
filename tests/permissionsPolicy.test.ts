@@ -19,7 +19,8 @@ function permissionsPolicy() {
     match,
     "security.headers.permissionsPolicy is not set in nuxt.config.js",
   ).not.toBeNull();
-  return match![1];
+  // A feature commented out is not allowed.
+  return match![1].replace(/\/\/.*$/gm, "");
 }
 
 describe("the permissions policy", () => {

@@ -317,20 +317,6 @@ try {
       }
     }
 
-    // The browser features the app uses on its own origin
-    // (ECCdigital/tickets#1366): nuxt-security switches every one off unless
-    // `nuxt.config.js` allows it. The header does not depend on the bundle.
-    if (!WITHOUT_NEW_SETTINGS) {
-      const policy = (await fetch(base + "/")).headers.get("permissions-policy") ?? "";
-      const blocked = ["camera=(self)", "geolocation=(self)"].filter(
-        (feature) => !policy.split(/,\s*/).includes(feature),
-      );
-      console.log(`${blocked.length ? "FAIL" : "ok  "} Permissions-Policy on /`);
-      if (blocked.length) {
-        failures.push(`Permissions-Policy on / without ${blocked.join(", ")}: "${policy}"`);
-      }
-    }
-
     failures.push(
       ...(await fontProblems(base, backend, { withoutNewSettings: WITHOUT_NEW_SETTINGS })),
     );

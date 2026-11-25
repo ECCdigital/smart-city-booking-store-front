@@ -135,7 +135,9 @@ const locationButton = (root, label) =>
   [...root.querySelectorAll("button")].find(
     (button) => textOf(button) === label,
   );
-const hint = (root) => textOf(root.querySelector("p.mt-3"));
+// The count beside the title, and the hint under the map.
+const count = (root) => textOf(root.querySelector("[aria-live]"));
+const hint = (root) => textOf(root.querySelector("section > p"));
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -145,7 +147,7 @@ describe("„Mein Standort“ where the browser refuses the position", () => {
   it("says under the map that the position is not available", async () => {
     const getCurrentPosition = refusePosition();
     const root = await mountArea("de");
-    expect(textOf(root.querySelector("h2 + p"))).toBe("2 Angebote mit Standort");
+    expect(count(root)).toBe("2 Angebote mit Standort");
     expect(hint(root)).not.toContain("Ihr Standort ist nicht verfügbar");
 
     locationButton(root, "Mein Standort").click();
@@ -156,7 +158,7 @@ describe("„Mein Standort“ where the browser refuses the position", () => {
       "Ihr Standort ist nicht verfügbar, die Karte zeigt alle Angebote.",
     );
     expect(locationButton(root, "Mein Standort").getAttribute("aria-pressed")).toBe("false");
-    expect(textOf(root.querySelector("h2 + p"))).toBe("2 Angebote mit Standort");
+    expect(count(root)).toBe("2 Angebote mit Standort");
     expect(root.querySelector("[data-map]").dataset.map).toBe("2");
   });
 
