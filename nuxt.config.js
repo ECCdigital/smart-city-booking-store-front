@@ -199,8 +199,12 @@ export default defineNuxtConfig({
       // Mobile Key / QR-Scan: nuxt-security setzt per Default `camera=()` und sperrt
       // getUserMedia damit auch für die eigene Herkunft. Der Scanner braucht
       // ausdrücklich `camera=(self)`.
+      // „Mein Standort“ on the start page: the default `geolocation=()` blocks
+      // getCurrentPosition the same way, and the browser never asks for the
+      // position. The map needs `geolocation=(self)`.
       permissionsPolicy: {
         camera: ["self"],
+        geolocation: ["self"],
       },
     },
     nonce: true,
