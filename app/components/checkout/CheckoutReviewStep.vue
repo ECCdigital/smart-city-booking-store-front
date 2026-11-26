@@ -2,9 +2,15 @@
 import { useCheckout } from "~/composables/api/useCheckout.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { isBusinessContact } from "~/utils/businessBooking.js";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
 import CancellationRefundTierList from "~/components/CancellationRefundTierList.vue";
+import CancellationRefundTierDisclosure from "~/components/CancellationRefundTierDisclosure.vue";
 
 const COUPON_ROW_ID = "__coupon__";
+
+// Below `lg`, where the checkout has one column, the refund scale is
+// collapsed and the actions sit beside their labels.
+const { isGreaterThanLg: isWide } = useBreakpointCheck();
 
 const props = defineProps({
   summary: {
@@ -732,7 +738,7 @@ const bookingDiscountDescription = computed(() => {
               {{ $t("checkout.review.sectionPayment") }}
             </h3>
             <UButton
-              v-if="paymentLabel && canEditPayment"
+              v-if="paymentLabel && canEditPayment && isWide"
               variant="link"
               color="primary"
               size="sm"
@@ -743,15 +749,28 @@ const bookingDiscountDescription = computed(() => {
             </UButton>
           </div>
 
-          <!-- Label beside value, as in the sections above; stacked where the
-               aside leaves the column narrow, so the refund scale does not wrap. -->
+          <!-- Label beside value where the column is wide, as in the sections
+               above; stacked below, so the refund scale does not wrap. Narrow
+               screens put the actions beside the labels. -->
           <dl class="space-y-6">
             <div
               v-if="paymentLabel"
-              class="grid grid-cols-1 sm:grid-cols-[9rem_1fr] lg:grid-cols-1 xl:grid-cols-[9rem_1fr] gap-x-8 gap-y-1"
+              class="grid grid-cols-1 xl:grid-cols-[9rem_1fr] gap-x-8 gap-y-1"
             >
-              <dt class="text-sm text-gray-500 dark:text-gray-400">
-                {{ $t("checkout.review.paymentMethodLabel") }}
+              <dt
+                class="flex items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400"
+              >
+                <span>{{ $t("checkout.review.paymentMethodLabel") }}</span>
+                <UButton
+                  v-if="canEditPayment && !isWide"
+                  variant="link"
+                  color="primary"
+                  size="sm"
+                  class="shrink-0 p-0"
+                  @click="onEdit('payment')"
+                >
+                  {{ $t("checkout.review.edit") }}
+                </UButton>
               </dt>
               <dd class="text-sm text-gray-900 dark:text-white">
                 <div class="font-semibold">{{ paymentLabel }}</div>
@@ -765,13 +784,50 @@ const bookingDiscountDescription = computed(() => {
             </div>
             <div
               v-if="cancellationRefundTiers.length > 0"
-              class="grid grid-cols-1 sm:grid-cols-[9rem_1fr] lg:grid-cols-1 xl:grid-cols-[9rem_1fr] gap-x-8 gap-y-1"
+              class="grid grid-cols-1 xl:grid-cols-[9rem_1fr] gap-x-8 gap-y-1"
             >
-              <dt class="text-sm text-gray-500 dark:text-gray-400 hyphens-auto">
+              <!-- Narrow screens show the label in the disclosure's summary. -->
+              <dt
+                class="text-sm text-gray-500 dark:text-gray-400 hyphens-auto"
+                :class="{ 'sr-only': !isWide }"
+              >
                 {{ $t("bookableDetail.cancellationTitleShort") }}
               </dt>
               <dd class="text-gray-900 dark:text-white min-w-0">
-                <CancellationRefundTierList :tiers="cancellationRefundTiers" />
+                <!-- Narrow screens keep the summary short: the scale opens on demand. -->
+                <CancellationRefundTierList
+                  v-if="isWide"
+                  :tiers="cancellationRefundTiers"
+                />
+                <CancellationRefundTierDisclosure
+                  v-else
+                  summary-class="text-sm"
+                  :tiers="cancellationRefundTiers"
+                >
+                  <template #summary="{ open }">
+                    <!-- The label stays in the summary's name: „Stornierungsbedingungen
+                         Anzeigen“ says on its own what the button opens. -->
+                    <span class="text-gray-500 dark:text-gray-400">
+                      {{ $t("bookableDetail.cancellationTitleShort") }}
+                    </span>
+                    <!-- Styled as the „Bearbeiten“ link (UButton link, size sm). -->
+                    <span
+                      class="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/75 transition-colors"
+                    >
+                      {{
+                        open
+                          ? $t("checkout.review.hideCancellationTerms")
+                          : $t("checkout.review.showCancellationTerms")
+                      }}
+                      <UIcon
+                        name="i-lucide-chevron-down"
+                        size="14"
+                        class="group-open:rotate-180 transition-transform"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </template>
+                </CancellationRefundTierDisclosure>
               </dd>
             </div>
           </dl>

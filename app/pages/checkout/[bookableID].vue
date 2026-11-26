@@ -2761,11 +2761,11 @@ function onReviewEdit(section) {
           :tenant="tenant"
         />
 
-        <!-- Spacer -->
-        <div class="flex-1" />
+        <!-- Spacer: keeps the card at the column's foot where it is sticky -->
+        <div class="hidden lg:block flex-1" />
 
-        <!-- Price Summary  -->
-        <div class="sticky bottom-4 md:bottom-6 mt-6 z-10">
+        <!-- Price Summary: under the bookable in one column, sticky in two -->
+        <div class="mt-6 lg:sticky lg:bottom-6 lg:z-10">
           <PriceSummaryBar
             v-if="currentStepKey !== 'confirm'"
             :summary="summary"

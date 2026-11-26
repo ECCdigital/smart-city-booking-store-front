@@ -1,7 +1,8 @@
 <script setup>
 import { reachedPerBookingLimit } from "~/utils/amountLimits";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
-import CancellationRefundTierList from "~/components/CancellationRefundTierList.vue";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
+import CancellationRefundTierDisclosure from "~/components/CancellationRefundTierDisclosure.vue";
 
 const props = defineProps({
   summary: {
@@ -53,6 +54,10 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["update:amount"]);
+
+// The card is sticky only where the checkout has two columns, from `lg` on
+// (see the page).
+const { isGreaterThanLg: isSticky } = useBreakpointCheck();
 
 const { t } = useI18n();
 const formatting = useFormatting();
@@ -229,7 +234,7 @@ const hasContent = computed(() => {
   <Transition name="summary-bar">
     <div
       v-if="hasContent"
-      class="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-2xl p-4 md:p-5 space-y-3"
+      class="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm lg:shadow-2xl p-4 md:p-5 space-y-3"
     >
       <!-- Loading Overlay -->
       <div
@@ -445,36 +450,12 @@ const hasContent = computed(() => {
           <span v-else class="text-gray-400">{{ $t("price.free") }}</span>
         </div>
 
-        <details
-          v-if="cancellationRefundTiers.length > 0"
-          class="group border-t border-gray-200 dark:border-gray-700 pt-3"
-        >
-          <summary
-            class="list-none [&::-webkit-details-marker]:hidden flex items-center justify-between gap-3 rounded-sm text-sm font-medium text-gray-700 dark:text-gray-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          >
-            <span>{{ $t("bookableDetail.cancellationTitleShort") }}</span>
-            <UIcon
-              name="i-lucide-chevron-down"
-              size="16"
-              class="shrink-0 text-gray-600 dark:text-gray-300 group-open:rotate-180 transition-transform"
-              aria-hidden="true"
-            />
-          </summary>
-
-          <!-- The card is sticky: a long scale scrolls inside it, also by keyboard. -->
-          <div
-            role="region"
-            tabindex="0"
-            :aria-label="$t('bookableDetail.cancellationTitleShort')"
-            class="mt-2 max-h-[35vh] overflow-y-auto rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          >
-            <CancellationRefundTierList
-              class="text-gray-700 dark:text-gray-200"
-              :tiers="cancellationRefundTiers"
-              compact
-            />
-          </div>
-        </details>
+        <CancellationRefundTierDisclosure
+          class="border-t border-gray-200 dark:border-gray-700 pt-3"
+          :tiers="cancellationRefundTiers"
+          :scrollable="isSticky"
+          compact
+        />
       </template>
     </div>
   </Transition>
