@@ -43,6 +43,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  /** Whether there is a payment step to go back to. */
+  canEditPayment: {
+    type: Boolean,
+    default: false,
+  },
   /** The tenant's refund scale, sorted; empty where nothing would be refunded. */
   cancellationRefundTiers: {
     type: Array,
@@ -727,7 +732,7 @@ const bookingDiscountDescription = computed(() => {
               {{ $t("checkout.review.sectionPayment") }}
             </h3>
             <UButton
-              v-if="paymentLabel"
+              v-if="paymentLabel && canEditPayment"
               variant="link"
               color="primary"
               size="sm"

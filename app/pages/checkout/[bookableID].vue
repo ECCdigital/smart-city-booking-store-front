@@ -705,6 +705,12 @@ const needsPaymentSelectionStep = computed(
   () => paymentProviders.value.length > 1 && !hasResolvedFreeCheckout.value,
 );
 
+// The summary names the payment method also where the tenant offers only
+// one and the checkout skips the choice.
+const showPaymentSummary = computed(
+  () => paymentProviders.value.length > 0 && !hasResolvedFreeCheckout.value,
+);
+
 function applyUserToContactForm(user, force = false) {
   if (!user) return;
 
@@ -3128,7 +3134,8 @@ function onReviewEdit(section) {
               :show-comment="!!String(customerComment || '').trim()"
               :payment-providers="paymentProviders"
               :selected-payment-provider-id="selectedPaymentProviderId"
-              :show-payment-summary="needsPaymentSelectionStep"
+              :show-payment-summary="showPaymentSummary"
+              :can-edit-payment="needsPaymentSelectionStep"
               :cancellation-refund-tiers="cancellationRefundTiers"
               :amounts="amounts"
               :lead-bookable-id="bookableID"
