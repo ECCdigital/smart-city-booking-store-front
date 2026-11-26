@@ -743,10 +743,12 @@ const bookingDiscountDescription = computed(() => {
             </UButton>
           </div>
 
+          <!-- Label beside value, as in the sections above; stacked where the
+               aside leaves the column narrow, so the refund scale does not wrap. -->
           <dl class="space-y-6">
             <div
               v-if="paymentLabel"
-              class="grid grid-cols-1 sm:grid-cols-[minmax(9rem,auto)_1fr] gap-x-8 gap-y-1"
+              class="grid grid-cols-1 sm:grid-cols-[9rem_1fr] lg:grid-cols-1 xl:grid-cols-[9rem_1fr] gap-x-8 gap-y-1"
             >
               <dt class="text-sm text-gray-500 dark:text-gray-400">
                 {{ $t("checkout.review.paymentMethodLabel") }}
@@ -761,9 +763,11 @@ const bookingDiscountDescription = computed(() => {
                 </div>
               </dd>
             </div>
-            <!-- The scale takes the full width: in the value column it would wrap. -->
-            <div v-if="cancellationRefundTiers.length > 0" class="space-y-2">
-              <dt class="text-sm text-gray-500 dark:text-gray-400">
+            <div
+              v-if="cancellationRefundTiers.length > 0"
+              class="grid grid-cols-1 sm:grid-cols-[9rem_1fr] lg:grid-cols-1 xl:grid-cols-[9rem_1fr] gap-x-8 gap-y-1"
+            >
+              <dt class="text-sm text-gray-500 dark:text-gray-400 hyphens-auto">
                 {{ $t("bookableDetail.cancellationTitleShort") }}
               </dt>
               <dd class="text-gray-900 dark:text-white min-w-0">
