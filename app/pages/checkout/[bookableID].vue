@@ -9,6 +9,7 @@ import InputWeekSelection from "~/components/checkout/InputWeekSelection.vue";
 import InputMonthSelection from "../../components/checkout/InputMonthSelection.vue";
 import InputBlockPeriodSelection from "~/components/checkout/InputBlockPeriodSelection.vue";
 import PriceSummaryBar from "~/components/checkout/PriceSummaryBar.vue";
+import { sortedRefundTiers } from "~/utils/cancellationRefundTiers.js";
 import CheckoutContactStep from "~/components/checkout/CheckoutContactStep.vue";
 import { isBusinessContact } from "~/utils/businessBooking.js";
 import CheckoutCustomFields from "~/components/checkout/CheckoutCustomFields.vue";
@@ -692,6 +693,13 @@ const hasResolvedFreeCheckout = computed(() => {
     total <= 0.005
   );
 });
+
+// Refunds only matter where the booking costs something.
+const cancellationRefundTiers = computed(() =>
+  Number(summary.value?.total ?? 0) > 0.005
+    ? sortedRefundTiers(leadBookable.value?.cancellationRefundTiers)
+    : [],
+);
 
 const needsPaymentSelectionStep = computed(
   () => paymentProviders.value.length > 1 && !hasResolvedFreeCheckout.value,
@@ -2764,6 +2772,7 @@ function onReviewEdit(section) {
             :max-amounts-per-booking="maxAmountsPerBooking"
             :lead-bookable-id="bookableID"
             :mandatory-ids="mandatoryBookableIds"
+            :cancellation-refund-tiers="cancellationRefundTiers"
             @update:amount="handleAmountUpdate"
           />
         </div>
@@ -3120,6 +3129,7 @@ function onReviewEdit(section) {
               :payment-providers="paymentProviders"
               :selected-payment-provider-id="selectedPaymentProviderId"
               :show-payment-summary="needsPaymentSelectionStep"
+              :cancellation-refund-tiers="cancellationRefundTiers"
               :amounts="amounts"
               :lead-bookable-id="bookableID"
               :enable-coupons="couponsEnabled"

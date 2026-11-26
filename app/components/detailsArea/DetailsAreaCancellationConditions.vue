@@ -1,48 +1,31 @@
 <template>
   <details
-    v-if="hasCancellationRefundTiers"
+    v-if="cancellationRefundTiers.length > 0"
     class="bg-gray-200 dark:bg-gray-700 rounded-md p-3 group"
   >
     <summary
-      class="font-bold list-none flex items-center justify-between gap-3"
+      class="font-bold list-none [&::-webkit-details-marker]:hidden flex items-center justify-between gap-3 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
       <span>{{ $t("bookableDetail.cancellationTitleShort") }}</span>
-      <span
-        class="text-sm font-normal text-gray-600 dark:text-gray-300 group-open:rotate-180 transition-transform"
-      >
-        ▼
-      </span>
+      <UIcon
+        name="i-lucide-chevron-down"
+        size="18"
+        class="shrink-0 text-gray-600 dark:text-gray-300 group-open:rotate-180 transition-transform"
+        aria-hidden="true"
+      />
     </summary>
 
-    <div class="mt-3 text-sm text-gray-700 dark:text-gray-200">
-      <p class="mb-3">
-        {{ $t("bookableDetail.cancellationHint") }}
-      </p>
-
-      <ul class="space-y-2">
-        <li
-          v-for="tier in normalizedCancellationRefundTiers"
-          :key="`${tier.hoursBeforeStart}-${tier.refundPercentage}`"
-          class="rounded-md bg-white/70 dark:bg-gray-800/70 px-3 py-2 flex items-center justify-between gap-4"
-        >
-          <span>{{ formatDeadline(tier.hoursBeforeStart) }}</span>
-          <span class="font-semibold text-right"
-            >{{ tier.refundPercentage }} % <br class="block md:hidden" />
-            {{ $t("bookableDetail.refund") }}</span
-          >
-        </li>
-      </ul>
-    </div>
+    <CancellationRefundTierList
+      class="mt-3 text-gray-700 dark:text-gray-200"
+      :tiers="cancellationRefundTiers"
+      row-class="bg-white/70 dark:bg-gray-800/70"
+    />
   </details>
 </template>
 <script setup>
 import { computed } from "vue";
-import {
-  sortedRefundTiers,
-  tierDeadline,
-} from "~/utils/cancellationRefundTiers.js";
-
-const { t } = useI18n();
+import CancellationRefundTierList from "~/components/CancellationRefundTierList.vue";
+import { sortedRefundTiers } from "~/utils/cancellationRefundTiers.js";
 
 const props = defineProps({
   item: {
@@ -57,7 +40,7 @@ const props = defineProps({
 
 // The tiers are the tenant's: a bookable carries them itself, an event on
 // each of its tickets, all alike.
-const normalizedCancellationRefundTiers = computed(() => {
+const cancellationRefundTiers = computed(() => {
   const source = props.isEvent
     ? props.item?.tickets?.find((ticket) =>
         Array.isArray(ticket?.cancellationRefundTiers),
@@ -65,20 +48,5 @@ const normalizedCancellationRefundTiers = computed(() => {
     : props.item;
   return sortedRefundTiers(source?.cancellationRefundTiers);
 });
-
-const hasCancellationRefundTiers = computed(
-  () => normalizedCancellationRefundTiers.value.length > 0,
-);
-
-function formatDeadline(hoursBeforeStart) {
-  if (hoursBeforeStart === 0) {
-    return t("bookableDetail.untilStart");
-  }
-
-  const { amount, unit } = tierDeadline(hoursBeforeStart);
-  return unit === "days"
-    ? t("bookableDetail.untilDaysBefore", { n: amount }, amount)
-    : t("bookableDetail.untilHoursBefore", { n: amount }, amount);
-}
 </script>
 <style scoped></style>

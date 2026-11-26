@@ -2,6 +2,7 @@
 import { useCheckout } from "~/composables/api/useCheckout.js";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
 import { isBusinessContact } from "~/utils/businessBooking.js";
+import CancellationRefundTierList from "~/components/CancellationRefundTierList.vue";
 
 const COUPON_ROW_ID = "__coupon__";
 
@@ -41,6 +42,11 @@ const props = defineProps({
   showPaymentSummary: {
     type: Boolean,
     default: false,
+  },
+  /** The tenant's refund scale, sorted; empty where nothing would be refunded. */
+  cancellationRefundTiers: {
+    type: Array,
+    default: () => [],
   },
   amounts: {
     type: Object,
@@ -712,12 +718,16 @@ const bookingDiscountDescription = computed(() => {
           </dl>
         </section>
 
-        <section v-if="showPaymentSummary && paymentLabel" class="pb-2">
+        <section
+          v-if="paymentLabel || cancellationRefundTiers.length > 0"
+          class="pb-2"
+        >
           <div class="flex items-start justify-between gap-4 mb-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ $t("checkout.review.sectionPayment") }}
             </h3>
             <UButton
+              v-if="paymentLabel"
               variant="link"
               color="primary"
               size="sm"
@@ -730,6 +740,7 @@ const bookingDiscountDescription = computed(() => {
 
           <dl class="space-y-6">
             <div
+              v-if="paymentLabel"
               class="grid grid-cols-1 sm:grid-cols-[minmax(9rem,auto)_1fr] gap-x-8 gap-y-1"
             >
               <dt class="text-sm text-gray-500 dark:text-gray-400">
@@ -743,6 +754,15 @@ const bookingDiscountDescription = computed(() => {
                 >
                   {{ paymentHint }}
                 </div>
+              </dd>
+            </div>
+            <!-- The scale takes the full width: in the value column it would wrap. -->
+            <div v-if="cancellationRefundTiers.length > 0" class="space-y-2">
+              <dt class="text-sm text-gray-500 dark:text-gray-400">
+                {{ $t("bookableDetail.cancellationTitleShort") }}
+              </dt>
+              <dd class="text-gray-900 dark:text-white min-w-0">
+                <CancellationRefundTierList :tiers="cancellationRefundTiers" />
               </dd>
             </div>
           </dl>

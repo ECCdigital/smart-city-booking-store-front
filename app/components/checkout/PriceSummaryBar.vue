@@ -1,6 +1,7 @@
 <script setup>
 import { reachedPerBookingLimit } from "~/utils/amountLimits";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+import CancellationRefundTierList from "~/components/CancellationRefundTierList.vue";
 
 const props = defineProps({
   summary: {
@@ -41,6 +42,11 @@ const props = defineProps({
     default: null,
   },
   mandatoryIds: {
+    type: Array,
+    default: () => [],
+  },
+  /** The tenant's refund scale, sorted; empty where nothing would be refunded. */
+  cancellationRefundTiers: {
     type: Array,
     default: () => [],
   },
@@ -438,6 +444,37 @@ const hasContent = computed(() => {
           </span>
           <span v-else class="text-gray-400">{{ $t("price.free") }}</span>
         </div>
+
+        <details
+          v-if="cancellationRefundTiers.length > 0"
+          class="group border-t border-gray-200 dark:border-gray-700 pt-3"
+        >
+          <summary
+            class="list-none [&::-webkit-details-marker]:hidden flex items-center justify-between gap-3 rounded-sm text-sm font-medium text-gray-700 dark:text-gray-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            <span>{{ $t("bookableDetail.cancellationTitleShort") }}</span>
+            <UIcon
+              name="i-lucide-chevron-down"
+              size="16"
+              class="shrink-0 text-gray-600 dark:text-gray-300 group-open:rotate-180 transition-transform"
+              aria-hidden="true"
+            />
+          </summary>
+
+          <!-- The card is sticky: a long scale scrolls inside it, also by keyboard. -->
+          <div
+            role="region"
+            tabindex="0"
+            :aria-label="$t('bookableDetail.cancellationTitleShort')"
+            class="mt-2 max-h-[35vh] overflow-y-auto rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            <CancellationRefundTierList
+              class="text-gray-700 dark:text-gray-200"
+              :tiers="cancellationRefundTiers"
+              compact
+            />
+          </div>
+        </details>
       </template>
     </div>
   </Transition>
