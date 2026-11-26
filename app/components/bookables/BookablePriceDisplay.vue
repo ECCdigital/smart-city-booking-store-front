@@ -10,7 +10,7 @@
         calculatedPrice.regularGrossPriceEur > calculatedPrice.userGrossPriceEur
       "
     >
-      <span class="text-gray-500 line-through md:mr-2">
+      <span class="text-gray-500 dark:text-gray-300 line-through md:mr-2">
         {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
       </span>
       <br class="md:hidden" />
@@ -33,7 +33,7 @@
     <p
       v-else-if="props.calculatedPrice && !!calculatedPrice.freeBookingAllowed"
     >
-      <span class="text-gray-500 line-through mr-2">
+      <span class="text-gray-500 dark:text-gray-300 line-through mr-2">
         {{ displayPrice(calculatedPrice.regularGrossPriceEur) }}
       </span>
       <span>{{ $t("checkout.review.totalFree") }}</span>

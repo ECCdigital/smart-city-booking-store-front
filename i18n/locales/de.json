@@ -1815,7 +1815,7 @@
     "flatRate": "Pauschalpreis",
     "information": "Preisinformationen",
     "allInclVat": "(Alle Preise inklusive Mehrwertsteuer.)",
-    "inclVat": "(inkl. MwSt.)",
+    "inclVat": "(inkl.\u00a0MwSt.)",
     "vat": "MwSt.",
     "total": "Gesamt",
     "duration": "Dauer",

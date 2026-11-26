@@ -1742,7 +1742,7 @@
     "flatRate": "Flat rate",
     "information": "Price information",
     "allInclVat": "(All prices include VAT.)",
-    "inclVat": "(incl. VAT)",
+    "inclVat": "(incl.\u00a0VAT)",
     "vat": "VAT",
     "total": "Total",
     "duration": "Duration",
