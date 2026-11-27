@@ -1443,6 +1443,7 @@
     "inMapViewCount": "no offers | {count} offer | {count} offers",
     "listView": "List view",
     "mapView": "Map view",
+    "viewSwitch": "Choose view",
     "atThisLocation": "Results at this location:",
     "clickToOpen": "Click to open the selection",
     "clickToSeeAll": "Click to see all",

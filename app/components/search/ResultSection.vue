@@ -35,7 +35,7 @@
         >
         <div class="" style="flex: 1" />
         <div class="grid md:flex gap-2 mt-2 sm:mt-0 -ml-2 sm:ml-0">
-          <div class="flex mb-2 md:my-0">
+          <div class="flex gap-2 mb-2 md:my-0">
             <ResultViewButton
               v-model="currentView"
               @set-view="setViewQueryParams"
@@ -55,7 +55,7 @@
               :only-registration-needed-events="query.regEv"
               :custom-fields="query.customFields"
               :class="
-                query.viewMode === 'map' ? 'ml-2 2xl:hidden' : 'lg:hidden'
+                query.viewMode === 'map' ? '2xl:hidden' : 'lg:hidden'
               "
               @filter="setFilterQueryParams"
             />

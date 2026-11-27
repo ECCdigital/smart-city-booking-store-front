@@ -1,5 +1,10 @@
 <template>
-  <UFieldGroup orientation="horizontal" class="rounded-lg overflow-hidden">
+  <UFieldGroup
+    orientation="horizontal"
+    class="rounded-lg overflow-hidden"
+    role="group"
+    :aria-label="t('results.viewSwitch')"
+  >
     <UTooltip
       v-for="option in viewOptions"
       :key="option.value"
