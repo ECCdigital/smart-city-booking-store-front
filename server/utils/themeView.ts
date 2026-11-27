@@ -18,7 +18,7 @@ import {
   type HeroParseOptions,
 } from "~~/shared/utils/heroLayout";
 import { sanitizeHeroLayoutRichtext } from "~~/shared/utils/heroRichtextAllowlist";
-import type { ThemeView } from "~~/shared/types/hero";
+import { AUTH_CARD_STYLES, type ThemeView } from "~~/shared/types/hero";
 import type { ThemeBundle } from "~~/shared/types/api";
 import { sanitizeHeroRichtext } from "./heroRichtext";
 import { parseFooterLogos } from "./footerLogos";
@@ -48,6 +48,7 @@ export function defaultThemeView(): ThemeView {
     logo: null,
     logoDark: null,
     authLogoSize: "sm",
+    authCardStyle: "glass",
     footerLogos: [],
     font: null,
   };
@@ -61,6 +62,16 @@ export function defaultThemeView(): ThemeView {
 function readFont(font: unknown, etag: string): ThemeView["font"] {
   const href = themeFontHref(font, etag);
   return href ? { href } : null;
+}
+
+/**
+ * The surface of the auth cards. Like the size of the logo, a value off the
+ * list reads as glass without a report: a default filled in is no failure.
+ */
+function readAuthCardStyle(value: unknown): ThemeView["authCardStyle"] {
+  return (AUTH_CARD_STYLES as readonly unknown[]).includes(value)
+    ? (value as ThemeView["authCardStyle"])
+    : "glass";
 }
 
 /**
@@ -106,6 +117,8 @@ export function buildThemeView(
         : parseHeroMediaReference(bundle.logoDark, options, "logoDark"),
     // A backend before the setting reads as S, the size the logo always had.
     authLogoSize: readLogoSize(bundle.authLogoSize, "sm"),
+    // A backend before the setting reads as glass, the cards it always had.
+    authCardStyle: readAuthCardStyle(bundle.authCardStyle),
     footerLogos: parseFooterLogos(bundle.footerLogos, options),
     font: readFont(bundle.font, etag),
   };

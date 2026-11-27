@@ -1,5 +1,5 @@
 <template>
-  <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
+  <UCard variant="soft" class="w-full max-w-md rounded-xl auth-card">
     <template #header>
       <AuthTitleSection />
       <h1 class="text-lg font-semibold text-center text-gray-500 dark:text-gray-400">

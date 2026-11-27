@@ -64,7 +64,7 @@ const handleRegister = async () => {
 <template>
   <PageBackground>
     <div class="flex items-center justify-center p-6 w-full">
-      <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
+      <UCard variant="soft" class="w-full max-w-md rounded-xl auth-card">
         <template #header>
           <h2 class="text-2xl font-semibold text-center">
             {{ t("sso.register.title") }}
