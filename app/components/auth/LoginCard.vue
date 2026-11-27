@@ -1,5 +1,5 @@
 <template>
-  <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
+  <UCard variant="soft" class="w-full max-w-md rounded-xl auth-card">
     <template #header>
       <AuthTitleSection />
       <h1 class="text-lg font-semibold text-center text-gray-500 dark:text-gray-400">
@@ -74,7 +74,7 @@
             <div class="w-full border-t border-gray-300 dark:border-gray-600" />
           </div>
           <div class="relative flex justify-center text-sm">
-            <span class="bg-gray-50 dark:bg-gray-800 px-2 text-gray-500">
+            <span class="bg-gray-50 dark:bg-gray-800 px-2 text-gray-500 dark:text-gray-400">
               {{ $t("login.or") }}
             </span>
           </div>

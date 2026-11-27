@@ -435,6 +435,8 @@ export interface ThemeView {
   logoDark: HeroMediaReference | null;
   /** The height step of the logo in the auth cards; S unless the bundle says otherwise. */
   authLogoSize: AuthLogoSize;
+  /** The surface of the auth cards; glass unless the bundle says otherwise. */
+  authCardStyle: AuthCardStyle;
   /** The logos of the footer row, in order; empty when there is no row. */
   footerLogos: FooterLogo[];
   /** The instance font's file for the preload; `null` for the system font. */
@@ -456,6 +458,14 @@ export type LogoSize = (typeof LOGO_SIZES)[number];
 
 /** The step of the logo in the auth cards. */
 export type AuthLogoSize = LogoSize;
+
+/**
+ * The surface of the auth cards: translucent and blurred over the Background,
+ * as before the setting, or opaque.
+ */
+export const AUTH_CARD_STYLES = ["glass", "solid"] as const;
+
+export type AuthCardStyle = (typeof AUTH_CARD_STYLES)[number];
 
 /**
  * The Live Preview protocol between the admin's Hero Editor and the storefront

@@ -11,7 +11,7 @@ defineProps({
 <template>
   <UCard
       variant="soft"
-      class="w-full max-w-md rounded-xl glass"
+      class="w-full max-w-md rounded-xl auth-card"
   >
     <template #header>
       <AuthTitleSection />

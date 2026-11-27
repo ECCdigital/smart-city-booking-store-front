@@ -13,7 +13,7 @@ const emit = defineEmits(["startVerification"]);
 <template>
   <UCard
     variant="soft"
-    class="w-full max-w-md rounded-xl bg-white/30 dark:bg-gray-900/30 backdrop-blur-lg"
+    class="w-full max-w-md rounded-xl auth-card"
   >
     <template #header>
       <AuthTitleSection />

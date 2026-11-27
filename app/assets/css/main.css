@@ -98,12 +98,26 @@ body {
     }
 }
 
-.glass {
+/*
+ * `auth-card` is the surface of every card on the auth pages: glass like
+ * `.glass`, unless the instance chose opaque cards (`authCardStyle: "solid"`
+ * of the Theme View, set on the page by PageBackground). Then the card is
+ * white or gray-900, and the text on it no longer depends on the Background
+ * shining through.
+ */
+.glass,
+.auth-card {
   @apply bg-slate-50/60 dark:bg-gray-900/80 backdrop-blur-lg;
 }
 
 .glass-light {
   @apply bg-slate-50/20 dark:bg-gray-900/40 backdrop-blur-lg;
+}
+
+[data-auth-card="solid"] .auth-card {
+  @apply bg-white dark:bg-gray-900;
+  /* The build adds the -webkit- prefix; written by hand, it ate this one. */
+  backdrop-filter: none;
 }
 
 /*
