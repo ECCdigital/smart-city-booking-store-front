@@ -34,6 +34,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- The filter dialog of the results keeps „Filter entfernen“ and „Filter anwenden“ in view on small or low screens ([ECCdigital/tickets#1344](https://github.com/ECCdigital/tickets/issues/1344)): title and buttons stay fixed and only the filters scroll, the dialog never grows past the viewport (WCAG 1.4.10). The dialog is named „Ergebnisse filtern“ for screen readers (WCAG 4.1.2)
 - „Mein Standort“ on the start page asks for the position ([ECCdigital/tickets#1366](https://github.com/ECCdigital/tickets/issues/1366)): the header `Permissions-Policy` sends `geolocation=(self)` besides `camera=(self)` on every page, where nuxt-security's default `geolocation=()` made the browser refuse at once. A refused position shows „Ihr Standort ist nicht verfügbar, die Karte zeigt alle Angebote.“ under the map
 - „oder“ in the login card and the hint of the card login read with enough contrast in dark (`gray-400`, WCAG AA), on glass as on the opaque card
 - Icon-only buttons have an accessible name (WCAG 4.1.2): „Filter zurücksetzen“ and „Schließen“ in the filter, „Schließen“ in the time-period picker and in the mobile-key panel now carry an `aria-label`; the list/map switch names its view and tells which one is active (`aria-pressed`). The copy icon next to an address is a button now, reachable by keyboard and named „Adresse kopieren“ (`bookableDetail.copyAddress`) instead of an icon with a click handler

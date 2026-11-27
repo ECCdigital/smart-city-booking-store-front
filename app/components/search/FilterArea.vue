@@ -1,10 +1,19 @@
 <template>
+  <!--
+    As a dialog, header and actions stay put and only the filters scroll:
+    the column fills the modal, whose height is capped to the viewport.
+  -->
   <div
     :class="
-      useAsDialog ? 'max-h-[80vh]' : 'my-2 p-2 border border-gray-200 rounded'
+      useAsDialog
+        ? 'flex flex-col flex-1 min-h-0'
+        : 'my-2 p-2 border border-gray-200 rounded'
     "
   >
-    <div class="flex justify-between items-center">
+    <div
+      class="flex justify-between items-center"
+      :class="useAsDialog ? 'shrink-0 px-4 sm:px-6' : ''"
+    >
       <p class="my-4 font-bold">{{ $t("filter.title") }}</p>
       <UTooltip v-if="!useAsDialog" :text="$t('filter.reset')">
         <UButton
@@ -29,7 +38,13 @@
       </UTooltip>
     </div>
     <USeparator v-if="!useAsDialog" class="border-gray-200" />
-    <div :class="useAsDialog ? 'overflow-auto max-h-[70vh] mb-2' : ''">
+    <div
+      :class="
+        useAsDialog
+          ? 'flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 border-y border-default'
+          : ''
+      "
+    >
       <div class="my-4 space-y-3">
         <div class="space-y-3">
           <USwitch
@@ -143,7 +158,10 @@
       </div>
     </div>
 
-    <div v-if="useAsDialog" class="flex justify-between">
+    <div
+      v-if="useAsDialog"
+      class="shrink-0 flex flex-wrap justify-between gap-2 px-4 sm:px-6 py-3"
+    >
       <UButton
         v-if="isFilterActive"
         :label="$t('filter.remove')"
