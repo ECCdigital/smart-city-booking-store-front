@@ -33,3 +33,22 @@ export function sortedRefundTiers(tiers) {
     )
     .sort((left, right) => right.hoursBeforeStart - left.hoursBeforeStart);
 }
+
+/**
+ * The deadline of a tier in words, „Bis 2 Tage vor Beginn“, as the detail
+ * page and the checkout name it.
+ *
+ * @param {Function} t vue-i18n's `t`
+ * @param {number} hoursBeforeStart
+ * @returns {string}
+ */
+export function formatTierDeadline(t, hoursBeforeStart) {
+  if (hoursBeforeStart === 0) {
+    return t("bookableDetail.untilStart");
+  }
+
+  const { amount, unit } = tierDeadline(hoursBeforeStart);
+  return unit === "days"
+    ? t("bookableDetail.untilDaysBefore", { n: amount }, amount)
+    : t("bookableDetail.untilHoursBefore", { n: amount }, amount);
+}

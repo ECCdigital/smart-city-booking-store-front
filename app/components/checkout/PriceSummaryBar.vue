@@ -1,6 +1,8 @@
 <script setup>
 import { reachedPerBookingLimit } from "~/utils/amountLimits";
 import { useFormatting } from "~/composables/utils/useFormatting.js";
+import { useBreakpointCheck } from "~/composables/utils/useBreakpointCheck.js";
+import CancellationRefundTierDisclosure from "~/components/CancellationRefundTierDisclosure.vue";
 
 const props = defineProps({
   summary: {
@@ -44,9 +46,18 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  /** The tenant's refund scale, sorted; empty where nothing would be refunded. */
+  cancellationRefundTiers: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const emit = defineEmits(["update:amount"]);
+
+// The card is sticky only where the checkout has two columns, from `lg` on
+// (see the page).
+const { isGreaterThanLg: isSticky } = useBreakpointCheck();
 
 const { t } = useI18n();
 const formatting = useFormatting();
@@ -223,7 +234,7 @@ const hasContent = computed(() => {
   <Transition name="summary-bar">
     <div
       v-if="hasContent"
-      class="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-2xl p-4 md:p-5 space-y-3"
+      class="relative rounded-xl border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm lg:shadow-2xl p-4 md:p-5 space-y-3"
     >
       <!-- Loading Overlay -->
       <div
@@ -438,6 +449,13 @@ const hasContent = computed(() => {
           </span>
           <span v-else class="text-gray-400">{{ $t("price.free") }}</span>
         </div>
+
+        <CancellationRefundTierDisclosure
+          class="border-t border-gray-200 dark:border-gray-700 pt-3"
+          :tiers="cancellationRefundTiers"
+          :scrollable="isSticky"
+          compact
+        />
       </template>
     </div>
   </Transition>

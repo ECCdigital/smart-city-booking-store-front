@@ -9,6 +9,7 @@ import InputWeekSelection from "~/components/checkout/InputWeekSelection.vue";
 import InputMonthSelection from "../../components/checkout/InputMonthSelection.vue";
 import InputBlockPeriodSelection from "~/components/checkout/InputBlockPeriodSelection.vue";
 import PriceSummaryBar from "~/components/checkout/PriceSummaryBar.vue";
+import { sortedRefundTiers } from "~/utils/cancellationRefundTiers.js";
 import CheckoutContactStep from "~/components/checkout/CheckoutContactStep.vue";
 import { isBusinessContact } from "~/utils/businessBooking.js";
 import CheckoutCustomFields from "~/components/checkout/CheckoutCustomFields.vue";
@@ -693,8 +694,21 @@ const hasResolvedFreeCheckout = computed(() => {
   );
 });
 
+// Refunds only matter where the booking costs something.
+const cancellationRefundTiers = computed(() =>
+  Number(summary.value?.total ?? 0) > 0.005
+    ? sortedRefundTiers(leadBookable.value?.cancellationRefundTiers)
+    : [],
+);
+
 const needsPaymentSelectionStep = computed(
   () => paymentProviders.value.length > 1 && !hasResolvedFreeCheckout.value,
+);
+
+// The summary names the payment method also where the tenant offers only
+// one and the checkout skips the choice.
+const showPaymentSummary = computed(
+  () => paymentProviders.value.length > 0 && !hasResolvedFreeCheckout.value,
 );
 
 function applyUserToContactForm(user, force = false) {
@@ -2747,11 +2761,11 @@ function onReviewEdit(section) {
           :tenant="tenant"
         />
 
-        <!-- Spacer -->
-        <div class="flex-1" />
+        <!-- Spacer: keeps the card at the column's foot where it is sticky -->
+        <div class="hidden lg:block flex-1" />
 
-        <!-- Price Summary  -->
-        <div class="sticky bottom-4 md:bottom-6 mt-6 z-10">
+        <!-- Price Summary: under the bookable in one column, sticky in two -->
+        <div class="mt-6 lg:sticky lg:bottom-6 lg:z-10">
           <PriceSummaryBar
             v-if="currentStepKey !== 'confirm'"
             :summary="summary"
@@ -2764,6 +2778,7 @@ function onReviewEdit(section) {
             :max-amounts-per-booking="maxAmountsPerBooking"
             :lead-bookable-id="bookableID"
             :mandatory-ids="mandatoryBookableIds"
+            :cancellation-refund-tiers="cancellationRefundTiers"
             @update:amount="handleAmountUpdate"
           />
         </div>
@@ -3119,7 +3134,9 @@ function onReviewEdit(section) {
               :show-comment="!!String(customerComment || '').trim()"
               :payment-providers="paymentProviders"
               :selected-payment-provider-id="selectedPaymentProviderId"
-              :show-payment-summary="needsPaymentSelectionStep"
+              :show-payment-summary="showPaymentSummary"
+              :can-edit-payment="needsPaymentSelectionStep"
+              :cancellation-refund-tiers="cancellationRefundTiers"
               :amounts="amounts"
               :lead-bookable-id="bookableID"
               :enable-coupons="couponsEnabled"

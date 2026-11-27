@@ -558,6 +558,8 @@
       "sectionPeriod": "Time period",
       "sectionContact": "Contact",
       "sectionPayment": "Payment",
+      "showCancellationTerms": "Show",
+      "hideCancellationTerms": "Hide",
       "dateLabel": "Date",
       "bookingLabel": "Booking",
       "addonsLabel": "Add-ons",
