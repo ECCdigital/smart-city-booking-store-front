@@ -1,22 +1,26 @@
 <template>
   <div
     v-if="showAvailabilityResult"
-    class="flex justify-between items-center dark:bg-gray-700 rounded-lg shadow-sm px-4 py-2 border border-gray-200 dark:border-gray-500 min-w-[250px]"
+    class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 dark:bg-gray-700 rounded-lg shadow-sm px-4 py-2 border border-gray-200 dark:border-gray-500 min-w-[250px]"
   >
+    <!-- The title may shrink and break inside long words; once it would get
+         narrower than 7rem, price and button wrap onto their own line. -->
     <div
-      class="font-semibold mr-3 content-center line-clamp-2 text-sm md:text-base"
+      class="flex-1 min-w-28 font-semibold line-clamp-2 break-words hyphens-auto text-sm md:text-base"
     >
       {{ item?.title }}
     </div>
     <div
-      class="content-center flex justify-end md:mt-0 ml-3 text-sm md:text-base"
+      class="flex flex-wrap items-center justify-end gap-2 ml-auto text-sm md:text-base"
     >
+      <!-- Capped width so a long unit such as "pro Stunde (inkl. MwSt.)"
+           wraps below the price instead of running into the title. -->
       <BookablePriceDisplay
         v-if="items.length > 0"
         :bookable="items[0].item"
         :calculated-price="items[0].calculatedPrice"
         :duration="timePeriodDuration"
-        class="mx-2 font-semibold content-center w-24 shrink-0 text-xs md:text-base"
+        class="font-semibold max-w-24 md:max-w-32 shrink-0 text-xs md:text-base"
       />
       <div class="content-center">
         <UButton

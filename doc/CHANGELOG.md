@@ -34,6 +34,7 @@ Every release `v<major>.<minor>.<patch>` is tagged on its branch `version/<major
 
 ### Fixed
 
+- Small screens: in „Verfügbarkeit“ on the bookable detail page the price no longer runs into the title ([ECCdigital/tickets#1370](https://github.com/ECCdigital/tickets/issues/1370)). The title breaks inside long words, a long unit such as „pro Stunde (inkl. MwSt.)“ wraps below the price, and when the title would get too narrow, price and „Buchen“ move to their own line (WCAG 1.4.10). In dark mode the struck-through regular price has enough contrast (WCAG 1.4.3)
 - The filter dialog of the results keeps „Filter entfernen“ and „Filter anwenden“ in view on small or low screens ([ECCdigital/tickets#1344](https://github.com/ECCdigital/tickets/issues/1344)): title and buttons stay fixed and only the filters scroll, the dialog never grows past the viewport (WCAG 1.4.10). The dialog is named „Ergebnisse filtern“ for screen readers (WCAG 4.1.2)
 - „Mein Standort“ on the start page asks for the position ([ECCdigital/tickets#1366](https://github.com/ECCdigital/tickets/issues/1366)): the header `Permissions-Policy` sends `geolocation=(self)` besides `camera=(self)` on every page, where nuxt-security's default `geolocation=()` made the browser refuse at once. A refused position shows „Ihr Standort ist nicht verfügbar, die Karte zeigt alle Angebote.“ under the map
 - „oder“ in the login card and the hint of the card login read with enough contrast in dark (`gray-400`, WCAG AA), on glass as on the opaque card
