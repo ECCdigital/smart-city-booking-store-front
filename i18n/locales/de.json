@@ -959,7 +959,7 @@
     "manualApproval": {
       "bannerTitle": "Manuelle Freigabe erforderlich",
       "bannerDescription": "Für dieses Buchungsobjekt prüft der Anbieter Ihre Anfrage, bevor die Buchung bestätigt wird. Sie erhalten eine Rückmeldung per E-Mail.",
-      "submitHint": "Mit dem Absenden senden Sie eine unverbindliche Buchungsanfrage. Die Buchung wird erst nach Freigabe durch den Anbieter verbindlich."
+      "submitHint": "Mit dem Absenden stellen Sie eine verbindliche Buchungsanfrage. Diese muss durch den Anbieter geprüft und freigegeben werden."
     },
     "steps": {
       "periodTitle": "Zeitraum & Extras auswählen",
@@ -1795,6 +1795,7 @@
     "inMapViewCount": "keine Angebote | {count} Angebot | {count} Angebote",
     "listView": "Listenansicht",
     "mapView": "Kartenansicht",
+    "viewSwitch": "Ansicht wählen",
     "atThisLocation": "Ergebnisse an diesem Standort:",
     "clickToOpen": "Klicken Sie, um die Auswahl zu öffnen",
     "clickToSeeAll": "Klicken Sie, um alle anzusehen",
@@ -1817,7 +1818,7 @@
     "flatRate": "Pauschalpreis",
     "information": "Preisinformationen",
     "allInclVat": "(Alle Preise inklusive Mehrwertsteuer.)",
-    "inclVat": "(inkl. MwSt.)",
+    "inclVat": "(inkl.\u00a0MwSt.)",
     "vat": "MwSt.",
     "total": "Gesamt",
     "duration": "Dauer",

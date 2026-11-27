@@ -1010,6 +1010,7 @@ const bookingDiscountDescription = computed(() => {
           <div class="mt-6 space-y-3">
             <p
               v-if="requiresManualApproval"
+              id="checkout-submit-hint"
               class="text-sm text-gray-600 dark:text-gray-300"
             >
               {{ $t("checkout.manualApproval.submitHint") }}
@@ -1023,6 +1024,9 @@ const bookingDiscountDescription = computed(() => {
               :disabled="!canSubmit"
               :class="!canSubmit ? 'text-gray-500' : ''"
               :loading="isSubmitting"
+              :aria-describedby="
+                requiresManualApproval ? 'checkout-submit-hint' : undefined
+              "
               @click="onFinish"
             >
               {{

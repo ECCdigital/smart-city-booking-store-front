@@ -82,7 +82,7 @@ const showRawReason = computed(
     <div class="flex w-full items-center justify-center p-6">
       <UCard
           variant="soft"
-          class="w-full max-w-md rounded-xl glass shadow-2xl/50"
+          class="w-full max-w-md rounded-xl auth-card shadow-2xl/50"
       >
         <div class="flex flex-col items-center text-center py-6">
           <UIcon

@@ -583,7 +583,7 @@
     "manualApproval": {
       "bannerTitle": "Manual approval required",
       "bannerDescription": "For this bookable, the provider reviews your request before the booking is confirmed. You will receive a response by email.",
-      "submitHint": "By submitting, you send a non-binding booking request. The booking becomes binding only after the provider approves it."
+      "submitHint": "By submitting, you make a binding booking request. The provider must review and approve it."
     },
     "steps": {
       "periodTitle": "Period & extras",
@@ -1445,6 +1445,7 @@
     "inMapViewCount": "no offers | {count} offer | {count} offers",
     "listView": "List view",
     "mapView": "Map view",
+    "viewSwitch": "Choose view",
     "atThisLocation": "Results at this location:",
     "clickToOpen": "Click to open the selection",
     "clickToSeeAll": "Click to see all",
@@ -1744,7 +1745,7 @@
     "flatRate": "Flat rate",
     "information": "Price information",
     "allInclVat": "(All prices include VAT.)",
-    "inclVat": "(incl. VAT)",
+    "inclVat": "(incl.\u00a0VAT)",
     "vat": "VAT",
     "total": "Total",
     "duration": "Duration",
