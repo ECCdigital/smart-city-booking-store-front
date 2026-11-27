@@ -17,7 +17,7 @@ const errorMessages = computed(() => ({
 </script>
 
 <template>
-  <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
+  <UCard variant="soft" class="w-full max-w-md rounded-xl auth-card">
     <template #header>
       <AuthTitleSection />
       <div class="flex flex-col justify-center items-center">

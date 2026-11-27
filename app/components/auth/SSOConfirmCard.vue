@@ -14,7 +14,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
+  <UCard variant="soft" class="w-full max-w-md rounded-xl auth-card">
     <template #header>
       <h2 class="text-2xl font-semibold text-center">
         {{ t("login.sso.confirmTitle") }}

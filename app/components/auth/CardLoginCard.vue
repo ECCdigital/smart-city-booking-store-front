@@ -199,14 +199,14 @@ const back = async () => {
 </script>
 
 <template>
-  <UCard variant="soft" class="w-full max-w-md rounded-xl glass">
+  <UCard variant="soft" class="w-full max-w-md rounded-xl auth-card">
     <template #header>
       <h2 class="text-2xl font-semibold text-center">
         {{ cardMethod.label || $t("cardLogin.title") }}
       </h2>
       <p
           v-if="cardMethod.description"
-          class="text-sm text-center text-gray-500 mt-1"
+          class="text-sm text-center text-gray-500 dark:text-gray-400 mt-1"
       >
         {{ cardMethod.description }}
       </p>
