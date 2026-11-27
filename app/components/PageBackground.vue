@@ -6,6 +6,10 @@
  * the server paints the right one — a wrapper that carries `dark` itself
  * forces it.
  *
+ * It carries the surface of the auth cards the instance chose: glass, unless
+ * the Theme View says `solid` (a Live Preview Draft carries none). The cards
+ * read it through the class `auth-card` (main.css).
+ *
  * The auth pages also get a slim navigation bar and the minimal footer, so a
  * visitor who is not signed in can still reach the start page and the legal
  * documents. The error page goes without them.
@@ -18,10 +22,11 @@ defineProps({
 });
 
 const { data: theme } = await useThemeBundle();
+const authCardStyle = computed(() => theme.value?.authCardStyle ?? "glass");
 </script>
 
 <template>
-  <div class="page-wrapper relative min-h-screen">
+  <div class="page-wrapper relative min-h-screen" :data-auth-card="authCardStyle">
     <div class="fixed inset-0 -z-10">
       <BackgroundLayers :background="theme?.background" />
       <div v-if="vignette" class="absolute inset-0 pointer-events-none vignette" />
