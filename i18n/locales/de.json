@@ -597,7 +597,7 @@
     "unavailable": "Nicht verfügbar",
     "availabilityUnchecked": "Nicht geprüft",
     "viewAll": "Alles ansehen",
-    "descriptionTitle": "Beschreibung von {title}",
+    "descriptionTitle": "Beschreibung von „{title}“",
     "moreInfo": "Weitere Informationen",
     "relatedTitle": "Könnte Sie auch interessieren:",
     "cancellationTitle": "Stornierungsbedingungen",

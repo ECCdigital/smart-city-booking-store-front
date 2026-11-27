@@ -755,7 +755,7 @@
     "unavailable": "Unavailable",
     "availabilityUnchecked": "Not checked",
     "viewAll": "View all",
-    "descriptionTitle": "Description of {title}",
+    "descriptionTitle": "Description of “{title}”",
     "moreInfo": "More information",
     "relatedTitle": "You might also like:",
     "cancellationTitle": "Cancellation policy",
